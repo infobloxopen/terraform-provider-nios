@@ -67,14 +67,17 @@ var LdapAuthServiceServersResourceSchemaAttributes = map[string]schema.Attribute
 	},
 	"bind_password": schema.StringAttribute{
 		Optional:            true,
+		Computed: 		  true,
 		MarkdownDescription: "The user password for authentication.",
 	},
 	"bind_user_dn": schema.StringAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The user DN for authentication.",
 	},
 	"comment": schema.StringAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The LDAP descriptive comment.",
 	},
 	"disable": schema.BoolAttribute{
@@ -105,8 +108,8 @@ var LdapAuthServiceServersResourceSchemaAttributes = map[string]schema.Attribute
 		MarkdownDescription: "Determines if the connection via the MGMT interface is allowed.",
 	},
 	"version": schema.StringAttribute{
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
 		Validators: []validator.String{
 			stringvalidator.OneOf("V2", "V3"),
 		},

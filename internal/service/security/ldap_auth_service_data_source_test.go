@@ -9,12 +9,26 @@ import (
 
 	"github.com/infobloxopen/infoblox-nios-go-client/security"
 	"github.com/infobloxopen/terraform-provider-nios/internal/acctest"
+	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
 func TestAccLdapAuthServiceDataSource_Filters(t *testing.T) {
 	dataSourceName := "data.nios_security_ldap_auth_service.test"
 	resourceName := "nios_security_ldap_auth_service.test"
 	var v security.LdapAuthService
+	name := acctest.RandomNameWithPrefix("ldap-auth-service")
+	servers := []map[string]any{
+		{
+			"address":             "2.2.2.2",
+			"authentication_type": "ANONYMOUS",
+			"base_dn":             "ou=People,dc=example,dc=com",
+			"disable":             false,
+			"encryption":          "SSL",
+			"port":                636,
+			"use_mgmt_port":       false,
+			"version":             "V3",
+		},
+	}
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -22,7 +36,7 @@ func TestAccLdapAuthServiceDataSource_Filters(t *testing.T) {
 		CheckDestroy:             testAccCheckLdapAuthServiceDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccLdapAuthServiceDataSourceConfigFilters(),
+				Config: testAccLdapAuthServiceDataSourceConfigFilters(name, servers, "adminID", 30, 5, 15),
 				Check: resource.ComposeTestCheckFunc(
 					append([]resource.TestCheckFunc{
 						testAccCheckLdapAuthServiceExists(context.Background(), resourceName, &v),
@@ -54,15 +68,23 @@ func testAccCheckLdapAuthServiceResourceAttrPair(resourceName, dataSourceName st
 	}
 }
 
-func testAccLdapAuthServiceDataSourceConfigFilters() string {
+func testAccLdapAuthServiceDataSourceConfigFilters(name string, servers []map[string]any, ldapUserAttribute string, recoveryInterval, retries, timeout int) string {
+	serversString := utils.ConvertSliceOfMapsToHCL(servers)
 	return fmt.Sprintf(`
 resource "nios_security_ldap_auth_service" "test" {
+	name = %q
+ldap_user_attribute = %q
+recovery_interval = %d
+retries = %d
+servers = %s
+timeout = %d
+
 }
 
 data "nios_security_ldap_auth_service" "test" {
   filters = {
-	 = nios_security_ldap_auth_service.test.
+	 name = nios_security_ldap_auth_service.test.name 
   }
 }
-`)
+`, name, ldapUserAttribute, recoveryInterval, retries, serversString, timeout)
 }

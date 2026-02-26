@@ -20,6 +20,19 @@ var readableAttributesForLdapAuthService = "comment,disable,ea_mapping,ldap_grou
 func TestAccLdapAuthServiceResource_basic(t *testing.T) {
 	var resourceName = "nios_security_ldap_auth_service.test"
 	var v security.LdapAuthService
+	name := acctest.RandomNameWithPrefix("ldap-auth-service")
+	servers := []map[string]any{
+		{
+			"address":             "2.2.2.2",
+			"authentication_type": "ANONYMOUS",
+			"base_dn":             "ou=People,dc=example,dc=com",
+			"disable":             false,
+			"encryption":          "SSL",
+			"port":                636,
+			"use_mgmt_port":       false,
+			"version":             "V3",
+		},
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -27,11 +40,26 @@ func TestAccLdapAuthServiceResource_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccLdapAuthServiceBasicConfig(""),
+				Config: testAccLdapAuthServiceBasicConfig(name, servers, "adminID", 30, 5, 5),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLdapAuthServiceExists(context.Background(), resourceName, &v),
-					// TODO: check and validate these
+					resource.TestCheckResourceAttr(resourceName, "name", name),
+					resource.TestCheckResourceAttr(resourceName, "servers.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "servers.0.address", "2.2.2.2"),
+					resource.TestCheckResourceAttr(resourceName, "servers.0.authentication_type", "ANONYMOUS"),
+					resource.TestCheckResourceAttr(resourceName, "servers.0.base_dn", "ou=People,dc=example,dc=com"),
+					resource.TestCheckResourceAttr(resourceName, "servers.0.disable", "false"),
+					resource.TestCheckResourceAttr(resourceName, "servers.0.encryption", "SSL"),
+					resource.TestCheckResourceAttr(resourceName, "servers.0.port", "636"),
+					resource.TestCheckResourceAttr(resourceName, "servers.0.use_mgmt_port", "false"),
+					resource.TestCheckResourceAttr(resourceName, "servers.0.version", "V3"),
 					// Test fields with default value
+					resource.TestCheckResourceAttr(resourceName, "search_scope", "ONELEVEL"),
+					resource.TestCheckResourceAttr(resourceName, "disable", "false"),
+					resource.TestCheckResourceAttr(resourceName, "ea_mapping.#", "0"),
+					resource.TestCheckResourceAttr(resourceName, "ldap_group_attribute", "memberOf"),
+					resource.TestCheckResourceAttr(resourceName, "ldap_group_authentication_type", "GROUP_ATTRIBUTE"),
+					resource.TestCheckResourceAttr(resourceName, "mode", "ORDERED_LIST"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -42,6 +70,19 @@ func TestAccLdapAuthServiceResource_basic(t *testing.T) {
 func TestAccLdapAuthServiceResource_disappears(t *testing.T) {
 	resourceName := "nios_security_ldap_auth_service.test"
 	var v security.LdapAuthService
+	name := acctest.RandomNameWithPrefix("ldap-auth-service")
+	servers := []map[string]any{
+		{
+			"address":             "2.2.2.2",
+			"authentication_type": "ANONYMOUS",
+			"base_dn":             "ou=People,dc=example,dc=com",
+			"disable":             false,
+			"encryption":          "SSL",
+			"port":                636,
+			"use_mgmt_port":       false,
+			"version":             "V3",
+		},
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -49,7 +90,7 @@ func TestAccLdapAuthServiceResource_disappears(t *testing.T) {
 		CheckDestroy:             testAccCheckLdapAuthServiceDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccLdapAuthServiceBasicConfig(""),
+				Config: testAccLdapAuthServiceBasicConfig(name, servers, "adminID", 30, 5, 5),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLdapAuthServiceExists(context.Background(), resourceName, &v),
 					testAccCheckLdapAuthServiceDisappears(context.Background(), &v),
@@ -63,6 +104,19 @@ func TestAccLdapAuthServiceResource_disappears(t *testing.T) {
 func TestAccLdapAuthServiceResource_Comment(t *testing.T) {
 	var resourceName = "nios_security_ldap_auth_service.test_comment"
 	var v security.LdapAuthService
+	name := acctest.RandomNameWithPrefix("ldap-auth-service")
+	servers := []map[string]any{
+		{
+			"address":             "2.2.2.2",
+			"authentication_type": "ANONYMOUS",
+			"base_dn":             "ou=People,dc=example,dc=com",
+			"disable":             false,
+			"encryption":          "SSL",
+			"port":                636,
+			"use_mgmt_port":       false,
+			"version":             "V3",
+		},
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -70,18 +124,18 @@ func TestAccLdapAuthServiceResource_Comment(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccLdapAuthServiceComment("COMMENT_REPLACE_ME"),
+				Config: testAccLdapAuthServiceComment(name, servers, "adminID", 30, 5, 5, "This is a comment"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLdapAuthServiceExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "comment", "COMMENT_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "comment", "This is a comment"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccLdapAuthServiceComment("COMMENT_UPDATE_REPLACE_ME"),
+				Config: testAccLdapAuthServiceComment(name, servers, "adminID", 30, 5, 5, "This is an updated comment"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLdapAuthServiceExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "comment", "COMMENT_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "comment", "This is an updated comment"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -92,6 +146,19 @@ func TestAccLdapAuthServiceResource_Comment(t *testing.T) {
 func TestAccLdapAuthServiceResource_Disable(t *testing.T) {
 	var resourceName = "nios_security_ldap_auth_service.test_disable"
 	var v security.LdapAuthService
+	name := acctest.RandomNameWithPrefix("ldap-auth-service")
+	servers := []map[string]any{
+		{
+			"address":             "2.2.2.2",
+			"authentication_type": "ANONYMOUS",
+			"base_dn":             "ou=People,dc=example,dc=com",
+			"disable":             false,
+			"encryption":          "SSL",
+			"port":                636,
+			"use_mgmt_port":       false,
+			"version":             "V3",
+		},
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -99,18 +166,18 @@ func TestAccLdapAuthServiceResource_Disable(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccLdapAuthServiceDisable("DISABLE_REPLACE_ME"),
+				Config: testAccLdapAuthServiceDisable(name, servers, "adminID", 30, 5, 5, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLdapAuthServiceExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "disable", "DISABLE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "disable", "true"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccLdapAuthServiceDisable("DISABLE_UPDATE_REPLACE_ME"),
+				Config: testAccLdapAuthServiceDisable(name, servers, "adminID", 30, 5, 5, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLdapAuthServiceExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "disable", "DISABLE_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "disable", "false"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -121,6 +188,31 @@ func TestAccLdapAuthServiceResource_Disable(t *testing.T) {
 func TestAccLdapAuthServiceResource_EaMapping(t *testing.T) {
 	var resourceName = "nios_security_ldap_auth_service.test_ea_mapping"
 	var v security.LdapAuthService
+	name := acctest.RandomNameWithPrefix("ldap-auth-service")
+	servers := []map[string]any{
+		{
+			"address":             "2.2.2.2",
+			"authentication_type": "ANONYMOUS",
+			"base_dn":             "ou=People,dc=example,dc=com",
+			"disable":             false,
+			"encryption":          "SSL",
+			"port":                636,
+			"use_mgmt_port":       false,
+			"version":             "V3",
+		},
+	}
+	eaMapping := []map[string]any{
+		{
+			"mapped_ea": "Availability zone",
+			"name":      "ldapfield",
+		},
+	}
+	eaMappingUpdate := []map[string]any{
+		{
+			"mapped_ea": "Subnet Name",
+			"name":      "ldapfield12",
+		},
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -128,18 +220,20 @@ func TestAccLdapAuthServiceResource_EaMapping(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccLdapAuthServiceEaMapping("EA_MAPPING_REPLACE_ME"),
+				Config: testAccLdapAuthServiceEaMapping(name, servers, "adminID", 30, 5, 5, eaMapping),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLdapAuthServiceExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ea_mapping", "EA_MAPPING_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "ea_mapping.0.mapped_ea", "Availability zone"),
+					resource.TestCheckResourceAttr(resourceName, "ea_mapping.0.name", "ldapfield"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccLdapAuthServiceEaMapping("EA_MAPPING_UPDATE_REPLACE_ME"),
+				Config: testAccLdapAuthServiceEaMapping(name, servers, "adminID", 30, 5, 5, eaMappingUpdate),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLdapAuthServiceExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ea_mapping", "EA_MAPPING_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "ea_mapping.0.mapped_ea", "Subnet Name"),
+					resource.TestCheckResourceAttr(resourceName, "ea_mapping.0.name", "ldapfield12"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -150,6 +244,19 @@ func TestAccLdapAuthServiceResource_EaMapping(t *testing.T) {
 func TestAccLdapAuthServiceResource_LdapGroupAttribute(t *testing.T) {
 	var resourceName = "nios_security_ldap_auth_service.test_ldap_group_attribute"
 	var v security.LdapAuthService
+	name := acctest.RandomNameWithPrefix("ldap-auth-service")
+	servers := []map[string]any{
+		{
+			"address":             "2.2.2.2",
+			"authentication_type": "ANONYMOUS",
+			"base_dn":             "ou=People,dc=example,dc=com",
+			"disable":             false,
+			"encryption":          "SSL",
+			"port":                636,
+			"use_mgmt_port":       false,
+			"version":             "V3",
+		},
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -157,18 +264,18 @@ func TestAccLdapAuthServiceResource_LdapGroupAttribute(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccLdapAuthServiceLdapGroupAttribute("LDAP_GROUP_ATTRIBUTE_REPLACE_ME"),
+				Config: testAccLdapAuthServiceLdapGroupAttribute(name, servers, "adminID", 30, 5, 5, "namecn"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLdapAuthServiceExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ldap_group_attribute", "LDAP_GROUP_ATTRIBUTE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "ldap_group_attribute", "namecn"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccLdapAuthServiceLdapGroupAttribute("LDAP_GROUP_ATTRIBUTE_UPDATE_REPLACE_ME"),
+				Config: testAccLdapAuthServiceLdapGroupAttribute(name, servers, "adminID", 30, 5, 5, "namecnid"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLdapAuthServiceExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ldap_group_attribute", "LDAP_GROUP_ATTRIBUTE_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "ldap_group_attribute", "namecnid"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -179,6 +286,19 @@ func TestAccLdapAuthServiceResource_LdapGroupAttribute(t *testing.T) {
 func TestAccLdapAuthServiceResource_LdapGroupAuthenticationType(t *testing.T) {
 	var resourceName = "nios_security_ldap_auth_service.test_ldap_group_authentication_type"
 	var v security.LdapAuthService
+	name := acctest.RandomNameWithPrefix("ldap-auth-service")
+	servers := []map[string]any{
+		{
+			"address":             "2.2.2.2",
+			"authentication_type": "ANONYMOUS",
+			"base_dn":             "ou=People,dc=example,dc=com",
+			"disable":             false,
+			"encryption":          "SSL",
+			"port":                636,
+			"use_mgmt_port":       false,
+			"version":             "V3",
+		},
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -186,18 +306,18 @@ func TestAccLdapAuthServiceResource_LdapGroupAuthenticationType(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccLdapAuthServiceLdapGroupAuthenticationType("LDAP_GROUP_AUTHENTICATION_TYPE_REPLACE_ME"),
+				Config: testAccLdapAuthServiceLdapGroupAuthenticationType(name, servers, "adminID", 30, 5, 5, "POSIX_GROUP"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLdapAuthServiceExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ldap_group_authentication_type", "LDAP_GROUP_AUTHENTICATION_TYPE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "ldap_group_authentication_type", "POSIX_GROUP"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccLdapAuthServiceLdapGroupAuthenticationType("LDAP_GROUP_AUTHENTICATION_TYPE_UPDATE_REPLACE_ME"),
+				Config: testAccLdapAuthServiceLdapGroupAuthenticationType(name, servers, "adminID", 30, 5, 5, "GROUP_ATTRIBUTE"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLdapAuthServiceExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ldap_group_authentication_type", "LDAP_GROUP_AUTHENTICATION_TYPE_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "ldap_group_authentication_type", "GROUP_ATTRIBUTE"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -208,6 +328,19 @@ func TestAccLdapAuthServiceResource_LdapGroupAuthenticationType(t *testing.T) {
 func TestAccLdapAuthServiceResource_LdapUserAttribute(t *testing.T) {
 	var resourceName = "nios_security_ldap_auth_service.test_ldap_user_attribute"
 	var v security.LdapAuthService
+	name := acctest.RandomNameWithPrefix("ldap-auth-service")
+	servers := []map[string]any{
+		{
+			"address":             "2.2.2.2",
+			"authentication_type": "ANONYMOUS",
+			"base_dn":             "ou=People,dc=example,dc=com",
+			"disable":             false,
+			"encryption":          "SSL",
+			"port":                636,
+			"use_mgmt_port":       false,
+			"version":             "V3",
+		},
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -215,18 +348,18 @@ func TestAccLdapAuthServiceResource_LdapUserAttribute(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccLdapAuthServiceLdapUserAttribute("LDAP_USER_ATTRIBUTE_REPLACE_ME"),
+				Config: testAccLdapAuthServiceLdapUserAttribute(name, servers, "adminID", 30, 5, 5),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLdapAuthServiceExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ldap_user_attribute", "LDAP_USER_ATTRIBUTE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "ldap_user_attribute", "adminID"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccLdapAuthServiceLdapUserAttribute("LDAP_USER_ATTRIBUTE_UPDATE_REPLACE_ME"),
+				Config: testAccLdapAuthServiceLdapUserAttribute(name, servers, "adminID12", 30, 5, 5),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLdapAuthServiceExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ldap_user_attribute", "LDAP_USER_ATTRIBUTE_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "ldap_user_attribute", "adminID12"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -237,6 +370,19 @@ func TestAccLdapAuthServiceResource_LdapUserAttribute(t *testing.T) {
 func TestAccLdapAuthServiceResource_Mode(t *testing.T) {
 	var resourceName = "nios_security_ldap_auth_service.test_mode"
 	var v security.LdapAuthService
+	name := acctest.RandomNameWithPrefix("ldap-auth-service")
+	servers := []map[string]any{
+		{
+			"address":             "2.2.2.2",
+			"authentication_type": "ANONYMOUS",
+			"base_dn":             "ou=People,dc=example,dc=com",
+			"disable":             false,
+			"encryption":          "SSL",
+			"port":                636,
+			"use_mgmt_port":       false,
+			"version":             "V3",
+		},
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -244,18 +390,18 @@ func TestAccLdapAuthServiceResource_Mode(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccLdapAuthServiceMode("MODE_REPLACE_ME"),
+				Config: testAccLdapAuthServiceMode(name, servers, "adminID", 30, 5, 5, "ORDERED_LIST"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLdapAuthServiceExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "mode", "MODE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "mode", "ORDERED_LIST"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccLdapAuthServiceMode("MODE_UPDATE_REPLACE_ME"),
+				Config: testAccLdapAuthServiceMode(name, servers, "adminID", 30, 5, 5, "ROUND_ROBIN"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLdapAuthServiceExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "mode", "MODE_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "mode", "ROUND_ROBIN"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -266,6 +412,20 @@ func TestAccLdapAuthServiceResource_Mode(t *testing.T) {
 func TestAccLdapAuthServiceResource_Name(t *testing.T) {
 	var resourceName = "nios_security_ldap_auth_service.test_name"
 	var v security.LdapAuthService
+	name := acctest.RandomNameWithPrefix("ldap-auth-service")
+	nameUpdate := acctest.RandomNameWithPrefix("ldap-auth-service")
+	servers := []map[string]any{
+		{
+			"address":             "2.2.2.2",
+			"authentication_type": "ANONYMOUS",
+			"base_dn":             "ou=People,dc=example,dc=com",
+			"disable":             false,
+			"encryption":          "SSL",
+			"port":                636,
+			"use_mgmt_port":       false,
+			"version":             "V3",
+		},
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -273,18 +433,18 @@ func TestAccLdapAuthServiceResource_Name(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccLdapAuthServiceName("NAME_REPLACE_ME"),
+				Config: testAccLdapAuthServiceName(name, servers, "adminID", 30, 5, 5),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLdapAuthServiceExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "name", "NAME_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "name", name),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccLdapAuthServiceName("NAME_UPDATE_REPLACE_ME"),
+				Config: testAccLdapAuthServiceName(nameUpdate, servers, "adminID", 30, 5, 5),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLdapAuthServiceExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "name", "NAME_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "name", nameUpdate),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -295,6 +455,19 @@ func TestAccLdapAuthServiceResource_Name(t *testing.T) {
 func TestAccLdapAuthServiceResource_RecoveryInterval(t *testing.T) {
 	var resourceName = "nios_security_ldap_auth_service.test_recovery_interval"
 	var v security.LdapAuthService
+	name := acctest.RandomNameWithPrefix("ldap-auth-service")
+	servers := []map[string]any{
+		{
+			"address":             "2.2.2.2",
+			"authentication_type": "ANONYMOUS",
+			"base_dn":             "ou=People,dc=example,dc=com",
+			"disable":             false,
+			"encryption":          "SSL",
+			"port":                636,
+			"use_mgmt_port":       false,
+			"version":             "V3",
+		},
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -302,18 +475,18 @@ func TestAccLdapAuthServiceResource_RecoveryInterval(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccLdapAuthServiceRecoveryInterval("RECOVERY_INTERVAL_REPLACE_ME"),
+				Config: testAccLdapAuthServiceRecoveryInterval(name, servers, "adminID", 30, 5, 5),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLdapAuthServiceExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "recovery_interval", "RECOVERY_INTERVAL_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "recovery_interval", "30"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccLdapAuthServiceRecoveryInterval("RECOVERY_INTERVAL_UPDATE_REPLACE_ME"),
+				Config: testAccLdapAuthServiceRecoveryInterval(name, servers, "adminID", 60, 5, 5),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLdapAuthServiceExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "recovery_interval", "RECOVERY_INTERVAL_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "recovery_interval", "60"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -324,6 +497,19 @@ func TestAccLdapAuthServiceResource_RecoveryInterval(t *testing.T) {
 func TestAccLdapAuthServiceResource_Retries(t *testing.T) {
 	var resourceName = "nios_security_ldap_auth_service.test_retries"
 	var v security.LdapAuthService
+	name := acctest.RandomNameWithPrefix("ldap-auth-service")
+	servers := []map[string]any{
+		{
+			"address":             "2.2.2.2",
+			"authentication_type": "ANONYMOUS",
+			"base_dn":             "ou=People,dc=example,dc=com",
+			"disable":             false,
+			"encryption":          "SSL",
+			"port":                636,
+			"use_mgmt_port":       false,
+			"version":             "V3",
+		},
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -331,18 +517,18 @@ func TestAccLdapAuthServiceResource_Retries(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccLdapAuthServiceRetries("RETRIES_REPLACE_ME"),
+				Config: testAccLdapAuthServiceRetries(name, servers, "adminID", 30, 2, 5),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLdapAuthServiceExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "retries", "RETRIES_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "retries", "2"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccLdapAuthServiceRetries("RETRIES_UPDATE_REPLACE_ME"),
+				Config: testAccLdapAuthServiceRetries(name, servers, "adminID", 30, 5, 5),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLdapAuthServiceExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "retries", "RETRIES_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "retries", "5"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -353,6 +539,19 @@ func TestAccLdapAuthServiceResource_Retries(t *testing.T) {
 func TestAccLdapAuthServiceResource_SearchScope(t *testing.T) {
 	var resourceName = "nios_security_ldap_auth_service.test_search_scope"
 	var v security.LdapAuthService
+	name := acctest.RandomNameWithPrefix("ldap-auth-service")
+	servers := []map[string]any{
+		{
+			"address":             "2.2.2.2",
+			"authentication_type": "ANONYMOUS",
+			"base_dn":             "ou=People,dc=example,dc=com",
+			"disable":             false,
+			"encryption":          "SSL",
+			"port":                636,
+			"use_mgmt_port":       false,
+			"version":             "V3",
+		},
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -360,18 +559,18 @@ func TestAccLdapAuthServiceResource_SearchScope(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccLdapAuthServiceSearchScope("SEARCH_SCOPE_REPLACE_ME"),
+				Config: testAccLdapAuthServiceSearchScope(name, servers, "adminID", 30, 5, 5, "BASE"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLdapAuthServiceExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "search_scope", "SEARCH_SCOPE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "search_scope", "BASE"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccLdapAuthServiceSearchScope("SEARCH_SCOPE_UPDATE_REPLACE_ME"),
+				Config: testAccLdapAuthServiceSearchScope(name, servers, "adminID", 30, 5, 5, "SUBTREE"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLdapAuthServiceExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "search_scope", "SEARCH_SCOPE_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "search_scope", "SUBTREE"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -382,6 +581,31 @@ func TestAccLdapAuthServiceResource_SearchScope(t *testing.T) {
 func TestAccLdapAuthServiceResource_Servers(t *testing.T) {
 	var resourceName = "nios_security_ldap_auth_service.test_servers"
 	var v security.LdapAuthService
+	name := acctest.RandomNameWithPrefix("ldap-auth-service")
+	servers := []map[string]any{
+		{
+			"address":             "2.2.2.2",
+			"authentication_type": "ANONYMOUS",
+			"base_dn":             "ou=People,dc=example,dc=com",
+			"disable":             false,
+			"encryption":          "SSL",
+			"port":                636,
+			"use_mgmt_port":       false,
+			"version":             "V3",
+		},
+	}
+	serversUpdate := []map[string]any{
+		{
+			"address":             "2.2.2.4",
+			"authentication_type": "ANONYMOUS",
+			"base_dn":             "ou=People,dc=example1,dc=com",
+			"disable":             true,
+			"encryption":          "SSL",
+			"port":                631,
+			"use_mgmt_port":       false,
+			"version":             "V2",
+		},
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -389,18 +613,32 @@ func TestAccLdapAuthServiceResource_Servers(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccLdapAuthServiceServers("SERVERS_REPLACE_ME"),
+				Config: testAccLdapAuthServiceServers(name, servers, "adminID", 30, 5, 5),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLdapAuthServiceExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "servers", "SERVERS_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "servers.0.address", "2.2.2.2"),
+					resource.TestCheckResourceAttr(resourceName, "servers.0.authentication_type", "ANONYMOUS"),
+					resource.TestCheckResourceAttr(resourceName, "servers.0.base_dn", "ou=People,dc=example,dc=com"),
+					resource.TestCheckResourceAttr(resourceName, "servers.0.disable", "false"),
+					resource.TestCheckResourceAttr(resourceName, "servers.0.encryption", "SSL"),
+					resource.TestCheckResourceAttr(resourceName, "servers.0.port", "636"),
+					resource.TestCheckResourceAttr(resourceName, "servers.0.use_mgmt_port", "false"),
+					resource.TestCheckResourceAttr(resourceName, "servers.0.version", "V3"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccLdapAuthServiceServers("SERVERS_UPDATE_REPLACE_ME"),
+				Config: testAccLdapAuthServiceServers(name, serversUpdate, "adminID", 30, 5, 5),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLdapAuthServiceExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "servers", "SERVERS_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "servers.0.address", "2.2.2.4"),
+					resource.TestCheckResourceAttr(resourceName, "servers.0.authentication_type", "ANONYMOUS"),
+					resource.TestCheckResourceAttr(resourceName, "servers.0.base_dn", "ou=People,dc=example1,dc=com"),
+					resource.TestCheckResourceAttr(resourceName, "servers.0.disable", "true"),
+					resource.TestCheckResourceAttr(resourceName, "servers.0.encryption", "SSL"),
+					resource.TestCheckResourceAttr(resourceName, "servers.0.port", "631"),
+					resource.TestCheckResourceAttr(resourceName, "servers.0.use_mgmt_port", "false"),
+					resource.TestCheckResourceAttr(resourceName, "servers.0.version", "V2"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -411,6 +649,19 @@ func TestAccLdapAuthServiceResource_Servers(t *testing.T) {
 func TestAccLdapAuthServiceResource_Timeout(t *testing.T) {
 	var resourceName = "nios_security_ldap_auth_service.test_timeout"
 	var v security.LdapAuthService
+	name := acctest.RandomNameWithPrefix("ldap-auth-service")
+	servers := []map[string]any{
+		{
+			"address":             "2.2.2.2",
+			"authentication_type": "ANONYMOUS",
+			"base_dn":             "ou=People,dc=example,dc=com",
+			"disable":             false,
+			"encryption":          "SSL",
+			"port":                636,
+			"use_mgmt_port":       false,
+			"version":             "V3",
+		},
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -418,18 +669,18 @@ func TestAccLdapAuthServiceResource_Timeout(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccLdapAuthServiceTimeout("TIMEOUT_REPLACE_ME"),
+				Config: testAccLdapAuthServiceTimeout(name, servers, "adminID", 30, 5, 15),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLdapAuthServiceExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "timeout", "TIMEOUT_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "timeout", "15"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccLdapAuthServiceTimeout("TIMEOUT_UPDATE_REPLACE_ME"),
+				Config: testAccLdapAuthServiceTimeout(name, servers, "adminID", 30, 5, 25),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLdapAuthServiceExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "timeout", "TIMEOUT_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "timeout", "25"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -495,114 +746,206 @@ func testAccCheckLdapAuthServiceDisappears(ctx context.Context, v *security.Ldap
 	}
 }
 
-func testAccLdapAuthServiceBasicConfig(string) string {
-	// TODO: create basic resource with required fields
+func testAccLdapAuthServiceBasicConfig(name string, servers []map[string]any, ldapUserAttribute string, recoveryInterval, retries, timeout int) string {
+	serverString := utils.ConvertSliceOfMapsToHCL(servers)
 	return fmt.Sprintf(`
 resource "nios_security_ldap_auth_service" "test" {
+	name = %q
+ldap_user_attribute = %q
+recovery_interval = %d
+retries = %d
+timeout = %d
+servers = %s
 }
-`)
+`, name, ldapUserAttribute, recoveryInterval, retries, timeout, serverString)
 }
 
-func testAccLdapAuthServiceComment(comment string) string {
+func testAccLdapAuthServiceComment(name string, servers []map[string]any, ldapUserAttribute string, recoveryInterval, retries, timeout int, comment string) string {
+	serverString := utils.ConvertSliceOfMapsToHCL(servers)
 	return fmt.Sprintf(`
 resource "nios_security_ldap_auth_service" "test_comment" {
+	name = %q
+ldap_user_attribute = %q
+recovery_interval = %d
+retries = %d
+timeout = %d
+servers = %s
     comment = %q
 }
-`, comment)
+`, name, ldapUserAttribute, recoveryInterval, retries, timeout, serverString, comment)
 }
 
-func testAccLdapAuthServiceDisable(disable string) string {
+func testAccLdapAuthServiceDisable(name string, servers []map[string]any, ldapUserAttribute string, recoveryInterval, retries, timeout int, disable bool) string {
+	serverString := utils.ConvertSliceOfMapsToHCL(servers)
 	return fmt.Sprintf(`
 resource "nios_security_ldap_auth_service" "test_disable" {
-    disable = %q
+	name = %q
+ldap_user_attribute = %q
+recovery_interval = %d
+retries = %d
+timeout = %d
+servers = %s
+    disable = %t
 }
-`, disable)
+`, name, ldapUserAttribute, recoveryInterval, retries, timeout, serverString, disable)
 }
 
-func testAccLdapAuthServiceEaMapping(eaMapping string) string {
+func testAccLdapAuthServiceEaMapping(name string, servers []map[string]any, ldapUserAttribute string, recoveryInterval, retries, timeout int, eaMapping []map[string]any) string {
+	serverString := utils.ConvertSliceOfMapsToHCL(servers)
+	eaMappingString := utils.ConvertSliceOfMapsToHCL(eaMapping)
 	return fmt.Sprintf(`
 resource "nios_security_ldap_auth_service" "test_ea_mapping" {
-    ea_mapping = %q
+	name = %q
+ldap_user_attribute = %q
+recovery_interval = %d
+retries = %d
+timeout = %d
+servers = %s
+    ea_mapping = %s
 }
-`, eaMapping)
+`, name, ldapUserAttribute, recoveryInterval, retries, timeout, serverString, eaMappingString)
 }
 
-func testAccLdapAuthServiceLdapGroupAttribute(ldapGroupAttribute string) string {
+func testAccLdapAuthServiceLdapGroupAttribute(name string, servers []map[string]any, ldapUserAttribute string, recoveryInterval, retries, timeout int, ldapGroupAttribute string) string {
+	serverString := utils.ConvertSliceOfMapsToHCL(servers)
 	return fmt.Sprintf(`
 resource "nios_security_ldap_auth_service" "test_ldap_group_attribute" {
+	name = %q
+ldap_user_attribute = %q
+recovery_interval = %d
+retries = %d
+timeout = %d
+servers = %s
     ldap_group_attribute = %q
 }
-`, ldapGroupAttribute)
+`, name, ldapUserAttribute, recoveryInterval, retries, timeout, serverString, ldapGroupAttribute)
 }
 
-func testAccLdapAuthServiceLdapGroupAuthenticationType(ldapGroupAuthenticationType string) string {
+func testAccLdapAuthServiceLdapGroupAuthenticationType(name string, servers []map[string]any, ldapUserAttribute string, recoveryInterval, retries, timeout int, ldapGroupAuthenticationType string) string {
+	serverString := utils.ConvertSliceOfMapsToHCL(servers)
 	return fmt.Sprintf(`
 resource "nios_security_ldap_auth_service" "test_ldap_group_authentication_type" {
+	name = %q
+ldap_user_attribute = %q
+recovery_interval = %d
+retries = %d
+timeout = %d
+servers = %s
     ldap_group_authentication_type = %q
 }
-`, ldapGroupAuthenticationType)
+`, name, ldapUserAttribute, recoveryInterval, retries, timeout, serverString, ldapGroupAuthenticationType)
 }
 
-func testAccLdapAuthServiceLdapUserAttribute(ldapUserAttribute string) string {
+func testAccLdapAuthServiceLdapUserAttribute(name string, servers []map[string]any, ldapUserAttribute string, recoveryInterval, retries, timeout int) string {
+	serverString := utils.ConvertSliceOfMapsToHCL(servers)
 	return fmt.Sprintf(`
 resource "nios_security_ldap_auth_service" "test_ldap_user_attribute" {
+	name = %q
+recovery_interval = %d
+retries = %d
+timeout = %d
+servers = %s
     ldap_user_attribute = %q
 }
-`, ldapUserAttribute)
+`, name, recoveryInterval, retries, timeout, serverString, ldapUserAttribute)
 }
 
-func testAccLdapAuthServiceMode(mode string) string {
+func testAccLdapAuthServiceMode(name string, servers []map[string]any, ldapUserAttribute string, recoveryInterval, retries, timeout int, mode string) string {
+	serverString := utils.ConvertSliceOfMapsToHCL(servers)
 	return fmt.Sprintf(`
 resource "nios_security_ldap_auth_service" "test_mode" {
+	name = %q
+ldap_user_attribute = %q
+recovery_interval = %d
+retries = %d
+timeout = %d
+servers = %s
     mode = %q
 }
-`, mode)
+`, name, ldapUserAttribute, recoveryInterval, retries, timeout, serverString, mode)
 }
 
-func testAccLdapAuthServiceName(name string) string {
+func testAccLdapAuthServiceName(name string, servers []map[string]any, ldapUserAttribute string, recoveryInterval, retries, timeout int) string {
+	serverString := utils.ConvertSliceOfMapsToHCL(servers)
 	return fmt.Sprintf(`
 resource "nios_security_ldap_auth_service" "test_name" {
     name = %q
+ldap_user_attribute = %q
+recovery_interval = %d
+retries = %d
+timeout = %d
+servers = %s
 }
-`, name)
+`, name, ldapUserAttribute, recoveryInterval, retries, timeout, serverString)
 }
 
-func testAccLdapAuthServiceRecoveryInterval(recoveryInterval string) string {
+func testAccLdapAuthServiceRecoveryInterval(name string, servers []map[string]any, ldapUserAttribute string, recoveryInterval, retries, timeout int) string {
+	serverString := utils.ConvertSliceOfMapsToHCL(servers)
 	return fmt.Sprintf(`
 resource "nios_security_ldap_auth_service" "test_recovery_interval" {
-    recovery_interval = %q
+	name = %q
+ldap_user_attribute = %q
+    recovery_interval = %d
+retries = %d
+timeout = %d
+servers = %s
 }
-`, recoveryInterval)
+`, name, ldapUserAttribute, recoveryInterval, retries, timeout, serverString)
 }
 
-func testAccLdapAuthServiceRetries(retries string) string {
+func testAccLdapAuthServiceRetries(name string, servers []map[string]any, ldapUserAttribute string, recoveryInterval, retries, timeout int) string {
+	serverString := utils.ConvertSliceOfMapsToHCL(servers)
 	return fmt.Sprintf(`
 resource "nios_security_ldap_auth_service" "test_retries" {
-    retries = %q
+	name = %q
+ldap_user_attribute = %q
+recovery_interval = %d
+timeout = %d
+servers = %s
+    retries = %d
 }
-`, retries)
+`, name, ldapUserAttribute, recoveryInterval, timeout, serverString, retries)
 }
 
-func testAccLdapAuthServiceSearchScope(searchScope string) string {
+func testAccLdapAuthServiceSearchScope(name string, servers []map[string]any, ldapUserAttribute string, recoveryInterval, retries, timeout int, searchScope string) string {
+	serverString := utils.ConvertSliceOfMapsToHCL(servers)
 	return fmt.Sprintf(`
 resource "nios_security_ldap_auth_service" "test_search_scope" {
+	name = %q
+ldap_user_attribute = %q
+recovery_interval = %d
+retries = %d
+timeout = %d
+servers = %s
     search_scope = %q
 }
-`, searchScope)
+`, name, ldapUserAttribute, recoveryInterval, retries, timeout, serverString, searchScope)
 }
 
-func testAccLdapAuthServiceServers(servers string) string {
+func testAccLdapAuthServiceServers(name string, servers []map[string]any, ldapUserAttribute string, recoveryInterval, retries, timeout int) string {
+	serversString := utils.ConvertSliceOfMapsToHCL(servers)
 	return fmt.Sprintf(`
 resource "nios_security_ldap_auth_service" "test_servers" {
-    servers = %q
+	name = %q
+ldap_user_attribute = %q
+recovery_interval = %d
+retries = %d
+timeout = %d
+    servers = %s
 }
-`, servers)
+`, name, ldapUserAttribute, recoveryInterval, retries, timeout, serversString)
 }
 
-func testAccLdapAuthServiceTimeout(timeout string) string {
+func testAccLdapAuthServiceTimeout(name string, servers []map[string]any, ldapUserAttribute string, recoveryInterval, retries, timeout int) string {
+	serversString := utils.ConvertSliceOfMapsToHCL(servers)
 	return fmt.Sprintf(`
 resource "nios_security_ldap_auth_service" "test_timeout" {
-    timeout = %q
+	name = %q
+ldap_user_attribute = %q
+recovery_interval = %d
+retries = %d
+servers = %s
+    timeout = %d
 }
-`, timeout)
+`, name, ldapUserAttribute, recoveryInterval, retries, serversString, timeout)
 }
