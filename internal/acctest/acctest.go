@@ -104,13 +104,8 @@ func RandomMACAddress() string {
 }
 
 func Random32Hexadecimal() string {
-	// 16 bytes = 128 bits → 32 hex characters
-	b := make([]byte, 16)
-	_, err := rand.Read(b)
-	if err != nil {
-		panic(err)
-	}
-	return fmt.Sprintf("%x", b) // lowercase hex
+	// Two 64-bit random values = 128 bits = 32 hex characters
+	return fmt.Sprintf("%016x%016x", rand.Uint64(), rand.Uint64())
 }
 
 func PreCheck(t *testing.T) {
