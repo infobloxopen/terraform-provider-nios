@@ -74,8 +74,8 @@ func (r *ParentalcontrolAvpResource) ValidateConfig(ctx context.Context, req res
 	}
 
 	// Check if 'is_restricted' is true when domain_types' is specified
-	if !data.DomainTypes.IsNull() {
-		if !data.IsRestricted.IsNull() && !data.IsRestricted.ValueBool() {
+	if !data.DomainTypes.IsNull() && !data.DomainTypes.IsUnknown() {
+		if !data.IsRestricted.IsNull() && !data.IsRestricted.IsUnknown() && !data.IsRestricted.ValueBool() {
 			resp.Diagnostics.AddError(
 				"Invalid Configuration",
 				"'is_restricted' must be true when 'domain_types' is specified.",
@@ -84,12 +84,14 @@ func (r *ParentalcontrolAvpResource) ValidateConfig(ctx context.Context, req res
 	}
 
 	// Check if 'vendor_id' and 'vendor_type' are specified when 'type'=26
-	if !data.Type.IsNull() && data.Type.ValueInt64() == 26 {
-		if data.VendorId.IsNull() && data.VendorType.IsNull() {
-			resp.Diagnostics.AddError(
-				"Invalid Configuration",
-				"'vendor_id' and 'vendor_type' must be specified when 'type' is 26.",
-			)
+	if !data.Type.IsNull() && !data.Type.IsUnknown() && data.Type.ValueInt64() == 26 {
+		if !data.VendorId.IsUnknown() && !data.VendorType.IsUnknown() {
+			if data.VendorId.IsNull() || data.VendorType.IsNull() {
+				resp.Diagnostics.AddError(
+					"Invalid Configuration",
+					"'vendor_id' and 'vendor_type' must be specified when 'type' is 26.",
+				)
+			}
 		}
 	}
 }
