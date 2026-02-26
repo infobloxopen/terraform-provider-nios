@@ -16,7 +16,7 @@ func TestAccParentalcontrolBlockingpolicyDataSource_Filters(t *testing.T) {
 	resourceName := "nios_parentalcontrol_blockingpolicy.test"
 	var v parentalcontrol.ParentalcontrolBlockingpolicy
 	name := acctest.RandomNameWithPrefix("blockingpolicy-")
-	value := "0000000abcd0000000abcdef00000001"
+	value := acctest.Random32Hexadecimal()
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,

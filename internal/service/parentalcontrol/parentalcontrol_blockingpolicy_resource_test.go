@@ -21,7 +21,7 @@ func TestAccParentalcontrolBlockingpolicyResource_basic(t *testing.T) {
 	var resourceName = "nios_parentalcontrol_blockingpolicy.test"
 	var v parentalcontrol.ParentalcontrolBlockingpolicy
 	name := acctest.RandomNameWithPrefix("blockingpolicy-")
-	value := "0000000abcd00000000000000000aaa1"
+	value := acctest.Random32Hexadecimal()
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
@@ -44,7 +44,7 @@ func TestAccParentalcontrolBlockingpolicyResource_disappears(t *testing.T) {
 	resourceName := "nios_parentalcontrol_blockingpolicy.test"
 	var v parentalcontrol.ParentalcontrolBlockingpolicy
 	name := acctest.RandomNameWithPrefix("blockingpolicy-")
-	value := "0000000abcd00000000000000000bbb1"
+	value := acctest.Random32Hexadecimal()
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
@@ -67,7 +67,7 @@ func TestAccParentalcontrolBlockingpolicyResource_Name(t *testing.T) {
 	var v parentalcontrol.ParentalcontrolBlockingpolicy
 	name1 := acctest.RandomNameWithPrefix("blockingpolicy-")
 	name2 := acctest.RandomNameWithPrefix("blockingpolicy-")
-	value := "0000000abcd000000000000000aba001"
+	value := acctest.Random32Hexadecimal()
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
@@ -97,8 +97,8 @@ func TestAccParentalcontrolBlockingpolicyResource_Value(t *testing.T) {
 	var resourceName = "nios_parentalcontrol_blockingpolicy.test_value"
 	var v parentalcontrol.ParentalcontrolBlockingpolicy
 	name := acctest.RandomNameWithPrefix("blockingpolicy-")
-	value1 := "0000000abcd000000000000000078901"
-	value2 := "0000000abcd0000000045600000efef1"
+	value1 := acctest.Random32Hexadecimal()
+	value2 := acctest.Random32Hexadecimal()
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,

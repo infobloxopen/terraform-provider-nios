@@ -1,7 +1,7 @@
 // Retrieve a specific Parental Control Blocking Policy by filters
 data "nios_parentalcontrol_blockingpolicy" "get_parentalcontrol_blockingpolicy_using_filters" {
   filters = {
-    name = "example_notification_rule"
+    name = "example_blockingpolicy"
   }
 }
 

@@ -3,12 +3,12 @@
 page_title: "nios_parentalcontrol_blockingpolicy Data Source - nios"
 subcategory: "PARENTAL CONTROL"
 description: |-
-  
+  Retrieves information about existing Parental Control Blocking Policies.
 ---
 
 # nios_parentalcontrol_blockingpolicy (Data Source)
 
-
+Retrieves information about existing Parental Control Blocking Policies.
 
 ## Example Usage
 
@@ -16,7 +16,7 @@ description: |-
 // Retrieve a specific Parental Control Blocking Policy by filters
 data "nios_parentalcontrol_blockingpolicy" "get_parentalcontrol_blockingpolicy_using_filters" {
   filters = {
-    name = "example_notification_rule"
+    name = "example_blockingpolicy"
   }
 }
 

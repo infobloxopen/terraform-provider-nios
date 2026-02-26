@@ -103,6 +103,16 @@ func RandomMACAddress() string {
 		rand.Intn(256))
 }
 
+func Random32Hexadecimal() string {
+	// 16 bytes = 128 bits → 32 hex characters
+	b := make([]byte, 16)
+	_, err := rand.Read(b)
+	if err != nil {
+		panic(err)
+	}
+	return fmt.Sprintf("%x", b) // lowercase hex
+}
+
 func PreCheck(t *testing.T) {
 	hostURL := os.Getenv("NIOS_HOST_URL")
 	if hostURL == "" {

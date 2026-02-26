@@ -37,7 +37,7 @@ func (r *ParentalcontrolBlockingpolicyResource) Metadata(ctx context.Context, re
 
 func (r *ParentalcontrolBlockingpolicyResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "",
+		MarkdownDescription: "Manages a Parental Control Blocking Policy.",
 		Attributes:          ParentalcontrolBlockingpolicyResourceSchemaAttributes,
 	}
 }
@@ -110,7 +110,7 @@ func (r *ParentalcontrolBlockingpolicyResource) Read(ctx context.Context, req re
 		ProxySearch(config.GetProxySearch()).
 		Execute()
 
-		// Handle not found case
+	// Handle not found case
 	if err != nil {
 		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
 			// Resource no longer exists, remove from state
