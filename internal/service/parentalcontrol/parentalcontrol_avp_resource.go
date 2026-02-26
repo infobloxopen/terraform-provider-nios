@@ -21,6 +21,7 @@ var readableAttributesForParentalcontrolAvp = "comment,domain_types,is_restricte
 // Ensure provider defined types fully satisfy framework interfaces.
 var _ resource.Resource = &ParentalcontrolAvpResource{}
 var _ resource.ResourceWithImportState = &ParentalcontrolAvpResource{}
+var _ resource.ResourceWithValidateConfig = &ParentalcontrolAvpResource{}
 
 func NewParentalcontrolAvpResource() resource.Resource {
 	return &ParentalcontrolAvpResource{}
@@ -72,12 +73,22 @@ func (r *ParentalcontrolAvpResource) ValidateConfig(ctx context.Context, req res
 		return
 	}
 
-	// Perform custom validation logic here and append any diagnostics to resp.Diagnostics
+	// Check if 'is_restricted' is true when domain_types' is specified
 	if !data.DomainTypes.IsNull() {
 		if !data.IsRestricted.IsNull() && !data.IsRestricted.ValueBool() {
 			resp.Diagnostics.AddError(
 				"Invalid Configuration",
 				"'is_restricted' must be true when 'domain_types' is specified.",
+			)
+		}
+	}
+
+	// Check if 'vendor_id' and 'vendor_type' are specified when 'type'=26
+	if !data.Type.IsNull() && data.Type.ValueInt64() == 26 {
+		if data.VendorId.IsNull() && data.VendorType.IsNull() {
+			resp.Diagnostics.AddError(
+				"Invalid Configuration",
+				"'vendor_id' and 'vendor_type' must be specified when 'type' is 26.",
 			)
 		}
 	}

@@ -103,4 +103,3 @@ resource "nios_notification_rule" "notification_rule_with_ipam_event_type" {
     template = "IPAM_PxgridEvent"
   }
 }
-
