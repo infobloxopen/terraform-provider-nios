@@ -26,11 +26,11 @@ var LdapAuthServiceEaMappingAttrTypes = map[string]attr.Type{
 
 var LdapAuthServiceEaMappingResourceSchemaAttributes = map[string]schema.Attribute{
 	"name": schema.StringAttribute{
-		Optional:            true,
+		Required:            true,
 		MarkdownDescription: "The LDAP attribute name.",
 	},
 	"mapped_ea": schema.StringAttribute{
-		Optional:            true,
+		Required:            true,
 		MarkdownDescription: "The name of the extensible attribute definition object to which the LDAP attribute is mapped.",
 	},
 }

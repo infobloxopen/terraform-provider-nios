@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -69,6 +70,8 @@ var LdapAuthServiceResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"disable": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Determines if the LDAP authentication service is disabled.",
 	},
 	"ea_mapping": schema.ListNestedAttribute{
@@ -83,34 +86,51 @@ var LdapAuthServiceResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"ldap_group_attribute": schema.StringAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             stringdefault.StaticString("memberOf"),
 		MarkdownDescription: "The name of the LDAP attribute that defines group membership.",
 	},
 	"ldap_group_authentication_type": schema.StringAttribute{
-		Optional:            true,
+		Optional: true,
+		Computed: true,
+		Validators: []validator.String{
+			stringvalidator.OneOf("GROUP_ATTRIBUTE", "POSIX_GROUP"),
+		},
+		Default:             stringdefault.StaticString("GROUP_ATTRIBUTE"),
 		MarkdownDescription: "The LDAP group authentication type.",
 	},
 	"ldap_user_attribute": schema.StringAttribute{
-		Optional:            true,
+		Required:            true,
 		MarkdownDescription: "The LDAP userid attribute that is used for search.",
 	},
 	"mode": schema.StringAttribute{
-		Optional:            true,
+		Optional: true,
+		Computed: true,
+		Validators: []validator.String{
+			stringvalidator.OneOf("ORDERED_LIST", "ROUND_ROBIN"),
+		},
+		Default:             stringdefault.StaticString("ORDERED_LIST"),
 		MarkdownDescription: "The LDAP authentication mode.",
 	},
 	"name": schema.StringAttribute{
-		Optional:            true,
+		Required:            true,
 		MarkdownDescription: "The LDAP authentication service name.",
 	},
 	"recovery_interval": schema.Int64Attribute{
-		Optional:            true,
+		Required:            true,
 		MarkdownDescription: "The period of time in seconds to wait before trying to contact a LDAP server that has been marked as 'DOWN'.",
 	},
 	"retries": schema.Int64Attribute{
-		Optional:            true,
+		Required:            true,
 		MarkdownDescription: "The maximum number of LDAP authentication attempts.",
 	},
 	"search_scope": schema.StringAttribute{
-		Optional:            true,
+		Optional: true,
+		Computed: true,
+		Validators: []validator.String{
+			stringvalidator.OneOf("BASE", "ONELEVEL", "SUBTREE"),
+		},
+		Default:             stringdefault.StaticString("ONELEVEL"),
 		MarkdownDescription: "The starting point of the LDAP search.",
 	},
 	"servers": schema.ListNestedAttribute{
@@ -124,7 +144,7 @@ var LdapAuthServiceResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The list of LDAP servers used for authentication.",
 	},
 	"timeout": schema.Int64Attribute{
-		Optional:            true,
+		Required:            true,
 		MarkdownDescription: "The LDAP authentication timeout in seconds.",
 	},
 }

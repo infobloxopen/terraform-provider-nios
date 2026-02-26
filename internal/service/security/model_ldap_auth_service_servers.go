@@ -3,9 +3,14 @@ package security
 import (
 	"context"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
@@ -44,15 +49,20 @@ var LdapAuthServiceServersAttrTypes = map[string]attr.Type{
 
 var LdapAuthServiceServersResourceSchemaAttributes = map[string]schema.Attribute{
 	"address": schema.StringAttribute{
-		Optional:            true,
+		Required:            true,
 		MarkdownDescription: "The IP address or FQDN of the LDAP server.",
 	},
 	"authentication_type": schema.StringAttribute{
-		Optional:            true,
+		Optional: true,
+		Computed: true,
+		Validators: []validator.String{
+			stringvalidator.OneOf("ANONYMOUS", "SIMPLE"),
+		},
+		Default:             stringdefault.StaticString("ANONYMOUS"),
 		MarkdownDescription: "The authentication type for the LDAP server.",
 	},
 	"base_dn": schema.StringAttribute{
-		Optional:            true,
+		Required:            true,
 		MarkdownDescription: "The base DN for the LDAP server.",
 	},
 	"bind_password": schema.StringAttribute{
@@ -69,22 +79,38 @@ var LdapAuthServiceServersResourceSchemaAttributes = map[string]schema.Attribute
 	},
 	"disable": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Determines if the LDAP server is disabled.",
 	},
 	"encryption": schema.StringAttribute{
-		Optional:            true,
+		Optional: true,
+		Computed: true,
+		Validators: []validator.String{
+			stringvalidator.OneOf("NONE", "SSL"),
+		},
+		Default:             stringdefault.StaticString("SSL"),
 		MarkdownDescription: "The LDAP server encryption type.",
 	},
 	"port": schema.Int64Attribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             int64default.StaticInt64(636),
 		MarkdownDescription: "The LDAP server port.",
 	},
 	"use_mgmt_port": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Determines if the connection via the MGMT interface is allowed.",
 	},
 	"version": schema.StringAttribute{
 		Optional:            true,
+		Computed:            true,
+		Validators: []validator.String{
+			stringvalidator.OneOf("V2", "V3"),
+		},
+		Default:             stringdefault.StaticString("V3"),
 		MarkdownDescription: "The LDAP server version.",
 	},
 }
