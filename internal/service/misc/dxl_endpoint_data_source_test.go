@@ -89,17 +89,17 @@ func testAccDxlEndpointDataSourceConfigFilters(clientCertificateToken, name, out
 	brokerStr := utils.ConvertSliceOfMapsToHCL(broker)
 	return fmt.Sprintf(`
 resource "nios_misc_dxl_endpoint" "test" {
-  client_certificate_file = %q
-  name = %q
-  outbound_member_type = %q
-  brokers = %s
+	client_certificate_file = %q
+	name = %q
+	outbound_member_type = %q
+	brokers = %s
 }
 
 data "nios_misc_dxl_endpoint" "test" {
-  filters = {
-	name = nios_misc_dxl_endpoint.test.name
-	outbound_member_type = nios_misc_dxl_endpoint.test.outbound_member_type
-  }
+	filters = {
+		name = nios_misc_dxl_endpoint.test.name
+		outbound_member_type = nios_misc_dxl_endpoint.test.outbound_member_type
+  	}
 }
 `, clientCertificateToken, name, outboundMemberType, brokerStr)
 }
@@ -108,19 +108,19 @@ func testAccDxlEndpointDataSourceConfigExtAttrFilters(clientCertificateToken, na
 	brokerStr := utils.ConvertSliceOfMapsToHCL(broker)
 	return fmt.Sprintf(`
 resource "nios_misc_dxl_endpoint" "test" {
-  client_certificate_file = %q
-  name = %q
-  outbound_member_type = %q
-  brokers = %s
-  extattrs = {
-    Site = %q
-  } 
+	client_certificate_file = %q
+	name = %q
+  	outbound_member_type = %q
+  	brokers = %s
+  	extattrs = {
+    	Site = %q
+  	} 
 }
 
 data "nios_misc_dxl_endpoint" "test" {
-  extattrfilters = {
-    Site = nios_misc_dxl_endpoint.test.extattrs.Site
-  }
+  	extattrfilters = {
+    	Site = nios_misc_dxl_endpoint.test.extattrs.Site
+  	}
 }
 `, clientCertificateToken, name, outboundMemberType, brokerStr, extAttrsValue)
 }

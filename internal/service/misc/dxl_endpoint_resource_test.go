@@ -299,6 +299,13 @@ func TestAccDxlEndpointResource_LogLevel(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
+				Config: testAccDxlEndpointLogLevelDefault(clientCertificateFile, broker, name, "GM"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckDxlEndpointExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "log_level", "WARNING"),
+				),
+			},
+			{
 				Config: testAccDxlEndpointLogLevel(clientCertificateFile, broker, name, "GM", "DEBUG"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDxlEndpointExists(context.Background(), resourceName, &v),
@@ -317,13 +324,6 @@ func TestAccDxlEndpointResource_LogLevel(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDxlEndpointExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "log_level", "INFO"),
-				),
-			},
-			{
-				Config: testAccDxlEndpointLogLevel(clientCertificateFile, broker, name, "GM", "WARNING"),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckDxlEndpointExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "log_level", "WARNING"),
 				),
 			},
 		},
@@ -575,7 +575,6 @@ func TestAccDxlEndpointResource_WapiUserName(t *testing.T) {
 			// Update and Read
 			{
 				Config: testAccDxlEndpointWapiUserName(clientCertificateFile, broker, name, "GM", "admin_updated", "password"),
-
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDxlEndpointExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "wapi_user_name", "admin_updated"),
@@ -733,6 +732,18 @@ resource "nios_misc_dxl_endpoint" "test_extattrs" {
 	brokers = %s
 }
 `, clientCertificateToken, name, outboundMemberType, extAttrsStr, brokerStr)
+}
+
+func testAccDxlEndpointLogLevelDefault(clientCertificateToken string, broker []map[string]any, name string, outboundMemberType string) string {
+	brokerStr := utils.ConvertSliceOfMapsToHCL(broker)
+	return fmt.Sprintf(`
+resource "nios_misc_dxl_endpoint" "test_log_level" {
+    client_certificate_file = %q
+    name = %q
+    outbound_member_type = %q
+	brokers = %s
+}
+`, clientCertificateToken, name, outboundMemberType, brokerStr)
 }
 
 func testAccDxlEndpointLogLevel(clientCertificateToken string, broker []map[string]any, name string, outboundMemberType string, logLevel string) string {
