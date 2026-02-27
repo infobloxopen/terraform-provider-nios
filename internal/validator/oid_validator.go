@@ -134,7 +134,7 @@ func (v oidValidator) ValidateString(ctx context.Context, req validator.StringRe
 				resp.Diagnostics.AddAttributeError(
 					req.Path,
 					"Invalid OID Format",
-					fmt.Sprintf("Sub-identifier at position %d contains invalid characters. Only digits are allowed.", i),
+					fmt.Sprintf("Sub-identifier at index %d contains invalid characters. Only digits are allowed.", i),
 				)
 				return
 			}
@@ -144,7 +144,7 @@ func (v oidValidator) ValidateString(ctx context.Context, req validator.StringRe
 				resp.Diagnostics.AddAttributeError(
 					req.Path,
 					"Invalid OID Format",
-					fmt.Sprintf("Sub-identifier at position %d exceeds maximum value of %d.", i, oidSubIdentifierMaxValue),
+					fmt.Sprintf("Sub-identifier at index %d exceeds maximum value of %d.", i, oidSubIdentifierMaxValue),
 				)
 				return
 			}
