@@ -82,11 +82,13 @@ func TestAccMsserverResource_AdSites(t *testing.T) {
 	adsitesLoginName := acctest.RandomName()
 	adsites := map[string]any{
 		"login_name": adsitesLoginName,
+		"use_login":  true,
 	}
 
 	updatedAdsitesLoginName := acctest.RandomName()
 	updatedAdsites := map[string]any{
 		"login_name": updatedAdsitesLoginName,
+		"use_login":  true,
 	}
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -118,24 +120,38 @@ func TestAccMsserverResource_AdUser(t *testing.T) {
 	var resourceName = "nios_microsoft_msserver.test_ad_user"
 	var v microsoft.Msserver
 
+	address := "10.10.0.1"
+	loginName := acctest.RandomName()
+	aduserLoginName := acctest.RandomName()
+	aduser := map[string]any{
+		"login_name": aduserLoginName,
+		"use_login":  true,
+	}
+
+	updatedAduserLoginName := acctest.RandomName()
+	updatedAduser := map[string]any{
+		"login_name": updatedAduserLoginName,
+		"use_login":  true,
+	}
+
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccMsserverAdUser("AD_USER_REPLACE_ME"),
+				Config: testAccMsserverAdUser(address, loginName, aduser),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMsserverExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ad_user", "AD_USER_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "ad_user.login_name", aduserLoginName),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccMsserverAdUser("AD_USER_UPDATE_REPLACE_ME"),
+				Config: testAccMsserverAdUser(address, loginName, updatedAduser),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMsserverExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ad_user", "AD_USER_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "ad_user.login_name", updatedAduserLoginName),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -147,24 +163,28 @@ func TestAccMsserverResource_Address(t *testing.T) {
 	var resourceName = "nios_microsoft_msserver.test_address"
 	var v microsoft.Msserver
 
+	address1 := "10.10.0.1"
+	address2 := "10.10.0.2"
+	loginName := acctest.RandomName()
+
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccMsserverAddress("ADDRESS_REPLACE_ME"),
+				Config: testAccMsserverAddress(address1, loginName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMsserverExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "address", "ADDRESS_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "address", address1),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccMsserverAddress("ADDRESS_UPDATE_REPLACE_ME"),
+				Config: testAccMsserverAddress(address2, loginName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMsserverExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "address", "ADDRESS_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "address", address2),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -175,6 +195,10 @@ func TestAccMsserverResource_Address(t *testing.T) {
 func TestAccMsserverResource_Comment(t *testing.T) {
 	var resourceName = "nios_microsoft_msserver.test_comment"
 	var v microsoft.Msserver
+	address := "10.10.0.1"
+	loginName := acctest.RandomName()
+	comment1 := "This is a new msserver"
+	comment2 := "This is an updated msserver"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -182,18 +206,18 @@ func TestAccMsserverResource_Comment(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccMsserverComment("COMMENT_REPLACE_ME"),
+				Config: testAccMsserverComment(address, loginName, comment1),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMsserverExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "comment", "COMMENT_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "comment", comment1),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccMsserverComment("COMMENT_UPDATE_REPLACE_ME"),
+				Config: testAccMsserverComment(address, loginName, comment2),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMsserverExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "comment", "COMMENT_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "comment", comment2),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -205,24 +229,38 @@ func TestAccMsserverResource_DhcpServer(t *testing.T) {
 	var resourceName = "nios_microsoft_msserver.test_dhcp_server"
 	var v microsoft.Msserver
 
+	address := "10.10.0.1"
+	loginName := acctest.RandomName()
+	dhcpServerLoginName := acctest.RandomName()
+	dhcp := map[string]any{
+		"login_name": dhcpServerLoginName,
+		"use_login":  true,
+	}
+
+	updatedDhcpServerLoginName := acctest.RandomName()
+	updatedDhcp := map[string]any{
+		"login_name": updatedDhcpServerLoginName,
+		"use_login":  true,
+	}
+
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccMsserverDhcpServer("DHCP_SERVER_REPLACE_ME"),
+				Config: testAccMsserverDhcpServer(address, loginName, dhcp),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMsserverExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "dhcp_server", "DHCP_SERVER_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "dhcp_server.login_name", dhcpServerLoginName),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccMsserverDhcpServer("DHCP_SERVER_UPDATE_REPLACE_ME"),
+				Config: testAccMsserverDhcpServer(address, loginName, updatedDhcp),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMsserverExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "dhcp_server", "DHCP_SERVER_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "dhcp_server.login_name", updatedDhcpServerLoginName),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -234,24 +272,27 @@ func TestAccMsserverResource_Disabled(t *testing.T) {
 	var resourceName = "nios_microsoft_msserver.test_disabled"
 	var v microsoft.Msserver
 
+	address := "10.10.0.1"
+	loginName := acctest.RandomName()
+
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccMsserverDisabled("DISABLED_REPLACE_ME"),
+				Config: testAccMsserverDisabled(address, loginName, "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMsserverExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "disabled", "DISABLED_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "disabled", "false"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccMsserverDisabled("DISABLED_UPDATE_REPLACE_ME"),
+				Config: testAccMsserverDisabled(address, loginName, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMsserverExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "disabled", "DISABLED_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "disabled", "true"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -263,24 +304,38 @@ func TestAccMsserverResource_DnsServer(t *testing.T) {
 	var resourceName = "nios_microsoft_msserver.test_dns_server"
 	var v microsoft.Msserver
 
+	address := "10.10.0.1"
+	loginName := acctest.RandomName()
+	dnsServerLoginName := acctest.RandomName()
+	dns := map[string]any{
+		"login_name": dnsServerLoginName,
+		"use_login":  true,
+	}
+
+	updatedDnsServerLoginName := acctest.RandomName()
+	updatedDns := map[string]any{
+		"login_name": updatedDnsServerLoginName,
+		"use_login":  true,
+	}
+
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccMsserverDnsServer("DNS_SERVER_REPLACE_ME"),
+				Config: testAccMsserverDnsServer(address, loginName, dns),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMsserverExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "dns_server", "DNS_SERVER_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "dns_server.login_name", dnsServerLoginName),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccMsserverDnsServer("DNS_SERVER_UPDATE_REPLACE_ME"),
+				Config: testAccMsserverDnsServer(address, loginName, updatedDns),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMsserverExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "dns_server", "DNS_SERVER_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "dns_server.login_name", updatedDnsServerLoginName),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -292,26 +347,23 @@ func TestAccMsserverResource_DnsView(t *testing.T) {
 	var resourceName = "nios_microsoft_msserver.test_dns_view"
 	var v microsoft.Msserver
 
+	address := "10.10.0.1"
+	loginName := acctest.RandomName()
+
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccMsserverDnsView("DNS_VIEW_REPLACE_ME"),
+				Config: testAccMsserverDnsView(address, loginName, "default"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMsserverExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "dns_view", "DNS_VIEW_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "dns_view", "default"),
 				),
 			},
-			// Update and Read
-			{
-				Config: testAccMsserverDnsView("DNS_VIEW_UPDATE_REPLACE_ME"),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckMsserverExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "dns_view", "DNS_VIEW_UPDATE_REPLACE_ME"),
-				),
-			},
+			// Can't update view as it is immutable
+
 			// Delete testing automatically occurs in TestCase
 		},
 	})
@@ -321,24 +373,29 @@ func TestAccMsserverResource_ExtAttrs(t *testing.T) {
 	var resourceName = "nios_microsoft_msserver.test_extattrs"
 	var v microsoft.Msserver
 
+	address := "10.10.0.1"
+	loginName := acctest.RandomName()
+	extAttrValue1 := acctest.RandomName()
+	extAttrValue2 := acctest.RandomName()
+
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccMsserverExtAttrs("EXT_ATTRS_REPLACE_ME"),
+				Config: testAccMsserverExtAttrs(address, loginName, map[string]any{"Site": extAttrValue1}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMsserverExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "extattrs", "EXT_ATTRS_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "extattrs.Site", extAttrValue1),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccMsserverExtAttrs("EXT_ATTRS_UPDATE_REPLACE_ME"),
+				Config: testAccMsserverExtAttrs(address, loginName, map[string]any{"Site": extAttrValue2}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMsserverExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "extattrs", "EXT_ATTRS_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "extattrs.Site", extAttrValue2),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -350,24 +407,29 @@ func TestAccMsserverResource_GridMember(t *testing.T) {
 	var resourceName = "nios_microsoft_msserver.test_grid_member"
 	var v microsoft.Msserver
 
+	address := "10.10.0.1"
+	loginName := acctest.RandomName()
+	member1 := "infoblox.localdomain"
+	member2 := "member.com"
+
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccMsserverGridMember("GRID_MEMBER_REPLACE_ME"),
+				Config: testAccMsserverGridMember(address, loginName, member1),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMsserverExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "grid_member", "GRID_MEMBER_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "grid_member", member1),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccMsserverGridMember("GRID_MEMBER_UPDATE_REPLACE_ME"),
+				Config: testAccMsserverGridMember(address, loginName, member2),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMsserverExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "grid_member", "GRID_MEMBER_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "grid_member", member2),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -379,24 +441,29 @@ func TestAccMsserverResource_LogDestination(t *testing.T) {
 	var resourceName = "nios_microsoft_msserver.test_log_destination"
 	var v microsoft.Msserver
 
+	address := "10.10.0.1"
+	loginName := acctest.RandomName()
+	member1 := "MSLOG"
+	member2 := "SYSLOG"
+
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccMsserverLogDestination("LOG_DESTINATION_REPLACE_ME"),
+				Config: testAccMsserverLogDestination(address, loginName, member1),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMsserverExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "log_destination", "LOG_DESTINATION_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "log_destination", member1),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccMsserverLogDestination("LOG_DESTINATION_UPDATE_REPLACE_ME"),
+				Config: testAccMsserverLogDestination(address, loginName, member2),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMsserverExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "log_destination", "LOG_DESTINATION_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "log_destination", member2),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -408,24 +475,47 @@ func TestAccMsserverResource_LogLevel(t *testing.T) {
 	var resourceName = "nios_microsoft_msserver.test_log_level"
 	var v microsoft.Msserver
 
+	address := "10.10.0.1"
+	loginName := acctest.RandomName()
+	member1 := "ADVANCED"
+	member2 := "FULL"
+	member3 := "MINIMUM"
+	member4 := "NORMAL"
+
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccMsserverLogLevel("LOG_LEVEL_REPLACE_ME"),
+				Config: testAccMsserverLogLevel(address, loginName, member1),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMsserverExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "log_level", "LOG_LEVEL_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "log_level", member1),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccMsserverLogLevel("LOG_LEVEL_UPDATE_REPLACE_ME"),
+				Config: testAccMsserverLogLevel(address, loginName, member2),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMsserverExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "log_level", "LOG_LEVEL_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "log_level", member2),
+				),
+			},
+			// Update and Read
+			{
+				Config: testAccMsserverLogLevel(address, loginName, member3),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckMsserverExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "log_level", member3),
+				),
+			},
+			// Update and Read
+			{
+				Config: testAccMsserverLogLevel(address, loginName, member4),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckMsserverExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "log_level", member4),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -437,24 +527,28 @@ func TestAccMsserverResource_LoginName(t *testing.T) {
 	var resourceName = "nios_microsoft_msserver.test_login_name"
 	var v microsoft.Msserver
 
+	address := "10.10.0.1"
+	loginName1 := acctest.RandomName()
+	loginName2 := acctest.RandomName()
+
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccMsserverLoginName("LOGIN_NAME_REPLACE_ME"),
+				Config: testAccMsserverLoginName(address, loginName1),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMsserverExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "login_name", "LOGIN_NAME_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "login_name", loginName1),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccMsserverLoginName("LOGIN_NAME_UPDATE_REPLACE_ME"),
+				Config: testAccMsserverLoginName(address, loginName2),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMsserverExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "login_name", "LOGIN_NAME_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "login_name", loginName2),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -465,6 +559,10 @@ func TestAccMsserverResource_LoginName(t *testing.T) {
 func TestAccMsserverResource_LoginPassword(t *testing.T) {
 	var resourceName = "nios_microsoft_msserver.test_login_password"
 	var v microsoft.Msserver
+	address := "10.10.0.1"
+	loginName := acctest.RandomName()
+	loginPassword1 := "Password@123"
+	loginPassword2 := "Password@456"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -472,18 +570,18 @@ func TestAccMsserverResource_LoginPassword(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccMsserverLoginPassword("LOGIN_PASSWORD_REPLACE_ME"),
+				Config: testAccMsserverLoginPassword(address, loginName, loginPassword1),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMsserverExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "login_password", "LOGIN_PASSWORD_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "login_password", loginPassword1),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccMsserverLoginPassword("LOGIN_PASSWORD_UPDATE_REPLACE_ME"),
+				Config: testAccMsserverLoginPassword(address, loginName, loginPassword2),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMsserverExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "login_password", "LOGIN_PASSWORD_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "login_password", loginPassword2),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -495,24 +593,29 @@ func TestAccMsserverResource_MsMaxConnection(t *testing.T) {
 	var resourceName = "nios_microsoft_msserver.test_ms_max_connection"
 	var v microsoft.Msserver
 
+	address := "10.10.0.1"
+	loginName := acctest.RandomName()
+	maxConnection := "10"
+	updatedMaxConnection := "20"
+
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccMsserverMsMaxConnection("MS_MAX_CONNECTION_REPLACE_ME"),
+				Config: testAccMsserverMsMaxConnection(address, loginName, maxConnection),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMsserverExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ms_max_connection", "MS_MAX_CONNECTION_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "ms_max_connection", maxConnection),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccMsserverMsMaxConnection("MS_MAX_CONNECTION_UPDATE_REPLACE_ME"),
+				Config: testAccMsserverMsMaxConnection(address, loginName, updatedMaxConnection),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMsserverExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ms_max_connection", "MS_MAX_CONNECTION_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "ms_max_connection", updatedMaxConnection),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -524,24 +627,29 @@ func TestAccMsserverResource_MsRpcTimeoutInSeconds(t *testing.T) {
 	var resourceName = "nios_microsoft_msserver.test_ms_rpc_timeout_in_seconds"
 	var v microsoft.Msserver
 
+	address := "10.10.0.1"
+	loginName := acctest.RandomName()
+	msRpcTimeoutInSeconds := "30"
+	updatedMsRpcTimeoutInSeconds := "60"
+
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccMsserverMsRpcTimeoutInSeconds("MS_RPC_TIMEOUT_IN_SECONDS_REPLACE_ME"),
+				Config: testAccMsserverMsRpcTimeoutInSeconds(address, loginName, msRpcTimeoutInSeconds),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMsserverExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ms_rpc_timeout_in_seconds", "MS_RPC_TIMEOUT_IN_SECONDS_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "ms_rpc_timeout_in_seconds", msRpcTimeoutInSeconds),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccMsserverMsRpcTimeoutInSeconds("MS_RPC_TIMEOUT_IN_SECONDS_UPDATE_REPLACE_ME"),
+				Config: testAccMsserverMsRpcTimeoutInSeconds(address, loginName, updatedMsRpcTimeoutInSeconds),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMsserverExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ms_rpc_timeout_in_seconds", "MS_RPC_TIMEOUT_IN_SECONDS_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "ms_rpc_timeout_in_seconds", updatedMsRpcTimeoutInSeconds),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -553,26 +661,23 @@ func TestAccMsserverResource_NetworkView(t *testing.T) {
 	var resourceName = "nios_microsoft_msserver.test_network_view"
 	var v microsoft.Msserver
 
+	address := "10.10.0.1"
+	loginName := acctest.RandomName()
+
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccMsserverNetworkView("NETWORK_VIEW_REPLACE_ME"),
+				Config: testAccMsserverNetworkView(address, loginName, "default"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMsserverExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "network_view", "NETWORK_VIEW_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "network_view", "default"),
 				),
 			},
-			// Update and Read
-			{
-				Config: testAccMsserverNetworkView("NETWORK_VIEW_UPDATE_REPLACE_ME"),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckMsserverExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "network_view", "NETWORK_VIEW_UPDATE_REPLACE_ME"),
-				),
-			},
+			// Can't update view as it is immutable
+
 			// Delete testing automatically occurs in TestCase
 		},
 	})
@@ -582,24 +687,27 @@ func TestAccMsserverResource_ReadOnly(t *testing.T) {
 	var resourceName = "nios_microsoft_msserver.test_read_only"
 	var v microsoft.Msserver
 
+	address := "10.10.0.1"
+	loginName := acctest.RandomName()
+
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccMsserverReadOnly("READ_ONLY_REPLACE_ME"),
+				Config: testAccMsserverReadOnly(address, loginName, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMsserverExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "read_only", "READ_ONLY_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "read_only", "false"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccMsserverReadOnly("READ_ONLY_UPDATE_REPLACE_ME"),
+				Config: testAccMsserverReadOnly(address, loginName, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMsserverExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "read_only", "READ_ONLY_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "read_only", "true"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -611,24 +719,29 @@ func TestAccMsserverResource_SynchronizationMinDelay(t *testing.T) {
 	var resourceName = "nios_microsoft_msserver.test_synchronization_min_delay"
 	var v microsoft.Msserver
 
+	address := "10.10.0.1"
+	loginName := acctest.RandomName()
+	synchronizationMinDelay := "2"
+	updatedSynchronizationMinDelay := "5"
+
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccMsserverSynchronizationMinDelay("SYNCHRONIZATION_MIN_DELAY_REPLACE_ME"),
+				Config: testAccMsserverSynchronizationMinDelay(address, loginName, synchronizationMinDelay),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMsserverExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "synchronization_min_delay", "SYNCHRONIZATION_MIN_DELAY_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "synchronization_min_delay", synchronizationMinDelay),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccMsserverSynchronizationMinDelay("SYNCHRONIZATION_MIN_DELAY_UPDATE_REPLACE_ME"),
+				Config: testAccMsserverSynchronizationMinDelay(address, loginName, updatedSynchronizationMinDelay),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMsserverExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "synchronization_min_delay", "SYNCHRONIZATION_MIN_DELAY_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "synchronization_min_delay", updatedSynchronizationMinDelay),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -640,24 +753,27 @@ func TestAccMsserverResource_UseLogDestination(t *testing.T) {
 	var resourceName = "nios_microsoft_msserver.test_use_log_destination"
 	var v microsoft.Msserver
 
+	address := "10.10.0.1"
+	loginName := acctest.RandomName()
+
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccMsserverUseLogDestination("USE_LOG_DESTINATION_REPLACE_ME"),
+				Config: testAccMsserverUseLogDestination(address, loginName, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMsserverExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_log_destination", "USE_LOG_DESTINATION_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "use_log_destination", "false"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccMsserverUseLogDestination("USE_LOG_DESTINATION_UPDATE_REPLACE_ME"),
+				Config: testAccMsserverUseLogDestination(address, loginName, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMsserverExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_log_destination", "USE_LOG_DESTINATION_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "use_log_destination", "true"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -669,24 +785,27 @@ func TestAccMsserverResource_UseMsMaxConnection(t *testing.T) {
 	var resourceName = "nios_microsoft_msserver.test_use_ms_max_connection"
 	var v microsoft.Msserver
 
+	address := "10.10.0.1"
+	loginName := acctest.RandomName()
+
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccMsserverUseMsMaxConnection("USE_MS_MAX_CONNECTION_REPLACE_ME"),
+				Config: testAccMsserverUseMsMaxConnection(address, loginName, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMsserverExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_ms_max_connection", "USE_MS_MAX_CONNECTION_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "use_ms_max_connection", "false"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccMsserverUseMsMaxConnection("USE_MS_MAX_CONNECTION_UPDATE_REPLACE_ME"),
+				Config: testAccMsserverUseMsMaxConnection(address, loginName, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMsserverExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_ms_max_connection", "USE_MS_MAX_CONNECTION_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "use_ms_max_connection", "true"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -698,24 +817,27 @@ func TestAccMsserverResource_UseMsRpcTimeoutInSeconds(t *testing.T) {
 	var resourceName = "nios_microsoft_msserver.test_use_ms_rpc_timeout_in_seconds"
 	var v microsoft.Msserver
 
+	address := "10.10.0.1"
+	loginName := acctest.RandomName()
+
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccMsserverUseMsRpcTimeoutInSeconds("USE_MS_RPC_TIMEOUT_IN_SECONDS_REPLACE_ME"),
+				Config: testAccMsserverUseMsRpcTimeoutInSeconds(address, loginName, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMsserverExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_ms_rpc_timeout_in_seconds", "USE_MS_RPC_TIMEOUT_IN_SECONDS_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "use_ms_rpc_timeout_in_seconds", "false"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccMsserverUseMsRpcTimeoutInSeconds("USE_MS_RPC_TIMEOUT_IN_SECONDS_UPDATE_REPLACE_ME"),
+				Config: testAccMsserverUseMsRpcTimeoutInSeconds(address, loginName, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMsserverExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_ms_rpc_timeout_in_seconds", "USE_MS_RPC_TIMEOUT_IN_SECONDS_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "use_ms_rpc_timeout_in_seconds", "true"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -802,170 +924,223 @@ resource "nios_microsoft_msserver" "test_ad_sites" {
 `, address, loginName, adSitesHCL)
 }
 
-func testAccMsserverAdUser(adUser string) string {
+func testAccMsserverAdUser(address, loginName string, adUser map[string]any) string {
+	adUserHCL := utils.ConvertMapToHCL(adUser)
+
 	return fmt.Sprintf(`
 resource "nios_microsoft_msserver" "test_ad_user" {
-    ad_user = %q
+    address = %q
+	login_name = %q
+	ad_user = %s
 }
-`, adUser)
+`, address, loginName, adUserHCL)
 }
 
-func testAccMsserverAddress(address string) string {
+func testAccMsserverAddress(address, loginName string) string {
 	return fmt.Sprintf(`
 resource "nios_microsoft_msserver" "test_address" {
     address = %q
+	login_name = %q
 }
-`, address)
+`, address, loginName)
 }
 
-func testAccMsserverComment(comment string) string {
+func testAccMsserverComment(address, loginName, comment string) string {
 	return fmt.Sprintf(`
 resource "nios_microsoft_msserver" "test_comment" {
+    address = %q
+	login_name = %q
     comment = %q
 }
-`, comment)
+`, address, loginName, comment)
 }
 
-func testAccMsserverDhcpServer(dhcpServer string) string {
+func testAccMsserverDhcpServer(address, loginName string, dhcpServer map[string]any) string {
+	dhcpServerHCL := utils.ConvertMapToHCL(dhcpServer)
+
 	return fmt.Sprintf(`
 resource "nios_microsoft_msserver" "test_dhcp_server" {
-    dhcp_server = %q
+    address = %q
+	login_name = %q
+	dhcp_server = %s
 }
-`, dhcpServer)
+`, address, loginName, dhcpServerHCL)
 }
 
-func testAccMsserverDisabled(disabled string) string {
+func testAccMsserverDisabled(address, loginName, disabled string) string {
 	return fmt.Sprintf(`
 resource "nios_microsoft_msserver" "test_disabled" {
+    address = %q
+	login_name = %q
     disabled = %q
 }
-`, disabled)
+`, address, loginName, disabled)
 }
 
-func testAccMsserverDnsServer(dnsServer string) string {
+func testAccMsserverDnsServer(address, loginName string, dnsServer map[string]any) string {
+	dnsServerHCL := utils.ConvertMapToHCL(dnsServer)
+
 	return fmt.Sprintf(`
 resource "nios_microsoft_msserver" "test_dns_server" {
-    dns_server = %q
+    address = %q
+	login_name = %q
+    dns_server = %s
 }
-`, dnsServer)
+`, address, loginName, dnsServerHCL)
 }
 
-func testAccMsserverDnsView(dnsView string) string {
+func testAccMsserverDnsView(address, loginName, dnsView string) string {
 	return fmt.Sprintf(`
 resource "nios_microsoft_msserver" "test_dns_view" {
+    address = %q
+	login_name = %q
     dns_view = %q
 }
-`, dnsView)
+`, address, loginName, dnsView)
 }
 
-func testAccMsserverExtAttrs(extAttrs string) string {
+func testAccMsserverExtAttrs(address, loginName string, extAttrs map[string]any) string {
+	extattrsStr := "{\n"
+	for k, v := range extAttrs {
+		extattrsStr += fmt.Sprintf(`
+	%s = %q
+	`, k, v)
+	}
+	extattrsStr += "\t}"
 	return fmt.Sprintf(`
 resource "nios_microsoft_msserver" "test_extattrs" {
-    extattrs = %q
+ 	address = %q
+	login_name = %q
+    extattrs = %s
 }
-`, extAttrs)
+`, address, loginName, extattrsStr)
 }
 
-func testAccMsserverGridMember(gridMember string) string {
+func testAccMsserverGridMember(address, loginName, gridMember string) string {
 	return fmt.Sprintf(`
 resource "nios_microsoft_msserver" "test_grid_member" {
+    address = %q
+	login_name = %q
     grid_member = %q
 }
-`, gridMember)
+`, address, loginName, gridMember)
 }
 
-func testAccMsserverLogDestination(logDestination string) string {
+func testAccMsserverLogDestination(address, loginName, logDestination string) string {
 	return fmt.Sprintf(`
 resource "nios_microsoft_msserver" "test_log_destination" {
+    address = %q
+	login_name = %q
     log_destination = %q
 }
-`, logDestination)
+`, address, loginName, logDestination)
 }
 
-func testAccMsserverLogLevel(logLevel string) string {
+func testAccMsserverLogLevel(address, loginName, logLevel string) string {
 	return fmt.Sprintf(`
 resource "nios_microsoft_msserver" "test_log_level" {
+    address = %q
+	login_name = %q
     log_level = %q
 }
-`, logLevel)
+`, address, loginName, logLevel)
 }
 
-func testAccMsserverLoginName(loginName string) string {
+func testAccMsserverLoginName(address, loginName string) string {
 	return fmt.Sprintf(`
 resource "nios_microsoft_msserver" "test_login_name" {
-    login_name = %q
+    address = %q
+	login_name = %q
 }
-`, loginName)
+`, address, loginName)
 }
 
-func testAccMsserverLoginPassword(loginPassword string) string {
+func testAccMsserverLoginPassword(address, loginName, loginPassword string) string {
 	return fmt.Sprintf(`
 resource "nios_microsoft_msserver" "test_login_password" {
+    address = %q
+	login_name = %q
     login_password = %q
 }
-`, loginPassword)
+`, address, loginName, loginPassword)
 }
 
-func testAccMsserverMsMaxConnection(msMaxConnection string) string {
+func testAccMsserverMsMaxConnection(address, loginName, msMaxConnection string) string {
 	return fmt.Sprintf(`
 resource "nios_microsoft_msserver" "test_ms_max_connection" {
+    address = %q
+	login_name = %q
     ms_max_connection = %q
 }
-`, msMaxConnection)
+`, address, loginName, msMaxConnection)
 }
 
-func testAccMsserverMsRpcTimeoutInSeconds(msRpcTimeoutInSeconds string) string {
+func testAccMsserverMsRpcTimeoutInSeconds(address, loginName, msRpcTimeoutInSeconds string) string {
 	return fmt.Sprintf(`
 resource "nios_microsoft_msserver" "test_ms_rpc_timeout_in_seconds" {
+	address = %q
+	login_name = %q
     ms_rpc_timeout_in_seconds = %q
 }
-`, msRpcTimeoutInSeconds)
+`, address, loginName, msRpcTimeoutInSeconds)
 }
 
-func testAccMsserverNetworkView(networkView string) string {
+func testAccMsserverNetworkView(address, loginName, networkView string) string {
 	return fmt.Sprintf(`
 resource "nios_microsoft_msserver" "test_network_view" {
+	address = %q
+	login_name = %q
     network_view = %q
 }
-`, networkView)
+`, address, loginName, networkView)
 }
 
-func testAccMsserverReadOnly(readOnly string) string {
+func testAccMsserverReadOnly(address, loginName string, readOnly bool) string {
 	return fmt.Sprintf(`
 resource "nios_microsoft_msserver" "test_read_only" {
-    read_only = %q
+    address = %q
+	login_name = %q
+    read_only = %t
 }
-`, readOnly)
+`, address, loginName, readOnly)
 }
 
-func testAccMsserverSynchronizationMinDelay(synchronizationMinDelay string) string {
+func testAccMsserverSynchronizationMinDelay(address, loginName, synchronizationMinDelay string) string {
 	return fmt.Sprintf(`
 resource "nios_microsoft_msserver" "test_synchronization_min_delay" {
+    address = %q
+	login_name = %q
     synchronization_min_delay = %q
 }
-`, synchronizationMinDelay)
+`, address, loginName, synchronizationMinDelay)
 }
 
-func testAccMsserverUseLogDestination(useLogDestination string) string {
+func testAccMsserverUseLogDestination(address, loginName string, useLogDestination bool) string {
 	return fmt.Sprintf(`
 resource "nios_microsoft_msserver" "test_use_log_destination" {
-    use_log_destination = %q
+    address = %q
+	login_name = %q
+    use_log_destination = %t
 }
-`, useLogDestination)
+`, address, loginName, useLogDestination)
 }
 
-func testAccMsserverUseMsMaxConnection(useMsMaxConnection string) string {
+func testAccMsserverUseMsMaxConnection(address, loginName string, useMsMaxConnection bool) string {
 	return fmt.Sprintf(`
 resource "nios_microsoft_msserver" "test_use_ms_max_connection" {
-    use_ms_max_connection = %q
+    address = %q
+	login_name = %q
+    use_ms_max_connection = %t
 }
-`, useMsMaxConnection)
+`, address, loginName, useMsMaxConnection)
 }
 
-func testAccMsserverUseMsRpcTimeoutInSeconds(useMsRpcTimeoutInSeconds string) string {
+func testAccMsserverUseMsRpcTimeoutInSeconds(address, loginName string, useMsRpcTimeoutInSeconds bool) string {
 	return fmt.Sprintf(`
 resource "nios_microsoft_msserver" "test_use_ms_rpc_timeout_in_seconds" {
-    use_ms_rpc_timeout_in_seconds = %q
+	address = %q
+	login_name = %q
+    use_ms_rpc_timeout_in_seconds = %t
 }
-`, useMsRpcTimeoutInSeconds)
+`, address, loginName, useMsRpcTimeoutInSeconds)
 }

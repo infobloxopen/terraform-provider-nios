@@ -3,11 +3,15 @@ package microsoft
 import (
 	"context"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/boolvalidator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
@@ -60,15 +64,21 @@ var MsserverAdUserResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The login password of the DHCP Microsoft Server.",
 	},
 	"enable_user_sync": schema.BoolAttribute{
-		Optional:            true,
-		Computed:            true,
-		Default:             booldefault.StaticBool(false),
+		Optional: true,
+		Computed: true,
+		Default:  booldefault.StaticBool(false),
+		Validators: []validator.Bool{
+			boolvalidator.AlsoRequires(path.MatchRoot("use_enable_user_sync")),
+		},
 		MarkdownDescription: "Determines whether the Active Directory user synchronization is enabled or not.",
 	},
 	"synchronization_interval": schema.Int64Attribute{
-		Optional:            true,
-		Computed:            true,
-		Default:             int64default.StaticInt64(2),
+		Optional: true,
+		Computed: true,
+		Default:  int64default.StaticInt64(2),
+		Validators: []validator.Int64{
+			int64validator.AlsoRequires(path.MatchRoot("use_synchronization_interval")),
+		},
 		MarkdownDescription: "The minimum number of minutes between two synchronizations.",
 	},
 	"last_sync_time": schema.Int64Attribute{

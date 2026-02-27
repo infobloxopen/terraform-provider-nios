@@ -9,6 +9,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
 
@@ -21,6 +23,7 @@ var readableAttributesForMsserver = "ad_domain,ad_sites,ad_user,address,comment,
 // Ensure provider defined types fully satisfy framework interfaces.
 var _ resource.Resource = &MsserverResource{}
 var _ resource.ResourceWithImportState = &MsserverResource{}
+var _ resource.ResourceWithValidateConfig = &MsserverResource{}
 
 func NewMsserverResource() resource.Resource {
 	return &MsserverResource{}
@@ -60,6 +63,105 @@ func (r *MsserverResource) Configure(ctx context.Context, req resource.Configure
 	}
 
 	r.client = client
+}
+
+func (r *MsserverResource) ValidateConfig(ctx context.Context, req resource.ValidateConfigRequest, resp *resource.ValidateConfigResponse) {
+	var data MsserverModel
+
+	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	if !data.AdSites.IsNull() && !data.AdSites.IsUnknown() {
+		var obj MsserverAdSitesModel
+		resp.Diagnostics.Append(data.AdSites.As(ctx, &obj, basetypes.ObjectAsOptions{})...)
+		if resp.Diagnostics.HasError() {
+			return
+		}
+		validateSubConfig(resp, obj.LoginName, obj.UseLogin, obj.SynchronizationMinDelay, obj.UseSynchronizationMinDelay, "adsites")
+	}
+
+	if !data.AdUser.IsNull() && !data.AdUser.IsUnknown() {
+		var obj MsserverAdUserModel
+		resp.Diagnostics.Append(data.AdUser.As(ctx, &obj, basetypes.ObjectAsOptions{})...)
+		if resp.Diagnostics.HasError() {
+			return
+		}
+		validateSubConfig(resp, obj.LoginName, obj.UseLogin, obj.SynchronizationInterval, obj.UseSynchronizationMinDelay, "aduser")
+	}
+
+	if !data.DhcpServer.IsNull() && !data.DhcpServer.IsUnknown() {
+		var obj MsserverDhcpServerModel
+		resp.Diagnostics.Append(data.DhcpServer.As(ctx, &obj, basetypes.ObjectAsOptions{})...)
+		if resp.Diagnostics.HasError() {
+			return
+		}
+		validateSubConfig(resp, obj.LoginName, obj.UseLogin, obj.SynchronizationMinDelay, obj.UseSynchronizationMinDelay, "dhcpserver")
+	}
+
+	if !data.DnsServer.IsNull() && !data.DnsServer.IsUnknown() {
+		var obj MsserverDnsServerModel
+		resp.Diagnostics.Append(data.DnsServer.As(ctx, &obj, basetypes.ObjectAsOptions{})...)
+		if resp.Diagnostics.HasError() {
+			return
+		}
+		validateSubConfig(resp, obj.LoginName, obj.UseLogin, obj.SynchronizationMinDelay, obj.UseSynchronizationMinDelay, "dnsserver")
+	}
+}
+
+func validateSubConfig(
+	resp *resource.ValidateConfigResponse,
+	login types.String,
+	useLogin types.Bool,
+	syncDelay types.Int64,
+	useSyncDelay types.Bool,
+	blockName string,
+) {
+
+	// login validation
+	loginSet := !login.IsNull() && !login.IsUnknown()
+	useLoginSet := !useLogin.IsNull() && !useLogin.IsUnknown()
+
+	if loginSet {
+		if !useLoginSet || !useLogin.ValueBool() {
+			resp.Diagnostics.AddAttributeError(
+				path.Root(blockName).AtName("uselogin"),
+				"Invalid Login Configuration",
+				fmt.Sprintf("`%s.uselogin` must be set to true when `%s.login_name` is provided.", blockName, blockName),
+			)
+		}
+	}
+
+	if useLoginSet && useLogin.ValueBool() && !loginSet {
+		resp.Diagnostics.AddAttributeError(
+			path.Root(blockName).AtName("login_name"),
+			"Missing Login Name",
+			fmt.Sprintf("`%s.login_name` must be provided when `%s.uselogin` is set to true.", blockName, blockName),
+		)
+	}
+
+	// synchronization validation
+	syncDelaySet := !syncDelay.IsNull() && !syncDelay.IsUnknown()
+	useSyncDelaySet := !useSyncDelay.IsNull() && !useSyncDelay.IsUnknown()
+
+	if syncDelaySet {
+		if !useSyncDelaySet || !useSyncDelay.ValueBool() {
+			resp.Diagnostics.AddAttributeError(
+				path.Root(blockName).AtName("use_synchronization_min_delay"),
+				"Invalid Synchronization Configuration",
+				fmt.Sprintf("`%s.use_synchronization_min_delay` must be set to true when `%s.synchronization_min_delay` is provided.", blockName, blockName),
+			)
+		}
+	}
+
+	if useSyncDelaySet && useSyncDelay.ValueBool() && !syncDelaySet {
+		resp.Diagnostics.AddAttributeError(
+			path.Root(blockName).AtName("synchronization_min_delay"),
+			"Missing Synchronization Delay",
+			fmt.Sprintf("`%s.synchronization_min_delay` must be provided when `%s.use_synchronization_min_delay` is set to true.", blockName, blockName),
+		)
+	}
 }
 
 func (r *MsserverResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {

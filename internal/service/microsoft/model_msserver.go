@@ -19,6 +19,7 @@ import (
 	"github.com/infobloxopen/infoblox-nios-go-client/microsoft"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	planmodifiers "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/immutable"
 	importmod "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/import"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
@@ -157,8 +158,11 @@ var MsserverResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed:   true,
 	},
 	"dns_view": schema.StringAttribute{
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
+		PlanModifiers: []planmodifier.String{
+			planmodifiers.ImmutableString(),
+		},
 		MarkdownDescription: "Reference to the DNS view",
 	},
 	"extattrs": schema.MapAttribute{
@@ -222,9 +226,12 @@ var MsserverResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "Timeout in seconds of RPC connections for this MS Server",
 	},
 	"network_view": schema.StringAttribute{
-		Optional:            true,
-		Computed:            true,
-		Default:             stringdefault.StaticString("default"),
+		Optional: true,
+		Computed: true,
+		Default:  stringdefault.StaticString("default"),
+		PlanModifiers: []planmodifier.String{
+			planmodifiers.ImmutableString(),
+		},
 		MarkdownDescription: "Reference to the network view",
 	},
 	"read_only": schema.BoolAttribute{
