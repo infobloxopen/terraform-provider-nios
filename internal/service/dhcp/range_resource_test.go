@@ -924,7 +924,7 @@ func TestAccRangeResource_ExtAttrs(t *testing.T) {
 			// Create and Read
 			{
 				Config: testAccRangeExtAttrs(startAddr, endAddr, map[string]any{
-						"Site": extAttrValue1,
+					"Site": extAttrValue1,
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangeExists(context.Background(), resourceName, &v),
@@ -3965,5 +3965,3 @@ resource "nios_dhcp_range" "test_use_update_dns_on_lease_renewal" {
 }
 `, startAddr, endAddr, useUpdateDnsOnLeaseRenewal)
 }
-
-
