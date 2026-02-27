@@ -3,12 +3,12 @@
 page_title: "nios_security_ldap_auth_service Resource - nios"
 subcategory: "SECURITY"
 description: |-
-  
+  Manages an LDAP Authservice.
 ---
 
 # nios_security_ldap_auth_service (Resource)
 
-
+Manages an LDAP Authservice.
 
 ## Example Usage
 

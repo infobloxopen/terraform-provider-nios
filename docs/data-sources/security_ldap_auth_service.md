@@ -3,12 +3,12 @@
 page_title: "nios_security_ldap_auth_service Data Source - nios"
 subcategory: "SECURITY"
 description: |-
-  
+  Retrieves information about existing LDAP Authentication Services
 ---
 
 # nios_security_ldap_auth_service (Data Source)
 
-
+Retrieves information about existing LDAP Authentication Services
 
 ## Example Usage
 
