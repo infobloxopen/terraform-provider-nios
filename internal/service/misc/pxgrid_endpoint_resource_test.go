@@ -706,19 +706,6 @@ func testAccCheckPxgridEndpointDisappears(ctx context.Context, v *misc.PxgridEnd
 	}
 }
 
-func testAccPxgridEndpointImportStateIdFunc(resourceName string) resource.ImportStateIdFunc {
-	return func(s *terraform.State) (string, error) {
-		rs, ok := s.RootModule().Resources[resourceName]
-		if !ok {
-			return "", fmt.Errorf("not found: %s", resourceName)
-		}
-		if rs.Primary.Attributes["ref"] == "" {
-			return "", fmt.Errorf("ref is not set")
-		}
-		return rs.Primary.Attributes["ref"], nil
-	}
-}
-
 func testAccPxgridEndpointBasicConfig(view, address, clientCertificateToken, name, outboundMemberType string, subscribeSettings map[string]any, publishSettings map[string]any) string {
 	subscribeSettingsStr := utils.ConvertMapToHCL(subscribeSettings)
 	publishSettingsStr := utils.ConvertMapToHCL(publishSettings)
