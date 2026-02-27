@@ -12,6 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/security"
 
@@ -122,6 +123,9 @@ var LdapAuthServiceResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"retries": schema.Int64Attribute{
 		Required:            true,
+		Validators: []validator.Int64{
+			int64validator.Between(1, 5),
+		},
 		MarkdownDescription: "The maximum number of LDAP authentication attempts.",
 	},
 	"search_scope": schema.StringAttribute{
