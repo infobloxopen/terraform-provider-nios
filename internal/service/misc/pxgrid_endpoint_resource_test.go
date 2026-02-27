@@ -19,6 +19,10 @@ import (
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
+// OBJECTS TO BE PRESENT IN GRID FOR TESTS
+// Pxgrid Templates - PxgrdiSessionTemplate, PxgrdiSessionTemplate_Alt
+// Grid Master Candidate - infoblox.grid_master_candidate1
+
 var readableAttributesForPxgridEndpoint = "address,client_certificate_subject,client_certificate_valid_from,client_certificate_valid_to,comment,disable,extattrs,log_level,name,network_view,outbound_member_type,outbound_members,publish_settings,subscribe_settings,template_instance,timeout,vendor_identifier,wapi_user_name"
 
 var (
