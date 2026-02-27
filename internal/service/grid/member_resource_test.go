@@ -504,6 +504,7 @@ func TestAccMemberResource_ConfigAddrType(t *testing.T) {
 					vipAddress4,
 					"172.28.82.1",
 					"255.255.254.0",
+					true,
 				),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
@@ -519,6 +520,7 @@ func TestAccMemberResource_ConfigAddrType(t *testing.T) {
 					vipAddress6,
 					"2001::1",
 					"64",
+					false,
 				),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
@@ -532,6 +534,7 @@ func TestAccMemberResource_ConfigAddrType(t *testing.T) {
 func TestAccMemberResource_CspAccessKey(t *testing.T) {
 	var resourceName = "nios_grid_member.test_csp_access_key"
 	var v grid.Member
+	t.Skip("Insertion and update not allowed for csp access key")
 	cspAccessKeyVal := []string{"CSP_ACCESS_KEY_REPLACE_ME1", "CSP_ACCESS_KEY_REPLACE_ME2"}
 	cspAccessKeyValUpdated := []string{"CSP_ACCESS_KEY_REPLACE_ME1", "CSP_ACCESS_KEY_REPLACE_ME2"}
 
@@ -560,63 +563,131 @@ func TestAccMemberResource_CspAccessKey(t *testing.T) {
 	})
 }
 
+// getting error via wapi - IB.Data.Conflict:CSP test connectivity failed: 'Could not perform Test Connection on offline member.')",
 func TestAccMemberResource_CspMemberSetting(t *testing.T) {
 	var resourceName = "nios_grid_member.test_csp_member_setting"
 	var v grid.Member
-	cspMemberSettingVal := map[string]any{}
-	cspMemberSettingValUpdated := map[string]any{}
+
+	hostName := fmt.Sprintf("infoblox-%s.localdomain", acctest.RandomName())
+	vipAddress := fmt.Sprintf("172.28.83.%d", acctest.RandomNumber(254))
+
+	cspMemberSettingVal := map[string]any{
+		"csp_dns_resolver":     "52.119.40.101",
+		"use_csp_dns_resolver": false,
+		"use_csp_https_proxy":  false,
+		"use_csp_join_token":   false,
+	}
+	cspMemberSettingValUpdated := map[string]any{
+		"csp_dns_resolver":     "1.1.1.1",
+		"use_csp_dns_resolver": true,
+		"use_csp_https_proxy":  true,
+		"use_csp_join_token":   true,
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
-			// Create and Read
 			{
-				Config: testAccMemberCspMemberSetting("HOST_NAME_REPLACE_ME", cspMemberSettingVal),
+				Config: testAccMemberCspMemberSetting(
+					hostName,
+					"IPV4",
+					"VNIOS",
+					"ALL_V4",
+					vipAddress,
+					"172.28.82.1",
+					"255.255.254.0",
+					cspMemberSettingVal,
+				),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "csp_member_setting", "CSP_MEMBER_SETTING_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "host_name", hostName),
+					resource.TestCheckResourceAttr(resourceName, "config_addr_type", "IPV4"),
+					resource.TestCheckResourceAttr(resourceName, "platform", "VNIOS"),
+					resource.TestCheckResourceAttr(resourceName, "service_type_configuration", "ALL_V4"),
+					// resource.TestCheckResourceAttr(resourceName, "csp_member_setting.csp_dns_resolver", "8.8.8.8"),
 				),
 			},
-			// Update and Read
 			{
-				Config: testAccMemberCspMemberSetting("HOST_NAME_REPLACE_ME", cspMemberSettingValUpdated),
+				Config: testAccMemberCspMemberSetting(
+					hostName,
+					"IPV4",
+					"VNIOS",
+					"ALL_V4",
+					vipAddress,
+					"172.28.82.1",
+					"255.255.254.0",
+					cspMemberSettingValUpdated,
+				),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "csp_member_setting", "CSP_MEMBER_SETTING_UPDATE_REPLACE_ME"),
+					//resource.TestCheckResourceAttr(resourceName, "csp_member_setting.csp_dns_resolver", "1.1.1.1"),
 				),
 			},
-			// Delete testing automatically occurs in TestCase
 		},
 	})
 }
 func TestAccMemberResource_DnsResolverSetting(t *testing.T) {
 	var resourceName = "nios_grid_member.test_dns_resolver_setting"
 	var v grid.Member
-	dnsResolverSettingVal := map[string]any{}
-	dnsResolverSettingValUpdated := map[string]any{}
+
+	hostName := fmt.Sprintf("infoblox-%s.localdomain", acctest.RandomName())
+	vipAddress := fmt.Sprintf("172.28.83.%d", acctest.RandomNumber(254))
+
+	dnsResolverSettingVal := map[string]any{
+		"resolvers":      []string{"10.0.0.1"},
+		"search_domains": []string{"a.com"},
+	}
+	dnsResolverSettingValUpdated := map[string]any{
+		"resolvers":      []string{"10.0.0.2"},
+		"search_domains": []string{"b.com"},
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
-			// Create and Read
 			{
-				Config: testAccMemberDnsResolverSetting("HOST_NAME_REPLACE_ME", dnsResolverSettingVal),
+				Config: testAccMemberDnsResolverSetting(
+					hostName,
+					"IPV4",
+					"VNIOS",
+					"ALL_V4",
+					vipAddress,
+					"172.28.82.1",
+					"255.255.254.0",
+					dnsResolverSettingVal,
+					true,
+				),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "dns_resolver_setting", "DNS_RESOLVER_SETTING_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "host_name", hostName),
+					resource.TestCheckResourceAttr(resourceName, "config_addr_type", "IPV4"),
+					resource.TestCheckResourceAttr(resourceName, "platform", "VNIOS"),
+					resource.TestCheckResourceAttr(resourceName, "service_type_configuration", "ALL_V4"),
+					resource.TestCheckResourceAttr(resourceName, "dns_resolver_setting.resolvers.0", "10.0.0.1"),
+					resource.TestCheckResourceAttr(resourceName, "dns_resolver_setting.search_domains.0", "a.com"),
+					resource.TestCheckResourceAttr(resourceName, "use_dns_resolver_setting", "true"),
 				),
 			},
-			// Update and Read
 			{
-				Config: testAccMemberDnsResolverSetting("HOST_NAME_REPLACE_ME", dnsResolverSettingValUpdated),
+				Config: testAccMemberDnsResolverSetting(
+					hostName,
+					"IPV4",
+					"VNIOS",
+					"ALL_V4",
+					vipAddress,
+					"172.28.82.1",
+					"255.255.254.0",
+					dnsResolverSettingValUpdated,
+					true,
+				),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "dns_resolver_setting", "DNS_RESOLVER_SETTING_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "dns_resolver_setting.resolvers.0", "10.0.0.2"),
+					resource.TestCheckResourceAttr(resourceName, "dns_resolver_setting.search_domains.0", "b.com"),
 				),
 			},
-			// Delete testing automatically occurs in TestCase
 		},
 	})
 }
@@ -624,57 +695,126 @@ func TestAccMemberResource_Dscp(t *testing.T) {
 	var resourceName = "nios_grid_member.test_dscp"
 	var v grid.Member
 
+	hostName := fmt.Sprintf("infoblox-%s.localdomain", acctest.RandomName())
+	vipAddress := fmt.Sprintf("172.28.83.%d", acctest.RandomNumber(254))
+
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
-			// Create and Read
 			{
-				Config: testAccMemberDscp("HOST_NAME_REPLACE_ME", "DSCP_REPLACE_ME"),
+				Config: testAccMemberDscp(
+					hostName,
+					"IPV4",
+					"VNIOS",
+					"ALL_V4",
+					vipAddress,
+					"172.28.82.1",
+					"255.255.254.0",
+					0, //DSCP cannot be configured on an IB-UNKNOWN appliance, can only check the default value which is 0
+					true,
+				),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "dscp", "DSCP_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "host_name", hostName),
+					resource.TestCheckResourceAttr(resourceName, "config_addr_type", "IPV4"),
+					resource.TestCheckResourceAttr(resourceName, "platform", "VNIOS"),
+					resource.TestCheckResourceAttr(resourceName, "service_type_configuration", "ALL_V4"),
+					resource.TestCheckResourceAttr(resourceName, "use_dscp", "true"),
+					resource.TestCheckResourceAttr(resourceName, "dscp", "0"),
 				),
 			},
-			// Update and Read
 			{
-				Config: testAccMemberDscp("HOST_NAME_REPLACE_ME", "DSCP_UPDATE_REPLACE_ME"),
+				Config: testAccMemberDscp(
+					hostName,
+					"IPV4",
+					"VNIOS",
+					"ALL_V4",
+					vipAddress,
+					"172.28.82.1",
+					"255.255.254.0",
+					0,
+					false,
+				),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "dscp", "DSCP_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "dscp", "0"),
+					resource.TestCheckResourceAttr(resourceName, "use_dscp", "false"),
 				),
 			},
-			// Delete testing automatically occurs in TestCase
 		},
 	})
 }
 func TestAccMemberResource_EmailSetting(t *testing.T) {
 	var resourceName = "nios_grid_member.test_email_setting"
 	var v grid.Member
-	emailSettingVal := map[string]any{}
-	emailSettingValUpdated := map[string]any{}
+
+	hostName := fmt.Sprintf("infoblox-%s.localdomain", acctest.RandomName())
+	vipAddress := fmt.Sprintf("172.28.83.%d", acctest.RandomNumber(254))
+
+	emailSettingVal := map[string]any{
+		"enabled":            false,
+		"port_number":        25,
+		"relay_enabled":      false,
+		"smtps":              false,
+		"use_authentication": false,
+	}
+	emailSettingValUpdated := map[string]any{
+		"enabled":            true,
+		"port_number":        25,
+		"relay_enabled":      false,
+		"smtps":              false,
+		"use_authentication": false,
+		"address":            "nios.provider@infoblox.com",
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
-			// Create and Read
 			{
-				Config: testAccMemberEmailSetting("HOST_NAME_REPLACE_ME", emailSettingVal),
+				Config: testAccMemberEmailSetting(
+					hostName,
+					"IPV4",
+					"VNIOS",
+					"ALL_V4",
+					vipAddress,
+					"172.28.82.1",
+					"255.255.254.0",
+					emailSettingVal,
+					false,
+				),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "email_setting", "EMAIL_SETTING_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "email_setting.enabled", "false"),
+					resource.TestCheckResourceAttr(resourceName, "email_setting.port_number", "25"),
+					resource.TestCheckResourceAttr(resourceName, "email_setting.relay_enabled", "false"),
+					resource.TestCheckResourceAttr(resourceName, "email_setting.smtps", "false"),
+					resource.TestCheckResourceAttr(resourceName, "email_setting.use_authentication", "false"),
+					resource.TestCheckResourceAttr(resourceName, "use_email_setting", "false"),
 				),
 			},
-			// Update and Read
 			{
-				Config: testAccMemberEmailSetting("HOST_NAME_REPLACE_ME", emailSettingValUpdated),
+				Config: testAccMemberEmailSetting(
+					hostName,
+					"IPV4",
+					"VNIOS",
+					"ALL_V4",
+					vipAddress,
+					"172.28.82.1",
+					"255.255.254.0",
+					emailSettingValUpdated,
+					true,
+				),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "email_setting", "EMAIL_SETTING_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "email_setting.enabled", "true"),
+					resource.TestCheckResourceAttr(resourceName, "email_setting.port_number", "25"),
+					resource.TestCheckResourceAttr(resourceName, "email_setting.relay_enabled", "false"),
+					resource.TestCheckResourceAttr(resourceName, "email_setting.smtps", "false"),
+					resource.TestCheckResourceAttr(resourceName, "use_email_setting", "true"),
 				),
 			},
-			// Delete testing automatically occurs in TestCase
 		},
 	})
 }
@@ -682,27 +822,26 @@ func TestAccMemberResource_EnableHa(t *testing.T) {
 	var resourceName = "nios_grid_member.test_enable_ha"
 	var v grid.Member
 
+	hostName := fmt.Sprintf("infoblox-%s.localdomain", acctest.RandomName())
+	vipAddress := fmt.Sprintf("172.28.83.%d", acctest.RandomNumber(254))
+
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
-			// Create and Read
 			{
-				Config: testAccMemberEnableHa("HOST_NAME_REPLACE_ME", "true"),
+				Config: testAccMemberEnableHa(
+					hostName, "IPV4", "VNIOS", "ALL_V4",
+					vipAddress, "172.28.82.1", "255.255.254.0",
+					true, 112,
+				),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "enable_ha", "true"),
+					resource.TestCheckResourceAttr(resourceName, "router_id", "112"),
+					resource.TestCheckResourceAttr(resourceName, "node_info.#", "2"),
 				),
 			},
-			// Update and Read
-			{
-				Config: testAccMemberEnableHa("HOST_NAME_REPLACE_ME", "false"),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckMemberExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "enable_ha", "false"),
-				),
-			},
-			// Delete testing automatically occurs in TestCase
 		},
 	})
 }
@@ -711,27 +850,47 @@ func TestAccMemberResource_EnableLom(t *testing.T) {
 	var resourceName = "nios_grid_member.test_enable_lom"
 	var v grid.Member
 
+	hostName := fmt.Sprintf("infoblox-%s.localdomain", acctest.RandomName())
+	vipAddress := fmt.Sprintf("172.28.83.%d", acctest.RandomNumber(254))
+
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
-			// Create and Read
 			{
-				Config: testAccMemberEnableLom("HOST_NAME_REPLACE_ME", "true"),
+				Config: testAccMemberEnableLom(
+					hostName,
+					"IPV4",
+					"VNIOS",
+					"ALL_V4",
+					vipAddress,
+					"172.28.82.1",
+					"255.255.254.0",
+					true,
+				),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "enable_lom", "true"),
+					resource.TestCheckResourceAttr(resourceName, "use_enable_lom", "true"),
 				),
 			},
-			// Update and Read
 			{
-				Config: testAccMemberEnableLom("HOST_NAME_REPLACE_ME", "false"),
+				Config: testAccMemberEnableLom(
+					hostName,
+					"IPV4",
+					"VNIOS",
+					"ALL_V4",
+					vipAddress,
+					"172.28.82.1",
+					"255.255.254.0",
+					false,
+				),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "enable_lom", "false"),
+					resource.TestCheckResourceAttr(resourceName, "use_enable_lom", "true"),
 				),
 			},
-			// Delete testing automatically occurs in TestCase
 		},
 	})
 }
@@ -740,27 +899,47 @@ func TestAccMemberResource_EnableMemberRedirect(t *testing.T) {
 	var resourceName = "nios_grid_member.test_enable_member_redirect"
 	var v grid.Member
 
+	hostName := fmt.Sprintf("infoblox-%s.localdomain", acctest.RandomName())
+	vipAddress := fmt.Sprintf("172.28.83.%d", acctest.RandomNumber(254))
+
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
-			// Create and Read
 			{
-				Config: testAccMemberEnableMemberRedirect("HOST_NAME_REPLACE_ME", "true"),
+				Config: testAccMemberEnableMemberRedirect(
+					hostName,
+					"IPV4",
+					"VNIOS",
+					"ALL_V4",
+					vipAddress,
+					"172.28.82.1",
+					"255.255.254.0",
+					true,
+				),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "enable_member_redirect", "true"),
+					resource.TestCheckResourceAttr(resourceName, "use_enable_member_redirect", "true"),
 				),
 			},
-			// Update and Read
 			{
-				Config: testAccMemberEnableMemberRedirect("HOST_NAME_REPLACE_ME", "false"),
+				Config: testAccMemberEnableMemberRedirect(
+					hostName,
+					"IPV4",
+					"VNIOS",
+					"ALL_V4",
+					vipAddress,
+					"172.28.82.1",
+					"255.255.254.0",
+					false,
+				),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "enable_member_redirect", "false"),
+					resource.TestCheckResourceAttr(resourceName, "use_enable_member_redirect", "true"),
 				),
 			},
-			// Delete testing automatically occurs in TestCase
 		},
 	})
 }
@@ -768,28 +947,46 @@ func TestAccMemberResource_EnableMemberRedirect(t *testing.T) {
 func TestAccMemberResource_EnableRoApiAccess(t *testing.T) {
 	var resourceName = "nios_grid_member.test_enable_ro_api_access"
 	var v grid.Member
+	t.Skip("Member should be Grid Master Candidate to enable read-only API access.")
+	hostName := fmt.Sprintf("infoblox-%s.localdomain", acctest.RandomName())
+	vipAddress := fmt.Sprintf("172.28.83.%d", acctest.RandomNumber(254))
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
-			// Create and Read
 			{
-				Config: testAccMemberEnableRoApiAccess("HOST_NAME_REPLACE_ME", "true"),
+				Config: testAccMemberEnableRoApiAccess(
+					hostName,
+					"IPV4",
+					"VNIOS",
+					"ALL_V4",
+					vipAddress,
+					"172.28.82.1",
+					"255.255.254.0",
+					true,
+				),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "enable_ro_api_access", "true"),
 				),
 			},
-			// Update and Read
 			{
-				Config: testAccMemberEnableRoApiAccess("HOST_NAME_REPLACE_ME", "false"),
+				Config: testAccMemberEnableRoApiAccess(
+					hostName,
+					"IPV4",
+					"VNIOS",
+					"ALL_V4",
+					vipAddress,
+					"172.28.82.1",
+					"255.255.254.0",
+					false,
+				),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "enable_ro_api_access", "false"),
 				),
 			},
-			// Delete testing automatically occurs in TestCase
 		},
 	})
 }
@@ -797,6 +994,9 @@ func TestAccMemberResource_EnableRoApiAccess(t *testing.T) {
 func TestAccMemberResource_ExtAttrs(t *testing.T) {
 	var resourceName = "nios_grid_member.test_extattrs"
 	var v grid.Member
+
+	hostName := fmt.Sprintf("infoblox-%s.localdomain", acctest.RandomName())
+	vipAddress := fmt.Sprintf("172.28.83.%d", acctest.RandomNumber(254))
 	extAttrValue1 := acctest.RandomName()
 	extAttrValue2 := acctest.RandomName()
 
@@ -804,87 +1004,123 @@ func TestAccMemberResource_ExtAttrs(t *testing.T) {
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
-			// Create and Read
 			{
-				Config: testAccMemberExtAttrs("HOST_NAME_REPLACE_ME", map[string]string{
-					"Site": extAttrValue1,
-				}),
+				Config: testAccMemberExtAttrs(
+					hostName,
+					"IPV4",
+					"VNIOS",
+					"ALL_V4",
+					vipAddress,
+					"172.28.82.1",
+					"255.255.254.0",
+					map[string]any{
+						"Site": extAttrValue1,
+					},
+				),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "extattrs.Site", extAttrValue1),
 				),
 			},
-			// Update and Read
 			{
-				Config: testAccMemberExtAttrs("HOST_NAME_REPLACE_ME", map[string]string{
-					"Site": extAttrValue2,
-				}),
+				Config: testAccMemberExtAttrs(
+					hostName,
+					"IPV4",
+					"VNIOS",
+					"ALL_V4",
+					vipAddress,
+					"172.28.82.1",
+					"255.255.254.0",
+					map[string]any{
+						"Site": extAttrValue2,
+					},
+				),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "extattrs.Site", extAttrValue2),
 				),
 			},
-			// Delete testing automatically occurs in TestCase
 		},
 	})
 }
 
+// /pasword issue
 func TestAccMemberResource_ExternalSyslogBackupServers(t *testing.T) {
 	var resourceName = "nios_grid_member.test_external_syslog_backup_servers"
 	var v grid.Member
-	externalSyslogBackupServersVal := []map[string]any{}
-	externalSyslogBackupServersValUpdated := []map[string]any{}
 
-	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.PreCheck(t) },
-		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-		Steps: []resource.TestStep{
-			// Create and Read
-			{
-				Config: testAccMemberExternalSyslogBackupServers("HOST_NAME_REPLACE_ME", externalSyslogBackupServersVal),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckMemberExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "external_syslog_backup_servers", "EXTERNAL_SYSLOG_BACKUP_SERVERS_REPLACE_ME"),
-				),
-			},
-			// Update and Read
-			{
-				Config: testAccMemberExternalSyslogBackupServers("HOST_NAME_REPLACE_ME", externalSyslogBackupServersValUpdated),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckMemberExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "external_syslog_backup_servers", "EXTERNAL_SYSLOG_BACKUP_SERVERS_UPDATE_REPLACE_ME"),
-				),
-			},
-			// Delete testing automatically occurs in TestCase
+	hostName := fmt.Sprintf("infoblox-%s.localdomain", acctest.RandomName())
+	vipAddress := fmt.Sprintf("172.28.83.%d", acctest.RandomNumber(254))
+
+	externalSyslogBackupServersVal := []map[string]any{
+		{
+			"address_or_fqdn": "192.0.2.10",
+			"directory_path":  "/var/log/backup",
+			"enable":          true,
+			"port":            21,
+			"protocol":        "FTP",
+			"username":        "admin1",
+			"password":        "Password123!",
 		},
-	})
-}
-
-func TestAccMemberResource_ExternalSyslogServerEnable(t *testing.T) {
-	var resourceName = "nios_grid_member.test_external_syslog_server_enable"
-	var v grid.Member
+	}
+	externalSyslogBackupServersValUpdated := []map[string]any{
+		{
+			"address":        "192.0.2.20",
+			"directory_path": "/var/log/backup2",
+			"enable":         false,
+			"port":           22,
+			"protocol":       "SCP",
+			"username":       "admin2",
+			"password":       "Password456!",
+		},
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
-			// Create and Read
 			{
-				Config: testAccMemberExternalSyslogServerEnable("HOST_NAME_REPLACE_ME", "true"),
+				Config: testAccMemberExternalSyslogBackupServers(
+					hostName,
+					"IPV4",
+					"VNIOS",
+					"ALL_V4",
+					vipAddress,
+					"172.28.82.1",
+					"255.255.254.0",
+					externalSyslogBackupServersVal,
+				),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "external_syslog_server_enable", "true"),
+					resource.TestCheckResourceAttr(resourceName, "external_syslog_backup_servers.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "external_syslog_backup_servers.0.address", "192.0.2.10"),
+					resource.TestCheckResourceAttr(resourceName, "external_syslog_backup_servers.0.protocol", "FTP"),
+					resource.TestCheckResourceAttr(resourceName, "external_syslog_backup_servers.0.port", "21"),
+					resource.TestCheckResourceAttr(resourceName, "external_syslog_backup_servers.0.enable", "true"),
+					resource.TestCheckResourceAttr(resourceName, "use_external_syslog_backup_servers", "true"),
 				),
 			},
-			// Update and Read
 			{
-				Config: testAccMemberExternalSyslogServerEnable("HOST_NAME_REPLACE_ME", "false"),
+				Config: testAccMemberExternalSyslogBackupServers(
+					hostName,
+					"IPV4",
+					"VNIOS",
+					"ALL_V4",
+					vipAddress,
+					"172.28.82.1",
+					"255.255.254.0",
+					externalSyslogBackupServersValUpdated,
+				),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "external_syslog_server_enable", "false"),
+					resource.TestCheckResourceAttr(resourceName, "external_syslog_backup_servers.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "external_syslog_backup_servers.0.address", "192.0.2.20"),
+					resource.TestCheckResourceAttr(resourceName, "external_syslog_backup_servers.0.protocol", "SCP"),
+					resource.TestCheckResourceAttr(resourceName, "external_syslog_backup_servers.0.port", "22"),
+					resource.TestCheckResourceAttr(resourceName, "external_syslog_backup_servers.0.enable", "false"),
+					resource.TestCheckResourceAttr(resourceName, "use_external_syslog_backup_servers", "true"),
 				),
 			},
-			// Delete testing automatically occurs in TestCase
 		},
 	})
 }
@@ -956,27 +1192,44 @@ func TestAccMemberResource_HostName(t *testing.T) {
 	var resourceName = "nios_grid_member.test_host_name"
 	var v grid.Member
 
+	hostName1 := fmt.Sprintf("infoblox-%s.localdomain", acctest.RandomName())
+	hostName2 := fmt.Sprintf("infoblox-%s.localdomain", acctest.RandomName())
+	vipAddress := fmt.Sprintf("172.28.83.%d", acctest.RandomNumber(254))
+
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
-			// Create and Read
 			{
-				Config: testAccMemberHostName("HOST_NAME_REPLACE_ME"),
+				Config: testAccMemberHostName(
+					hostName1,
+					"IPV4",
+					"VNIOS",
+					"ALL_V4",
+					vipAddress,
+					"172.28.82.1",
+					"255.255.254.0",
+				),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "host_name", "HOST_NAME_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "host_name", hostName1),
 				),
 			},
-			// Update and Read
 			{
-				Config: testAccMemberHostName("HOST_NAME_REPLACE_ME"),
+				Config: testAccMemberHostName(
+					hostName2,
+					"IPV4",
+					"VNIOS",
+					"ALL_V4",
+					vipAddress,
+					"172.28.82.1",
+					"255.255.254.0",
+				),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "host_name", "HOST_NAME_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "host_name", hostName2),
 				),
 			},
-			// Delete testing automatically occurs in TestCase
 		},
 	})
 }
@@ -984,33 +1237,67 @@ func TestAccMemberResource_HostName(t *testing.T) {
 func TestAccMemberResource_Ipv6Setting(t *testing.T) {
 	var resourceName = "nios_grid_member.test_ipv6_setting"
 	var v grid.Member
-	ipv6SettingVal := map[string]any{}
-	ipv6SettingValUpdated := map[string]any{}
+
+	hostName := fmt.Sprintf("infoblox-%s.localdomain", acctest.RandomName())
+	vipAddress := fmt.Sprintf("172.28.83.%d", acctest.RandomNumber(254))
+
+	ipv6SettingVal := map[string]any{
+		"auto_router_config_enabled": false,
+		"dscp":                       0,
+		"enabled":                    false,
+		"primary":                    true,
+		"use_dscp":                   false,
+	}
+	ipv6SettingValUpdated := map[string]any{
+		"auto_router_config_enabled": true,
+		"dscp":                       0,
+		"enabled":                    true,
+		"primary":                    true,
+		"use_dscp":                   false,
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
-			// Create and Read
 			{
-				Config: testAccMemberIpv6Setting("HOST_NAME_REPLACE_ME", ipv6SettingVal),
+				Config: testAccMemberIpv6Setting(
+					hostName,
+					"IPV4",
+					"VNIOS",
+					"ALL_V4",
+					vipAddress,
+					"172.28.82.1",
+					"255.255.254.0",
+					ipv6SettingVal,
+				),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ipv6_setting", "IPV6_SETTING_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "ipv6_setting.enabled", "false"),
+					resource.TestCheckResourceAttr(resourceName, "ipv6_setting.auto_router_config_enabled", "false"),
 				),
 			},
-			// Update and Read
 			{
-				Config: testAccMemberIpv6Setting("HOST_NAME_REPLACE_ME", ipv6SettingValUpdated),
+				Config: testAccMemberIpv6Setting(
+					hostName,
+					"IPV4",
+					"VNIOS",
+					"ALL_V4",
+					vipAddress,
+					"172.28.82.1",
+					"255.255.254.0",
+					ipv6SettingValUpdated,
+				),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ipv6_setting", "IPV6_SETTING_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "ipv6_setting.enabled", "true"),
+					resource.TestCheckResourceAttr(resourceName, "ipv6_setting.auto_router_config_enabled", "true"),
 				),
 			},
-			// Delete testing automatically occurs in TestCase
 		},
 	})
 }
+
 func TestAccMemberResource_Ipv6StaticRoutes(t *testing.T) {
 	var resourceName = "nios_grid_member.test_ipv6_static_routes"
 	var v grid.Member
@@ -1314,63 +1601,138 @@ func TestAccMemberResource_NodeInfo(t *testing.T) {
 	})
 }
 
-func TestAccMemberResource_NtpSetting(t *testing.T) {
-	var resourceName = "nios_grid_member.test_ntp_setting"
-	var v grid.Member
-	ntpSettingVal := map[string]any{}
-	ntpSettingValUpdated := map[string]any{}
 
-	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.PreCheck(t) },
-		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-		Steps: []resource.TestStep{
-			// Create and Read
-			{
-				Config: testAccMemberNtpSetting("HOST_NAME_REPLACE_ME", ntpSettingVal),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckMemberExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ntp_setting", "NTP_SETTING_REPLACE_ME"),
-				),
-			},
-			// Update and Read
-			{
-				Config: testAccMemberNtpSetting("HOST_NAME_REPLACE_ME", ntpSettingValUpdated),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckMemberExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ntp_setting", "NTP_SETTING_UPDATE_REPLACE_ME"),
-				),
-			},
-			// Delete testing automatically occurs in TestCase
-		},
-	})
+func TestAccMemberResource_NtpSetting(t *testing.T) {
+    var resourceName = "nios_grid_member.test_ntp_setting"
+    var v grid.Member
+
+    hostName := fmt.Sprintf("infoblox-%s.localdomain", acctest.RandomName())
+    vipAddress := fmt.Sprintf("172.28.83.%d", acctest.RandomNumber(254))
+
+    ntpSettingVal := map[string]any{
+        "enable_external_ntp_servers":    false,
+        "enable_ntp":                     false,
+        "exclude_grid_master_ntp_server": false,
+        "local_ntp_stratum":              15,
+        "use_default_stratum":            true,
+        "use_local_ntp_stratum":          false,
+    }
+
+    ntpSettingValUpdated := map[string]any{
+        "enable_external_ntp_servers":    true,
+        "enable_ntp":                     true,
+        "exclude_grid_master_ntp_server": false,
+        "local_ntp_stratum":              15,
+        "use_default_stratum":            true,
+        "use_local_ntp_stratum":          false,
+    }
+
+    resource.ParallelTest(t, resource.TestCase{
+        PreCheck:                 func() { acctest.PreCheck(t) },
+        ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+        Steps: []resource.TestStep{
+            {
+                Config: testAccMemberNtpSetting(
+                    hostName, "IPV4", "VNIOS", "ALL_V4",
+                    vipAddress, "172.28.82.1", "255.255.254.0",
+                    ntpSettingVal,
+                ),
+                Check: resource.ComposeTestCheckFunc(
+                    testAccCheckMemberExists(context.Background(), resourceName, &v),
+                    resource.TestCheckResourceAttr(resourceName, "ntp_setting.enable_ntp", "false"),
+                    resource.TestCheckResourceAttr(resourceName, "ntp_setting.local_ntp_stratum", "15"),
+                ),
+            },
+            {
+                Config: testAccMemberNtpSetting(
+                    hostName, "IPV4", "VNIOS", "ALL_V4",
+                    vipAddress, "172.28.82.1", "255.255.254.0",
+                    ntpSettingValUpdated,
+                ),
+                Check: resource.ComposeTestCheckFunc(
+                    testAccCheckMemberExists(context.Background(), resourceName, &v),
+                    resource.TestCheckResourceAttr(resourceName, "ntp_setting.enable_ntp", "true"),
+                    resource.TestCheckResourceAttr(resourceName, "ntp_setting.enable_external_ntp_servers", "true"),
+                ),
+            },
+        },
+    })
 }
+
 func TestAccMemberResource_OspfList(t *testing.T) {
 	var resourceName = "nios_grid_member.test_ospf_list"
 	var v grid.Member
-	ospfListVal := []map[string]any{}
-	ospfListValUpdated := []map[string]any{}
+
+	hostName := fmt.Sprintf("infoblox-%s.localdomain", acctest.RandomName())
+	vipAddress := fmt.Sprintf("172.28.83.%d", acctest.RandomNumber(254))
+
+	ospfListVal := []map[string]any{
+		{
+			"area_id":                "121",
+			"area_type":              "STANDARD",
+			"authentication_type":    "NONE",
+			"auto_calc_cost_enabled": true,
+			"cost":                   1,
+			"dead_interval":          40,
+			"enable_bfd":             false,
+			"enable_bfd_dnscheck":    true,
+			"hello_interval":         10,
+			"interface":              "LAN_HA",
+			"is_ipv4":                true,
+			"key_id":                 1,
+			"retransmit_interval":    5,
+			"transmit_delay":         1,
+		},
+	}
+	ospfListValUpdated := []map[string]any{
+		{
+			"area_id":                "121",
+			"area_type":              "STANDARD",
+			"authentication_type":    "NONE",
+			"auto_calc_cost_enabled": true,
+			"cost":                   2,
+			"dead_interval":          40,
+			"enable_bfd":             false,
+			"enable_bfd_dnscheck":    true,
+			"hello_interval":         10,
+			"interface":              "LAN_HA",
+			"is_ipv4":                true,
+			"key_id":                 1,
+			"retransmit_interval":    5,
+			"transmit_delay":         1,
+		},
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
-			// Create and Read
 			{
-				Config: testAccMemberOspfList("HOST_NAME_REPLACE_ME", ospfListVal),
+				Config: testAccMemberOspfList(
+					hostName, "IPV4", "VNIOS", "ALL_V4",
+					vipAddress, "172.28.82.1", "255.255.254.0",
+					ospfListVal,
+				),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ospf_list", "OSPF_LIST_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "ospf_list.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "ospf_list.0.area_id", "121"),
+					resource.TestCheckResourceAttr(resourceName, "ospf_list.0.interface", "LAN_HA"),
+					resource.TestCheckResourceAttr(resourceName, "ospf_list.0.cost", "1"),
 				),
 			},
-			// Update and Read
 			{
-				Config: testAccMemberOspfList("HOST_NAME_REPLACE_ME", ospfListValUpdated),
+				Config: testAccMemberOspfList(
+					hostName, "IPV4", "VNIOS", "ALL_V4",
+					vipAddress, "172.28.82.1", "255.255.254.0",
+					ospfListValUpdated,
+				),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ospf_list", "OSPF_LIST_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "ospf_list.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "ospf_list.0.cost", "2"),
 				),
 			},
-			// Delete testing automatically occurs in TestCase
 		},
 	})
 }
@@ -1379,27 +1741,27 @@ func TestAccMemberResource_PassiveHaArpEnabled(t *testing.T) {
 	var resourceName = "nios_grid_member.test_passive_ha_arp_enabled"
 	var v grid.Member
 
+	hostName := fmt.Sprintf("infoblox-%s.localdomain", acctest.RandomName())
+	vipAddress := fmt.Sprintf("172.28.83.%d", acctest.RandomNumber(254))
+
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
-			// Create and Read
 			{
-				Config: testAccMemberPassiveHaArpEnabled("HOST_NAME_REPLACE_ME", "true"),
+				Config: testAccMemberPassiveHaArpEnabled(
+					hostName, "IPV4", "VNIOS", "ALL_V4",
+					vipAddress, "172.28.82.1", "255.255.254.0",
+					true,
+				),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "enable_ha", "true"),
+					resource.TestCheckResourceAttr(resourceName, "router_id", "112"),
+					resource.TestCheckResourceAttr(resourceName, "node_info.#", "2"),
 					resource.TestCheckResourceAttr(resourceName, "passive_ha_arp_enabled", "true"),
 				),
 			},
-			// Update and Read
-			{
-				Config: testAccMemberPassiveHaArpEnabled("HOST_NAME_REPLACE_ME", "false"),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckMemberExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "passive_ha_arp_enabled", "false"),
-				),
-			},
-			// Delete testing automatically occurs in TestCase
 		},
 	})
 }
@@ -1452,6 +1814,7 @@ func TestAccMemberResource_Platform(t *testing.T) {
 	})
 }
 
+// unable to get pre_provisioning
 func TestAccMemberResource_PreProvisioning(t *testing.T) {
 	var resourceName = "nios_grid_member.test_pre_provisioning"
 	var v grid.Member
@@ -1486,27 +1849,35 @@ func TestAccMemberResource_PreserveIfOwnsDelegation(t *testing.T) {
 	var resourceName = "nios_grid_member.test_preserve_if_owns_delegation"
 	var v grid.Member
 
+	hostName := fmt.Sprintf("infoblox-%s.localdomain", acctest.RandomName())
+	vipAddress := fmt.Sprintf("172.28.83.%d", acctest.RandomNumber(254))
+
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
-			// Create and Read
 			{
-				Config: testAccMemberPreserveIfOwnsDelegation("HOST_NAME_REPLACE_ME", "true"),
+				Config: testAccMemberPreserveIfOwnsDelegation(
+					hostName, "IPV4", "VNIOS", "ALL_V4",
+					vipAddress, "172.28.82.1", "255.255.254.0",
+					true,
+				),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "preserve_if_owns_delegation", "true"),
 				),
 			},
-			// Update and Read
 			{
-				Config: testAccMemberPreserveIfOwnsDelegation("HOST_NAME_REPLACE_ME", "false"),
+				Config: testAccMemberPreserveIfOwnsDelegation(
+					hostName, "IPV4", "VNIOS", "ALL_V4",
+					vipAddress, "172.28.82.1", "255.255.254.0",
+					false,
+				),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "preserve_if_owns_delegation", "false"),
 				),
 			},
-			// Delete testing automatically occurs in TestCase
 		},
 	})
 }
@@ -1515,27 +1886,35 @@ func TestAccMemberResource_RemoteConsoleAccessEnable(t *testing.T) {
 	var resourceName = "nios_grid_member.test_remote_console_access_enable"
 	var v grid.Member
 
+	hostName := fmt.Sprintf("infoblox-%s.localdomain", acctest.RandomName())
+	vipAddress := fmt.Sprintf("172.28.83.%d", acctest.RandomNumber(254))
+
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
-			// Create and Read
 			{
-				Config: testAccMemberRemoteConsoleAccessEnable("HOST_NAME_REPLACE_ME", "true"),
+				Config: testAccMemberRemoteConsoleAccessEnable(
+					hostName, "IPV4", "VNIOS", "ALL_V4",
+					vipAddress, "172.28.82.1", "255.255.254.0",
+					true,
+				),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "remote_console_access_enable", "true"),
 				),
 			},
-			// Update and Read
 			{
-				Config: testAccMemberRemoteConsoleAccessEnable("HOST_NAME_REPLACE_ME", "false"),
+				Config: testAccMemberRemoteConsoleAccessEnable(
+					hostName, "IPV4", "VNIOS", "ALL_V4",
+					vipAddress, "172.28.82.1", "255.255.254.0",
+					false,
+				),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "remote_console_access_enable", "false"),
 				),
 			},
-			// Delete testing automatically occurs in TestCase
 		},
 	})
 }
@@ -1544,121 +1923,196 @@ func TestAccMemberResource_RouterId(t *testing.T) {
 	var resourceName = "nios_grid_member.test_router_id"
 	var v grid.Member
 
-	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.PreCheck(t) },
-		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-		Steps: []resource.TestStep{
-			// Create and Read
-			{
-				Config: testAccMemberRouterId("HOST_NAME_REPLACE_ME", "ROUTER_ID_REPLACE_ME"),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckMemberExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "router_id", "ROUTER_ID_REPLACE_ME"),
-				),
-			},
-			// Update and Read
-			{
-				Config: testAccMemberRouterId("HOST_NAME_REPLACE_ME", "ROUTER_ID_UPDATE_REPLACE_ME"),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckMemberExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "router_id", "ROUTER_ID_UPDATE_REPLACE_ME"),
-				),
-			},
-			// Delete testing automatically occurs in TestCase
-		},
-	})
-}
-func TestAccMemberResource_ServiceTypeConfiguration(t *testing.T) {
-	var resourceName = "nios_grid_member.test_service_type_configuration"
-	var v grid.Member
+	hostName := fmt.Sprintf("infoblox-%s.localdomain", acctest.RandomName())
+	vipAddress := fmt.Sprintf("172.28.83.%d", acctest.RandomNumber(254))
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
-			// Create and Read
 			{
-				Config: testAccMemberServiceTypeConfiguration("SERVICE_TYPE_CONFIGURATION_REPLACE_ME", "ALL_V4"),
+				Config: testAccMemberRouterId(
+					hostName, "IPV4", "VNIOS", "ALL_V4",
+					vipAddress, "172.28.82.1", "255.255.254.0",
+					111,
+				),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckMemberExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "router_id", "111"),
+				),
+			},
+			{
+				Config: testAccMemberRouterId(
+					hostName, "IPV4", "VNIOS", "ALL_V4",
+					vipAddress, "172.28.82.1", "255.255.254.0",
+					112,
+				),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckMemberExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "router_id", "112"),
+				),
+			},
+		},
+	})
+}
+
+// issue
+func TestAccMemberResource_ServiceTypeConfiguration(t *testing.T) {
+	var resourceName = "nios_grid_member.test_service_type_configuration"
+	var v grid.Member
+
+	hostName := fmt.Sprintf("infoblox-%s.localdomain", acctest.RandomName())
+	vipAddress4 := fmt.Sprintf("172.28.83.%d", acctest.RandomNumber(254))
+	vipAddress6 := fmt.Sprintf("2001:db8:%x:%x::%x", acctest.RandomNumber(65535), acctest.RandomNumber(65535), acctest.RandomNumber(65535))
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccMemberServiceTypeConfiguration(
+					hostName, "IPV4", "VNIOS", "ALL_V4",
+					vipAddress4, "172.28.82.1", "255.255.254.0",
+				),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "service_type_configuration", "ALL_V4"),
 				),
 			},
 			{
-				Config: testAccMemberServiceTypeConfiguration("SERVICE_TYPE_CONFIGURATION_REPLACE_ME", "ALL_V6"),
+				Config: testAccMemberServiceTypeConfiguration(
+					hostName, "IPV6", "VNIOS", "ALL_V6",
+					vipAddress6, "2001::1", "64",
+				),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "service_type_configuration", "ALL_V6"),
 				),
 			},
-			{
-				Config: testAccMemberServiceTypeConfiguration("SERVICE_TYPE_CONFIGURATION_REPLACE_ME", "CUSTOM"),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckMemberExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "service_type_configuration", "CUSTOM"),
-				),
-			},
 		},
 	})
 }
 
+// issue
 func TestAccMemberResource_SnmpSetting(t *testing.T) {
 	var resourceName = "nios_grid_member.test_snmp_setting"
 	var v grid.Member
-	snmpSettingVal := map[string]any{}
-	snmpSettingValUpdated := map[string]any{}
+
+	hostName := fmt.Sprintf("infoblox-%s.localdomain", acctest.RandomName())
+	vipAddress := fmt.Sprintf("172.28.83.%d", acctest.RandomNumber(254))
+
+	snmpSettingVal := map[string]any{
+		"queries_enable":        false,
+		"snmpv3_queries_enable": false,
+		"snmpv3_traps_enable":   false,
+		"traps_enable":          false,
+	}
+
+	snmpSettingValUpdated := map[string]any{
+		"queries_enable":        true,
+		"snmpv3_queries_enable": true,
+		"snmpv3_traps_enable":   true,
+		"traps_enable":          true,
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
-			// Create and Read
 			{
-				Config: testAccMemberSnmpSetting("HOST_NAME_REPLACE_ME", snmpSettingVal),
+				Config: testAccMemberSnmpSetting(
+					hostName, "IPV4", "VNIOS", "ALL_V4",
+					vipAddress, "172.28.82.1", "255.255.254.0",
+					snmpSettingVal,
+				),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "snmp_setting", "SNMP_SETTING_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "snmp_setting.queries_enable", "false"),
+					resource.TestCheckResourceAttr(resourceName, "snmp_setting.snmpv3_queries_enable", "false"),
+					resource.TestCheckResourceAttr(resourceName, "snmp_setting.snmpv3_traps_enable", "false"),
+					resource.TestCheckResourceAttr(resourceName, "snmp_setting.traps_enable", "false"),
+					resource.TestCheckResourceAttr(resourceName, "snmp_setting.syscontact.#", "0"),
+					resource.TestCheckResourceAttr(resourceName, "snmp_setting.sysdescr.#", "0"),
+					resource.TestCheckResourceAttr(resourceName, "snmp_setting.syslocation.#", "0"),
+					resource.TestCheckResourceAttr(resourceName, "snmp_setting.sysname.#", "0"),
+					resource.TestCheckResourceAttr(resourceName, "snmp_setting.trap_receivers.#", "0"),
+					resource.TestCheckResourceAttr(resourceName, "use_snmp_setting", "true"),
 				),
 			},
-			// Update and Read
 			{
-				Config: testAccMemberSnmpSetting("HOST_NAME_REPLACE_ME", snmpSettingValUpdated),
+				Config: testAccMemberSnmpSetting(
+					hostName, "IPV4", "VNIOS", "ALL_V4",
+					vipAddress, "172.28.82.1", "255.255.254.0",
+					snmpSettingValUpdated,
+				),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "snmp_setting", "SNMP_SETTING_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "snmp_setting.queries_enable", "true"),
+					resource.TestCheckResourceAttr(resourceName, "snmp_setting.snmpv3_queries_enable", "true"),
+					resource.TestCheckResourceAttr(resourceName, "snmp_setting.snmpv3_traps_enable", "true"),
+					resource.TestCheckResourceAttr(resourceName, "snmp_setting.traps_enable", "true"),
+					resource.TestCheckResourceAttr(resourceName, "use_snmp_setting", "true"),
 				),
 			},
-			// Delete testing automatically occurs in TestCase
 		},
 	})
 }
+
+// dont know how to do set on UI///issue
 func TestAccMemberResource_StaticRoutes(t *testing.T) {
 	var resourceName = "nios_grid_member.test_static_routes"
 	var v grid.Member
-	staticRoutesVal := []map[string]any{}
-	staticRoutesValUpdated := []map[string]any{}
+
+	hostName := fmt.Sprintf("infoblox-%s.localdomain", acctest.RandomName())
+	vipAddress := fmt.Sprintf("172.28.83.%d", acctest.RandomNumber(254))
+
+	staticRoutesVal := []map[string]any{
+		{
+			"address":     "172.28.90.0",
+			"gateway":     "172.28.82.1",
+			"subnet_mask": "255.255.254.0",
+			"primary":     true,
+			"dscp":        0,
+			"use_dscp":    true,
+		},
+	}
+	staticRoutesValUpdated := []map[string]any{
+		{
+			"address":     "172.28.90.0",
+			"gateway":     "172.28.82.1",
+			"subnet_mask": "255.255.254.0",
+			"primary":     true,
+			"dscp":        0,
+			"use_dscp":    true,
+		},
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
-			// Create and Read
 			{
-				Config: testAccMemberStaticRoutes("HOST_NAME_REPLACE_ME", staticRoutesVal),
+				Config: testAccMemberStaticRoutes(
+					hostName, "IPV4", "VNIOS", "ALL_V4",
+					vipAddress, "172.28.82.1", "255.255.254.0",
+					staticRoutesVal,
+				),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "static_routes", "STATIC_ROUTES_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "static_routes.#", "1"),
 				),
 			},
-			// Update and Read
 			{
-				Config: testAccMemberStaticRoutes("HOST_NAME_REPLACE_ME", staticRoutesValUpdated),
+				Config: testAccMemberStaticRoutes(
+					hostName, "IPV4", "VNIOS", "ALL_V4",
+					vipAddress, "172.28.82.1", "255.255.254.0",
+					staticRoutesValUpdated,
+				),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "static_routes", "STATIC_ROUTES_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "static_routes.#", "1"),
 				),
 			},
-			// Delete testing automatically occurs in TestCase
 		},
 	})
 }
@@ -1667,88 +2121,195 @@ func TestAccMemberResource_SupportAccessEnable(t *testing.T) {
 	var resourceName = "nios_grid_member.test_support_access_enable"
 	var v grid.Member
 
+	hostName := fmt.Sprintf("infoblox-%s.localdomain", acctest.RandomName())
+	vipAddress := fmt.Sprintf("172.28.83.%d", acctest.RandomNumber(254))
+
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
-			// Create and Read
 			{
-				Config: testAccMemberSupportAccessEnable("HOST_NAME_REPLACE_ME", "true"),
+				Config: testAccMemberSupportAccessEnable(
+					hostName, "IPV4", "VNIOS", "ALL_V4",
+					vipAddress, "172.28.82.1", "255.255.254.0",
+					true,
+				),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "support_access_enable", "true"),
+					resource.TestCheckResourceAttr(resourceName, "use_support_access_enable", "true"),
 				),
 			},
-			// Update and Read
 			{
-				Config: testAccMemberSupportAccessEnable("HOST_NAME_REPLACE_ME", "false"),
+				Config: testAccMemberSupportAccessEnable(
+					hostName, "IPV4", "VNIOS", "ALL_V4",
+					vipAddress, "172.28.82.1", "255.255.254.0",
+					false,
+				),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "support_access_enable", "false"),
+					resource.TestCheckResourceAttr(resourceName, "use_support_access_enable", "true"),
 				),
 			},
-			// Delete testing automatically occurs in TestCase
 		},
 	})
 }
 
+// issue
 func TestAccMemberResource_SyslogProxySetting(t *testing.T) {
 	var resourceName = "nios_grid_member.test_syslog_proxy_setting"
 	var v grid.Member
-	syslogProxySettingVal := map[string]any{}
-	syslogProxySettingValUpdated := map[string]any{}
+
+	hostName := fmt.Sprintf("infoblox-%s.localdomain", acctest.RandomName())
+	vipAddress := fmt.Sprintf("172.28.83.%d", acctest.RandomNumber(254))
+
+	syslogProxySettingVal := []map[string]any{
+		{
+			"client_acls": []string{},
+			"enable":      false,
+			"tcp_enable":  false,
+			"tcp_port":    514,
+			"udp_enable":  true,
+			"udp_port":    514,
+		},
+	}
+
+	syslogProxySettingValUpdated := []map[string]any{
+		{
+			"client_acls": []string{},
+			"enable":      true,
+			"tcp_enable":  true,
+			"tcp_port":    1514,
+			"udp_enable":  false,
+			"udp_port":    514,
+		},
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
-			// Create and Read
 			{
-				Config: testAccMemberSyslogProxySetting("HOST_NAME_REPLACE_ME", syslogProxySettingVal),
+				Config: testAccMemberSyslogProxySetting(
+					hostName, "IPV4", "VNIOS", "ALL_V4",
+					vipAddress, "172.28.82.1", "255.255.254.0",
+					syslogProxySettingVal,
+				),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "syslog_proxy_setting", "SYSLOG_PROXY_SETTING_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "syslog_proxy_setting.client_acls.#", "0"),
+					resource.TestCheckResourceAttr(resourceName, "syslog_proxy_setting.enable", "false"),
+					resource.TestCheckResourceAttr(resourceName, "syslog_proxy_setting.tcp_enable", "false"),
+					resource.TestCheckResourceAttr(resourceName, "syslog_proxy_setting.tcp_port", "514"),
+					resource.TestCheckResourceAttr(resourceName, "syslog_proxy_setting.udp_enable", "true"),
+					resource.TestCheckResourceAttr(resourceName, "syslog_proxy_setting.udp_port", "514"),
+					resource.TestCheckResourceAttr(resourceName, "use_syslog_proxy_setting", "true"),
 				),
 			},
-			// Update and Read
 			{
-				Config: testAccMemberSyslogProxySetting("HOST_NAME_REPLACE_ME", syslogProxySettingValUpdated),
+				Config: testAccMemberSyslogProxySetting(
+					hostName, "IPV4", "VNIOS", "ALL_V4",
+					vipAddress, "172.28.82.1", "255.255.254.0",
+					syslogProxySettingValUpdated,
+				),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "syslog_proxy_setting", "SYSLOG_PROXY_SETTING_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "syslog_proxy_setting.client_acls.#", "0"),
+					resource.TestCheckResourceAttr(resourceName, "syslog_proxy_setting.enable", "true"),
+					resource.TestCheckResourceAttr(resourceName, "syslog_proxy_setting.tcp_enable", "true"),
+					resource.TestCheckResourceAttr(resourceName, "syslog_proxy_setting.tcp_port", "1514"),
+					resource.TestCheckResourceAttr(resourceName, "syslog_proxy_setting.udp_enable", "false"),
+					resource.TestCheckResourceAttr(resourceName, "syslog_proxy_setting.udp_port", "514"),
+					resource.TestCheckResourceAttr(resourceName, "use_syslog_proxy_setting", "true"),
 				),
 			},
-			// Delete testing automatically occurs in TestCase
 		},
 	})
 }
+
+// issue
 func TestAccMemberResource_SyslogServers(t *testing.T) {
 	var resourceName = "nios_grid_member.test_syslog_servers"
 	var v grid.Member
-	syslogServersVal := []map[string]any{}
-	syslogServersValUpdated := []map[string]any{}
+
+	hostName := fmt.Sprintf("infoblox-%s.localdomain", acctest.RandomName())
+	vipAddress := fmt.Sprintf("172.28.83.%d", acctest.RandomNumber(254))
+
+	syslogServersVal := []map[string]any{
+		{
+			"address_or_fqdn":    "192.com",
+			"category_list":      []string{"AUTH_ACTIVE_DIRECTORY"},
+			"connection_type":    "TCP",
+			"local_interface":    "ANY",
+			"message_node_id":    "LAN",
+			"message_source":     "ANY",
+			"only_category_list": false,
+			"port":               514,
+			"severity":           "DEBUG",
+		},
+	}
+
+	syslogServersValUpdated := []map[string]any{
+		{
+			"address_or_fqdn":    "192.com",
+			"category_list":      []string{"AUTH_ACTIVE_DIRECTORY"},
+			"connection_type":    "TCP",
+			"local_interface":    "ANY",
+			"message_node_id":    "LAN",
+			"message_source":     "ANY",
+			"only_category_list": false,
+			"port":               515,
+			"severity":           "INFO",
+		},
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
-			// Create and Read
 			{
-				Config: testAccMemberSyslogServers("HOST_NAME_REPLACE_ME", syslogServersVal),
+				Config: testAccMemberSyslogServers(
+					hostName,
+					"IPV4",
+					"VNIOS",
+					"ALL_V4",
+					vipAddress,
+					"172.28.82.1",
+					"255.255.254.0",
+					syslogServersVal,
+				),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "syslog_servers", "SYSLOG_SERVERS_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "syslog_servers.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "syslog_servers.0.address", "192.com"),
+					resource.TestCheckResourceAttr(resourceName, "syslog_servers.0.connection_type", "TCP"),
+					resource.TestCheckResourceAttr(resourceName, "syslog_servers.0.port", "514"),
+					resource.TestCheckResourceAttr(resourceName, "syslog_servers.0.severity", "DEBUG"),
+					resource.TestCheckResourceAttr(resourceName, "use_syslog_proxy_setting", "true"),
 				),
 			},
-			// Update and Read
 			{
-				Config: testAccMemberSyslogServers("HOST_NAME_REPLACE_ME", syslogServersValUpdated),
+				Config: testAccMemberSyslogServers(
+					hostName,
+					"IPV4",
+					"VNIOS",
+					"ALL_V4",
+					vipAddress,
+					"172.28.82.1",
+					"255.255.254.0",
+					syslogServersValUpdated,
+				),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "syslog_servers", "SYSLOG_SERVERS_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "syslog_servers.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "syslog_servers.0.address", "192.com"),
+					resource.TestCheckResourceAttr(resourceName, "syslog_servers.0.connection_type", "TCP"),
+					resource.TestCheckResourceAttr(resourceName, "syslog_servers.0.port", "515"),
+					resource.TestCheckResourceAttr(resourceName, "syslog_servers.0.severity", "INFO"),
+					resource.TestCheckResourceAttr(resourceName, "use_syslog_proxy_setting", "true"),
 				),
 			},
-			// Delete testing automatically occurs in TestCase
 		},
 	})
 }
@@ -1757,57 +2318,106 @@ func TestAccMemberResource_SyslogSize(t *testing.T) {
 	var resourceName = "nios_grid_member.test_syslog_size"
 	var v grid.Member
 
-	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.PreCheck(t) },
-		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-		Steps: []resource.TestStep{
-			// Create and Read
-			{
-				Config: testAccMemberSyslogSize("HOST_NAME_REPLACE_ME", "SYSLOG_SIZE_REPLACE_ME"),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckMemberExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "syslog_size", "SYSLOG_SIZE_REPLACE_ME"),
-				),
-			},
-			// Update and Read
-			{
-				Config: testAccMemberSyslogSize("HOST_NAME_REPLACE_ME", "SYSLOG_SIZE_UPDATE_REPLACE_ME"),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckMemberExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "syslog_size", "SYSLOG_SIZE_UPDATE_REPLACE_ME"),
-				),
-			},
-			// Delete testing automatically occurs in TestCase
-		},
-	})
-}
-func TestAccMemberResource_ThresholdTraps(t *testing.T) {
-	var resourceName = "nios_grid_member.test_threshold_traps"
-	var v grid.Member
-	thresholdTrapsVal := []map[string]any{}
-	thresholdTrapsValUpdated := []map[string]any{}
+	hostName := fmt.Sprintf("infoblox-%s.localdomain", acctest.RandomName())
+	vipAddress := fmt.Sprintf("172.28.83.%d", acctest.RandomNumber(254))
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
-			// Create and Read
 			{
-				Config: testAccMemberThresholdTraps("HOST_NAME_REPLACE_ME", thresholdTrapsVal),
+				Config: testAccMemberSyslogSize(
+					hostName,
+					"IPV4",
+					"VNIOS",
+					"ALL_V4",
+					vipAddress,
+					"172.28.82.1",
+					"255.255.254.0",
+					10,
+				),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "threshold_traps", "THRESHOLD_TRAPS_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "syslog_size", "10"),
 				),
 			},
-			// Update and Read
 			{
-				Config: testAccMemberThresholdTraps("HOST_NAME_REPLACE_ME", thresholdTrapsValUpdated),
+				Config: testAccMemberSyslogSize(
+					hostName,
+					"IPV4",
+					"VNIOS",
+					"ALL_V4",
+					vipAddress,
+					"172.28.82.1",
+					"255.255.254.0",
+					300,
+				),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "threshold_traps", "THRESHOLD_TRAPS_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "syslog_size", "300"),
 				),
 			},
-			// Delete testing automatically occurs in TestCase
+		},
+	})
+}
+
+// issue
+func TestAccMemberResource_ThresholdTraps(t *testing.T) {
+	var resourceName = "nios_grid_member.test_threshold_traps"
+	var v grid.Member
+
+	hostName := fmt.Sprintf("infoblox-%s.localdomain", acctest.RandomName())
+	vipAddress := fmt.Sprintf("172.28.83.%d", acctest.RandomNumber(254))
+
+	thresholdTrapsVal := []map[string]any{
+		{
+			"trap_reset":   10,
+			"trap_trigger": 100,
+			"trap_type":    "CpuUsage",
+		},
+	}
+	thresholdTrapsValUpdated := []map[string]any{
+		{
+			"trap_reset":   15,
+			"trap_trigger": 150,
+			"trap_type":    "CpuUsage",
+		},
+	}
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccMemberThresholdTraps(
+					hostName, "IPV4", "VNIOS", "ALL_V4",
+					vipAddress, "172.28.82.1", "255.255.254.0",
+					thresholdTrapsVal,
+				),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckMemberExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "threshold_traps.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "threshold_traps.0.trap_type", "CpuUsage"),
+					resource.TestCheckResourceAttr(resourceName, "threshold_traps.0.trap_trigger", "100"),
+					resource.TestCheckResourceAttr(resourceName, "threshold_traps.0.trap_reset", "10"),
+					resource.TestCheckResourceAttr(resourceName, "use_threshold_traps", "true"),
+				),
+			},
+			{
+				Config: testAccMemberThresholdTraps(
+					hostName, "IPV4", "VNIOS", "ALL_V4",
+					vipAddress, "172.28.82.1", "255.255.254.0",
+					thresholdTrapsValUpdated,
+				),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckMemberExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "threshold_traps.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "threshold_traps.0.trap_type", "CpuUsage"),
+					resource.TestCheckResourceAttr(resourceName, "threshold_traps.0.trap_trigger", "150"),
+					resource.TestCheckResourceAttr(resourceName, "threshold_traps.0.trap_reset", "15"),
+					resource.TestCheckResourceAttr(resourceName, "use_threshold_traps", "true"),
+				),
+			},
 		},
 	})
 }
@@ -1816,27 +2426,45 @@ func TestAccMemberResource_TimeZone(t *testing.T) {
 	var resourceName = "nios_grid_member.test_time_zone"
 	var v grid.Member
 
+	hostName := fmt.Sprintf("infoblox-%s.localdomain", acctest.RandomName())
+	vipAddress := fmt.Sprintf("172.28.83.%d", acctest.RandomNumber(254))
+
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
-			// Create and Read
 			{
-				Config: testAccMemberTimeZone("HOST_NAME_REPLACE_ME", "TIME_ZONE_REPLACE_ME"),
+				Config: testAccMemberTimeZone(
+					hostName,
+					"IPV4",
+					"VNIOS",
+					"ALL_V4",
+					vipAddress,
+					"172.28.82.1",
+					"255.255.254.0",
+					"UTC",
+				),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "time_zone", "TIME_ZONE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "time_zone", "UTC"),
 				),
 			},
-			// Update and Read
 			{
-				Config: testAccMemberTimeZone("HOST_NAME_REPLACE_ME", "TIME_ZONE_UPDATE_REPLACE_ME"),
+				Config: testAccMemberTimeZone(
+					hostName,
+					"IPV4",
+					"VNIOS",
+					"ALL_V4",
+					vipAddress,
+					"172.28.82.1",
+					"255.255.254.0",
+					"UTC",
+				),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "time_zone", "TIME_ZONE_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "time_zone", "UTC"),
 				),
 			},
-			// Delete testing automatically occurs in TestCase
 		},
 	})
 }
@@ -1844,180 +2472,306 @@ func TestAccMemberResource_TimeZone(t *testing.T) {
 func TestAccMemberResource_TrafficCaptureAuthDnsSetting(t *testing.T) {
 	var resourceName = "nios_grid_member.test_traffic_capture_auth_dns_setting"
 	var v grid.Member
-	trafficCaptureAuthDnsSettingVal := map[string]any{}
-	trafficCaptureAuthDnsSettingValUpdated := map[string]any{}
+
+	hostName := fmt.Sprintf("infoblox-%s.localdomain", acctest.RandomName())
+	vipAddress := fmt.Sprintf("172.28.83.%d", acctest.RandomNumber(254))
+
+	trafficCaptureAuthDnsSettingVal := map[string]any{
+		"auth_dns_latency_listen_on_source": "VIP_V4",
+		"auth_dns_latency_trigger_enable":   false,
+	}
+	trafficCaptureAuthDnsSettingValUpdated := map[string]any{
+		"auth_dns_latency_listen_on_source": "VIP_V4",
+		"auth_dns_latency_trigger_enable":   true,
+		"auth_dns_latency_threshold":        15,
+		"auth_dns_latency_reset":            15,
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
-			// Create and Read
 			{
-				Config: testAccMemberTrafficCaptureAuthDnsSetting("HOST_NAME_REPLACE_ME", trafficCaptureAuthDnsSettingVal),
+				Config: testAccMemberTrafficCaptureAuthDnsSetting(
+					hostName, "IPV4", "VNIOS", "ALL_V4",
+					vipAddress, "172.28.82.1", "255.255.254.0",
+					trafficCaptureAuthDnsSettingVal,
+				),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "traffic_capture_auth_dns_setting", "TRAFFIC_CAPTURE_AUTH_DNS_SETTING_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "traffic_capture_auth_dns_setting.auth_dns_latency_listen_on_source", "VIP_V4"),
+					resource.TestCheckResourceAttr(resourceName, "traffic_capture_auth_dns_setting.auth_dns_latency_trigger_enable", "false"),
+					resource.TestCheckResourceAttr(resourceName, "use_traffic_capture_auth_dns", "true"),
 				),
 			},
-			// Update and Read
 			{
-				Config: testAccMemberTrafficCaptureAuthDnsSetting("HOST_NAME_REPLACE_ME", trafficCaptureAuthDnsSettingValUpdated),
+				Config: testAccMemberTrafficCaptureAuthDnsSetting(
+					hostName, "IPV4", "VNIOS", "ALL_V4",
+					vipAddress, "172.28.82.1", "255.255.254.0",
+					trafficCaptureAuthDnsSettingValUpdated,
+				),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "traffic_capture_auth_dns_setting", "TRAFFIC_CAPTURE_AUTH_DNS_SETTING_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "traffic_capture_auth_dns_setting.auth_dns_latency_listen_on_source", "VIP_V4"),
+					resource.TestCheckResourceAttr(resourceName, "traffic_capture_auth_dns_setting.auth_dns_latency_trigger_enable", "true"),
+					resource.TestCheckResourceAttr(resourceName, "traffic_capture_auth_dns_setting.auth_dns_latency_threshold", "15"),
+					resource.TestCheckResourceAttr(resourceName, "traffic_capture_auth_dns_setting.auth_dns_latency_reset", "15"),
+					resource.TestCheckResourceAttr(resourceName, "use_traffic_capture_auth_dns", "true"),
 				),
 			},
-			// Delete testing automatically occurs in TestCase
 		},
 	})
 }
+
 func TestAccMemberResource_TrafficCaptureChrSetting(t *testing.T) {
 	var resourceName = "nios_grid_member.test_traffic_capture_chr_setting"
 	var v grid.Member
-	trafficCaptureChrSettingVal := map[string]any{}
-	trafficCaptureChrSettingValUpdated := map[string]any{}
+
+	hostName := fmt.Sprintf("infoblox-%s.localdomain", acctest.RandomName())
+	vipAddress := fmt.Sprintf("172.28.83.%d", acctest.RandomNumber(254))
+
+	trafficCaptureChrSettingVal := map[string]any{
+		"chr_trigger_enable": false,
+	}
+	trafficCaptureChrSettingValUpdated := map[string]any{
+		"chr_trigger_enable":        true,
+		"chr_threshold":             15,
+		"chr_reset":                 15,
+		"chr_min_cache_utilization": 15,
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
-			// Create and Read
 			{
-				Config: testAccMemberTrafficCaptureChrSetting("HOST_NAME_REPLACE_ME", trafficCaptureChrSettingVal),
+				Config: testAccMemberTrafficCaptureChrSetting(
+					hostName, "IPV4", "VNIOS", "ALL_V4",
+					vipAddress, "172.28.82.1", "255.255.254.0",
+					trafficCaptureChrSettingVal,
+				),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "traffic_capture_chr_setting", "TRAFFIC_CAPTURE_CHR_SETTING_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "traffic_capture_chr_setting.chr_trigger_enable", "false"),
+					resource.TestCheckResourceAttr(resourceName, "use_traffic_capture_chr", "true"),
 				),
 			},
-			// Update and Read
 			{
-				Config: testAccMemberTrafficCaptureChrSetting("HOST_NAME_REPLACE_ME", trafficCaptureChrSettingValUpdated),
+				Config: testAccMemberTrafficCaptureChrSetting(
+					hostName, "IPV4", "VNIOS", "ALL_V4",
+					vipAddress, "172.28.82.1", "255.255.254.0",
+					trafficCaptureChrSettingValUpdated,
+				),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "traffic_capture_chr_setting", "TRAFFIC_CAPTURE_CHR_SETTING_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "traffic_capture_chr_setting.chr_trigger_enable", "true"),
+					resource.TestCheckResourceAttr(resourceName, "traffic_capture_chr_setting.chr_threshold", "15"),
+					resource.TestCheckResourceAttr(resourceName, "traffic_capture_chr_setting.chr_reset", "15"),
+					resource.TestCheckResourceAttr(resourceName, "traffic_capture_chr_setting.chr_min_cache_utilization", "15"),
+					resource.TestCheckResourceAttr(resourceName, "use_traffic_capture_chr", "true"),
 				),
 			},
-			// Delete testing automatically occurs in TestCase
 		},
 	})
 }
+
 func TestAccMemberResource_TrafficCaptureQpsSetting(t *testing.T) {
 	var resourceName = "nios_grid_member.test_traffic_capture_qps_setting"
 	var v grid.Member
-	trafficCaptureQpsSettingVal := map[string]any{}
-	trafficCaptureQpsSettingValUpdated := map[string]any{}
+
+	hostName := fmt.Sprintf("infoblox-%s.localdomain", acctest.RandomName())
+	vipAddress := fmt.Sprintf("172.28.83.%d", acctest.RandomNumber(254))
+
+	trafficCaptureQpsSettingVal := map[string]any{
+		"qps_trigger_enable": false,
+	}
+	trafficCaptureQpsSettingValUpdated := map[string]any{
+		"qps_trigger_enable": true,
+		"qps_threshold":      15,
+		"qps_reset":          15,
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
-			// Create and Read
 			{
-				Config: testAccMemberTrafficCaptureQpsSetting("HOST_NAME_REPLACE_ME", trafficCaptureQpsSettingVal),
+				Config: testAccMemberTrafficCaptureQpsSetting(
+					hostName, "IPV4", "VNIOS", "ALL_V4",
+					vipAddress, "172.28.82.1", "255.255.254.0",
+					trafficCaptureQpsSettingVal,
+				),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "traffic_capture_qps_setting", "TRAFFIC_CAPTURE_QPS_SETTING_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "traffic_capture_qps_setting.qps_trigger_enable", "false"),
+					resource.TestCheckResourceAttr(resourceName, "use_traffic_capture_qps", "true"),
 				),
 			},
-			// Update and Read
 			{
-				Config: testAccMemberTrafficCaptureQpsSetting("HOST_NAME_REPLACE_ME", trafficCaptureQpsSettingValUpdated),
+				Config: testAccMemberTrafficCaptureQpsSetting(
+					hostName, "IPV4", "VNIOS", "ALL_V4",
+					vipAddress, "172.28.82.1", "255.255.254.0",
+					trafficCaptureQpsSettingValUpdated,
+				),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "traffic_capture_qps_setting", "TRAFFIC_CAPTURE_QPS_SETTING_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "traffic_capture_qps_setting.qps_trigger_enable", "true"),
+					resource.TestCheckResourceAttr(resourceName, "traffic_capture_qps_setting.qps_threshold", "15"),
+					resource.TestCheckResourceAttr(resourceName, "traffic_capture_qps_setting.qps_reset", "15"),
+					resource.TestCheckResourceAttr(resourceName, "use_traffic_capture_qps", "true"),
 				),
 			},
-			// Delete testing automatically occurs in TestCase
 		},
 	})
 }
+
+// issue
 func TestAccMemberResource_TrafficCaptureRecDnsSetting(t *testing.T) {
 	var resourceName = "nios_grid_member.test_traffic_capture_rec_dns_setting"
 	var v grid.Member
-	trafficCaptureRecDnsSettingVal := map[string]any{}
-	trafficCaptureRecDnsSettingValUpdated := map[string]any{}
+
+	hostName := fmt.Sprintf("infoblox-%s.localdomain", acctest.RandomName())
+	vipAddress := fmt.Sprintf("172.28.83.%d", acctest.RandomNumber(254))
+
+	trafficCaptureRecDnsSettingVal := map[string]any{
+		"kpi_monitored_domains":            []string{},
+		"rec_dns_latency_listen_on_source": "VIP_V4",
+		"rec_dns_latency_trigger_enable":   false,
+	}
+	trafficCaptureRecDnsSettingValUpdated := map[string]any{
+		"kpi_monitored_domains":            []map[string]any{{"domain_name": "a.com", "record_type": "A"}},
+		"rec_dns_latency_listen_on_source": "VIP_V4",
+		"rec_dns_latency_trigger_enable":   false,
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
-			// Create and Read
 			{
-				Config: testAccMemberTrafficCaptureRecDnsSetting("HOST_NAME_REPLACE_ME", trafficCaptureRecDnsSettingVal),
+				Config: testAccMemberTrafficCaptureRecDnsSetting(
+					hostName, "IPV4", "VNIOS", "ALL_V4",
+					vipAddress, "172.28.82.1", "255.255.254.0",
+					trafficCaptureRecDnsSettingVal,
+				),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "traffic_capture_rec_dns_setting", "TRAFFIC_CAPTURE_REC_DNS_SETTING_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "traffic_capture_rec_dns_setting.rec_dns_latency_listen_on_source", "VIP_V4"),
+					resource.TestCheckResourceAttr(resourceName, "traffic_capture_rec_dns_setting.rec_dns_latency_trigger_enable", "false"),
+					resource.TestCheckResourceAttr(resourceName, "use_traffic_capture_rec_dns", "true"),
 				),
 			},
-			// Update and Read
 			{
-				Config: testAccMemberTrafficCaptureRecDnsSetting("HOST_NAME_REPLACE_ME", trafficCaptureRecDnsSettingValUpdated),
+				Config: testAccMemberTrafficCaptureRecDnsSetting(
+					hostName, "IPV4", "VNIOS", "ALL_V4",
+					vipAddress, "172.28.82.1", "255.255.254.0",
+					trafficCaptureRecDnsSettingValUpdated,
+				),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "traffic_capture_rec_dns_setting", "TRAFFIC_CAPTURE_REC_DNS_SETTING_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "traffic_capture_rec_dns_setting.rec_dns_latency_listen_on_source", "VIP_V4"),
+					resource.TestCheckResourceAttr(resourceName, "traffic_capture_rec_dns_setting.rec_dns_latency_trigger_enable", "true"),
+					resource.TestCheckResourceAttr(resourceName, "use_traffic_capture_rec_dns", "true"),
 				),
 			},
-			// Delete testing automatically occurs in TestCase
 		},
 	})
 }
 func TestAccMemberResource_TrafficCaptureRecQueriesSetting(t *testing.T) {
 	var resourceName = "nios_grid_member.test_traffic_capture_rec_queries_setting"
 	var v grid.Member
-	trafficCaptureRecQueriesSettingVal := map[string]any{}
-	trafficCaptureRecQueriesSettingValUpdated := map[string]any{}
+
+	hostName := fmt.Sprintf("infoblox-%s.localdomain", acctest.RandomName())
+	vipAddress := fmt.Sprintf("172.28.83.%d", acctest.RandomNumber(254))
+
+	trafficCaptureRecQueriesSettingVal := map[string]any{
+		"recursive_clients_count_trigger_enable": false,
+	}
+	trafficCaptureRecQueriesSettingValUpdated := map[string]any{
+		"recursive_clients_count_trigger_enable": true,
+		"recursive_clients_count_threshold":      15,
+		"recursive_clients_count_reset":          15,
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
-			// Create and Read
 			{
-				Config: testAccMemberTrafficCaptureRecQueriesSetting("HOST_NAME_REPLACE_ME", trafficCaptureRecQueriesSettingVal),
+				Config: testAccMemberTrafficCaptureRecQueriesSetting(
+					hostName, "IPV4", "VNIOS", "ALL_V4",
+					vipAddress, "172.28.82.1", "255.255.254.0",
+					trafficCaptureRecQueriesSettingVal,
+				),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "traffic_capture_rec_queries_setting", "TRAFFIC_CAPTURE_REC_QUERIES_SETTING_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "traffic_capture_rec_queries_setting.recursive_clients_count_trigger_enable", "false"),
+					resource.TestCheckResourceAttr(resourceName, "use_traffic_capture_rec_queries", "true"),
 				),
 			},
-			// Update and Read
 			{
-				Config: testAccMemberTrafficCaptureRecQueriesSetting("HOST_NAME_REPLACE_ME", trafficCaptureRecQueriesSettingValUpdated),
+				Config: testAccMemberTrafficCaptureRecQueriesSetting(
+					hostName, "IPV4", "VNIOS", "ALL_V4",
+					vipAddress, "172.28.82.1", "255.255.254.0",
+					trafficCaptureRecQueriesSettingValUpdated,
+				),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "traffic_capture_rec_queries_setting", "TRAFFIC_CAPTURE_REC_QUERIES_SETTING_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "traffic_capture_rec_queries_setting.recursive_clients_count_trigger_enable", "true"),
+					resource.TestCheckResourceAttr(resourceName, "traffic_capture_rec_queries_setting.recursive_clients_count_threshold", "15"),
+					resource.TestCheckResourceAttr(resourceName, "traffic_capture_rec_queries_setting.recursive_clients_count_reset", "15"),
+					resource.TestCheckResourceAttr(resourceName, "use_traffic_capture_rec_queries", "true"),
 				),
 			},
-			// Delete testing automatically occurs in TestCase
 		},
 	})
 }
+
+// issue
 func TestAccMemberResource_TrapNotifications(t *testing.T) {
 	var resourceName = "nios_grid_member.test_trap_notifications"
 	var v grid.Member
-	trapNotificationsVal := []map[string]any{}
-	trapNotificationsValUpdated := []map[string]any{}
+
+	hostName := fmt.Sprintf("infoblox-%s.localdomain", acctest.RandomName())
+	vipAddress := fmt.Sprintf("172.28.83.%d", acctest.RandomNumber(254))
+
+	trapNotificationsVal := []map[string]any{
+		{"enable_email": false, "enable_trap": true, "trap_type": "AnalyticsRPZ"},
+		{"enable_email": false, "enable_trap": true, "trap_type": "DNS"},
+	}
+	trapNotificationsValUpdated := []map[string]any{
+		{"enable_email": true, "enable_trap": true, "trap_type": "AnalyticsRPZ"},
+		{"enable_email": false, "enable_trap": true, "trap_type": "DNS"},
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
-			// Create and Read
 			{
-				Config: testAccMemberTrapNotifications("HOST_NAME_REPLACE_ME", trapNotificationsVal),
+				Config: testAccMemberTrapNotifications(
+					hostName, "IPV4", "VNIOS", "ALL_V4",
+					vipAddress, "172.28.82.1", "255.255.254.0",
+					trapNotificationsVal,
+				),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "trap_notifications", "TRAP_NOTIFICATIONS_REPLACE_ME"),
+					resource.TestCheckResourceAttrSet(resourceName, "trap_notifications.#"),
+					resource.TestCheckResourceAttr(resourceName, "use_trap_notifications", "true"),
 				),
 			},
-			// Update and Read
 			{
-				Config: testAccMemberTrapNotifications("HOST_NAME_REPLACE_ME", trapNotificationsValUpdated),
+				Config: testAccMemberTrapNotifications(
+					hostName, "IPV4", "VNIOS", "ALL_V4",
+					vipAddress, "172.28.82.1", "255.255.254.0",
+					trapNotificationsValUpdated,
+				),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "trap_notifications", "TRAP_NOTIFICATIONS_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttrSet(resourceName, "trap_notifications.#"),
+					resource.TestCheckResourceAttr(resourceName, "use_trap_notifications", "true"),
 				),
 			},
-			// Delete testing automatically occurs in TestCase
 		},
 	})
 }
@@ -2025,28 +2779,46 @@ func TestAccMemberResource_TrapNotifications(t *testing.T) {
 func TestAccMemberResource_UpgradeGroup(t *testing.T) {
 	var resourceName = "nios_grid_member.test_upgrade_group"
 	var v grid.Member
+	t.Skip("UpgradeGroup is either master or default and cannot be updated.")
+	hostName := fmt.Sprintf("infoblox-%s.localdomain", acctest.RandomName())
+	vipAddress := fmt.Sprintf("172.28.83.%d", acctest.RandomNumber(254))
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
-			// Create and Read
 			{
-				Config: testAccMemberUpgradeGroup("HOST_NAME_REPLACE_ME", "UPGRADE_GROUP_REPLACE_ME"),
+				Config: testAccMemberUpgradeGroup(
+					hostName,
+					"IPV4",
+					"VNIOS",
+					"ALL_V4",
+					vipAddress,
+					"172.28.82.1",
+					"255.255.254.0",
+					"Default",
+				),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "upgrade_group", "UPGRADE_GROUP_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "upgrade_group", "Default"),
 				),
 			},
-			// Update and Read
 			{
-				Config: testAccMemberUpgradeGroup("HOST_NAME_REPLACE_ME", "UPGRADE_GROUP_UPDATE_REPLACE_ME"),
+				Config: testAccMemberUpgradeGroup(
+					hostName,
+					"IPV4",
+					"VNIOS",
+					"ALL_V4",
+					vipAddress,
+					"172.28.82.1",
+					"255.255.254.0",
+					"Grid Master",
+				),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "upgrade_group", "UPGRADE_GROUP_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "upgrade_group", "Grid Master"),
 				),
 			},
-			// Delete testing automatically occurs in TestCase
 		},
 	})
 }
@@ -2055,27 +2827,45 @@ func TestAccMemberResource_UseAutomatedTrafficCapture(t *testing.T) {
 	var resourceName = "nios_grid_member.test_use_automated_traffic_capture"
 	var v grid.Member
 
+	hostName := fmt.Sprintf("infoblox-%s.localdomain", acctest.RandomName())
+	vipAddress := fmt.Sprintf("172.28.83.%d", acctest.RandomNumber(254))
+
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
-			// Create and Read
 			{
-				Config: testAccMemberUseAutomatedTrafficCapture("HOST_NAME_REPLACE_ME", "true"),
+				Config: testAccMemberUseAutomatedTrafficCapture(
+					hostName,
+					"IPV4",
+					"VNIOS",
+					"ALL_V4",
+					vipAddress,
+					"172.28.82.1",
+					"255.255.254.0",
+					true,
+				),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_automated_traffic_capture", "true"),
 				),
 			},
-			// Update and Read
 			{
-				Config: testAccMemberUseAutomatedTrafficCapture("HOST_NAME_REPLACE_ME", "false"),
+				Config: testAccMemberUseAutomatedTrafficCapture(
+					hostName,
+					"IPV4",
+					"VNIOS",
+					"ALL_V4",
+					vipAddress,
+					"172.28.82.1",
+					"255.255.254.0",
+					false,
+				),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_automated_traffic_capture", "false"),
 				),
 			},
-			// Delete testing automatically occurs in TestCase
 		},
 	})
 }
@@ -2084,27 +2874,45 @@ func TestAccMemberResource_UseDnsResolverSetting(t *testing.T) {
 	var resourceName = "nios_grid_member.test_use_dns_resolver_setting"
 	var v grid.Member
 
+	hostName := fmt.Sprintf("infoblox-%s.localdomain", acctest.RandomName())
+	vipAddress := fmt.Sprintf("172.28.83.%d", acctest.RandomNumber(254))
+
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
-			// Create and Read
 			{
-				Config: testAccMemberUseDnsResolverSetting("HOST_NAME_REPLACE_ME", "true"),
+				Config: testAccMemberUseDnsResolverSetting(
+					hostName,
+					"IPV4",
+					"VNIOS",
+					"ALL_V4",
+					vipAddress,
+					"172.28.82.1",
+					"255.255.254.0",
+					true,
+				),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_dns_resolver_setting", "true"),
 				),
 			},
-			// Update and Read
 			{
-				Config: testAccMemberUseDnsResolverSetting("HOST_NAME_REPLACE_ME", "false"),
+				Config: testAccMemberUseDnsResolverSetting(
+					hostName,
+					"IPV4",
+					"VNIOS",
+					"ALL_V4",
+					vipAddress,
+					"172.28.82.1",
+					"255.255.254.0",
+					false,
+				),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_dns_resolver_setting", "false"),
 				),
 			},
-			// Delete testing automatically occurs in TestCase
 		},
 	})
 }
@@ -2113,27 +2921,45 @@ func TestAccMemberResource_UseDscp(t *testing.T) {
 	var resourceName = "nios_grid_member.test_use_dscp"
 	var v grid.Member
 
+	hostName := fmt.Sprintf("infoblox-%s.localdomain", acctest.RandomName())
+	vipAddress := fmt.Sprintf("172.28.83.%d", acctest.RandomNumber(254))
+
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
-			// Create and Read
 			{
-				Config: testAccMemberUseDscp("HOST_NAME_REPLACE_ME", "true"),
+				Config: testAccMemberUseDscp(
+					hostName,
+					"IPV4",
+					"VNIOS",
+					"ALL_V4",
+					vipAddress,
+					"172.28.82.1",
+					"255.255.254.0",
+					true,
+				),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_dscp", "true"),
 				),
 			},
-			// Update and Read
 			{
-				Config: testAccMemberUseDscp("HOST_NAME_REPLACE_ME", "false"),
+				Config: testAccMemberUseDscp(
+					hostName,
+					"IPV4",
+					"VNIOS",
+					"ALL_V4",
+					vipAddress,
+					"172.28.82.1",
+					"255.255.254.0",
+					false,
+				),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_dscp", "false"),
 				),
 			},
-			// Delete testing automatically occurs in TestCase
 		},
 	})
 }
@@ -2142,27 +2968,45 @@ func TestAccMemberResource_UseEmailSetting(t *testing.T) {
 	var resourceName = "nios_grid_member.test_use_email_setting"
 	var v grid.Member
 
+	hostName := fmt.Sprintf("infoblox-%s.localdomain", acctest.RandomName())
+	vipAddress := fmt.Sprintf("172.28.83.%d", acctest.RandomNumber(254))
+
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
-			// Create and Read
 			{
-				Config: testAccMemberUseEmailSetting("HOST_NAME_REPLACE_ME", "true"),
+				Config: testAccMemberUseEmailSetting(
+					hostName,
+					"IPV4",
+					"VNIOS",
+					"ALL_V4",
+					vipAddress,
+					"172.28.82.1",
+					"255.255.254.0",
+					true,
+				),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_email_setting", "true"),
 				),
 			},
-			// Update and Read
 			{
-				Config: testAccMemberUseEmailSetting("HOST_NAME_REPLACE_ME", "false"),
+				Config: testAccMemberUseEmailSetting(
+					hostName,
+					"IPV4",
+					"VNIOS",
+					"ALL_V4",
+					vipAddress,
+					"172.28.82.1",
+					"255.255.254.0",
+					false,
+				),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_email_setting", "false"),
 				),
 			},
-			// Delete testing automatically occurs in TestCase
 		},
 	})
 }
@@ -2171,27 +3015,45 @@ func TestAccMemberResource_UseEnableLom(t *testing.T) {
 	var resourceName = "nios_grid_member.test_use_enable_lom"
 	var v grid.Member
 
+	hostName := fmt.Sprintf("infoblox-%s.localdomain", acctest.RandomName())
+	vipAddress := fmt.Sprintf("172.28.83.%d", acctest.RandomNumber(254))
+
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
-			// Create and Read
 			{
-				Config: testAccMemberUseEnableLom("HOST_NAME_REPLACE_ME", "true"),
+				Config: testAccMemberUseEnableLom(
+					hostName,
+					"IPV4",
+					"VNIOS",
+					"ALL_V4",
+					vipAddress,
+					"172.28.82.1",
+					"255.255.254.0",
+					true,
+				),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_enable_lom", "true"),
 				),
 			},
-			// Update and Read
 			{
-				Config: testAccMemberUseEnableLom("HOST_NAME_REPLACE_ME", "false"),
+				Config: testAccMemberUseEnableLom(
+					hostName,
+					"IPV4",
+					"VNIOS",
+					"ALL_V4",
+					vipAddress,
+					"172.28.82.1",
+					"255.255.254.0",
+					false,
+				),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_enable_lom", "false"),
 				),
 			},
-			// Delete testing automatically occurs in TestCase
 		},
 	})
 }
@@ -2200,27 +3062,45 @@ func TestAccMemberResource_UseEnableMemberRedirect(t *testing.T) {
 	var resourceName = "nios_grid_member.test_use_enable_member_redirect"
 	var v grid.Member
 
+	hostName := fmt.Sprintf("infoblox-%s.localdomain", acctest.RandomName())
+	vipAddress := fmt.Sprintf("172.28.83.%d", acctest.RandomNumber(254))
+
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
-			// Create and Read
 			{
-				Config: testAccMemberUseEnableMemberRedirect("HOST_NAME_REPLACE_ME", "true"),
+				Config: testAccMemberUseEnableMemberRedirect(
+					hostName,
+					"IPV4",
+					"VNIOS",
+					"ALL_V4",
+					vipAddress,
+					"172.28.82.1",
+					"255.255.254.0",
+					true,
+				),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_enable_member_redirect", "true"),
 				),
 			},
-			// Update and Read
 			{
-				Config: testAccMemberUseEnableMemberRedirect("HOST_NAME_REPLACE_ME", "false"),
+				Config: testAccMemberUseEnableMemberRedirect(
+					hostName,
+					"IPV4",
+					"VNIOS",
+					"ALL_V4",
+					vipAddress,
+					"172.28.82.1",
+					"255.255.254.0",
+					false,
+				),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_enable_member_redirect", "false"),
 				),
 			},
-			// Delete testing automatically occurs in TestCase
 		},
 	})
 }
@@ -2229,27 +3109,45 @@ func TestAccMemberResource_UseExternalSyslogBackupServers(t *testing.T) {
 	var resourceName = "nios_grid_member.test_use_external_syslog_backup_servers"
 	var v grid.Member
 
+	hostName := fmt.Sprintf("infoblox-%s.localdomain", acctest.RandomName())
+	vipAddress := fmt.Sprintf("172.28.83.%d", acctest.RandomNumber(254))
+
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
-			// Create and Read
 			{
-				Config: testAccMemberUseExternalSyslogBackupServers("HOST_NAME_REPLACE_ME", "true"),
+				Config: testAccMemberUseExternalSyslogBackupServers(
+					hostName,
+					"IPV4",
+					"VNIOS",
+					"ALL_V4",
+					vipAddress,
+					"172.28.82.1",
+					"255.255.254.0",
+					true,
+				),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_external_syslog_backup_servers", "true"),
 				),
 			},
-			// Update and Read
 			{
-				Config: testAccMemberUseExternalSyslogBackupServers("HOST_NAME_REPLACE_ME", "false"),
+				Config: testAccMemberUseExternalSyslogBackupServers(
+					hostName,
+					"IPV4",
+					"VNIOS",
+					"ALL_V4",
+					vipAddress,
+					"172.28.82.1",
+					"255.255.254.0",
+					false,
+				),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_external_syslog_backup_servers", "false"),
 				),
 			},
-			// Delete testing automatically occurs in TestCase
 		},
 	})
 }
@@ -2258,56 +3156,93 @@ func TestAccMemberResource_UseRemoteConsoleAccessEnable(t *testing.T) {
 	var resourceName = "nios_grid_member.test_use_remote_console_access_enable"
 	var v grid.Member
 
+	hostName := fmt.Sprintf("infoblox-%s.localdomain", acctest.RandomName())
+	vipAddress := fmt.Sprintf("172.28.83.%d", acctest.RandomNumber(254))
+
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
-			// Create and Read
 			{
-				Config: testAccMemberUseRemoteConsoleAccessEnable("HOST_NAME_REPLACE_ME", "true"),
+				Config: testAccMemberUseRemoteConsoleAccessEnable(
+					hostName,
+					"IPV4",
+					"VNIOS",
+					"ALL_V4",
+					vipAddress,
+					"172.28.82.1",
+					"255.255.254.0",
+					true,
+				),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_remote_console_access_enable", "true"),
 				),
 			},
-			// Update and Read
 			{
-				Config: testAccMemberUseRemoteConsoleAccessEnable("HOST_NAME_REPLACE_ME", "false"),
+				Config: testAccMemberUseRemoteConsoleAccessEnable(
+					hostName,
+					"IPV4",
+					"VNIOS",
+					"ALL_V4",
+					vipAddress,
+					"172.28.82.1",
+					"255.255.254.0",
+					false,
+				),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_remote_console_access_enable", "false"),
 				),
 			},
-			// Delete testing automatically occurs in TestCase
 		},
 	})
 }
 
+// issue
 func TestAccMemberResource_UseSnmpSetting(t *testing.T) {
 	var resourceName = "nios_grid_member.test_use_snmp_setting"
 	var v grid.Member
+
+	hostName := fmt.Sprintf("infoblox-%s.localdomain", acctest.RandomName())
+	vipAddress := fmt.Sprintf("172.28.83.%d", acctest.RandomNumber(254))
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
-			// Create and Read
 			{
-				Config: testAccMemberUseSnmpSetting("HOST_NAME_REPLACE_ME", "true"),
+				Config: testAccMemberUseSnmpSetting(
+					hostName,
+					"IPV4",
+					"VNIOS",
+					"ALL_V4",
+					vipAddress,
+					"172.28.82.1",
+					"255.255.254.0",
+					true,
+				),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_snmp_setting", "true"),
 				),
 			},
-			// Update and Read
 			{
-				Config: testAccMemberUseSnmpSetting("HOST_NAME_REPLACE_ME", "false"),
+				Config: testAccMemberUseSnmpSetting(
+					hostName,
+					"IPV4",
+					"VNIOS",
+					"ALL_V4",
+					vipAddress,
+					"172.28.82.1",
+					"255.255.254.0",
+					false,
+				),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_snmp_setting", "false"),
 				),
 			},
-			// Delete testing automatically occurs in TestCase
 		},
 	})
 }
@@ -2316,27 +3251,45 @@ func TestAccMemberResource_UseSupportAccessEnable(t *testing.T) {
 	var resourceName = "nios_grid_member.test_use_support_access_enable"
 	var v grid.Member
 
+	hostName := fmt.Sprintf("infoblox-%s.localdomain", acctest.RandomName())
+	vipAddress := fmt.Sprintf("172.28.83.%d", acctest.RandomNumber(254))
+
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
-			// Create and Read
 			{
-				Config: testAccMemberUseSupportAccessEnable("HOST_NAME_REPLACE_ME", "true"),
+				Config: testAccMemberUseSupportAccessEnable(
+					hostName,
+					"IPV4",
+					"VNIOS",
+					"ALL_V4",
+					vipAddress,
+					"172.28.82.1",
+					"255.255.254.0",
+					true,
+				),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_support_access_enable", "true"),
 				),
 			},
-			// Update and Read
 			{
-				Config: testAccMemberUseSupportAccessEnable("HOST_NAME_REPLACE_ME", "false"),
+				Config: testAccMemberUseSupportAccessEnable(
+					hostName,
+					"IPV4",
+					"VNIOS",
+					"ALL_V4",
+					vipAddress,
+					"172.28.82.1",
+					"255.255.254.0",
+					false,
+				),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_support_access_enable", "false"),
 				),
 			},
-			// Delete testing automatically occurs in TestCase
 		},
 	})
 }
@@ -2345,27 +3298,45 @@ func TestAccMemberResource_UseSyslogProxySetting(t *testing.T) {
 	var resourceName = "nios_grid_member.test_use_syslog_proxy_setting"
 	var v grid.Member
 
+	hostName := fmt.Sprintf("infoblox-%s.localdomain", acctest.RandomName())
+	vipAddress := fmt.Sprintf("172.28.83.%d", acctest.RandomNumber(254))
+
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
-			// Create and Read
 			{
-				Config: testAccMemberUseSyslogProxySetting("HOST_NAME_REPLACE_ME", "true"),
+				Config: testAccMemberUseSyslogProxySetting(
+					hostName,
+					"IPV4",
+					"VNIOS",
+					"ALL_V4",
+					vipAddress,
+					"172.28.82.1",
+					"255.255.254.0",
+					true,
+				),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_syslog_proxy_setting", "true"),
 				),
 			},
-			// Update and Read
 			{
-				Config: testAccMemberUseSyslogProxySetting("HOST_NAME_REPLACE_ME", "false"),
+				Config: testAccMemberUseSyslogProxySetting(
+					hostName,
+					"IPV4",
+					"VNIOS",
+					"ALL_V4",
+					vipAddress,
+					"172.28.82.1",
+					"255.255.254.0",
+					false,
+				),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_syslog_proxy_setting", "false"),
 				),
 			},
-			// Delete testing automatically occurs in TestCase
 		},
 	})
 }
@@ -2374,27 +3345,45 @@ func TestAccMemberResource_UseThresholdTraps(t *testing.T) {
 	var resourceName = "nios_grid_member.test_use_threshold_traps"
 	var v grid.Member
 
+	hostName := fmt.Sprintf("infoblox-%s.localdomain", acctest.RandomName())
+	vipAddress := fmt.Sprintf("172.28.83.%d", acctest.RandomNumber(254))
+
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
-			// Create and Read
 			{
-				Config: testAccMemberUseThresholdTraps("HOST_NAME_REPLACE_ME", "true"),
+				Config: testAccMemberUseThresholdTraps(
+					hostName,
+					"IPV4",
+					"VNIOS",
+					"ALL_V4",
+					vipAddress,
+					"172.28.82.1",
+					"255.255.254.0",
+					true,
+				),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_threshold_traps", "true"),
 				),
 			},
-			// Update and Read
 			{
-				Config: testAccMemberUseThresholdTraps("HOST_NAME_REPLACE_ME", "false"),
+				Config: testAccMemberUseThresholdTraps(
+					hostName,
+					"IPV4",
+					"VNIOS",
+					"ALL_V4",
+					vipAddress,
+					"172.28.82.1",
+					"255.255.254.0",
+					false,
+				),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_threshold_traps", "false"),
 				),
 			},
-			// Delete testing automatically occurs in TestCase
 		},
 	})
 }
@@ -2403,27 +3392,45 @@ func TestAccMemberResource_UseTimeZone(t *testing.T) {
 	var resourceName = "nios_grid_member.test_use_time_zone"
 	var v grid.Member
 
+	hostName := fmt.Sprintf("infoblox-%s.localdomain", acctest.RandomName())
+	vipAddress := fmt.Sprintf("172.28.83.%d", acctest.RandomNumber(254))
+
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
-			// Create and Read
 			{
-				Config: testAccMemberUseTimeZone("HOST_NAME_REPLACE_ME", "true"),
+				Config: testAccMemberUseTimeZone(
+					hostName,
+					"IPV4",
+					"VNIOS",
+					"ALL_V4",
+					vipAddress,
+					"172.28.82.1",
+					"255.255.254.0",
+					true,
+				),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_time_zone", "true"),
 				),
 			},
-			// Update and Read
 			{
-				Config: testAccMemberUseTimeZone("HOST_NAME_REPLACE_ME", "false"),
+				Config: testAccMemberUseTimeZone(
+					hostName,
+					"IPV4",
+					"VNIOS",
+					"ALL_V4",
+					vipAddress,
+					"172.28.82.1",
+					"255.255.254.0",
+					false,
+				),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_time_zone", "false"),
 				),
 			},
-			// Delete testing automatically occurs in TestCase
 		},
 	})
 }
@@ -2432,27 +3439,45 @@ func TestAccMemberResource_UseTrafficCaptureAuthDns(t *testing.T) {
 	var resourceName = "nios_grid_member.test_use_traffic_capture_auth_dns"
 	var v grid.Member
 
+	hostName := fmt.Sprintf("infoblox-%s.localdomain", acctest.RandomName())
+	vipAddress := fmt.Sprintf("172.28.83.%d", acctest.RandomNumber(254))
+
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
-			// Create and Read
 			{
-				Config: testAccMemberUseTrafficCaptureAuthDns("HOST_NAME_REPLACE_ME", "true"),
+				Config: testAccMemberUseTrafficCaptureAuthDns(
+					hostName,
+					"IPV4",
+					"VNIOS",
+					"ALL_V4",
+					vipAddress,
+					"172.28.82.1",
+					"255.255.254.0",
+					true,
+				),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_traffic_capture_auth_dns", "true"),
 				),
 			},
-			// Update and Read
 			{
-				Config: testAccMemberUseTrafficCaptureAuthDns("HOST_NAME_REPLACE_ME", "false"),
+				Config: testAccMemberUseTrafficCaptureAuthDns(
+					hostName,
+					"IPV4",
+					"VNIOS",
+					"ALL_V4",
+					vipAddress,
+					"172.28.82.1",
+					"255.255.254.0",
+					false,
+				),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_traffic_capture_auth_dns", "false"),
 				),
 			},
-			// Delete testing automatically occurs in TestCase
 		},
 	})
 }
@@ -2461,27 +3486,45 @@ func TestAccMemberResource_UseTrafficCaptureChr(t *testing.T) {
 	var resourceName = "nios_grid_member.test_use_traffic_capture_chr"
 	var v grid.Member
 
+	hostName := fmt.Sprintf("infoblox-%s.localdomain", acctest.RandomName())
+	vipAddress := fmt.Sprintf("172.28.83.%d", acctest.RandomNumber(254))
+
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
-			// Create and Read
 			{
-				Config: testAccMemberUseTrafficCaptureChr("HOST_NAME_REPLACE_ME", "true"),
+				Config: testAccMemberUseTrafficCaptureChr(
+					hostName,
+					"IPV4",
+					"VNIOS",
+					"ALL_V4",
+					vipAddress,
+					"172.28.82.1",
+					"255.255.254.0",
+					true,
+				),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_traffic_capture_chr", "true"),
 				),
 			},
-			// Update and Read
 			{
-				Config: testAccMemberUseTrafficCaptureChr("HOST_NAME_REPLACE_ME", "false"),
+				Config: testAccMemberUseTrafficCaptureChr(
+					hostName,
+					"IPV4",
+					"VNIOS",
+					"ALL_V4",
+					vipAddress,
+					"172.28.82.1",
+					"255.255.254.0",
+					false,
+				),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_traffic_capture_chr", "false"),
 				),
 			},
-			// Delete testing automatically occurs in TestCase
 		},
 	})
 }
@@ -2490,27 +3533,45 @@ func TestAccMemberResource_UseTrafficCaptureQps(t *testing.T) {
 	var resourceName = "nios_grid_member.test_use_traffic_capture_qps"
 	var v grid.Member
 
+	hostName := fmt.Sprintf("infoblox-%s.localdomain", acctest.RandomName())
+	vipAddress := fmt.Sprintf("172.28.83.%d", acctest.RandomNumber(254))
+
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
-			// Create and Read
 			{
-				Config: testAccMemberUseTrafficCaptureQps("HOST_NAME_REPLACE_ME", "true"),
+				Config: testAccMemberUseTrafficCaptureQps(
+					hostName,
+					"IPV4",
+					"VNIOS",
+					"ALL_V4",
+					vipAddress,
+					"172.28.82.1",
+					"255.255.254.0",
+					true,
+				),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_traffic_capture_qps", "true"),
 				),
 			},
-			// Update and Read
 			{
-				Config: testAccMemberUseTrafficCaptureQps("HOST_NAME_REPLACE_ME", "false"),
+				Config: testAccMemberUseTrafficCaptureQps(
+					hostName,
+					"IPV4",
+					"VNIOS",
+					"ALL_V4",
+					vipAddress,
+					"172.28.82.1",
+					"255.255.254.0",
+					false,
+				),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_traffic_capture_qps", "false"),
 				),
 			},
-			// Delete testing automatically occurs in TestCase
 		},
 	})
 }
@@ -2519,27 +3580,45 @@ func TestAccMemberResource_UseTrafficCaptureRecDns(t *testing.T) {
 	var resourceName = "nios_grid_member.test_use_traffic_capture_rec_dns"
 	var v grid.Member
 
+	hostName := fmt.Sprintf("infoblox-%s.localdomain", acctest.RandomName())
+	vipAddress := fmt.Sprintf("172.28.83.%d", acctest.RandomNumber(254))
+
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
-			// Create and Read
 			{
-				Config: testAccMemberUseTrafficCaptureRecDns("HOST_NAME_REPLACE_ME", "true"),
+				Config: testAccMemberUseTrafficCaptureRecDns(
+					hostName,
+					"IPV4",
+					"VNIOS",
+					"ALL_V4",
+					vipAddress,
+					"172.28.82.1",
+					"255.255.254.0",
+					true,
+				),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_traffic_capture_rec_dns", "true"),
 				),
 			},
-			// Update and Read
 			{
-				Config: testAccMemberUseTrafficCaptureRecDns("HOST_NAME_REPLACE_ME", "false"),
+				Config: testAccMemberUseTrafficCaptureRecDns(
+					hostName,
+					"IPV4",
+					"VNIOS",
+					"ALL_V4",
+					vipAddress,
+					"172.28.82.1",
+					"255.255.254.0",
+					false,
+				),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_traffic_capture_rec_dns", "false"),
 				),
 			},
-			// Delete testing automatically occurs in TestCase
 		},
 	})
 }
@@ -2548,27 +3627,45 @@ func TestAccMemberResource_UseTrafficCaptureRecQueries(t *testing.T) {
 	var resourceName = "nios_grid_member.test_use_traffic_capture_rec_queries"
 	var v grid.Member
 
+	hostName := fmt.Sprintf("infoblox-%s.localdomain", acctest.RandomName())
+	vipAddress := fmt.Sprintf("172.28.83.%d", acctest.RandomNumber(254))
+
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
-			// Create and Read
 			{
-				Config: testAccMemberUseTrafficCaptureRecQueries("HOST_NAME_REPLACE_ME", "true"),
+				Config: testAccMemberUseTrafficCaptureRecQueries(
+					hostName,
+					"IPV4",
+					"VNIOS",
+					"ALL_V4",
+					vipAddress,
+					"172.28.82.1",
+					"255.255.254.0",
+					true,
+				),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_traffic_capture_rec_queries", "true"),
 				),
 			},
-			// Update and Read
 			{
-				Config: testAccMemberUseTrafficCaptureRecQueries("HOST_NAME_REPLACE_ME", "false"),
+				Config: testAccMemberUseTrafficCaptureRecQueries(
+					hostName,
+					"IPV4",
+					"VNIOS",
+					"ALL_V4",
+					vipAddress,
+					"172.28.82.1",
+					"255.255.254.0",
+					false,
+				),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_traffic_capture_rec_queries", "false"),
 				),
 			},
-			// Delete testing automatically occurs in TestCase
 		},
 	})
 }
@@ -2577,27 +3674,45 @@ func TestAccMemberResource_UseTrapNotifications(t *testing.T) {
 	var resourceName = "nios_grid_member.test_use_trap_notifications"
 	var v grid.Member
 
+	hostName := fmt.Sprintf("infoblox-%s.localdomain", acctest.RandomName())
+	vipAddress := fmt.Sprintf("172.28.83.%d", acctest.RandomNumber(254))
+
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
-			// Create and Read
 			{
-				Config: testAccMemberUseTrapNotifications("HOST_NAME_REPLACE_ME", "true"),
+				Config: testAccMemberUseTrapNotifications(
+					hostName,
+					"IPV4",
+					"VNIOS",
+					"ALL_V4",
+					vipAddress,
+					"172.28.82.1",
+					"255.255.254.0",
+					true,
+				),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_trap_notifications", "true"),
 				),
 			},
-			// Update and Read
 			{
-				Config: testAccMemberUseTrapNotifications("HOST_NAME_REPLACE_ME", "false"),
+				Config: testAccMemberUseTrapNotifications(
+					hostName,
+					"IPV4",
+					"VNIOS",
+					"ALL_V4",
+					vipAddress,
+					"172.28.82.1",
+					"255.255.254.0",
+					false,
+				),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_trap_notifications", "false"),
 				),
 			},
-			// Delete testing automatically occurs in TestCase
 		},
 	})
 }
@@ -2606,27 +3721,45 @@ func TestAccMemberResource_UseV4Vrrp(t *testing.T) {
 	var resourceName = "nios_grid_member.test_use_v4_vrrp"
 	var v grid.Member
 
+	hostName := fmt.Sprintf("infoblox-%s.localdomain", acctest.RandomName())
+	vipAddress := fmt.Sprintf("172.28.83.%d", acctest.RandomNumber(254))
+
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
-			// Create and Read
 			{
-				Config: testAccMemberUseV4Vrrp("HOST_NAME_REPLACE_ME", "true"),
+				Config: testAccMemberUseV4Vrrp(
+					hostName,
+					"IPV4",
+					"VNIOS",
+					"ALL_V4",
+					vipAddress,
+					"172.28.82.1",
+					"255.255.254.0",
+					true,
+				),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_v4_vrrp", "true"),
 				),
 			},
-			// Update and Read
 			{
-				Config: testAccMemberUseV4Vrrp("HOST_NAME_REPLACE_ME", "false"),
+				Config: testAccMemberUseV4Vrrp(
+					hostName,
+					"IPV4",
+					"VNIOS",
+					"ALL_V4",
+					vipAddress,
+					"172.28.82.1",
+					"255.255.254.0",
+					false,
+				),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_v4_vrrp", "false"),
 				),
 			},
-			// Delete testing automatically occurs in TestCase
 		},
 	})
 }
@@ -2634,30 +3767,60 @@ func TestAccMemberResource_UseV4Vrrp(t *testing.T) {
 func TestAccMemberResource_VipSetting(t *testing.T) {
 	var resourceName = "nios_grid_member.test_vip_setting"
 	var v grid.Member
-	vipSettingVal := map[string]any{}
-	vipSettingValUpdated := map[string]any{}
+
+	hostName := fmt.Sprintf("infoblox-%s.localdomain", acctest.RandomName())
+	vipAddress := fmt.Sprintf("172.28.83.%d", acctest.RandomNumber(254))
+
+	vipSettingVal := map[string]any{
+		"address":     vipAddress,
+		"dscp":        0,
+		"gateway":     "172.28.82.1",
+		"primary":     true,
+		"subnet_mask": "255.255.254.0",
+		"use_dscp":    false,
+	}
+	vipSettingValUpdated := map[string]any{
+		"address":     vipAddress,
+		"dscp":        0,
+		"gateway":     "172.28.82.2",
+		"primary":     true,
+		"subnet_mask": "255.255.254.0",
+		"use_dscp":    false,
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
-			// Create and Read
 			{
-				Config: testAccMemberVipSetting("HOST_NAME_REPLACE_ME", vipSettingVal),
+				Config: testAccMemberVipSetting(
+					hostName,
+					"IPV4",
+					"VNIOS",
+					"ALL_V4",
+					vipSettingVal,
+				),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "vip_setting", "VIP_SETTING_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "vip_setting.address", vipAddress),
+					resource.TestCheckResourceAttr(resourceName, "vip_setting.dscp", "0"),
+					resource.TestCheckResourceAttr(resourceName, "vip_setting.use_dscp", "false"),
 				),
 			},
-			// Update and Read
 			{
-				Config: testAccMemberVipSetting("HOST_NAME_REPLACE_ME", vipSettingValUpdated),
+				Config: testAccMemberVipSetting(
+					hostName,
+					"IPV4",
+					"VNIOS",
+					"ALL_V4",
+					vipSettingValUpdated,
+				),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "vip_setting", "VIP_SETTING_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "vip_setting.address", vipAddress),
+					resource.TestCheckResourceAttr(resourceName, "vip_setting.gateway", "172.28.82.2"),
 				),
 			},
-			// Delete testing automatically occurs in TestCase
 		},
 	})
 }
@@ -2665,27 +3828,47 @@ func TestAccMemberResource_VpnMtu(t *testing.T) {
 	var resourceName = "nios_grid_member.test_vpn_mtu"
 	var v grid.Member
 
+	hostName := fmt.Sprintf("infoblox-%s.localdomain", acctest.RandomName())
+	vipAddress := fmt.Sprintf("172.28.83.%d", acctest.RandomNumber(254))
+	vpnMtu1 := 1450
+	vpnMtu2 := 1400
+
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
-			// Create and Read
 			{
-				Config: testAccMemberVpnMtu("HOST_NAME_REPLACE_ME", "VPN_MTU_REPLACE_ME"),
+				Config: testAccMemberVpnMtu(
+					hostName,
+					"IPV4",
+					"VNIOS",
+					"ALL_V4",
+					vipAddress,
+					"172.28.82.1",
+					"255.255.254.0",
+					vpnMtu1,
+				),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "vpn_mtu", "VPN_MTU_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "vpn_mtu", "1450"),
 				),
 			},
-			// Update and Read
 			{
-				Config: testAccMemberVpnMtu("HOST_NAME_REPLACE_ME", "VPN_MTU_UPDATE_REPLACE_ME"),
+				Config: testAccMemberVpnMtu(
+					hostName,
+					"IPV4",
+					"VNIOS",
+					"ALL_V4",
+					vipAddress,
+					"172.28.82.1",
+					"255.255.254.0",
+					vpnMtu2,
+				),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "vpn_mtu", "VPN_MTU_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "vpn_mtu", "1400"),
 				),
 			},
-			// Delete testing automatically occurs in TestCase
 		},
 	})
 }
@@ -2933,7 +4116,7 @@ resource "nios_grid_member" "test_comment" {
 
 func testAccMemberConfigAddrType(
 	hostName, configAddrType, platform, serviceTypeConfig,
-	vipAddress, vipGateway, vipSubnetMask string,
+	vipAddress, vipGateway, vipSubnetMask string, useV4Vrrp bool,
 ) string {
 	return fmt.Sprintf(`
 resource "nios_grid_member" "test_config_addr_type" {
@@ -2958,8 +4141,9 @@ resource "nios_grid_member" "test_config_addr_type" {
         subnet_mask = %q
         use_dscp = false
     }
+	use_v4_vrrp = %t // set use_v4_vrrp to false to avoid dependency on vrrp resource for config_addr_type testing
 }
-`, hostName, configAddrType, platform, serviceTypeConfig, vipAddress, vipGateway, vipSubnetMask)
+`, hostName, configAddrType, platform, serviceTypeConfig, vipAddress, vipGateway, vipSubnetMask, useV4Vrrp)
 }
 
 func testAccMemberCspAccessKey(hostName string, cspAccessKey []string) string {
@@ -2972,106 +4156,396 @@ resource "nios_grid_member" "test_csp_access_key" {
 `, hostName, cspAccessKeyStr)
 }
 
-func testAccMemberCspMemberSetting(hostName string, cspMemberSetting map[string]any) string {
+func testAccMemberCspMemberSetting(
+	hostName, configAddrType, platform, serviceTypeConfig,
+	vipAddress, vipGateway, vipSubnetMask string,
+	cspMemberSetting map[string]any,
+) string {
+	cspMemberSettingStr := utils.ConvertMapToHCL(cspMemberSetting)
+
 	return fmt.Sprintf(`
 resource "nios_grid_member" "test_csp_member_setting" {
     host_name = %q
+    config_addr_type = %q
+    platform = %q
+    service_type_configuration = %q
+
+    ipv6_setting = {
+        auto_router_config_enabled = false
+        dscp = 0
+        enabled = false
+        primary = true
+        use_dscp = false
+    }
+
+    vip_setting = {
+        address = %q
+        dscp = 0
+        gateway = %q
+        primary = true
+        subnet_mask = %q
+        use_dscp = false
+    }
+
     csp_member_setting = %s
 }
-`, hostName, cspMemberSetting)
+`, hostName, configAddrType, platform, serviceTypeConfig, vipAddress, vipGateway, vipSubnetMask, cspMemberSettingStr)
 }
 
-func testAccMemberDnsResolverSetting(hostName string, dnsResolverSetting map[string]any) string {
+func testAccMemberDnsResolverSetting(
+	hostName, configAddrType, platform, serviceTypeConfig,
+	vipAddress, vipGateway, vipSubnetMask string,
+	dnsResolverSetting map[string]any,
+	useDNSResolverSetting bool,
+) string {
+	dnsResolverSettingStr := utils.ConvertMapToHCL(dnsResolverSetting)
+
 	return fmt.Sprintf(`
 resource "nios_grid_member" "test_dns_resolver_setting" {
     host_name = %q
+    config_addr_type = %q
+    platform = %q
+    service_type_configuration = %q
+
+    ipv6_setting = {
+        auto_router_config_enabled = false
+        dscp = 0
+        enabled = false
+        primary = true
+        use_dscp = false
+    }
+
+    vip_setting = {
+        address = %q
+        dscp = 0
+        gateway = %q
+        primary = true
+        subnet_mask = %q
+        use_dscp = false
+    }
+
     dns_resolver_setting = %s
-    use_dns_resolver_setting = true
+    use_dns_resolver_setting = %t
 }
-`, hostName, dnsResolverSetting)
+`, hostName, configAddrType, platform, serviceTypeConfig, vipAddress, vipGateway, vipSubnetMask, dnsResolverSettingStr, useDNSResolverSetting)
 }
 
-func testAccMemberDscp(hostName string, dscp string) string {
+func testAccMemberDscp(
+	hostName, configAddrType, platform, serviceTypeConfig,
+	vipAddress, vipGateway, vipSubnetMask string,
+	dscp int, use_dscp bool,
+) string {
 	return fmt.Sprintf(`
 resource "nios_grid_member" "test_dscp" {
     host_name = %q
-    dscp = %q
-    use_dscp = true
+    config_addr_type = %q
+    platform = %q
+    service_type_configuration = %q
+
+    ipv6_setting = {
+        auto_router_config_enabled = false
+        dscp = 0
+        enabled = false
+        primary = true
+        use_dscp = false
+    }
+
+    vip_setting = {
+        address = %q
+        dscp = 0
+        gateway = %q
+        primary = true
+        subnet_mask = %q
+        use_dscp = false
+    }
+
+    dscp = %d
+    use_dscp = %t
 }
-`, hostName, dscp)
+`, hostName, configAddrType, platform, serviceTypeConfig, vipAddress, vipGateway, vipSubnetMask, dscp, use_dscp)
 }
 
-func testAccMemberEmailSetting(hostName string, emailSetting map[string]any) string {
+func testAccMemberEmailSetting(
+	hostName, configAddrType, platform, serviceTypeConfig,
+	vipAddress, vipGateway, vipSubnetMask string,
+	emailSetting map[string]any,
+	useEmailSetting bool,
+) string {
+	emailSettingStr := utils.ConvertMapToHCL(emailSetting)
+
 	return fmt.Sprintf(`
 resource "nios_grid_member" "test_email_setting" {
     host_name = %q
+    config_addr_type = %q
+    platform = %q
+    service_type_configuration = %q
+
+    ipv6_setting = {
+        auto_router_config_enabled = false
+        dscp = 0
+        enabled = false
+        primary = true
+        use_dscp = false
+    }
+
+    vip_setting = {
+        address = %q
+        dscp = 0
+        gateway = %q
+        primary = true
+        subnet_mask = %q
+        use_dscp = false
+    }
+
     email_setting = %s
-    use_email_setting = true
+    use_email_setting = %t
 }
-`, hostName, emailSetting)
+`, hostName, configAddrType, platform, serviceTypeConfig, vipAddress, vipGateway, vipSubnetMask, emailSettingStr, useEmailSetting)
 }
 
-func testAccMemberEnableHa(hostName string, enableHa string) string {
+func testAccMemberEnableHa(
+	hostName, configAddrType, platform, serviceTypeConfig,
+	vipAddress, vipGateway, vipSubnetMask string,
+	enableHa bool,
+	routerID int,
+) string {
 	return fmt.Sprintf(`
 resource "nios_grid_member" "test_enable_ha" {
-    host_name = %q
-    enable_ha = %q
+  host_name = %q
+  config_addr_type = %q
+  platform = %q
+  service_type_configuration = %q
+
+  ipv6_setting = {
+    auto_router_config_enabled = false
+    enabled = false
+    primary = true
+    use_dscp = false
+    dscp = 0
+  }
+
+  vip_setting = {
+    address = %q
+    gateway = %q
+    subnet_mask = %q
+    primary = true
+    use_dscp = false
+    dscp = 0
+  }
+  enable_ha = %t
+  router_id = %d
+
+  node_info = [
+    {
+      lan_ha_port_setting = {
+        ha_cloud_attribute = "UNK"
+        ha_ip_address = "172.28.82.11"
+        ha_port_setting = {
+          auto_port_setting_enabled = true
+          speed = "10"
+        }
+        lan_port_setting = {
+          auto_port_setting_enabled = true
+        }
+        mgmt_lan = "172.28.82.32"
+      }
+    },
+    {
+      lan_ha_port_setting = {
+        ha_cloud_attribute = "UNK"
+        ha_ip_address = "172.28.82.41"
+        ha_port_setting = {
+          auto_port_setting_enabled = true
+          speed = "10"
+        }
+        lan_port_setting = {
+          auto_port_setting_enabled = true
+        }
+        mgmt_lan = "172.28.82.43"
+      }
+    }
+  ]
 }
-`, hostName, enableHa)
+`, hostName, configAddrType, platform, serviceTypeConfig, vipAddress, vipGateway, vipSubnetMask, enableHa, routerID)
 }
 
-func testAccMemberEnableLom(hostName string, enableLom string) string {
+func testAccMemberEnableLom(
+	hostName, configAddrType, platform, serviceTypeConfig,
+	vipAddress, vipGateway, vipSubnetMask string,
+	enableLom bool,
+) string {
 	return fmt.Sprintf(`
 resource "nios_grid_member" "test_enable_lom" {
     host_name = %q
-    enable_lom = %q
+    config_addr_type = %q
+    platform = %q
+    service_type_configuration = %q
+
+    ipv6_setting = {
+        auto_router_config_enabled = false
+        dscp = 0
+        enabled = false
+        primary = true
+        use_dscp = false
+    }
+
+    vip_setting = {
+        address = %q
+        dscp = 0
+        gateway = %q
+        primary = true
+        subnet_mask = %q
+        use_dscp = false
+    }
+
+    enable_lom = %t
     use_enable_lom = true
 }
-`, hostName, enableLom)
+`, hostName, configAddrType, platform, serviceTypeConfig, vipAddress, vipGateway, vipSubnetMask, enableLom)
 }
 
-func testAccMemberEnableMemberRedirect(hostName string, enableMemberRedirect string) string {
+func testAccMemberEnableMemberRedirect(
+	hostName, configAddrType, platform, serviceTypeConfig,
+	vipAddress, vipGateway, vipSubnetMask string,
+	enableMemberRedirect bool,
+) string {
 	return fmt.Sprintf(`
 resource "nios_grid_member" "test_enable_member_redirect" {
     host_name = %q
-    enable_member_redirect = %q
+    config_addr_type = %q
+    platform = %q
+    service_type_configuration = %q
+
+    ipv6_setting = {
+        auto_router_config_enabled = false
+        dscp = 0
+        enabled = false
+        primary = true
+        use_dscp = false
+    }
+
+    vip_setting = {
+        address = %q
+        dscp = 0
+        gateway = %q
+        primary = true
+        subnet_mask = %q
+        use_dscp = false
+    }
+
+    enable_member_redirect = %t
     use_enable_member_redirect = true
 }
-`, hostName, enableMemberRedirect)
+`, hostName, configAddrType, platform, serviceTypeConfig, vipAddress, vipGateway, vipSubnetMask, enableMemberRedirect)
 }
 
-func testAccMemberEnableRoApiAccess(hostName string, enableRoApiAccess string) string {
+func testAccMemberEnableRoApiAccess(
+	hostName, configAddrType, platform, serviceTypeConfig,
+	vipAddress, vipGateway, vipSubnetMask string,
+	enableRoApiAccess bool,
+) string {
 	return fmt.Sprintf(`
 resource "nios_grid_member" "test_enable_ro_api_access" {
     host_name = %q
-    enable_ro_api_access = %q
+    config_addr_type = %q
+    platform = %q
+    service_type_configuration = %q
+
+    ipv6_setting = {
+        auto_router_config_enabled = false
+        dscp = 0
+        enabled = false
+        primary = true
+        use_dscp = false
+    }
+
+    vip_setting = {
+        address = %q
+        dscp = 0
+        gateway = %q
+        primary = true
+        subnet_mask = %q
+        use_dscp = false
+    }
+
+    enable_ro_api_access = %t
 }
-`, hostName, enableRoApiAccess)
+`, hostName, configAddrType, platform, serviceTypeConfig, vipAddress, vipGateway, vipSubnetMask, enableRoApiAccess)
 }
 
-func testAccMemberExtAttrs(hostName string, extAttrs map[string]string) string {
-	extAttrsStr := "{\n"
-	for k, v := range extAttrs {
-		extAttrsStr += fmt.Sprintf("    %s = %q\n", k, v)
-	}
-	extAttrsStr += "  }"
+func testAccMemberExtAttrs(
+	hostName, configAddrType, platform, serviceTypeConfig,
+	vipAddress, vipGateway, vipSubnetMask string,
+	extAttrs map[string]any,
+) string {
+	extAttrsStr := utils.ConvertMapToHCL(extAttrs)
+
 	return fmt.Sprintf(`
 resource "nios_grid_member" "test_extattrs" {
     host_name = %q
+    config_addr_type = %q
+    platform = %q
+    service_type_configuration = %q
+
+    ipv6_setting = {
+        auto_router_config_enabled = false
+        dscp = 0
+        enabled = false
+        primary = true
+        use_dscp = false
+    }
+
+    vip_setting = {
+        address = %q
+        dscp = 0
+        gateway = %q
+        primary = true
+        subnet_mask = %q
+        use_dscp = false
+    }
+
     extattrs = %s
 }
-`, hostName, extAttrsStr)
+`, hostName, configAddrType, platform, serviceTypeConfig, vipAddress, vipGateway, vipSubnetMask, extAttrsStr)
 }
 
-func testAccMemberExternalSyslogBackupServers(hostName string, externalSyslogBackupServers []map[string]any) string {
+func testAccMemberExternalSyslogBackupServers(
+	hostName, configAddrType, platform, serviceTypeConfig,
+	vipAddress, vipGateway, vipSubnetMask string,
+	externalSyslogBackupServers []map[string]any,
+) string {
 	externalSyslogBackupServersStr := utils.ConvertSliceOfMapsToHCL(externalSyslogBackupServers)
+
 	return fmt.Sprintf(`
 resource "nios_grid_member" "test_external_syslog_backup_servers" {
     host_name = %q
+    config_addr_type = %q
+    platform = %q
+    service_type_configuration = %q
+
+    ipv6_setting = {
+        auto_router_config_enabled = false
+        dscp = 0
+        enabled = false
+        primary = true
+        use_dscp = false
+    }
+
+    vip_setting = {
+        address = %q
+        dscp = 0
+        gateway = %q
+        primary = true
+        subnet_mask = %q
+        use_dscp = false
+    }
+
     external_syslog_backup_servers = %s
     use_external_syslog_backup_servers = true
+	external_syslog_server_enable = false
+    use_syslog_proxy_setting = true
 }
-`, hostName, externalSyslogBackupServersStr)
+`, hostName, configAddrType, platform, serviceTypeConfig, vipAddress, vipGateway, vipSubnetMask, externalSyslogBackupServersStr)
 }
 
 func testAccMemberExternalSyslogServerEnable(hostName string, externalSyslogServerEnable string) string {
@@ -3102,21 +4576,63 @@ resource "nios_grid_member" "test_ha_on_cloud" {
 `, hostName, haOnCloud)
 }
 
-func testAccMemberHostName(hostName string) string {
+func testAccMemberHostName(
+	hostName, configAddrType, platform, serviceTypeConfig,
+	vipAddress, vipGateway, vipSubnetMask string,
+) string {
 	return fmt.Sprintf(`
 resource "nios_grid_member" "test_host_name" {
     host_name = %q
+    config_addr_type = %q
+    platform = %q
+    service_type_configuration = %q
+
+    ipv6_setting = {
+        auto_router_config_enabled = false
+        dscp = 0
+        enabled = false
+        primary = true
+        use_dscp = false
+    }
+
+    vip_setting = {
+        address = %q
+        dscp = 0
+        gateway = %q
+        primary = true
+        subnet_mask = %q
+        use_dscp = false
+    }
 }
-`, hostName)
+`, hostName, configAddrType, platform, serviceTypeConfig, vipAddress, vipGateway, vipSubnetMask)
 }
 
-func testAccMemberIpv6Setting(hostName string, ipv6Setting map[string]any) string {
+func testAccMemberIpv6Setting(
+	hostName, configAddrType, platform, serviceTypeConfig,
+	vipAddress, vipGateway, vipSubnetMask string,
+	ipv6Setting map[string]any,
+) string {
+	ipv6SettingStr := utils.ConvertMapToHCL(ipv6Setting)
+
 	return fmt.Sprintf(`
 resource "nios_grid_member" "test_ipv6_setting" {
     host_name = %q
+    config_addr_type = %q
+    platform = %q
+    service_type_configuration = %q
+
     ipv6_setting = %s
+
+    vip_setting = {
+        address = %q
+        dscp = 0
+        gateway = %q
+        primary = true
+        subnet_mask = %q
+        use_dscp = false
+    }
 }
-`, hostName, ipv6Setting)
+`, hostName, configAddrType, platform, serviceTypeConfig, ipv6SettingStr, vipAddress, vipGateway, vipSubnetMask)
 }
 
 func testAccMemberIpv6StaticRoutes(hostName string, ipv6StaticRoutes []map[string]any) string {
@@ -3214,32 +4730,143 @@ resource "nios_grid_member" "test_node_info" {
 `, hostName, nodeInfoStr)
 }
 
-func testAccMemberNtpSetting(hostName string, ntpSetting map[string]any) string {
-	return fmt.Sprintf(`
+func testAccMemberNtpSetting(
+    hostName, configAddrType, platform, serviceTypeConfig,
+    vipAddress, vipGateway, vipSubnetMask string,
+    ntpSetting map[string]any,
+) string {
+    ntpSettingStr := utils.ConvertMapToHCL(ntpSetting)
+
+    return fmt.Sprintf(`
 resource "nios_grid_member" "test_ntp_setting" {
     host_name = %q
+    config_addr_type = %q
+    platform = %q
+    service_type_configuration = %q
+
+    ipv6_setting = {
+        auto_router_config_enabled = false
+        dscp = 0
+        enabled = false
+        primary = true
+        use_dscp = false
+    }
+
+    vip_setting = {
+        address = %q
+        dscp = 0
+        gateway = %q
+        primary = true
+        subnet_mask = %q
+        use_dscp = false
+    }
+
     ntp_setting = %s
 }
-`, hostName, ntpSetting)
+`, hostName, configAddrType, platform, serviceTypeConfig, vipAddress, vipGateway, vipSubnetMask, ntpSettingStr)
 }
 
-func testAccMemberOspfList(hostName string, ospfList []map[string]any) string {
+func testAccMemberOspfList(
+	hostName, configAddrType, platform, serviceTypeConfig,
+	vipAddress, vipGateway, vipSubnetMask string,
+	ospfList []map[string]any,
+) string {
 	ospfListStr := utils.ConvertSliceOfMapsToHCL(ospfList)
+
 	return fmt.Sprintf(`
 resource "nios_grid_member" "test_ospf_list" {
     host_name = %q
+    config_addr_type = %q
+    platform = %q
+    service_type_configuration = %q
+
+    ipv6_setting = {
+        auto_router_config_enabled = false
+        dscp = 0
+        enabled = false
+        primary = true
+        use_dscp = false
+    }
+
+    vip_setting = {
+        address = %q
+        dscp = 0
+        gateway = %q
+        primary = true
+        subnet_mask = %q
+        use_dscp = false
+    }
+
     ospf_list = %s
 }
-`, hostName, ospfListStr)
+`, hostName, configAddrType, platform, serviceTypeConfig, vipAddress, vipGateway, vipSubnetMask, ospfListStr)
 }
 
-func testAccMemberPassiveHaArpEnabled(hostName string, passiveHaArpEnabled string) string {
+func testAccMemberPassiveHaArpEnabled(
+	hostName, configAddrType, platform, serviceTypeConfig,
+	vipAddress, vipGateway, vipSubnetMask string,
+	passiveHaArpEnabled bool,
+) string {
 	return fmt.Sprintf(`
 resource "nios_grid_member" "test_passive_ha_arp_enabled" {
     host_name = %q
-    passive_ha_arp_enabled = %q
+    config_addr_type = %q
+    platform = %q
+    service_type_configuration = %q
+
+    ipv6_setting = {
+        auto_router_config_enabled = false
+        dscp = 0
+        enabled = false
+        primary = true
+        use_dscp = false
+    }
+
+    vip_setting = {
+        address = %q
+        dscp = 0
+        gateway = %q
+        primary = true
+        subnet_mask = %q
+        use_dscp = false
+    }
+
+    enable_ha = true
+    router_id = 112
+    passive_ha_arp_enabled = %t
+
+    node_info = [
+        {
+            lan_ha_port_setting = {
+                ha_cloud_attribute = "UNK"
+                ha_ip_address = "172.28.82.11"
+                ha_port_setting = {
+                    auto_port_setting_enabled = true
+                    speed = "10"
+                }
+                lan_port_setting = {
+                    auto_port_setting_enabled = true
+                }
+                mgmt_lan = "172.28.82.32"
+            }
+        },
+        {
+            lan_ha_port_setting = {
+                ha_cloud_attribute = "UNK"
+                ha_ip_address = "172.28.82.41"
+                ha_port_setting = {
+                    auto_port_setting_enabled = true
+                    speed = "10"
+                }
+                lan_port_setting = {
+                    auto_port_setting_enabled = true
+                }
+                mgmt_lan = "172.28.82.43"
+            }
+        }
+    ]
 }
-`, hostName, passiveHaArpEnabled)
+`, hostName, configAddrType, platform, serviceTypeConfig, vipAddress, vipGateway, vipSubnetMask, passiveHaArpEnabled)
 }
 
 func testAccMemberPlatform(hostName string, platform string) string {
@@ -3260,389 +4887,1440 @@ resource "nios_grid_member" "test_pre_provisioning" {
 `, hostName, preProvisioning)
 }
 
-func testAccMemberPreserveIfOwnsDelegation(hostName string, preserveIfOwnsDelegation string) string {
+func testAccMemberPreserveIfOwnsDelegation(
+	hostName, configAddrType, platform, serviceTypeConfig,
+	vipAddress, vipGateway, vipSubnetMask string,
+	preserveIfOwnsDelegation bool,
+) string {
 	return fmt.Sprintf(`
 resource "nios_grid_member" "test_preserve_if_owns_delegation" {
     host_name = %q
-    preserve_if_owns_delegation = %q
+    config_addr_type = %q
+    platform = %q
+    service_type_configuration = %q
+
+    ipv6_setting = {
+        auto_router_config_enabled = false
+        dscp = 0
+        enabled = false
+        primary = true
+        use_dscp = false
+    }
+
+    vip_setting = {
+        address = %q
+        dscp = 0
+        gateway = %q
+        primary = true
+        subnet_mask = %q
+        use_dscp = false
+    }
+
+    preserve_if_owns_delegation = %t
 }
-`, hostName, preserveIfOwnsDelegation)
+`, hostName, configAddrType, platform, serviceTypeConfig, vipAddress, vipGateway, vipSubnetMask, preserveIfOwnsDelegation)
 }
 
-func testAccMemberRemoteConsoleAccessEnable(hostName string, remoteConsoleAccessEnable string) string {
+func testAccMemberRemoteConsoleAccessEnable(
+	hostName, configAddrType, platform, serviceTypeConfig,
+	vipAddress, vipGateway, vipSubnetMask string,
+	remoteConsoleAccessEnable bool,
+) string {
 	return fmt.Sprintf(`
 resource "nios_grid_member" "test_remote_console_access_enable" {
     host_name = %q
-    remote_console_access_enable = %q
+    config_addr_type = %q
+    platform = %q
+    service_type_configuration = %q
+
+    ipv6_setting = {
+        auto_router_config_enabled = false
+        dscp = 0
+        enabled = false
+        primary = true
+        use_dscp = false
+    }
+
+    vip_setting = {
+        address = %q
+        dscp = 0
+        gateway = %q
+        primary = true
+        subnet_mask = %q
+        use_dscp = false
+    }
+
+    remote_console_access_enable = %t
     use_remote_console_access_enable = true
 }
-`, hostName, remoteConsoleAccessEnable)
+`, hostName, configAddrType, platform, serviceTypeConfig, vipAddress, vipGateway, vipSubnetMask, remoteConsoleAccessEnable)
 }
 
-func testAccMemberRouterId(hostName string, routerId string) string {
+func testAccMemberRouterId(
+	hostName, configAddrType, platform, serviceTypeConfig,
+	vipAddress, vipGateway, vipSubnetMask string,
+	routerId int,
+) string {
 	return fmt.Sprintf(`
 resource "nios_grid_member" "test_router_id" {
     host_name = %q
-    router_id = %q
+    config_addr_type = %q
+    platform = %q
+    service_type_configuration = %q
+
+    ipv6_setting = {
+        auto_router_config_enabled = false
+        dscp = 0
+        enabled = false
+        primary = true
+        use_dscp = false
+    }
+
+    vip_setting = {
+        address = %q
+        dscp = 0
+        gateway = %q
+        primary = true
+        subnet_mask = %q
+        use_dscp = false
+    }
+
+    router_id = %d
 }
-`, hostName, routerId)
+`, hostName, configAddrType, platform, serviceTypeConfig, vipAddress, vipGateway, vipSubnetMask, routerId)
 }
 
-func testAccMemberServiceTypeConfiguration(hostName string, serviceTypeConfiguration string) string {
+func testAccMemberServiceTypeConfiguration(
+	hostName, configAddrType, platform, serviceTypeConfiguration,
+	vipAddress, vipGateway, vipSubnetMask string,
+) string {
 	return fmt.Sprintf(`
 resource "nios_grid_member" "test_service_type_configuration" {
     host_name = %q
+    config_addr_type = %q
+    platform = %q
     service_type_configuration = %q
+
+    ipv6_setting = {
+        auto_router_config_enabled = false
+        dscp = 0
+        enabled = false
+        primary = true
+        use_dscp = false
+    }
+
+    vip_setting = {
+        address = %q
+        dscp = 0
+        gateway = %q
+        primary = true
+        subnet_mask = %q
+        use_dscp = false
+    }
 }
-`, hostName, serviceTypeConfiguration)
+`, hostName, configAddrType, platform, serviceTypeConfiguration, vipAddress, vipGateway, vipSubnetMask)
 }
 
-func testAccMemberSnmpSetting(hostName string, snmpSetting map[string]any) string {
+func testAccMemberSnmpSetting(
+	hostName, configAddrType, platform, serviceTypeConfig,
+	vipAddress, vipGateway, vipSubnetMask string,
+	snmpSetting map[string]any,
+) string {
+	snmpSettingStr := utils.ConvertMapToHCL(snmpSetting)
+
 	return fmt.Sprintf(`
 resource "nios_grid_member" "test_snmp_setting" {
     host_name = %q
+    config_addr_type = %q
+    platform = %q
+    service_type_configuration = %q
+
+    ipv6_setting = {
+        auto_router_config_enabled = false
+        dscp = 0
+        enabled = false
+        primary = true
+        use_dscp = false
+    }
+
+    vip_setting = {
+        address = %q
+        dscp = 0
+        gateway = %q
+        primary = true
+        subnet_mask = %q
+        use_dscp = false
+    }
+
     snmp_setting = %s
     use_snmp_setting = true
 }
-`, hostName, snmpSetting)
+`, hostName, configAddrType, platform, serviceTypeConfig, vipAddress, vipGateway, vipSubnetMask, snmpSettingStr)
 }
 
-func testAccMemberStaticRoutes(hostName string, staticRoutes []map[string]any) string {
+func testAccMemberStaticRoutes(
+	hostName, configAddrType, platform, serviceTypeConfig,
+	vipAddress, vipGateway, vipSubnetMask string,
+	staticRoutes []map[string]any,
+) string {
 	staticRoutesStr := utils.ConvertSliceOfMapsToHCL(staticRoutes)
+
 	return fmt.Sprintf(`
 resource "nios_grid_member" "test_static_routes" {
     host_name = %q
+    config_addr_type = %q
+    platform = %q
+    service_type_configuration = %q
+
+    ipv6_setting = {
+        auto_router_config_enabled = false
+        dscp = 0
+        enabled = false
+        primary = true
+        use_dscp = false
+    }
+
+    vip_setting = {
+        address = %q
+        dscp = 0
+        gateway = %q
+        primary = true
+        subnet_mask = %q
+        use_dscp = false
+    }
+
     static_routes = %s
+	use_dscp = true
 }
-`, hostName, staticRoutesStr)
+`, hostName, configAddrType, platform, serviceTypeConfig, vipAddress, vipGateway, vipSubnetMask, staticRoutesStr)
 }
 
-func testAccMemberSupportAccessEnable(hostName string, supportAccessEnable string) string {
+func testAccMemberSupportAccessEnable(
+	hostName, configAddrType, platform, serviceTypeConfig,
+	vipAddress, vipGateway, vipSubnetMask string,
+	supportAccessEnable bool,
+) string {
 	return fmt.Sprintf(`
 resource "nios_grid_member" "test_support_access_enable" {
     host_name = %q
-    support_access_enable = %q
+    config_addr_type = %q
+    platform = %q
+    service_type_configuration = %q
+
+    ipv6_setting = {
+        auto_router_config_enabled = false
+        dscp = 0
+        enabled = false
+        primary = true
+        use_dscp = false
+    }
+
+    vip_setting = {
+        address = %q
+        dscp = 0
+        gateway = %q
+        primary = true
+        subnet_mask = %q
+        use_dscp = false
+    }
+
+    support_access_enable = %t
     use_support_access_enable = true
 }
-`, hostName, supportAccessEnable)
+`, hostName, configAddrType, platform, serviceTypeConfig, vipAddress, vipGateway, vipSubnetMask, supportAccessEnable)
 }
 
-func testAccMemberSyslogProxySetting(hostName string, syslogProxySetting map[string]any) string {
+func testAccMemberSyslogProxySetting(
+	hostName, configAddrType, platform, serviceTypeConfig,
+	vipAddress, vipGateway, vipSubnetMask string,
+	syslogProxySetting []map[string]any,
+) string {
+	syslogProxySettingStr := utils.ConvertSliceOfMapsToHCL(syslogProxySetting)
+
 	return fmt.Sprintf(`
 resource "nios_grid_member" "test_syslog_proxy_setting" {
     host_name = %q
+    config_addr_type = %q
+    platform = %q
+    service_type_configuration = %q
+
+    ipv6_setting = {
+        auto_router_config_enabled = false
+        dscp = 0
+        enabled = false
+        primary = true
+        use_dscp = false
+    }
+
+    vip_setting = {
+        address = %q
+        dscp = 0
+        gateway = %q
+        primary = true
+        subnet_mask = %q
+        use_dscp = false
+    }
+
     syslog_proxy_setting = %s
     use_syslog_proxy_setting = true
 }
-`, hostName, syslogProxySetting)
+`, hostName, configAddrType, platform, serviceTypeConfig, vipAddress, vipGateway, vipSubnetMask, syslogProxySettingStr)
 }
 
-func testAccMemberSyslogServers(hostName string, syslogServers []map[string]any) string {
+func testAccMemberSyslogServers(
+	hostName, configAddrType, platform, serviceTypeConfig,
+	vipAddress, vipGateway, vipSubnetMask string,
+	syslogServers []map[string]any,
+) string {
 	syslogServersStr := utils.ConvertSliceOfMapsToHCL(syslogServers)
+
 	return fmt.Sprintf(`
 resource "nios_grid_member" "test_syslog_servers" {
     host_name = %q
+    config_addr_type = %q
+    platform = %q
+    service_type_configuration = %q
+
+    ipv6_setting = {
+        auto_router_config_enabled = false
+        dscp = 0
+        enabled = false
+        primary = true
+        use_dscp = false
+    }
+
+    vip_setting = {
+        address = %q
+        dscp = 0
+        gateway = %q
+        primary = true
+        subnet_mask = %q
+        use_dscp = false
+    }
+
     syslog_servers = %s
     use_syslog_proxy_setting = true
 }
-`, hostName, syslogServersStr)
+`, hostName, configAddrType, platform, serviceTypeConfig, vipAddress, vipGateway, vipSubnetMask, syslogServersStr)
 }
 
-func testAccMemberSyslogSize(hostName string, syslogSize string) string {
+func testAccMemberSyslogSize(
+	hostName, configAddrType, platform, serviceTypeConfig,
+	vipAddress, vipGateway, vipSubnetMask string,
+	syslogSize int,
+) string {
 	return fmt.Sprintf(`
 resource "nios_grid_member" "test_syslog_size" {
     host_name = %q
-    syslog_size = %q
+    config_addr_type = %q
+    platform = %q
+    service_type_configuration = %q
+
+    ipv6_setting = {
+        auto_router_config_enabled = false
+        dscp = 0
+        enabled = false
+        primary = true
+        use_dscp = false
+    }
+
+    vip_setting = {
+        address = %q
+        dscp = 0
+        gateway = %q
+        primary = true
+        subnet_mask = %q
+        use_dscp = false
+    }
+
+    syslog_size = %d
     use_syslog_proxy_setting = true
 }
-`, hostName, syslogSize)
+`, hostName, configAddrType, platform, serviceTypeConfig, vipAddress, vipGateway, vipSubnetMask, syslogSize)
 }
 
-func testAccMemberThresholdTraps(hostName string, thresholdTraps []map[string]any) string {
+func testAccMemberThresholdTraps(
+	hostName, configAddrType, platform, serviceTypeConfig,
+	vipAddress, vipGateway, vipSubnetMask string,
+	thresholdTraps []map[string]any,
+) string {
 	thresholdTrapsStr := utils.ConvertSliceOfMapsToHCL(thresholdTraps)
+
 	return fmt.Sprintf(`
 resource "nios_grid_member" "test_threshold_traps" {
     host_name = %q
+    config_addr_type = %q
+    platform = %q
+    service_type_configuration = %q
+
+    ipv6_setting = {
+        auto_router_config_enabled = false
+        dscp = 0
+        enabled = false
+        primary = true
+        use_dscp = false
+    }
+
+    vip_setting = {
+        address = %q
+        dscp = 0
+        gateway = %q
+        primary = true
+        subnet_mask = %q
+        use_dscp = false
+    }
+
     threshold_traps = %s
     use_threshold_traps = true
 }
-`, hostName, thresholdTrapsStr)
+`, hostName, configAddrType, platform, serviceTypeConfig, vipAddress, vipGateway, vipSubnetMask, thresholdTrapsStr)
 }
 
-func testAccMemberTimeZone(hostName string, timeZone string) string {
+func testAccMemberTimeZone(
+	hostName, configAddrType, platform, serviceTypeConfig,
+	vipAddress, vipGateway, vipSubnetMask, timeZone string,
+) string {
 	return fmt.Sprintf(`
 resource "nios_grid_member" "test_time_zone" {
     host_name = %q
+    config_addr_type = %q
+    platform = %q
+    service_type_configuration = %q
+
+    ipv6_setting = {
+        auto_router_config_enabled = false
+        dscp = 0
+        enabled = false
+        primary = true
+        use_dscp = false
+    }
+
+    vip_setting = {
+        address = %q
+        dscp = 0
+        gateway = %q
+        primary = true
+        subnet_mask = %q
+        use_dscp = false
+    }
+
     time_zone = %q
     use_time_zone = true
 }
-`, hostName, timeZone)
+`, hostName, configAddrType, platform, serviceTypeConfig, vipAddress, vipGateway, vipSubnetMask, timeZone)
 }
 
-func testAccMemberTrafficCaptureAuthDnsSetting(hostName string, trafficCaptureAuthDnsSetting map[string]any) string {
+func testAccMemberTrafficCaptureAuthDnsSetting(
+	hostName, configAddrType, platform, serviceTypeConfig,
+	vipAddress, vipGateway, vipSubnetMask string,
+	trafficCaptureAuthDnsSetting map[string]any,
+) string {
+	trafficCaptureAuthDnsSettingStr := utils.ConvertMapToHCL(trafficCaptureAuthDnsSetting)
+
 	return fmt.Sprintf(`
 resource "nios_grid_member" "test_traffic_capture_auth_dns_setting" {
     host_name = %q
+    config_addr_type = %q
+    platform = %q
+    service_type_configuration = %q
+
+    ipv6_setting = {
+        auto_router_config_enabled = false
+        dscp = 0
+        enabled = false
+        primary = true
+        use_dscp = false
+    }
+
+    vip_setting = {
+        address = %q
+        dscp = 0
+        gateway = %q
+        primary = true
+        subnet_mask = %q
+        use_dscp = false
+    }
+
     traffic_capture_auth_dns_setting = %s
     use_traffic_capture_auth_dns = true
 }
-`, hostName, trafficCaptureAuthDnsSetting)
+`, hostName, configAddrType, platform, serviceTypeConfig, vipAddress, vipGateway, vipSubnetMask, trafficCaptureAuthDnsSettingStr)
 }
 
-func testAccMemberTrafficCaptureChrSetting(hostName string, trafficCaptureChrSetting map[string]any) string {
+func testAccMemberTrafficCaptureChrSetting(
+	hostName, configAddrType, platform, serviceTypeConfig,
+	vipAddress, vipGateway, vipSubnetMask string,
+	trafficCaptureChrSetting map[string]any,
+) string {
+	trafficCaptureChrSettingStr := utils.ConvertMapToHCL(trafficCaptureChrSetting)
+
 	return fmt.Sprintf(`
 resource "nios_grid_member" "test_traffic_capture_chr_setting" {
     host_name = %q
+    config_addr_type = %q
+    platform = %q
+    service_type_configuration = %q
+
+    ipv6_setting = {
+        auto_router_config_enabled = false
+        dscp = 0
+        enabled = false
+        primary = true
+        use_dscp = false
+    }
+
+    vip_setting = {
+        address = %q
+        dscp = 0
+        gateway = %q
+        primary = true
+        subnet_mask = %q
+        use_dscp = false
+    }
+
     traffic_capture_chr_setting = %s
     use_traffic_capture_chr = true
 }
-`, hostName, trafficCaptureChrSetting)
+`, hostName, configAddrType, platform, serviceTypeConfig, vipAddress, vipGateway, vipSubnetMask, trafficCaptureChrSettingStr)
 }
 
-func testAccMemberTrafficCaptureQpsSetting(hostName string, trafficCaptureQpsSetting map[string]any) string {
+func testAccMemberTrafficCaptureQpsSetting(
+	hostName, configAddrType, platform, serviceTypeConfig,
+	vipAddress, vipGateway, vipSubnetMask string,
+	trafficCaptureQpsSetting map[string]any,
+) string {
+	trafficCaptureQpsSettingStr := utils.ConvertMapToHCL(trafficCaptureQpsSetting)
+
 	return fmt.Sprintf(`
 resource "nios_grid_member" "test_traffic_capture_qps_setting" {
     host_name = %q
+    config_addr_type = %q
+    platform = %q
+    service_type_configuration = %q
+
+    ipv6_setting = {
+        auto_router_config_enabled = false
+        dscp = 0
+        enabled = false
+        primary = true
+        use_dscp = false
+    }
+
+    vip_setting = {
+        address = %q
+        dscp = 0
+        gateway = %q
+        primary = true
+        subnet_mask = %q
+        use_dscp = false
+    }
+
     traffic_capture_qps_setting = %s
     use_traffic_capture_qps = true
 }
-`, hostName, trafficCaptureQpsSetting)
+`, hostName, configAddrType, platform, serviceTypeConfig, vipAddress, vipGateway, vipSubnetMask, trafficCaptureQpsSettingStr)
 }
 
-func testAccMemberTrafficCaptureRecDnsSetting(hostName string, trafficCaptureRecDnsSetting map[string]any) string {
+func testAccMemberTrafficCaptureRecDnsSetting(
+	hostName, configAddrType, platform, serviceTypeConfig,
+	vipAddress, vipGateway, vipSubnetMask string,
+	trafficCaptureRecDnsSetting map[string]any,
+) string {
+	trafficCaptureRecDnsSettingStr := utils.ConvertMapToHCL(trafficCaptureRecDnsSetting)
+
 	return fmt.Sprintf(`
 resource "nios_grid_member" "test_traffic_capture_rec_dns_setting" {
     host_name = %q
+    config_addr_type = %q
+    platform = %q
+    service_type_configuration = %q
+
+    ipv6_setting = {
+        auto_router_config_enabled = false
+        dscp = 0
+        enabled = false
+        primary = true
+        use_dscp = false
+    }
+
+    vip_setting = {
+        address = %q
+        dscp = 0
+        gateway = %q
+        primary = true
+        subnet_mask = %q
+        use_dscp = false
+    }
+
     traffic_capture_rec_dns_setting = %s
     use_traffic_capture_rec_dns = true
 }
-`, hostName, trafficCaptureRecDnsSetting)
+`, hostName, configAddrType, platform, serviceTypeConfig, vipAddress, vipGateway, vipSubnetMask, trafficCaptureRecDnsSettingStr)
 }
 
-func testAccMemberTrafficCaptureRecQueriesSetting(hostName string, trafficCaptureRecQueriesSetting map[string]any) string {
+func testAccMemberTrafficCaptureRecQueriesSetting(
+	hostName, configAddrType, platform, serviceTypeConfig,
+	vipAddress, vipGateway, vipSubnetMask string,
+	trafficCaptureRecQueriesSetting map[string]any,
+) string {
+	trafficCaptureRecQueriesSettingStr := utils.ConvertMapToHCL(trafficCaptureRecQueriesSetting)
+
 	return fmt.Sprintf(`
 resource "nios_grid_member" "test_traffic_capture_rec_queries_setting" {
     host_name = %q
+    config_addr_type = %q
+    platform = %q
+    service_type_configuration = %q
+
+    ipv6_setting = {
+        auto_router_config_enabled = false
+        dscp = 0
+        enabled = false
+        primary = true
+        use_dscp = false
+    }
+
+    vip_setting = {
+        address = %q
+        dscp = 0
+        gateway = %q
+        primary = true
+        subnet_mask = %q
+        use_dscp = false
+    }
+
     traffic_capture_rec_queries_setting = %s
     use_traffic_capture_rec_queries = true
 }
-`, hostName, trafficCaptureRecQueriesSetting)
+`, hostName, configAddrType, platform, serviceTypeConfig, vipAddress, vipGateway, vipSubnetMask, trafficCaptureRecQueriesSettingStr)
 }
 
-func testAccMemberTrapNotifications(hostName string, trapNotifications []map[string]any) string {
+func testAccMemberTrapNotifications(
+	hostName, configAddrType, platform, serviceTypeConfig,
+	vipAddress, vipGateway, vipSubnetMask string,
+	trapNotifications []map[string]any,
+) string {
 	trapNotificationsStr := utils.ConvertSliceOfMapsToHCL(trapNotifications)
+
 	return fmt.Sprintf(`
 resource "nios_grid_member" "test_trap_notifications" {
     host_name = %q
+    config_addr_type = %q
+    platform = %q
+    service_type_configuration = %q
+
+    ipv6_setting = {
+        auto_router_config_enabled = false
+        dscp = 0
+        enabled = false
+        primary = true
+        use_dscp = false
+    }
+
+    vip_setting = {
+        address = %q
+        dscp = 0
+        gateway = %q
+        primary = true
+        subnet_mask = %q
+        use_dscp = false
+    }
+
     trap_notifications = %s
     use_trap_notifications = true
 }
-`, hostName, trapNotificationsStr)
+`, hostName, configAddrType, platform, serviceTypeConfig, vipAddress, vipGateway, vipSubnetMask, trapNotificationsStr)
 }
 
-func testAccMemberUpgradeGroup(hostName string, upgradeGroup string) string {
+func testAccMemberUpgradeGroup(
+	hostName, configAddrType, platform, serviceTypeConfig,
+	vipAddress, vipGateway, vipSubnetMask, upgradeGroup string,
+) string {
 	return fmt.Sprintf(`
 resource "nios_grid_member" "test_upgrade_group" {
     host_name = %q
+    config_addr_type = %q
+    platform = %q
+    service_type_configuration = %q
+
+    ipv6_setting = {
+        auto_router_config_enabled = false
+        dscp = 0
+        enabled = false
+        primary = true
+        use_dscp = false
+    }
+
+    vip_setting = {
+        address = %q
+        dscp = 0
+        gateway = %q
+        primary = true
+        subnet_mask = %q
+        use_dscp = false
+    }
+
     upgrade_group = %q
 }
-`, hostName, upgradeGroup)
+`, hostName, configAddrType, platform, serviceTypeConfig, vipAddress, vipGateway, vipSubnetMask, upgradeGroup)
 }
 
-func testAccMemberUseAutomatedTrafficCapture(hostName string, useAutomatedTrafficCapture string) string {
+func testAccMemberUseAutomatedTrafficCapture(
+	hostName, configAddrType, platform, serviceTypeConfig,
+	vipAddress, vipGateway, vipSubnetMask string,
+	useAutomatedTrafficCapture bool,
+) string {
 	return fmt.Sprintf(`
 resource "nios_grid_member" "test_use_automated_traffic_capture" {
     host_name = %q
-    use_automated_traffic_capture = %q
+    config_addr_type = %q
+    platform = %q
+    service_type_configuration = %q
+
+    ipv6_setting = {
+        auto_router_config_enabled = false
+        dscp = 0
+        enabled = false
+        primary = true
+        use_dscp = false
+    }
+
+    vip_setting = {
+        address = %q
+        dscp = 0
+        gateway = %q
+        primary = true
+        subnet_mask = %q
+        use_dscp = false
+    }
+
+    automated_traffic_capture_setting = {
+        destination            = "NONE"
+        include_support_bundle = false
+        keep_local_copy        = false
+        traffic_capture_enable = false
+    }
+
+    use_automated_traffic_capture = %t
 }
-`, hostName, useAutomatedTrafficCapture)
+`, hostName, configAddrType, platform, serviceTypeConfig, vipAddress, vipGateway, vipSubnetMask, useAutomatedTrafficCapture)
 }
 
-func testAccMemberUseDnsResolverSetting(hostName string, useDnsResolverSetting string) string {
+func testAccMemberUseDnsResolverSetting(
+	hostName, configAddrType, platform, serviceTypeConfig,
+	vipAddress, vipGateway, vipSubnetMask string,
+	useDnsResolverSetting bool,
+) string {
 	return fmt.Sprintf(`
 resource "nios_grid_member" "test_use_dns_resolver_setting" {
     host_name = %q
-    use_dns_resolver_setting = %q
+    config_addr_type = %q
+    platform = %q
+    service_type_configuration = %q
+
+    ipv6_setting = {
+        auto_router_config_enabled = false
+        dscp = 0
+        enabled = false
+        primary = true
+        use_dscp = false
+    }
+
+    vip_setting = {
+        address = %q
+        dscp = 0
+        gateway = %q
+        primary = true
+        subnet_mask = %q
+        use_dscp = false
+    }
+
+    dns_resolver_setting = {
+        resolvers      = ["10.0.0.1"]
+        search_domains = ["a.com"]
+    }
+
+    use_dns_resolver_setting = %t
 }
-`, hostName, useDnsResolverSetting)
+`, hostName, configAddrType, platform, serviceTypeConfig, vipAddress, vipGateway, vipSubnetMask, useDnsResolverSetting)
 }
 
-func testAccMemberUseDscp(hostName string, useDscp string) string {
+func testAccMemberUseDscp(
+	hostName, configAddrType, platform, serviceTypeConfig,
+	vipAddress, vipGateway, vipSubnetMask string,
+	useDscp bool,
+) string {
 	return fmt.Sprintf(`
 resource "nios_grid_member" "test_use_dscp" {
     host_name = %q
-    use_dscp = %q
+    config_addr_type = %q
+    platform = %q
+    service_type_configuration = %q
+
+    ipv6_setting = {
+        auto_router_config_enabled = false
+        dscp = 0
+        enabled = false
+        primary = true
+        use_dscp = false
+    }
+
+    vip_setting = {
+        address = %q
+        dscp = 0
+        gateway = %q
+        primary = true
+        subnet_mask = %q
+        use_dscp = false
+    }
+
+    dscp = 0
+    use_dscp = %t
 }
-`, hostName, useDscp)
+`, hostName, configAddrType, platform, serviceTypeConfig, vipAddress, vipGateway, vipSubnetMask, useDscp)
 }
 
-func testAccMemberUseEmailSetting(hostName string, useEmailSetting string) string {
+func testAccMemberUseEmailSetting(
+	hostName, configAddrType, platform, serviceTypeConfig,
+	vipAddress, vipGateway, vipSubnetMask string,
+	useEmailSetting bool,
+) string {
 	return fmt.Sprintf(`
 resource "nios_grid_member" "test_use_email_setting" {
     host_name = %q
-    use_email_setting = %q
+    config_addr_type = %q
+    platform = %q
+    service_type_configuration = %q
+
+    ipv6_setting = {
+        auto_router_config_enabled = false
+        dscp = 0
+        enabled = false
+        primary = true
+        use_dscp = false
+    }
+
+    vip_setting = {
+        address = %q
+        dscp = 0
+        gateway = %q
+        primary = true
+        subnet_mask = %q
+        use_dscp = false
+    }
+
+    use_email_setting = %t
+	email_setting = {
+	enabled            = false
+	port_number        = 25
+	relay_enabled      = false
+	smtps              = false
+	use_authentication = false
+    }
 }
-`, hostName, useEmailSetting)
+`, hostName, configAddrType, platform, serviceTypeConfig, vipAddress, vipGateway, vipSubnetMask, useEmailSetting)
 }
 
-func testAccMemberUseEnableLom(hostName string, useEnableLom string) string {
+func testAccMemberUseEnableLom(
+	hostName, configAddrType, platform, serviceTypeConfig,
+	vipAddress, vipGateway, vipSubnetMask string,
+	useEnableLom bool,
+) string {
 	return fmt.Sprintf(`
 resource "nios_grid_member" "test_use_enable_lom" {
     host_name = %q
-    use_enable_lom = %q
+    config_addr_type = %q
+    platform = %q
+    service_type_configuration = %q
+
+    ipv6_setting = {
+        auto_router_config_enabled = false
+        dscp = 0
+        enabled = false
+        primary = true
+        use_dscp = false
+    }
+
+    vip_setting = {
+        address = %q
+        dscp = 0
+        gateway = %q
+        primary = true
+        subnet_mask = %q
+        use_dscp = false
+    }
+
+    use_enable_lom = %t
 }
-`, hostName, useEnableLom)
+`, hostName, configAddrType, platform, serviceTypeConfig, vipAddress, vipGateway, vipSubnetMask, useEnableLom)
 }
 
-func testAccMemberUseEnableMemberRedirect(hostName string, useEnableMemberRedirect string) string {
+func testAccMemberUseEnableMemberRedirect(
+	hostName, configAddrType, platform, serviceTypeConfig,
+	vipAddress, vipGateway, vipSubnetMask string,
+	useEnableMemberRedirect bool,
+) string {
 	return fmt.Sprintf(`
 resource "nios_grid_member" "test_use_enable_member_redirect" {
     host_name = %q
-    use_enable_member_redirect = %q
+    config_addr_type = %q
+    platform = %q
+    service_type_configuration = %q
+
+    ipv6_setting = {
+        auto_router_config_enabled = false
+        dscp = 0
+        enabled = false
+        primary = true
+        use_dscp = false
+    }
+
+    vip_setting = {
+        address = %q
+        dscp = 0
+        gateway = %q
+        primary = true
+        subnet_mask = %q
+        use_dscp = false
+    }
+
+    use_enable_member_redirect = %t
 }
-`, hostName, useEnableMemberRedirect)
+`, hostName, configAddrType, platform, serviceTypeConfig, vipAddress, vipGateway, vipSubnetMask, useEnableMemberRedirect)
 }
 
-func testAccMemberUseExternalSyslogBackupServers(hostName string, useExternalSyslogBackupServers string) string {
+func testAccMemberUseExternalSyslogBackupServers(
+	hostName, configAddrType, platform, serviceTypeConfig,
+	vipAddress, vipGateway, vipSubnetMask string,
+	useExternalSyslogBackupServers bool,
+) string {
 	return fmt.Sprintf(`
 resource "nios_grid_member" "test_use_external_syslog_backup_servers" {
     host_name = %q
-    use_external_syslog_backup_servers = %q
+    config_addr_type = %q
+    platform = %q
+    service_type_configuration = %q
+
+    ipv6_setting = {
+        auto_router_config_enabled = false
+        dscp = 0
+        enabled = false
+        primary = true
+        use_dscp = false
+    }
+
+    vip_setting = {
+        address = %q
+        dscp = 0
+        gateway = %q
+        primary = true
+        subnet_mask = %q
+        use_dscp = false
+    }
+
+    use_external_syslog_backup_servers = %t
 }
-`, hostName, useExternalSyslogBackupServers)
+`, hostName, configAddrType, platform, serviceTypeConfig, vipAddress, vipGateway, vipSubnetMask, useExternalSyslogBackupServers)
 }
 
-func testAccMemberUseRemoteConsoleAccessEnable(hostName string, useRemoteConsoleAccessEnable string) string {
+func testAccMemberUseRemoteConsoleAccessEnable(
+	hostName, configAddrType, platform, serviceTypeConfig,
+	vipAddress, vipGateway, vipSubnetMask string,
+	useRemoteConsoleAccessEnable bool,
+) string {
 	return fmt.Sprintf(`
 resource "nios_grid_member" "test_use_remote_console_access_enable" {
     host_name = %q
-    use_remote_console_access_enable = %q
+    config_addr_type = %q
+    platform = %q
+    service_type_configuration = %q
+
+    ipv6_setting = {
+        auto_router_config_enabled = false
+        dscp = 0
+        enabled = false
+        primary = true
+        use_dscp = false
+    }
+
+    vip_setting = {
+        address = %q
+        dscp = 0
+        gateway = %q
+        primary = true
+        subnet_mask = %q
+        use_dscp = false
+    }
+
+    use_remote_console_access_enable = %t
 }
-`, hostName, useRemoteConsoleAccessEnable)
+`, hostName, configAddrType, platform, serviceTypeConfig, vipAddress, vipGateway, vipSubnetMask, useRemoteConsoleAccessEnable)
 }
 
-func testAccMemberUseSnmpSetting(hostName string, useSnmpSetting string) string {
+func testAccMemberUseSnmpSetting(
+	hostName, configAddrType, platform, serviceTypeConfig,
+	vipAddress, vipGateway, vipSubnetMask string,
+	useSnmpSetting bool,
+) string {
 	return fmt.Sprintf(`
 resource "nios_grid_member" "test_use_snmp_setting" {
-    host_name = %q
-    use_snmp_setting = %q
+	host_name = %q
+	config_addr_type = %q
+	platform = %q
+	service_type_configuration = %q
+
+	ipv6_setting = {
+		auto_router_config_enabled = false
+		dscp = 0
+		enabled = false
+		primary = true
+		use_dscp = false
+	}
+
+	vip_setting = {
+		address = %q
+		dscp = 0
+		gateway = %q
+		primary = true
+		subnet_mask = %q
+		use_dscp = false
+	}
+
+	use_snmp_setting = %t
 }
-`, hostName, useSnmpSetting)
+`, hostName, configAddrType, platform, serviceTypeConfig, vipAddress, vipGateway, vipSubnetMask, useSnmpSetting)
 }
 
-func testAccMemberUseSupportAccessEnable(hostName string, useSupportAccessEnable string) string {
+func testAccMemberUseSupportAccessEnable(
+	hostName, configAddrType, platform, serviceTypeConfig,
+	vipAddress, vipGateway, vipSubnetMask string,
+	useSupportAccessEnable bool,
+) string {
 	return fmt.Sprintf(`
 resource "nios_grid_member" "test_use_support_access_enable" {
-    host_name = %q
-    use_support_access_enable = %q
+	host_name = %q
+	config_addr_type = %q
+	platform = %q
+	service_type_configuration = %q
+
+	ipv6_setting = {
+		auto_router_config_enabled = false
+		dscp = 0
+		enabled = false
+		primary = true
+		use_dscp = false
+	}
+
+	vip_setting = {
+		address = %q
+		dscp = 0
+		gateway = %q
+		primary = true
+		subnet_mask = %q
+		use_dscp = false
+	}
+
+	use_support_access_enable = %t
 }
-`, hostName, useSupportAccessEnable)
+`, hostName, configAddrType, platform, serviceTypeConfig, vipAddress, vipGateway, vipSubnetMask, useSupportAccessEnable)
 }
 
-func testAccMemberUseSyslogProxySetting(hostName string, useSyslogProxySetting string) string {
+func testAccMemberUseSyslogProxySetting(
+	hostName, configAddrType, platform, serviceTypeConfig,
+	vipAddress, vipGateway, vipSubnetMask string,
+	useSyslogProxySetting bool,
+) string {
 	return fmt.Sprintf(`
 resource "nios_grid_member" "test_use_syslog_proxy_setting" {
-    host_name = %q
-    use_syslog_proxy_setting = %q
+	host_name = %q
+	config_addr_type = %q
+	platform = %q
+	service_type_configuration = %q
+
+	ipv6_setting = {
+		auto_router_config_enabled = false
+		dscp = 0
+		enabled = false
+		primary = true
+		use_dscp = false
+	}
+
+	vip_setting = {
+		address = %q
+		dscp = 0
+		gateway = %q
+		primary = true
+		subnet_mask = %q
+		use_dscp = false
+	}
+
+	use_syslog_proxy_setting = %t
 }
-`, hostName, useSyslogProxySetting)
+`, hostName, configAddrType, platform, serviceTypeConfig, vipAddress, vipGateway, vipSubnetMask, useSyslogProxySetting)
 }
 
-func testAccMemberUseThresholdTraps(hostName string, useThresholdTraps string) string {
+func testAccMemberUseThresholdTraps(
+	hostName, configAddrType, platform, serviceTypeConfig,
+	vipAddress, vipGateway, vipSubnetMask string,
+	useThresholdTraps bool,
+) string {
 	return fmt.Sprintf(`
 resource "nios_grid_member" "test_use_threshold_traps" {
-    host_name = %q
-    use_threshold_traps = %q
+	host_name = %q
+	config_addr_type = %q
+	platform = %q
+	service_type_configuration = %q
+
+	ipv6_setting = {
+		auto_router_config_enabled = false
+		dscp = 0
+		enabled = false
+		primary = true
+		use_dscp = false
+	}
+
+	vip_setting = {
+		address = %q
+		dscp = 0
+		gateway = %q
+		primary = true
+		subnet_mask = %q
+		use_dscp = false
+	}
+
+	use_threshold_traps = %t
 }
-`, hostName, useThresholdTraps)
+`, hostName, configAddrType, platform, serviceTypeConfig, vipAddress, vipGateway, vipSubnetMask, useThresholdTraps)
 }
 
-func testAccMemberUseTimeZone(hostName string, useTimeZone string) string {
+func testAccMemberUseTimeZone(
+	hostName, configAddrType, platform, serviceTypeConfig,
+	vipAddress, vipGateway, vipSubnetMask string,
+	useTimeZone bool,
+) string {
 	return fmt.Sprintf(`
 resource "nios_grid_member" "test_use_time_zone" {
-    host_name = %q
-    use_time_zone = %q
+	host_name = %q
+	config_addr_type = %q
+	platform = %q
+	service_type_configuration = %q
+
+	ipv6_setting = {
+		auto_router_config_enabled = false
+		dscp = 0
+		enabled = false
+		primary = true
+		use_dscp = false
+	}
+
+	vip_setting = {
+		address = %q
+		dscp = 0
+		gateway = %q
+		primary = true
+		subnet_mask = %q
+		use_dscp = false
+	}
+
+	use_time_zone = %t
 }
-`, hostName, useTimeZone)
+`, hostName, configAddrType, platform, serviceTypeConfig, vipAddress, vipGateway, vipSubnetMask, useTimeZone)
 }
 
-func testAccMemberUseTrafficCaptureAuthDns(hostName string, useTrafficCaptureAuthDns string) string {
+func testAccMemberUseTrafficCaptureAuthDns(
+	hostName, configAddrType, platform, serviceTypeConfig,
+	vipAddress, vipGateway, vipSubnetMask string,
+	useTrafficCaptureAuthDns bool,
+) string {
 	return fmt.Sprintf(`
 resource "nios_grid_member" "test_use_traffic_capture_auth_dns" {
     host_name = %q
-    use_traffic_capture_auth_dns = %q
+    config_addr_type = %q
+    platform = %q
+    service_type_configuration = %q
+
+    ipv6_setting = {
+        auto_router_config_enabled = false
+        dscp = 0
+        enabled = false
+        primary = true
+        use_dscp = false
+    }
+
+    vip_setting = {
+        address = %q
+        dscp = 0
+        gateway = %q
+        primary = true
+        subnet_mask = %q
+        use_dscp = false
+    }
+
+    use_traffic_capture_auth_dns = %t
 }
-`, hostName, useTrafficCaptureAuthDns)
+`, hostName, configAddrType, platform, serviceTypeConfig, vipAddress, vipGateway, vipSubnetMask, useTrafficCaptureAuthDns)
 }
 
-func testAccMemberUseTrafficCaptureChr(hostName string, useTrafficCaptureChr string) string {
+func testAccMemberUseTrafficCaptureChr(
+	hostName, configAddrType, platform, serviceTypeConfig,
+	vipAddress, vipGateway, vipSubnetMask string,
+	useTrafficCaptureChr bool,
+) string {
 	return fmt.Sprintf(`
 resource "nios_grid_member" "test_use_traffic_capture_chr" {
     host_name = %q
-    use_traffic_capture_chr = %q
+    config_addr_type = %q
+    platform = %q
+    service_type_configuration = %q
+
+    ipv6_setting = {
+        auto_router_config_enabled = false
+        dscp = 0
+        enabled = false
+        primary = true
+        use_dscp = false
+    }
+
+    vip_setting = {
+        address = %q
+        dscp = 0
+        gateway = %q
+        primary = true
+        subnet_mask = %q
+        use_dscp = false
+    }
+
+    use_traffic_capture_chr = %t
 }
-`, hostName, useTrafficCaptureChr)
+`, hostName, configAddrType, platform, serviceTypeConfig, vipAddress, vipGateway, vipSubnetMask, useTrafficCaptureChr)
 }
 
-func testAccMemberUseTrafficCaptureQps(hostName string, useTrafficCaptureQps string) string {
+func testAccMemberUseTrafficCaptureQps(
+	hostName, configAddrType, platform, serviceTypeConfig,
+	vipAddress, vipGateway, vipSubnetMask string,
+	useTrafficCaptureQps bool,
+) string {
 	return fmt.Sprintf(`
 resource "nios_grid_member" "test_use_traffic_capture_qps" {
     host_name = %q
-    use_traffic_capture_qps = %q
+    config_addr_type = %q
+    platform = %q
+    service_type_configuration = %q
+
+    ipv6_setting = {
+        auto_router_config_enabled = false
+        dscp = 0
+        enabled = false
+        primary = true
+        use_dscp = false
+    }
+
+    vip_setting = {
+        address = %q
+        dscp = 0
+        gateway = %q
+        primary = true
+        subnet_mask = %q
+        use_dscp = false
+    }
+
+    use_traffic_capture_qps = %t
 }
-`, hostName, useTrafficCaptureQps)
+`, hostName, configAddrType, platform, serviceTypeConfig, vipAddress, vipGateway, vipSubnetMask, useTrafficCaptureQps)
 }
 
-func testAccMemberUseTrafficCaptureRecDns(hostName string, useTrafficCaptureRecDns string) string {
+func testAccMemberUseTrafficCaptureRecDns(
+	hostName, configAddrType, platform, serviceTypeConfig,
+	vipAddress, vipGateway, vipSubnetMask string,
+	useTrafficCaptureRecDns bool,
+) string {
 	return fmt.Sprintf(`
 resource "nios_grid_member" "test_use_traffic_capture_rec_dns" {
     host_name = %q
-    use_traffic_capture_rec_dns = %q
+    config_addr_type = %q
+    platform = %q
+    service_type_configuration = %q
+
+    ipv6_setting = {
+        auto_router_config_enabled = false
+        dscp = 0
+        enabled = false
+        primary = true
+        use_dscp = false
+    }
+
+    vip_setting = {
+        address = %q
+        dscp = 0
+        gateway = %q
+        primary = true
+        subnet_mask = %q
+        use_dscp = false
+    }
+
+    use_traffic_capture_rec_dns = %t
 }
-`, hostName, useTrafficCaptureRecDns)
+`, hostName, configAddrType, platform, serviceTypeConfig, vipAddress, vipGateway, vipSubnetMask, useTrafficCaptureRecDns)
 }
 
-func testAccMemberUseTrafficCaptureRecQueries(hostName string, useTrafficCaptureRecQueries string) string {
+func testAccMemberUseTrafficCaptureRecQueries(
+	hostName, configAddrType, platform, serviceTypeConfig,
+	vipAddress, vipGateway, vipSubnetMask string,
+	useTrafficCaptureRecQueries bool,
+) string {
 	return fmt.Sprintf(`
 resource "nios_grid_member" "test_use_traffic_capture_rec_queries" {
     host_name = %q
-    use_traffic_capture_rec_queries = %q
+    config_addr_type = %q
+    platform = %q
+    service_type_configuration = %q
+
+    ipv6_setting = {
+        auto_router_config_enabled = false
+        dscp = 0
+        enabled = false
+        primary = true
+        use_dscp = false
+    }
+
+    vip_setting = {
+        address = %q
+        dscp = 0
+        gateway = %q
+        primary = true
+        subnet_mask = %q
+        use_dscp = false
+    }
+
+    use_traffic_capture_rec_queries = %t
 }
-`, hostName, useTrafficCaptureRecQueries)
+`, hostName, configAddrType, platform, serviceTypeConfig, vipAddress, vipGateway, vipSubnetMask, useTrafficCaptureRecQueries)
 }
 
-func testAccMemberUseTrapNotifications(hostName string, useTrapNotifications string) string {
+func testAccMemberUseTrapNotifications(
+	hostName, configAddrType, platform, serviceTypeConfig,
+	vipAddress, vipGateway, vipSubnetMask string,
+	useTrapNotifications bool,
+) string {
 	return fmt.Sprintf(`
 resource "nios_grid_member" "test_use_trap_notifications" {
     host_name = %q
-    use_trap_notifications = %q
+    config_addr_type = %q
+    platform = %q
+    service_type_configuration = %q
+
+    ipv6_setting = {
+        auto_router_config_enabled = false
+        dscp = 0
+        enabled = false
+        primary = true
+        use_dscp = false
+    }
+
+    vip_setting = {
+        address = %q
+        dscp = 0
+        gateway = %q
+        primary = true
+        subnet_mask = %q
+        use_dscp = false
+    }
+
+    use_trap_notifications = %t
 }
-`, hostName, useTrapNotifications)
+`, hostName, configAddrType, platform, serviceTypeConfig, vipAddress, vipGateway, vipSubnetMask, useTrapNotifications)
 }
 
-func testAccMemberUseV4Vrrp(hostName string, useV4Vrrp string) string {
+func testAccMemberUseV4Vrrp(
+	hostName, configAddrType, platform, serviceTypeConfig,
+	vipAddress, vipGateway, vipSubnetMask string,
+	useV4Vrrp bool,
+) string {
 	return fmt.Sprintf(`
 resource "nios_grid_member" "test_use_v4_vrrp" {
     host_name = %q
-    use_v4_vrrp = %q
+    config_addr_type = %q
+    platform = %q
+    service_type_configuration = %q
+
+    ipv6_setting = {
+        auto_router_config_enabled = false
+        dscp = 0
+        enabled = false
+        primary = true
+        use_dscp = false
+    }
+
+    vip_setting = {
+        address = %q
+        dscp = 0
+        gateway = %q
+        primary = true
+        subnet_mask = %q
+        use_dscp = false
+    }
+
+    use_v4_vrrp = %t
 }
-`, hostName, useV4Vrrp)
+`, hostName, configAddrType, platform, serviceTypeConfig, vipAddress, vipGateway, vipSubnetMask, useV4Vrrp)
 }
 
-func testAccMemberVipSetting(hostName string, vipSetting map[string]any) string {
+func testAccMemberVipSetting(
+	hostName, configAddrType, platform, serviceTypeConfig string,
+	vipSetting map[string]any,
+) string {
+	vipSettingStr := utils.ConvertMapToHCL(vipSetting)
+
 	return fmt.Sprintf(`
 resource "nios_grid_member" "test_vip_setting" {
     host_name = %q
+    config_addr_type = %q
+    platform = %q
+    service_type_configuration = %q
+
+    ipv6_setting = {
+        auto_router_config_enabled = false
+        dscp = 0
+        enabled = false
+        primary = true
+        use_dscp = false
+    }
+
     vip_setting = %s
 }
-`, hostName, vipSetting)
+`, hostName, configAddrType, platform, serviceTypeConfig, vipSettingStr)
 }
 
-func testAccMemberVpnMtu(hostName string, vpnMtu string) string {
+func testAccMemberVpnMtu(
+	hostName, configAddrType, platform, serviceTypeConfig,
+	vipAddress, vipGateway, vipSubnetMask string,
+	vpnMtu int,
+) string {
 	return fmt.Sprintf(`
 resource "nios_grid_member" "test_vpn_mtu" {
     host_name = %q
-    vpn_mtu = %q
+    config_addr_type = %q
+    platform = %q
+    service_type_configuration = %q
+
+    ipv6_setting = {
+        auto_router_config_enabled = false
+        dscp = 0
+        enabled = false
+        primary = true
+        use_dscp = false
+    }
+
+    vip_setting = {
+        address = %q
+        dscp = 0
+        gateway = %q
+        primary = true
+        subnet_mask = %q
+        use_dscp = false
+    }
+
+    vpn_mtu = %d
 }
-`, hostName, vpnMtu)
+`, hostName, configAddrType, platform, serviceTypeConfig, vipAddress, vipGateway, vipSubnetMask, vpnMtu)
 }

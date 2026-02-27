@@ -3,9 +3,11 @@ package grid
 import (
 	"context"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
@@ -36,8 +38,12 @@ var MembertrafficcapturerecdnssettingKpiMonitoredDomainsResourceSchemaAttributes
 		MarkdownDescription: "Domain name (FQDN to Query).",
 	},
 	"record_type": schema.StringAttribute{
-		Computed:            true,
-		Optional:            true,
+		Computed: true,
+		Optional: true,
+		Validators: []validator.String{
+			stringvalidator.OneOf("A", "AAAA", "BOTH"),
+		},
+		Default:             stringdefault.StaticString("A"),
 		MarkdownDescription: "Record type(record to query).",
 	},
 }

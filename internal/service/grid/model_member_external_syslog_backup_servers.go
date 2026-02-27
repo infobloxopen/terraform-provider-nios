@@ -59,6 +59,8 @@ var MemberExternalSyslogBackupServersResourceSchemaAttributes = map[string]schem
 	"password": schema.StringAttribute{
 		Computed:            true,
 		Optional:            true,
+		Sensitive:           true,
+		Default:             stringdefault.StaticString(""),
 		MarkdownDescription: "The password of the backup syslog server.",
 	},
 	"port": schema.Int64Attribute{

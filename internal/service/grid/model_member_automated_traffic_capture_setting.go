@@ -62,6 +62,7 @@ var MemberAutomatedTrafficCaptureSettingResourceSchemaAttributes = map[string]sc
 	},
 	"duration": schema.Int64Attribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The time interval on which traffic will be captured(in sec).",
 	},
 	"include_support_bundle": schema.BoolAttribute{
@@ -99,6 +100,8 @@ var MemberAutomatedTrafficCaptureSettingResourceSchemaAttributes = map[string]sc
 	"password": schema.StringAttribute{
 		Sensitive:           true,
 		Optional:            true,
+		Computed:            true,
+		Default:             stringdefault.StaticString(""),
 		MarkdownDescription: "Password for accessing the FTP/SCP server. This field is not readable.",
 	},
 }
@@ -161,4 +164,5 @@ func (m *MemberAutomatedTrafficCaptureSettingModel) Flatten(ctx context.Context,
 	m.TrafficCaptureDirectory = flex.FlattenStringPointer(from.TrafficCaptureDirectory)
 	m.SupportBundleDirectory = flex.FlattenStringPointer(from.SupportBundleDirectory)
 	m.Username = flex.FlattenStringPointer(from.Username)
+	m.Password = flex.FlattenStringPointer(from.Password)
 }

@@ -19,20 +19,20 @@ import (
 )
 
 type MemberSyslogProxySettingModel struct {
-	Enable    types.Bool  `tfsdk:"enable"`
-	TcpEnable types.Bool  `tfsdk:"tcp_enable"`
-	TcpPort   types.Int64 `tfsdk:"tcp_port"`
-	UdpEnable types.Bool  `tfsdk:"udp_enable"`
-	UdpPort   types.Int64 `tfsdk:"udp_port"`
+	Enable     types.Bool  `tfsdk:"enable"`
+	TcpEnable  types.Bool  `tfsdk:"tcp_enable"`
+	TcpPort    types.Int64 `tfsdk:"tcp_port"`
+	UdpEnable  types.Bool  `tfsdk:"udp_enable"`
+	UdpPort    types.Int64 `tfsdk:"udp_port"`
 	ClientAcls types.List  `tfsdk:"client_acls"`
 }
 
 var MemberSyslogProxySettingAttrTypes = map[string]attr.Type{
-	"enable":     types.BoolType,
-	"tcp_enable": types.BoolType,
-	"tcp_port":   types.Int64Type,
-	"udp_enable": types.BoolType,
-	"udp_port":   types.Int64Type,
+	"enable":      types.BoolType,
+	"tcp_enable":  types.BoolType,
+	"tcp_port":    types.Int64Type,
+	"udp_enable":  types.BoolType,
+	"udp_port":    types.Int64Type,
 	"client_acls": types.ListType{ElemType: types.ObjectType{AttrTypes: MembersyslogproxysettingClientAclsAttrTypes}},
 }
 
@@ -97,11 +97,11 @@ func (m *MemberSyslogProxySettingModel) Expand(ctx context.Context, diags *diag.
 		return nil
 	}
 	to := &grid.MemberSyslogProxySetting{
-		Enable:    flex.ExpandBoolPointer(m.Enable),
-		TcpEnable: flex.ExpandBoolPointer(m.TcpEnable),
-		TcpPort:   flex.ExpandInt64Pointer(m.TcpPort),
-		UdpEnable: flex.ExpandBoolPointer(m.UdpEnable),
-		UdpPort:   flex.ExpandInt64Pointer(m.UdpPort),
+		Enable:     flex.ExpandBoolPointer(m.Enable),
+		TcpEnable:  flex.ExpandBoolPointer(m.TcpEnable),
+		TcpPort:    flex.ExpandInt64Pointer(m.TcpPort),
+		UdpEnable:  flex.ExpandBoolPointer(m.UdpEnable),
+		UdpPort:    flex.ExpandInt64Pointer(m.UdpPort),
 		ClientAcls: flex.ExpandFrameworkListNestedBlock(ctx, m.ClientAcls, diags, ExpandMembersyslogproxysettingClientAcls),
 	}
 	return to

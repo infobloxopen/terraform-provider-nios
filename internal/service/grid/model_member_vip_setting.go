@@ -18,19 +18,19 @@ import (
 )
 
 type MemberVipSettingModel struct {
-	Address       iptypes.IPv4Address `tfsdk:"address"`
-	Gateway       types.String        `tfsdk:"gateway"`
-	SubnetMask    types.String        `tfsdk:"subnet_mask"`
-	VlanId        types.Int64         `tfsdk:"vlan_id"`
-	Primary       types.Bool          `tfsdk:"primary"`
-	Dscp          types.Int64         `tfsdk:"dscp"`
-	LanSubnetMask types.String        `tfsdk:"lan_subnet_mask"`
-	LanGateway    types.String        `tfsdk:"lan_gateway"`
-	UseDscp       types.Bool          `tfsdk:"use_dscp"`
+	Address       iptypes.IPAddress `tfsdk:"address"`
+	Gateway       types.String      `tfsdk:"gateway"`
+	SubnetMask    types.String      `tfsdk:"subnet_mask"`
+	VlanId        types.Int64       `tfsdk:"vlan_id"`
+	Primary       types.Bool        `tfsdk:"primary"`
+	Dscp          types.Int64       `tfsdk:"dscp"`
+	LanSubnetMask types.String      `tfsdk:"lan_subnet_mask"`
+	LanGateway    types.String      `tfsdk:"lan_gateway"`
+	UseDscp       types.Bool        `tfsdk:"use_dscp"`
 }
 
 var MemberVipSettingAttrTypes = map[string]attr.Type{
-	"address":         iptypes.IPv4AddressType{},
+	"address":         iptypes.IPAddressType{},
 	"gateway":         types.StringType,
 	"subnet_mask":     types.StringType,
 	"vlan_id":         types.Int64Type,
@@ -43,7 +43,7 @@ var MemberVipSettingAttrTypes = map[string]attr.Type{
 
 var MemberVipSettingResourceSchemaAttributes = map[string]schema.Attribute{
 	"address": schema.StringAttribute{
-		CustomType:          iptypes.IPv4AddressType{},
+		CustomType:          iptypes.IPAddressType{},
 		Computed:            true,
 		Optional:            true,
 		MarkdownDescription: "The IPv4 Address of the Grid Member.",
@@ -112,7 +112,7 @@ func (m *MemberVipSettingModel) Expand(ctx context.Context, diags *diag.Diagnost
 		return nil
 	}
 	to := &grid.MemberVipSetting{
-		Address:       flex.ExpandIPv4Address(m.Address),
+		Address:       flex.ExpandIPAddress(m.Address),
 		Gateway:       flex.ExpandStringPointer(m.Gateway),
 		SubnetMask:    flex.ExpandStringPointer(m.SubnetMask),
 		VlanId:        flex.ExpandInt64Pointer(m.VlanId),
@@ -143,7 +143,7 @@ func (m *MemberVipSettingModel) Flatten(ctx context.Context, from *grid.MemberVi
 	if m == nil {
 		*m = MemberVipSettingModel{}
 	}
-	m.Address = flex.FlattenIPv4Address(from.Address)
+	m.Address = flex.FlattenIPAddress(from.Address)
 	m.Gateway = flex.FlattenStringPointer(from.Gateway)
 	m.SubnetMask = flex.FlattenStringPointer(from.SubnetMask)
 	m.VlanId = flex.FlattenInt64Pointer(from.VlanId)
