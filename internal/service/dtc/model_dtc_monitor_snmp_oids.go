@@ -15,6 +15,7 @@ import (
 	"github.com/infobloxopen/infoblox-nios-go-client/dtc"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
 type DtcMonitorSnmpOidsModel struct {
@@ -37,7 +38,10 @@ var DtcMonitorSnmpOidsAttrTypes = map[string]attr.Type{
 
 var DtcMonitorSnmpOidsResourceSchemaAttributes = map[string]schema.Attribute{
 	"oid": schema.StringAttribute{
-		Required:            true,
+		Required: true,
+		Validators: []validator.String{
+			customvalidator.OIDValidator(),
+		},
 		MarkdownDescription: "The SNMP OID value for DTC SNMP Monitor health checks.",
 	},
 	"comment": schema.StringAttribute{
