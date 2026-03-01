@@ -21,6 +21,7 @@ var readableAttributesForUpgradeschedule = "active,start_time,time_zone,upgrade_
 // Ensure provider defined types fully satisfy framework interfaces.
 var _ resource.Resource = &UpgradescheduleResource{}
 var _ resource.ResourceWithImportState = &UpgradescheduleResource{}
+var _ resource.ResourceWithValidateConfig = &UpgradescheduleResource{}
 
 func NewUpgradescheduleResource() resource.Resource {
 	return &UpgradescheduleResource{}
