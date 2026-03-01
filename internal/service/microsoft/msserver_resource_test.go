@@ -79,16 +79,24 @@ func TestAccMsserverResource_AdSites(t *testing.T) {
 
 	address := "10.10.0.1"
 	loginName := acctest.RandomName()
+	syncMinDelay := "2"
+
 	adsitesLoginName := acctest.RandomName()
+	adsitesSyncMinDelay := "5"
 	adsites := map[string]any{
-		"login_name": adsitesLoginName,
-		"use_login":  true,
+		"login_name":                    adsitesLoginName,
+		"use_login":                     true,
+		"synchronization_min_delay":     adsitesSyncMinDelay,
+		"use_synchronization_min_delay": true,
 	}
 
 	updatedAdsitesLoginName := acctest.RandomName()
+	updatedAdSyncMinDelay := "10"
 	updatedAdsites := map[string]any{
-		"login_name": updatedAdsitesLoginName,
-		"use_login":  true,
+		"login_name":                    updatedAdsitesLoginName,
+		"use_login":                     true,
+		"synchronization_min_delay":     updatedAdSyncMinDelay,
+		"use_synchronization_min_delay": true,
 	}
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -97,18 +105,20 @@ func TestAccMsserverResource_AdSites(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccMsserverAdSites(address, loginName, adsites),
+				Config: testAccMsserverAdSites(address, loginName, syncMinDelay, adsites),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMsserverExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "ad_sites.login_name", adsitesLoginName),
+					resource.TestCheckResourceAttr(resourceName, "ad_sites.synchronization_min_delay", adsitesSyncMinDelay),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccMsserverAdSites(address, loginName, updatedAdsites),
+				Config: testAccMsserverAdSites(address, loginName, updatedAdSyncMinDelay, updatedAdsites),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMsserverExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "ad_sites.login_name", updatedAdsitesLoginName),
+					resource.TestCheckResourceAttr(resourceName, "ad_sites.synchronization_min_delay", updatedAdSyncMinDelay),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -122,16 +132,26 @@ func TestAccMsserverResource_AdUser(t *testing.T) {
 
 	address := "10.10.0.1"
 	loginName := acctest.RandomName()
+	syncMinDelay := "2"
+
 	aduserLoginName := acctest.RandomName()
+	aduserSyncMinDelay := "5"
 	aduser := map[string]any{
-		"login_name": aduserLoginName,
-		"use_login":  true,
+		"login_name":                    aduserLoginName,
+		"use_login":                     true,
+		"synchronization_interval":      aduserSyncMinDelay,
+		"use_synchronization_interval":  true,
+		"use_synchronization_min_delay": true,
 	}
 
 	updatedAduserLoginName := acctest.RandomName()
+	updatedAduserSyncMinDelay := "10"
 	updatedAduser := map[string]any{
-		"login_name": updatedAduserLoginName,
-		"use_login":  true,
+		"login_name":                    updatedAduserLoginName,
+		"use_login":                     true,
+		"synchronization_interval":      updatedAduserSyncMinDelay,
+		"use_synchronization_interval":  true,
+		"use_synchronization_min_delay": true,
 	}
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -140,18 +160,20 @@ func TestAccMsserverResource_AdUser(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccMsserverAdUser(address, loginName, aduser),
+				Config: testAccMsserverAdUser(address, loginName, syncMinDelay, aduser),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMsserverExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "ad_user.login_name", aduserLoginName),
+					resource.TestCheckResourceAttr(resourceName, "ad_user.synchronization_interval", aduserSyncMinDelay),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccMsserverAdUser(address, loginName, updatedAduser),
+				Config: testAccMsserverAdUser(address, loginName, syncMinDelay, updatedAduser),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMsserverExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "ad_user.login_name", updatedAduserLoginName),
+					resource.TestCheckResourceAttr(resourceName, "ad_user.synchronization_interval", updatedAduserSyncMinDelay),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -231,16 +253,24 @@ func TestAccMsserverResource_DhcpServer(t *testing.T) {
 
 	address := "10.10.0.1"
 	loginName := acctest.RandomName()
+	syncMinDelay := "2"
+
 	dhcpServerLoginName := acctest.RandomName()
+	dhcpServerSyncMinDelay := "5"
 	dhcp := map[string]any{
-		"login_name": dhcpServerLoginName,
-		"use_login":  true,
+		"login_name":                    dhcpServerLoginName,
+		"use_login":                     true,
+		"synchronization_min_delay":     dhcpServerSyncMinDelay,
+		"use_synchronization_min_delay": true,
 	}
 
 	updatedDhcpServerLoginName := acctest.RandomName()
+	updatedDhcpServerSyncMinDelay := "10"
 	updatedDhcp := map[string]any{
-		"login_name": updatedDhcpServerLoginName,
-		"use_login":  true,
+		"login_name":                    updatedDhcpServerLoginName,
+		"use_login":                     true,
+		"synchronization_min_delay":     updatedDhcpServerSyncMinDelay,
+		"use_synchronization_min_delay": true,
 	}
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -249,18 +279,20 @@ func TestAccMsserverResource_DhcpServer(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccMsserverDhcpServer(address, loginName, dhcp),
+				Config: testAccMsserverDhcpServer(address, loginName, syncMinDelay, dhcp),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMsserverExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "dhcp_server.login_name", dhcpServerLoginName),
+					resource.TestCheckResourceAttr(resourceName, "dhcp_server.synchronization_min_delay", dhcpServerSyncMinDelay),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccMsserverDhcpServer(address, loginName, updatedDhcp),
+				Config: testAccMsserverDhcpServer(address, loginName, syncMinDelay, updatedDhcp),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMsserverExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "dhcp_server.login_name", updatedDhcpServerLoginName),
+					resource.TestCheckResourceAttr(resourceName, "dhcp_server.synchronization_min_delay", updatedDhcpServerSyncMinDelay),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -306,16 +338,24 @@ func TestAccMsserverResource_DnsServer(t *testing.T) {
 
 	address := "10.10.0.1"
 	loginName := acctest.RandomName()
+	syncMinDelay := "2"
+
 	dnsServerLoginName := acctest.RandomName()
+	dnsServerSyncMinDelay := "5"
 	dns := map[string]any{
-		"login_name": dnsServerLoginName,
-		"use_login":  true,
+		"login_name":                    dnsServerLoginName,
+		"use_login":                     true,
+		"synchronization_min_delay":     dnsServerSyncMinDelay,
+		"use_synchronization_min_delay": true,
 	}
 
 	updatedDnsServerLoginName := acctest.RandomName()
+	updatedDnsServerSyncMinDelay := "10"
 	updatedDns := map[string]any{
-		"login_name": updatedDnsServerLoginName,
-		"use_login":  true,
+		"login_name":                    updatedDnsServerLoginName,
+		"use_login":                     true,
+		"synchronization_min_delay":     updatedDnsServerSyncMinDelay,
+		"use_synchronization_min_delay": true,
 	}
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -324,18 +364,20 @@ func TestAccMsserverResource_DnsServer(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccMsserverDnsServer(address, loginName, dns),
+				Config: testAccMsserverDnsServer(address, loginName, syncMinDelay, dns),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMsserverExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "dns_server.login_name", dnsServerLoginName),
+					resource.TestCheckResourceAttr(resourceName, "dns_server.synchronization_min_delay", dnsServerSyncMinDelay),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccMsserverDnsServer(address, loginName, updatedDns),
+				Config: testAccMsserverDnsServer(address, loginName, syncMinDelay, updatedDns),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMsserverExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "dns_server.login_name", updatedDnsServerLoginName),
+					resource.TestCheckResourceAttr(resourceName, "dns_server.synchronization_min_delay", updatedDnsServerSyncMinDelay),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -912,28 +954,30 @@ resource "nios_microsoft_msserver" "test" {
 `, address, loginName)
 }
 
-func testAccMsserverAdSites(address, loginName string, adSites map[string]any) string {
+func testAccMsserverAdSites(address, loginName, syncMinDelay string, adSites map[string]any) string {
 	adSitesHCL := utils.ConvertMapToHCL(adSites)
 
 	return fmt.Sprintf(`
 resource "nios_microsoft_msserver" "test_ad_sites" {
     address = %q
 	login_name = %q
+	synchronization_min_delay = %q
 	ad_sites = %s
 }
-`, address, loginName, adSitesHCL)
+`, address, loginName, syncMinDelay, adSitesHCL)
 }
 
-func testAccMsserverAdUser(address, loginName string, adUser map[string]any) string {
+func testAccMsserverAdUser(address, loginName, syncMinDelay string, adUser map[string]any) string {
 	adUserHCL := utils.ConvertMapToHCL(adUser)
 
 	return fmt.Sprintf(`
 resource "nios_microsoft_msserver" "test_ad_user" {
     address = %q
 	login_name = %q
+	synchronization_min_delay = %q
 	ad_user = %s
 }
-`, address, loginName, adUserHCL)
+`, address, loginName, syncMinDelay, adUserHCL)
 }
 
 func testAccMsserverAddress(address, loginName string) string {
@@ -955,16 +999,17 @@ resource "nios_microsoft_msserver" "test_comment" {
 `, address, loginName, comment)
 }
 
-func testAccMsserverDhcpServer(address, loginName string, dhcpServer map[string]any) string {
+func testAccMsserverDhcpServer(address, loginName, syncMinDelay string, dhcpServer map[string]any) string {
 	dhcpServerHCL := utils.ConvertMapToHCL(dhcpServer)
 
 	return fmt.Sprintf(`
 resource "nios_microsoft_msserver" "test_dhcp_server" {
     address = %q
 	login_name = %q
+	synchronization_min_delay = %q
 	dhcp_server = %s
 }
-`, address, loginName, dhcpServerHCL)
+`, address, loginName, syncMinDelay, dhcpServerHCL)
 }
 
 func testAccMsserverDisabled(address, loginName, disabled string) string {
@@ -977,16 +1022,17 @@ resource "nios_microsoft_msserver" "test_disabled" {
 `, address, loginName, disabled)
 }
 
-func testAccMsserverDnsServer(address, loginName string, dnsServer map[string]any) string {
+func testAccMsserverDnsServer(address, loginName, syncMinDelay string, dnsServer map[string]any) string {
 	dnsServerHCL := utils.ConvertMapToHCL(dnsServer)
 
 	return fmt.Sprintf(`
 resource "nios_microsoft_msserver" "test_dns_server" {
     address = %q
 	login_name = %q
+    synchronization_min_delay = %q
     dns_server = %s
 }
-`, address, loginName, dnsServerHCL)
+`, address, loginName, syncMinDelay, dnsServerHCL)
 }
 
 func testAccMsserverDnsView(address, loginName, dnsView string) string {

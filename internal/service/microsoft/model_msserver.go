@@ -251,7 +251,6 @@ var MsserverResourceSchemaAttributes = map[string]schema.Attribute{
 	"synchronization_min_delay": schema.Int64Attribute{
 		Optional:            true,
 		Computed:            true,
-		Default:             int64default.StaticInt64(2),
 		MarkdownDescription: "Minimum number of minutes between two synchronizations",
 	},
 	"synchronization_status": schema.StringAttribute{
