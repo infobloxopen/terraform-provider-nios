@@ -59,7 +59,7 @@ func (validator fqdnValidator) ValidateString(ctx context.Context, req validator
 	}
 }
 
-// IsValidFQDN returns an AttributeValidator which ensures that any configured attribute value is a valid FQDN.
+// Deprecated: Use IsValidDomainName() instead.
 func IsValidFQDN() validator.String {
 	return fqdnValidator{}
 }
