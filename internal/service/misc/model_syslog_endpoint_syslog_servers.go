@@ -109,8 +109,9 @@ var SyslogEndpointSyslogServersResourceSchemaAttributes = map[string]schema.Attr
 		MarkdownDescription: "The token returned by the uploadinit function call in object fileop.",
 	},
 	"certificate_file_path": schema.StringAttribute{
-		Required:            true,
-		MarkdownDescription: "The file path of the certificate to be uploaded. This is required when the certificate is uploaded using fileop.",
+		Computed:            true,
+		Optional:            true,
+		MarkdownDescription: "The file path to the certificate.",
 	},
 }
 
@@ -168,6 +169,32 @@ func (m *SyslogEndpointSyslogServersModel) Flatten(ctx context.Context, from *mi
 	m.Format = flex.FlattenStringPointer(from.Format)
 	m.Facility = flex.FlattenStringPointer(from.Facility)
 	m.Severity = flex.FlattenStringPointer(from.Severity)
-	m.Certificate = flex.FlattenStringPointer(from.Certificate)
+	m.Certificate = flattenCertificate(from.Certificate)
 	m.CertificateToken = flex.FlattenStringPointer(from.CertificateToken)
+	m.CertificateFilePath = types.StringNull() // This field is write-only and should not be set from API data
+}
+
+// flattenCertificate handles both string and object types returned by the API.
+// When the API returns an object (for stcp connections), it extracts the _ref field.
+func flattenCertificate(cert interface{}) types.String {
+	if cert == nil {
+		return types.StringNull()
+	}
+	switch v := cert.(type) {
+	case string:
+		return types.StringValue(v)
+	case *string:
+		if v == nil {
+			return types.StringNull()
+		}
+		return types.StringValue(*v)
+	case map[string]interface{}:
+		// API returns certificate as an object with _ref, issuer, serial, etc.
+		if ref, ok := v["_ref"].(string); ok {
+			return types.StringValue(ref)
+		}
+		return types.StringNull()
+	default:
+		return types.StringNull()
+	}
 }
