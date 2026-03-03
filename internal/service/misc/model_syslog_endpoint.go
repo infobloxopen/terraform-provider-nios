@@ -16,12 +16,13 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/misc"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
-	"github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/immutable"
 	importmod "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/import"
+	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
@@ -82,7 +83,10 @@ var SyslogEndpointResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The log level for a notification REST endpoint.",
 	},
 	"name": schema.StringAttribute{
-		Required:            true,
+		Required: true,
+		Validators: []validator.String{
+			customvalidator.ValidateSyslogEndpointName(),
+		},
 		MarkdownDescription: "The name of a Syslog endpoint.",
 	},
 	"outbound_member_type": schema.StringAttribute{
@@ -107,6 +111,7 @@ var SyslogEndpointResourceSchemaAttributes = map[string]schema.Attribute{
 			listvalidator.SizeAtLeast(1),
 		},
 		Optional: true,
+		Computed: true,
 		Default: listdefault.StaticValue(
 			types.ListValueMust(
 				types.ObjectType{AttrTypes: SyslogEndpointSyslogServersAttrTypes},
@@ -116,12 +121,9 @@ var SyslogEndpointResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "List of syslog servers",
 	},
 	"template_instance": schema.SingleNestedAttribute{
-		Attributes: SyslogEndpointTemplateInstanceResourceSchemaAttributes,
-		Optional:   true,
-		Computed:   true,
-		PlanModifiers: []planmodifier.Object{
-			immutable.ImmutableObject(),
-		},
+		Attributes:          SyslogEndpointTemplateInstanceResourceSchemaAttributes,
+		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The Syslog template instance.",
 	},
 	"timeout": schema.Int64Attribute{
@@ -146,6 +148,7 @@ var SyslogEndpointResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional:  true,
 		Computed:  true,
 		Sensitive: true,
+		Default:   stringdefault.StaticString(""),
 		Validators: []validator.String{
 			customvalidator.ValidateTrimmedString(),
 		},
@@ -206,10 +209,18 @@ func (m *SyslogEndpointModel) Flatten(ctx context.Context, from *misc.SyslogEndp
 	m.Name = flex.FlattenStringPointer(from.Name)
 	m.OutboundMemberType = flex.FlattenStringPointer(from.OutboundMemberType)
 	m.OutboundMembers = flex.FlattenFrameworkListString(ctx, from.OutboundMembers, diags)
+	planSyslogServers := m.SyslogServers
 	m.SyslogServers = flex.FlattenFrameworkListNestedBlock(ctx, from.SyslogServers, SyslogEndpointSyslogServersAttrTypes, diags, FlattenSyslogEndpointSyslogServers)
 	m.TemplateInstance = FlattenSyslogEndpointTemplateInstance(ctx, from.TemplateInstance, diags)
 	m.Timeout = flex.FlattenInt64Pointer(from.Timeout)
 	m.VendorIdentifier = flex.FlattenStringPointer(from.VendorIdentifier)
 	m.WapiUserName = flex.FlattenStringPointer(from.WapiUserName)
-	m.WapiUserPassword = flex.FlattenStringPointer(from.WapiUserPassword)
+	// Preserve WapiUserPassword - API doesn't return sensitive password fields
+	// The value is already set from plan/state, so we don't overwrite it
+	if !planSyslogServers.IsNull() {
+		result, diags := utils.CopyFieldFromPlanToRespList(ctx, planSyslogServers, m.SyslogServers, "certificate_file_path")
+		if !diags.HasError() {
+			m.SyslogServers = result.(basetypes.ListValue)
+		}
+	}
 }
