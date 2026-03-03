@@ -65,7 +65,7 @@ Optional:
 - `grid_member` (String) eference to the assigned grid member
 - `log_destination` (String) Directs logging of sync messages either to syslog or mslog
 - `log_level` (String) Log level for this Microsoft Server
-- `login_password` (String) Microsoft Server login password
+- `login_password` (String, Sensitive) Microsoft Server login password
 - `ms_max_connection` (Number) Maximum number of connections to MS server
 - `ms_rpc_timeout_in_seconds` (Number) Timeout in seconds of RPC connections for this MS Server
 - `network_view` (String) Reference to the network view
@@ -100,7 +100,7 @@ Optional:
 - `ldap_encryption` (String) Encryption for LDAP connections for this MS Server
 - `ldap_timeout` (Number) Timeout in seconds for LDAP connections for this MS Server
 - `login_name` (String) Microsoft Server login name, with optional
-- `login_password` (String) Microsoft Server login password.
+- `login_password` (String, Sensitive) Microsoft Server login password.
 - `managed` (Boolean) Controls whether the Sites of this MS Server are to be synchronized by the assigned managing member or not
 - `read_only` (Boolean) Enable/disable read-only synchronization of Sites for this Active Directory domain
 - `synchronization_min_delay` (Number) Minimum number of minutes between two synchronizations
@@ -124,7 +124,7 @@ Optional:
 
 - `enable_user_sync` (Boolean) Determines whether the Active Directory user synchronization is enabled or not.
 - `login_name` (String) The login name of the Microsoft Server.
-- `login_password` (String) The login password of the DHCP Microsoft Server.
+- `login_password` (String, Sensitive) The login password of the DHCP Microsoft Server.
 - `synchronization_interval` (Number) The minimum number of minutes between two synchronizations.
 - `use_enable_ad_user_sync` (Boolean) Flag to override AD User sync from grid level
 - `use_enable_user_sync` (Boolean) Use flag for: enable_user_sync
@@ -148,7 +148,7 @@ Optional:
 - `enable_invalid_mac` (Boolean) Enable Invalid Mac Address
 - `enable_monitoring` (Boolean) Flag indicating if the DNS service is monitored and controlled
 - `login_name` (String) Microsoft Server login name
-- `login_password` (String) Microsoft Server login password
+- `login_password` (String, Sensitive) Microsoft Server login password
 - `managed` (Boolean) flag indicating if the DNS service is managed
 - `next_sync_control` (String) Defines what control to apply on the DNS server
 - `synchronization_min_delay` (Number) Minimum number of minutes between two synchronizations
@@ -172,7 +172,7 @@ Optional:
 - `enable_dns_reports_sync` (Boolean) Enable or Disable MS DNS data for reports from this MS Server
 - `enable_monitoring` (Boolean) Flag indicating if the DNS service is monitored and controlled
 - `login_name` (String) Microsoft Server login name
-- `login_password` (String) Microsoft Server login password
+- `login_password` (String, Sensitive) Microsoft Server login password
 - `managed` (Boolean) flag indicating if the DNS service is managed
 - `next_sync_control` (String) Defines what control to apply on the DNS server
 - `synchronization_min_delay` (Number) Minimum number of minutes between two synchronizations

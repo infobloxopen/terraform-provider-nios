@@ -1068,16 +1068,6 @@ resource "nios_microsoft_msserver" "test_login_name" {
 `, address, loginName)
 }
 
-func testAccMsserverLoginPassword(address, loginName, loginPassword string) string {
-	return fmt.Sprintf(`
-resource "nios_microsoft_msserver" "test_login_password" {
-    address = %q
-	login_name = %q
-    login_password = %q
-}
-`, address, loginName, loginPassword)
-}
-
 func testAccMsserverMsMaxConnection(address, loginName, msMaxConnection string) string {
 	return fmt.Sprintf(`
 resource "nios_microsoft_msserver" "test_ms_max_connection" {
