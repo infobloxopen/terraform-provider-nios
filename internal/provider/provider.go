@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/infobloxopen/terraform-provider-nios/internal/service/rir"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
 	gridclient "github.com/infobloxopen/infoblox-nios-go-client/grid"
@@ -234,6 +235,8 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 		grid.NewGridServicerestartGroupResource,
 		grid.NewDistributionscheduleResource,
 		grid.NewGmcgroupResource,
+		grid.NewUpgradescheduleResource,
+
 
 		discovery.NewDiscoveryCredentialgroupResource,
 		discovery.NewVdiscoverytaskResource,
@@ -255,6 +258,8 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 		rpz.NewRecordRpzCnameClientipaddressResource,
 		rpz.NewRecordRpzCnameIpaddressdnResource,
 		rpz.NewRecordRpzCnameClientipaddressdnResource,
+
+		rir.NewRirOrganizationResource,
 	}
 }
 
@@ -375,6 +380,7 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 		grid.NewGridServicerestartGroupDataSource,
 		grid.NewDistributionscheduleDataSource,
 		grid.NewGmcgroupDataSource,
+		grid.NewUpgradescheduleDataSource,
 
 		discovery.NewDiscoveryCredentialgroupDataSource,
 		discovery.NewVdiscoverytaskDataSource,
@@ -397,6 +403,8 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 		rpz.NewRecordRpzCnameClientipaddressDataSource,
 		rpz.NewRecordRpzCnameIpaddressdnDataSource,
 		rpz.NewRecordRpzCnameClientipaddressdnDataSource,
+
+		rir.NewRirOrganizationDataSource,
 	}
 }
 
