@@ -16,7 +16,7 @@ import (
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
-var readableAttributesForMssuperscope = "comment,dhcp_utilization,dhcp_utilization_status,disable,dynamic_hosts,extattrs,high_water_mark,high_water_mark_reset,low_water_mark,low_water_mark_reset,name,network_view,static_hosts,total_hosts"
+var readableAttributesForMssuperscope = "comment,dhcp_utilization,dhcp_utilization_status,disable,dynamic_hosts,extattrs,high_water_mark,high_water_mark_reset,low_water_mark,low_water_mark_reset,name,network_view,ranges,static_hosts,total_hosts"
 
 func TestAccMssuperscopeResource_basic(t *testing.T) {
 	var resourceName = "nios_microsoft_mssuperscope.test"

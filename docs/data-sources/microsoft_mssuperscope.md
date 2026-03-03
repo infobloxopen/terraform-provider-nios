@@ -19,7 +19,7 @@ data "nios_microsoft_mssuperscope" "get_microsoft_mssuperscope_using_filters" {
     name = "example_mssuperscope"
   }
 }
-// Retrieve specific microsoft Microsoft Super Scopes using Extensible Attributes
+// Retrieve specific Microsoft Super Scopes using Extensible Attributes
 data "nios_microsoft_mssuperscope" "get_microsoft_mssuperscopes_using_extensible_attributes" {
   extattrfilters = {
     Site = "location-1"
