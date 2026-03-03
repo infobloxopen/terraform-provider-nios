@@ -267,11 +267,11 @@ func (r *Awsrte53taskgroupResource) ValidateConfig(ctx context.Context, req reso
 	// Validation 2: aws_account_ids_file_path can only be used with UPLOAD_CHILDREN policy
 	if !data.AwsAccountIdsFilePath.IsUnknown() && !data.MultipleAccountsSyncPolicy.IsUnknown() {
 		if !data.AwsAccountIdsFilePath.IsNull() && data.AwsAccountIdsFilePath.ValueString() != "" {
-			if data.MultipleAccountsSyncPolicy.IsNull() || data.MultipleAccountsSyncPolicy.ValueString() != "UPLOAD_CHILDREN" {
-				policyValue := "NONE"
-				if !data.MultipleAccountsSyncPolicy.IsNull() {
-					policyValue = data.MultipleAccountsSyncPolicy.ValueString()
-				}
+			policyValue := "NONE"
+			if !data.MultipleAccountsSyncPolicy.IsNull() {
+				policyValue = data.MultipleAccountsSyncPolicy.ValueString()
+			}
+			if policyValue != "UPLOAD_CHILDREN" {
 				resp.Diagnostics.AddError(
 					"Invalid Configuration",
 					"'aws_account_ids_file_path' can only be used when 'multiple_accounts_sync_policy' is set to 'UPLOAD_CHILDREN'. "+
