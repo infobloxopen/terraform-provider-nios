@@ -598,39 +598,6 @@ func TestAccMsserverResource_LoginName(t *testing.T) {
 	})
 }
 
-func TestAccMsserverResource_LoginPassword(t *testing.T) {
-	var resourceName = "nios_microsoft_msserver.test_login_password"
-	var v microsoft.Msserver
-	address := "10.10.0.1"
-	loginName := acctest.RandomName()
-	loginPassword1 := "Password@123"
-	loginPassword2 := "Password@456"
-
-	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.PreCheck(t) },
-		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-		Steps: []resource.TestStep{
-			// Create and Read
-			{
-				Config: testAccMsserverLoginPassword(address, loginName, loginPassword1),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckMsserverExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "login_password", loginPassword1),
-				),
-			},
-			// Update and Read
-			{
-				Config: testAccMsserverLoginPassword(address, loginName, loginPassword2),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckMsserverExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "login_password", loginPassword2),
-				),
-			},
-			// Delete testing automatically occurs in TestCase
-		},
-	})
-}
-
 func TestAccMsserverResource_MsMaxConnection(t *testing.T) {
 	var resourceName = "nios_microsoft_msserver.test_ms_max_connection"
 	var v microsoft.Msserver

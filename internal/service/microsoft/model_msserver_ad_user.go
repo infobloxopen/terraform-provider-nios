@@ -60,6 +60,7 @@ var MsserverAdUserResourceSchemaAttributes = map[string]schema.Attribute{
 	"login_password": schema.StringAttribute{
 		Optional:            true,
 		Computed:            true,
+		Sensitive:           true,
 		MarkdownDescription: "The login password of the DHCP Microsoft Server.",
 	},
 	"enable_user_sync": schema.BoolAttribute{
