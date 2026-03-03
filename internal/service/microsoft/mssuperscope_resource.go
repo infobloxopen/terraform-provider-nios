@@ -37,7 +37,7 @@ func (r *MssuperscopeResource) Metadata(ctx context.Context, req resource.Metada
 
 func (r *MssuperscopeResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Manages a Mssuperscope resource object.",
+		MarkdownDescription: "Manages a Microsoft Super Scope.",
 		Attributes:          MssuperscopeResourceSchemaAttributes,
 	}
 }

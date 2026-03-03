@@ -3,12 +3,12 @@
 page_title: "nios_microsoft_mssuperscope Data Source - nios"
 subcategory: ""
 description: |-
-  Retrieves information about existing Mssuperscope objects.
+  Retrieves information about existing Microsoft Super Scopes.
 ---
 
 # nios_microsoft_mssuperscope (Data Source)
 
-Retrieves information about existing Mssuperscope objects.
+Retrieves information about existing Microsoft Super Scopes.
 
 ## Example Usage
 

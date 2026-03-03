@@ -3,6 +3,7 @@ package microsoft_test
 import (
 	"context"
 	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -16,6 +17,9 @@ func TestAccMssuperscopeDataSource_Filters(t *testing.T) {
 	dataSourceName := "data.nios_microsoft_mssuperscope.test"
 	resourceName := "nios_microsoft_mssuperscope.test"
 	var v microsoft.Mssuperscope
+	name := acctest.RandomNameWithPrefix("mssuperscope")
+	startAddrRange := "117.0.0.66"
+	endAddrRange := "117.0.0.70"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -23,7 +27,7 @@ func TestAccMssuperscopeDataSource_Filters(t *testing.T) {
 		CheckDestroy:             testAccCheckMssuperscopeDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccMssuperscopeDataSourceConfigFilters("NAME_REPLACE_ME", "RANGES_REPLACE_ME"),
+				Config: testAccMssuperscopeDataSourceConfigFilters(name, startAddrRange, endAddrRange),
 				Check: resource.ComposeTestCheckFunc(
 					append([]resource.TestCheckFunc{
 						testAccCheckMssuperscopeExists(context.Background(), resourceName, &v),
@@ -38,6 +42,9 @@ func TestAccMssuperscopeDataSource_ExtAttrFilters(t *testing.T) {
 	dataSourceName := "data.nios_microsoft_mssuperscope.test"
 	resourceName := "nios_microsoft_mssuperscope.test"
 	var v microsoft.Mssuperscope
+	name := acctest.RandomNameWithPrefix("mssuperscope")
+	startAddrRange := "117.0.0.71"
+	endAddrRange := "117.0.0.75"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -45,7 +52,7 @@ func TestAccMssuperscopeDataSource_ExtAttrFilters(t *testing.T) {
 		CheckDestroy:             testAccCheckMssuperscopeDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccMssuperscopeDataSourceConfigExtAttrFilters("NAME_REPLACE_ME", "RANGES_REPLACE_ME", acctest.RandomName()),
+				Config: testAccMssuperscopeDataSourceConfigExtAttrFilters(name, startAddrRange, endAddrRange, acctest.RandomName()),
 				Check: resource.ComposeTestCheckFunc(
 					append([]resource.TestCheckFunc{
 						testAccCheckMssuperscopeExists(context.Background(), resourceName, &v),
@@ -79,11 +86,12 @@ func testAccCheckMssuperscopeResourceAttrPair(resourceName, dataSourceName strin
 	}
 }
 
-func testAccMssuperscopeDataSourceConfigFilters(name, ranges string) string {
-	return fmt.Sprintf(`
+func testAccMssuperscopeDataSourceConfigFilters(name, startAddr string, endAddr string) string {
+	config := fmt.Sprintf(`
 resource "nios_microsoft_mssuperscope" "test" {
-  name = %q
-  ranges = %q
+    name = %q
+    ranges = [nios_dhcp_range.test.ref]
+    network_view = "ms_server"
 }
 
 data "nios_microsoft_mssuperscope" "test" {
@@ -91,14 +99,16 @@ data "nios_microsoft_mssuperscope" "test" {
 	name = nios_microsoft_mssuperscope.test.name
   }
 }
-`, name, ranges)
+`, name)
+	return strings.Join([]string{testAccBaseWithRanges(startAddr, endAddr), config}, "")
 }
 
-func testAccMssuperscopeDataSourceConfigExtAttrFilters(name, ranges, extAttrsValue string) string {
-	return fmt.Sprintf(`
+func testAccMssuperscopeDataSourceConfigExtAttrFilters(name, startAddr, endAddr, extAttrsValue string) string {
+	config := fmt.Sprintf(`
 resource "nios_microsoft_mssuperscope" "test" {
   name = %q
-  ranges = %q
+  ranges = [nios_dhcp_range.test.ref]
+  network_view = "ms_server"
   extattrs = {
     Site = %q
   } 
@@ -109,5 +119,6 @@ data "nios_microsoft_mssuperscope" "test" {
     Site = nios_microsoft_mssuperscope.test.extattrs.Site
   }
 }
-`, name, ranges, extAttrsValue)
+`, name, extAttrsValue)
+	return strings.Join([]string{testAccBaseWithRanges(startAddr, endAddr), config}, "")
 }
