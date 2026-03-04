@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/infobloxopen/terraform-provider-nios/internal/service/microsoft"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/rir"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
@@ -258,6 +259,8 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 		rpz.NewRecordRpzCnameClientipaddressdnResource,
 
 		rir.NewRirOrganizationResource,
+
+		microsoft.NewMsserverAdsitesSiteResource,
 	}
 }
 
@@ -402,6 +405,8 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 		rpz.NewRecordRpzCnameClientipaddressdnDataSource,
 
 		rir.NewRirOrganizationDataSource,
+
+		microsoft.NewMsserverAdsitesSiteDataSource,
 	}
 }
 
