@@ -422,43 +422,51 @@ func (r *RangetemplateResource) ValidateConfig(ctx context.Context, req resource
 				)
 			}
 		}
+	}
 
-		serverAssociationType := "NONE"
-		if !data.ServerAssociationType.IsNull() && !data.ServerAssociationType.IsUnknown() {
+	// For Configuration object, any attributes not defined by the user appear as null, unless derived from another instance.
+	// We perform IsUnknown() check to handle variables from .tfvars that are resolved
+	// during the plan phase rather than validation phase, preventing false validation errors.
+
+	var serverAssociationType string
+
+	if !data.ServerAssociationType.IsUnknown() {
+		serverAssociationType = "NONE"
+		if !data.ServerAssociationType.IsNull() {
 			serverAssociationType = data.ServerAssociationType.ValueString()
 		}
+	}
 
-		// If server_association_type is MEMBER, member field must be set
-		if serverAssociationType == "MEMBER" {
-			if data.Member.IsNull() || data.Member.IsUnknown() {
-				resp.Diagnostics.AddAttributeError(
-					path.Root("member"),
-					"Invalid Configuration",
-					"The 'member' field must be set when 'server_association_type' is set to 'MEMBER'.",
-				)
-			}
+	// If server_association_type is MEMBER, member field must be set
+	if serverAssociationType == "MEMBER" {
+		if data.Member.IsNull() || data.Member.IsUnknown() {
+			resp.Diagnostics.AddAttributeError(
+				path.Root("member"),
+				"Invalid Configuration",
+				"The 'member' field must be set when 'server_association_type' is set to 'MEMBER'.",
+			)
 		}
+	}
 
-		// If server_association_type is FAILOVER, failover_association field must be set
-		if serverAssociationType == "FAILOVER" {
-			if data.FailoverAssociation.IsNull() || data.FailoverAssociation.IsUnknown() {
-				resp.Diagnostics.AddAttributeError(
-					path.Root("failover_association"),
-					"Invalid Configuration",
-					"The 'failover_association' field must be set when 'server_association_type' is set to 'FAILOVER'.",
-				)
-			}
+	// If server_association_type is FAILOVER, failover_association field must be set
+	if serverAssociationType == "FAILOVER" {
+		if data.FailoverAssociation.IsNull() || data.FailoverAssociation.IsUnknown() {
+			resp.Diagnostics.AddAttributeError(
+				path.Root("failover_association"),
+				"Invalid Configuration",
+				"The 'failover_association' field must be set when 'server_association_type' is set to 'FAILOVER'.",
+			)
 		}
+	}
 
-		// If server_association_type is MS_SERVER, ms_server field must be set
-		if serverAssociationType == "MS_SERVER" {
-			if data.MsServer.IsNull() || data.MsServer.IsUnknown() {
-				resp.Diagnostics.AddAttributeError(
-					path.Root("ms_server"),
-					"Invalid Configuration",
-					"The 'ms_server' field must be set when 'server_association_type' is set to 'MS_SERVER'.",
-				)
-			}
+	// If server_association_type is MS_SERVER, ms_server field must be set
+	if serverAssociationType == "MS_SERVER" {
+		if data.MsServer.IsNull() || data.MsServer.IsUnknown() {
+			resp.Diagnostics.AddAttributeError(
+				path.Root("ms_server"),
+				"Invalid Configuration",
+				"The 'ms_server' field must be set when 'server_association_type' is set to 'MS_SERVER'.",
+			)
 		}
 	}
 }
