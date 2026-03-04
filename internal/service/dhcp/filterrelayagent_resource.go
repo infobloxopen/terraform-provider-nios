@@ -350,7 +350,7 @@ func (r *FilterrelayagentResource) ValidateConfig(ctx context.Context, req resou
 	// We perform IsUnknown() check to handle variables from .tfvars that are resolved
 	// during the plan phase rather than validation phase, preventing false validation errors.
 
-	// Get the values or default to empty string
+	// Defaults to "ANY" if not set
 	var isCircuitId string
 	if !data.IsCircuitId.IsUnknown() {
 		isCircuitId = "ANY"
