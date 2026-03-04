@@ -247,6 +247,10 @@ func (r *Awsrte53taskgroupResource) ValidateConfig(ctx context.Context, req reso
 		return
 	}
 
+	// For Configuration object, any attributes not defined by the user appear as null, unless derived from another instance.
+	// We perform IsUnknown() check to handle variables from .tfvars that are resolved
+	// during the plan phase rather than validation phase, preventing false validation errors.
+
 	// Validation 1: Handle filter validation
 	if !data.TaskList.IsNull() && !data.TaskList.IsUnknown() {
 		var taskList []Awsrte53taskgroupTaskListModel

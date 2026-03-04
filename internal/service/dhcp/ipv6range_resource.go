@@ -334,6 +334,10 @@ func (r *Ipv6rangeResource) ValidateConfig(ctx context.Context, req resource.Val
 		return
 	}
 
+	// For Configuration object, any attributes not defined by the user appear as null, unless derived from another instance.
+	// We perform IsUnknown() check to handle variables from .tfvars that are resolved
+	// during the plan phase rather than validation phase, preventing false validation errors.
+
 	var addressType string
 
 	if !data.AddressType.IsUnknown() {

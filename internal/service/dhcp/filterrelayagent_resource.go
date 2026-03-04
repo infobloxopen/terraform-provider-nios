@@ -346,6 +346,10 @@ func (r *FilterrelayagentResource) ValidateConfig(ctx context.Context, req resou
 		return
 	}
 
+	// For Configuration object, any attributes not defined by the user appear as null, unless derived from another instance.
+	// We perform IsUnknown() check to handle variables from .tfvars that are resolved
+	// during the plan phase rather than validation phase, preventing false validation errors.
+
 	// Get the values or default to empty string
 	var isCircuitId string
 	if !data.IsCircuitId.IsUnknown() {

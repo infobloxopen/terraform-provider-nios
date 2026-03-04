@@ -368,6 +368,10 @@ func (r *Ipv6fixedaddressResource) ValidateConfig(ctx context.Context, req resou
 	// Validate based on address_type only if func_call is not set
 	if data.FuncCall.IsNull() || data.FuncCall.IsUnknown() {
 
+		// For Configuration object, any attributes not defined by the user appear as null, unless derived from another instance.
+		// We perform IsUnknown() check to handle variables from .tfvars that are resolved
+		// during the plan phase rather than validation phase, preventing false validation errors.
+
 		var addressType string
 		if !data.AddressType.IsUnknown() {
 			addressType = "ADDRESS"

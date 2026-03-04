@@ -472,13 +472,16 @@ func (r RoaminghostResource) ValidateConfig(ctx context.Context, req resource.Va
 		}
 	}
 
-	if data.AddressType.IsUnknown() {
-		return
-	}
+	// For Configuration object, any attributes not defined by the user appear as null, unless derived from another instance.
+	// We perform IsUnknown() check to handle variables from .tfvars that are resolved
+	// during the plan phase rather than validation phase, preventing false validation errors.
 
-	addressType := "IPV4"
-	if !data.AddressType.IsNull() {
-		addressType = data.AddressType.ValueString()
+	var addressType string
+	if !data.AddressType.IsUnknown() {
+		addressType = "IPV4"
+		if !data.AddressType.IsNull() {
+			addressType = data.AddressType.ValueString()
+		}
 	}
 
 	switch addressType {
@@ -568,13 +571,11 @@ func (r RoaminghostResource) ValidateConfig(ctx context.Context, req resource.Va
 		}
 	}
 
-	if data.Ipv6MatchOption.IsUnknown() {
-		return
-	}
-
 	var ipv6MatchOption string
-	if !data.Ipv6MatchOption.IsNull() {
-		ipv6MatchOption = data.Ipv6MatchOption.ValueString()
+	if !data.Ipv6MatchOption.IsUnknown() {
+		if !data.Ipv6MatchOption.IsNull() {
+			ipv6MatchOption = data.Ipv6MatchOption.ValueString()
+		}
 	}
 
 	switch ipv6MatchOption {
