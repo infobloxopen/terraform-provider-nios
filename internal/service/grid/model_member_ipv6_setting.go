@@ -7,8 +7,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
@@ -43,6 +41,7 @@ var MemberIpv6SettingAttrTypes = map[string]attr.Type{
 
 var MemberIpv6SettingResourceSchemaAttributes = map[string]schema.Attribute{
 	"enabled": schema.BoolAttribute{
+		Computed:            true,
 		Optional:            true,
 		MarkdownDescription: "Determines if IPv6 networking should be enabled.",
 	},
@@ -54,6 +53,7 @@ var MemberIpv6SettingResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"cidr_prefix": schema.Int64Attribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "IPv6 cidr prefix",
 	},
 	"gateway": schema.StringAttribute{
@@ -63,31 +63,33 @@ var MemberIpv6SettingResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"auto_router_config_enabled": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "Determines if automatic router configuration should be enabled.",
 	},
 	"vlan_id": schema.Int64Attribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The identifier for the VLAN. Valid values are from 1 to 4096.",
 	},
 	"primary": schema.BoolAttribute{
-		Optional:            true,
-		Computed:            true,
-		Default:             booldefault.StaticBool(true),
+		Optional: true,
+		Computed: true,
+		//Default:             booldefault.StaticBool(true),
 		MarkdownDescription: "Determines if the current address is the primary VLAN address or not.",
 	},
 	"dscp": schema.Int64Attribute{
 		Optional: true,
 		Computed: true,
-		Default:  int64default.StaticInt64(0),
+		//Default:  int64default.StaticInt64(0),
 		// Validators: []validator.Int64{
 		// 	int64validator.AlsoRequires(path.MatchRoot("use_dscp")),
 		// },
 		MarkdownDescription: "The DSCP (Differentiated Services Code Point) value determines relative priorities for the type of services on your network. The appliance implements QoS (Quality of Service) rules based on this configuration. Valid values are from 0 to 63.",
 	},
 	"use_dscp": schema.BoolAttribute{
-		Optional:            true,
-		Computed:            true,
-		Default:             booldefault.StaticBool(false),
+		Optional: true,
+		Computed: true,
+		//Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Use flag for: dscp",
 	},
 }
