@@ -89,6 +89,7 @@ var MemberSnmpSettingResourceSchemaAttributes = map[string]schema.Attribute{
 	"syscontact": schema.ListAttribute{
 		ElementType: types.StringType,
 		Optional:    true,
+		Computed:    true,
 		Validators: []validator.List{
 			listvalidator.SizeAtLeast(1),
 		},
@@ -97,6 +98,7 @@ var MemberSnmpSettingResourceSchemaAttributes = map[string]schema.Attribute{
 	"sysdescr": schema.ListAttribute{
 		ElementType: types.StringType,
 		Optional:    true,
+		Computed:    true,
 		Validators: []validator.List{
 			listvalidator.SizeAtLeast(1),
 		},
@@ -105,6 +107,7 @@ var MemberSnmpSettingResourceSchemaAttributes = map[string]schema.Attribute{
 	"syslocation": schema.ListAttribute{
 		ElementType: types.StringType,
 		Optional:    true,
+		Computed:    true,
 		Validators: []validator.List{
 			listvalidator.SizeAtLeast(1),
 		},
@@ -113,6 +116,7 @@ var MemberSnmpSettingResourceSchemaAttributes = map[string]schema.Attribute{
 	"sysname": schema.ListAttribute{
 		ElementType: types.StringType,
 		Optional:    true,
+		Computed:    true,
 		Validators: []validator.List{
 			listvalidator.SizeAtLeast(1),
 		},
@@ -163,16 +167,16 @@ func (m *MemberSnmpSettingModel) Expand(ctx context.Context, diags *diag.Diagnos
 	to := &grid.MemberSnmpSetting{
 		QueriesCommunityString: flex.ExpandStringPointer(m.QueriesCommunityString),
 		QueriesEnable:          flex.ExpandBoolPointer(m.QueriesEnable),
-		Snmpv3QueriesEnable:  flex.ExpandBoolPointer(m.Snmpv3QueriesEnable),
-		Snmpv3QueriesUsers: flex.ExpandFrameworkListNestedBlock(ctx, m.Snmpv3QueriesUsers, diags, ExpandMembersnmpsettingSnmpv3QueriesUsers),
-		Snmpv3TrapsEnable:    flex.ExpandBoolPointer(m.Snmpv3TrapsEnable),
-		Syscontact:           flex.ExpandFrameworkListString(ctx, m.Syscontact, diags),
-		Sysdescr:             flex.ExpandFrameworkListString(ctx, m.Sysdescr, diags),
-		Syslocation:          flex.ExpandFrameworkListString(ctx, m.Syslocation, diags),
-		Sysname:              flex.ExpandFrameworkListString(ctx, m.Sysname, diags),
-		TrapReceivers:        flex.ExpandFrameworkListNestedBlock(ctx, m.TrapReceivers, diags, ExpandMembersnmpsettingTrapReceivers),
-		TrapsCommunityString: flex.ExpandStringPointer(m.TrapsCommunityString),
-		TrapsEnable:          flex.ExpandBoolPointer(m.TrapsEnable),
+		Snmpv3QueriesEnable:    flex.ExpandBoolPointer(m.Snmpv3QueriesEnable),
+		Snmpv3QueriesUsers:     flex.ExpandFrameworkListNestedBlock(ctx, m.Snmpv3QueriesUsers, diags, ExpandMembersnmpsettingSnmpv3QueriesUsers),
+		Snmpv3TrapsEnable:      flex.ExpandBoolPointer(m.Snmpv3TrapsEnable),
+		Syscontact:             flex.ExpandFrameworkListString(ctx, m.Syscontact, diags),
+		Sysdescr:               flex.ExpandFrameworkListString(ctx, m.Sysdescr, diags),
+		Syslocation:            flex.ExpandFrameworkListString(ctx, m.Syslocation, diags),
+		Sysname:                flex.ExpandFrameworkListString(ctx, m.Sysname, diags),
+		TrapReceivers:          flex.ExpandFrameworkListNestedBlock(ctx, m.TrapReceivers, diags, ExpandMembersnmpsettingTrapReceivers),
+		TrapsCommunityString:   flex.ExpandStringPointer(m.TrapsCommunityString),
+		TrapsEnable:            flex.ExpandBoolPointer(m.TrapsEnable),
 	}
 	return to
 }
@@ -197,15 +201,15 @@ func (m *MemberSnmpSettingModel) Flatten(ctx context.Context, from *grid.MemberS
 	}
 	m.EngineId = flex.FlattenFrameworkListString(ctx, from.EngineId, diags)
 	m.QueriesCommunityString = flex.FlattenStringPointer(from.QueriesCommunityString)
-	//m.QueriesEnable = types.BoolPointerValue(from.QueriesEnable)
-	//m.Snmpv3QueriesEnable = types.BoolPointerValue(from.Snmpv3QueriesEnable)
+	m.QueriesEnable = types.BoolPointerValue(from.QueriesEnable)
+	m.Snmpv3QueriesEnable = types.BoolPointerValue(from.Snmpv3QueriesEnable)
 	m.Snmpv3QueriesUsers = flex.FlattenFrameworkListNestedBlock(ctx, from.Snmpv3QueriesUsers, MembersnmpsettingSnmpv3QueriesUsersAttrTypes, diags, FlattenMembersnmpsettingSnmpv3QueriesUsers)
-	//m.Snmpv3TrapsEnable = types.BoolPointerValue(from.Snmpv3TrapsEnable)
+	m.Snmpv3TrapsEnable = types.BoolPointerValue(from.Snmpv3TrapsEnable)
 	m.Syscontact = flex.FlattenFrameworkListString(ctx, from.Syscontact, diags)
 	m.Sysdescr = flex.FlattenFrameworkListString(ctx, from.Sysdescr, diags)
 	m.Syslocation = flex.FlattenFrameworkListString(ctx, from.Syslocation, diags)
 	m.Sysname = flex.FlattenFrameworkListString(ctx, from.Sysname, diags)
 	m.TrapReceivers = flex.FlattenFrameworkListNestedBlock(ctx, from.TrapReceivers, MembersnmpsettingTrapReceiversAttrTypes, diags, FlattenMembersnmpsettingTrapReceivers)
 	m.TrapsCommunityString = flex.FlattenStringPointer(from.TrapsCommunityString)
-	//m.TrapsEnable = types.BoolPointerValue(from.TrapsEnable)
+	m.TrapsEnable = types.BoolPointerValue(from.TrapsEnable)
 }

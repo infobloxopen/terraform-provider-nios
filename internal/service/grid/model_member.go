@@ -20,11 +20,13 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/grid"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 	importmod "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/import"
+	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
@@ -1013,7 +1015,17 @@ func (m *MemberModel) Flatten(ctx context.Context, from *grid.Member, diags *dia
 	m.TrafficCaptureQpsSetting = FlattenMemberTrafficCaptureQpsSetting(ctx, from.TrafficCaptureQpsSetting, diags)
 	m.TrafficCaptureRecDnsSetting = FlattenMemberTrafficCaptureRecDnsSetting(ctx, from.TrafficCaptureRecDnsSetting, diags)
 	m.TrafficCaptureRecQueriesSetting = FlattenMemberTrafficCaptureRecQueriesSetting(ctx, from.TrafficCaptureRecQueriesSetting, diags)
+
+	planList := m.TrapNotifications
 	m.TrapNotifications = flex.FlattenFrameworkListNestedBlock(ctx, from.TrapNotifications, MemberTrapNotificationsAttrTypes, diags, FlattenMemberTrapNotifications)
+	if !planList.IsUnknown() {
+		reOrderedList, diags := utils.ReorderAndFilterNestedListResponse(ctx, planList, m.TrapNotifications, "trap_type")
+		if !diags.HasError() {
+			m.TrapNotifications = reOrderedList.(basetypes.ListValue)
+		}
+	}
+	// m.TrapNotifications = flex.FlattenFrameworkListNestedBlock(ctx, from.TrapNotifications, MemberTrapNotificationsAttrTypes, diags, FlattenMemberTrapNotifications)
+
 	m.UpgradeGroup = flex.FlattenStringPointer(from.UpgradeGroup)
 	m.UseAutomatedTrafficCapture = types.BoolPointerValue(from.UseAutomatedTrafficCapture)
 	m.UseDnsResolverSetting = types.BoolPointerValue(from.UseDnsResolverSetting)
