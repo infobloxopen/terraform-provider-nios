@@ -17,6 +17,8 @@ import (
 
 var readableAttributesForThreatprotectionGridRule = "allowed_actions,category,comment,config,description,disabled,is_factory_reset_enabled,name,ruleset,sid,template,type"
 
+var testThreatProtectionRuleTemplate = ""
+
 func TestAccThreatprotectionGridRuleResource_basic(t *testing.T) {
 	var resourceName = "nios_threatprotection_grid_rule.test"
 	var v threatprotection.ThreatprotectionGridRule
@@ -27,11 +29,10 @@ func TestAccThreatprotectionGridRuleResource_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccThreatprotectionGridRuleBasicConfig("TEMPLATE_REPLACE_ME"),
+				Config: testAccThreatprotectionGridRuleBasicConfig(testThreatProtectionRuleTemplate),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckThreatprotectionGridRuleExists(context.Background(), resourceName, &v),
-					// TODO: check and validate these
-					resource.TestCheckResourceAttr(resourceName, "template", "TEMPLATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "template", testThreatProtectionRuleTemplate),
 					// Test fields with default value
 					resource.TestCheckResourceAttr(resourceName, "disabled", "true"),
 				),
@@ -51,7 +52,7 @@ func TestAccThreatprotectionGridRuleResource_disappears(t *testing.T) {
 		CheckDestroy:             testAccCheckThreatprotectionGridRuleDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccThreatprotectionGridRuleBasicConfig("TEMPLATE_REPLACE_ME"),
+				Config: testAccThreatprotectionGridRuleBasicConfig(testThreatProtectionRuleTemplate),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckThreatprotectionGridRuleExists(context.Background(), resourceName, &v),
 					testAccCheckThreatprotectionGridRuleDisappears(context.Background(), &v),
@@ -72,7 +73,7 @@ func TestAccThreatprotectionGridRuleResource_Import(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccThreatprotectionGridRuleBasicConfig("TEMPLATE_REPLACE_ME"),
+				Config: testAccThreatprotectionGridRuleBasicConfig(testThreatProtectionRuleTemplate),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckThreatprotectionGridRuleExists(context.Background(), resourceName, &v),
 				),
@@ -110,7 +111,7 @@ func TestAccThreatprotectionGridRuleResource_Comment(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccThreatprotectionGridRuleComment("TEMPLATE_REPLACE_ME", "Comment for the object"),
+				Config: testAccThreatprotectionGridRuleComment(testThreatProtectionRuleTemplate, "Comment for the object"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckThreatprotectionGridRuleExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "comment", "Comment for the object"),
@@ -118,7 +119,7 @@ func TestAccThreatprotectionGridRuleResource_Comment(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccThreatprotectionGridRuleComment("TEMPLATE_REPLACE_ME", "Updated comment for the object"),
+				Config: testAccThreatprotectionGridRuleComment(testThreatProtectionRuleTemplate, "Updated comment for the object"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckThreatprotectionGridRuleExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "comment", "Updated comment for the object"),
@@ -132,8 +133,36 @@ func TestAccThreatprotectionGridRuleResource_Comment(t *testing.T) {
 func TestAccThreatprotectionGridRuleResource_Config(t *testing.T) {
 	var resourceName = "nios_threatprotection_grid_rule.test_config"
 	var v threatprotection.ThreatprotectionGridRule
-	configVal := map[string]any{}
-	configValUpdated := map[string]any{}
+	configVal := map[string]any{
+		"action":       "ALERT",
+		"log_severity": "CRITICAL",
+		"params": map[string]any{
+			"name":  "param1",
+			"value": "value1",
+		},
+	}
+	configValUpdate := map[string]any{
+		"action":       "DROP",
+		"log_severity": "INFORMATIONAL",
+		"params": []map[string]string{
+			{
+				"name":  "param1",
+				"value": "value1",
+			},
+			{
+				"name":  "param2",
+				"value": "value2",
+			},
+		},
+	}
+	configValUpdate2 := map[string]any{
+		"action":       "PASS",
+		"log_severity": "MAJOR",
+	}
+	configValUpdate3 := map[string]any{
+		"action":       "ALERT",
+		"log_severity": "WARNING",
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -141,18 +170,44 @@ func TestAccThreatprotectionGridRuleResource_Config(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccThreatprotectionGridRuleConfig("TEMPLATE_REPLACE_ME", configVal),
+				Config: testAccThreatprotectionGridRuleConfig(testThreatProtectionRuleTemplate, configVal),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckThreatprotectionGridRuleExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "config", "CONFIG_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "config.action", "ALERT"),
+					resource.TestCheckResourceAttr(resourceName, "config.log_severity", "CRITICAL"),
+					resource.TestCheckResourceAttr(resourceName, "config.params.0.name", "param1"),
+					resource.TestCheckResourceAttr(resourceName, "config.params.0.value", "value1"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccThreatprotectionGridRuleConfig("TEMPLATE_REPLACE_ME", configValUpdated),
+				Config: testAccThreatprotectionGridRuleConfig(testThreatProtectionRuleTemplate, configValUpdate),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckThreatprotectionGridRuleExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "config", "CONFIG_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "config.action", "DROP"),
+					resource.TestCheckResourceAttr(resourceName, "config.log_severity", "INFORMATIONAL"),
+					resource.TestCheckResourceAttr(resourceName, "config.params.0.name", "param1"),
+					resource.TestCheckResourceAttr(resourceName, "config.params.0.value", "value1"),
+					resource.TestCheckResourceAttr(resourceName, "config.params.1.name", "param2"),
+					resource.TestCheckResourceAttr(resourceName, "config.params.1.value", "value2"),
+				),
+			},
+			// Update and Read
+			{
+				Config: testAccThreatprotectionGridRuleConfig(testThreatProtectionRuleTemplate, configValUpdate2),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckThreatprotectionGridRuleExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "config.action", "PASS"),
+					resource.TestCheckResourceAttr(resourceName, "config.log_severity", "MAJOR"),
+				),
+			},
+			// Update and Read
+			{
+				Config: testAccThreatprotectionGridRuleConfig(testThreatProtectionRuleTemplate, configValUpdate3),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckThreatprotectionGridRuleExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "config.action", "ALERT"),
+					resource.TestCheckResourceAttr(resourceName, "config.log_severity", "WARNING"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -169,7 +224,7 @@ func TestAccThreatprotectionGridRuleResource_Disabled(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccThreatprotectionGridRuleDisabled("TEMPLATE_REPLACE_ME", "true"),
+				Config: testAccThreatprotectionGridRuleDisabled(testThreatProtectionRuleTemplate, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckThreatprotectionGridRuleExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "disabled", "true"),
@@ -177,7 +232,7 @@ func TestAccThreatprotectionGridRuleResource_Disabled(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccThreatprotectionGridRuleDisabled("TEMPLATE_REPLACE_ME", "false"),
+				Config: testAccThreatprotectionGridRuleDisabled(testThreatProtectionRuleTemplate, "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckThreatprotectionGridRuleExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "disabled", "false"),
@@ -191,6 +246,7 @@ func TestAccThreatprotectionGridRuleResource_Disabled(t *testing.T) {
 func TestAccThreatprotectionGridRuleResource_Template(t *testing.T) {
 	var resourceName = "nios_threatprotection_grid_rule.test_template"
 	var v threatprotection.ThreatprotectionGridRule
+	testThreatProtectionRuleTemplateUpdate := ""
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -198,18 +254,18 @@ func TestAccThreatprotectionGridRuleResource_Template(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccThreatprotectionGridRuleTemplate("TEMPLATE_REPLACE_ME"),
+				Config: testAccThreatprotectionGridRuleTemplate(testThreatProtectionRuleTemplate),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckThreatprotectionGridRuleExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "template", "TEMPLATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "template", testThreatProtectionRuleTemplate),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccThreatprotectionGridRuleTemplate("TEMPLATE_REPLACE_ME"),
+				Config: testAccThreatprotectionGridRuleTemplate(testThreatProtectionRuleTemplateUpdate),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckThreatprotectionGridRuleExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "template", "TEMPLATE_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "template", testThreatProtectionRuleTemplateUpdate),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -306,12 +362,13 @@ resource "nios_threatprotection_grid_rule" "test_comment" {
 }
 
 func testAccThreatprotectionGridRuleConfig(template string, config map[string]any) string {
+	configStr := utils.ConvertMapToHCL(config)
 	return fmt.Sprintf(`
 resource "nios_threatprotection_grid_rule" "test_config" {
     template = %q
     config = %s
 }
-`, template, config)
+`, template, configStr)
 }
 
 func testAccThreatprotectionGridRuleDisabled(template string, disabled string) string {

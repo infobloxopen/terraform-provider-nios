@@ -1,7 +1,7 @@
 // Retrieve a specific Threat Protection Grid Rule by filters
 data "nios_threatprotection_grid_rule" "get_threatprotection_grid_rule_using_filters" {
   filters = {
-    template = "TEMPLATE_REPLACE_ME"
+    template = ""
   }
 }
 

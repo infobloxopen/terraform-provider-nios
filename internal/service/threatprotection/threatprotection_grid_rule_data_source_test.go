@@ -23,7 +23,7 @@ func TestAccThreatprotectionGridRuleDataSource_Filters(t *testing.T) {
 		CheckDestroy:             testAccCheckThreatprotectionGridRuleDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccThreatprotectionGridRuleDataSourceConfigFilters("TEMPLATE_REPLACE_ME"),
+				Config: testAccThreatprotectionGridRuleDataSourceConfigFilters(testThreatProtectionRuleTemplate),
 				Check: resource.ComposeTestCheckFunc(
 					append([]resource.TestCheckFunc{
 						testAccCheckThreatprotectionGridRuleExists(context.Background(), resourceName, &v),
