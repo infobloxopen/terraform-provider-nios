@@ -367,56 +367,76 @@ func (r *Ipv6fixedaddressResource) ValidateConfig(ctx context.Context, req resou
 
 	// Validate based on address_type only if func_call is not set
 	if data.FuncCall.IsNull() || data.FuncCall.IsUnknown() {
-		addressType := data.AddressType.ValueString()
-		if addressType == "" || data.AddressType.IsNull() || data.AddressType.IsUnknown() {
+
+		// For Configuration object, any attributes not defined by the user appear as null, unless derived from another instance.
+		// We perform IsUnknown() check to handle variables from .tfvars that are resolved
+		// during the plan phase rather than validation phase, preventing false validation errors.
+
+		var addressType string
+		if !data.AddressType.IsUnknown() {
 			addressType = "ADDRESS"
+			if !data.AddressType.IsNull() {
+				addressType = data.AddressType.ValueString()
+			}
 		}
 
 		switch addressType {
 		case "ADDRESS":
-			if data.Ipv6addr.IsNull() || data.Ipv6addr.IsUnknown() {
-				resp.Diagnostics.AddAttributeError(
-					path.Root("ipv6addr"),
-					"Missing Required Attribute",
-					"When address_type is set to 'ADDRESS', the 'ipv6addr' attribute must be specified.",
-				)
+			if !data.Ipv6addr.IsUnknown() {
+				if data.Ipv6addr.IsNull() {
+					resp.Diagnostics.AddAttributeError(
+						path.Root("ipv6addr"),
+						"Missing Required Attribute",
+						"When address_type is set to 'ADDRESS' (default), the 'ipv6addr' attribute must be specified.",
+					)
+				}
 			}
 		case "PREFIX":
-			if data.Ipv6prefix.IsNull() || data.Ipv6prefix.IsUnknown() {
-				resp.Diagnostics.AddAttributeError(
-					path.Root("ipv6prefix"),
-					"Missing Required Attribute",
-					"When address_type is set to 'PREFIX', the 'ipv6prefix' attribute must be specified.",
-				)
+			if !data.Ipv6prefix.IsUnknown() {
+				if data.Ipv6prefix.IsNull() {
+					resp.Diagnostics.AddAttributeError(
+						path.Root("ipv6prefix"),
+						"Missing Required Attribute",
+						"When address_type is set to 'PREFIX', the 'ipv6prefix' attribute must be specified.",
+					)
+				}
 			}
-			if data.Ipv6prefixBits.IsNull() || data.Ipv6prefixBits.IsUnknown() {
-				resp.Diagnostics.AddAttributeError(
-					path.Root("ipv6prefix_bits"),
-					"Missing Required Attribute",
-					"When address_type is set to 'PREFIX', the 'ipv6prefix_bits' attribute must be specified.",
-				)
+			if !data.Ipv6prefixBits.IsUnknown() {
+				if data.Ipv6prefixBits.IsNull() {
+					resp.Diagnostics.AddAttributeError(
+						path.Root("ipv6prefix_bits"),
+						"Missing Required Attribute",
+						"When address_type is set to 'PREFIX', the 'ipv6prefix_bits' attribute must be specified.",
+					)
+				}
 			}
 		case "BOTH":
-			if data.Ipv6addr.IsNull() || data.Ipv6addr.IsUnknown() {
-				resp.Diagnostics.AddAttributeError(
-					path.Root("ipv6addr"),
-					"Missing Required Attribute",
-					"When address_type is set to 'BOTH', the 'ipv6addr' attribute must be specified.",
-				)
+			if !data.Ipv6addr.IsUnknown() {
+				if data.Ipv6addr.IsNull() {
+					resp.Diagnostics.AddAttributeError(
+						path.Root("ipv6addr"),
+						"Missing Required Attribute",
+						"When address_type is set to 'BOTH', the 'ipv6addr' attribute must be specified.",
+					)
+				}
 			}
-			if data.Ipv6prefix.IsNull() || data.Ipv6prefix.IsUnknown() {
-				resp.Diagnostics.AddAttributeError(
-					path.Root("ipv6prefix"),
-					"Missing Required Attribute",
-					"When address_type is set to 'BOTH', the 'ipv6prefix' attribute must be specified.",
-				)
+			if !data.Ipv6prefix.IsUnknown() {
+				if data.Ipv6prefix.IsNull() {
+					resp.Diagnostics.AddAttributeError(
+						path.Root("ipv6prefix"),
+						"Missing Required Attribute",
+						"When address_type is set to 'BOTH', the 'ipv6prefix' attribute must be specified.",
+					)
+				}
 			}
-			if data.Ipv6prefixBits.IsNull() || data.Ipv6prefixBits.IsUnknown() {
-				resp.Diagnostics.AddAttributeError(
-					path.Root("ipv6prefix_bits"),
-					"Missing Required Attribute",
-					"When address_type is set to 'BOTH', the 'ipv6prefix_bits' attribute must be specified.",
-				)
+			if !data.Ipv6prefixBits.IsUnknown() {
+				if data.Ipv6prefixBits.IsNull() {
+					resp.Diagnostics.AddAttributeError(
+						path.Root("ipv6prefix_bits"),
+						"Missing Required Attribute",
+						"When address_type is set to 'BOTH', the 'ipv6prefix_bits' attribute must be specified.",
+					)
+				}
 			}
 		}
 	}

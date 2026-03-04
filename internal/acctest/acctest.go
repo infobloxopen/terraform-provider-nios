@@ -103,6 +103,7 @@ func RandomMACAddress() string {
 		rand.Intn(256))
 }
 
+// Random32Hexadecimal generates a random 32-character hexadecimal string
 func Random32Hexadecimal() string {
 	// Two 64-bit random values = 128 bits = 32 hex characters
 	return fmt.Sprintf("%016x%016x", rand.Uint64(), rand.Uint64())

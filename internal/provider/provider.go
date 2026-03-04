@@ -235,6 +235,7 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 		grid.NewUpgradegroupResource,
 		grid.NewGridServicerestartGroupResource,
 		grid.NewDistributionscheduleResource,
+		grid.NewUpgradescheduleResource,
 
 		discovery.NewDiscoveryCredentialgroupResource,
 		discovery.NewVdiscoverytaskResource,
@@ -258,6 +259,8 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 		rpz.NewRecordRpzCnameClientipaddressdnResource,
 
 		rir.NewRirOrganizationResource,
+
+		parentalcontrol.NewParentalcontrolAvpResource,
 
 		parentalcontrol.NewParentalcontrolBlockingpolicyResource,
 	}
@@ -379,6 +382,7 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 		grid.NewUpgradegroupDataSource,
 		grid.NewGridServicerestartGroupDataSource,
 		grid.NewDistributionscheduleDataSource,
+		grid.NewUpgradescheduleDataSource,
 
 		discovery.NewDiscoveryCredentialgroupDataSource,
 		discovery.NewVdiscoverytaskDataSource,
@@ -403,6 +407,8 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 		rpz.NewRecordRpzCnameClientipaddressdnDataSource,
 
 		rir.NewRirOrganizationDataSource,
+
+		parentalcontrol.NewParentalcontrolAvpDataSource,
 
 		parentalcontrol.NewParentalcontrolBlockingpolicyDataSource,
 	}
