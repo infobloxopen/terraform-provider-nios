@@ -20,7 +20,7 @@ data "nios_microsoft_msserver_adsites_site" "get_msserver_adsites_using_filters"
   }
 }
 
-// Retrieve all Microsoft Servers
+// Retrieve all Microsoft Server Adsites
 data "nios_microsoft_msserver_adsites_site" "get_all_msserver_adsites" {}
 ```
 
