@@ -532,7 +532,9 @@ func FormatEntrustnshieldHsmToHCL(hsmList []map[string]any) string {
 			case int:
 				remotePort = v
 			case string:
-				fmt.Sscanf(v, "%d", &remotePort)
+				if _, err := fmt.Scanf(v, "%d", &remotePort); err != nil {
+					remotePort = 9004
+				}
 			}
 		}
 
