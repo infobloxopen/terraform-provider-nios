@@ -261,6 +261,7 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 		rir.NewRirOrganizationResource,
 
 		parentalcontrol.NewParentalcontrolAvpResource,
+		parentalcontrol.NewParentalcontrolBlockingpolicyResource,
 	}
 }
 
@@ -407,6 +408,7 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 		rir.NewRirOrganizationDataSource,
 
 		parentalcontrol.NewParentalcontrolAvpDataSource,
+		parentalcontrol.NewParentalcontrolBlockingpolicyDataSource,
 	}
 }
 
