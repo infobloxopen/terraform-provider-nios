@@ -30,7 +30,7 @@ resource "nios_security_saml_authservice" "saml_authservice_with_additional_fiel
     idp_type           = "OKTA"
     metadata_file_path = "<path-to-the-metadata-file>"
     groupname          = "group1"
-    comment            = "IDP for SAML Authserv232ce"
+    comment            = "IDP for SAML Authservice"
     sso_redirect_url   = "2.2.2.2"
   }
   session_timeout = 120
@@ -65,7 +65,7 @@ Optional:
 
 - `comment` (String) The SAML Identity Provider descriptive comment.
 - `groupname` (String) The SAML groupname optional user group attribute.
-- `metadata_file_path` (String) The file path to the certificate.
+- `metadata_file_path` (String) The file path to the IdP SAML metadata XML file.
 - `metadata_url` (String) Identity Provider Metadata URL.
 - `sso_redirect_url` (String) host name or IP address of the GM
 

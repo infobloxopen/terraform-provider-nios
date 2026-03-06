@@ -65,7 +65,7 @@ Optional:
 
 - `comment` (String) The SAML Identity Provider descriptive comment.
 - `groupname` (String) The SAML groupname optional user group attribute.
-- `metadata_file_path` (String) The file path to the certificate.
+- `metadata_file_path` (String) The file path to the IdP SAML metadata XML file.
 - `metadata_url` (String) Identity Provider Metadata URL.
 - `sso_redirect_url` (String) host name or IP address of the GM
 
