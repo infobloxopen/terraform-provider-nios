@@ -121,6 +121,7 @@ var MsserverResourceSchemaAttributes = map[string]schema.Attribute{
 		Required: true,
 		Validators: []validator.String{
 			customvalidator.ValidateTrimmedString(),
+			customvalidator.IsValidIPOrFQDN(),
 		},
 		MarkdownDescription: "The address or FQDN of the server.",
 	},
