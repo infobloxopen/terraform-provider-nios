@@ -20,7 +20,7 @@ data "nios_security_saml_authservice" "get_saml_authservice_using_filters" {
   }
 }
 
-// Retrieve all Certificate Authservices
+// Retrieve all SAML Authservices
 data "nios_security_saml_authservice" "get_all_saml_authservices" {}
 ```
 

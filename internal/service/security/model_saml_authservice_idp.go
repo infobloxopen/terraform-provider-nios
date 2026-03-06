@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
@@ -14,6 +15,7 @@ import (
 	"github.com/infobloxopen/infoblox-nios-go-client/security"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
 type SamlAuthserviceIdpModel struct {
@@ -51,8 +53,12 @@ var SamlAuthserviceIdpResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "SAML Identity Provider type.",
 	},
 	"comment": schema.StringAttribute{
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
+		Default:  stringdefault.StaticString(""),
+		Validators: []validator.String{
+			customvalidator.ValidateTrimmedString(),
+		},
 		MarkdownDescription: "The SAML Identity Provider descriptive comment.",
 	},
 	"metadata_url": schema.StringAttribute{
@@ -66,7 +72,7 @@ var SamlAuthserviceIdpResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"metadata_file_path": schema.StringAttribute{
 		Optional:            true,
-		MarkdownDescription: "The file path to the certificate.",
+		MarkdownDescription: "The file path to the IdP SAML metadata XML file.",
 	},
 	"groupname": schema.StringAttribute{
 		Optional:            true,

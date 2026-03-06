@@ -15,7 +15,7 @@ resource "nios_security_saml_authservice" "saml_authservice_with_additional_fiel
     idp_type           = "OKTA"
     metadata_file_path = "<path-to-the-metadata-file>"
     groupname          = "group1"
-    comment            = "IDP for SAML Authserv232ce"
+    comment            = "IDP for SAML Authservice"
     sso_redirect_url   = "2.2.2.2"
   }
   session_timeout = 120

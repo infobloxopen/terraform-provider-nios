@@ -75,9 +75,9 @@ func (r *SamlAuthserviceResource) Create(ctx context.Context, req resource.Creat
 	}
 
 	// Process IDP metadata file
-    if !r.processIdpMetadata(ctx, &data, &resp.Diagnostics) {
-        return
-    }
+	if !r.processIdpMetadata(ctx, &data, &resp.Diagnostics) {
+		return
+	}
 
 	apiRes, _, err := r.client.SecurityAPI.
 		SamlAuthserviceAPI.
@@ -148,9 +148,9 @@ func (r *SamlAuthserviceResource) Update(ctx context.Context, req resource.Updat
 	}
 
 	// Process IDP metadata file
-    if !r.processIdpMetadata(ctx, &data, &resp.Diagnostics) {
-        return
-    }
+	if !r.processIdpMetadata(ctx, &data, &resp.Diagnostics) {
+		return
+	}
 	diags = req.State.GetAttribute(ctx, path.Root("ref"), &data.Ref)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)

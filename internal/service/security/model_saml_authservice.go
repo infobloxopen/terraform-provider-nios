@@ -101,12 +101,12 @@ func (m *SamlAuthserviceModel) Flatten(ctx context.Context, from *security.SamlA
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
 	m.Comment = flex.FlattenStringPointer(from.Comment)
-	//m.Idp = FlattenSamlAuthserviceIdp(ctx, from.Idp, diags)
 	planIdp := m.Idp
 	m.Idp = FlattenSamlAuthserviceIdp(ctx, from.Idp, diags)
 	if !planIdp.IsUnknown() {
-		idpVal, diags := utils.CopyFieldFromPlanToRespObject(ctx, planIdp, m.Idp, "metadata_file_path")
-		if !diags.HasError() {
+		idpVal, copyDiags := utils.CopyFieldFromPlanToRespObject(ctx, planIdp, m.Idp, "metadata_file_path")
+		diags.Append(copyDiags.Errors()...)
+		if !copyDiags.HasError() {
 			m.Idp = idpVal.(types.Object)
 		}
 	}

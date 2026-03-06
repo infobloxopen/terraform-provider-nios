@@ -312,13 +312,13 @@ resource "nios_security_saml_authservice" "test_comment" {
 }
 
 func testAccSamlAuthserviceIdp(name string, idp map[string]any) string {
-	ipdString := utils.ConvertMapToHCL(idp)
+	idpString := utils.ConvertMapToHCL(idp)
 	return fmt.Sprintf(`
 resource "nios_security_saml_authservice" "test_idp" {
 	name = %q
     idp = %s
 }
-`, name, ipdString)
+`, name, idpString)
 }
 
 func testAccSamlAuthserviceName(name string, idp map[string]any) string {
