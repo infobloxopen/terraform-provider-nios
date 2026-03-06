@@ -9,12 +9,26 @@ import (
 
 	"github.com/infobloxopen/infoblox-nios-go-client/security"
 	"github.com/infobloxopen/terraform-provider-nios/internal/acctest"
+	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
 func TestAccRadiusAuthserviceDataSource_Filters(t *testing.T) {
 	dataSourceName := "data.nios_security_radius_authservice.test"
 	resourceName := "nios_security_radius_authservice.test"
 	var v security.RadiusAuthservice
+	name := acctest.RandomNameWithPrefix("radius-authservice")
+	servers := []map[string]interface{}{
+		{
+			"acct_port":      1813,
+			"address":        "2.2.3.1",
+			"auth_port":      1812,
+			"auth_type":      "PAP",
+			"disable":        false,
+			"use_accounting": false,
+			"use_mgmt_port":  false,
+			"shared_secret":  "test",
+		},
+	}
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -22,7 +36,7 @@ func TestAccRadiusAuthserviceDataSource_Filters(t *testing.T) {
 		CheckDestroy:             testAccCheckRadiusAuthserviceDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccRadiusAuthserviceDataSourceConfigFilters(),
+				Config: testAccRadiusAuthserviceDataSourceConfigFilters(name, servers),
 				Check: resource.ComposeTestCheckFunc(
 					append([]resource.TestCheckFunc{
 						testAccCheckRadiusAuthserviceExists(context.Background(), resourceName, &v),
@@ -53,15 +67,18 @@ func testAccCheckRadiusAuthserviceResourceAttrPair(resourceName, dataSourceName 
 	}
 }
 
-func testAccRadiusAuthserviceDataSourceConfigFilters() string {
+func testAccRadiusAuthserviceDataSourceConfigFilters(name string, servers []map[string]any) string {
+	serversString := utils.ConvertSliceOfMapsToHCL(servers)
 	return fmt.Sprintf(`
 resource "nios_security_radius_authservice" "test" {
+	name = %q
+	servers = %s
 }
 
 data "nios_security_radius_authservice" "test" {
   filters = {
-	 = nios_security_radius_authservice.test.
+	name = nios_security_radius_authservice.test.name
   }
 }
-`)
+`, name, serversString)
 }

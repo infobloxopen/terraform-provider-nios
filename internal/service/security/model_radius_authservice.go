@@ -16,7 +16,9 @@ import (
 
 	"github.com/infobloxopen/infoblox-nios-go-client/security"
 
+	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
 type RadiusAuthserviceModel struct {
@@ -186,5 +188,12 @@ func (m *RadiusAuthserviceModel) Flatten(ctx context.Context, from *security.Rad
 	m.Mode = flex.FlattenStringPointer(from.Mode)
 	m.Name = flex.FlattenStringPointer(from.Name)
 	m.RecoveryInterval = flex.FlattenInt64Pointer(from.RecoveryInterval)
+	planServers := m.Servers
 	m.Servers = flex.FlattenFrameworkListNestedBlock(ctx, from.Servers, RadiusAuthserviceServersAttrTypes, diags, FlattenRadiusAuthserviceServers)
+	if !planServers.IsNull() {
+		result, diags := utils.CopyFieldFromPlanToRespList(ctx, planServers, m.Servers, "shared_secret")
+		if !diags.HasError() {
+			m.Servers = result.(basetypes.ListValue)
+		}
+	}
 }

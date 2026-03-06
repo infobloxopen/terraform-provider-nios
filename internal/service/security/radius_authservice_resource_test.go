@@ -30,7 +30,7 @@ func TestAccRadiusAuthserviceResource_basic(t *testing.T) {
 			"disable":        false,
 			"use_accounting": false,
 			"use_mgmt_port":  false,
-			"shared_secret": "test",
+			"shared_secret":  "test",
 		},
 	}
 
@@ -43,8 +43,17 @@ func TestAccRadiusAuthserviceResource_basic(t *testing.T) {
 				Config: testAccRadiusAuthserviceBasicConfig(name, servers),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRadiusAuthserviceExists(context.Background(), resourceName, &v),
-					// TODO: check and validate these
+					resource.TestCheckResourceAttr(resourceName, "name", name),
 					// Test fields with default value
+					resource.TestCheckResourceAttr(resourceName, "acct_retries", "1000"),
+					resource.TestCheckResourceAttr(resourceName, "acct_timeout", "5000"),
+					resource.TestCheckResourceAttr(resourceName, "auth_retries", "6"),
+					resource.TestCheckResourceAttr(resourceName, "auth_timeout", "5000"),
+					resource.TestCheckResourceAttr(resourceName, "cache_ttl", "3600"),
+					resource.TestCheckResourceAttr(resourceName, "disable", "false"),
+					resource.TestCheckResourceAttr(resourceName, "enable_cache", "false"),
+					resource.TestCheckResourceAttr(resourceName, "mode", "HUNT_GROUP"),
+					resource.TestCheckResourceAttr(resourceName, "recovery_interval", "30"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -55,6 +64,19 @@ func TestAccRadiusAuthserviceResource_basic(t *testing.T) {
 func TestAccRadiusAuthserviceResource_disappears(t *testing.T) {
 	resourceName := "nios_security_radius_authservice.test"
 	var v security.RadiusAuthservice
+	name := acctest.RandomNameWithPrefix("radius-authservice")
+	servers := []map[string]interface{}{
+		{
+			"acct_port":      1813,
+			"address":        "2.2.3.1",
+			"auth_port":      1812,
+			"auth_type":      "PAP",
+			"disable":        false,
+			"use_accounting": false,
+			"use_mgmt_port":  false,
+			"shared_secret":  "test",
+		},
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -62,7 +84,7 @@ func TestAccRadiusAuthserviceResource_disappears(t *testing.T) {
 		CheckDestroy:             testAccCheckRadiusAuthserviceDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccRadiusAuthserviceBasicConfig("", nil),
+				Config: testAccRadiusAuthserviceBasicConfig(name, servers),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRadiusAuthserviceExists(context.Background(), resourceName, &v),
 					testAccCheckRadiusAuthserviceDisappears(context.Background(), &v),
@@ -76,6 +98,19 @@ func TestAccRadiusAuthserviceResource_disappears(t *testing.T) {
 func TestAccRadiusAuthserviceResource_AcctRetries(t *testing.T) {
 	var resourceName = "nios_security_radius_authservice.test_acct_retries"
 	var v security.RadiusAuthservice
+	name := acctest.RandomNameWithPrefix("radius-authservice")
+	servers := []map[string]interface{}{
+		{
+			"acct_port":      1813,
+			"address":        "2.2.3.1",
+			"auth_port":      1812,
+			"auth_type":      "PAP",
+			"disable":        false,
+			"use_accounting": false,
+			"use_mgmt_port":  false,
+			"shared_secret":  "test",
+		},
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -83,18 +118,18 @@ func TestAccRadiusAuthserviceResource_AcctRetries(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRadiusAuthserviceAcctRetries("ACCT_RETRIES_REPLACE_ME"),
+				Config: testAccRadiusAuthserviceAcctRetries(name, servers, 20),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRadiusAuthserviceExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "acct_retries", "ACCT_RETRIES_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "acct_retries", "20"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccRadiusAuthserviceAcctRetries("ACCT_RETRIES_UPDATE_REPLACE_ME"),
+				Config: testAccRadiusAuthserviceAcctRetries(name, servers, 30),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRadiusAuthserviceExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "acct_retries", "ACCT_RETRIES_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "acct_retries", "30"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -105,6 +140,19 @@ func TestAccRadiusAuthserviceResource_AcctRetries(t *testing.T) {
 func TestAccRadiusAuthserviceResource_AcctTimeout(t *testing.T) {
 	var resourceName = "nios_security_radius_authservice.test_acct_timeout"
 	var v security.RadiusAuthservice
+	name := acctest.RandomNameWithPrefix("radius-authservice")
+	servers := []map[string]interface{}{
+		{
+			"acct_port":      1813,
+			"address":        "2.2.3.1",
+			"auth_port":      1812,
+			"auth_type":      "PAP",
+			"disable":        false,
+			"use_accounting": false,
+			"use_mgmt_port":  false,
+			"shared_secret":  "test",
+		},
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -112,18 +160,18 @@ func TestAccRadiusAuthserviceResource_AcctTimeout(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRadiusAuthserviceAcctTimeout("ACCT_TIMEOUT_REPLACE_ME"),
+				Config: testAccRadiusAuthserviceAcctTimeout(name, servers, 3600),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRadiusAuthserviceExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "acct_timeout", "ACCT_TIMEOUT_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "acct_timeout", "3600"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccRadiusAuthserviceAcctTimeout("ACCT_TIMEOUT_UPDATE_REPLACE_ME"),
+				Config: testAccRadiusAuthserviceAcctTimeout(name, servers, 7200),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRadiusAuthserviceExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "acct_timeout", "ACCT_TIMEOUT_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "acct_timeout", "7200"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -134,6 +182,19 @@ func TestAccRadiusAuthserviceResource_AcctTimeout(t *testing.T) {
 func TestAccRadiusAuthserviceResource_AuthRetries(t *testing.T) {
 	var resourceName = "nios_security_radius_authservice.test_auth_retries"
 	var v security.RadiusAuthservice
+	name := acctest.RandomNameWithPrefix("radius-authservice")
+	servers := []map[string]interface{}{
+		{
+			"acct_port":      1813,
+			"address":        "2.2.3.1",
+			"auth_port":      1812,
+			"auth_type":      "PAP",
+			"disable":        false,
+			"use_accounting": false,
+			"use_mgmt_port":  false,
+			"shared_secret":  "test",
+		},
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -141,18 +202,18 @@ func TestAccRadiusAuthserviceResource_AuthRetries(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRadiusAuthserviceAuthRetries("AUTH_RETRIES_REPLACE_ME"),
+				Config: testAccRadiusAuthserviceAuthRetries(name, servers, 10),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRadiusAuthserviceExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "auth_retries", "AUTH_RETRIES_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "auth_retries", "10"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccRadiusAuthserviceAuthRetries("AUTH_RETRIES_UPDATE_REPLACE_ME"),
+				Config: testAccRadiusAuthserviceAuthRetries(name, servers, 7),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRadiusAuthserviceExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "auth_retries", "AUTH_RETRIES_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "auth_retries", "7"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -163,6 +224,19 @@ func TestAccRadiusAuthserviceResource_AuthRetries(t *testing.T) {
 func TestAccRadiusAuthserviceResource_AuthTimeout(t *testing.T) {
 	var resourceName = "nios_security_radius_authservice.test_auth_timeout"
 	var v security.RadiusAuthservice
+	name := acctest.RandomNameWithPrefix("radius-authservice")
+	servers := []map[string]interface{}{
+		{
+			"acct_port":      1813,
+			"address":        "2.2.3.1",
+			"auth_port":      1812,
+			"auth_type":      "PAP",
+			"disable":        false,
+			"use_accounting": false,
+			"use_mgmt_port":  false,
+			"shared_secret":  "test",
+		},
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -170,18 +244,18 @@ func TestAccRadiusAuthserviceResource_AuthTimeout(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRadiusAuthserviceAuthTimeout("AUTH_TIMEOUT_REPLACE_ME"),
+				Config: testAccRadiusAuthserviceAuthTimeout(name, servers, 4000),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRadiusAuthserviceExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "auth_timeout", "AUTH_TIMEOUT_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "auth_timeout", "4000"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccRadiusAuthserviceAuthTimeout("AUTH_TIMEOUT_UPDATE_REPLACE_ME"),
+				Config: testAccRadiusAuthserviceAuthTimeout(name, servers, 4500),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRadiusAuthserviceExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "auth_timeout", "AUTH_TIMEOUT_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "auth_timeout", "4500"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -192,6 +266,19 @@ func TestAccRadiusAuthserviceResource_AuthTimeout(t *testing.T) {
 func TestAccRadiusAuthserviceResource_CacheTtl(t *testing.T) {
 	var resourceName = "nios_security_radius_authservice.test_cache_ttl"
 	var v security.RadiusAuthservice
+	name := acctest.RandomNameWithPrefix("radius-authservice")
+	servers := []map[string]interface{}{
+		{
+			"acct_port":      1813,
+			"address":        "2.2.3.1",
+			"auth_port":      1812,
+			"auth_type":      "PAP",
+			"disable":        false,
+			"use_accounting": false,
+			"use_mgmt_port":  false,
+			"shared_secret":  "test",
+		},
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -199,18 +286,18 @@ func TestAccRadiusAuthserviceResource_CacheTtl(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRadiusAuthserviceCacheTtl("CACHE_TTL_REPLACE_ME"),
+				Config: testAccRadiusAuthserviceCacheTtl(name, servers, 4000),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRadiusAuthserviceExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "cache_ttl", "CACHE_TTL_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "cache_ttl", "4000"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccRadiusAuthserviceCacheTtl("CACHE_TTL_UPDATE_REPLACE_ME"),
+				Config: testAccRadiusAuthserviceCacheTtl(name, servers, 4500),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRadiusAuthserviceExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "cache_ttl", "CACHE_TTL_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "cache_ttl", "4500"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -221,6 +308,19 @@ func TestAccRadiusAuthserviceResource_CacheTtl(t *testing.T) {
 func TestAccRadiusAuthserviceResource_Comment(t *testing.T) {
 	var resourceName = "nios_security_radius_authservice.test_comment"
 	var v security.RadiusAuthservice
+	name := acctest.RandomNameWithPrefix("radius-authservice")
+	servers := []map[string]interface{}{
+		{
+			"acct_port":      1813,
+			"address":        "2.2.3.1",
+			"auth_port":      1812,
+			"auth_type":      "PAP",
+			"disable":        false,
+			"use_accounting": false,
+			"use_mgmt_port":  false,
+			"shared_secret":  "test",
+		},
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -228,18 +328,18 @@ func TestAccRadiusAuthserviceResource_Comment(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRadiusAuthserviceComment("COMMENT_REPLACE_ME"),
+				Config: testAccRadiusAuthserviceComment(name, servers, "This is a comment"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRadiusAuthserviceExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "comment", "COMMENT_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "comment", "This is a comment"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccRadiusAuthserviceComment("COMMENT_UPDATE_REPLACE_ME"),
+				Config: testAccRadiusAuthserviceComment(name, servers, "This is an updated comment"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRadiusAuthserviceExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "comment", "COMMENT_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "comment", "This is an updated comment"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -250,6 +350,19 @@ func TestAccRadiusAuthserviceResource_Comment(t *testing.T) {
 func TestAccRadiusAuthserviceResource_Disable(t *testing.T) {
 	var resourceName = "nios_security_radius_authservice.test_disable"
 	var v security.RadiusAuthservice
+	name := acctest.RandomNameWithPrefix("radius-authservice")
+	servers := []map[string]interface{}{
+		{
+			"acct_port":      1813,
+			"address":        "2.2.3.1",
+			"auth_port":      1812,
+			"auth_type":      "PAP",
+			"disable":        false,
+			"use_accounting": false,
+			"use_mgmt_port":  false,
+			"shared_secret":  "test",
+		},
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -257,18 +370,18 @@ func TestAccRadiusAuthserviceResource_Disable(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRadiusAuthserviceDisable("DISABLE_REPLACE_ME"),
+				Config: testAccRadiusAuthserviceDisable(name, servers, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRadiusAuthserviceExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "disable", "DISABLE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "disable", "true"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccRadiusAuthserviceDisable("DISABLE_UPDATE_REPLACE_ME"),
+				Config: testAccRadiusAuthserviceDisable(name, servers, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRadiusAuthserviceExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "disable", "DISABLE_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "disable", "false"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -279,6 +392,19 @@ func TestAccRadiusAuthserviceResource_Disable(t *testing.T) {
 func TestAccRadiusAuthserviceResource_EnableCache(t *testing.T) {
 	var resourceName = "nios_security_radius_authservice.test_enable_cache"
 	var v security.RadiusAuthservice
+	name := acctest.RandomNameWithPrefix("radius-authservice")
+	servers := []map[string]interface{}{
+		{
+			"acct_port":      1813,
+			"address":        "2.2.3.1",
+			"auth_port":      1812,
+			"auth_type":      "PAP",
+			"disable":        false,
+			"use_accounting": false,
+			"use_mgmt_port":  false,
+			"shared_secret":  "test",
+		},
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -286,18 +412,18 @@ func TestAccRadiusAuthserviceResource_EnableCache(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRadiusAuthserviceEnableCache("ENABLE_CACHE_REPLACE_ME"),
+				Config: testAccRadiusAuthserviceEnableCache(name, servers, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRadiusAuthserviceExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "enable_cache", "ENABLE_CACHE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "enable_cache", "true"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccRadiusAuthserviceEnableCache("ENABLE_CACHE_UPDATE_REPLACE_ME"),
+				Config: testAccRadiusAuthserviceEnableCache(name, servers, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRadiusAuthserviceExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "enable_cache", "ENABLE_CACHE_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "enable_cache", "false"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -308,6 +434,19 @@ func TestAccRadiusAuthserviceResource_EnableCache(t *testing.T) {
 func TestAccRadiusAuthserviceResource_Mode(t *testing.T) {
 	var resourceName = "nios_security_radius_authservice.test_mode"
 	var v security.RadiusAuthservice
+	name := acctest.RandomNameWithPrefix("radius-authservice")
+	servers := []map[string]interface{}{
+		{
+			"acct_port":      1813,
+			"address":        "2.2.3.1",
+			"auth_port":      1812,
+			"auth_type":      "PAP",
+			"disable":        false,
+			"use_accounting": false,
+			"use_mgmt_port":  false,
+			"shared_secret":  "test",
+		},
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -315,18 +454,18 @@ func TestAccRadiusAuthserviceResource_Mode(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRadiusAuthserviceMode("MODE_REPLACE_ME"),
+				Config: testAccRadiusAuthserviceMode(name, servers, "ROUND_ROBIN"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRadiusAuthserviceExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "mode", "MODE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "mode", "ROUND_ROBIN"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccRadiusAuthserviceMode("MODE_UPDATE_REPLACE_ME"),
+				Config: testAccRadiusAuthserviceMode(name, servers, "HUNT_GROUP"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRadiusAuthserviceExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "mode", "MODE_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "mode", "HUNT_GROUP"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -337,6 +476,20 @@ func TestAccRadiusAuthserviceResource_Mode(t *testing.T) {
 func TestAccRadiusAuthserviceResource_Name(t *testing.T) {
 	var resourceName = "nios_security_radius_authservice.test_name"
 	var v security.RadiusAuthservice
+	name := acctest.RandomNameWithPrefix("radius-authservice")
+	nameUpdate := acctest.RandomNameWithPrefix("radius-authservice")
+	servers := []map[string]interface{}{
+		{
+			"acct_port":      1813,
+			"address":        "2.2.3.1",
+			"auth_port":      1812,
+			"auth_type":      "PAP",
+			"disable":        false,
+			"use_accounting": false,
+			"use_mgmt_port":  false,
+			"shared_secret":  "test",
+		},
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -344,18 +497,18 @@ func TestAccRadiusAuthserviceResource_Name(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRadiusAuthserviceName("NAME_REPLACE_ME"),
+				Config: testAccRadiusAuthserviceName(name, servers),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRadiusAuthserviceExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "name", "NAME_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "name", name),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccRadiusAuthserviceName("NAME_UPDATE_REPLACE_ME"),
+				Config: testAccRadiusAuthserviceName(nameUpdate, servers),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRadiusAuthserviceExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "name", "NAME_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "name", nameUpdate),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -366,6 +519,19 @@ func TestAccRadiusAuthserviceResource_Name(t *testing.T) {
 func TestAccRadiusAuthserviceResource_RecoveryInterval(t *testing.T) {
 	var resourceName = "nios_security_radius_authservice.test_recovery_interval"
 	var v security.RadiusAuthservice
+	name := acctest.RandomNameWithPrefix("radius-authservice")
+	servers := []map[string]interface{}{
+		{
+			"acct_port":      1813,
+			"address":        "2.2.3.1",
+			"auth_port":      1812,
+			"auth_type":      "PAP",
+			"disable":        false,
+			"use_accounting": false,
+			"use_mgmt_port":  false,
+			"shared_secret":  "test",
+		},
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -373,18 +539,18 @@ func TestAccRadiusAuthserviceResource_RecoveryInterval(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRadiusAuthserviceRecoveryInterval("RECOVERY_INTERVAL_REPLACE_ME"),
+				Config: testAccRadiusAuthserviceRecoveryInterval(name, servers, 45),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRadiusAuthserviceExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "recovery_interval", "RECOVERY_INTERVAL_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "recovery_interval", "45"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccRadiusAuthserviceRecoveryInterval("RECOVERY_INTERVAL_UPDATE_REPLACE_ME"),
+				Config: testAccRadiusAuthserviceRecoveryInterval(name, servers, 60),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRadiusAuthserviceExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "recovery_interval", "RECOVERY_INTERVAL_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "recovery_interval", "60"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -395,25 +561,64 @@ func TestAccRadiusAuthserviceResource_RecoveryInterval(t *testing.T) {
 func TestAccRadiusAuthserviceResource_Servers(t *testing.T) {
 	var resourceName = "nios_security_radius_authservice.test_servers"
 	var v security.RadiusAuthservice
+	name := acctest.RandomNameWithPrefix("radius-authservice")
+	servers := []map[string]interface{}{
+		{
+			"acct_port":      1813,
+			"address":        "2.2.3.1",
+			"auth_port":      1812,
+			"auth_type":      "PAP",
+			"disable":        false,
+			"use_accounting": false,
+			"use_mgmt_port":  false,
+			"shared_secret":  "test",
+		},
+	}
 
+	serversUpdate := []map[string]interface{}{
+		{
+			"acct_port":      1813,
+			"address":        "2.2.3.2",
+			"auth_port":      1812,
+			"auth_type":      "CHAP",
+			"disable":        false,
+			"use_accounting": true,
+			"use_mgmt_port":  false,
+			"shared_secret":  "test",
+		},
+	}
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRadiusAuthserviceServers("SERVERS_REPLACE_ME"),
+				Config: testAccRadiusAuthserviceServers(name, servers),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRadiusAuthserviceExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "servers", "SERVERS_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "servers.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "servers.0.address", "2.2.3.1"),
+					resource.TestCheckResourceAttr(resourceName, "servers.0.auth_port", "1812"),
+					resource.TestCheckResourceAttr(resourceName, "servers.0.acct_port", "1813"),
+					resource.TestCheckResourceAttr(resourceName, "servers.0.auth_type", "PAP"),
+					resource.TestCheckResourceAttr(resourceName, "servers.0.disable", "false"),
+					resource.TestCheckResourceAttr(resourceName, "servers.0.use_accounting", "false"),
+					resource.TestCheckResourceAttr(resourceName, "servers.0.use_mgmt_port", "false"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccRadiusAuthserviceServers("SERVERS_UPDATE_REPLACE_ME"),
+				Config: testAccRadiusAuthserviceServers(name, serversUpdate),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRadiusAuthserviceExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "servers", "SERVERS_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "servers.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "servers.0.address", "2.2.3.2"),
+					resource.TestCheckResourceAttr(resourceName, "servers.0.auth_port", "1812"),
+					resource.TestCheckResourceAttr(resourceName, "servers.0.acct_port", "1813"),
+					resource.TestCheckResourceAttr(resourceName, "servers.0.auth_type", "CHAP"),
+					resource.TestCheckResourceAttr(resourceName, "servers.0.disable", "false"),
+					resource.TestCheckResourceAttr(resourceName, "servers.0.use_accounting", "true"),
+					resource.TestCheckResourceAttr(resourceName, "servers.0.use_mgmt_port", "false"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -489,98 +694,132 @@ resource "nios_security_radius_authservice" "test" {
 `, name, serversString)
 }
 
-func testAccRadiusAuthserviceAcctRetries(acctRetries string) string {
+func testAccRadiusAuthserviceAcctRetries(name string, servers []map[string]any, acctRetries int) string {
+	serversString := utils.ConvertSliceOfMapsToHCL(servers)
 	return fmt.Sprintf(`
 resource "nios_security_radius_authservice" "test_acct_retries" {
-    acct_retries = %q
+	name = %q
+	servers = %s
+    acct_retries = %d
 }
-`, acctRetries)
+`, name, serversString, acctRetries)
 }
 
-func testAccRadiusAuthserviceAcctTimeout(acctTimeout string) string {
+func testAccRadiusAuthserviceAcctTimeout(name string, servers []map[string]any, acctTimeout int) string {
+	serversString := utils.ConvertSliceOfMapsToHCL(servers)
 	return fmt.Sprintf(`
 resource "nios_security_radius_authservice" "test_acct_timeout" {
-    acct_timeout = %q
+	name = %q
+	servers = %s
+    acct_timeout = %d
 }
-`, acctTimeout)
+`, name, serversString, acctTimeout)
 }
 
-func testAccRadiusAuthserviceAuthRetries(authRetries string) string {
+func testAccRadiusAuthserviceAuthRetries(name string, servers []map[string]any, authRetries int) string {
+	serversString := utils.ConvertSliceOfMapsToHCL(servers)
 	return fmt.Sprintf(`
 resource "nios_security_radius_authservice" "test_auth_retries" {
-    auth_retries = %q
+	name = %q
+	servers = %s
+    auth_retries = %d
 }
-`, authRetries)
+`, name, serversString, authRetries)
 }
 
-func testAccRadiusAuthserviceAuthTimeout(authTimeout string) string {
+func testAccRadiusAuthserviceAuthTimeout(name string, servers []map[string]any, authTimeout int) string {
+	serversString := utils.ConvertSliceOfMapsToHCL(servers)
 	return fmt.Sprintf(`
 resource "nios_security_radius_authservice" "test_auth_timeout" {
-    auth_timeout = %q
+	name = %q
+	servers = %s
+    auth_timeout = %d
 }
-`, authTimeout)
+`, name, serversString, authTimeout)
 }
 
-func testAccRadiusAuthserviceCacheTtl(cacheTtl string) string {
+func testAccRadiusAuthserviceCacheTtl(name string, servers []map[string]any, cacheTtl int) string {
+	serversString := utils.ConvertSliceOfMapsToHCL(servers)
 	return fmt.Sprintf(`
 resource "nios_security_radius_authservice" "test_cache_ttl" {
-    cache_ttl = %q
+	name = %q
+	servers = %s
+    cache_ttl = %d
 }
-`, cacheTtl)
+`, name, serversString, cacheTtl)
 }
 
-func testAccRadiusAuthserviceComment(comment string) string {
+func testAccRadiusAuthserviceComment(name string, servers []map[string]any, comment string) string {
+	serversString := utils.ConvertSliceOfMapsToHCL(servers)
 	return fmt.Sprintf(`
 resource "nios_security_radius_authservice" "test_comment" {
+	name = %q
+	servers = %s
     comment = %q
 }
-`, comment)
+`, name, serversString, comment)
 }
 
-func testAccRadiusAuthserviceDisable(disable string) string {
+func testAccRadiusAuthserviceDisable(name string, servers []map[string]any, disable bool) string {
+	serversString := utils.ConvertSliceOfMapsToHCL(servers)
 	return fmt.Sprintf(`
 resource "nios_security_radius_authservice" "test_disable" {
-    disable = %q
+	name = %q
+	servers = %s
+    disable = %t
 }
-`, disable)
+`, name, serversString, disable)
 }
 
-func testAccRadiusAuthserviceEnableCache(enableCache string) string {
+func testAccRadiusAuthserviceEnableCache(name string, servers []map[string]any, enableCache bool) string {
+	serversString := utils.ConvertSliceOfMapsToHCL(servers)
 	return fmt.Sprintf(`
 resource "nios_security_radius_authservice" "test_enable_cache" {
-    enable_cache = %q
+	name = %q
+	servers = %s
+    enable_cache = %t
 }
-`, enableCache)
+`, name, serversString, enableCache)
 }
 
-func testAccRadiusAuthserviceMode(mode string) string {
+func testAccRadiusAuthserviceMode(name string, servers []map[string]any, mode string) string {
+	serversString := utils.ConvertSliceOfMapsToHCL(servers)
 	return fmt.Sprintf(`
 resource "nios_security_radius_authservice" "test_mode" {
+	name = %q
+	servers = %s
     mode = %q
 }
-`, mode)
+`, name, serversString, mode)
 }
 
-func testAccRadiusAuthserviceName(name string) string {
+func testAccRadiusAuthserviceName(name string, servers []map[string]any) string {
+	serversString := utils.ConvertSliceOfMapsToHCL(servers)
 	return fmt.Sprintf(`
 resource "nios_security_radius_authservice" "test_name" {
     name = %q
+	servers = %s
 }
-`, name)
+`, name, serversString)
 }
 
-func testAccRadiusAuthserviceRecoveryInterval(recoveryInterval string) string {
+func testAccRadiusAuthserviceRecoveryInterval(name string, servers []map[string]any, recoveryInterval int) string {
+	serversString := utils.ConvertSliceOfMapsToHCL(servers)
 	return fmt.Sprintf(`
 resource "nios_security_radius_authservice" "test_recovery_interval" {
-    recovery_interval = %q
+	name = %q
+	servers = %s
+    recovery_interval = %d
 }
-`, recoveryInterval)
+`, name, serversString, recoveryInterval)
 }
 
-func testAccRadiusAuthserviceServers(servers string) string {
+func testAccRadiusAuthserviceServers(name string, servers []map[string]any) string {
+	serversString := utils.ConvertSliceOfMapsToHCL(servers)
 	return fmt.Sprintf(`
 resource "nios_security_radius_authservice" "test_servers" {
-    servers = %q
+	name = %q
+    servers = %s
 }
-`, servers)
+`, name, serversString)
 }
