@@ -80,8 +80,11 @@ var SamlAuthserviceIdpResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The SAML groupname optional user group attribute.",
 	},
 	"sso_redirect_url": schema.StringAttribute{
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
+		Validators: []validator.String{
+			customvalidator.IsValidIPv4OrFQDN(),
+		},
 		MarkdownDescription: "host name or IP address of the GM",
 	},
 }

@@ -30,7 +30,7 @@ func TestAccSamlAuthserviceResource_basic(t *testing.T) {
 		"sso_redirect_url":   "2.2.2.2",
 	}
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
@@ -61,7 +61,7 @@ func TestAccSamlAuthserviceResource_disappears(t *testing.T) {
 		"sso_redirect_url":   "2.2.2.2",
 	}
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		CheckDestroy:             testAccCheckSamlAuthserviceDestroy(context.Background(), &v),
@@ -89,7 +89,7 @@ func TestAccSamlAuthserviceResource_Comment(t *testing.T) {
 		"sso_redirect_url":   "2.2.2.2",
 	}
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
@@ -130,7 +130,7 @@ func TestAccSamlAuthserviceResource_Idp(t *testing.T) {
 		"sso_redirect_url": "2.2.2.1",
 	}
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
@@ -170,7 +170,7 @@ func TestAccSamlAuthserviceResource_Name(t *testing.T) {
 		"sso_redirect_url":   "2.2.2.2",
 	}
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
@@ -206,7 +206,7 @@ func TestAccSamlAuthserviceResource_SessionTimeout(t *testing.T) {
 		"sso_redirect_url":   "2.2.2.2",
 	}
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
