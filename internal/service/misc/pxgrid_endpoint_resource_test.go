@@ -273,6 +273,14 @@ func TestAccPxgridEndpointResource_LogLevel(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
+				Config: testAccPxgridEndpointLogLevelDefault(view, address, clientCertificateFile, name, "GM", subscribeSettings, publishSettings),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckPxgridEndpointExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "log_level", "WARNING"),
+				),
+			},
+			// Update and Read
+			{
 				Config: testAccPxgridEndpointLogLevel(view, address, clientCertificateFile, name, "GM", subscribeSettings, publishSettings, "DEBUG"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckPxgridEndpointExists(context.Background(), resourceName, &v),
@@ -813,6 +821,23 @@ resource "nios_misc_pxgrid_endpoint" "test_extattrs" {
     extattrs = %s
 }
 `, address, clientCertificateFile, name, outboundMemberType, subscribeSettingsStr, publishSettingsStr, extAttrsStr)
+	return strings.Join([]string{testAccBaseWithview(view), config}, "")
+}
+
+func testAccPxgridEndpointLogLevelDefault(view, address, clientCertificateFile, name, outboundMemberType string, subscribeSettings map[string]any, publishSettings map[string]any) string {
+	subscribeSettingsStr := utils.ConvertMapToHCL(subscribeSettings)
+	publishSettingsStr := utils.ConvertMapToHCL(publishSettings)
+	config := fmt.Sprintf(`
+resource "nios_misc_pxgrid_endpoint" "test_log_level" {
+    address = %q
+    client_certificate_file = %q
+    name = %q
+    outbound_member_type = %q
+    subscribe_settings = %s
+	publish_settings = %s
+	network_view = nios_ipam_network_view.test.name
+}
+`, address, clientCertificateFile, name, outboundMemberType, subscribeSettingsStr, publishSettingsStr)
 	return strings.Join([]string{testAccBaseWithview(view), config}, "")
 }
 

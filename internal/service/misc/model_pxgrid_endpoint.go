@@ -85,7 +85,7 @@ var PxgridEndpointResourceSchemaAttributes = map[string]schema.Attribute{
 	"address": schema.StringAttribute{
 		Required: true,
 		Validators: []validator.String{
-			customvalidator.ValidateTrimmedString(),
+			customvalidator.IsValidIPOrFQDN(),
 		},
 		MarkdownDescription: "The pxgrid endpoint IPv4 Address or IPv6 Address or Fully-Qualified Domain Name (FQDN)",
 	},

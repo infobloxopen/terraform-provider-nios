@@ -98,19 +98,19 @@ func testAccPxgridEndpointDataSourceConfigFilters(view, address, clientCertifica
 	publishSettingsStr := utils.ConvertMapToHCL(publishSettings)
 	config := fmt.Sprintf(`
 resource "nios_misc_pxgrid_endpoint" "test" {
-  address = %q
-  client_certificate_file = %q
-  name = %q
-  outbound_member_type = %q
-  subscribe_settings = %s
-  publish_settings = %s
-  network_view = nios_ipam_network_view.test.name
+	address = %q
+	client_certificate_file = %q
+	name = %q
+	outbound_member_type = %q
+	subscribe_settings = %s
+  	publish_settings = %s
+  	network_view = nios_ipam_network_view.test.name
 }
 
 data "nios_misc_pxgrid_endpoint" "test" {
-  filters = {
-	address = nios_misc_pxgrid_endpoint.test.address
-  }
+	filters = {
+		address = nios_misc_pxgrid_endpoint.test.address
+	}
 }
 `, address, clientCertificateFile, name, outboundMemberType, subscribeSettingsStr, publishSettingsStr)
 	return strings.Join([]string{testAccBaseWithview(view), config}, "")
@@ -121,22 +121,22 @@ func testAccPxgridEndpointDataSourceConfigExtAttrFilters(view, address, clientCe
 	publishSettingsStr := utils.ConvertMapToHCL(publishSettings)
 	config := fmt.Sprintf(`
 resource "nios_misc_pxgrid_endpoint" "test" {
-  address = %q
-  client_certificate_file = %q
-  name = %q
-  outbound_member_type = %q
-  subscribe_settings = %s
-  publish_settings = %s
-  network_view = nios_ipam_network_view.test.name
-  extattrs = {
-    Site = %q
-  } 
+	address = %q
+  	client_certificate_file = %q
+  	name = %q
+  	outbound_member_type = %q
+  	subscribe_settings = %s
+  	publish_settings = %s
+  	network_view = nios_ipam_network_view.test.name
+  	extattrs = {
+    	Site = %q
+  	} 
 }
 
 data "nios_misc_pxgrid_endpoint" "test" {
-  extattrfilters = {
-    Site = nios_misc_pxgrid_endpoint.test.extattrs.Site
-  }
+	extattrfilters = {
+		Site = nios_misc_pxgrid_endpoint.test.extattrs.Site
+	}
 }
 `, address, clientCertificateFile, name, outboundMemberType, subscribeSettingsStr, publishSettingsStr, extAttrsValue)
 	return strings.Join([]string{testAccBaseWithview(view), config}, "")
