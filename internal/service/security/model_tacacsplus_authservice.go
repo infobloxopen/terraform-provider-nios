@@ -100,7 +100,10 @@ var TacacsplusAuthserviceResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "Determines whether the TACACS+ authentication service object is disabled.",
 	},
 	"name": schema.StringAttribute{
-		Required:            true,
+		Required: true,
+		Validators: []validator.String{
+			customvalidator.ValidateTrimmedString(),
+		},
 		MarkdownDescription: "The TACACS+ authentication service name.",
 	},
 	"servers": schema.ListNestedAttribute{

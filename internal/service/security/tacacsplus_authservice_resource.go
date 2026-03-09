@@ -37,7 +37,7 @@ func (r *TacacsplusAuthserviceResource) Metadata(ctx context.Context, req resour
 
 func (r *TacacsplusAuthserviceResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "",
+		MarkdownDescription: "Manages a Tacacsplus Authentication Service.",
 		Attributes:          TacacsplusAuthserviceResourceSchemaAttributes,
 	}
 }
