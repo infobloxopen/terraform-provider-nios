@@ -3,6 +3,7 @@ package security
 import (
 	"context"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
@@ -19,6 +20,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
+	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
 type RadiusAuthserviceModel struct {
@@ -71,9 +73,12 @@ var RadiusAuthserviceResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The number of seconds to wait for a response from the RADIUS server.",
 	},
 	"auth_retries": schema.Int64Attribute{
-		Optional:            true,
-		Computed:            true,
-		Default:             int64default.StaticInt64(6),
+		Optional: true,
+		Computed: true,
+		Default:  int64default.StaticInt64(6),
+		Validators: []validator.Int64{
+			int64validator.Between(1, 10),
+		},
 		MarkdownDescription: "The number of times to attempt to contact an authentication RADIUS server.",
 	},
 	"auth_timeout": schema.Int64Attribute{
@@ -89,9 +94,12 @@ var RadiusAuthserviceResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The TTL of cached authentication data in seconds.",
 	},
 	"comment": schema.StringAttribute{
-		Optional:            true,
-		Computed:            true,
-		Default:             stringdefault.StaticString(""),
+		Optional: true,
+		Computed: true,
+		Default:  stringdefault.StaticString(""),
+		Validators: []validator.String{
+			customvalidator.ValidateTrimmedString(),
+		},
 		MarkdownDescription: "The RADIUS descriptive comment.",
 	},
 	"disable": schema.BoolAttribute{
