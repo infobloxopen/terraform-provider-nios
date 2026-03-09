@@ -53,7 +53,7 @@ func TestAccMsserverResource_disappears(t *testing.T) {
 	resourceName := "nios_microsoft_msserver.test"
 	var v microsoft.Msserver
 
-	address := "10.10.0.1"
+	address := "10.10.0.2"
 	loginName := acctest.RandomName()
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -77,7 +77,7 @@ func TestAccMsserverResource_AdSites(t *testing.T) {
 	var resourceName = "nios_microsoft_msserver.test_ad_sites"
 	var v microsoft.Msserver
 
-	address := "10.10.0.1"
+	address := "10.10.0.3"
 	loginName := acctest.RandomName()
 	syncMinDelay := "2"
 
@@ -130,7 +130,7 @@ func TestAccMsserverResource_AdUser(t *testing.T) {
 	var resourceName = "nios_microsoft_msserver.test_ad_user"
 	var v microsoft.Msserver
 
-	address := "10.10.0.1"
+	address := "10.10.0.4"
 	loginName := acctest.RandomName()
 	syncMinDelay := "2"
 
@@ -185,8 +185,8 @@ func TestAccMsserverResource_Address(t *testing.T) {
 	var resourceName = "nios_microsoft_msserver.test_address"
 	var v microsoft.Msserver
 
-	address1 := "10.10.0.1"
-	address2 := "10.10.0.2"
+	address1 := "10.10.0.5"
+	address2 := "10.10.0.6"
 	loginName := acctest.RandomName()
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -217,7 +217,7 @@ func TestAccMsserverResource_Address(t *testing.T) {
 func TestAccMsserverResource_Comment(t *testing.T) {
 	var resourceName = "nios_microsoft_msserver.test_comment"
 	var v microsoft.Msserver
-	address := "10.10.0.1"
+	address := "10.10.0.7"
 	loginName := acctest.RandomName()
 	comment1 := "This is a new msserver"
 	comment2 := "This is an updated msserver"
@@ -251,7 +251,7 @@ func TestAccMsserverResource_DhcpServer(t *testing.T) {
 	var resourceName = "nios_microsoft_msserver.test_dhcp_server"
 	var v microsoft.Msserver
 
-	address := "10.10.0.1"
+	address := "10.10.0.8"
 	loginName := acctest.RandomName()
 	syncMinDelay := "2"
 
@@ -304,7 +304,7 @@ func TestAccMsserverResource_Disabled(t *testing.T) {
 	var resourceName = "nios_microsoft_msserver.test_disabled"
 	var v microsoft.Msserver
 
-	address := "10.10.0.1"
+	address := "10.10.0.9"
 	loginName := acctest.RandomName()
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -336,7 +336,7 @@ func TestAccMsserverResource_DnsServer(t *testing.T) {
 	var resourceName = "nios_microsoft_msserver.test_dns_server"
 	var v microsoft.Msserver
 
-	address := "10.10.0.1"
+	address := "10.10.0.10"
 	loginName := acctest.RandomName()
 	syncMinDelay := "2"
 
@@ -389,7 +389,7 @@ func TestAccMsserverResource_DnsView(t *testing.T) {
 	var resourceName = "nios_microsoft_msserver.test_dns_view"
 	var v microsoft.Msserver
 
-	address := "10.10.0.1"
+	address := "10.10.0.11"
 	loginName := acctest.RandomName()
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -415,7 +415,7 @@ func TestAccMsserverResource_ExtAttrs(t *testing.T) {
 	var resourceName = "nios_microsoft_msserver.test_extattrs"
 	var v microsoft.Msserver
 
-	address := "10.10.0.1"
+	address := "10.10.0.12"
 	loginName := acctest.RandomName()
 	extAttrValue1 := acctest.RandomName()
 	extAttrValue2 := acctest.RandomName()
@@ -449,7 +449,7 @@ func TestAccMsserverResource_GridMember(t *testing.T) {
 	var resourceName = "nios_microsoft_msserver.test_grid_member"
 	var v microsoft.Msserver
 
-	address := "10.10.0.1"
+	address := "10.10.0.13"
 	loginName := acctest.RandomName()
 	member1 := "infoblox.localdomain"
 	member2 := "member.com"
@@ -483,7 +483,7 @@ func TestAccMsserverResource_LogDestination(t *testing.T) {
 	var resourceName = "nios_microsoft_msserver.test_log_destination"
 	var v microsoft.Msserver
 
-	address := "10.10.0.1"
+	address := "10.10.0.14"
 	loginName := acctest.RandomName()
 	member1 := "MSLOG"
 	member2 := "SYSLOG"
@@ -517,7 +517,7 @@ func TestAccMsserverResource_LogLevel(t *testing.T) {
 	var resourceName = "nios_microsoft_msserver.test_log_level"
 	var v microsoft.Msserver
 
-	address := "10.10.0.1"
+	address := "10.10.0.15"
 	loginName := acctest.RandomName()
 	member1 := "ADVANCED"
 	member2 := "FULL"
@@ -569,7 +569,7 @@ func TestAccMsserverResource_LoginName(t *testing.T) {
 	var resourceName = "nios_microsoft_msserver.test_login_name"
 	var v microsoft.Msserver
 
-	address := "10.10.0.1"
+	address := "10.10.0.16"
 	loginName1 := acctest.RandomName()
 	loginName2 := acctest.RandomName()
 
@@ -602,7 +602,7 @@ func TestAccMsserverResource_MsMaxConnection(t *testing.T) {
 	var resourceName = "nios_microsoft_msserver.test_ms_max_connection"
 	var v microsoft.Msserver
 
-	address := "10.10.0.1"
+	address := "10.10.0.17"
 	loginName := acctest.RandomName()
 	maxConnection := "10"
 	updatedMaxConnection := "20"
@@ -636,7 +636,7 @@ func TestAccMsserverResource_MsRpcTimeoutInSeconds(t *testing.T) {
 	var resourceName = "nios_microsoft_msserver.test_ms_rpc_timeout_in_seconds"
 	var v microsoft.Msserver
 
-	address := "10.10.0.1"
+	address := "10.10.0.18"
 	loginName := acctest.RandomName()
 	msRpcTimeoutInSeconds := "30"
 	updatedMsRpcTimeoutInSeconds := "60"
@@ -670,7 +670,7 @@ func TestAccMsserverResource_NetworkView(t *testing.T) {
 	var resourceName = "nios_microsoft_msserver.test_network_view"
 	var v microsoft.Msserver
 
-	address := "10.10.0.1"
+	address := "10.10.0.19"
 	loginName := acctest.RandomName()
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -696,7 +696,7 @@ func TestAccMsserverResource_ReadOnly(t *testing.T) {
 	var resourceName = "nios_microsoft_msserver.test_read_only"
 	var v microsoft.Msserver
 
-	address := "10.10.0.1"
+	address := "10.10.0.20"
 	loginName := acctest.RandomName()
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -728,7 +728,7 @@ func TestAccMsserverResource_SynchronizationMinDelay(t *testing.T) {
 	var resourceName = "nios_microsoft_msserver.test_synchronization_min_delay"
 	var v microsoft.Msserver
 
-	address := "10.10.0.1"
+	address := "10.10.0.21"
 	loginName := acctest.RandomName()
 	synchronizationMinDelay := "2"
 	updatedSynchronizationMinDelay := "5"
@@ -762,7 +762,7 @@ func TestAccMsserverResource_UseLogDestination(t *testing.T) {
 	var resourceName = "nios_microsoft_msserver.test_use_log_destination"
 	var v microsoft.Msserver
 
-	address := "10.10.0.1"
+	address := "10.10.0.22"
 	loginName := acctest.RandomName()
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -794,7 +794,7 @@ func TestAccMsserverResource_UseMsMaxConnection(t *testing.T) {
 	var resourceName = "nios_microsoft_msserver.test_use_ms_max_connection"
 	var v microsoft.Msserver
 
-	address := "10.10.0.1"
+	address := "10.10.0.23"
 	loginName := acctest.RandomName()
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -826,7 +826,7 @@ func TestAccMsserverResource_UseMsRpcTimeoutInSeconds(t *testing.T) {
 	var resourceName = "nios_microsoft_msserver.test_use_ms_rpc_timeout_in_seconds"
 	var v microsoft.Msserver
 
-	address := "10.10.0.1"
+	address := "10.10.0.24"
 	loginName := acctest.RandomName()
 
 	resource.ParallelTest(t, resource.TestCase{
