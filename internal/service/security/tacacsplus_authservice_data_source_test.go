@@ -9,12 +9,25 @@ import (
 
 	"github.com/infobloxopen/infoblox-nios-go-client/security"
 	"github.com/infobloxopen/terraform-provider-nios/internal/acctest"
+	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
 func TestAccTacacsplusAuthserviceDataSource_Filters(t *testing.T) {
 	dataSourceName := "data.nios_security_tacacsplus_authservice.test"
 	resourceName := "nios_security_tacacsplus_authservice.test"
 	var v security.TacacsplusAuthservice
+	name := acctest.RandomNameWithPrefix("tacacsplus_authservice")
+	servers := []map[string]any{
+		{
+			"address":        "2.2.3.3",
+			"auth_type":      "CHAP",
+			"disable":        false,
+			"port":           49,
+			"use_accounting": false,
+			"use_mgmt_port":  false,
+			"shared_secret":  "test",
+		},
+	}
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -22,7 +35,7 @@ func TestAccTacacsplusAuthserviceDataSource_Filters(t *testing.T) {
 		CheckDestroy:             testAccCheckTacacsplusAuthserviceDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccTacacsplusAuthserviceDataSourceConfigFilters(),
+				Config: testAccTacacsplusAuthserviceDataSourceConfigFilters(name, servers),
 				Check: resource.ComposeTestCheckFunc(
 					append([]resource.TestCheckFunc{
 						testAccCheckTacacsplusAuthserviceExists(context.Background(), resourceName, &v),
@@ -49,15 +62,18 @@ func testAccCheckTacacsplusAuthserviceResourceAttrPair(resourceName, dataSourceN
 	}
 }
 
-func testAccTacacsplusAuthserviceDataSourceConfigFilters() string {
+func testAccTacacsplusAuthserviceDataSourceConfigFilters(name string, servers []map[string]any) string {
+	serversStr := utils.ConvertSliceOfMapsToHCL(servers)
 	return fmt.Sprintf(`
 resource "nios_security_tacacsplus_authservice" "test" {
+  name = %q
+  servers = %s
 }
 
 data "nios_security_tacacsplus_authservice" "test" {
   filters = {
-	 = nios_security_tacacsplus_authservice.test.
+	name = nios_security_tacacsplus_authservice.test.name
   }
 }
-`)
+`, name, serversStr)
 }

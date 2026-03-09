@@ -6,6 +6,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
@@ -39,6 +40,7 @@ var TacacsplusAuthserviceServersAttrTypes = map[string]attr.Type{
 var TacacsplusAuthserviceServersResourceSchemaAttributes = map[string]schema.Attribute{
 	"address": schema.StringAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The valid IP address or FQDN of the TACACS+ server.",
 	},
 	"port": schema.Int64Attribute{
@@ -55,6 +57,8 @@ var TacacsplusAuthserviceServersResourceSchemaAttributes = map[string]schema.Att
 	},
 	"comment": schema.StringAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             stringdefault.StaticString(""),
 		MarkdownDescription: "The TACACS+ descriptive comment.",
 	},
 	"disable": schema.BoolAttribute{

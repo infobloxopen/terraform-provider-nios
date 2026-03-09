@@ -20,6 +20,18 @@ var readableAttributesForTacacsplusAuthservice = "acct_retries,acct_timeout,auth
 func TestAccTacacsplusAuthserviceResource_basic(t *testing.T) {
 	var resourceName = "nios_security_tacacsplus_authservice.test"
 	var v security.TacacsplusAuthservice
+	name := acctest.RandomNameWithPrefix("tacacsplus_authservice")
+	servers := []map[string]any{
+		{
+			"address":        "2.2.3.3",
+			"auth_type":      "CHAP",
+			"disable":        false,
+			"port":           49,
+			"use_accounting": false,
+			"use_mgmt_port":  false,
+			"shared_secret":  "test",
+		},
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -27,11 +39,23 @@ func TestAccTacacsplusAuthserviceResource_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccTacacsplusAuthserviceBasicConfig(""),
+				Config: testAccTacacsplusAuthserviceBasicConfig(name, servers),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckTacacsplusAuthserviceExists(context.Background(), resourceName, &v),
-					// TODO: check and validate these
+					resource.TestCheckResourceAttr(resourceName, "name", name),
+					resource.TestCheckResourceAttr(resourceName, "servers.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "servers.0.address", "2.2.3.3"),
+					resource.TestCheckResourceAttr(resourceName, "servers.0.auth_type", "CHAP"),
+					resource.TestCheckResourceAttr(resourceName, "servers.0.disable", "false"),
+					resource.TestCheckResourceAttr(resourceName, "servers.0.port", "49"),
+					resource.TestCheckResourceAttr(resourceName, "servers.0.shared_secret", "test"),
 					// Test fields with default value
+					resource.TestCheckResourceAttr(resourceName, "acct_retries", "0"),
+					resource.TestCheckResourceAttr(resourceName, "acct_timeout", "1000"),
+					resource.TestCheckResourceAttr(resourceName, "auth_retries", "0"),
+					resource.TestCheckResourceAttr(resourceName, "auth_timeout", "5000"),
+					resource.TestCheckResourceAttr(resourceName, "comment", ""),
+					resource.TestCheckResourceAttr(resourceName, "disable", "false"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -42,6 +66,18 @@ func TestAccTacacsplusAuthserviceResource_basic(t *testing.T) {
 func TestAccTacacsplusAuthserviceResource_disappears(t *testing.T) {
 	resourceName := "nios_security_tacacsplus_authservice.test"
 	var v security.TacacsplusAuthservice
+	name := acctest.RandomNameWithPrefix("tacacsplus_authservice")
+	servers := []map[string]any{
+		{
+			"address":        "2.2.3.3",
+			"auth_type":      "CHAP",
+			"disable":        false,
+			"port":           49,
+			"use_accounting": false,
+			"use_mgmt_port":  false,
+			"shared_secret":  "test",
+		},
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -49,7 +85,7 @@ func TestAccTacacsplusAuthserviceResource_disappears(t *testing.T) {
 		CheckDestroy:             testAccCheckTacacsplusAuthserviceDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccTacacsplusAuthserviceBasicConfig(""),
+				Config: testAccTacacsplusAuthserviceBasicConfig(name, servers),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckTacacsplusAuthserviceExists(context.Background(), resourceName, &v),
 					testAccCheckTacacsplusAuthserviceDisappears(context.Background(), &v),
@@ -63,6 +99,18 @@ func TestAccTacacsplusAuthserviceResource_disappears(t *testing.T) {
 func TestAccTacacsplusAuthserviceResource_AcctRetries(t *testing.T) {
 	var resourceName = "nios_security_tacacsplus_authservice.test_acct_retries"
 	var v security.TacacsplusAuthservice
+	name := acctest.RandomNameWithPrefix("tacacsplus_authservice")
+	servers := []map[string]any{
+		{
+			"address":        "2.2.3.3",
+			"auth_type":      "CHAP",
+			"disable":        false,
+			"port":           49,
+			"use_accounting": false,
+			"use_mgmt_port":  false,
+			"shared_secret":  "test",
+		},
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -70,18 +118,18 @@ func TestAccTacacsplusAuthserviceResource_AcctRetries(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccTacacsplusAuthserviceAcctRetries("ACCT_RETRIES_REPLACE_ME"),
+				Config: testAccTacacsplusAuthserviceAcctRetries(name, servers, 1),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckTacacsplusAuthserviceExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "acct_retries", "ACCT_RETRIES_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "acct_retries", "1"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccTacacsplusAuthserviceAcctRetries("ACCT_RETRIES_UPDATE_REPLACE_ME"),
+				Config: testAccTacacsplusAuthserviceAcctRetries(name, servers, 3),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckTacacsplusAuthserviceExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "acct_retries", "ACCT_RETRIES_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "acct_retries", "3"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -92,6 +140,18 @@ func TestAccTacacsplusAuthserviceResource_AcctRetries(t *testing.T) {
 func TestAccTacacsplusAuthserviceResource_AcctTimeout(t *testing.T) {
 	var resourceName = "nios_security_tacacsplus_authservice.test_acct_timeout"
 	var v security.TacacsplusAuthservice
+	name := acctest.RandomNameWithPrefix("tacacsplus_authservice")
+	servers := []map[string]any{
+		{
+			"address":        "2.2.3.3",
+			"auth_type":      "CHAP",
+			"disable":        false,
+			"port":           49,
+			"use_accounting": false,
+			"use_mgmt_port":  false,
+			"shared_secret":  "test",
+		},
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -99,18 +159,18 @@ func TestAccTacacsplusAuthserviceResource_AcctTimeout(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccTacacsplusAuthserviceAcctTimeout("ACCT_TIMEOUT_REPLACE_ME"),
+				Config: testAccTacacsplusAuthserviceAcctTimeout(name, servers, 3600),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckTacacsplusAuthserviceExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "acct_timeout", "ACCT_TIMEOUT_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "acct_timeout", "3600"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccTacacsplusAuthserviceAcctTimeout("ACCT_TIMEOUT_UPDATE_REPLACE_ME"),
+				Config: testAccTacacsplusAuthserviceAcctTimeout(name, servers, 7200),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckTacacsplusAuthserviceExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "acct_timeout", "ACCT_TIMEOUT_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "acct_timeout", "7200"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -121,6 +181,18 @@ func TestAccTacacsplusAuthserviceResource_AcctTimeout(t *testing.T) {
 func TestAccTacacsplusAuthserviceResource_AuthRetries(t *testing.T) {
 	var resourceName = "nios_security_tacacsplus_authservice.test_auth_retries"
 	var v security.TacacsplusAuthservice
+	name := acctest.RandomNameWithPrefix("tacacsplus_authservice")
+	servers := []map[string]any{
+		{
+			"address":        "2.2.3.3",
+			"auth_type":      "CHAP",
+			"disable":        false,
+			"port":           49,
+			"use_accounting": false,
+			"use_mgmt_port":  false,
+			"shared_secret":  "test",
+		},
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -128,18 +200,18 @@ func TestAccTacacsplusAuthserviceResource_AuthRetries(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccTacacsplusAuthserviceAuthRetries("AUTH_RETRIES_REPLACE_ME"),
+				Config: testAccTacacsplusAuthserviceAuthRetries(name, servers, 2),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckTacacsplusAuthserviceExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "auth_retries", "AUTH_RETRIES_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "auth_retries", "2"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccTacacsplusAuthserviceAuthRetries("AUTH_RETRIES_UPDATE_REPLACE_ME"),
+				Config: testAccTacacsplusAuthserviceAuthRetries(name, servers, 4),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckTacacsplusAuthserviceExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "auth_retries", "AUTH_RETRIES_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "auth_retries", "4"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -150,6 +222,18 @@ func TestAccTacacsplusAuthserviceResource_AuthRetries(t *testing.T) {
 func TestAccTacacsplusAuthserviceResource_AuthTimeout(t *testing.T) {
 	var resourceName = "nios_security_tacacsplus_authservice.test_auth_timeout"
 	var v security.TacacsplusAuthservice
+	name := acctest.RandomNameWithPrefix("tacacsplus_authservice")
+	servers := []map[string]any{
+		{
+			"address":        "2.2.3.3",
+			"auth_type":      "CHAP",
+			"disable":        false,
+			"port":           49,
+			"use_accounting": false,
+			"use_mgmt_port":  false,
+			"shared_secret":  "test",
+		},
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -157,18 +241,18 @@ func TestAccTacacsplusAuthserviceResource_AuthTimeout(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccTacacsplusAuthserviceAuthTimeout("AUTH_TIMEOUT_REPLACE_ME"),
+				Config: testAccTacacsplusAuthserviceAuthTimeout(name, servers, 7000),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckTacacsplusAuthserviceExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "auth_timeout", "AUTH_TIMEOUT_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "auth_timeout", "7000"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccTacacsplusAuthserviceAuthTimeout("AUTH_TIMEOUT_UPDATE_REPLACE_ME"),
+				Config: testAccTacacsplusAuthserviceAuthTimeout(name, servers, 6000),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckTacacsplusAuthserviceExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "auth_timeout", "AUTH_TIMEOUT_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "auth_timeout", "6000"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -179,6 +263,18 @@ func TestAccTacacsplusAuthserviceResource_AuthTimeout(t *testing.T) {
 func TestAccTacacsplusAuthserviceResource_Comment(t *testing.T) {
 	var resourceName = "nios_security_tacacsplus_authservice.test_comment"
 	var v security.TacacsplusAuthservice
+	name := acctest.RandomNameWithPrefix("tacacsplus_authservice")
+	servers := []map[string]any{
+		{
+			"address":        "2.2.3.3",
+			"auth_type":      "CHAP",
+			"disable":        false,
+			"port":           49,
+			"use_accounting": false,
+			"use_mgmt_port":  false,
+			"shared_secret":  "test",
+		},
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -186,18 +282,18 @@ func TestAccTacacsplusAuthserviceResource_Comment(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccTacacsplusAuthserviceComment("COMMENT_REPLACE_ME"),
+				Config: testAccTacacsplusAuthserviceComment(name, servers, "This is a comment"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckTacacsplusAuthserviceExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "comment", "COMMENT_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "comment", "This is a comment"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccTacacsplusAuthserviceComment("COMMENT_UPDATE_REPLACE_ME"),
+				Config: testAccTacacsplusAuthserviceComment(name, servers, "This is an updated comment"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckTacacsplusAuthserviceExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "comment", "COMMENT_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "comment", "This is an updated comment"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -208,6 +304,18 @@ func TestAccTacacsplusAuthserviceResource_Comment(t *testing.T) {
 func TestAccTacacsplusAuthserviceResource_Disable(t *testing.T) {
 	var resourceName = "nios_security_tacacsplus_authservice.test_disable"
 	var v security.TacacsplusAuthservice
+	name := acctest.RandomNameWithPrefix("tacacsplus_authservice")
+	servers := []map[string]any{
+		{
+			"address":        "2.2.3.3",
+			"auth_type":      "CHAP",
+			"disable":        false,
+			"port":           49,
+			"use_accounting": false,
+			"use_mgmt_port":  false,
+			"shared_secret":  "test",
+		},
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -215,18 +323,18 @@ func TestAccTacacsplusAuthserviceResource_Disable(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccTacacsplusAuthserviceDisable("DISABLE_REPLACE_ME"),
+				Config: testAccTacacsplusAuthserviceDisable(name, servers, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckTacacsplusAuthserviceExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "disable", "DISABLE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "disable", "false"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccTacacsplusAuthserviceDisable("DISABLE_UPDATE_REPLACE_ME"),
+				Config: testAccTacacsplusAuthserviceDisable(name, servers, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckTacacsplusAuthserviceExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "disable", "DISABLE_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "disable", "true"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -237,6 +345,19 @@ func TestAccTacacsplusAuthserviceResource_Disable(t *testing.T) {
 func TestAccTacacsplusAuthserviceResource_Name(t *testing.T) {
 	var resourceName = "nios_security_tacacsplus_authservice.test_name"
 	var v security.TacacsplusAuthservice
+	name := acctest.RandomNameWithPrefix("tacacsplus_authservice")
+	nameUpdate := acctest.RandomNameWithPrefix("tacacsplus_authservice")
+	servers := []map[string]any{
+		{
+			"address":        "2.2.3.3",
+			"auth_type":      "CHAP",
+			"disable":        false,
+			"port":           49,
+			"use_accounting": false,
+			"use_mgmt_port":  false,
+			"shared_secret":  "test",
+		},
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -244,18 +365,18 @@ func TestAccTacacsplusAuthserviceResource_Name(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccTacacsplusAuthserviceName("NAME_REPLACE_ME"),
+				Config: testAccTacacsplusAuthserviceName(name, servers),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckTacacsplusAuthserviceExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "name", "NAME_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "name", name),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccTacacsplusAuthserviceName("NAME_UPDATE_REPLACE_ME"),
+				Config: testAccTacacsplusAuthserviceName(nameUpdate, servers),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckTacacsplusAuthserviceExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "name", "NAME_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "name", nameUpdate),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -266,6 +387,29 @@ func TestAccTacacsplusAuthserviceResource_Name(t *testing.T) {
 func TestAccTacacsplusAuthserviceResource_Servers(t *testing.T) {
 	var resourceName = "nios_security_tacacsplus_authservice.test_servers"
 	var v security.TacacsplusAuthservice
+	name := acctest.RandomNameWithPrefix("tacacsplus_authservice")
+	servers := []map[string]any{
+		{
+			"address":        "2.2.3.3",
+			"auth_type":      "CHAP",
+			"disable":        false,
+			"port":           49,
+			"use_accounting": false,
+			"use_mgmt_port":  false,
+			"shared_secret":  "test",
+		},
+	}
+	serversUpdate := []map[string]any{
+		{
+			"address":        "2.2.1.3",
+			"auth_type":      "PAP",
+			"disable":        true,
+			"port":           49,
+			"use_accounting": false,
+			"use_mgmt_port":  true,
+			"shared_secret":  "testing_key",
+		},
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -273,18 +417,32 @@ func TestAccTacacsplusAuthserviceResource_Servers(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccTacacsplusAuthserviceServers("SERVERS_REPLACE_ME"),
+				Config: testAccTacacsplusAuthserviceServers(name, servers),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckTacacsplusAuthserviceExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "servers", "SERVERS_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "servers.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "servers.0.address", "2.2.3.3"),
+					resource.TestCheckResourceAttr(resourceName, "servers.0.auth_type", "CHAP"),
+					resource.TestCheckResourceAttr(resourceName, "servers.0.disable", "false"),
+					resource.TestCheckResourceAttr(resourceName, "servers.0.port", "49"),
+					//resource.TestCheckResourceAttr(resourceName, "servers.0.shared_secret", "test"),
+					resource.TestCheckResourceAttr(resourceName, "servers.0.use_accounting", "false"),
+					resource.TestCheckResourceAttr(resourceName, "servers.0.use_mgmt_port", "false"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccTacacsplusAuthserviceServers("SERVERS_UPDATE_REPLACE_ME"),
+				Config: testAccTacacsplusAuthserviceServers(name, serversUpdate),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckTacacsplusAuthserviceExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "servers", "SERVERS_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "servers.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "servers.0.address", "2.2.1.3"),
+					resource.TestCheckResourceAttr(resourceName, "servers.0.auth_type", "PAP"),
+					resource.TestCheckResourceAttr(resourceName, "servers.0.disable", "true"),
+					resource.TestCheckResourceAttr(resourceName, "servers.0.port", "49"),
+					//resource.TestCheckResourceAttr(resourceName, "servers.0.shared_secret", "testing_key"),
+					resource.TestCheckResourceAttr(resourceName, "servers.0.use_accounting", "false"),
+					resource.TestCheckResourceAttr(resourceName, "servers.0.use_mgmt_port", "true"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -350,74 +508,98 @@ func testAccCheckTacacsplusAuthserviceDisappears(ctx context.Context, v *securit
 	}
 }
 
-func testAccTacacsplusAuthserviceBasicConfig(string) string {
-	// TODO: create basic resource with required fields
+func testAccTacacsplusAuthserviceBasicConfig(name string, servers []map[string]any) string {
+	serversStr := utils.ConvertSliceOfMapsToHCL(servers)
 	return fmt.Sprintf(`
 resource "nios_security_tacacsplus_authservice" "test" {
+	name = %q
+	servers = %s
 }
-`)
+`, name, serversStr)
 }
 
-func testAccTacacsplusAuthserviceAcctRetries(acctRetries string) string {
+func testAccTacacsplusAuthserviceAcctRetries(name string, servers []map[string]any, acctRetries int) string {
+	serversStr := utils.ConvertSliceOfMapsToHCL(servers)
 	return fmt.Sprintf(`
 resource "nios_security_tacacsplus_authservice" "test_acct_retries" {
-    acct_retries = %q
+	name = %q
+	servers = %s
+    acct_retries = %d
 }
-`, acctRetries)
+`, name, serversStr, acctRetries)
 }
 
-func testAccTacacsplusAuthserviceAcctTimeout(acctTimeout string) string {
+func testAccTacacsplusAuthserviceAcctTimeout(name string, servers []map[string]any, acctTimeout int) string {
+	serversStr := utils.ConvertSliceOfMapsToHCL(servers)
 	return fmt.Sprintf(`
 resource "nios_security_tacacsplus_authservice" "test_acct_timeout" {
-    acct_timeout = %q
+	name = %q
+	servers = %s
+    acct_timeout = %d
 }
-`, acctTimeout)
+`, name, serversStr, acctTimeout)
 }
 
-func testAccTacacsplusAuthserviceAuthRetries(authRetries string) string {
+func testAccTacacsplusAuthserviceAuthRetries(name string, servers []map[string]any, authRetries int) string {
+	serversStr := utils.ConvertSliceOfMapsToHCL(servers)
 	return fmt.Sprintf(`
 resource "nios_security_tacacsplus_authservice" "test_auth_retries" {
-    auth_retries = %q
+	name = %q
+	servers = %s
+    auth_retries = %d
 }
-`, authRetries)
+`, name, serversStr, authRetries)
 }
 
-func testAccTacacsplusAuthserviceAuthTimeout(authTimeout string) string {
+func testAccTacacsplusAuthserviceAuthTimeout(name string, servers []map[string]any, authTimeout int) string {
+	serversStr := utils.ConvertSliceOfMapsToHCL(servers)
 	return fmt.Sprintf(`
 resource "nios_security_tacacsplus_authservice" "test_auth_timeout" {
-    auth_timeout = %q
+	name = %q
+	servers = %s
+    auth_timeout = %d
 }
-`, authTimeout)
+`, name, serversStr, authTimeout)
 }
 
-func testAccTacacsplusAuthserviceComment(comment string) string {
+func testAccTacacsplusAuthserviceComment(name string, servers []map[string]any, comment string) string {
+	serversStr := utils.ConvertSliceOfMapsToHCL(servers)
 	return fmt.Sprintf(`
 resource "nios_security_tacacsplus_authservice" "test_comment" {
+	name = %q
+	servers = %s
     comment = %q
 }
-`, comment)
+`, name, serversStr, comment)
 }
 
-func testAccTacacsplusAuthserviceDisable(disable string) string {
+func testAccTacacsplusAuthserviceDisable(name string, servers []map[string]any, disable bool) string {
+	serversStr := utils.ConvertSliceOfMapsToHCL(servers)
 	return fmt.Sprintf(`
 resource "nios_security_tacacsplus_authservice" "test_disable" {
-    disable = %q
+	name = %q
+	servers = %s
+    disable = %t
 }
-`, disable)
+`, name, serversStr, disable)
 }
 
-func testAccTacacsplusAuthserviceName(name string) string {
+func testAccTacacsplusAuthserviceName(name string, servers []map[string]any) string {
+	serversStr := utils.ConvertSliceOfMapsToHCL(servers)
 	return fmt.Sprintf(`
 resource "nios_security_tacacsplus_authservice" "test_name" {
     name = %q
+	servers = %s
 }
-`, name)
+`, name, serversStr)
 }
 
-func testAccTacacsplusAuthserviceServers(servers string) string {
+func testAccTacacsplusAuthserviceServers(name string, servers []map[string]any) string {
+	serversStr := utils.ConvertSliceOfMapsToHCL(servers)
 	return fmt.Sprintf(`
 resource "nios_security_tacacsplus_authservice" "test_servers" {
-    servers = %q
+	name = %q
+    servers = %s
 }
-`, servers)
+`, name, serversStr)
 }

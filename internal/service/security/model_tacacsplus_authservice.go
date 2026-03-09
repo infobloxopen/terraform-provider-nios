@@ -3,10 +3,12 @@ package security
 import (
 	"context"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
@@ -14,7 +16,9 @@ import (
 
 	"github.com/infobloxopen/infoblox-nios-go-client/security"
 
+	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
@@ -48,9 +52,12 @@ var TacacsplusAuthserviceResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The reference to the object.",
 	},
 	"acct_retries": schema.Int64Attribute{
-		Optional:            true,
-		Computed:            true,
-		Default:             int64default.StaticInt64(0),
+		Optional: true,
+		Computed: true,
+		Default:  int64default.StaticInt64(0),
+		Validators: []validator.Int64{
+			int64validator.Between(0, 5),
+		},
 		MarkdownDescription: "The number of the accounting retries before giving up and moving on to the next server.",
 	},
 	"acct_timeout": schema.Int64Attribute{
@@ -60,15 +67,21 @@ var TacacsplusAuthserviceResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The accounting retry period in milliseconds.",
 	},
 	"auth_retries": schema.Int64Attribute{
-		Optional:            true,
-		Computed:            true,
-		Default:             int64default.StaticInt64(0),
+		Optional: true,
+		Computed: true,
+		Default:  int64default.StaticInt64(0),
+		Validators: []validator.Int64{
+			int64validator.Between(0, 5),
+		},
 		MarkdownDescription: "The number of the authentication/authorization retries before giving up and moving on to the next server.",
 	},
 	"auth_timeout": schema.Int64Attribute{
-		Optional:            true,
-		Computed:            true,
-		Default:             int64default.StaticInt64(5000),
+		Optional: true,
+		Computed: true,
+		Default:  int64default.StaticInt64(5000),
+		Validators: []validator.Int64{
+			int64validator.Between(5000, 60000),
+		},
 		MarkdownDescription: "The authentication/authorization timeout period in milliseconds.",
 	},
 	"comment": schema.StringAttribute{
@@ -82,10 +95,12 @@ var TacacsplusAuthserviceResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"disable": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Determines whether the TACACS+ authentication service object is disabled.",
 	},
 	"name": schema.StringAttribute{
-		Optional:            true,
+		Required:            true,
 		MarkdownDescription: "The TACACS+ authentication service name.",
 	},
 	"servers": schema.ListNestedAttribute{
@@ -95,7 +110,7 @@ var TacacsplusAuthserviceResourceSchemaAttributes = map[string]schema.Attribute{
 		Validators: []validator.List{
 			listvalidator.SizeAtLeast(1),
 		},
-		Optional:            true,
+		Required:            true,
 		MarkdownDescription: "The list of the TACACS+ servers used for authentication.",
 	},
 }
@@ -143,5 +158,12 @@ func (m *TacacsplusAuthserviceModel) Flatten(ctx context.Context, from *security
 	m.Comment = flex.FlattenStringPointer(from.Comment)
 	m.Disable = types.BoolPointerValue(from.Disable)
 	m.Name = flex.FlattenStringPointer(from.Name)
+	planServers := m.Servers
 	m.Servers = flex.FlattenFrameworkListNestedBlock(ctx, from.Servers, TacacsplusAuthserviceServersAttrTypes, diags, FlattenTacacsplusAuthserviceServers)
+	if !planServers.IsNull() {
+		result, diags := utils.CopyFieldFromPlanToRespList(ctx, planServers, m.Servers, "shared_secret")
+		if !diags.HasError() {
+			m.Servers = result.(basetypes.ListValue)
+		}
+	}
 }
