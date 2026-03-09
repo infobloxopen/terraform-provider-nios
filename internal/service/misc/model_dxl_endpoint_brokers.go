@@ -37,7 +37,7 @@ var DxlEndpointBrokersResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed: true,
 		Optional: true,
 		Validators: []validator.String{
-			customvalidator.IsValidFQDN(),
+			customvalidator.IsValidDomainName(),
 		},
 		MarkdownDescription: "The FQDN for the DXL endpoint broker.",
 	},

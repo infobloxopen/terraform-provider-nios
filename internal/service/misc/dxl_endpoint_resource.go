@@ -38,7 +38,7 @@ func (r *DxlEndpointResource) Metadata(ctx context.Context, req resource.Metadat
 
 func (r *DxlEndpointResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Manages a Dxl Endpoint.",
+		MarkdownDescription: "Manages a DXL Endpoint.",
 		Attributes:          DxlEndpointResourceSchemaAttributes,
 	}
 }

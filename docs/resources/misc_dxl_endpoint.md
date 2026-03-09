@@ -3,12 +3,12 @@
 page_title: "nios_misc_dxl_endpoint Resource - nios"
 subcategory: "MISC"
 description: |-
-  Manages a Dxl Endpoint.
+  Manages a DXL Endpoint.
 ---
 
 # nios_misc_dxl_endpoint (Resource)
 
-Manages a Dxl Endpoint.
+Manages a DXL Endpoint.
 
 ## Example Usage
 
@@ -53,6 +53,7 @@ resource "nios_misc_dxl_endpoint" "misc_dxl_endpoint_with_additional_fields" {
 
 ### Required
 
+- `client_certificate_file` (String) The file path for the DXL endpoint client certificate.
 - `name` (String) The name of a DXL endpoint.
 - `outbound_member_type` (String) The outbound member that will generate events.
 
@@ -61,7 +62,6 @@ resource "nios_misc_dxl_endpoint" "misc_dxl_endpoint_with_additional_fields" {
 - `brokers` (Attributes List) The list of DXL endpoint brokers. Note that you cannot specify brokers and brokers_import_token at the same time. (see [below for nested schema](#nestedatt--brokers))
 - `brokers_import_file` (String) The file path for the DXL broker configuration file. When specified, the file is uploaded and the resulting configuration is stored in the brokers field.
 - `brokers_import_token` (String) The token returned by the uploadinit function call in object fileop for a DXL broker configuration file. Note that you cannot specify brokers and brokers_import_token at the same time.
-- `client_certificate_file` (String) The file path for the DXL endpoint client certificate.
 - `comment` (String) The comment of a DXL endpoint.
 - `disable` (Boolean) Determines whether a DXL endpoint is disabled.
 - `extattrs` (Map of String) Extensible attributes associated with the object.

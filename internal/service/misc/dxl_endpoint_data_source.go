@@ -52,7 +52,7 @@ func (m *DxlEndpointModelWithFilter) FlattenResults(ctx context.Context, from []
 
 func (d *DxlEndpointDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Retrieves information about existing Dxl Endpoints.",
+		MarkdownDescription: "Retrieves information about existing DXL Endpoints.",
 		Attributes: map[string]schema.Attribute{
 			"filters": schema.MapAttribute{
 				Description: "Filters are used to return a more specific list of results. Filters can be used to match resources by specific attributes, e.g. name. If you specify multiple filters, the results returned will have only resources that match all the specified filters.",

@@ -3,12 +3,12 @@
 page_title: "nios_misc_dxl_endpoint Data Source - nios"
 subcategory: "MISC"
 description: |-
-  Retrieves information about existing Dxl Endpoints.
+  Retrieves information about existing DXL Endpoints.
 ---
 
 # nios_misc_dxl_endpoint (Data Source)
 
-Retrieves information about existing Dxl Endpoints.
+Retrieves information about existing DXL Endpoints.
 
 ## Example Usage
 
@@ -51,6 +51,7 @@ data "nios_misc_dxl_endpoint" "get_all_dxl_endpoints" {}
 
 Required:
 
+- `client_certificate_file` (String) The file path for the DXL endpoint client certificate.
 - `name` (String) The name of a DXL endpoint.
 - `outbound_member_type` (String) The outbound member that will generate events.
 
@@ -59,7 +60,6 @@ Optional:
 - `brokers` (Attributes List) The list of DXL endpoint brokers. Note that you cannot specify brokers and brokers_import_token at the same time. (see [below for nested schema](#nestedatt--result--brokers))
 - `brokers_import_file` (String) The file path for the DXL broker configuration file. When specified, the file is uploaded and the resulting configuration is stored in the brokers field.
 - `brokers_import_token` (String) The token returned by the uploadinit function call in object fileop for a DXL broker configuration file. Note that you cannot specify brokers and brokers_import_token at the same time.
-- `client_certificate_file` (String) The file path for the DXL endpoint client certificate.
 - `comment` (String) The comment of a DXL endpoint.
 - `disable` (Boolean) Determines whether a DXL endpoint is disabled.
 - `extattrs` (Map of String) Extensible attributes associated with the object.

@@ -111,7 +111,7 @@ var DxlEndpointResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The token returned by the uploadinit function call in object fileop for a DXL endpoint client certificate.",
 	},
 	"client_certificate_file": schema.StringAttribute{
-		Optional:            true,
+		Required:            true,
 		MarkdownDescription: "The file path for the DXL endpoint client certificate.",
 	},
 	"client_certificate_valid_from": schema.Int64Attribute{
