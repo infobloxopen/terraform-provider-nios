@@ -3,12 +3,12 @@
 page_title: "nios_security_radius_authservice Resource - nios"
 subcategory: "SECURITY"
 description: |-
-  
+  Manages a Radius Authentication Service.
 ---
 
 # nios_security_radius_authservice (Resource)
 
-
+Manages a Radius Authentication Service.
 
 ## Example Usage
 

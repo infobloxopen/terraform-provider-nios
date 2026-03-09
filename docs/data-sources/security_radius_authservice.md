@@ -3,12 +3,12 @@
 page_title: "nios_security_radius_authservice Data Source - nios"
 subcategory: "SECURITY"
 description: |-
-  
+  Retrieves information about existing Radius Authentication Services.
 ---
 
 # nios_security_radius_authservice (Data Source)
 
-
+Retrieves information about existing Radius Authentication Services.
 
 ## Example Usage
 
