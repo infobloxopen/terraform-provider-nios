@@ -55,9 +55,9 @@ resource "nios_microsoft_msserver_adsites_site" "test" {
 }
 
 data "nios_microsoft_msserver_adsites_site" "test" {
-  filters = {
-	name = nios_microsoft_msserver_adsites_site.test.name
-  }
+	filters = {
+		name = nios_microsoft_msserver_adsites_site.test.name
+	}
 }
 `, domain, name)
 }
