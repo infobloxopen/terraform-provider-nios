@@ -28,7 +28,7 @@ var SyslogEndpointTemplateInstanceAttrTypes = map[string]attr.Type{
 
 var SyslogEndpointTemplateInstanceResourceSchemaAttributes = map[string]schema.Attribute{
 	"template": schema.StringAttribute{
-		Optional:            true,
+		Required:            true,
 		MarkdownDescription: "The name of the REST API template parameter.",
 	},
 	"parameters": schema.ListNestedAttribute{
@@ -38,6 +38,7 @@ var SyslogEndpointTemplateInstanceResourceSchemaAttributes = map[string]schema.A
 		Validators: []validator.List{
 			listvalidator.SizeAtLeast(1),
 		},
+		Computed:            true,
 		Optional:            true,
 		MarkdownDescription: "The notification REST template parameters.",
 	},

@@ -9,10 +9,20 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
-	"github.com/infobloxopen/infoblox-nios-go-client/misc"
-
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 )
+
+// SyslogEndpointSyslogServersCertificate is a local struct representing certificate data
+// returned by the API. The API client doesn't have this type, but the API returns
+// certificate as an object with these fields.
+type SyslogEndpointSyslogServersCertificate struct {
+	Ref            *string
+	Issuer         *string
+	Serial         *string
+	Subject        *string
+	ValidNotAfter  *int64
+	ValidNotBefore *int64
+}
 
 type SyslogEndpointSyslogServersCertificateModel struct {
 	Ref            types.String `tfsdk:"ref"`
@@ -59,7 +69,7 @@ var SyslogEndpointSyslogServersCertificateResourceSchemaAttributes = map[string]
 	},
 }
 
-func ExpandSyslogEndpointSyslogServersCertificate(ctx context.Context, o types.Object, diags *diag.Diagnostics) *misc.SyslogEndpointSyslogServersCertificate {
+func ExpandSyslogEndpointSyslogServersCertificate(ctx context.Context, o types.Object, diags *diag.Diagnostics) *SyslogEndpointSyslogServersCertificate {
 	if o.IsNull() || o.IsUnknown() {
 		return nil
 	}
@@ -71,15 +81,22 @@ func ExpandSyslogEndpointSyslogServersCertificate(ctx context.Context, o types.O
 	return m.Expand(ctx, diags)
 }
 
-func (m *SyslogEndpointSyslogServersCertificateModel) Expand(ctx context.Context, diags *diag.Diagnostics) *misc.SyslogEndpointSyslogServersCertificate {
+func (m *SyslogEndpointSyslogServersCertificateModel) Expand(ctx context.Context, diags *diag.Diagnostics) *SyslogEndpointSyslogServersCertificate {
 	if m == nil {
 		return nil
 	}
-	to := &misc.SyslogEndpointSyslogServersCertificate{}
+	to := &SyslogEndpointSyslogServersCertificate{
+		Ref:            flex.ExpandStringPointer(m.Ref),
+		Issuer:         flex.ExpandStringPointer(m.Issuer),
+		Serial:         flex.ExpandStringPointer(m.Serial),
+		Subject:        flex.ExpandStringPointer(m.Subject),
+		ValidNotAfter:  flex.ExpandInt64Pointer(m.ValidNotAfter),
+		ValidNotBefore: flex.ExpandInt64Pointer(m.ValidNotBefore),
+	}
 	return to
 }
 
-func FlattenSyslogEndpointSyslogServersCertificate(ctx context.Context, from *misc.SyslogEndpointSyslogServersCertificate, diags *diag.Diagnostics) types.Object {
+func FlattenSyslogEndpointSyslogServersCertificate(ctx context.Context, from *SyslogEndpointSyslogServersCertificate, diags *diag.Diagnostics) types.Object {
 	if from == nil {
 		return types.ObjectNull(SyslogEndpointSyslogServersCertificateAttrTypes)
 	}
@@ -90,7 +107,7 @@ func FlattenSyslogEndpointSyslogServersCertificate(ctx context.Context, from *mi
 	return t
 }
 
-func (m *SyslogEndpointSyslogServersCertificateModel) Flatten(ctx context.Context, from *misc.SyslogEndpointSyslogServersCertificate, diags *diag.Diagnostics) {
+func (m *SyslogEndpointSyslogServersCertificateModel) Flatten(ctx context.Context, from *SyslogEndpointSyslogServersCertificate, diags *diag.Diagnostics) {
 	if from == nil {
 		return
 	}
