@@ -9,7 +9,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
 
@@ -71,9 +70,6 @@ func (r *SyslogEndpointResource) Create(ctx context.Context, req resource.Create
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
 
 	if resp.Diagnostics.HasError() {
-		return
-	}
-	if !r.processCertificatePath(ctx, &data, &resp.Diagnostics) {
 		return
 	}
 
@@ -282,10 +278,6 @@ func (r *SyslogEndpointResource) Update(ctx context.Context, req resource.Update
 		return
 	}
 
-	if !r.processCertificatePath(ctx, &data, &resp.Diagnostics) {
-		return
-	}
-
 	apiRes, _, err := r.client.MiscAPI.
 		SyslogEndpointAPI.
 		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
@@ -342,70 +334,4 @@ func (r *SyslogEndpointResource) Delete(ctx context.Context, req resource.Delete
 func (r *SyslogEndpointResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("ref"), req.ID)...)
 	resp.Diagnostics.Append(resp.Private.SetKey(ctx, "associate_internal_id", []byte("true"))...)
-}
-func (r *SyslogEndpointResource) processCertificatePath(ctx context.Context, data *SyslogEndpointModel, diags *diag.Diagnostics) bool {
-	// Get connection details from client configuration
-	baseUrl := r.client.MiscAPI.Cfg.NIOSHostURL
-	username := r.client.MiscAPI.Cfg.NIOSUsername
-	password := r.client.MiscAPI.Cfg.NIOSPassword
-
-	var syslogServers []SyslogEndpointSyslogServersModel
-	diagResult := data.SyslogServers.ElementsAs(ctx, &syslogServers, false)
-	diags.Append(diagResult...)
-	if diags.HasError() {
-		return false
-	}
-	// Check if certificate_file_path is provided
-	for i, server := range syslogServers {
-		// Upload if certificate_file_path is provided
-		if !server.CertificateFilePath.IsNull() && server.ConnectionType.ValueString() == "stcp" {
-			certificate := server.CertificateFilePath.ValueString()
-			if certificate != "" {
-				token, err := utils.UploadFileWithToken(ctx, baseUrl, certificate, username, password)
-				if err != nil {
-					diags.AddError("Certificate Upload Error", fmt.Sprintf("Unable to upload certificate for Syslog Server, got error: %s", err))
-					return false
-				}
-				syslogServers[i].CertificateToken = types.StringValue(token)
-			}
-		}
-	}
-	listValue, diagResult := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: SyslogEndpointSyslogServersAttrTypes}, syslogServers)
-	diags.Append(diagResult...)
-	if diags.HasError() {
-		return false
-	}
-
-	data.SyslogServers = listValue
-	return true
-}
-
-func (r *SyslogEndpointResource) ValidateConfig(ctx context.Context, req resource.ValidateConfigRequest, resp *resource.ValidateConfigResponse) {
-	var data SyslogEndpointModel
-
-	// Read Terraform plan data into the model
-
-	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-
-	// Read Syslog Servers from the model
-	var syslogServers []SyslogEndpointSyslogServersModel
-	diagResult := data.SyslogServers.ElementsAs(ctx, &syslogServers, false)
-	resp.Diagnostics.Append(diagResult...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-
-	for _, server := range syslogServers {
-		if server.ConnectionType.ValueString() == "stcp" {
-			if server.CertificateFilePath.IsNull() {
-				resp.Diagnostics.AddError(
-					"Invalid Syslog Server Configuration",
-					"Syslog servers with STCP connection type must have a certificate specified either through certificate or certificate_file_path.",
-				)
-			}
-		}
-	}
 }

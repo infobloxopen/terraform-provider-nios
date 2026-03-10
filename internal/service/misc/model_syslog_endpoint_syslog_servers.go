@@ -3,13 +3,9 @@ package misc
 import (
 	"context"
 
-	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
-	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
@@ -19,99 +15,65 @@ import (
 )
 
 type SyslogEndpointSyslogServersModel struct {
-	Address             types.String `tfsdk:"address"`
-	ConnectionType      types.String `tfsdk:"connection_type"`
-	Port                types.Int64  `tfsdk:"port"`
-	Hostname            types.String `tfsdk:"hostname"`
-	Format              types.String `tfsdk:"format"`
-	Facility            types.String `tfsdk:"facility"`
-	Severity            types.String `tfsdk:"severity"`
-	Certificate         types.String `tfsdk:"certificate"`
-	CertificateToken    types.String `tfsdk:"certificate_token"`
-	CertificateFilePath types.String `tfsdk:"certificate_file_path"`
+	Address          types.String `tfsdk:"address"`
+	ConnectionType   types.String `tfsdk:"connection_type"`
+	Port             types.Int64  `tfsdk:"port"`
+	Hostname         types.String `tfsdk:"hostname"`
+	Format           types.String `tfsdk:"format"`
+	Facility         types.String `tfsdk:"facility"`
+	Severity         types.String `tfsdk:"severity"`
+	Certificate      types.Object `tfsdk:"certificate"`
+	CertificateToken types.String `tfsdk:"certificate_token"`
 }
 
 var SyslogEndpointSyslogServersAttrTypes = map[string]attr.Type{
-	"address":               types.StringType,
-	"connection_type":       types.StringType,
-	"port":                  types.Int64Type,
-	"hostname":              types.StringType,
-	"format":                types.StringType,
-	"facility":              types.StringType,
-	"severity":              types.StringType,
-	"certificate":           types.StringType,
-	"certificate_token":     types.StringType,
-	"certificate_file_path": types.StringType,
+	"address":           types.StringType,
+	"connection_type":   types.StringType,
+	"port":              types.Int64Type,
+	"hostname":          types.StringType,
+	"format":            types.StringType,
+	"facility":          types.StringType,
+	"severity":          types.StringType,
+	"certificate":       types.ObjectType{AttrTypes: SyslogEndpointSyslogServersCertificateAttrTypes},
+	"certificate_token": types.StringType,
 }
 
 var SyslogEndpointSyslogServersResourceSchemaAttributes = map[string]schema.Attribute{
 	"address": schema.StringAttribute{
-		Required:            true,
+		Optional:            true,
 		MarkdownDescription: "Syslog Server IP address",
 	},
 	"connection_type": schema.StringAttribute{
-		Computed: true,
-		Optional: true,
-		Validators: []validator.String{
-			stringvalidator.OneOf("stcp", "udp", "tls"),
-		},
-		Default:             stringdefault.StaticString("udp"),
+		Optional:            true,
 		MarkdownDescription: "Connection type values",
 	},
 	"port": schema.Int64Attribute{
-		Computed:            true,
 		Optional:            true,
-		Default:             int64default.StaticInt64(514),
 		MarkdownDescription: "The port this server listens on.",
 	},
 	"hostname": schema.StringAttribute{
-		Computed: true,
-		Optional: true,
-		Validators: []validator.String{
-			stringvalidator.OneOf("HOSTNAME", "FQDN", "IP_ADDRESS"),
-		},
-		Default:             stringdefault.StaticString("HOSTNAME"),
+		Optional:            true,
 		MarkdownDescription: "List of hostnames",
 	},
 	"format": schema.StringAttribute{
-		Computed: true,
-		Optional: true,
-		Validators: []validator.String{
-			stringvalidator.OneOf("formatted", "raw"),
-		},
-		Default:             stringdefault.StaticString("raw"),
+		Optional:            true,
 		MarkdownDescription: "Format vlues for syslog endpoint server",
 	},
 	"facility": schema.StringAttribute{
-		Computed: true,
-		Optional: true,
-		Validators: []validator.String{
-			stringvalidator.OneOf("local0", "local1", "local2", "local3", "local4", "local5", "local6", "local7"),
-		},
-		Default:             stringdefault.StaticString("local0"),
+		Optional:            true,
 		MarkdownDescription: "Facility values for syslog endpoint server",
 	},
 	"severity": schema.StringAttribute{
-		Computed: true,
-		Optional: true,
-		Validators: []validator.String{
-			stringvalidator.OneOf("alert", "critic", "debug", "emerg", "err", "info", "notice", "warning"),
-		},
-		Default:             stringdefault.StaticString("debug"),
+		Optional:            true,
 		MarkdownDescription: "Severity values for syslog endpoint server.",
 	},
-	"certificate": schema.StringAttribute{
-		Computed:            true,
-		MarkdownDescription: "Reference for creating sysog endpoint server.",
+	"certificate": schema.SingleNestedAttribute{
+		Attributes: SyslogEndpointSyslogServersCertificateResourceSchemaAttributes,
+		Optional:   true,
 	},
 	"certificate_token": schema.StringAttribute{
-		Computed:            true,
-		MarkdownDescription: "The token returned by the uploadinit function call in object fileop.",
-	},
-	"certificate_file_path": schema.StringAttribute{
-		Computed:            true,
 		Optional:            true,
-		MarkdownDescription: "The file path to the certificate.",
+		MarkdownDescription: "The token returned by the uploadinit function call in object fileop.",
 	},
 }
 
@@ -139,6 +101,7 @@ func (m *SyslogEndpointSyslogServersModel) Expand(ctx context.Context, diags *di
 		Format:           flex.ExpandStringPointer(m.Format),
 		Facility:         flex.ExpandStringPointer(m.Facility),
 		Severity:         flex.ExpandStringPointer(m.Severity),
+		Certificate:      ExpandSyslogEndpointSyslogServersCertificate(ctx, m.Certificate, diags),
 		CertificateToken: flex.ExpandStringPointer(m.CertificateToken),
 	}
 	return to
@@ -169,32 +132,6 @@ func (m *SyslogEndpointSyslogServersModel) Flatten(ctx context.Context, from *mi
 	m.Format = flex.FlattenStringPointer(from.Format)
 	m.Facility = flex.FlattenStringPointer(from.Facility)
 	m.Severity = flex.FlattenStringPointer(from.Severity)
-	m.Certificate = flattenCertificate(from.Certificate)
+	m.Certificate = FlattenSyslogEndpointSyslogServersCertificate(ctx, from.Certificate, diags)
 	m.CertificateToken = flex.FlattenStringPointer(from.CertificateToken)
-	m.CertificateFilePath = types.StringNull() // This field is write-only and should not be set from API data
-}
-
-// flattenCertificate handles both string and object types returned by the API.
-// When the API returns an object (for stcp connections), it extracts the _ref field.
-func flattenCertificate(cert interface{}) types.String {
-	if cert == nil {
-		return types.StringNull()
-	}
-	switch v := cert.(type) {
-	case string:
-		return types.StringValue(v)
-	case *string:
-		if v == nil {
-			return types.StringNull()
-		}
-		return types.StringValue(*v)
-	case map[string]interface{}:
-		// API returns certificate as an object with _ref, issuer, serial, etc.
-		if ref, ok := v["_ref"].(string); ok {
-			return types.StringValue(ref)
-		}
-		return types.StringNull()
-	default:
-		return types.StringNull()
-	}
 }
