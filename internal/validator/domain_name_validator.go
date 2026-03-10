@@ -220,6 +220,7 @@ func findLabelLength(s string) int {
 	return len(s) - skipChars
 }
 
+// WithAllowNullOrEmpty returns a DomainNameOption that allows null or empty string values.
 func WithAllowNullOrEmpty() DomainNameOption {
 	return func(v *domainNameValidator) {
 		v.allowNullOrEmpty = true
