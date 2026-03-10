@@ -88,8 +88,21 @@ Optional:
 
 Read-Only:
 
-- `certificate` (String) Reference for creating sysog endpoint server.
+- `certificate` (Attributes) Reference for creating sysog endpoint server. (see [below for nested schema](#nestedatt--result--syslog_servers--certificate))
 - `certificate_token` (String) The token returned by the uploadinit function call in object fileop.
+
+<a id="nestedatt--result--syslog_servers--certificate"></a>
+### Nested Schema for `result.syslog_servers.certificate`
+
+Read-Only:
+
+- `issuer` (String) The certificate issuer subject name.
+- `ref` (String) The reference to the Syslog endpoint server certificate.
+- `serial` (String) The certificate serial number in hex format.
+- `subject` (String) The certificate subject name.
+- `valid_not_after` (Number) The date after which the certificate becomes invalid.
+- `valid_not_before` (Number) The date before which the certificate is not valid.
+
 
 
 <a id="nestedatt--result--template_instance"></a>
