@@ -225,6 +225,7 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 
 		misc.NewRulesetResource,
 		misc.NewBfdtemplateResource,
+		misc.NewDxlEndpointResource,
 
 		smartfolder.NewSmartfolderPersonalResource,
 		smartfolder.NewSmartfolderGlobalResource,
@@ -262,6 +263,7 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 		rir.NewRirOrganizationResource,
 
 		parentalcontrol.NewParentalcontrolAvpResource,
+		parentalcontrol.NewParentalcontrolBlockingpolicyResource,
 	}
 }
 
@@ -371,6 +373,7 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 
 		misc.NewRulesetDataSource,
 		misc.NewBfdtemplateDataSource,
+		misc.NewDxlEndpointDataSource,
 
 		smartfolder.NewSmartfolderPersonalDataSource,
 		smartfolder.NewSmartfolderGlobalDataSource,
@@ -388,7 +391,6 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 		discovery.NewVdiscoverytaskDataSource,
 
 		notification.NewNotificationRuleDataSource,
-
 		notification.NewNotificationRestEndpointDataSource,
 
 		rpz.NewRecordRpzADataSource,
@@ -409,6 +411,7 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 		rir.NewRirOrganizationDataSource,
 
 		parentalcontrol.NewParentalcontrolAvpDataSource,
+		parentalcontrol.NewParentalcontrolBlockingpolicyDataSource,
 	}
 }
 
