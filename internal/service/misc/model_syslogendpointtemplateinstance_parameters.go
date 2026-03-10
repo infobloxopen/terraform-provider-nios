@@ -3,15 +3,18 @@ package misc
 import (
 	"context"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/misc"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
 type SyslogendpointtemplateinstanceParametersModel struct {
@@ -30,10 +33,14 @@ var SyslogendpointtemplateinstanceParametersAttrTypes = map[string]attr.Type{
 
 var SyslogendpointtemplateinstanceParametersResourceSchemaAttributes = map[string]schema.Attribute{
 	"name": schema.StringAttribute{
-		Optional:            true,
+		Required: true,
+		Validators: []validator.String{
+			customvalidator.ValidateTrimmedString(),
+		},
 		MarkdownDescription: "The name of the REST API template parameter.",
 	},
 	"value": schema.StringAttribute{
+		Computed:            true,
 		Optional:            true,
 		MarkdownDescription: "The value of the REST API template parameter.",
 	},
@@ -42,7 +49,10 @@ var SyslogendpointtemplateinstanceParametersResourceSchemaAttributes = map[strin
 		MarkdownDescription: "The default value of the REST API template parameter.",
 	},
 	"syntax": schema.StringAttribute{
-		Optional:            true,
+		Required: true,
+		Validators: []validator.String{
+			stringvalidator.OneOf("BOOL", "INT", "STR"),
+		},
 		MarkdownDescription: "The syntax of the REST API template parameter.",
 	},
 }
