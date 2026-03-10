@@ -4,26 +4,17 @@ import (
 	"context"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
-	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
-	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listdefault"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/misc"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 	importmod "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/import"
-	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
-	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
 type SyslogEndpointModel struct {
@@ -74,33 +65,23 @@ var SyslogEndpointResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "Extensible attributes associated with the object. For valid values for extensible attributes, see {extattrs:values}.",
 	},
 	"log_level": schema.StringAttribute{
-		Computed: true,
-		Optional: true,
-		Validators: []validator.String{
-			stringvalidator.OneOf("DEBUG", "ERROR", "INFO", "WARNING"),
-		},
-		Default:             stringdefault.StaticString("WARNING"),
+		Optional:            true,
 		MarkdownDescription: "The log level for a notification REST endpoint.",
 	},
 	"name": schema.StringAttribute{
-		Required: true,
-		Validators: []validator.String{
-			customvalidator.ValidateSyslogEndpointName(),
-		},
+		Optional:            true,
 		MarkdownDescription: "The name of a Syslog endpoint.",
 	},
 	"outbound_member_type": schema.StringAttribute{
-		Required: true,
-		Validators: []validator.String{
-			stringvalidator.OneOf("GM", "MEMBER"),
-		},
+		Optional:            true,
 		MarkdownDescription: "The outbound member that will generate events.",
 	},
 	"outbound_members": schema.ListAttribute{
-		ElementType:         types.StringType,
-		Computed:            true,
+		ElementType: types.StringType,
+		Validators: []validator.List{
+			listvalidator.SizeAtLeast(1),
+		},
 		Optional:            true,
-		Default:             listdefault.StaticValue(types.ListNull(types.StringType)),
 		MarkdownDescription: "The list of members for outbound events.",
 	},
 	"syslog_servers": schema.ListNestedAttribute{
@@ -110,48 +91,27 @@ var SyslogEndpointResourceSchemaAttributes = map[string]schema.Attribute{
 		Validators: []validator.List{
 			listvalidator.SizeAtLeast(1),
 		},
-		Optional: true,
-		Computed: true,
-		Default: listdefault.StaticValue(
-			types.ListValueMust(
-				types.ObjectType{AttrTypes: SyslogEndpointSyslogServersAttrTypes},
-				[]attr.Value{},
-			),
-		),
+		Optional:            true,
 		MarkdownDescription: "List of syslog servers",
 	},
 	"template_instance": schema.SingleNestedAttribute{
-		Attributes:          SyslogEndpointTemplateInstanceResourceSchemaAttributes,
-		Optional:            true,
-		Computed:            true,
-		MarkdownDescription: "The Syslog template instance.",
+		Attributes: SyslogEndpointTemplateInstanceResourceSchemaAttributes,
+		Optional:   true,
 	},
 	"timeout": schema.Int64Attribute{
-		Computed:            true,
 		Optional:            true,
-		Default:             int64default.StaticInt64(30),
 		MarkdownDescription: "The timeout of session management (in seconds).",
 	},
 	"vendor_identifier": schema.StringAttribute{
-		Computed:            true,
 		Optional:            true,
-		Default:             stringdefault.StaticString(""),
 		MarkdownDescription: "The vendor identifier.",
 	},
 	"wapi_user_name": schema.StringAttribute{
-		Computed:            true,
 		Optional:            true,
-		Default:             stringdefault.StaticString(""),
 		MarkdownDescription: "The user name for WAPI integration.",
 	},
 	"wapi_user_password": schema.StringAttribute{
-		Optional:  true,
-		Computed:  true,
-		Sensitive: true,
-		Default:   stringdefault.StaticString(""),
-		Validators: []validator.String{
-			customvalidator.ValidateTrimmedString(),
-		},
+		Optional:            true,
 		MarkdownDescription: "The user password for WAPI integration.",
 	},
 	"extattrs_all": schema.MapAttribute{
@@ -209,18 +169,10 @@ func (m *SyslogEndpointModel) Flatten(ctx context.Context, from *misc.SyslogEndp
 	m.Name = flex.FlattenStringPointer(from.Name)
 	m.OutboundMemberType = flex.FlattenStringPointer(from.OutboundMemberType)
 	m.OutboundMembers = flex.FlattenFrameworkListString(ctx, from.OutboundMembers, diags)
-	planSyslogServers := m.SyslogServers
 	m.SyslogServers = flex.FlattenFrameworkListNestedBlock(ctx, from.SyslogServers, SyslogEndpointSyslogServersAttrTypes, diags, FlattenSyslogEndpointSyslogServers)
 	m.TemplateInstance = FlattenSyslogEndpointTemplateInstance(ctx, from.TemplateInstance, diags)
 	m.Timeout = flex.FlattenInt64Pointer(from.Timeout)
 	m.VendorIdentifier = flex.FlattenStringPointer(from.VendorIdentifier)
 	m.WapiUserName = flex.FlattenStringPointer(from.WapiUserName)
-	// Preserve WapiUserPassword - API doesn't return sensitive password fields
-	// The value is already set from plan/state, so we don't overwrite it
-	if !planSyslogServers.IsNull() {
-		result, diags := utils.CopyFieldFromPlanToRespList(ctx, planSyslogServers, m.SyslogServers, "certificate_file_path")
-		if !diags.HasError() {
-			m.SyslogServers = result.(basetypes.ListValue)
-		}
-	}
+	m.WapiUserPassword = flex.FlattenStringPointer(from.WapiUserPassword)
 }
