@@ -2165,7 +2165,13 @@ func TestAccMemberResource_SyslogProxySetting(t *testing.T) {
 
 	syslogProxySettingVal := map[string]any{
 
-		// "client_acls": []string{},
+		"client_acls": []map[string]any{
+			{
+				"_struct":    "addressac",
+				"address":    "192.0.0.1",
+				"permission": "ALLOW",
+			},
+		},
 		"enable":     false,
 		"tcp_enable": false,
 		"tcp_port":   514,
@@ -2174,7 +2180,13 @@ func TestAccMemberResource_SyslogProxySetting(t *testing.T) {
 	}
 
 	syslogProxySettingValUpdated := map[string]any{
-		// "client_acls": []string{},
+		"client_acls": []map[string]any{
+			{
+				"_struct":    "addressac",
+				"address":    "192.0.0.1",
+				"permission": "ALLOW",
+			},
+		},
 		"enable":     true,
 		"tcp_enable": true,
 		"tcp_port":   1514,
@@ -2277,12 +2289,11 @@ func TestAccMemberResource_SyslogServers(t *testing.T) {
 				),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
-					// resource.TestCheckResourceAttr(resourceName, "syslog_servers.#", "1"),
-					// resource.TestCheckResourceAttr(resourceName, "syslog_servers.0.address", "192.com"),
-					// resource.TestCheckResourceAttr(resourceName, "syslog_servers.0.connection_type", "TCP"),
-					// resource.TestCheckResourceAttr(resourceName, "syslog_servers.0.port", "514"),
-					// resource.TestCheckResourceAttr(resourceName, "syslog_servers.0.severity", "DEBUG"),
-					// resource.TestCheckResourceAttr(resourceName, "use_syslog_proxy_setting", "true"),
+					resource.TestCheckResourceAttr(resourceName, "syslog_servers.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "syslog_servers.0.connection_type", "TCP"),
+					resource.TestCheckResourceAttr(resourceName, "syslog_servers.0.port", "514"),
+					resource.TestCheckResourceAttr(resourceName, "syslog_servers.0.severity", "DEBUG"),
+					resource.TestCheckResourceAttr(resourceName, "use_syslog_proxy_setting", "true"),
 				),
 			},
 			{
@@ -2298,12 +2309,11 @@ func TestAccMemberResource_SyslogServers(t *testing.T) {
 				),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
-					// resource.TestCheckResourceAttr(resourceName, "syslog_servers.#", "1"),
-					// resource.TestCheckResourceAttr(resourceName, "syslog_servers.0.address", "192.com"),
-					// resource.TestCheckResourceAttr(resourceName, "syslog_servers.0.connection_type", "TCP"),
-					// resource.TestCheckResourceAttr(resourceName, "syslog_servers.0.port", "515"),
-					// resource.TestCheckResourceAttr(resourceName, "syslog_servers.0.severity", "INFO"),
-					// resource.TestCheckResourceAttr(resourceName, "use_syslog_proxy_setting", "true"),
+					resource.TestCheckResourceAttr(resourceName, "syslog_servers.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "syslog_servers.0.connection_type", "TCP"),
+					resource.TestCheckResourceAttr(resourceName, "syslog_servers.0.port", "515"),
+					resource.TestCheckResourceAttr(resourceName, "syslog_servers.0.severity", "INFO"),
+					resource.TestCheckResourceAttr(resourceName, "use_syslog_proxy_setting", "true"),
 				),
 			},
 		},

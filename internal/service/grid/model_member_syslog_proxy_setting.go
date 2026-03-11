@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -19,15 +20,17 @@ import (
 )
 
 type MemberSyslogProxySettingModel struct {
-	Enable     types.Bool  `tfsdk:"enable"`
-	TcpEnable  types.Bool  `tfsdk:"tcp_enable"`
-	TcpPort    types.Int64 `tfsdk:"tcp_port"`
-	UdpEnable  types.Bool  `tfsdk:"udp_enable"`
-	UdpPort    types.Int64 `tfsdk:"udp_port"`
-	ClientAcls types.List  `tfsdk:"client_acls"`
+	Struct     types.String `tfsdk:"struct"`
+	Enable     types.Bool   `tfsdk:"enable"`
+	TcpEnable  types.Bool   `tfsdk:"tcp_enable"`
+	TcpPort    types.Int64  `tfsdk:"tcp_port"`
+	UdpEnable  types.Bool   `tfsdk:"udp_enable"`
+	UdpPort    types.Int64  `tfsdk:"udp_port"`
+	ClientAcls types.List   `tfsdk:"client_acls"`
 }
 
 var MemberSyslogProxySettingAttrTypes = map[string]attr.Type{
+	"struct":      types.StringType,
 	"enable":      types.BoolType,
 	"tcp_enable":  types.BoolType,
 	"tcp_port":    types.Int64Type,
@@ -37,6 +40,13 @@ var MemberSyslogProxySettingAttrTypes = map[string]attr.Type{
 }
 
 var MemberSyslogProxySettingResourceSchemaAttributes = map[string]schema.Attribute{
+	"struct": schema.StringAttribute{
+		Required: true,
+		Validators: []validator.String{
+			stringvalidator.OneOf("addressac", "tsigac"),
+		},
+		MarkdownDescription: "The struct type of the object. The value must be one of 'addressac' and 'tsigac'.",
+	},
 	"enable": schema.BoolAttribute{
 		Optional:            true,
 		Computed:            true,
@@ -97,6 +107,7 @@ func (m *MemberSyslogProxySettingModel) Expand(ctx context.Context, diags *diag.
 		return nil
 	}
 	to := &grid.MemberSyslogProxySetting{
+		//Struct:     flex.ExpandStringPointer(m.Struct),
 		Enable:     flex.ExpandBoolPointer(m.Enable),
 		TcpEnable:  flex.ExpandBoolPointer(m.TcpEnable),
 		TcpPort:    flex.ExpandInt64Pointer(m.TcpPort),
@@ -125,6 +136,7 @@ func (m *MemberSyslogProxySettingModel) Flatten(ctx context.Context, from *grid.
 	if m == nil {
 		*m = MemberSyslogProxySettingModel{}
 	}
+	//m.Struct = flex.FlattenStringPointer(from.Struct)
 	m.Enable = types.BoolPointerValue(from.Enable)
 	m.TcpEnable = types.BoolPointerValue(from.TcpEnable)
 	m.TcpPort = flex.FlattenInt64Pointer(from.TcpPort)

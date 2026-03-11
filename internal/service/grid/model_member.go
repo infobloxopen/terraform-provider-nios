@@ -1008,7 +1008,15 @@ func (m *MemberModel) Flatten(ctx context.Context, from *grid.Member, diags *dia
 	m.SyslogProxySetting = FlattenMemberSyslogProxySetting(ctx, from.SyslogProxySetting, diags)
 	m.SyslogServers = flex.FlattenFrameworkListNestedBlock(ctx, from.SyslogServers, MemberSyslogServersAttrTypes, diags, FlattenMemberSyslogServers)
 	m.SyslogSize = flex.FlattenInt64Pointer(from.SyslogSize)
+	planList2 := m.ThresholdTraps
 	m.ThresholdTraps = flex.FlattenFrameworkListNestedBlock(ctx, from.ThresholdTraps, MemberThresholdTrapsAttrTypes, diags, FlattenMemberThresholdTraps)
+	if !planList2.IsUnknown() {
+		reOrderedList, diags := utils.ReorderAndFilterNestedListResponse(ctx, planList2, m.ThresholdTraps, "trap_type")
+		if !diags.HasError() {
+			m.ThresholdTraps = reOrderedList.(basetypes.ListValue)
+		}
+	}
+	// m.ThresholdTraps = flex.FlattenFrameworkListNestedBlock(ctx, from.ThresholdTraps, MemberThresholdTrapsAttrTypes, diags, FlattenMemberThresholdTraps)
 	m.TimeZone = flex.FlattenStringPointer(from.TimeZone)
 	m.TrafficCaptureAuthDnsSetting = FlattenMemberTrafficCaptureAuthDnsSetting(ctx, from.TrafficCaptureAuthDnsSetting, diags)
 	m.TrafficCaptureChrSetting = FlattenMemberTrafficCaptureChrSetting(ctx, from.TrafficCaptureChrSetting, diags)
