@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"net/http"
-	"strings"
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -202,8 +201,8 @@ func (r *HsmEntrustnshieldgroupResource) ValidateConfig(ctx context.Context, req
 		return
 	}
 
-	// Validate: card_name must be set when protection is SOFTCARD
-	if !data.Protection.IsNull() && !data.Protection.IsUnknown() && strings.ToUpper(data.Protection.ValueString()) == "SOFTCARD" {
+	// Validate: card_name and pass_phrase must be set when protection is SOFTCARD
+	if !data.Protection.IsNull() && !data.Protection.IsUnknown() && data.Protection.ValueString() == "SOFTCARD" {
 		if data.CardName.IsNull() || data.CardName.IsUnknown() || data.CardName.ValueString() == "" {
 			resp.Diagnostics.AddAttributeError(
 				path.Root("card_name"),
@@ -211,7 +210,6 @@ func (r *HsmEntrustnshieldgroupResource) ValidateConfig(ctx context.Context, req
 				"You must specify 'card_name' when 'protection' is set to 'SOFTCARD'.",
 			)
 		}
-		// Validate: pass_phrase must be set when protection is SOFTCARD
 		if data.PassPhrase.IsNull() || data.PassPhrase.IsUnknown() || data.PassPhrase.ValueString() == "" {
 			resp.Diagnostics.AddAttributeError(
 				path.Root("pass_phrase"),

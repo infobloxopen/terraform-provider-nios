@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/hashicorp/terraform-plugin-framework-nettypes/iptypes"
+	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
@@ -81,9 +82,12 @@ var HsmEntrustnshieldgroupResourceSchemaAttributes = map[string]schema.Attribute
 		MarkdownDescription: "The remote file server (RFS) IPv4 Address.",
 	},
 	"key_server_port": schema.Int64Attribute{
-		Optional:            true,
-		Computed:            true,
-		Default:             int64default.StaticInt64(9004),
+		Optional: true,
+		Computed: true,
+		Default:  int64default.StaticInt64(9004),
+		Validators: []validator.Int64{
+			int64validator.Between(0, 65535),
+		},
 		MarkdownDescription: "The remote file server (RFS) port.",
 	},
 	"name": schema.StringAttribute{

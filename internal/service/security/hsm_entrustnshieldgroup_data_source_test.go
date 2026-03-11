@@ -9,6 +9,7 @@ import (
 
 	"github.com/infobloxopen/infoblox-nios-go-client/security"
 	"github.com/infobloxopen/terraform-provider-nios/internal/acctest"
+	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
 func TestAccHsmEntrustnshieldgroupDataSource_Filters(t *testing.T) {
@@ -17,18 +18,6 @@ func TestAccHsmEntrustnshieldgroupDataSource_Filters(t *testing.T) {
 	var v security.HsmEntrustnshieldgroup
 
 	name := acctest.RandomNameWithPrefix("entrustnshieldgroup-hsm-")
-	keyServerIp := keyServerIp
-	keyServerPort := keyServerPort
-
-	entrustnshieldHSM := []map[string]any{
-		{
-			"keyhash":     keyhash,
-			"remote_ip":   remoteIp,
-			"remote_port": remotePort,
-			"disable":     true, //Remove this line when running tests against an active HSM group
-		},
-	}
-	entrustnshieldHSM_HCL := FormatEntrustnshieldHsmToHCL(entrustnshieldHSM)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -36,7 +25,7 @@ func TestAccHsmEntrustnshieldgroupDataSource_Filters(t *testing.T) {
 		CheckDestroy:             testAccCheckHsmEntrustnshieldgroupDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccHsmEntrustnshieldgroupDataSourceConfigFilters(name, keyServerIp, keyServerPort, entrustnshieldHSM_HCL),
+				Config: testAccHsmEntrustnshieldgroupDataSourceConfigFilters(name, keyServerIp, keyServerPort, entrustnshieldHSM),
 				Check: resource.ComposeTestCheckFunc(
 					append([]resource.TestCheckFunc{
 						testAccCheckHsmEntrustnshieldgroupExists(context.Background(), resourceName, &v),
@@ -63,7 +52,9 @@ func testAccCheckHsmEntrustnshieldgroupResourceAttrPair(resourceName, dataSource
 	}
 }
 
-func testAccHsmEntrustnshieldgroupDataSourceConfigFilters(name, keyServerIp string, keyServerPort int, entrustnshieldHSM string) string {
+func testAccHsmEntrustnshieldgroupDataSourceConfigFilters(name, keyServerIp string, keyServerPort int, entrustnshieldHSM []map[string]any) string {
+	entrustnshieldHSM_HCL := utils.ConvertSliceOfMapsToHCL(entrustnshieldHSM)
+
 	return fmt.Sprintf(`
 resource "nios_security_hsm_entrustnshieldgroup" "test" {
 	name = %q
@@ -77,5 +68,5 @@ data "nios_security_hsm_entrustnshieldgroup" "test" {
 		name = nios_security_hsm_entrustnshieldgroup.test.name
 	}
 }
-`, name, keyServerIp, keyServerPort, entrustnshieldHSM)
+`, name, keyServerIp, keyServerPort, entrustnshieldHSM_HCL)
 }

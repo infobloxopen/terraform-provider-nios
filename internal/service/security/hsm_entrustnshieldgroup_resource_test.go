@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -39,11 +38,12 @@ var entrustnshieldHSM = []map[string]any{
 		"disable":     true, //Remove this line when running tests against an active HSM group
 	},
 }
-var entrustnshieldHSM_HCL = FormatEntrustnshieldHsmToHCL(entrustnshieldHSM)
 
 func TestAccHsmEntrustnshieldgroupResource_basic(t *testing.T) {
 	var resourceName = "nios_security_hsm_entrustnshieldgroup.test"
 	var v security.HsmEntrustnshieldgroup
+
+	name := acctest.RandomNameWithPrefix("entrustnshieldgroup-hsm-")
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -51,7 +51,7 @@ func TestAccHsmEntrustnshieldgroupResource_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccHsmEntrustnshieldgroupBasicConfig(name, keyServerIp, entrustnshieldHSM_HCL),
+				Config: testAccHsmEntrustnshieldgroupBasicConfig(name, keyServerIp, entrustnshieldHSM),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckHsmEntrustnshieldgroupExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "name", name),
@@ -63,7 +63,7 @@ func TestAccHsmEntrustnshieldgroupResource_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "protection", "MODULE"),
 					resource.TestCheckResourceAttr(resourceName, "comment", ""),
 					resource.TestCheckResourceAttr(resourceName, "key_server_port", "9004"),
-					//resource.TestCheckResourceAttr(resourceName, "entrustnshield_hsm.0.disable", "false"),
+					resource.TestCheckResourceAttr(resourceName, "entrustnshield_hsm.0.disable", "false"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -75,13 +75,15 @@ func TestAccHsmEntrustnshieldgroupResource_disappears(t *testing.T) {
 	resourceName := "nios_security_hsm_entrustnshieldgroup.test"
 	var v security.HsmEntrustnshieldgroup
 
+	name := acctest.RandomNameWithPrefix("entrustnshieldgroup-hsm-")
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		CheckDestroy:             testAccCheckHsmEntrustnshieldgroupDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccHsmEntrustnshieldgroupBasicConfig(name, keyServerIp, entrustnshieldHSM_HCL),
+				Config: testAccHsmEntrustnshieldgroupBasicConfig(name, keyServerIp, entrustnshieldHSM),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckHsmEntrustnshieldgroupExists(context.Background(), resourceName, &v),
 					testAccCheckHsmEntrustnshieldgroupDisappears(context.Background(), &v),
@@ -96,13 +98,15 @@ func TestAccHsmEntrustnshieldgroupResource_CardName(t *testing.T) {
 	var resourceName = "nios_security_hsm_entrustnshieldgroup.test_card_name"
 	var v security.HsmEntrustnshieldgroup
 
+	name := acctest.RandomNameWithPrefix("entrustnshieldgroup-hsm-")
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccHsmEntrustnshieldgroupCardName(name, "SOFTCARD", "example-softcard", "examplepassphrase@123", keyServerIp, keyServerPort, entrustnshieldHSM_HCL),
+				Config: testAccHsmEntrustnshieldgroupCardName(name, "SOFTCARD", "example-softcard", "examplepassphrase@123", keyServerIp, keyServerPort, entrustnshieldHSM),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckHsmEntrustnshieldgroupExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "card_name", "example-softcard"),
@@ -110,7 +114,7 @@ func TestAccHsmEntrustnshieldgroupResource_CardName(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccHsmEntrustnshieldgroupCardName(name, "SOFTCARD", "example-softcard2", "updatedexamplepassphrase@123", keyServerIp, keyServerPort, entrustnshieldHSM_HCL),
+				Config: testAccHsmEntrustnshieldgroupCardName(name, "SOFTCARD", "example-softcard2", "updatedexamplepassphrase@123", keyServerIp, keyServerPort, entrustnshieldHSM),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckHsmEntrustnshieldgroupExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "card_name", "example-softcard2"),
@@ -125,13 +129,15 @@ func TestAccHsmEntrustnshieldgroupResource_Comment(t *testing.T) {
 	var resourceName = "nios_security_hsm_entrustnshieldgroup.test_comment"
 	var v security.HsmEntrustnshieldgroup
 
+	name := acctest.RandomNameWithPrefix("entrustnshieldgroup-hsm-")
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccHsmEntrustnshieldgroupComment(name, keyServerIp, entrustnshieldHSM_HCL, "sample comment"),
+				Config: testAccHsmEntrustnshieldgroupComment(name, keyServerIp, entrustnshieldHSM, "sample comment"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckHsmEntrustnshieldgroupExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "comment", "sample comment"),
@@ -139,7 +145,7 @@ func TestAccHsmEntrustnshieldgroupResource_Comment(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccHsmEntrustnshieldgroupComment(name, keyServerIp, entrustnshieldHSM_HCL, "updated sample comment"),
+				Config: testAccHsmEntrustnshieldgroupComment(name, keyServerIp, entrustnshieldHSM, "updated sample comment"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckHsmEntrustnshieldgroupExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "comment", "updated sample comment"),
@@ -154,6 +160,7 @@ func TestAccHsmEntrustnshieldgroupResource_EntrustnshieldHsm(t *testing.T) {
 	var resourceName = "nios_security_hsm_entrustnshieldgroup.test_entrustnshield_hsm"
 	var v security.HsmEntrustnshieldgroup
 
+	name := acctest.RandomNameWithPrefix("entrustnshieldgroup-hsm-")
 	updatedentrustnshieldHSM := []map[string]any{
 		{
 			"keyhash":     keyhash,
@@ -163,24 +170,22 @@ func TestAccHsmEntrustnshieldgroupResource_EntrustnshieldHsm(t *testing.T) {
 		},
 	}
 
-	updatedentrustnshieldHSM_HCL := FormatEntrustnshieldHsmToHCL(updatedentrustnshieldHSM)
-
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccHsmEntrustnshieldgroupEntrustnshieldHsm(name, keyServerIp, entrustnshieldHSM_HCL),
+				Config: testAccHsmEntrustnshieldgroupEntrustnshieldHsm(name, keyServerIp, entrustnshieldHSM),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckHsmEntrustnshieldgroupExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "entrustnshield_hsm.0.remote_port", "9004"),
-					//resource.TestCheckResourceAttr(resourceName, "entrustnshield_hsm.0.disable", "false"),
+					resource.TestCheckResourceAttr(resourceName, "entrustnshield_hsm.0.disable", "false"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccHsmEntrustnshieldgroupEntrustnshieldHsm(name, keyServerIp, updatedentrustnshieldHSM_HCL),
+				Config: testAccHsmEntrustnshieldgroupEntrustnshieldHsm(name, keyServerIp, updatedentrustnshieldHSM),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckHsmEntrustnshieldgroupExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "entrustnshield_hsm.0.remote_port", "9005"),
@@ -196,6 +201,7 @@ func TestAccHsmEntrustnshieldgroupResource_KeyServerIp(t *testing.T) {
 	var resourceName = "nios_security_hsm_entrustnshieldgroup.test_key_server_ip"
 	var v security.HsmEntrustnshieldgroup
 
+	name := acctest.RandomNameWithPrefix("entrustnshieldgroup-hsm-")
 	updatedkeyServerIp := "10.10.10.15"
 
 	resource.Test(t, resource.TestCase{
@@ -204,7 +210,7 @@ func TestAccHsmEntrustnshieldgroupResource_KeyServerIp(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccHsmEntrustnshieldgroupKeyServerIp(name, keyServerIp, entrustnshieldHSM_HCL),
+				Config: testAccHsmEntrustnshieldgroupKeyServerIp(name, keyServerIp, entrustnshieldHSM),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckHsmEntrustnshieldgroupExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "key_server_ip", keyServerIp),
@@ -212,7 +218,7 @@ func TestAccHsmEntrustnshieldgroupResource_KeyServerIp(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccHsmEntrustnshieldgroupKeyServerIp(name, updatedkeyServerIp, entrustnshieldHSM_HCL),
+				Config: testAccHsmEntrustnshieldgroupKeyServerIp(name, updatedkeyServerIp, entrustnshieldHSM),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckHsmEntrustnshieldgroupExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "key_server_ip", updatedkeyServerIp),
@@ -227,6 +233,7 @@ func TestAccHsmEntrustnshieldgroupResource_KeyServerPort(t *testing.T) {
 	var resourceName = "nios_security_hsm_entrustnshieldgroup.test_key_server_port"
 	var v security.HsmEntrustnshieldgroup
 
+	name := acctest.RandomNameWithPrefix("entrustnshieldgroup-hsm-")
 	updatedKeyServerPort := 9005
 
 	resource.Test(t, resource.TestCase{
@@ -235,7 +242,7 @@ func TestAccHsmEntrustnshieldgroupResource_KeyServerPort(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccHsmEntrustnshieldgroupKeyServerPort(name, keyServerIp, keyServerPort, entrustnshieldHSM_HCL),
+				Config: testAccHsmEntrustnshieldgroupKeyServerPort(name, keyServerIp, keyServerPort, entrustnshieldHSM),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckHsmEntrustnshieldgroupExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "key_server_port", "9004"),
@@ -243,7 +250,7 @@ func TestAccHsmEntrustnshieldgroupResource_KeyServerPort(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccHsmEntrustnshieldgroupKeyServerPort(name, keyServerIp, updatedKeyServerPort, entrustnshieldHSM_HCL),
+				Config: testAccHsmEntrustnshieldgroupKeyServerPort(name, keyServerIp, updatedKeyServerPort, entrustnshieldHSM),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckHsmEntrustnshieldgroupExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "key_server_port", "9005"),
@@ -258,6 +265,7 @@ func TestAccHsmEntrustnshieldgroupResource_Name(t *testing.T) {
 	var resourceName = "nios_security_hsm_entrustnshieldgroup.test_name"
 	var v security.HsmEntrustnshieldgroup
 
+	name := acctest.RandomNameWithPrefix("entrustnshieldgroup-hsm-")
 	updatedName := acctest.RandomNameWithPrefix("entrustnshieldgroup-hsm-1")
 
 	resource.Test(t, resource.TestCase{
@@ -266,7 +274,7 @@ func TestAccHsmEntrustnshieldgroupResource_Name(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccHsmEntrustnshieldgroupName(name, keyServerIp, entrustnshieldHSM_HCL),
+				Config: testAccHsmEntrustnshieldgroupName(name, keyServerIp, entrustnshieldHSM),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckHsmEntrustnshieldgroupExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "name", name),
@@ -274,7 +282,7 @@ func TestAccHsmEntrustnshieldgroupResource_Name(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccHsmEntrustnshieldgroupName(updatedName, keyServerIp, entrustnshieldHSM_HCL),
+				Config: testAccHsmEntrustnshieldgroupName(updatedName, keyServerIp, entrustnshieldHSM),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckHsmEntrustnshieldgroupExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "name", updatedName),
@@ -289,13 +297,15 @@ func TestAccHsmEntrustnshieldgroupResource_PassPhrase(t *testing.T) {
 	var resourceName = "nios_security_hsm_entrustnshieldgroup.test_pass_phrase"
 	var v security.HsmEntrustnshieldgroup
 
+	name := acctest.RandomNameWithPrefix("entrustnshieldgroup-hsm-")
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccHsmEntrustnshieldgroupPassPhrase(name, "SOFTCARD", "example-softcard", "examplepassphrase@123", keyServerIp, 9004, entrustnshieldHSM_HCL),
+				Config: testAccHsmEntrustnshieldgroupPassPhrase(name, "SOFTCARD", "example-softcard", "examplepassphrase@123", keyServerIp, 9004, entrustnshieldHSM),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckHsmEntrustnshieldgroupExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "pass_phrase", "examplepassphrase@123"),
@@ -303,7 +313,7 @@ func TestAccHsmEntrustnshieldgroupResource_PassPhrase(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccHsmEntrustnshieldgroupPassPhrase(name, "SOFTCARD", "example-softcard", "updatedpassphrase@123", keyServerIp, 9004, entrustnshieldHSM_HCL),
+				Config: testAccHsmEntrustnshieldgroupPassPhrase(name, "SOFTCARD", "example-softcard", "updatedpassphrase@123", keyServerIp, 9004, entrustnshieldHSM),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckHsmEntrustnshieldgroupExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "pass_phrase", "updatedpassphrase@123"),
@@ -318,13 +328,15 @@ func TestAccHsmEntrustnshieldgroupResource_Protection(t *testing.T) {
 	var resourceName = "nios_security_hsm_entrustnshieldgroup.test_protection"
 	var v security.HsmEntrustnshieldgroup
 
+	name := acctest.RandomNameWithPrefix("entrustnshieldgroup-hsm-")
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccHsmEntrustnshieldgroupProtectionSoftcard(name, "SOFTCARD", "example-softcard", "examplepassphrase@123", keyServerIp, keyServerPort, entrustnshieldHSM_HCL),
+				Config: testAccHsmEntrustnshieldgroupProtectionSoftcard(name, "SOFTCARD", "example-softcard", "examplepassphrase@123", keyServerIp, keyServerPort, entrustnshieldHSM),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckHsmEntrustnshieldgroupExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "protection", "SOFTCARD"),
@@ -332,7 +344,7 @@ func TestAccHsmEntrustnshieldgroupResource_Protection(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccHsmEntrustnshieldgroupProtectionModule(name, "MODULE", keyServerIp, keyServerPort, entrustnshieldHSM_HCL),
+				Config: testAccHsmEntrustnshieldgroupProtectionModule(name, "MODULE", keyServerIp, keyServerPort, entrustnshieldHSM),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckHsmEntrustnshieldgroupExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "protection", "MODULE"),
@@ -401,17 +413,21 @@ func testAccCheckHsmEntrustnshieldgroupDisappears(ctx context.Context, v *securi
 	}
 }
 
-func testAccHsmEntrustnshieldgroupBasicConfig(name, keyServerIp string, entrustnshieldHSM string) string {
+func testAccHsmEntrustnshieldgroupBasicConfig(name, keyServerIp string, entrustnshieldHSM []map[string]any) string {
+	entrustnshieldHSM_HCL := utils.ConvertSliceOfMapsToHCL(entrustnshieldHSM)
+
 	return fmt.Sprintf(`
 resource "nios_security_hsm_entrustnshieldgroup" "test" {
     name = %q
     key_server_ip = %q
 	entrustnshield_hsm = %s
 }
-`, name, keyServerIp, entrustnshieldHSM)
+`, name, keyServerIp, entrustnshieldHSM_HCL)
 }
 
-func testAccHsmEntrustnshieldgroupCardName(name, protection, cardName, passwordPhrase, keyServerIp string, keyServerPort int, entrustnshieldHSM string) string {
+func testAccHsmEntrustnshieldgroupCardName(name, protection, cardName, passwordPhrase, keyServerIp string, keyServerPort int, entrustnshieldHSM []map[string]any) string {
+	entrustnshieldHSM_HCL := utils.ConvertSliceOfMapsToHCL(entrustnshieldHSM)
+
 	return fmt.Sprintf(`
 resource "nios_security_hsm_entrustnshieldgroup" "test_card_name" {
 	name = %q
@@ -422,10 +438,12 @@ resource "nios_security_hsm_entrustnshieldgroup" "test_card_name" {
 	key_server_port = %d
 	entrustnshield_hsm = %s
 }
-`, name, protection, cardName, passwordPhrase, keyServerIp, keyServerPort, entrustnshieldHSM)
+`, name, protection, cardName, passwordPhrase, keyServerIp, keyServerPort, entrustnshieldHSM_HCL)
 }
 
-func testAccHsmEntrustnshieldgroupComment(name, keyServerIp string, entrustnshieldHSM string, comment string) string {
+func testAccHsmEntrustnshieldgroupComment(name, keyServerIp string, entrustnshieldHSM []map[string]any, comment string) string {
+	entrustnshieldHSM_HCL := utils.ConvertSliceOfMapsToHCL(entrustnshieldHSM)
+
 	return fmt.Sprintf(`
 resource "nios_security_hsm_entrustnshieldgroup" "test_comment" {
 	name = %q
@@ -433,30 +451,36 @@ resource "nios_security_hsm_entrustnshieldgroup" "test_comment" {
 	entrustnshield_hsm = %s
     comment = %q
 }
-`, name, keyServerIp, entrustnshieldHSM, comment)
+`, name, keyServerIp, entrustnshieldHSM_HCL, comment)
 }
 
-func testAccHsmEntrustnshieldgroupEntrustnshieldHsm(name, keyServerIp string, entrustnshieldHsm string) string {
+func testAccHsmEntrustnshieldgroupEntrustnshieldHsm(name, keyServerIp string, entrustnshieldHsm []map[string]any) string {
+	entrustnshieldHSM_HCL := utils.ConvertSliceOfMapsToHCL(entrustnshieldHsm)
+
 	return fmt.Sprintf(`
 resource "nios_security_hsm_entrustnshieldgroup" "test_entrustnshield_hsm" {
     name = %q
     key_server_ip = %q
     entrustnshield_hsm = %s
 }
-`, name, keyServerIp, entrustnshieldHsm)
+`, name, keyServerIp, entrustnshieldHSM_HCL)
 }
 
-func testAccHsmEntrustnshieldgroupKeyServerIp(name, keyServerIp string, entrustnshieldHsm string) string {
+func testAccHsmEntrustnshieldgroupKeyServerIp(name, keyServerIp string, entrustnshieldHsm []map[string]any) string {
+	entrustnshieldHSM_HCL := utils.ConvertSliceOfMapsToHCL(entrustnshieldHsm)
+
 	return fmt.Sprintf(`
 resource "nios_security_hsm_entrustnshieldgroup" "test_key_server_ip" {
     name = %q
     key_server_ip = %q
     entrustnshield_hsm = %s
 }
-`, name, keyServerIp, entrustnshieldHsm)
+`, name, keyServerIp, entrustnshieldHSM_HCL)
 }
 
-func testAccHsmEntrustnshieldgroupKeyServerPort(name, keyServerIp string, keyServerPort int, entrustnshieldHsm string) string {
+func testAccHsmEntrustnshieldgroupKeyServerPort(name, keyServerIp string, keyServerPort int, entrustnshieldHsm []map[string]any) string {
+	entrustnshieldHSM_HCL := utils.ConvertSliceOfMapsToHCL(entrustnshieldHsm)
+
 	return fmt.Sprintf(`
 resource "nios_security_hsm_entrustnshieldgroup" "test_key_server_port" {
     name = %q
@@ -464,20 +488,24 @@ resource "nios_security_hsm_entrustnshieldgroup" "test_key_server_port" {
 	key_server_port = %d
     entrustnshield_hsm = %s
 }
-`, name, keyServerIp, keyServerPort, entrustnshieldHsm)
+`, name, keyServerIp, keyServerPort, entrustnshieldHSM_HCL)
 }
 
-func testAccHsmEntrustnshieldgroupName(name, keyServerIp string, entrustnshieldHsm string) string {
+func testAccHsmEntrustnshieldgroupName(name, keyServerIp string, entrustnshieldHsm []map[string]any) string {
+	entrustnshieldHSM_HCL := utils.ConvertSliceOfMapsToHCL(entrustnshieldHsm)
+
 	return fmt.Sprintf(`
 resource "nios_security_hsm_entrustnshieldgroup" "test_name" {
     name = %q
     key_server_ip = %q
     entrustnshield_hsm = %s
 }
-`, name, keyServerIp, entrustnshieldHsm)
+`, name, keyServerIp, entrustnshieldHSM_HCL)
 }
 
-func testAccHsmEntrustnshieldgroupPassPhrase(name, protection, cardName, passwordPhrase, keyServerIp string, keyServerPort int, entrustnshieldHSM string) string {
+func testAccHsmEntrustnshieldgroupPassPhrase(name, protection, cardName, passwordPhrase, keyServerIp string, keyServerPort int, entrustnshieldHSM []map[string]any) string {
+	entrustnshieldHSM_HCL := utils.ConvertSliceOfMapsToHCL(entrustnshieldHSM)
+
 	return fmt.Sprintf(`
 resource "nios_security_hsm_entrustnshieldgroup" "test_pass_phrase" {
    	name = %q
@@ -488,10 +516,12 @@ resource "nios_security_hsm_entrustnshieldgroup" "test_pass_phrase" {
 	key_server_port = %d
 	entrustnshield_hsm = %s
 }
-`, name, protection, cardName, passwordPhrase, keyServerIp, keyServerPort, entrustnshieldHSM)
+`, name, protection, cardName, passwordPhrase, keyServerIp, keyServerPort, entrustnshieldHSM_HCL)
 }
 
-func testAccHsmEntrustnshieldgroupProtectionModule(name, protection, keyServerIp string, keyServerPort int, entrustnshieldHSM string) string {
+func testAccHsmEntrustnshieldgroupProtectionModule(name, protection, keyServerIp string, keyServerPort int, entrustnshieldHSM []map[string]any) string {
+	entrustnshieldHSM_HCL := utils.ConvertSliceOfMapsToHCL(entrustnshieldHSM)
+
 	return fmt.Sprintf(`
 resource "nios_security_hsm_entrustnshieldgroup" "test_protection" {
 	name = %q
@@ -500,10 +530,12 @@ resource "nios_security_hsm_entrustnshieldgroup" "test_protection" {
 	key_server_port = %d
     entrustnshield_hsm = %s
 }
-`, name, protection, keyServerIp, keyServerPort, entrustnshieldHSM)
+`, name, protection, keyServerIp, keyServerPort, entrustnshieldHSM_HCL)
 }
 
-func testAccHsmEntrustnshieldgroupProtectionSoftcard(name, protection, cardName, passwordPhrase, keyServerIp string, keyServerPort int, entrustnshieldHSM string) string {
+func testAccHsmEntrustnshieldgroupProtectionSoftcard(name, protection, cardName, passwordPhrase, keyServerIp string, keyServerPort int, entrustnshieldHSM []map[string]any) string {
+	entrustnshieldHSM_HCL := utils.ConvertSliceOfMapsToHCL(entrustnshieldHSM)
+
 	return fmt.Sprintf(`
 resource "nios_security_hsm_entrustnshieldgroup" "test_protection" {
     name = %q
@@ -514,41 +546,5 @@ resource "nios_security_hsm_entrustnshieldgroup" "test_protection" {
 	key_server_port = %d
 	entrustnshield_hsm = %s
 }
-`, name, protection, cardName, passwordPhrase, keyServerIp, keyServerPort, entrustnshieldHSM)
-}
-
-func FormatEntrustnshieldHsmToHCL(hsmList []map[string]any) string {
-	var hsmBlocks []string
-
-	for _, hsm := range hsmList {
-		disable := false
-		if val, ok := hsm["disable"]; ok {
-			disable = val.(bool)
-		}
-
-		remotePort := 9004
-		if val, ok := hsm["remote_port"]; ok {
-			switch v := val.(type) {
-			case int:
-				remotePort = v
-			case string:
-				if _, err := fmt.Scanf(v, "%d", &remotePort); err != nil {
-					remotePort = 9004
-				}
-			}
-		}
-
-		block := fmt.Sprintf(`    {
-    disable      = %t
-    keyhash      = %q
-    remote_ip    = %q
-    remote_port  = %d
-
-    }`, disable, hsm["keyhash"], hsm["remote_ip"], remotePort)
-		hsmBlocks = append(hsmBlocks, block)
-	}
-
-	return fmt.Sprintf(`[
-%s
-  ]`, strings.Join(hsmBlocks, ",\n"))
+`, name, protection, cardName, passwordPhrase, keyServerIp, keyServerPort, entrustnshieldHSM_HCL)
 }
