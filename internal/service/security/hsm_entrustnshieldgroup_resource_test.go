@@ -23,7 +23,6 @@ import (
 
 var readableAttributesForHsmEntrustnshieldgroup = "card_name,comment,entrustnshield_hsm,key_server_ip,key_server_port,name,protection,status"
 
-var name = acctest.RandomNameWithPrefix("entrustnshieldgroup-hsm-")
 var keyServerIp = "10.10.10.10"
 var keyServerPort = 9004
 var keyhash = "keyhash-for-testing"
