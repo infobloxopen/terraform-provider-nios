@@ -267,6 +267,7 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 		parentalcontrol.NewParentalcontrolBlockingpolicyResource,
 
 		microsoft.NewMsserverResource,
+		microsoft.NewMsserverAdsitesSiteResource,
 		microsoft.NewMssuperscopeResource,
 	}
 }
@@ -418,6 +419,7 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 		parentalcontrol.NewParentalcontrolBlockingpolicyDataSource,
 
 		microsoft.NewMsserverDataSource,
+		microsoft.NewMsserverAdsitesSiteDataSource,
 		microsoft.NewMssuperscopeDataSource,
 	}
 }
