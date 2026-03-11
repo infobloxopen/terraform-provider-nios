@@ -138,11 +138,7 @@ func (m *HsmThaleslunagroupModel) Flatten(ctx context.Context, from *security.Hs
 	m.GroupSn = flex.FlattenStringPointer(from.GroupSn)
 	m.HsmVersion = flex.FlattenStringPointer(from.HsmVersion)
 	m.Name = flex.FlattenStringPointer(from.Name)
-	//m.PassPhrase = flex.FlattenStringPointer(from.PassPhrase)
 	m.Status = flex.FlattenStringPointer(from.Status)
-	//m.Thalesluna = flex.FlattenFrameworkListNestedBlock(ctx, from.Thalesluna, HsmThaleslunagroupThaleslunaAttrTypes, diags, FlattenHsmThaleslunagroupThalesluna)
-
-	// Flatten thalesluna and preserve ServerCertFilePath
 	flattenedThalesluna := flex.FlattenFrameworkListNestedBlock(ctx, from.Thalesluna, HsmThaleslunagroupThaleslunaAttrTypes, diags, FlattenHsmThaleslunagroupThalesluna)
 	m.Thalesluna = preserveThaleslunaServerCertFilePath(ctx, m.Thalesluna, flattenedThalesluna, diags)
 

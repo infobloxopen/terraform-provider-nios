@@ -18,12 +18,21 @@ import (
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
-// TODO:
-// 1. Generate client certificate on NIOS Grid: Grid -> Members -> Certificates -> Client Cert -> Generate Client Certificate (RSA SHA256)
-// 2. Register NIOS client on Luna HSM box and assign partition
-// 3. Copy server.pem from Luna HSM box to the testdata directory
+// NOTE: Complete the following steps before running the tests:
+// 1. Generate client certificate on the NIOS Grid:
+//    Grid -> Members -> Certificates -> Client Cert -> Generate Client Certificate (RSA SHA256)
+// 2. Login as root to NIOS box and copy the client certificate to the Luna HSM box:
+//    cd /storage/safenet-hsm/lunasa_7/cert/client/
+//    scp <NIOS_IP>.pem admin@<Luna_HSM_IP>:
+// 3. Login to Luna HSM box and register the NIOS client and assign partition:
+//    ssh admin@<Luna_HSM_IP>
+//    client register -c <username> -i <NIOS_IP>
+//    client assignPartition -c <username> -P <partition_name>
+// 4. Download server.pem from the Luna HSM box to your workstation and place it at:
+//    internal/testdata/nios_security_hsm_thaleslunagroup/server.pem
+// 5. Get the partition serial number using "partition list" on the Luna HSM box CLI
 
-// NOTE: Please replace the placeholder values with actual values before running the tests
+// Replace the placeholder values with actual values before running the tests
 
 var readableAttributesForHsmThaleslunagroup = "comment,group_sn,hsm_version,name,status,thalesluna"
 
@@ -63,6 +72,7 @@ var (
 )
 
 func TestAccHsmThaleslunagroupResource_basic(t *testing.T) {
+	t.Skip("Skipping acceptance test as it requires a setup")
 	var resourceName = "nios_security_hsm_thaleslunagroup.test"
 	var v security.HsmThaleslunagroup
 
@@ -93,6 +103,7 @@ func TestAccHsmThaleslunagroupResource_basic(t *testing.T) {
 }
 
 func TestAccHsmThaleslunagroupResource_disappears(t *testing.T) {
+	t.Skip("Skipping acceptance test as it requires a setup")
 	resourceName := "nios_security_hsm_thaleslunagroup.test"
 	var v security.HsmThaleslunagroup
 
@@ -116,6 +127,7 @@ func TestAccHsmThaleslunagroupResource_disappears(t *testing.T) {
 }
 
 func TestAccHsmThaleslunagroupResource_Comment(t *testing.T) {
+	t.Skip("Skipping acceptance test as it requires a setup")
 	var resourceName = "nios_security_hsm_thaleslunagroup.test_comment"
 	var v security.HsmThaleslunagroup
 
@@ -147,6 +159,7 @@ func TestAccHsmThaleslunagroupResource_Comment(t *testing.T) {
 }
 
 func TestAccHsmThaleslunagroupResource_HsmVersion(t *testing.T) {
+	t.Skip("Skipping acceptance test as it requires a setup")
 	var resourceName = "nios_security_hsm_thaleslunagroup.test_hsm_version"
 	var v security.HsmThaleslunagroup
 
@@ -170,6 +183,7 @@ func TestAccHsmThaleslunagroupResource_HsmVersion(t *testing.T) {
 }
 
 func TestAccHsmThaleslunagroupResource_Name(t *testing.T) {
+	t.Skip("Skipping acceptance test as it requires a setup")
 	var resourceName = "nios_security_hsm_thaleslunagroup.test_name"
 	var v security.HsmThaleslunagroup
 
@@ -202,6 +216,7 @@ func TestAccHsmThaleslunagroupResource_Name(t *testing.T) {
 }
 
 func TestAccHsmThaleslunagroupResource_PassPhrase(t *testing.T) {
+	t.Skip("Skipping acceptance test as it requires a setup")
 	var resourceName = "nios_security_hsm_thaleslunagroup.test_pass_phrase"
 	var v security.HsmThaleslunagroup
 
@@ -225,6 +240,7 @@ func TestAccHsmThaleslunagroupResource_PassPhrase(t *testing.T) {
 }
 
 func TestAccHsmThaleslunagroupResource_Thalesluna(t *testing.T) {
+	t.Skip("Skipping acceptance test as it requires a setup")
 	var resourceName = "nios_security_hsm_thaleslunagroup.test_thalesluna"
 	var v security.HsmThaleslunagroup
 

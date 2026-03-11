@@ -12,6 +12,7 @@ import (
 )
 
 func TestAccHsmThaleslunagroupDataSource_Filters(t *testing.T) {
+	t.Skip("Skipping acceptance test as it requires a setup")
 	dataSourceName := "data.nios_security_hsm_thaleslunagroup.test"
 	resourceName := "nios_security_hsm_thaleslunagroup.test"
 	var v security.HsmThaleslunagroup
