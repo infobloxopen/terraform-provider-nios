@@ -221,7 +221,7 @@ var RecordPtrResourceSchemaAttributes = map[string]schema.Attribute{
 			customvalidator.IsValidArpaOrFQDN(
 				customvalidator.IsValidArpaIPv4(),
 				customvalidator.IsValidArpaIPv6(),
-				customvalidator.IsValidFQDN(),
+				customvalidator.IsValidDomainName(customvalidator.WithAllowNullOrEmpty()),
 			),
 		},
 		MarkdownDescription: "The name of the DNS PTR record in FQDN format. Either of `ipv4addr`,`ipv6addr`, `name` or `func_call` to invoke `next_available_ip` is required.",
