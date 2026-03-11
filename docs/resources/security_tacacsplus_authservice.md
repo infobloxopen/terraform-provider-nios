@@ -13,7 +13,7 @@ Manages a Tacacsplus Authentication Service.
 ## Example Usage
 
 ```terraform
-// Create TacacsPlus Authservice with Basic Fields
+// Create TACACS+ Authservice with Basic Fields
 resource "nios_security_tacacsplus_authservice" "tacacsplus_authservice_with_basic_fields" {
   name = "tacacsplus_authservice1"
   servers = [
@@ -30,7 +30,7 @@ resource "nios_security_tacacsplus_authservice" "tacacsplus_authservice_with_bas
   ]
 }
 
-// Create TacacsPlus Authservice with Additional Fields
+// Create TACACS+ Authservice with Additional Fields
 resource "nios_security_tacacsplus_authservice" "tacacsplus_authservice_with_additional_field" {
   name = "tacacsplus_authservice2"
   servers = [

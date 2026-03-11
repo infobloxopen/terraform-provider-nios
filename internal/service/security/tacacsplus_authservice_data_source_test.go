@@ -66,8 +66,8 @@ func testAccTacacsplusAuthserviceDataSourceConfigFilters(name string, servers []
 	serversStr := utils.ConvertSliceOfMapsToHCL(servers)
 	return fmt.Sprintf(`
 resource "nios_security_tacacsplus_authservice" "test" {
-  name = %q
-  servers = %s
+	name = %q
+  	servers = %s
 }
 
 data "nios_security_tacacsplus_authservice" "test" {
