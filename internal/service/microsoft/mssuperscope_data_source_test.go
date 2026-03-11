@@ -106,18 +106,18 @@ data "nios_microsoft_mssuperscope" "test" {
 func testAccMssuperscopeDataSourceConfigExtAttrFilters(name, startAddr, endAddr, extAttrsValue string) string {
 	config := fmt.Sprintf(`
 resource "nios_microsoft_mssuperscope" "test" {
-  name = %q
-  ranges = [nios_dhcp_range.test.ref]
-  network_view = "ms_server"
-  extattrs = {
-    Site = %q
-  } 
+	name = %q
+	ranges = [nios_dhcp_range.test.ref]
+	network_view = "ms_server"
+	extattrs = {
+		Site = %q
+	} 
 }
 
 data "nios_microsoft_mssuperscope" "test" {
-  extattrfilters = {
-    Site = nios_microsoft_mssuperscope.test.extattrs.Site
-  }
+	extattrfilters = {
+		Site = nios_microsoft_mssuperscope.test.extattrs.Site
+	}
 }
 `, name, extAttrsValue)
 	return strings.Join([]string{testAccBaseWithRanges(startAddr, endAddr), config}, "")

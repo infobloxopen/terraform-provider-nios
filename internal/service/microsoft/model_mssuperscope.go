@@ -15,6 +15,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
+	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/microsoft"
 
@@ -68,9 +69,12 @@ var MssuperscopeResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The reference to the object.",
 	},
 	"comment": schema.StringAttribute{
-		Computed:            true,
-		Optional:            true,
-		Default:             stringdefault.StaticString(""),
+		Computed: true,
+		Optional: true,
+		Default:  stringdefault.StaticString(""),
+		Validators: []validator.String{
+			customvalidator.ValidateTrimmedString(),
+		},
 		MarkdownDescription: "The superscope descriptive comment.",
 	},
 	"dhcp_utilization": schema.Int64Attribute{
@@ -126,12 +130,16 @@ var MssuperscopeResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The percentage value for DHCP range usage below which an alarm will be reset.",
 	},
 	"name": schema.StringAttribute{
-		Required:            true,
+		Required: true,
+		Validators: []validator.String{
+			customvalidator.ValidateTrimmedString(),
+		},
 		MarkdownDescription: "The name of the Microsoft DHCP superscope.",
 	},
 	"network_view": schema.StringAttribute{
 		Computed:            true,
 		Optional:            true,
+		Default:             stringdefault.StaticString("default"),
 		MarkdownDescription: "The name of the network view in which the superscope resides.",
 	},
 	"ranges": schema.ListAttribute{
