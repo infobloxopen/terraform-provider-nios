@@ -21,6 +21,9 @@ var (
 	labelsPattern  = regexp.MustCompile(`(.*?)?([^\\])\.`)
 )
 
+// DomainNameOption defines a functional option for domainNameValidator
+type DomainNameOption func(*domainNameValidator)
+
 // domainNameValidator validates if the provided value is a valid domain name.
 type domainNameValidator struct {
 	isMultiLabel        bool
@@ -32,14 +35,20 @@ type domainNameValidator struct {
 
 // IsValidDomainName creates a new domain name validator with default options
 // (multi-label enabled, null/empty not allowed, root zone allowed, trailing dot not allowed, printable chars not checked)
-func IsValidDomainName() validator.String {
-	return domainNameValidator{
+func IsValidDomainName(opts ...DomainNameOption) validator.String {
+	v := domainNameValidator{
 		isMultiLabel:        true,
 		allowRootZone:       true,
 		allowNullOrEmpty:    false,
 		allowTrailingDot:    false,
 		checkPrintableChars: false,
 	}
+
+	for _, opt := range opts {
+		opt(&v)
+	}
+
+	return v
 }
 
 func (v domainNameValidator) Description(ctx context.Context) string {
@@ -209,4 +218,11 @@ func findLabelLength(s string) int {
 	}
 
 	return len(s) - skipChars
+}
+
+// WithAllowNullOrEmpty returns a DomainNameOption that allows null or empty string values.
+func WithAllowNullOrEmpty() DomainNameOption {
+	return func(v *domainNameValidator) {
+		v.allowNullOrEmpty = true
+	}
 }
