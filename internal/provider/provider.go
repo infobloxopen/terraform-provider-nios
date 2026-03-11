@@ -27,8 +27,10 @@ import (
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/dtc"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/grid"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/ipam"
+	"github.com/infobloxopen/terraform-provider-nios/internal/service/microsoft"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/misc"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/notification"
+	"github.com/infobloxopen/terraform-provider-nios/internal/service/parentalcontrol"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/rpz"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/security"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/smartfolder"
@@ -221,9 +223,11 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 		security.NewFtpuserResource,
 		security.NewSnmpuserResource,
 		security.NewCertificateAuthserviceResource,
+		security.NewSamlAuthserviceResource,
 
 		misc.NewRulesetResource,
 		misc.NewBfdtemplateResource,
+		misc.NewDxlEndpointResource,
 
 		smartfolder.NewSmartfolderPersonalResource,
 		smartfolder.NewSmartfolderGlobalResource,
@@ -260,6 +264,10 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 
 		rir.NewRirOrganizationResource,
 
+		parentalcontrol.NewParentalcontrolAvpResource,
+		parentalcontrol.NewParentalcontrolBlockingpolicyResource,
+
+		microsoft.NewMsserverResource,
 		microsoft.NewMsserverAdsitesSiteResource,
 	}
 }
@@ -366,9 +374,11 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 		security.NewPermissionDataSource,
 		security.NewSnmpuserDataSource,
 		security.NewCertificateAuthserviceDataSource,
+		security.NewSamlAuthserviceDataSource,
 
 		misc.NewRulesetDataSource,
 		misc.NewBfdtemplateDataSource,
+		misc.NewDxlEndpointDataSource,
 
 		smartfolder.NewSmartfolderPersonalDataSource,
 		smartfolder.NewSmartfolderGlobalDataSource,
@@ -386,7 +396,6 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 		discovery.NewVdiscoverytaskDataSource,
 
 		notification.NewNotificationRuleDataSource,
-
 		notification.NewNotificationRestEndpointDataSource,
 
 		rpz.NewRecordRpzADataSource,
@@ -406,6 +415,10 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 
 		rir.NewRirOrganizationDataSource,
 
+		parentalcontrol.NewParentalcontrolAvpDataSource,
+		parentalcontrol.NewParentalcontrolBlockingpolicyDataSource,
+
+		microsoft.NewMsserverDataSource,
 		microsoft.NewMsserverAdsitesSiteDataSource,
 	}
 }
