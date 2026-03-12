@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/infobloxopen/terraform-provider-nios/internal/service/microsoft"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/rir"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
@@ -221,10 +222,12 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 		security.NewFtpuserResource,
 		security.NewSnmpuserResource,
 		security.NewCertificateAuthserviceResource,
+		security.NewSamlAuthserviceResource,
 		security.NewTacacsplusAuthserviceResource,
 
 		misc.NewRulesetResource,
 		misc.NewBfdtemplateResource,
+		misc.NewDxlEndpointResource,
 
 		smartfolder.NewSmartfolderPersonalResource,
 		smartfolder.NewSmartfolderGlobalResource,
@@ -263,6 +266,9 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 
 		parentalcontrol.NewParentalcontrolAvpResource,
 		parentalcontrol.NewParentalcontrolBlockingpolicyResource,
+
+		microsoft.NewMsserverResource,
+		microsoft.NewMsserverAdsitesSiteResource,
 	}
 }
 
@@ -368,10 +374,12 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 		security.NewPermissionDataSource,
 		security.NewSnmpuserDataSource,
 		security.NewCertificateAuthserviceDataSource,
+		security.NewSamlAuthserviceDataSource,
 		security.NewTacacsplusAuthserviceDataSource,
 
 		misc.NewRulesetDataSource,
 		misc.NewBfdtemplateDataSource,
+		misc.NewDxlEndpointDataSource,
 
 		smartfolder.NewSmartfolderPersonalDataSource,
 		smartfolder.NewSmartfolderGlobalDataSource,
@@ -389,7 +397,6 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 		discovery.NewVdiscoverytaskDataSource,
 
 		notification.NewNotificationRuleDataSource,
-
 		notification.NewNotificationRestEndpointDataSource,
 
 		rpz.NewRecordRpzADataSource,
@@ -411,6 +418,9 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 
 		parentalcontrol.NewParentalcontrolAvpDataSource,
 		parentalcontrol.NewParentalcontrolBlockingpolicyDataSource,
+
+		microsoft.NewMsserverDataSource,
+		microsoft.NewMsserverAdsitesSiteDataSource,
 	}
 }
 
