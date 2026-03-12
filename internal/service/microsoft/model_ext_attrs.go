@@ -1,4 +1,4 @@
-package dhcp
+package microsoft
 
 import (
 	"context"
@@ -12,16 +12,16 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
-	"github.com/infobloxopen/infoblox-nios-go-client/dhcp"
+	"github.com/infobloxopen/infoblox-nios-go-client/microsoft"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
 const terraformInternalIDEA = "Terraform Internal ID"
 
-func ExpandExtAttrs(ctx context.Context, extattrs types.Map, diags *diag.Diagnostics) *map[string]dhcp.ExtAttrs {
+func ExpandExtAttrs(ctx context.Context, extattrs types.Map, diags *diag.Diagnostics) *map[string]microsoft.ExtAttrs {
 	if extattrs.IsNull() || extattrs.IsUnknown() {
-		return &map[string]dhcp.ExtAttrs{}
+		return &map[string]microsoft.ExtAttrs{}
 	}
 	var extAttrsMap map[string]string
 	diags.Append(extattrs.ElementsAs(ctx, &extAttrsMap, false)...)
@@ -29,16 +29,16 @@ func ExpandExtAttrs(ctx context.Context, extattrs types.Map, diags *diag.Diagnos
 		return nil
 	}
 
-	result := make(map[string]dhcp.ExtAttrs)
+	result := make(map[string]microsoft.ExtAttrs)
 
 	for key, valStr := range extAttrsMap {
 		parsedValue := utils.ParseInterfaceValue(valStr)
-		result[key] = dhcp.ExtAttrs{Value: parsedValue}
+		result[key] = microsoft.ExtAttrs{Value: parsedValue}
 	}
 	return &result
 }
 
-func FlattenExtAttrs(ctx context.Context, planExtAttrs types.Map, extattrs *map[string]dhcp.ExtAttrs, diags *diag.Diagnostics) types.Map {
+func FlattenExtAttrs(ctx context.Context, planExtAttrs types.Map, extattrs *map[string]microsoft.ExtAttrs, diags *diag.Diagnostics) types.Map {
 	result := make(map[string]attr.Value)
 	planExtAttrsMap := planExtAttrs.Elements()
 	if extattrs == nil || len(*extattrs) == 0 {
@@ -81,15 +81,15 @@ func FlattenExtAttrs(ctx context.Context, planExtAttrs types.Map, extattrs *map[
 	return mapVal
 }
 
-func RemoveInheritedExtAttrs(ctx context.Context, planExtAttrs types.Map, respExtAttrs map[string]dhcp.ExtAttrs) (*map[string]dhcp.ExtAttrs, types.Map, diag.Diagnostics) {
+func RemoveInheritedExtAttrs(ctx context.Context, planExtAttrs types.Map, respExtAttrs map[string]microsoft.ExtAttrs) (*map[string]microsoft.ExtAttrs, types.Map, diag.Diagnostics) {
 	var diags diag.Diagnostics
-	var planMap map[string]dhcp.ExtAttrs
-	extAttrsRespMap := make(map[string]dhcp.ExtAttrs, len(planExtAttrs.Elements()))
-	extAttrsAllRespMap := make(map[string]dhcp.ExtAttrs)
+	var planMap map[string]microsoft.ExtAttrs
+	extAttrsRespMap := make(map[string]microsoft.ExtAttrs, len(planExtAttrs.Elements()))
+	extAttrsAllRespMap := make(map[string]microsoft.ExtAttrs)
 	var extAttrAll types.Map
 
 	if planExtAttrs.IsNull() || planExtAttrs.IsUnknown() {
-		planMap = make(map[string]dhcp.ExtAttrs)
+		planMap = make(map[string]microsoft.ExtAttrs)
 	} else {
 		planMap = *ExpandExtAttrs(ctx, planExtAttrs, &diags)
 		if diags.HasError() {
