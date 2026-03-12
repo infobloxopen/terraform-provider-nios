@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"path/filepath"
 	"runtime"
-	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -66,9 +65,6 @@ var (
 			"disable":                 true,
 		},
 	}
-
-	hsmThalesLunaGroup_HCL        = FormatThaleslunaToHCL(hsmThalesLunaGroup)
-	hsmThalesLunaGroupUpdated_HCL = FormatThaleslunaToHCL(hsmThalesLunaGroupUpdated)
 )
 
 func TestAccHsmThaleslunagroupResource_basic(t *testing.T) {
@@ -84,7 +80,7 @@ func TestAccHsmThaleslunagroupResource_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccHsmThaleslunagroupBasicConfig(name, hsmThalesLunaVersion, hsmThalesLunaPassPhrase, hsmThalesLunaGroup_HCL),
+				Config: testAccHsmThaleslunagroupBasicConfig(name, hsmThalesLunaVersion, hsmThalesLunaPassPhrase, hsmThalesLunaGroup),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckHsmThaleslunagroupExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "name", name),
@@ -115,7 +111,7 @@ func TestAccHsmThaleslunagroupResource_disappears(t *testing.T) {
 		CheckDestroy:             testAccCheckHsmThaleslunagroupDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccHsmThaleslunagroupBasicConfig(name, hsmThalesLunaVersion, hsmThalesLunaPassPhrase, hsmThalesLunaGroup_HCL),
+				Config: testAccHsmThaleslunagroupBasicConfig(name, hsmThalesLunaVersion, hsmThalesLunaPassPhrase, hsmThalesLunaGroup),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckHsmThaleslunagroupExists(context.Background(), resourceName, &v),
 					testAccCheckHsmThaleslunagroupDisappears(context.Background(), &v),
@@ -139,7 +135,7 @@ func TestAccHsmThaleslunagroupResource_Comment(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccHsmThaleslunagroupComment(name, hsmThalesLunaVersion, hsmThalesLunaPassPhrase, hsmThalesLunaGroup_HCL, "sample comment"),
+				Config: testAccHsmThaleslunagroupComment(name, hsmThalesLunaVersion, hsmThalesLunaPassPhrase, hsmThalesLunaGroup, "sample comment"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckHsmThaleslunagroupExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "comment", "sample comment"),
@@ -147,7 +143,7 @@ func TestAccHsmThaleslunagroupResource_Comment(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccHsmThaleslunagroupComment(name, hsmThalesLunaVersion, hsmThalesLunaPassPhrase, hsmThalesLunaGroup_HCL, "updated comment"),
+				Config: testAccHsmThaleslunagroupComment(name, hsmThalesLunaVersion, hsmThalesLunaPassPhrase, hsmThalesLunaGroup, "updated comment"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckHsmThaleslunagroupExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "comment", "updated comment"),
@@ -171,7 +167,7 @@ func TestAccHsmThaleslunagroupResource_HsmVersion(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccHsmThaleslunagroupHsmVersion(name, hsmThalesLunaVersion, hsmThalesLunaPassPhrase, hsmThalesLunaGroup_HCL),
+				Config: testAccHsmThaleslunagroupHsmVersion(name, hsmThalesLunaVersion, hsmThalesLunaPassPhrase, hsmThalesLunaGroup),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckHsmThaleslunagroupExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "hsm_version", hsmThalesLunaVersion),
@@ -196,7 +192,7 @@ func TestAccHsmThaleslunagroupResource_Name(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccHsmThaleslunagroupName(name1, hsmThalesLunaVersion, hsmThalesLunaPassPhrase, hsmThalesLunaGroup_HCL),
+				Config: testAccHsmThaleslunagroupName(name1, hsmThalesLunaVersion, hsmThalesLunaPassPhrase, hsmThalesLunaGroup),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckHsmThaleslunagroupExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "name", name1),
@@ -204,7 +200,7 @@ func TestAccHsmThaleslunagroupResource_Name(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccHsmThaleslunagroupName(name2, hsmThalesLunaVersion, hsmThalesLunaPassPhrase, hsmThalesLunaGroup_HCL),
+				Config: testAccHsmThaleslunagroupName(name2, hsmThalesLunaVersion, hsmThalesLunaPassPhrase, hsmThalesLunaGroup),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckHsmThaleslunagroupExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "name", name2),
@@ -228,7 +224,7 @@ func TestAccHsmThaleslunagroupResource_PassPhrase(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccHsmThaleslunagroupPassPhrase(name, hsmThalesLunaVersion, hsmThalesLunaPassPhrase, hsmThalesLunaGroup_HCL),
+				Config: testAccHsmThaleslunagroupPassPhrase(name, hsmThalesLunaVersion, hsmThalesLunaPassPhrase, hsmThalesLunaGroup),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckHsmThaleslunagroupExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "pass_phrase", hsmThalesLunaPassPhrase),
@@ -252,7 +248,7 @@ func TestAccHsmThaleslunagroupResource_Thalesluna(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccHsmThaleslunagroupThalesluna(name, hsmThalesLunaVersion, hsmThalesLunaPassPhrase, hsmThalesLunaGroup_HCL),
+				Config: testAccHsmThaleslunagroupThalesluna(name, hsmThalesLunaVersion, hsmThalesLunaPassPhrase, hsmThalesLunaGroup),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckHsmThaleslunagroupExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "thalesluna.#", "1"),
@@ -262,7 +258,7 @@ func TestAccHsmThaleslunagroupResource_Thalesluna(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccHsmThaleslunagroupThalesluna(name, hsmThalesLunaVersion, hsmThalesLunaPassPhrase, hsmThalesLunaGroupUpdated_HCL),
+				Config: testAccHsmThaleslunagroupThalesluna(name, hsmThalesLunaVersion, hsmThalesLunaPassPhrase, hsmThalesLunaGroupUpdated),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckHsmThaleslunagroupExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "thalesluna.#", "2"),
@@ -328,7 +324,9 @@ func testAccCheckHsmThaleslunagroupDisappears(ctx context.Context, v *security.H
 	}
 }
 
-func testAccHsmThaleslunagroupBasicConfig(name, hsmVersion, passPhrase, thalesLuna string) string {
+func testAccHsmThaleslunagroupBasicConfig(name, hsmVersion, passPhrase string, thalesLuna []map[string]any) string {
+	thalesLunaHCL := utils.ConvertSliceOfMapsToHCL(thalesLuna)
+
 	return fmt.Sprintf(`
 resource "nios_security_hsm_thaleslunagroup" "test" {
     name        = %q
@@ -336,10 +334,12 @@ resource "nios_security_hsm_thaleslunagroup" "test" {
     pass_phrase = %q
     thalesluna  = %s
 }
-`, name, hsmVersion, passPhrase, thalesLuna)
+`, name, hsmVersion, passPhrase, thalesLunaHCL)
 }
 
-func testAccHsmThaleslunagroupComment(name, hsmVersion, passPhrase, thalesLuna, comment string) string {
+func testAccHsmThaleslunagroupComment(name, hsmVersion, passPhrase string, thalesLuna []map[string]any, comment string) string {
+	thalesLunaHCL := utils.ConvertSliceOfMapsToHCL(thalesLuna)
+
 	return fmt.Sprintf(`
 resource "nios_security_hsm_thaleslunagroup" "test_comment" {
     name        = %q
@@ -348,10 +348,12 @@ resource "nios_security_hsm_thaleslunagroup" "test_comment" {
     thalesluna  = %s
     comment     = %q
 }
-`, name, hsmVersion, passPhrase, thalesLuna, comment)
+`, name, hsmVersion, passPhrase, thalesLunaHCL, comment)
 }
 
-func testAccHsmThaleslunagroupHsmVersion(name, hsmVersion, passPhrase, thalesLuna string) string {
+func testAccHsmThaleslunagroupHsmVersion(name, hsmVersion, passPhrase string, thalesLuna []map[string]any) string {
+	thalesLunaHCL := utils.ConvertSliceOfMapsToHCL(thalesLuna)
+
 	return fmt.Sprintf(`
 resource "nios_security_hsm_thaleslunagroup" "test_hsm_version" {
     name        = %q
@@ -359,10 +361,12 @@ resource "nios_security_hsm_thaleslunagroup" "test_hsm_version" {
     pass_phrase = %q
     thalesluna  = %s
 }
-`, name, hsmVersion, passPhrase, thalesLuna)
+`, name, hsmVersion, passPhrase, thalesLunaHCL)
 }
 
-func testAccHsmThaleslunagroupName(name, hsmVersion, passPhrase, thalesLuna string) string {
+func testAccHsmThaleslunagroupName(name, hsmVersion, passPhrase string, thalesLuna []map[string]any) string {
+	thalesLunaHCL := utils.ConvertSliceOfMapsToHCL(thalesLuna)
+
 	return fmt.Sprintf(`
 resource "nios_security_hsm_thaleslunagroup" "test_name" {
     name        = %q
@@ -370,10 +374,12 @@ resource "nios_security_hsm_thaleslunagroup" "test_name" {
     pass_phrase = %q
     thalesluna  = %s
 }
-`, name, hsmVersion, passPhrase, thalesLuna)
+`, name, hsmVersion, passPhrase, thalesLunaHCL)
 }
 
-func testAccHsmThaleslunagroupPassPhrase(name, hsmVersion, passPhrase, thalesLuna string) string {
+func testAccHsmThaleslunagroupPassPhrase(name, hsmVersion, passPhrase string, thalesLuna []map[string]any) string {
+	thalesLunaHCL := utils.ConvertSliceOfMapsToHCL(thalesLuna)
+
 	return fmt.Sprintf(`
 resource "nios_security_hsm_thaleslunagroup" "test_pass_phrase" {
 	name        = %q
@@ -381,10 +387,12 @@ resource "nios_security_hsm_thaleslunagroup" "test_pass_phrase" {
 	pass_phrase = %q
 	thalesluna  = %s
 }
-`, name, hsmVersion, passPhrase, thalesLuna)
+`, name, hsmVersion, passPhrase, thalesLunaHCL)
 }
 
-func testAccHsmThaleslunagroupThalesluna(name, hsmVersion, passPhrase, thalesLuna string) string {
+func testAccHsmThaleslunagroupThalesluna(name, hsmVersion, passPhrase string, thalesLuna []map[string]any) string {
+	thalesLunaHCL := utils.ConvertSliceOfMapsToHCL(thalesLuna)
+
 	return fmt.Sprintf(`
 resource "nios_security_hsm_thaleslunagroup" "test_thalesluna" {
 	name        = %q
@@ -392,34 +400,7 @@ resource "nios_security_hsm_thaleslunagroup" "test_thalesluna" {
 	pass_phrase = %q
 	thalesluna  = %s
 }
-`, name, hsmVersion, passPhrase, thalesLuna)
-}
-
-func FormatThaleslunaToHCL(thaleslunaList []map[string]any) string {
-	var thaleslunaBlocks []string
-
-	for _, thalesluna := range thaleslunaList {
-		disable := false
-		if val, ok := thalesluna["disable"]; ok {
-			disable = val.(bool)
-		}
-		block := fmt.Sprintf(`    {
-	  name                    = %q
-      partition_serial_number = %q
-      server_cert_file_path   = %q
-      disable                 = %t
-    }`,
-			thalesluna["name"],
-			thalesluna["partition_serial_number"],
-			thalesluna["server_cert_file_path"],
-			disable,
-		)
-		thaleslunaBlocks = append(thaleslunaBlocks, block)
-	}
-
-	return fmt.Sprintf(`[
-%s
-  ]`, strings.Join(thaleslunaBlocks, ",\n"))
+`, name, hsmVersion, passPhrase, thalesLunaHCL)
 }
 
 func getServerCertPath() string {

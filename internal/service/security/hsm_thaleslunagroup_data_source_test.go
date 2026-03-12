@@ -9,6 +9,7 @@ import (
 
 	"github.com/infobloxopen/infoblox-nios-go-client/security"
 	"github.com/infobloxopen/terraform-provider-nios/internal/acctest"
+	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
 func TestAccHsmThaleslunagroupDataSource_Filters(t *testing.T) {
@@ -25,7 +26,7 @@ func TestAccHsmThaleslunagroupDataSource_Filters(t *testing.T) {
 		CheckDestroy:             testAccCheckHsmThaleslunagroupDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccHsmThaleslunagroupDataSourceConfigFilters(name, hsmThalesLunaVersion, hsmThalesLunaPassPhrase, hsmThalesLunaGroup_HCL),
+				Config: testAccHsmThaleslunagroupDataSourceConfigFilters(name, hsmThalesLunaVersion, hsmThalesLunaPassPhrase, hsmThalesLunaGroup),
 				Check: resource.ComposeTestCheckFunc(
 					append([]resource.TestCheckFunc{
 						testAccCheckHsmThaleslunagroupExists(context.Background(), resourceName, &v),
@@ -48,7 +49,9 @@ func testAccCheckHsmThaleslunagroupResourceAttrPair(resourceName, dataSourceName
 	}
 }
 
-func testAccHsmThaleslunagroupDataSourceConfigFilters(name, hsmVersion, passPhrase, thalesLuna string) string {
+func testAccHsmThaleslunagroupDataSourceConfigFilters(name, hsmVersion, passPhrase string, thalesLuna []map[string]any) string {
+	thalesLunaHCL := utils.ConvertSliceOfMapsToHCL(thalesLuna)
+
 	return fmt.Sprintf(`
 resource "nios_security_hsm_thaleslunagroup" "test" {
     name        = %q
@@ -62,5 +65,5 @@ data "nios_security_hsm_thaleslunagroup" "test" {
         name = nios_security_hsm_thaleslunagroup.test.name
     }
 }
-`, name, hsmVersion, passPhrase, thalesLuna)
+`, name, hsmVersion, passPhrase, thalesLunaHCL)
 }
