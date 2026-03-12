@@ -751,11 +751,11 @@ func testAccLdapAuthServiceBasicConfig(name string, servers []map[string]any, ld
 	return fmt.Sprintf(`
 resource "nios_security_ldap_auth_service" "test" {
 	name = %q
-ldap_user_attribute = %q
-recovery_interval = %d
-retries = %d
-timeout = %d
-servers = %s
+	ldap_user_attribute = %q
+	recovery_interval = %d
+	retries = %d
+	timeout = %d
+	servers = %s
 }
 `, name, ldapUserAttribute, recoveryInterval, retries, timeout, serverString)
 }
@@ -765,11 +765,11 @@ func testAccLdapAuthServiceComment(name string, servers []map[string]any, ldapUs
 	return fmt.Sprintf(`
 resource "nios_security_ldap_auth_service" "test_comment" {
 	name = %q
-ldap_user_attribute = %q
-recovery_interval = %d
-retries = %d
-timeout = %d
-servers = %s
+	ldap_user_attribute = %q
+	recovery_interval = %d
+	retries = %d
+	timeout = %d
+	servers = %s
     comment = %q
 }
 `, name, ldapUserAttribute, recoveryInterval, retries, timeout, serverString, comment)
@@ -780,11 +780,11 @@ func testAccLdapAuthServiceDisable(name string, servers []map[string]any, ldapUs
 	return fmt.Sprintf(`
 resource "nios_security_ldap_auth_service" "test_disable" {
 	name = %q
-ldap_user_attribute = %q
-recovery_interval = %d
-retries = %d
-timeout = %d
-servers = %s
+	ldap_user_attribute = %q
+	recovery_interval = %d
+	retries = %d
+	timeout = %d
+	servers = %s
     disable = %t
 }
 `, name, ldapUserAttribute, recoveryInterval, retries, timeout, serverString, disable)
@@ -796,11 +796,11 @@ func testAccLdapAuthServiceEaMapping(name string, servers []map[string]any, ldap
 	return fmt.Sprintf(`
 resource "nios_security_ldap_auth_service" "test_ea_mapping" {
 	name = %q
-ldap_user_attribute = %q
-recovery_interval = %d
-retries = %d
-timeout = %d
-servers = %s
+	ldap_user_attribute = %q
+	recovery_interval = %d
+	retries = %d
+	timeout = %d
+	servers = %s
     ea_mapping = %s
 }
 `, name, ldapUserAttribute, recoveryInterval, retries, timeout, serverString, eaMappingString)
@@ -811,11 +811,11 @@ func testAccLdapAuthServiceLdapGroupAttribute(name string, servers []map[string]
 	return fmt.Sprintf(`
 resource "nios_security_ldap_auth_service" "test_ldap_group_attribute" {
 	name = %q
-ldap_user_attribute = %q
-recovery_interval = %d
-retries = %d
-timeout = %d
-servers = %s
+	ldap_user_attribute = %q
+	recovery_interval = %d
+	retries = %d
+	timeout = %d
+	servers = %s
     ldap_group_attribute = %q
 }
 `, name, ldapUserAttribute, recoveryInterval, retries, timeout, serverString, ldapGroupAttribute)
@@ -826,11 +826,11 @@ func testAccLdapAuthServiceLdapGroupAuthenticationType(name string, servers []ma
 	return fmt.Sprintf(`
 resource "nios_security_ldap_auth_service" "test_ldap_group_authentication_type" {
 	name = %q
-ldap_user_attribute = %q
-recovery_interval = %d
-retries = %d
-timeout = %d
-servers = %s
+	ldap_user_attribute = %q
+	recovery_interval = %d
+	retries = %d
+	timeout = %d
+	servers = %s
     ldap_group_authentication_type = %q
 }
 `, name, ldapUserAttribute, recoveryInterval, retries, timeout, serverString, ldapGroupAuthenticationType)
@@ -841,10 +841,10 @@ func testAccLdapAuthServiceLdapUserAttribute(name string, servers []map[string]a
 	return fmt.Sprintf(`
 resource "nios_security_ldap_auth_service" "test_ldap_user_attribute" {
 	name = %q
-recovery_interval = %d
-retries = %d
-timeout = %d
-servers = %s
+	recovery_interval = %d
+	retries = %d
+	timeout = %d
+	servers = %s
     ldap_user_attribute = %q
 }
 `, name, recoveryInterval, retries, timeout, serverString, ldapUserAttribute)
@@ -855,11 +855,11 @@ func testAccLdapAuthServiceMode(name string, servers []map[string]any, ldapUserA
 	return fmt.Sprintf(`
 resource "nios_security_ldap_auth_service" "test_mode" {
 	name = %q
-ldap_user_attribute = %q
-recovery_interval = %d
-retries = %d
-timeout = %d
-servers = %s
+	ldap_user_attribute = %q
+	recovery_interval = %d
+	retries = %d
+	timeout = %d
+	servers = %s
     mode = %q
 }
 `, name, ldapUserAttribute, recoveryInterval, retries, timeout, serverString, mode)
@@ -870,11 +870,11 @@ func testAccLdapAuthServiceName(name string, servers []map[string]any, ldapUserA
 	return fmt.Sprintf(`
 resource "nios_security_ldap_auth_service" "test_name" {
     name = %q
-ldap_user_attribute = %q
-recovery_interval = %d
-retries = %d
-timeout = %d
-servers = %s
+	ldap_user_attribute = %q
+	recovery_interval = %d
+	retries = %d
+	timeout = %d
+	servers = %s
 }
 `, name, ldapUserAttribute, recoveryInterval, retries, timeout, serverString)
 }
@@ -884,11 +884,11 @@ func testAccLdapAuthServiceRecoveryInterval(name string, servers []map[string]an
 	return fmt.Sprintf(`
 resource "nios_security_ldap_auth_service" "test_recovery_interval" {
 	name = %q
-ldap_user_attribute = %q
+	ldap_user_attribute = %q
     recovery_interval = %d
-retries = %d
-timeout = %d
-servers = %s
+	retries = %d
+	timeout = %d
+	servers = %s
 }
 `, name, ldapUserAttribute, recoveryInterval, retries, timeout, serverString)
 }
@@ -898,10 +898,10 @@ func testAccLdapAuthServiceRetries(name string, servers []map[string]any, ldapUs
 	return fmt.Sprintf(`
 resource "nios_security_ldap_auth_service" "test_retries" {
 	name = %q
-ldap_user_attribute = %q
-recovery_interval = %d
-timeout = %d
-servers = %s
+	ldap_user_attribute = %q
+	recovery_interval = %d
+	timeout = %d
+	servers = %s
     retries = %d
 }
 `, name, ldapUserAttribute, recoveryInterval, timeout, serverString, retries)
@@ -912,11 +912,11 @@ func testAccLdapAuthServiceSearchScope(name string, servers []map[string]any, ld
 	return fmt.Sprintf(`
 resource "nios_security_ldap_auth_service" "test_search_scope" {
 	name = %q
-ldap_user_attribute = %q
-recovery_interval = %d
-retries = %d
-timeout = %d
-servers = %s
+	ldap_user_attribute = %q
+	recovery_interval = %d
+	retries = %d
+	timeout = %d
+	servers = %s
     search_scope = %q
 }
 `, name, ldapUserAttribute, recoveryInterval, retries, timeout, serverString, searchScope)
@@ -927,10 +927,10 @@ func testAccLdapAuthServiceServers(name string, servers []map[string]any, ldapUs
 	return fmt.Sprintf(`
 resource "nios_security_ldap_auth_service" "test_servers" {
 	name = %q
-ldap_user_attribute = %q
-recovery_interval = %d
-retries = %d
-timeout = %d
+	ldap_user_attribute = %q
+	recovery_interval = %d
+	retries = %d
+	timeout = %d
     servers = %s
 }
 `, name, ldapUserAttribute, recoveryInterval, retries, timeout, serversString)
@@ -941,10 +941,10 @@ func testAccLdapAuthServiceTimeout(name string, servers []map[string]any, ldapUs
 	return fmt.Sprintf(`
 resource "nios_security_ldap_auth_service" "test_timeout" {
 	name = %q
-ldap_user_attribute = %q
-recovery_interval = %d
-retries = %d
-servers = %s
+	ldap_user_attribute = %q
+	recovery_interval = %d
+	retries = %d
+	servers = %s
     timeout = %d
 }
 `, name, ldapUserAttribute, recoveryInterval, retries, serversString, timeout)

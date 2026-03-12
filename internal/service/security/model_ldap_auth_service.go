@@ -3,6 +3,7 @@ package security
 import (
 	"context"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
@@ -12,7 +13,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/security"
 
@@ -122,7 +122,7 @@ var LdapAuthServiceResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The period of time in seconds to wait before trying to contact a LDAP server that has been marked as 'DOWN'.",
 	},
 	"retries": schema.Int64Attribute{
-		Required:            true,
+		Required: true,
 		Validators: []validator.Int64{
 			int64validator.Between(1, 5),
 		},
@@ -144,11 +144,14 @@ var LdapAuthServiceResourceSchemaAttributes = map[string]schema.Attribute{
 		Validators: []validator.List{
 			listvalidator.SizeAtLeast(1),
 		},
-		Optional:            true,
+		Required:            true,
 		MarkdownDescription: "The list of LDAP servers used for authentication.",
 	},
 	"timeout": schema.Int64Attribute{
 		Required:            true,
+		Validators: []validator.Int64{
+			int64validator.Between(0, 4294967295),
+		},
 		MarkdownDescription: "The LDAP authentication timeout in seconds.",
 	},
 }

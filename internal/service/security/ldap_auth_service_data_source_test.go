@@ -73,12 +73,11 @@ func testAccLdapAuthServiceDataSourceConfigFilters(name string, servers []map[st
 	return fmt.Sprintf(`
 resource "nios_security_ldap_auth_service" "test" {
 	name = %q
-ldap_user_attribute = %q
-recovery_interval = %d
-retries = %d
-servers = %s
-timeout = %d
-
+	ldap_user_attribute = %q
+	recovery_interval = %d
+	retries = %d
+	servers = %s
+	timeout = %d
 }
 
 data "nios_security_ldap_auth_service" "test" {

@@ -22,7 +22,7 @@ resource "nios_security_ldap_auth_service" "ldap_authservice_with_basic_fields" 
 // Create LDAP Authservice with Additional Fields
 resource "nios_security_ldap_auth_service" "ldap_authservice_with_additional_fields" {
   name    = "example_ldap_authservice2"
-  comment = "This is a comment"
+  comment = "Example LDAP Auth Service"
   disable = false
   ea_mapping = [
     {

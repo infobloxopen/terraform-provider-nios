@@ -37,7 +37,7 @@ resource "nios_security_ldap_auth_service" "ldap_authservice_with_basic_fields" 
 // Create LDAP Authservice with Additional Fields
 resource "nios_security_ldap_auth_service" "ldap_authservice_with_additional_fields" {
   name    = "example_ldap_authservice2"
-  comment = "This is a comment"
+  comment = "Example LDAP Auth Service"
   disable = false
   ea_mapping = [
     {
@@ -77,6 +77,7 @@ resource "nios_security_ldap_auth_service" "ldap_authservice_with_additional_fie
 - `name` (String) The LDAP authentication service name.
 - `recovery_interval` (Number) The period of time in seconds to wait before trying to contact a LDAP server that has been marked as 'DOWN'.
 - `retries` (Number) The maximum number of LDAP authentication attempts.
+- `servers` (Attributes List) The list of LDAP servers used for authentication. (see [below for nested schema](#nestedatt--servers))
 - `timeout` (Number) The LDAP authentication timeout in seconds.
 
 ### Optional
@@ -88,20 +89,10 @@ resource "nios_security_ldap_auth_service" "ldap_authservice_with_additional_fie
 - `ldap_group_authentication_type` (String) The LDAP group authentication type.
 - `mode` (String) The LDAP authentication mode.
 - `search_scope` (String) The starting point of the LDAP search.
-- `servers` (Attributes List) The list of LDAP servers used for authentication. (see [below for nested schema](#nestedatt--servers))
 
 ### Read-Only
 
 - `ref` (String) The reference to the object.
-
-<a id="nestedatt--ea_mapping"></a>
-### Nested Schema for `ea_mapping`
-
-Required:
-
-- `mapped_ea` (String) The name of the extensible attribute definition object to which the LDAP attribute is mapped.
-- `name` (String) The LDAP attribute name.
-
 
 <a id="nestedatt--servers"></a>
 ### Nested Schema for `servers`
@@ -114,7 +105,7 @@ Required:
 Optional:
 
 - `authentication_type` (String) The authentication type for the LDAP server.
-- `bind_password` (String) The user password for authentication.
+- `bind_password` (String, Sensitive) The user password for authentication.
 - `bind_user_dn` (String) The user DN for authentication.
 - `comment` (String) The LDAP descriptive comment.
 - `disable` (Boolean) Determines if the LDAP server is disabled.
@@ -122,3 +113,12 @@ Optional:
 - `port` (Number) The LDAP server port.
 - `use_mgmt_port` (Boolean) Determines if the connection via the MGMT interface is allowed.
 - `version` (String) The LDAP server version.
+
+
+<a id="nestedatt--ea_mapping"></a>
+### Nested Schema for `ea_mapping`
+
+Required:
+
+- `mapped_ea` (String) The name of the extensible attribute definition object to which the LDAP attribute is mapped.
+- `name` (String) The LDAP attribute name.

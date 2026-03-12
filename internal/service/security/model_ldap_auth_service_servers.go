@@ -3,6 +3,7 @@ package security
 import (
 	"context"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -67,7 +68,7 @@ var LdapAuthServiceServersResourceSchemaAttributes = map[string]schema.Attribute
 	},
 	"bind_password": schema.StringAttribute{
 		Optional:            true,
-		Computed: 		  true,
+		Sensitive:           true,
 		MarkdownDescription: "The user password for authentication.",
 	},
 	"bind_user_dn": schema.StringAttribute{
@@ -96,9 +97,12 @@ var LdapAuthServiceServersResourceSchemaAttributes = map[string]schema.Attribute
 		MarkdownDescription: "The LDAP server encryption type.",
 	},
 	"port": schema.Int64Attribute{
-		Optional:            true,
-		Computed:            true,
-		Default:             int64default.StaticInt64(636),
+		Optional: true,
+		Computed: true,
+		Default:  int64default.StaticInt64(636),
+		Validators: []validator.Int64{
+			int64validator.Between(1, 65535),
+		},
 		MarkdownDescription: "The LDAP server port.",
 	},
 	"use_mgmt_port": schema.BoolAttribute{
@@ -171,7 +175,6 @@ func (m *LdapAuthServiceServersModel) Flatten(ctx context.Context, from *securit
 	m.Address = flex.FlattenStringPointer(from.Address)
 	m.AuthenticationType = flex.FlattenStringPointer(from.AuthenticationType)
 	m.BaseDn = flex.FlattenStringPointer(from.BaseDn)
-	m.BindPassword = flex.FlattenStringPointer(from.BindPassword)
 	m.BindUserDn = flex.FlattenStringPointer(from.BindUserDn)
 	m.Comment = flex.FlattenStringPointer(from.Comment)
 	m.Disable = types.BoolPointerValue(from.Disable)

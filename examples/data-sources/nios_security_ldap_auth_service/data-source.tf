@@ -1,9 +1,9 @@
-// Retrieve a specific Ldap Authservice by filters
+// Retrieve a specific LDAP Authservice by filters
 data "nios_security_ldap_auth_service" "get_ldap_authservice_using_filters" {
   filters = {
     name = "example_ldap_authservice"
   }
 }
 
-// Retrieve all Ldap Authservices
+// Retrieve all LDAP Authservices
 data "nios_security_ldap_auth_service" "get_all_ldap_authservices" {}
