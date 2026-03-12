@@ -3,24 +3,24 @@
 page_title: "nios_security_ldap_auth_service Data Source - nios"
 subcategory: "SECURITY"
 description: |-
-  Retrieves information about existing LDAP Authentication Services
+  Retrieves information about existing LDAP Auth Services
 ---
 
 # nios_security_ldap_auth_service (Data Source)
 
-Retrieves information about existing LDAP Authentication Services
+Retrieves information about existing LDAP Auth Services
 
 ## Example Usage
 
 ```terraform
-// Retrieve a specific LDAP Authservice by filters
+// Retrieve a specific LDAP Auth Service by filters
 data "nios_security_ldap_auth_service" "get_ldap_authservice_using_filters" {
   filters = {
     name = "example_ldap_authservice"
   }
 }
 
-// Retrieve all LDAP Authservices
+// Retrieve all LDAP Auth Services
 data "nios_security_ldap_auth_service" "get_all_ldap_authservices" {}
 ```
 

@@ -1,4 +1,4 @@
-// Create LDAP Authservice with Basic Fields
+// Create LDAP Auth Service with Basic Fields
 resource "nios_security_ldap_auth_service" "ldap_authservice_with_basic_fields" {
   name = "example_ldap_authservice"
   servers = [
@@ -19,7 +19,7 @@ resource "nios_security_ldap_auth_service" "ldap_authservice_with_basic_fields" 
   timeout             = 60
 }
 
-// Create LDAP Authservice with Additional Fields
+// Create LDAP Auth Service with Additional Fields
 resource "nios_security_ldap_auth_service" "ldap_authservice_with_additional_fields" {
   name    = "example_ldap_authservice2"
   comment = "Example LDAP Auth Service"

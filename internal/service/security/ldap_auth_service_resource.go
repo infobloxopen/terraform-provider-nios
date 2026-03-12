@@ -37,7 +37,7 @@ func (r *LdapAuthServiceResource) Metadata(ctx context.Context, req resource.Met
 
 func (r *LdapAuthServiceResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Manages an LDAP Authservice.",
+		MarkdownDescription: "Manages an LDAP Auth Service.",
 		Attributes:          LdapAuthServiceResourceSchemaAttributes,
 	}
 }
