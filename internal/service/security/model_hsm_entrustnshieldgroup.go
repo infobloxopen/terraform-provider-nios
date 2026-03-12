@@ -100,6 +100,7 @@ var HsmEntrustnshieldgroupResourceSchemaAttributes = map[string]schema.Attribute
 	},
 	"pass_phrase": schema.StringAttribute{
 		Optional:            true,
+		Sensitive:           true,
 		MarkdownDescription: "The password phrase used to unlock the Entrust nShield HSM keystore.",
 	},
 	"protection": schema.StringAttribute{

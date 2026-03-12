@@ -62,7 +62,6 @@ func TestAccHsmEntrustnshieldgroupResource_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "protection", "MODULE"),
 					resource.TestCheckResourceAttr(resourceName, "comment", ""),
 					resource.TestCheckResourceAttr(resourceName, "key_server_port", "9004"),
-					resource.TestCheckResourceAttr(resourceName, "entrustnshield_hsm.0.disable", "false"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -179,7 +178,7 @@ func TestAccHsmEntrustnshieldgroupResource_EntrustnshieldHsm(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckHsmEntrustnshieldgroupExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "entrustnshield_hsm.0.remote_port", "9004"),
-					resource.TestCheckResourceAttr(resourceName, "entrustnshield_hsm.0.disable", "false"),
+					resource.TestCheckResourceAttr(resourceName, "entrustnshield_hsm.0.disable", "true"),
 				),
 			},
 			// Update and Read

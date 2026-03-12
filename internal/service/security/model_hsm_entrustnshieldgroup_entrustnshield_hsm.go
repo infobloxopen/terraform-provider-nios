@@ -4,12 +4,14 @@ import (
 	"context"
 
 	"github.com/hashicorp/terraform-plugin-framework-nettypes/iptypes"
+	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
@@ -43,9 +45,12 @@ var HsmEntrustnshieldgroupEntrustnshieldHsmResourceSchemaAttributes = map[string
 		MarkdownDescription: "The IPv4 Address of the Entrust nShield HSM device.",
 	},
 	"remote_port": schema.Int64Attribute{
-		Optional:            true,
-		Computed:            true,
-		Default:             int64default.StaticInt64(9004),
+		Optional: true,
+		Computed: true,
+		Default:  int64default.StaticInt64(9004),
+		Validators: []validator.Int64{
+			int64validator.Between(0, 65535),
+		},
 		MarkdownDescription: "The Entrust nShield HSM device destination port.",
 	},
 	"status": schema.StringAttribute{
