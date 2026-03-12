@@ -51,7 +51,7 @@ Optional:
 - `card_name` (String) The Entrust nShield HSM softcard name.
 - `comment` (String) The Entrust nShield HSM group comment.
 - `key_server_port` (Number) The remote file server (RFS) port.
-- `pass_phrase` (String) The password phrase used to unlock the Entrust nShield HSM keystore.
+- `pass_phrase` (String, Sensitive) The password phrase used to unlock the Entrust nShield HSM keystore.
 - `protection` (String) The level of protection that the HSM group uses for the DNSSEC key data.
 
 Read-Only:
