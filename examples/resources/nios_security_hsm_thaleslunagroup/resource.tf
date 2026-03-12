@@ -19,7 +19,7 @@ resource "nios_security_hsm_thaleslunagroup" "hsm_thaleslunagroup_with_additiona
   hsm_version = "Luna_7_CPL"
   pass_phrase = "examplePass123"
 
-  comment = "Group for Thales Luna 7 HSM1 "
+  comment = "Group for Thales Luna 7 HSM1"
 
   thalesluna = [
     {
