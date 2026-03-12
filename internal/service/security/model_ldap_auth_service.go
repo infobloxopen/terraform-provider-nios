@@ -148,7 +148,7 @@ var LdapAuthServiceResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The list of LDAP servers used for authentication.",
 	},
 	"timeout": schema.Int64Attribute{
-		Required:            true,
+		Required: true,
 		Validators: []validator.Int64{
 			int64validator.Between(0, 4294967295),
 		},
