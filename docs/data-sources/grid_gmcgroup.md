@@ -3,12 +3,12 @@
 page_title: "nios_grid_gmcgroup Data Source - nios"
 subcategory: "GRID"
 description: |-
-  Retrieves information about existing Gmcgroup objects.
+  Retrieves information about existing GMC Group objects.
 ---
 
 # nios_grid_gmcgroup (Data Source)
 
-Retrieves information about existing Gmcgroup objects.
+Retrieves information about existing GMC Group objects.
 
 ## Example Usage
 
