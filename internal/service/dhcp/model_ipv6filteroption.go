@@ -60,7 +60,7 @@ var Ipv6filteroptionResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"uuid": schema.StringAttribute{
 		Computed:            true,
-		MarkdownDescription: "The uuid to the object.",
+		MarkdownDescription: "Universally Unique ID assigned for this object.",
 	},
 	"apply_as_class": schema.BoolAttribute{
 		Optional:            true,

@@ -109,7 +109,7 @@ var DhcpfailoverResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"uuid": schema.StringAttribute{
 		Computed:            true,
-		MarkdownDescription: "The uuid to the object.",
+		MarkdownDescription: "Universally Unique ID assigned for this object.",
 	},
 	"association_type": schema.StringAttribute{
 		Computed:            true,

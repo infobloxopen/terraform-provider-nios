@@ -60,7 +60,7 @@ var ExtensibleattributedefResourceSchemaAttributes = map[string]schema.Attribute
 	},
 	"uuid": schema.StringAttribute{
 		Computed:            true,
-		MarkdownDescription: "The uuid to the object.",
+		MarkdownDescription: "Universally Unique ID assigned for this object.",
 	},
 	"allowed_object_types": schema.ListAttribute{
 		ElementType: types.StringType,

@@ -22,6 +22,7 @@ import (
 
 type LdapAuthServiceModel struct {
 	Ref                         types.String `tfsdk:"ref"`
+	Uuid                        types.String `tfsdk:"uuid"`
 	UUID                        types.String `tfsdk:"uuid"`
 	Comment                     types.String `tfsdk:"comment"`
 	Disable                     types.Bool   `tfsdk:"disable"`
@@ -63,7 +64,7 @@ var LdapAuthServiceResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"uuid": schema.StringAttribute{
 		Computed:            true,
-		MarkdownDescription: "The uuid to the object.",
+		MarkdownDescription: "Universally Unique ID assigned for this object.",
 	},
 	"comment": schema.StringAttribute{
 		Optional: true,
@@ -203,7 +204,7 @@ func (m *LdapAuthServiceModel) Flatten(ctx context.Context, from *security.LdapA
 		*m = LdapAuthServiceModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
-	m.UUID = flex.FlattenStringPointer(from.UUID)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.Comment = flex.FlattenStringPointer(from.Comment)
 	m.Disable = types.BoolPointerValue(from.Disable)
 	m.EaMapping = flex.FlattenFrameworkListNestedBlock(ctx, from.EaMapping, LdapAuthServiceEaMappingAttrTypes, diags, FlattenLdapAuthServiceEaMapping)

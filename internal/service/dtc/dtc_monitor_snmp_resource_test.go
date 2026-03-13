@@ -299,7 +299,7 @@ func TestAccDtcMonitorSnmpResource_Oids(t *testing.T) {
 			"first":     "10",
 		},
 		{
-			"oid": ".02",
+			"oid":       ".02",
 			"condition": "RANGE",
 			"first":     "2",
 			"last":      "4",
@@ -318,7 +318,7 @@ func TestAccDtcMonitorSnmpResource_Oids(t *testing.T) {
 			"first":     "10",
 		},
 		{
-			"oid": ".01",
+			"oid":       ".01",
 			"condition": "GEQ",
 			"first":     "25",
 		},
@@ -783,12 +783,12 @@ resource "nios_dtc_monitor_snmp" "test_version" {
 }
 
 func testAccDtcMonitorSnmpVersionV3(name, version, snmpUser string) string {
-    config := fmt.Sprintf(`
+	config := fmt.Sprintf(`
 resource "nios_dtc_monitor_snmp" "test_version" {
     name = %q
     version = %q
     user = %s.name
 }
 `, name, version, snmpUser)
-    return strings.Join([]string{testAccBaseWithSnmpUsers(), config}, "")
+	return strings.Join([]string{testAccBaseWithSnmpUsers(), config}, "")
 }

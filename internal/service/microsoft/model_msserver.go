@@ -26,6 +26,7 @@ import (
 
 type MsserverModel struct {
 	Ref                         types.String `tfsdk:"ref"`
+	Uuid                        types.String `tfsdk:"uuid"`
 	UUID                        types.String `tfsdk:"uuid"`
 	AdDomain                    types.String `tfsdk:"ad_domain"`
 	AdSites                     types.Object `tfsdk:"ad_sites"`
@@ -107,7 +108,7 @@ var MsserverResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"uuid": schema.StringAttribute{
 		Computed:            true,
-		MarkdownDescription: "The uuid to the object.",
+		MarkdownDescription: "Universally Unique ID assigned for this object.",
 	},
 	"ad_domain": schema.StringAttribute{
 		Computed:            true,
@@ -350,7 +351,7 @@ func (m *MsserverModel) Flatten(ctx context.Context, from *microsoft.Msserver, d
 		*m = MsserverModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
-	m.UUID = flex.FlattenStringPointer(from.UUID)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.AdDomain = flex.FlattenStringPointer(from.AdDomain)
 	m.AdSites = FlattenMsserverAdSites(ctx, from.AdSites, diags)
 	m.AdUser = FlattenMsserverAdUser(ctx, from.AdUser, diags)

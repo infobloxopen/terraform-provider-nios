@@ -18,6 +18,7 @@ import (
 
 type UpgradescheduleModel struct {
 	Ref           types.String `tfsdk:"ref"`
+	Uuid          types.String `tfsdk:"uuid"`
 	UUID          types.String `tfsdk:"uuid"`
 	Active        types.Bool   `tfsdk:"active"`
 	StartTime     types.String `tfsdk:"start_time"`
@@ -41,7 +42,7 @@ var UpgradescheduleResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"uuid": schema.StringAttribute{
 		Computed:            true,
-		MarkdownDescription: "The uuid to the object.",
+		MarkdownDescription: "Universally Unique ID assigned for this object.",
 	},
 	"active": schema.BoolAttribute{
 		Optional:            true,
@@ -129,7 +130,7 @@ func (m *UpgradescheduleModel) Flatten(ctx context.Context, from *grid.Upgradesc
 		*m = UpgradescheduleModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
-	m.UUID = flex.FlattenStringPointer(from.UUID)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.Active = types.BoolPointerValue(from.Active)
 	m.StartTime = flex.FlattenUnixTime(from.StartTime, diags)
 	m.TimeZone = flex.FlattenStringPointer(from.TimeZone)

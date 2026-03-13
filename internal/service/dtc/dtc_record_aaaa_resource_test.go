@@ -381,4 +381,3 @@ func testAccDtcRecordAaaaUseTtl(ipv4addr, serverName string, useTtl bool) string
 	`, ipv4addr, useTtl, 30)
 	return strings.Join([]string{testAccBaseWithDtcServer(serverName, "2.2.2.2"), config}, "")
 }
-

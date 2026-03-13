@@ -62,7 +62,7 @@ var DtcServerResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"uuid": schema.StringAttribute{
 		Computed:            true,
-		MarkdownDescription: "The uuid to the object.",
+		MarkdownDescription: "Universally Unique ID assigned for this object.",
 	},
 	"auto_create_host_record": schema.BoolAttribute{
 		Optional:            true,

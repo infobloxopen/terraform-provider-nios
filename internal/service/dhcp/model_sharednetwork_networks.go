@@ -15,11 +15,13 @@ import (
 )
 
 type SharednetworkNetworksModel struct {
-	Ref types.String `tfsdk:"ref"`
+	Ref  types.String `tfsdk:"ref"`
+	Uuid types.String `tfsdk:"uuid"`
 }
 
 var SharednetworkNetworksAttrTypes = map[string]attr.Type{
-	"ref": types.StringType,
+	"ref":  types.StringType,
+	"uuid": types.StringType,
 }
 
 var SharednetworkNetworksResourceSchemaAttributes = map[string]schema.Attribute{
@@ -70,4 +72,5 @@ func (m *SharednetworkNetworksModel) Flatten(ctx context.Context, from *dhcp.Sha
 		*m = SharednetworkNetworksModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 }

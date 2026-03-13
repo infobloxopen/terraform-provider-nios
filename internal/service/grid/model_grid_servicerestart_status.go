@@ -55,7 +55,7 @@ var GridServicerestartStatusResourceSchemaAttributes = map[string]schema.Attribu
 	},
 	"uuid": schema.StringAttribute{
 		Computed:            true,
-		MarkdownDescription: "The uuid to the object.",
+		MarkdownDescription: "Universally Unique ID assigned for this object.",
 	},
 	"failures": schema.Int64Attribute{
 		Computed:            true,

@@ -45,7 +45,7 @@ var DtcTopologyRuleResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"uuid": schema.StringAttribute{
 		Computed:            true,
-		MarkdownDescription: "The uuid to the object.",
+		MarkdownDescription: "Universally Unique ID assigned for this object.",
 	},
 	"dest_type": schema.StringAttribute{
 		Optional:            true,
@@ -89,10 +89,10 @@ func (m *DtcTopologyRuleModel) Expand(ctx context.Context, diags *diag.Diagnosti
 		return nil
 	}
 	to := &dtc.DtcTopologyRule{
-		DestType:        flex.ExpandStringPointer(m.DestType),
-		DestinationLink: ExpandDtcTopologyRuleDestinationLink(ctx, m.DestinationLink, diags),
-		ReturnType:      flex.ExpandStringPointer(m.ReturnType),
-		Sources:         flex.ExpandFrameworkListNestedBlock(ctx, m.Sources, diags, ExpandDtcTopologyRuleSources),
+		DestType: flex.ExpandStringPointer(m.DestType),
+		// DestinationLink: ExpandDtcTopologyRuleDestinationLink(ctx, m.DestinationLink, diags),
+		ReturnType: flex.ExpandStringPointer(m.ReturnType),
+		Sources:    flex.ExpandFrameworkListNestedBlock(ctx, m.Sources, diags, ExpandDtcTopologyRuleSources),
 	}
 	return to
 }
@@ -118,25 +118,25 @@ func (m *DtcTopologyRuleModel) Flatten(ctx context.Context, from *dtc.DtcTopolog
 	m.Ref = flex.FlattenStringPointer(from.Ref)
 	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.DestType = flex.FlattenStringPointer(from.DestType)
-	m.DestinationLink = FlattenDtcTopologyRuleDestinationLink(ctx, from.DestinationLink, diags)
+	// m.DestinationLink = FlattenDtcTopologyRuleDestinationLink(ctx, from.DestinationLink, diags)
 	m.ReturnType = flex.FlattenStringPointer(from.ReturnType)
 	m.Sources = flex.FlattenFrameworkListNestedBlock(ctx, from.Sources, DtcTopologyRuleSourcesAttrTypes, diags, FlattenDtcTopologyRuleSources)
 	m.Topology = flex.FlattenStringPointer(from.Topology)
 	m.Valid = types.BoolPointerValue(from.Valid)
 }
 
-func ExpandDtcTopologyRuleDestinationLink(ctx context.Context, o types.String, diags *diag.Diagnostics) *dtc.DtcTopologyRuleDestinationLink {
-	if o.IsNull() || o.IsUnknown() {
-		return nil
-	}
-	return &dtc.DtcTopologyRuleDestinationLink{
-		String: flex.ExpandStringPointer(o),
-	}
-}
+// func ExpandDtcTopologyRuleDestinationLink(ctx context.Context, o types.String, diags *diag.Diagnostics) *dtc.DtcTopologyRuleDestinationLink {
+// 	if o.IsNull() || o.IsUnknown() {
+// 		return nil
+// 	}
+// 	return &dtc.DtcTopologyRuleDestinationLink{
+// 		String: flex.ExpandStringPointer(o),
+// 	}
+// }
 
-func FlattenDtcTopologyRuleDestinationLink(ctx context.Context, from *dtc.DtcTopologyRuleDestinationLink, diags *diag.Diagnostics) types.String {
-	if from == nil {
-		return types.StringNull()
-	}
-	return flex.FlattenStringPointer(from.DtcTopologyRuleDestinationLinkOneOf.Ref)
-}
+// func FlattenDtcTopologyRuleDestinationLink(ctx context.Context, from *dtc.DtcTopologyRuleDestinationLink, diags *diag.Diagnostics) types.String {
+// 	if from == nil {
+// 		return types.StringNull()
+// 	}
+// 	return flex.FlattenStringPointer(from.DtcTopologyRuleDestinationLinkOneOf.Ref)
+// }

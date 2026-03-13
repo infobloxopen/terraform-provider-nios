@@ -71,7 +71,7 @@ var RecordRpzSrvResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"uuid": schema.StringAttribute{
 		Computed:            true,
-		MarkdownDescription: "The uuid to the object.",
+		MarkdownDescription: "Universally Unique ID assigned for this object.",
 	},
 	"comment": schema.StringAttribute{
 		Optional: true,
@@ -201,7 +201,7 @@ func (m *RecordRpzSrvModel) Expand(ctx context.Context, diags *diag.Diagnostics)
 		Ttl:      flex.ExpandInt64Pointer(m.Ttl),
 		UseTtl:   flex.ExpandBoolPointer(m.UseTtl),
 		Weight:   flex.ExpandInt64Pointer(m.Weight),
-		View:    flex.ExpandStringPointer(m.View),
+		View:     flex.ExpandStringPointer(m.View),
 	}
 	return to
 }

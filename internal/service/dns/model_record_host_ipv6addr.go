@@ -98,7 +98,7 @@ var RecordHostIpv6addrResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"uuid": schema.StringAttribute{
 		Computed:            true,
-		MarkdownDescription: "The uuid to the object.",
+		MarkdownDescription: "Universally Unique ID assigned for this object.",
 	},
 	"address_type": schema.StringAttribute{
 		Optional:            true,

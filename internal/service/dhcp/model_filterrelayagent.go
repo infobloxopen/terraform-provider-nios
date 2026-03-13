@@ -66,7 +66,7 @@ var FilterrelayagentResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"uuid": schema.StringAttribute{
 		Computed:            true,
-		MarkdownDescription: "The uuid to the object.",
+		MarkdownDescription: "Universally Unique ID assigned for this object.",
 	},
 	"circuit_id_name": schema.StringAttribute{
 		Optional: true,

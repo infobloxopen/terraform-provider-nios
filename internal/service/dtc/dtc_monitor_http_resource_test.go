@@ -861,7 +861,6 @@ resource "nios_dtc_monitor_http" "test" {
 `, name)
 }
 
-
 func testAccDtcMonitorHttpCiphers(name, ciphers string) string {
 	return fmt.Sprintf(`
 resource "nios_dtc_monitor_http" "test_ciphers" {

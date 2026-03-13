@@ -22,6 +22,7 @@ import (
 
 type RirOrganizationModel struct {
 	Ref         types.String `tfsdk:"ref"`
+	Uuid        types.String `tfsdk:"uuid"`
 	UUID        types.String `tfsdk:"uuid"`
 	ExtAttrs    types.Map    `tfsdk:"extattrs"`
 	Id          types.String `tfsdk:"id"`
@@ -51,7 +52,7 @@ var RirOrganizationResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"uuid": schema.StringAttribute{
 		Computed:            true,
-		MarkdownDescription: "The uuid to the object.",
+		MarkdownDescription: "Universally Unique ID assigned for this object.",
 	},
 	"extattrs": schema.MapAttribute{
 		Optional:    true,
@@ -152,7 +153,7 @@ func (m *RirOrganizationModel) Flatten(ctx context.Context, from *rir.RirOrganiz
 		*m = RirOrganizationModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
-	m.UUID = flex.FlattenStringPointer(from.UUID)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.ExtAttrs = FlattenExtAttrs(ctx, m.ExtAttrs, from.ExtAttrs, diags)
 	m.Id = flex.FlattenStringPointer(from.Id)
 	m.Maintainer = flex.FlattenStringPointer(from.Maintainer)

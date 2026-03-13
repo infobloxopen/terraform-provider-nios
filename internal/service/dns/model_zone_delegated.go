@@ -97,7 +97,7 @@ var ZoneDelegatedResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"uuid": schema.StringAttribute{
 		Computed:            true,
-		MarkdownDescription: "The uuid to the object.",
+		MarkdownDescription: "Universally Unique ID assigned for this object.",
 	},
 	"address": schema.StringAttribute{
 		CustomType:          iptypes.IPAddressType{},

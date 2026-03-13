@@ -103,7 +103,7 @@ var RecordHostIpv4addrResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"uuid": schema.StringAttribute{
 		Computed:            true,
-		MarkdownDescription: "The uuid to the object.",
+		MarkdownDescription: "Universally Unique ID assigned for this object.",
 	},
 	"bootfile": schema.StringAttribute{
 		Optional:            true,

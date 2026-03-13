@@ -83,7 +83,7 @@ var RecordCaaResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"uuid": schema.StringAttribute{
 		Computed:            true,
-		MarkdownDescription: "The uuid to the object.",
+		MarkdownDescription: "Universally Unique ID assigned for this object.",
 	},
 	"ca_flag": schema.Int64Attribute{
 		Required:            true,

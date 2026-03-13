@@ -63,7 +63,7 @@ func TestAccFilterrelayagentDataSource_ExtAttrFilters(t *testing.T) {
 func testAccCheckFilterrelayagentResourceAttrPair(resourceName, dataSourceName string) []resource.TestCheckFunc {
 	return []resource.TestCheckFunc{
 		resource.TestCheckResourceAttrPair(resourceName, "ref", dataSourceName, "result.0.ref"),
-        resource.TestCheckResourceAttrPair(resourceName, "uuid", dataSourceName, "result.0.uuid"),
+		resource.TestCheckResourceAttrPair(resourceName, "uuid", dataSourceName, "result.0.uuid"),
 		resource.TestCheckResourceAttrPair(resourceName, "circuit_id_name", dataSourceName, "result.0.circuit_id_name"),
 		resource.TestCheckResourceAttrPair(resourceName, "circuit_id_substring_length", dataSourceName, "result.0.circuit_id_substring_length"),
 		resource.TestCheckResourceAttrPair(resourceName, "circuit_id_substring_offset", dataSourceName, "result.0.circuit_id_substring_offset"),

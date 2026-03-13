@@ -73,7 +73,7 @@ var NetworkviewResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"uuid": schema.StringAttribute{
 		Computed:            true,
-		MarkdownDescription: "The uuid to the object.",
+		MarkdownDescription: "Universally Unique ID assigned for this object.",
 	},
 	"associated_dns_views": schema.ListAttribute{
 		ElementType: types.StringType,

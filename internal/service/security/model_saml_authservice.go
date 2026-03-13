@@ -20,6 +20,7 @@ import (
 
 type SamlAuthserviceModel struct {
 	Ref            types.String `tfsdk:"ref"`
+	Uuid           types.String `tfsdk:"uuid"`
 	UUID           types.String `tfsdk:"uuid"`
 	Comment        types.String `tfsdk:"comment"`
 	Idp            types.Object `tfsdk:"idp"`
@@ -43,7 +44,7 @@ var SamlAuthserviceResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"uuid": schema.StringAttribute{
 		Computed:            true,
-		MarkdownDescription: "The uuid to the object.",
+		MarkdownDescription: "Universally Unique ID assigned for this object.",
 	},
 	"comment": schema.StringAttribute{
 		Optional: true,
@@ -106,7 +107,7 @@ func (m *SamlAuthserviceModel) Flatten(ctx context.Context, from *security.SamlA
 		*m = SamlAuthserviceModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
-	m.UUID = flex.FlattenStringPointer(from.UUID)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.Comment = flex.FlattenStringPointer(from.Comment)
 	planIdp := m.Idp
 	m.Idp = FlattenSamlAuthserviceIdp(ctx, from.Idp, diags)

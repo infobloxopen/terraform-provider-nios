@@ -79,7 +79,7 @@ var RecordUnknownResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"uuid": schema.StringAttribute{
 		Computed:            true,
-		MarkdownDescription: "The uuid to the object.",
+		MarkdownDescription: "Universally Unique ID assigned for this object.",
 	},
 	"cloud_info": schema.SingleNestedAttribute{
 		Attributes:          RecordUnknownCloudInfoResourceSchemaAttributes,

@@ -67,7 +67,7 @@ var RecordRpzCnameClientipaddressdnResourceSchemaAttributes = map[string]schema.
 	},
 	"uuid": schema.StringAttribute{
 		Computed:            true,
-		MarkdownDescription: "The uuid to the object.",
+		MarkdownDescription: "Universally Unique ID assigned for this object.",
 	},
 	"canonical": schema.StringAttribute{
 		Required: true,

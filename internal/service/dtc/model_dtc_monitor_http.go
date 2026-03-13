@@ -90,7 +90,7 @@ var DtcMonitorHttpResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"uuid": schema.StringAttribute{
 		Computed:            true,
-		MarkdownDescription: "The uuid to the object.",
+		MarkdownDescription: "Universally Unique ID assigned for this object.",
 	},
 	"ciphers": schema.StringAttribute{
 		Optional:            true,

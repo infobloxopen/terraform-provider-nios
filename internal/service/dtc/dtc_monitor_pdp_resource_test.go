@@ -37,7 +37,7 @@ func TestAccDtcMonitorPdpResource_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "retry_down", "1"),
 					resource.TestCheckResourceAttr(resourceName, "retry_up", "1"),
 					resource.TestCheckResourceAttr(resourceName, "timeout", "15"),
-					resource.TestCheckResourceAttr(resourceName,"interval", "5"),
+					resource.TestCheckResourceAttr(resourceName, "interval", "5"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -78,7 +78,7 @@ func TestAccDtcMonitorPdpResource_Comment(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccDtcMonitorPdpComment(name , "This is a comment"),
+				Config: testAccDtcMonitorPdpComment(name, "This is a comment"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcMonitorPdpExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "comment", "This is a comment"),
@@ -86,7 +86,7 @@ func TestAccDtcMonitorPdpResource_Comment(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccDtcMonitorPdpComment(name , "This is an updated comment"),
+				Config: testAccDtcMonitorPdpComment(name, "This is an updated comment"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcMonitorPdpExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "comment", "This is an updated comment"),
@@ -110,7 +110,7 @@ func TestAccDtcMonitorPdpResource_ExtAttrs(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccDtcMonitorPdpExtAttrs(name , map[string]string{
+				Config: testAccDtcMonitorPdpExtAttrs(name, map[string]string{
 					"Site": extAttrValue1,
 				}),
 				Check: resource.ComposeTestCheckFunc(
@@ -120,7 +120,7 @@ func TestAccDtcMonitorPdpResource_ExtAttrs(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccDtcMonitorPdpExtAttrs(name , map[string]string{
+				Config: testAccDtcMonitorPdpExtAttrs(name, map[string]string{
 					"Site": extAttrValue2,
 				}),
 				Check: resource.ComposeTestCheckFunc(
@@ -205,7 +205,7 @@ func TestAccDtcMonitorPdpResource_Port(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccDtcMonitorPdpPort(name , 2314),
+				Config: testAccDtcMonitorPdpPort(name, 2314),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcMonitorPdpExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "port", "2314"),
@@ -213,7 +213,7 @@ func TestAccDtcMonitorPdpResource_Port(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccDtcMonitorPdpPort(name , 4321),
+				Config: testAccDtcMonitorPdpPort(name, 4321),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcMonitorPdpExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "port", "4321"),
@@ -235,7 +235,7 @@ func TestAccDtcMonitorPdpResource_RetryDown(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccDtcMonitorPdpRetryDown(name , 5),
+				Config: testAccDtcMonitorPdpRetryDown(name, 5),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcMonitorPdpExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "retry_down", "5"),
@@ -243,7 +243,7 @@ func TestAccDtcMonitorPdpResource_RetryDown(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccDtcMonitorPdpRetryDown(name , 3),
+				Config: testAccDtcMonitorPdpRetryDown(name, 3),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcMonitorPdpExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "retry_down", "3"),
@@ -265,7 +265,7 @@ func TestAccDtcMonitorPdpResource_RetryUp(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccDtcMonitorPdpRetryUp(name , 2),
+				Config: testAccDtcMonitorPdpRetryUp(name, 2),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcMonitorPdpExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "retry_up", "2"),
@@ -273,7 +273,7 @@ func TestAccDtcMonitorPdpResource_RetryUp(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccDtcMonitorPdpRetryUp(name , 4),
+				Config: testAccDtcMonitorPdpRetryUp(name, 4),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcMonitorPdpExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "retry_up", "4"),
@@ -295,7 +295,7 @@ func TestAccDtcMonitorPdpResource_Timeout(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccDtcMonitorPdpTimeout(name , 20),
+				Config: testAccDtcMonitorPdpTimeout(name, 20),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcMonitorPdpExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "timeout", "20"),
@@ -303,7 +303,7 @@ func TestAccDtcMonitorPdpResource_Timeout(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccDtcMonitorPdpTimeout(name , 25),
+				Config: testAccDtcMonitorPdpTimeout(name, 25),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcMonitorPdpExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "timeout", "25"),
@@ -389,7 +389,7 @@ resource "nios_dtc_monitor_pdp" "test_comment" {
 `, name, comment)
 }
 
-func testAccDtcMonitorPdpExtAttrs(name string , extAttrs map[string]string) string {
+func testAccDtcMonitorPdpExtAttrs(name string, extAttrs map[string]string) string {
 	extattrsStr := "{\n"
 	for k, v := range extAttrs {
 		extattrsStr += fmt.Sprintf(`
@@ -405,7 +405,7 @@ resource "nios_dtc_monitor_pdp" "test_extattrs" {
 `, name, extattrsStr)
 }
 
-func testAccDtcMonitorPdpInterval(name string , interval int) string {
+func testAccDtcMonitorPdpInterval(name string, interval int) string {
 	return fmt.Sprintf(`
 resource "nios_dtc_monitor_pdp" "test_interval" {
 	name = %q
@@ -431,7 +431,7 @@ resource "nios_dtc_monitor_pdp" "test_port" {
 `, name, port)
 }
 
-func testAccDtcMonitorPdpRetryDown(name string , retryDown int) string {
+func testAccDtcMonitorPdpRetryDown(name string, retryDown int) string {
 	return fmt.Sprintf(`
 resource "nios_dtc_monitor_pdp" "test_retry_down" {
 	name = %q
@@ -440,7 +440,7 @@ resource "nios_dtc_monitor_pdp" "test_retry_down" {
 `, name, retryDown)
 }
 
-func testAccDtcMonitorPdpRetryUp(name string , retryUp int) string {
+func testAccDtcMonitorPdpRetryUp(name string, retryUp int) string {
 	return fmt.Sprintf(`
 resource "nios_dtc_monitor_pdp" "test_retry_up" {
 	name = %q
@@ -449,7 +449,7 @@ resource "nios_dtc_monitor_pdp" "test_retry_up" {
 `, name, retryUp)
 }
 
-func testAccDtcMonitorPdpTimeout(name string , timeout int) string {
+func testAccDtcMonitorPdpTimeout(name string, timeout int) string {
 	return fmt.Sprintf(`
 resource "nios_dtc_monitor_pdp" "test_timeout" {
 	name = %q

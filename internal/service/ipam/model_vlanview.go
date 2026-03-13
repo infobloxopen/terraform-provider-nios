@@ -59,7 +59,7 @@ var VlanviewResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"uuid": schema.StringAttribute{
 		Computed:            true,
-		MarkdownDescription: "The uuid to the object.",
+		MarkdownDescription: "Universally Unique ID assigned for this object.",
 	},
 	"allow_range_overlapping": schema.BoolAttribute{
 		Optional:            true,

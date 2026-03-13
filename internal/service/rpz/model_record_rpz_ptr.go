@@ -69,7 +69,7 @@ var RecordRpzPtrResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"uuid": schema.StringAttribute{
 		Computed:            true,
-		MarkdownDescription: "The uuid to the object.",
+		MarkdownDescription: "Universally Unique ID assigned for this object.",
 	},
 	"comment": schema.StringAttribute{
 		Optional:            true,
@@ -196,7 +196,7 @@ func (m *RecordRpzPtrModel) Expand(ctx context.Context, diags *diag.Diagnostics)
 		RpZone:   flex.ExpandStringPointer(m.RpZone),
 		Ttl:      flex.ExpandInt64Pointer(m.Ttl),
 		UseTtl:   flex.ExpandBoolPointer(m.UseTtl),
-		View : flex.ExpandStringPointer(m.View),
+		View:     flex.ExpandStringPointer(m.View),
 	}
 	return to
 }

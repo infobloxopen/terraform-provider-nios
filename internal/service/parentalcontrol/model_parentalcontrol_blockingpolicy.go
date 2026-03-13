@@ -18,6 +18,7 @@ import (
 
 type ParentalcontrolBlockingpolicyModel struct {
 	Ref   types.String `tfsdk:"ref"`
+	Uuid  types.String `tfsdk:"uuid"`
 	UUID  types.String `tfsdk:"uuid"`
 	Name  types.String `tfsdk:"name"`
 	Value types.String `tfsdk:"value"`
@@ -39,7 +40,7 @@ var ParentalcontrolBlockingpolicyResourceSchemaAttributes = map[string]schema.At
 	},
 	"uuid": schema.StringAttribute{
 		Computed:            true,
-		MarkdownDescription: "The uuid to the object.",
+		MarkdownDescription: "Universally Unique ID assigned for this object.",
 	},
 	"name": schema.StringAttribute{
 		Required: true,
@@ -88,7 +89,7 @@ func (m *ParentalcontrolBlockingpolicyModel) Flatten(ctx context.Context, from *
 		*m = ParentalcontrolBlockingpolicyModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
-	m.UUID = flex.FlattenStringPointer(from.UUID)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.Name = flex.FlattenStringPointer(from.Name)
 	m.Value = flex.FlattenStringPointer(from.Value)
 }

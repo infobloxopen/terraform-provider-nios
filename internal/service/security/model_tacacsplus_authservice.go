@@ -24,6 +24,7 @@ import (
 
 type TacacsplusAuthserviceModel struct {
 	Ref         types.String `tfsdk:"ref"`
+	Uuid        types.String `tfsdk:"uuid"`
 	UUID        types.String `tfsdk:"uuid"`
 	AcctRetries types.Int64  `tfsdk:"acct_retries"`
 	AcctTimeout types.Int64  `tfsdk:"acct_timeout"`
@@ -55,7 +56,7 @@ var TacacsplusAuthserviceResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"uuid": schema.StringAttribute{
 		Computed:            true,
-		MarkdownDescription: "The uuid to the object.",
+		MarkdownDescription: "Universally Unique ID assigned for this object.",
 	},
 	"acct_retries": schema.Int64Attribute{
 		Optional: true,
@@ -163,7 +164,7 @@ func (m *TacacsplusAuthserviceModel) Flatten(ctx context.Context, from *security
 		*m = TacacsplusAuthserviceModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
-	m.UUID = flex.FlattenStringPointer(from.UUID)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.AcctRetries = flex.FlattenInt64Pointer(from.AcctRetries)
 	m.AcctTimeout = flex.FlattenInt64Pointer(from.AcctTimeout)
 	m.AuthRetries = flex.FlattenInt64Pointer(from.AuthRetries)

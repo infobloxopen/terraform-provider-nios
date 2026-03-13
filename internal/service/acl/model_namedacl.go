@@ -53,7 +53,7 @@ var NamedaclResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"uuid": schema.StringAttribute{
 		Computed:            true,
-		MarkdownDescription: "The uuid to the object.",
+		MarkdownDescription: "Universally Unique ID assigned for this object.",
 	},
 	"access_list": schema.ListNestedAttribute{
 		NestedObject: schema.NestedAttributeObject{

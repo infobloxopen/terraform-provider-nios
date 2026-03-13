@@ -1,4 +1,3 @@
-
 package dtc_test
 
 import (
@@ -27,8 +26,8 @@ func TestAccDtcMonitorPdpDataSource_Filters(t *testing.T) {
 				Config: testAccDtcMonitorPdpDataSourceConfigFilters(name),
 				Check: resource.ComposeTestCheckFunc(
 					append([]resource.TestCheckFunc{
-							testAccCheckDtcMonitorPdpExists(context.Background(), resourceName, &v),
-						}, testAccCheckDtcMonitorPdpResourceAttrPair(resourceName, dataSourceName)...)...,
+						testAccCheckDtcMonitorPdpExists(context.Background(), resourceName, &v),
+					}, testAccCheckDtcMonitorPdpResourceAttrPair(resourceName, dataSourceName)...)...,
 				),
 			},
 		},
@@ -48,11 +47,11 @@ func TestAccDtcMonitorPdpDataSource_ExtAttrFilters(t *testing.T) {
 		CheckDestroy:             testAccCheckDtcMonitorPdpDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDtcMonitorPdpDataSourceConfigExtAttrFilters(name , extAttrValue),
+				Config: testAccDtcMonitorPdpDataSourceConfigExtAttrFilters(name, extAttrValue),
 				Check: resource.ComposeTestCheckFunc(
 					append([]resource.TestCheckFunc{
-							testAccCheckDtcMonitorPdpExists(context.Background(), resourceName, &v),
-						}, testAccCheckDtcMonitorPdpResourceAttrPair(resourceName, dataSourceName)...)...,
+						testAccCheckDtcMonitorPdpExists(context.Background(), resourceName, &v),
+					}, testAccCheckDtcMonitorPdpResourceAttrPair(resourceName, dataSourceName)...)...,
 				),
 			},
 		},
@@ -61,22 +60,22 @@ func TestAccDtcMonitorPdpDataSource_ExtAttrFilters(t *testing.T) {
 
 // below all TestAcc functions
 
-func testAccCheckDtcMonitorPdpResourceAttrPair(resourceName, dataSourceName string) []resource.TestCheckFunc{
-    return []resource.TestCheckFunc{
-        resource.TestCheckResourceAttrPair(resourceName, "ref", dataSourceName, "result.0.ref"),
-        resource.TestCheckResourceAttrPair(resourceName, "uuid", dataSourceName, "result.0.uuid"),
-        resource.TestCheckResourceAttrPair(resourceName, "comment", dataSourceName, "result.0.comment"),
-        resource.TestCheckResourceAttrPair(resourceName, "extattrs", dataSourceName, "result.0.extattrs"),
-        resource.TestCheckResourceAttrPair(resourceName, "interval", dataSourceName, "result.0.interval"),
-        resource.TestCheckResourceAttrPair(resourceName, "name", dataSourceName, "result.0.name"),
-        resource.TestCheckResourceAttrPair(resourceName, "port", dataSourceName, "result.0.port"),
-        resource.TestCheckResourceAttrPair(resourceName, "retry_down", dataSourceName, "result.0.retry_down"),
-        resource.TestCheckResourceAttrPair(resourceName, "retry_up", dataSourceName, "result.0.retry_up"),
-        resource.TestCheckResourceAttrPair(resourceName, "timeout", dataSourceName, "result.0.timeout"),
-    }
+func testAccCheckDtcMonitorPdpResourceAttrPair(resourceName, dataSourceName string) []resource.TestCheckFunc {
+	return []resource.TestCheckFunc{
+		resource.TestCheckResourceAttrPair(resourceName, "ref", dataSourceName, "result.0.ref"),
+		resource.TestCheckResourceAttrPair(resourceName, "uuid", dataSourceName, "result.0.uuid"),
+		resource.TestCheckResourceAttrPair(resourceName, "comment", dataSourceName, "result.0.comment"),
+		resource.TestCheckResourceAttrPair(resourceName, "extattrs", dataSourceName, "result.0.extattrs"),
+		resource.TestCheckResourceAttrPair(resourceName, "interval", dataSourceName, "result.0.interval"),
+		resource.TestCheckResourceAttrPair(resourceName, "name", dataSourceName, "result.0.name"),
+		resource.TestCheckResourceAttrPair(resourceName, "port", dataSourceName, "result.0.port"),
+		resource.TestCheckResourceAttrPair(resourceName, "retry_down", dataSourceName, "result.0.retry_down"),
+		resource.TestCheckResourceAttrPair(resourceName, "retry_up", dataSourceName, "result.0.retry_up"),
+		resource.TestCheckResourceAttrPair(resourceName, "timeout", dataSourceName, "result.0.timeout"),
+	}
 }
 
-func testAccDtcMonitorPdpDataSourceConfigFilters(name string ) string {
+func testAccDtcMonitorPdpDataSourceConfigFilters(name string) string {
 	return fmt.Sprintf(`
 resource "nios_dtc_monitor_pdp" "test" {
   name = %q	
@@ -106,4 +105,3 @@ data "nios_dtc_monitor_pdp" "test" {
 }
 `, name, extAttrsValue)
 }
-

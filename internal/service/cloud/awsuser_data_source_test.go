@@ -41,7 +41,7 @@ func TestAccAwsuserDataSource_Filters(t *testing.T) {
 func testAccCheckAwsuserResourceAttrPair(resourceName, dataSourceName string) []resource.TestCheckFunc {
 	return []resource.TestCheckFunc{
 		resource.TestCheckResourceAttrPair(resourceName, "ref", dataSourceName, "result.0.ref"),
-        resource.TestCheckResourceAttrPair(resourceName, "uuid", dataSourceName, "result.0.uuid"),
+		resource.TestCheckResourceAttrPair(resourceName, "uuid", dataSourceName, "result.0.uuid"),
 		resource.TestCheckResourceAttrPair(resourceName, "access_key_id", dataSourceName, "result.0.access_key_id"),
 		resource.TestCheckResourceAttrPair(resourceName, "account_id", dataSourceName, "result.0.account_id"),
 		resource.TestCheckResourceAttrPair(resourceName, "govcloud_enabled", dataSourceName, "result.0.govcloud_enabled"),

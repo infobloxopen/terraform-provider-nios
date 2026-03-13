@@ -23,6 +23,7 @@ import (
 
 type ParentalcontrolAvpModel struct {
 	Ref          types.String `tfsdk:"ref"`
+	Uuid         types.String `tfsdk:"uuid"`
 	UUID         types.String `tfsdk:"uuid"`
 	Comment      types.String `tfsdk:"comment"`
 	DomainTypes  types.List   `tfsdk:"domain_types"`
@@ -56,7 +57,7 @@ var ParentalcontrolAvpResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"uuid": schema.StringAttribute{
 		Computed:            true,
-		MarkdownDescription: "The uuid to the object.",
+		MarkdownDescription: "Universally Unique ID assigned for this object.",
 	},
 	"comment": schema.StringAttribute{
 		Optional: true,
@@ -174,7 +175,7 @@ func (m *ParentalcontrolAvpModel) Flatten(ctx context.Context, from *parentalcon
 		*m = ParentalcontrolAvpModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
-	m.UUID = flex.FlattenStringPointer(from.UUID)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.Comment = flex.FlattenStringPointer(from.Comment)
 	m.DomainTypes = flex.FlattenFrameworkListString(ctx, from.DomainTypes, diags)
 	m.IsRestricted = types.BoolPointerValue(from.IsRestricted)

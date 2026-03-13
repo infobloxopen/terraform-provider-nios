@@ -76,7 +76,7 @@ var DtcLbdnResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"uuid": schema.StringAttribute{
 		Computed:            true,
-		MarkdownDescription: "The uuid to the object.",
+		MarkdownDescription: "Universally Unique ID assigned for this object.",
 	},
 	"auth_zones": schema.ListAttribute{
 		CustomType:  internaltypes.UnorderedListOfStringType,
