@@ -56,7 +56,7 @@ var TacacsplusAuthserviceServersResourceSchemaAttributes = map[string]schema.Att
 		Computed: true,
 		Default:  int64default.StaticInt64(49),
 		Validators: []validator.Int64{
-			int64validator.Between(0, 65535),
+			int64validator.Between(1, 65535),
 		},
 		MarkdownDescription: "The TACACS+ server port.",
 	},
