@@ -16,7 +16,7 @@ import (
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
-// NOTE:Ensure two member are created to run the tests	
+// NOTE: Ensure two member are created to run the tests	
 //		  - infoblox.member1 
 // 		  - infoblox.member2
 
