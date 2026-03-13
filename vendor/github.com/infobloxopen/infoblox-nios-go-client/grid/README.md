@@ -453,6 +453,7 @@ Class | Method | HTTP request | Description
  - [GridsecuritysettingInactivityLockoutSetting](docs/GridsecuritysettingInactivityLockoutSetting.md)
  - [GridservicerestartgrouprecurringscheduleSchedule](docs/GridservicerestartgrouprecurringscheduleSchedule.md)
  - [GridsnmpsettingSnmpv3QueriesUsers](docs/GridsnmpsettingSnmpv3QueriesUsers.md)
+ - [GridsnmpsettingSnmpv3QueriesUsersOneOf](docs/GridsnmpsettingSnmpv3QueriesUsersOneOf.md)
  - [GridsnmpsettingTrapReceivers](docs/GridsnmpsettingTrapReceivers.md)
  - [GridthreatprotectionnatrulesNatPorts](docs/GridthreatprotectionnatrulesNatPorts.md)
  - [GridtrafficcapturerecdnssettingKpiMonitoredDomains](docs/GridtrafficcapturerecdnssettingKpiMonitoredDomains.md)

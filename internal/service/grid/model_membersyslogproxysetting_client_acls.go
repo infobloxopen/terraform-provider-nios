@@ -3,9 +3,11 @@ package grid
 import (
 	"context"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
@@ -15,6 +17,7 @@ import (
 )
 
 type MembersyslogproxysettingClientAclsModel struct {
+	Struct         types.String `tfsdk:"struct"`
 	Address        types.String `tfsdk:"address"`
 	Permission     types.String `tfsdk:"permission"`
 	TsigKey        types.String `tfsdk:"tsig_key"`
@@ -24,6 +27,7 @@ type MembersyslogproxysettingClientAclsModel struct {
 }
 
 var MembersyslogproxysettingClientAclsAttrTypes = map[string]attr.Type{
+	"struct":            types.StringType,
 	"address":           types.StringType,
 	"permission":        types.StringType,
 	"tsig_key":          types.StringType,
@@ -33,6 +37,13 @@ var MembersyslogproxysettingClientAclsAttrTypes = map[string]attr.Type{
 }
 
 var MembersyslogproxysettingClientAclsResourceSchemaAttributes = map[string]schema.Attribute{
+	"struct": schema.StringAttribute{
+		Required: true,
+		Validators: []validator.String{
+			stringvalidator.OneOf("addressac", "tsigac"),
+		},
+		MarkdownDescription: "The struct type of the object. The value must be one of 'addressac' and 'tsigac'.",
+	},
 	"address": schema.StringAttribute{
 		Computed:            true,
 		Optional:            true,
@@ -81,6 +92,7 @@ func (m *MembersyslogproxysettingClientAclsModel) Expand(ctx context.Context, di
 		return nil
 	}
 	to := &grid.MembersyslogproxysettingClientAcls{
+		Struct:         flex.ExpandStringPointer(m.Struct),
 		Address:        flex.ExpandStringPointer(m.Address),
 		Permission:     flex.ExpandStringPointer(m.Permission),
 		TsigKey:        flex.ExpandStringPointer(m.TsigKey),
@@ -109,6 +121,7 @@ func (m *MembersyslogproxysettingClientAclsModel) Flatten(ctx context.Context, f
 	if m == nil {
 		*m = MembersyslogproxysettingClientAclsModel{}
 	}
+	m.Struct = flex.FlattenStringPointer(from.Struct)
 	m.Address = flex.FlattenStringPointer(from.Address)
 	m.Permission = flex.FlattenStringPointer(from.Permission)
 	m.TsigKey = flex.FlattenStringPointer(from.TsigKey)

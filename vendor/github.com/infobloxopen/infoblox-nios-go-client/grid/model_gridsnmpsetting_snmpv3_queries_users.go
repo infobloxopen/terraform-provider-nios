@@ -12,147 +12,100 @@ package grid
 
 import (
 	"encoding/json"
+	"fmt"
 )
 
-// checks if the GridsnmpsettingSnmpv3QueriesUsers type satisfies the MappedNullable interface at compile time
-var _ MappedNullable = &GridsnmpsettingSnmpv3QueriesUsers{}
-
-// GridsnmpsettingSnmpv3QueriesUsers struct for GridsnmpsettingSnmpv3QueriesUsers
+// GridsnmpsettingSnmpv3QueriesUsers - struct for GridsnmpsettingSnmpv3QueriesUsers
 type GridsnmpsettingSnmpv3QueriesUsers struct {
-	// The SNMPv3 user.
-	User *string `json:"user,omitempty"`
-	// A descriptive comment for this queries user.
-	Comment              *string `json:"comment,omitempty"`
-	AdditionalProperties map[string]interface{}
+	GridsnmpsettingSnmpv3QueriesUsersOneOf *GridsnmpsettingSnmpv3QueriesUsersOneOf
+	String                                 *string
 }
 
-type _GridsnmpsettingSnmpv3QueriesUsers GridsnmpsettingSnmpv3QueriesUsers
-
-// NewGridsnmpsettingSnmpv3QueriesUsers instantiates a new GridsnmpsettingSnmpv3QueriesUsers object
-// This constructor will assign default values to properties that have it defined,
-// and makes sure properties required by API are set, but the set of arguments
-// will change when the set of required properties is changed
-func NewGridsnmpsettingSnmpv3QueriesUsers() *GridsnmpsettingSnmpv3QueriesUsers {
-	this := GridsnmpsettingSnmpv3QueriesUsers{}
-	return &this
-}
-
-// NewGridsnmpsettingSnmpv3QueriesUsersWithDefaults instantiates a new GridsnmpsettingSnmpv3QueriesUsers object
-// This constructor will only assign default values to properties that have it defined,
-// but it doesn't guarantee that properties required by API are set
-func NewGridsnmpsettingSnmpv3QueriesUsersWithDefaults() *GridsnmpsettingSnmpv3QueriesUsers {
-	this := GridsnmpsettingSnmpv3QueriesUsers{}
-	return &this
-}
-
-// GetUser returns the User field value if set, zero value otherwise.
-func (o *GridsnmpsettingSnmpv3QueriesUsers) GetUser() string {
-	if o == nil || IsNil(o.User) {
-		var ret string
-		return ret
+// GridsnmpsettingSnmpv3QueriesUsersOneOfAsGridsnmpsettingSnmpv3QueriesUsers is a convenience function that returns GridsnmpsettingSnmpv3QueriesUsersOneOf wrapped in GridsnmpsettingSnmpv3QueriesUsers
+func GridsnmpsettingSnmpv3QueriesUsersOneOfAsGridsnmpsettingSnmpv3QueriesUsers(v *GridsnmpsettingSnmpv3QueriesUsersOneOf) GridsnmpsettingSnmpv3QueriesUsers {
+	return GridsnmpsettingSnmpv3QueriesUsers{
+		GridsnmpsettingSnmpv3QueriesUsersOneOf: v,
 	}
-	return *o.User
 }
 
-// GetUserOk returns a tuple with the User field value if set, nil otherwise
-// and a boolean to check if the value has been set.
-func (o *GridsnmpsettingSnmpv3QueriesUsers) GetUserOk() (*string, bool) {
-	if o == nil || IsNil(o.User) {
-		return nil, false
+// stringAsGridsnmpsettingSnmpv3QueriesUsers is a convenience function that returns string wrapped in GridsnmpsettingSnmpv3QueriesUsers
+func StringAsGridsnmpsettingSnmpv3QueriesUsers(v *string) GridsnmpsettingSnmpv3QueriesUsers {
+	return GridsnmpsettingSnmpv3QueriesUsers{
+		String: v,
 	}
-	return o.User, true
 }
 
-// HasUser returns a boolean if a field has been set.
-func (o *GridsnmpsettingSnmpv3QueriesUsers) HasUser() bool {
-	if o != nil && !IsNil(o.User) {
-		return true
+// Unmarshal JSON data into one of the pointers in the struct
+func (dst *GridsnmpsettingSnmpv3QueriesUsers) UnmarshalJSON(data []byte) error {
+	var err error
+	match := 0
+	// try to unmarshal data into GridsnmpsettingSnmpv3QueriesUsersOneOf
+	err = newStrictDecoder(data).Decode(&dst.GridsnmpsettingSnmpv3QueriesUsersOneOf)
+	if err == nil {
+		jsonGridsnmpsettingSnmpv3QueriesUsersOneOf, _ := json.Marshal(dst.GridsnmpsettingSnmpv3QueriesUsersOneOf)
+		if string(jsonGridsnmpsettingSnmpv3QueriesUsersOneOf) == "{}" { // empty struct
+			dst.GridsnmpsettingSnmpv3QueriesUsersOneOf = nil
+		} else {
+			match++
+		}
+	} else {
+		dst.GridsnmpsettingSnmpv3QueriesUsersOneOf = nil
 	}
 
-	return false
+	// try to unmarshal data into String
+	err = newStrictDecoder(data).Decode(&dst.String)
+	if err == nil {
+		jsonString, _ := json.Marshal(dst.String)
+		if string(jsonString) == "{}" { // empty struct
+			dst.String = nil
+		} else {
+			match++
+		}
+	} else {
+		dst.String = nil
+	}
+
+	if match > 1 { // more than 1 match
+		// reset to nil
+		dst.GridsnmpsettingSnmpv3QueriesUsersOneOf = nil
+		dst.String = nil
+
+		return fmt.Errorf("data matches more than one schema in oneOf(GridsnmpsettingSnmpv3QueriesUsers)")
+	} else if match == 1 {
+		return nil // exactly one match
+	} else { // no match
+		return fmt.Errorf("data failed to match schemas in oneOf(GridsnmpsettingSnmpv3QueriesUsers)")
+	}
 }
 
-// SetUser gets a reference to the given string and assigns it to the User field.
-func (o *GridsnmpsettingSnmpv3QueriesUsers) SetUser(v string) {
-	o.User = &v
+// Marshal data from the first non-nil pointers in the struct to JSON
+func (src GridsnmpsettingSnmpv3QueriesUsers) MarshalJSON() ([]byte, error) {
+	if src.GridsnmpsettingSnmpv3QueriesUsersOneOf != nil {
+		return json.Marshal(&src.GridsnmpsettingSnmpv3QueriesUsersOneOf)
+	}
+
+	if src.String != nil {
+		return json.Marshal(&src.String)
+	}
+
+	return nil, nil // no data in oneOf schemas
 }
 
-// GetComment returns the Comment field value if set, zero value otherwise.
-func (o *GridsnmpsettingSnmpv3QueriesUsers) GetComment() string {
-	if o == nil || IsNil(o.Comment) {
-		var ret string
-		return ret
+// Get the actual instance
+func (obj *GridsnmpsettingSnmpv3QueriesUsers) GetActualInstance() interface{} {
+	if obj == nil {
+		return nil
 	}
-	return *o.Comment
-}
-
-// GetCommentOk returns a tuple with the Comment field value if set, nil otherwise
-// and a boolean to check if the value has been set.
-func (o *GridsnmpsettingSnmpv3QueriesUsers) GetCommentOk() (*string, bool) {
-	if o == nil || IsNil(o.Comment) {
-		return nil, false
-	}
-	return o.Comment, true
-}
-
-// HasComment returns a boolean if a field has been set.
-func (o *GridsnmpsettingSnmpv3QueriesUsers) HasComment() bool {
-	if o != nil && !IsNil(o.Comment) {
-		return true
+	if obj.GridsnmpsettingSnmpv3QueriesUsersOneOf != nil {
+		return obj.GridsnmpsettingSnmpv3QueriesUsersOneOf
 	}
 
-	return false
-}
-
-// SetComment gets a reference to the given string and assigns it to the Comment field.
-func (o *GridsnmpsettingSnmpv3QueriesUsers) SetComment(v string) {
-	o.Comment = &v
-}
-
-func (o GridsnmpsettingSnmpv3QueriesUsers) MarshalJSON() ([]byte, error) {
-	toSerialize, err := o.ToMap()
-	if err != nil {
-		return []byte{}, err
-	}
-	return json.Marshal(toSerialize)
-}
-
-func (o GridsnmpsettingSnmpv3QueriesUsers) ToMap() (map[string]interface{}, error) {
-	toSerialize := map[string]interface{}{}
-	if !IsNil(o.User) {
-		toSerialize["user"] = o.User
-	}
-	if !IsNil(o.Comment) {
-		toSerialize["comment"] = o.Comment
+	if obj.String != nil {
+		return obj.String
 	}
 
-	for key, value := range o.AdditionalProperties {
-		toSerialize[key] = value
-	}
-
-	return toSerialize, nil
-}
-
-func (o *GridsnmpsettingSnmpv3QueriesUsers) UnmarshalJSON(data []byte) (err error) {
-	varGridsnmpsettingSnmpv3QueriesUsers := _GridsnmpsettingSnmpv3QueriesUsers{}
-
-	err = json.Unmarshal(data, &varGridsnmpsettingSnmpv3QueriesUsers)
-
-	if err != nil {
-		return err
-	}
-
-	*o = GridsnmpsettingSnmpv3QueriesUsers(varGridsnmpsettingSnmpv3QueriesUsers)
-
-	additionalProperties := make(map[string]interface{})
-
-	if err = json.Unmarshal(data, &additionalProperties); err == nil {
-		delete(additionalProperties, "user")
-		delete(additionalProperties, "comment")
-		o.AdditionalProperties = additionalProperties
-	}
-
-	return err
+	// all schemas are nil
+	return nil
 }
 
 type NullableGridsnmpsettingSnmpv3QueriesUsers struct {

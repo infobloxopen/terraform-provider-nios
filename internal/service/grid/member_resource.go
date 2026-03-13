@@ -80,6 +80,14 @@ func (r *MemberResource) Create(ctx context.Context, req resource.CreateRequest,
 		return
 	}
 
+	if !data.SyslogServers.IsNull() && !data.SyslogServers.IsUnknown() {
+        processedList, ok := r.processSyslogServers(ctx, data.SyslogServers, &resp.Diagnostics)
+        if !ok {
+            return
+        }
+        data.SyslogServers = processedList
+    }
+
 	apiRes, _, err := r.client.GridAPI.
 		MemberAPI.
 		Create(ctx).
@@ -245,6 +253,13 @@ func (r *MemberResource) Update(ctx context.Context, req resource.UpdateRequest,
 	if resp.Diagnostics.HasError() {
 		return
 	}
+	if !data.SyslogServers.IsNull() && !data.SyslogServers.IsUnknown() {
+        processedList, ok := r.processSyslogServers(ctx, data.SyslogServers, &resp.Diagnostics)
+        if !ok {
+            return
+        }
+        data.SyslogServers = processedList
+    }
 
 	planExtAttrs := data.ExtAttrs
 	diags = req.State.GetAttribute(ctx, path.Root("ref"), &data.Ref)
