@@ -16,10 +16,9 @@ import (
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
-/*
-// INFO : create 2 member for this UT to run
-		  - infoblox.member1 and infoblox.member2
-*/
+// NOTE : Ensure two member are created to run the tests	
+//		  - infoblox.member1 
+// 		  - infoblox.member2
 
 var readableAttributesForGmcgroup = "comment,gmc_promotion_policy,members,name,scheduled_time,time_zone"
 
