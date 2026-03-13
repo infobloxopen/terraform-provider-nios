@@ -135,7 +135,7 @@ var SharedrecordSrvResourceSchemaAttributes = map[string]schema.Attribute{
 	"target": schema.StringAttribute{
 		Required: true,
 		Validators: []validator.String{
-			customvalidator.IsValidFQDN(),
+			customvalidator.IsValidDomainName(),
 		},
 		MarkdownDescription: "The target of the shared SRV record in FQDN format. This value can be in unicode format.",
 	},

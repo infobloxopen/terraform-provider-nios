@@ -103,7 +103,7 @@ var SharedrecordMxResourceSchemaAttributes = map[string]schema.Attribute{
 	"mail_exchanger": schema.StringAttribute{
 		Required: true,
 		Validators: []validator.String{
-			customvalidator.IsValidFQDN(),
+			customvalidator.IsValidDomainName(),
 		},
 		MarkdownDescription: "The name of the mail exchanger in FQDN format. This value can be in unicode format.",
 	},
