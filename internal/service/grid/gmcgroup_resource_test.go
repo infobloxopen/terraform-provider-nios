@@ -16,7 +16,7 @@ import (
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
-// NOTE : Ensure two member are created to run the tests	
+// NOTE:Ensure two member are created to run the tests	
 //		  - infoblox.member1 
 // 		  - infoblox.member2
 
@@ -67,7 +67,6 @@ func TestAccGmcgroupResource_disappears(t *testing.T) {
 	})
 }
 
-// TO DO
 func TestAccGmcgroupResource_Import(t *testing.T) {
 	var resourceName = "nios_grid_gmcgroup.test"
 	var v grid.Gmcgroup
