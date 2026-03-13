@@ -21,11 +21,11 @@ var _ MappedNullable = &SmartfolderPersonal{}
 type SmartfolderPersonal struct {
 	// The reference to the object.
 	Ref *string `json:"_ref,omitempty"`
-	// The uuid of the object.
+	// Universally Unique ID assigned for this object
 	Uuid *string `json:"uuid,omitempty"`
 	// The personal Smart Folder descriptive comment.
 	Comment *string `json:"comment,omitempty"`
-	// The personal Smart Folder groupping rules.
+	// The personal Smart Folder grouping rules.
 	GroupBys []SmartfolderPersonalGroupBys `json:"group_bys,omitempty"`
 	// Determines whether the personal Smart Folder is a shortcut.
 	IsShortcut *bool `json:"is_shortcut,omitempty"`

@@ -47,7 +47,7 @@ type Msserver struct {
 	ExtAttrsMinus *map[string]ExtAttrs `json:"extattrs-,omitempty"`
 	// Extensible attributes associated with the object. For valid values for extensible attributes, see {extattrs:values}.
 	ExtAttrs *map[string]ExtAttrs `json:"extattrs,omitempty"`
-	// eference to the assigned grid member
+	// Reference to the assigned grid member
 	GridMember *string `json:"grid_member,omitempty"`
 	// Timestamp of the last message received
 	LastSeen *int64 `json:"last_seen,omitempty"`

@@ -180,8 +180,6 @@ type GridDns struct {
 	EnableDnstapForwarderQueries *bool `json:"enable_dnstap_forwarder_queries,omitempty"`
 	// Enable DNSTAP for forwarder response messages.
 	EnableDnstapForwarderResponses *bool `json:"enable_dnstap_forwarder_responses,omitempty"`
-	// DNSTAP logging type: true=non-accelerated, false=accelerated.
-	EnableDnstapLoggingType *bool `json:"enable_dnstap_logging_type,omitempty"`
 	// Determines whether the query messages need to be forwarded to DNSTAP or not.
 	EnableDnstapQueries *bool `json:"enable_dnstap_queries,omitempty"`
 	// Enable DNSTAP for resolver query messages.
@@ -3008,38 +3006,6 @@ func (o *GridDns) SetEnableDnstapForwarderResponses(v bool) {
 	o.EnableDnstapForwarderResponses = &v
 }
 
-// GetEnableDnstapLoggingType returns the EnableDnstapLoggingType field value if set, zero value otherwise.
-func (o *GridDns) GetEnableDnstapLoggingType() bool {
-	if o == nil || IsNil(o.EnableDnstapLoggingType) {
-		var ret bool
-		return ret
-	}
-	return *o.EnableDnstapLoggingType
-}
-
-// GetEnableDnstapLoggingTypeOk returns a tuple with the EnableDnstapLoggingType field value if set, nil otherwise
-// and a boolean to check if the value has been set.
-func (o *GridDns) GetEnableDnstapLoggingTypeOk() (*bool, bool) {
-	if o == nil || IsNil(o.EnableDnstapLoggingType) {
-		return nil, false
-	}
-	return o.EnableDnstapLoggingType, true
-}
-
-// HasEnableDnstapLoggingType returns a boolean if a field has been set.
-func (o *GridDns) HasEnableDnstapLoggingType() bool {
-	if o != nil && !IsNil(o.EnableDnstapLoggingType) {
-		return true
-	}
-
-	return false
-}
-
-// SetEnableDnstapLoggingType gets a reference to the given bool and assigns it to the EnableDnstapLoggingType field.
-func (o *GridDns) SetEnableDnstapLoggingType(v bool) {
-	o.EnableDnstapLoggingType = &v
-}
-
 // GetEnableDnstapQueries returns the EnableDnstapQueries field value if set, zero value otherwise.
 func (o *GridDns) GetEnableDnstapQueries() bool {
 	if o == nil || IsNil(o.EnableDnstapQueries) {
@@ -5794,9 +5760,6 @@ func (o GridDns) ToMap() (map[string]interface{}, error) {
 	}
 	if !IsNil(o.EnableDnstapForwarderResponses) {
 		toSerialize["enable_dnstap_forwarder_responses"] = o.EnableDnstapForwarderResponses
-	}
-	if !IsNil(o.EnableDnstapLoggingType) {
-		toSerialize["enable_dnstap_logging_type"] = o.EnableDnstapLoggingType
 	}
 	if !IsNil(o.EnableDnstapQueries) {
 		toSerialize["enable_dnstap_queries"] = o.EnableDnstapQueries

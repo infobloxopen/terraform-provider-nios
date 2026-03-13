@@ -136,7 +136,7 @@ type Networkcontainer struct {
 	RestartIfNeeded *bool `json:"restart_if_needed,omitempty"`
 	// The registry (RIR) that allocated the network container address space.
 	Rir *string `json:"rir,omitempty"`
-	// The RIR organization assoicated with the network container.
+	// The RIR organization associated with the network container.
 	RirOrganization *string `json:"rir_organization,omitempty"`
 	// The RIR registration action.
 	RirRegistrationAction *string `json:"rir_registration_action,omitempty"`

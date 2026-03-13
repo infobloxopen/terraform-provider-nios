@@ -21,7 +21,7 @@ var _ MappedNullable = &DiscoveryStatus{}
 type DiscoveryStatus struct {
 	// The reference to the object.
 	Ref *string `json:"_ref,omitempty"`
-	// The uuid of the object.
+	// Universally Unique ID assigned for this object
 	Uuid *string `json:"uuid,omitempty"`
 	// The IPv4 Address or IPv6 Address of the device.
 	Address *string `json:"address,omitempty"`
@@ -29,7 +29,7 @@ type DiscoveryStatus struct {
 	CliCollectionEnabled *bool                             `json:"cli_collection_enabled,omitempty"`
 	CliCredentialInfo    *DiscoveryStatusCliCredentialInfo `json:"cli_credential_info,omitempty"`
 	ExistenceInfo        *DiscoveryStatusExistenceInfo     `json:"existence_info,omitempty"`
-	// Indicates if DHCP finterprinting is enabled.
+	// Indicates if DHCP fingerprinting is enabled.
 	FingerprintEnabled *bool                           `json:"fingerprint_enabled,omitempty"`
 	FingerprintInfo    *DiscoveryStatusFingerprintInfo `json:"fingerprint_info,omitempty"`
 	// The timestamp when the device was first discovered.

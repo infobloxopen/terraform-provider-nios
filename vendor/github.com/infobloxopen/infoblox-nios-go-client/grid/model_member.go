@@ -103,7 +103,7 @@ type Member struct {
 	PreserveIfOwnsDelegation *bool `json:"preserve_if_owns_delegation,omitempty"`
 	// If set to True, superuser admins can access the Infoblox CLI from a remote location using an SSH (Secure Shell) v2 client.
 	RemoteConsoleAccessEnable *bool `json:"remote_console_access_enable,omitempty"`
-	// Virutal router identifier. Provide this ID if \"ha_enabled\" is set to \"true\". This is a unique VRID number (from 1 to 255) for the local subnet.
+	// Virtual router identifier. Provide this ID if \"ha_enabled\" is set to \"true\". This is a unique VRID number (from 1 to 255) for the local subnet.
 	RouterId *int64 `json:"router_id,omitempty"`
 	// The service status list of a grid member.
 	ServiceStatus []MemberServiceStatus `json:"service_status,omitempty"`
@@ -160,11 +160,11 @@ type Member struct {
 	UseThresholdTraps *bool `json:"use_threshold_traps,omitempty"`
 	// Use flag for: time_zone
 	UseTimeZone *bool `json:"use_time_zone,omitempty"`
-	// This flag is the use flag for enabling automated traffic capture based on authorative DNS latency.
+	// This flag is the use flag for enabling automated traffic capture based on authoritative DNS latency.
 	UseTrafficCaptureAuthDns *bool `json:"use_traffic_capture_auth_dns,omitempty"`
 	// This flag is the use flag for automated traffic capture settings at member level.
 	UseTrafficCaptureChr *bool `json:"use_traffic_capture_chr,omitempty"`
-	// This flag is the use flag for enabling automated traffic capture based on DNS querie per second thresholds.
+	// This flag is the use flag for enabling automated traffic capture based on DNS queries per second thresholds.
 	UseTrafficCaptureQps *bool `json:"use_traffic_capture_qps,omitempty"`
 	// This flag is the use flag for enabling automated traffic capture based on recursive DNS latency.
 	UseTrafficCaptureRecDns *bool `json:"use_traffic_capture_rec_dns,omitempty"`

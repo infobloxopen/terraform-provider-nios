@@ -106,9 +106,9 @@ type Networktemplate struct {
 	RangeTemplates []string `json:"range_templates,omitempty"`
 	// If the field is set to True, the leases are kept in the Recycle Bin until one week after expiration. Otherwise, the leases are permanently deleted.
 	RecycleLeases *bool `json:"recycle_leases,omitempty"`
-	// THe registry (RIR) that allocated the network address space.
+	// The registry (RIR) that allocated the network address space.
 	Rir *string `json:"rir,omitempty"`
-	// The RIR organization assoicated with the network.
+	// The RIR organization associated with the network.
 	RirOrganization *string `json:"rir_organization,omitempty"`
 	// The RIR registration action.
 	RirRegistrationAction *string `json:"rir_registration_action,omitempty"`

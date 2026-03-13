@@ -31,7 +31,7 @@ type DtcMonitorPdp struct {
 	ExtAttrsMinus *map[string]ExtAttrs `json:"extattrs-,omitempty"`
 	// Extensible attributes associated with the object. For valid values for extensible attributes, see {extattrs:values}.
 	ExtAttrs *map[string]ExtAttrs `json:"extattrs,omitempty"`
-	// The interval for TCP health check.
+	// The interval for a health check.
 	Interval *int64 `json:"interval,omitempty"`
 	// The display name for this DTC monitor.
 	Name *string `json:"name,omitempty"`
@@ -41,7 +41,7 @@ type DtcMonitorPdp struct {
 	RetryDown *int64 `json:"retry_down,omitempty"`
 	// The value of how many times the server should appear as up to be treated as alive after it was dead.
 	RetryUp *int64 `json:"retry_up,omitempty"`
-	// The timeout for TCP health check in seconds.
+	// The timeout for a health check in seconds.
 	Timeout *int64 `json:"timeout,omitempty"`
 }
 

@@ -21,9 +21,9 @@ var _ MappedNullable = &SmartfolderChildren{}
 type SmartfolderChildren struct {
 	// The reference to the object.
 	Ref *string `json:"_ref,omitempty"`
-	// The uuid of the object.
+	// Universally Unique ID assigned for this object
 	Uuid *string `json:"uuid,omitempty"`
-	// The object retuned by the Smart Folder query.
+	// The object returned by the Smart Folder query.
 	Resource *string                   `json:"resource,omitempty"`
 	Value    *SmartfolderChildrenValue `json:"value,omitempty"`
 	// The type of the returned value.

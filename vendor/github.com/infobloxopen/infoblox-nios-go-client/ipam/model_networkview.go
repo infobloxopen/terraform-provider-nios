@@ -32,7 +32,7 @@ type Networkview struct {
 	Comment *string `json:"comment,omitempty"`
 	// DNS views that will receive the updates if you enable the appliance to send updates to Grid members.
 	DdnsDnsView *string `json:"ddns_dns_view,omitempty"`
-	// An array of Ddns Zone Primary dhcpddns structs that lists the information of primary zone to wich DDNS updates should be sent.
+	// An array of Ddns Zone Primary dhcpddns structs that lists the information of primary zone to which DDNS updates should be sent.
 	DdnsZonePrimaries []NetworkviewDdnsZonePrimaries `json:"ddns_zone_primaries,omitempty"`
 	// Extensible attributes associated with the object. For valid values for extensible attributes, see {extattrs:values}.
 	ExtAttrsPlus *map[string]ExtAttrs `json:"extattrs+,omitempty"`

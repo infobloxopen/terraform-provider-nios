@@ -208,7 +208,7 @@ type MemberDns struct {
 	EnableNotifySourcePort *bool `json:"enable_notify_source_port,omitempty"`
 	// Determines if the DNS query rewrite is enabled or not for this member.
 	EnableQueryRewrite *bool `json:"enable_query_rewrite,omitempty"`
-	// Determines if the query source port for a memer is enabled or not.
+	// Determines if the query source port for a member is enabled or not.
 	EnableQuerySourcePort *bool `json:"enable_query_source_port,omitempty"`
 	// The list of domains that are excluded from DNS query and response capture.
 	ExcludedDomainNames []string `json:"excluded_domain_names,omitempty"`

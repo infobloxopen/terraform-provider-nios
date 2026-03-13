@@ -27,7 +27,7 @@ type SyslogEndpointSyslogServers struct {
 	Port *int64 `json:"port,omitempty"`
 	// List of hostnames
 	Hostname *string `json:"hostname,omitempty"`
-	// Format vlues for syslog endpoint server
+	// Format values for syslog endpoint server
 	Format *string `json:"format,omitempty"`
 	// Facility values for syslog endpoint server
 	Facility *string `json:"facility,omitempty"`

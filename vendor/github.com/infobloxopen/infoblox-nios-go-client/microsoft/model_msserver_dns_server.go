@@ -39,7 +39,7 @@ type MsserverDnsServer struct {
 	LastSyncTs *int64 `json:"last_sync_ts,omitempty"`
 	// Status of the last synchronization attempt
 	LastSyncStatus *string `json:"last_sync_status,omitempty"`
-	// Detailled status of the last synchronization attempt
+	// Detailed status of the last synchronization attempt
 	LastSyncDetail *string `json:"last_sync_detail,omitempty"`
 	// Ordered list of IP addresses to forward queries to
 	Forwarders []string `json:"forwarders,omitempty"`

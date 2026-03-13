@@ -35,7 +35,7 @@ type RecordRpzCnameIpaddress struct {
 	ExtAttrsMinus *map[string]ExtAttrs `json:"extattrs-,omitempty"`
 	// Extensible attributes associated with the object. For valid values for extensible attributes, see {extattrs:values}.
 	ExtAttrs *map[string]ExtAttrs `json:"extattrs,omitempty"`
-	// Indicates whether the record is an IPv4 record. If the return value is \"true\", it is an IPv4 record. Ohterwise, it is an IPv6 record.
+	// Indicates whether the record is an IPv4 record. If the return value is \"true\", it is an IPv4 record. Otherwise, it is an IPv6 record.
 	IsIpv4 *bool `json:"is_ipv4,omitempty"`
 	// The name for a record in FQDN format. This value cannot be in unicode format.
 	Name *string `json:"name,omitempty"`

@@ -197,18 +197,6 @@ func (a *RecordNsAPIService) CreateExecute(r RecordNsAPICreateRequest) (*CreateR
 	if localVarHTTPHeaderAccept != "" {
 		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
 	}
-	if len(a.Client.Cfg.DefaultExtAttrs) > 0 && r.recordNs != nil {
-		if r.recordNs.ExtAttrs == nil {
-			r.recordNs.ExtAttrs = &map[string]ExtAttrs{}
-		}
-		for k, v := range a.Client.Cfg.DefaultExtAttrs {
-			if _, ok := (*r.recordNs.ExtAttrs)[k]; !ok {
-				(*r.recordNs.ExtAttrs)[k] = ExtAttrs{
-					Value: v.Value,
-				}
-			}
-		}
-	}
 	// body params
 	localVarPostBody = r.recordNs
 	req, err := a.Client.PrepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
@@ -754,18 +742,6 @@ func (a *RecordNsAPIService) UpdateExecute(r RecordNsAPIUpdateRequest) (*UpdateR
 	localVarHTTPHeaderAccept := internal.SelectHeaderAccept(localVarHTTPHeaderAccepts)
 	if localVarHTTPHeaderAccept != "" {
 		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
-	}
-	if len(a.Client.Cfg.DefaultExtAttrs) > 0 && r.recordNs != nil {
-		if r.recordNs.ExtAttrs == nil {
-			r.recordNs.ExtAttrs = &map[string]ExtAttrs{}
-		}
-		for k, v := range a.Client.Cfg.DefaultExtAttrs {
-			if _, ok := (*r.recordNs.ExtAttrs)[k]; !ok {
-				(*r.recordNs.ExtAttrs)[k] = ExtAttrs{
-					Value: v.Value,
-				}
-			}
-		}
 	}
 	// body params
 	localVarPostBody = r.recordNs

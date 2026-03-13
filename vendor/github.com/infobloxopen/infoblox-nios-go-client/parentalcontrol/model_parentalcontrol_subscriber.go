@@ -67,7 +67,7 @@ type ParentalcontrolSubscriber struct {
 	PcZoneName *string `json:"pc_zone_name,omitempty"`
 	// Proxy server password used for authentication.
 	ProxyPassword *string `json:"proxy_password,omitempty"`
-	// Proxy url to download category data from and upload feedback to, configure for parental control. The default value 'None' is no longer valid as it match url regex pattern \"^http|https://\". The new default value does not get saved in database, but rather used for comparision with object created in unit test cases.
+	// Proxy url to download category data from and upload feedback to, configure for parental control. The default value 'None' is no longer valid as it match url regex pattern \"^http|https://\". The new default value does not get saved in database, but rather used for comparison with object created in unit test cases.
 	ProxyUrl *string `json:"proxy_url,omitempty"`
 	// Proxy server username used for authentication.
 	ProxyUsername *string `json:"proxy_username,omitempty"`

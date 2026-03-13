@@ -29,7 +29,7 @@ type NetworkviewRemoteForwardZones struct {
 	GssTsigDomain *string `json:"gss_tsig_domain,omitempty"`
 	// The TSIG key value.
 	TsigKey *string `json:"tsig_key,omitempty"`
-	// The TSIG key alorithm name.
+	// The TSIG key algorithm name.
 	TsigKeyAlg *string `json:"tsig_key_alg,omitempty"`
 	// The name of the TSIG key. The key name entered here must match the TSIG key name on the external name server.
 	TsigKeyName *string `json:"tsig_key_name,omitempty"`

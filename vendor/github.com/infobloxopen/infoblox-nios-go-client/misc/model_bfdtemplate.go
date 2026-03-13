@@ -25,9 +25,9 @@ type Bfdtemplate struct {
 	Uuid *string `json:"uuid,omitempty"`
 	// The detection time multiplier value for BFD protocol. The negotiated transmit interval, multiplied by this value, provides the detection time for the receiving system in asynchronous BFD mode. Valid values are between 3 and 50.
 	DetectionMultiplier *int64 `json:"detection_multiplier,omitempty"`
-	// The minimum receive time (in seconds) for BFD protocol. Valid values are between 50 and 9999.
+	// The minimum receive time (in seconds) for BFD protocol. Valid values are between 50 and 9999. From NIOS 9.1.0 onwards, the BFD default value has been changed from 100 to 300.
 	MinRxInterval *int64 `json:"min_rx_interval,omitempty"`
-	// The minimum transmission time (in seconds) for BFD protocol. Valid values are between 50 and 9999.
+	// The minimum transmission time (in seconds) for BFD protocol. Valid values are between 50 and 9999. From NIOS 9.1.0 onwards, the BFD default value has been changed from 100 to 300.
 	MinTxInterval *int64 `json:"min_tx_interval,omitempty"`
 	// The name of the BFD template object.
 	Name *string `json:"name,omitempty"`

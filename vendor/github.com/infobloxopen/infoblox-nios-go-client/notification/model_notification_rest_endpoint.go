@@ -25,7 +25,7 @@ type NotificationRestEndpoint struct {
 	Uuid *string `json:"uuid,omitempty"`
 	// The client certificate subject of a notification REST endpoint.
 	ClientCertificateSubject *string `json:"client_certificate_subject,omitempty"`
-	// The token returned by the uploadinit function call in object fileop for a notification REST endpoit client certificate.
+	// The token returned by the uploadinit function call in object fileop for a notification REST endpoint client certificate.
 	ClientCertificateToken *string `json:"client_certificate_token,omitempty"`
 	// The timestamp when client certificate for a notification REST endpoint was created.
 	ClientCertificateValidFrom *int64 `json:"client_certificate_valid_from,omitempty"`

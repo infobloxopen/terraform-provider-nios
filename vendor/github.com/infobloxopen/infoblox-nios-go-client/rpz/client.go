@@ -33,10 +33,12 @@ type APIClient struct {
 	RecordRpzCnameClientipaddressdnAPI RecordRpzCnameClientipaddressdnAPI
 	RecordRpzCnameIpaddressAPI RecordRpzCnameIpaddressAPI
 	RecordRpzCnameIpaddressdnAPI RecordRpzCnameIpaddressdnAPI
+	RecordRpzHttpsAPI RecordRpzHttpsAPI
 	RecordRpzMxAPI RecordRpzMxAPI
 	RecordRpzNaptrAPI RecordRpzNaptrAPI
 	RecordRpzPtrAPI RecordRpzPtrAPI
 	RecordRpzSrvAPI RecordRpzSrvAPI
+	RecordRpzSvcbAPI RecordRpzSvcbAPI
 	RecordRpzTxtAPI RecordRpzTxtAPI
 }
 
@@ -69,10 +71,12 @@ func NewAPIClient(options ...option.ClientOption) *APIClient {
 	c.RecordRpzCnameClientipaddressdnAPI = (*RecordRpzCnameClientipaddressdnAPIService)(&c.Common)
 	c.RecordRpzCnameIpaddressAPI = (*RecordRpzCnameIpaddressAPIService)(&c.Common)
 	c.RecordRpzCnameIpaddressdnAPI = (*RecordRpzCnameIpaddressdnAPIService)(&c.Common)
+	c.RecordRpzHttpsAPI = (*RecordRpzHttpsAPIService)(&c.Common)
 	c.RecordRpzMxAPI = (*RecordRpzMxAPIService)(&c.Common)
 	c.RecordRpzNaptrAPI = (*RecordRpzNaptrAPIService)(&c.Common)
 	c.RecordRpzPtrAPI = (*RecordRpzPtrAPIService)(&c.Common)
 	c.RecordRpzSrvAPI = (*RecordRpzSrvAPIService)(&c.Common)
+	c.RecordRpzSvcbAPI = (*RecordRpzSvcbAPIService)(&c.Common)
 	c.RecordRpzTxtAPI = (*RecordRpzTxtAPIService)(&c.Common)
 
 	return c

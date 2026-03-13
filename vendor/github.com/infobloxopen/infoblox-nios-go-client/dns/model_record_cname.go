@@ -57,6 +57,8 @@ type RecordCname struct {
 	Name *string `json:"name,omitempty"`
 	// Determines if the record is reclaimable or not.
 	Reclaimable *bool `json:"reclaimable,omitempty"`
+	// List of pre-condition instructions for CNAME record creation.
+	RrPreconditionInstructions []RecordCnameRrPreconditionInstructions `json:"rr_precondition_instructions,omitempty"`
 	// The name of the shared record group in which the record resides. This field exists only on db_objects if this record is a shared record.
 	SharedRecordGroup *string `json:"shared_record_group,omitempty"`
 	// The Time To Live (TTL) value for record. A 32-bit unsigned integer that represents the duration, in seconds, for which the record is valid (cached). Zero indicates that the record should not be cached.
@@ -726,6 +728,38 @@ func (o *RecordCname) SetReclaimable(v bool) {
 	o.Reclaimable = &v
 }
 
+// GetRrPreconditionInstructions returns the RrPreconditionInstructions field value if set, zero value otherwise.
+func (o *RecordCname) GetRrPreconditionInstructions() []RecordCnameRrPreconditionInstructions {
+	if o == nil || IsNil(o.RrPreconditionInstructions) {
+		var ret []RecordCnameRrPreconditionInstructions
+		return ret
+	}
+	return o.RrPreconditionInstructions
+}
+
+// GetRrPreconditionInstructionsOk returns a tuple with the RrPreconditionInstructions field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *RecordCname) GetRrPreconditionInstructionsOk() ([]RecordCnameRrPreconditionInstructions, bool) {
+	if o == nil || IsNil(o.RrPreconditionInstructions) {
+		return nil, false
+	}
+	return o.RrPreconditionInstructions, true
+}
+
+// HasRrPreconditionInstructions returns a boolean if a field has been set.
+func (o *RecordCname) HasRrPreconditionInstructions() bool {
+	if o != nil && !IsNil(o.RrPreconditionInstructions) {
+		return true
+	}
+
+	return false
+}
+
+// SetRrPreconditionInstructions gets a reference to the given []RecordCnameRrPreconditionInstructions and assigns it to the RrPreconditionInstructions field.
+func (o *RecordCname) SetRrPreconditionInstructions(v []RecordCnameRrPreconditionInstructions) {
+	o.RrPreconditionInstructions = v
+}
+
 // GetSharedRecordGroup returns the SharedRecordGroup field value if set, zero value otherwise.
 func (o *RecordCname) GetSharedRecordGroup() string {
 	if o == nil || IsNil(o.SharedRecordGroup) {
@@ -955,6 +989,9 @@ func (o RecordCname) ToMap() (map[string]interface{}, error) {
 	}
 	if !IsNil(o.Reclaimable) {
 		toSerialize["reclaimable"] = o.Reclaimable
+	}
+	if !IsNil(o.RrPreconditionInstructions) {
+		toSerialize["rr_precondition_instructions"] = o.RrPreconditionInstructions
 	}
 	if !IsNil(o.SharedRecordGroup) {
 		toSerialize["shared_record_group"] = o.SharedRecordGroup

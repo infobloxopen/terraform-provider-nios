@@ -19,7 +19,7 @@ var _ MappedNullable = &MembernodeinfoLan2PhysicalSetting{}
 
 // MembernodeinfoLan2PhysicalSetting struct for MembernodeinfoLan2PhysicalSetting
 type MembernodeinfoLan2PhysicalSetting struct {
-	// Enable or disalbe the auto port setting.
+	// Enable or disable the auto port setting.
 	AutoPortSettingEnabled *bool `json:"auto_port_setting_enabled,omitempty"`
 	// The port speed; if speed is 1000, duplex is FULL.
 	Speed *string `json:"speed,omitempty"`

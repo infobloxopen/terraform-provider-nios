@@ -21,7 +21,7 @@ var _ MappedNullable = &DiscoveryDevice{}
 type DiscoveryDevice struct {
 	// The reference to the object.
 	Ref *string `json:"_ref,omitempty"`
-	// The uuid of the object.
+	// Universally Unique ID assigned for this object
 	Uuid *string `json:"uuid,omitempty"`
 	// The IPv4 Address or IPv6 Address of the device.
 	Address *string `json:"address,omitempty"`
@@ -49,7 +49,7 @@ type DiscoveryDevice struct {
 	CapNetVlanProvisioningInd *bool `json:"cap_net_vlan_provisioning_ind,omitempty"`
 	// The reason that network provisioning on VLAN is not available.
 	CapNetVlanProvisioningNaReason *string `json:"cap_net_vlan_provisioning_na_reason,omitempty"`
-	// Determines whether to modify the VLAN assignement of an interface of the device.
+	// Determines whether to modify the VLAN assignment of an interface of the device.
 	CapVlanAssignmentInd *bool `json:"cap_vlan_assignment_ind,omitempty"`
 	// The reason that VLAN assignment action is not available.
 	CapVlanAssignmentNaReason *string `json:"cap_vlan_assignment_na_reason,omitempty"`

@@ -41,7 +41,7 @@ type Discoverytask struct {
 	NetworkView *string `json:"network_view,omitempty"`
 	// The list of the networks on which the network discovery will be invoked.
 	Networks []string `json:"networks,omitempty"`
-	// The number of times to perfrom ping for ICMP and FULL modes.
+	// The number of times to perform ping for ICMP and FULL modes.
 	PingRetries *int64 `json:"ping_retries,omitempty"`
 	// The ping timeout for ICMP and FULL modes.
 	PingTimeout  *int64                     `json:"ping_timeout,omitempty"`
@@ -56,7 +56,7 @@ type Discoverytask struct {
 	StatusTime *int64 `json:"status_time,omitempty"`
 	// The ports to scan for FULL and TCP modes.
 	TcpPorts []DiscoverytaskTcpPorts `json:"tcp_ports,omitempty"`
-	// The TCP scan techinque for FULL and TCP modes.
+	// The TCP scan technique for FULL and TCP modes.
 	TcpScanTechnique *string `json:"tcp_scan_technique,omitempty"`
 	// Name of the network view in which target networks for VMWare scanning reside.
 	VNetworkView *string `json:"v_network_view,omitempty"`

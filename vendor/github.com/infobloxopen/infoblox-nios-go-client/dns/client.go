@@ -46,6 +46,7 @@ type APIClient struct {
 	RecordHostAPI RecordHostAPI
 	RecordHostIpv4addrAPI RecordHostIpv4addrAPI
 	RecordHostIpv6addrAPI RecordHostIpv6addrAPI
+	RecordHttpsAPI RecordHttpsAPI
 	RecordMxAPI RecordMxAPI
 	RecordNaptrAPI RecordNaptrAPI
 	RecordNsAPI RecordNsAPI
@@ -55,6 +56,7 @@ type APIClient struct {
 	RecordPtrAPI RecordPtrAPI
 	RecordRrsigAPI RecordRrsigAPI
 	RecordSrvAPI RecordSrvAPI
+	RecordSvcbAPI RecordSvcbAPI
 	RecordTlsaAPI RecordTlsaAPI
 	RecordTxtAPI RecordTxtAPI
 	RecordUnknownAPI RecordUnknownAPI
@@ -117,6 +119,7 @@ func NewAPIClient(options ...option.ClientOption) *APIClient {
 	c.RecordHostAPI = (*RecordHostAPIService)(&c.Common)
 	c.RecordHostIpv4addrAPI = (*RecordHostIpv4addrAPIService)(&c.Common)
 	c.RecordHostIpv6addrAPI = (*RecordHostIpv6addrAPIService)(&c.Common)
+	c.RecordHttpsAPI = (*RecordHttpsAPIService)(&c.Common)
 	c.RecordMxAPI = (*RecordMxAPIService)(&c.Common)
 	c.RecordNaptrAPI = (*RecordNaptrAPIService)(&c.Common)
 	c.RecordNsAPI = (*RecordNsAPIService)(&c.Common)
@@ -126,6 +129,7 @@ func NewAPIClient(options ...option.ClientOption) *APIClient {
 	c.RecordPtrAPI = (*RecordPtrAPIService)(&c.Common)
 	c.RecordRrsigAPI = (*RecordRrsigAPIService)(&c.Common)
 	c.RecordSrvAPI = (*RecordSrvAPIService)(&c.Common)
+	c.RecordSvcbAPI = (*RecordSvcbAPIService)(&c.Common)
 	c.RecordTlsaAPI = (*RecordTlsaAPIService)(&c.Common)
 	c.RecordTxtAPI = (*RecordTxtAPIService)(&c.Common)
 	c.RecordUnknownAPI = (*RecordUnknownAPIService)(&c.Common)

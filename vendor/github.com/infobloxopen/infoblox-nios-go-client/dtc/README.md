@@ -242,8 +242,6 @@ Class | Method | HTTP request | Description
  - [DtcTopologyLabel](docs/DtcTopologyLabel.md)
  - [DtcTopologyRule](docs/DtcTopologyRule.md)
  - [DtcTopologyRuleDestination](docs/DtcTopologyRuleDestination.md)
- - [DtcTopologyRuleDestinationLink](docs/DtcTopologyRuleDestinationLink.md)
- - [DtcTopologyRuleDestinationLinkOneOf](docs/DtcTopologyRuleDestinationLinkOneOf.md)
  - [DtcTopologyRuleSources](docs/DtcTopologyRuleSources.md)
  - [DtcTopologyRulesInner](docs/DtcTopologyRulesInner.md)
  - [DtcTopologyRulesInnerOneOf](docs/DtcTopologyRulesInnerOneOf.md)

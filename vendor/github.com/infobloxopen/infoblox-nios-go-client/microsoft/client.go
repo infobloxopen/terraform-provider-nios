@@ -17,7 +17,7 @@ import (
 
 const serviceBasePath = "/wapi/v2.14"
 
-// APIClient manages communication with the Infoblox MICROSOFTSERVER API 2.14
+// APIClient manages communication with the Infoblox MICROSOFT API 2.14
 // In most cases there should be only one, shared, APIClient.
 type APIClient struct {
 	*internal.APIClient

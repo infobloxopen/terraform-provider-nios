@@ -61,7 +61,7 @@ type Approvalworkflow struct {
 	RescheduledNotifyTo *string `json:"rescheduled_notify_to,omitempty"`
 	// The requirement for the comment when a submitter submits a task for approval.
 	SubmitterComment *string `json:"submitter_comment,omitempty"`
-	// The submitter admininstration group.
+	// The submitter administration group.
 	SubmitterGroup *string `json:"submitter_group,omitempty"`
 	// The destination for succeeded task notifications.
 	SucceededNotifyTo *string `json:"succeeded_notify_to,omitempty"`

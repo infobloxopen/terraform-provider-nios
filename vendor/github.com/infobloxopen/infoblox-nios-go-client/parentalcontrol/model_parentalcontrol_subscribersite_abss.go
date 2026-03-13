@@ -19,9 +19,9 @@ var _ MappedNullable = &ParentalcontrolSubscribersiteAbss{}
 
 // ParentalcontrolSubscribersiteAbss struct for ParentalcontrolSubscribersiteAbss
 type ParentalcontrolSubscribersiteAbss struct {
-	// The IP address of addional blocking server.
+	// The IP address of additional blocking server.
 	IpAddress *string `json:"ip_address,omitempty"`
-	// The blocking policy for the addional blocking server.
+	// The blocking policy for the additional blocking server.
 	BlockingPolicy       *string `json:"blocking_policy,omitempty"`
 	AdditionalProperties map[string]interface{}
 }

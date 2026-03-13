@@ -21,7 +21,7 @@ var _ MappedNullable = &DiscoveryDeviceinterface{}
 type DiscoveryDeviceinterface struct {
 	// The reference to the object.
 	Ref *string `json:"_ref,omitempty"`
-	// The uuid of the object.
+	// Universally Unique ID assigned for this object
 	Uuid *string `json:"uuid,omitempty"`
 	// Administrative state of the interface.
 	AdminStatus         *string                                      `json:"admin_status,omitempty"`
@@ -52,11 +52,11 @@ type DiscoveryDeviceinterface struct {
 	CapIfNetProvisioningIpv6Ind *bool `json:"cap_if_net_provisioning_ipv6_ind,omitempty"`
 	// The reason that IPv6 network provisioning is not available.
 	CapIfNetProvisioningIpv6NaReason *string `json:"cap_if_net_provisioning_ipv6_na_reason,omitempty"`
-	// Determines whether to modify the VLAN assignement of the interface.
+	// Determines whether to modify the VLAN assignment of the interface.
 	CapIfVlanAssignmentInd *bool `json:"cap_if_vlan_assignment_ind,omitempty"`
 	// The reason that VLAN assignment action is not available.
 	CapIfVlanAssignmentNaReason *string `json:"cap_if_vlan_assignment_na_reason,omitempty"`
-	// Determines whether to modify the voice VLAN assignement of the interface.
+	// Determines whether to modify the voice VLAN assignment of the interface.
 	CapIfVoiceVlanInd *bool `json:"cap_if_voice_vlan_ind,omitempty"`
 	// The reason that voice VLAN assignment action is not available.
 	CapIfVoiceVlanNaReason *string `json:"cap_if_voice_vlan_na_reason,omitempty"`

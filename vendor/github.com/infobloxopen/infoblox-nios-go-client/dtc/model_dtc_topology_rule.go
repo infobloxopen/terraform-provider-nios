@@ -26,8 +26,7 @@ type DtcTopologyRule struct {
 	// The type of the destination for this DTC Topology rule.
 	DestType *string `json:"dest_type,omitempty"`
 	// Set of destinations for this DTC Topology rule.
-	Destination     []DtcTopologyRuleDestination    `json:"destination,omitempty"`
-	DestinationLink *DtcTopologyRuleDestinationLink `json:"destination_link,omitempty"`
+	Destination []DtcTopologyRuleDestination `json:"destination,omitempty"`
 	// Type of the DNS response for rule.
 	ReturnType *string `json:"return_type,omitempty"`
 	// The conditions for matching sources. Should be empty to set rule as default destination.
@@ -183,38 +182,6 @@ func (o *DtcTopologyRule) SetDestination(v []DtcTopologyRuleDestination) {
 	o.Destination = v
 }
 
-// GetDestinationLink returns the DestinationLink field value if set, zero value otherwise.
-func (o *DtcTopologyRule) GetDestinationLink() DtcTopologyRuleDestinationLink {
-	if o == nil || IsNil(o.DestinationLink) {
-		var ret DtcTopologyRuleDestinationLink
-		return ret
-	}
-	return *o.DestinationLink
-}
-
-// GetDestinationLinkOk returns a tuple with the DestinationLink field value if set, nil otherwise
-// and a boolean to check if the value has been set.
-func (o *DtcTopologyRule) GetDestinationLinkOk() (*DtcTopologyRuleDestinationLink, bool) {
-	if o == nil || IsNil(o.DestinationLink) {
-		return nil, false
-	}
-	return o.DestinationLink, true
-}
-
-// HasDestinationLink returns a boolean if a field has been set.
-func (o *DtcTopologyRule) HasDestinationLink() bool {
-	if o != nil && !IsNil(o.DestinationLink) {
-		return true
-	}
-
-	return false
-}
-
-// SetDestinationLink gets a reference to the given DtcTopologyRuleDestinationLink and assigns it to the DestinationLink field.
-func (o *DtcTopologyRule) SetDestinationLink(v DtcTopologyRuleDestinationLink) {
-	o.DestinationLink = &v
-}
-
 // GetReturnType returns the ReturnType field value if set, zero value otherwise.
 func (o *DtcTopologyRule) GetReturnType() string {
 	if o == nil || IsNil(o.ReturnType) {
@@ -364,9 +331,6 @@ func (o DtcTopologyRule) ToMap() (map[string]interface{}, error) {
 	}
 	if !IsNil(o.Destination) {
 		toSerialize["destination"] = o.Destination
-	}
-	if !IsNil(o.DestinationLink) {
-		toSerialize["destination_link"] = o.DestinationLink
 	}
 	if !IsNil(o.ReturnType) {
 		toSerialize["return_type"] = o.ReturnType

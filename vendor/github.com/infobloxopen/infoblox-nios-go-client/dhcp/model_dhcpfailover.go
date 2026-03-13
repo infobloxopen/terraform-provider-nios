@@ -23,7 +23,7 @@ type Dhcpfailover struct {
 	Ref *string `json:"_ref,omitempty"`
 	// Universally Unique ID assigned for this object
 	Uuid *string `json:"uuid,omitempty"`
-	// The value indicating whether the failover assoctaion is Microsoft or Grid based. This is a read-only attribute.
+	// The value indicating whether the failover association is Microsoft or Grid based. This is a read-only attribute.
 	AssociationType *string `json:"association_type,omitempty"`
 	// A descriptive comment about a DHCP failover object.
 	Comment *string `json:"comment,omitempty"`
@@ -57,7 +57,7 @@ type Dhcpfailover struct {
 	MsFailoverPartner *string `json:"ms_failover_partner,omitempty"`
 	// The partner role in the case of HotStandby.
 	MsHotstandbyPartnerRole *string `json:"ms_hotstandby_partner_role,omitempty"`
-	// Determines if the matching Microsfot failover association (if any) is in synchronization (False) or not (True). If there is no matching failover association the returned values is False. This is a read-only attribute.
+	// Determines if the matching Microsoft failover association (if any) is in synchronization (False) or not (True). If there is no matching failover association the returned values is False. This is a read-only attribute.
 	MsIsConflict *bool `json:"ms_is_conflict,omitempty"`
 	// The previous failover association state. This is a read-only attribute.
 	MsPreviousState *string `json:"ms_previous_state,omitempty"`

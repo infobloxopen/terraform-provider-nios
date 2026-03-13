@@ -29,15 +29,15 @@ type MsserverDhcpServer struct {
 	Managed *bool `json:"managed,omitempty"`
 	// flag indicating if the DHCPv6 service is managed
 	V6Managed *bool `json:"v6_managed,omitempty"`
-	// Defines what control to apply on the DNS server
+	// Defines what control to apply on the DHCP server
 	NextSyncControl *string `json:"next_sync_control,omitempty"`
-	// Status of the Microsoft DNS Service
+	// Status of the Microsoft DHCP Service
 	Status *string `json:"status,omitempty"`
 	// Timestamp of the last update
 	StatusLastUpdated *int64 `json:"status_last_updated,omitempty"`
 	// Override enable monitoring inherited from grid level
 	UseEnableMonitoring *bool `json:"use_enable_monitoring,omitempty"`
-	// Flag indicating if the DNS service is monitored and controlled
+	// Flag indicating if the DHCP service is monitored and controlled
 	EnableMonitoring *bool `json:"enable_monitoring,omitempty"`
 	// Override setting for Enable Invalid Mac Address
 	UseEnableInvalidMac *bool `json:"use_enable_invalid_mac,omitempty"`

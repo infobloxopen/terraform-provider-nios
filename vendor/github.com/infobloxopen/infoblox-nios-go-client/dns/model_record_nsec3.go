@@ -34,7 +34,7 @@ type RecordNsec3 struct {
 	DnsName *string `json:"dns_name,omitempty"`
 	// The set of 8 one-bit flags, of which only one flag, the Opt-Out flag, is defined by RFC 5155. The Opt-Out flag indicates whether the NSEC3 record covers unsigned delegations.
 	Flags *int64 `json:"flags,omitempty"`
-	// The number of times the hash function was performed.
+	// The number of times the hash function was performed. RFC 9276 Section 3.1 mandates that this value MUST be set to zero (0) to ensure DNSSEC resolver compatibility and alleviate computational burdens on validating resolvers.
 	Iterations *int64 `json:"iterations,omitempty"`
 	// The time of the last DNS query in Epoch seconds format.
 	LastQueried *int64 `json:"last_queried,omitempty"`
@@ -44,7 +44,7 @@ type RecordNsec3 struct {
 	NextOwnerName *string `json:"next_owner_name,omitempty"`
 	// The RRSet types that exist at the original owner name of the NSEC3 RR.
 	RrsetTypes []string `json:"rrset_types,omitempty"`
-	// A series of case-insensitive hexadecimal digits. It is appended to the original owner name as protection against pre-calculated dictionary attacks. A new salt value is generated when ZSK rolls over. You can control the period of the rollover. For random salt values, the selected length is between one and 15 octets.
+	// A series of case-insensitive hexadecimal digits. It is appended to the original owner name as protection against pre-calculated dictionary attacks. A new salt value is generated when ZSK rolls over. You can control the period of the rollover. RFC 9276 recommends using an empty salt (0 octets) for optimal resolver compatibility and reduced computational overhead. For random salt values, the selected length is between zero and 255 octets.
 	Salt *string `json:"salt,omitempty"`
 	// The Time To Live (TTL) value for the record. A 32-bit unsigned integer that represents the duration, in seconds, for which the record is valid (cached). Zero indicates that the record should not be cached.
 	Ttl *int64 `json:"ttl,omitempty"`

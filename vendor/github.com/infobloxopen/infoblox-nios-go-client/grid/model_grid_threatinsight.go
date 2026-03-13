@@ -49,7 +49,7 @@ type GridThreatinsight struct {
 	LastAllowlistUpdateVersion *string `json:"last_allowlist_update_version,omitempty"`
 	// Timestamp of last checked allowlist
 	LastCheckedForAllowlistUpdate *int64 `json:"last_checked_for_allowlist_update,omitempty"`
-	// The last update time for the threat analytics moduleset package.
+	// The last update time for the threat insight moduleset package.
 	LastCheckedForPackageUpdate *int64 `json:"last_checked_for_package_update,omitempty"`
 	// The last time when the threat insight module set was checked for the update.
 	LastCheckedForUpdate *int64 `json:"last_checked_for_update,omitempty"`
