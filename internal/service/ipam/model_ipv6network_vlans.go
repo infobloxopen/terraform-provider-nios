@@ -16,21 +16,21 @@ import (
 
 // TODO: function call support for VLANs
 type Ipv6networkVlansModel struct {
-	Vlan types.Map    `tfsdk:"vlan"`
+	Vlan types.String `tfsdk:"vlan"`
 	Id   types.Int64  `tfsdk:"id"`
 	Name types.String `tfsdk:"name"`
 }
 
 var Ipv6networkVlansAttrTypes = map[string]attr.Type{
-	"vlan": types.MapType{ElemType: types.StringType},
+	"vlan": types.StringType,
 	"id":   types.Int64Type,
 	"name": types.StringType,
 }
 
 var Ipv6networkVlansResourceSchemaAttributes = map[string]schema.Attribute{
-	"vlan": schema.MapAttribute{
-		ElementType:         types.StringType,
+	"vlan": schema.StringAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "Reference to the underlying StaticVlan object vlan.",
 	},
 	"id": schema.Int64Attribute{
@@ -60,7 +60,7 @@ func (m *Ipv6networkVlansModel) Expand(ctx context.Context, diags *diag.Diagnost
 		return nil
 	}
 	to := &ipam.Ipv6networkVlans{
-		Vlan: flex.ExpandFrameworkMapString(ctx, m.Vlan, diags),
+		Vlan: flex.ExpandStringPointer(m.Vlan),
 	}
 	return to
 }
@@ -83,7 +83,7 @@ func (m *Ipv6networkVlansModel) Flatten(ctx context.Context, from *ipam.Ipv6netw
 	if m == nil {
 		*m = Ipv6networkVlansModel{}
 	}
-	m.Vlan = flex.FlattenFrameworkMapString(ctx, from.Vlan, diags)
+	m.Vlan = flex.FlattenStringPointer(from.Vlan)
 	m.Id = flex.FlattenInt64Pointer(from.Id)
 	m.Name = flex.FlattenStringPointer(from.Name)
 }

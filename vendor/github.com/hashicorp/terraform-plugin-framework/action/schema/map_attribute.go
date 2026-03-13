@@ -126,10 +126,6 @@ type MapAttribute struct {
 	// xattr.TypeWithValidate interface, the validators defined in this field
 	// are run in addition to the validation defined by the type.
 	Validators []validator.Map
-
-	// WriteOnly indicates whether this attribute can accept ephemeral values
-	// or not. If WriteOnly is true, either Optional or Required must also be true.
-	WriteOnly bool
 }
 
 // ApplyTerraform5AttributePathStep returns the result of stepping into a map
@@ -194,9 +190,9 @@ func (a MapAttribute) IsSensitive() bool {
 	return false
 }
 
-// IsWriteOnly returns the WriteOnly field value.
+// IsWriteOnly always returns false as action schema attributes cannot be WriteOnly.
 func (a MapAttribute) IsWriteOnly() bool {
-	return a.WriteOnly
+	return false
 }
 
 // IsRequiredForImport returns false as this behavior is only relevant

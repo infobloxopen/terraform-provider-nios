@@ -107,10 +107,6 @@ type Int64Attribute struct {
 	// xattr.TypeWithValidate interface, the validators defined in this field
 	// are run in addition to the validation defined by the type.
 	Validators []validator.Int64
-
-	// WriteOnly indicates whether this attribute can accept ephemeral values
-	// or not. If WriteOnly is true, either Optional or Required must also be true.
-	WriteOnly bool
 }
 
 // ApplyTerraform5AttributePathStep always returns an error as it is not
@@ -173,9 +169,9 @@ func (a Int64Attribute) IsSensitive() bool {
 	return false
 }
 
-// IsWriteOnly returns the WriteOnly field value.
+// IsWriteOnly always returns false as action schema attributes cannot be WriteOnly.
 func (a Int64Attribute) IsWriteOnly() bool {
-	return a.WriteOnly
+	return false
 }
 
 // IsRequiredForImport returns false as this behavior is only relevant

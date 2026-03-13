@@ -133,13 +133,6 @@ type MapNestedAttribute struct {
 	// xattr.TypeWithValidate interface, the validators defined in this field
 	// are run in addition to the validation defined by the type.
 	Validators []validator.Map
-
-	// WriteOnly indicates whether this attribute can accept ephemeral values
-	// or not. If WriteOnly is true, either Optional or Required must also be true.
-	//
-	// If WriteOnly is true for a nested attribute, all of its child attributes
-	// must also set WriteOnly to true.
-	WriteOnly bool
 }
 
 // ApplyTerraform5AttributePathStep returns the Attributes field value if step
@@ -222,9 +215,9 @@ func (a MapNestedAttribute) IsSensitive() bool {
 	return false
 }
 
-// IsWriteOnly returns the WriteOnly field value.
+// IsWriteOnly always returns false as action schema attributes cannot be WriteOnly.
 func (a MapNestedAttribute) IsWriteOnly() bool {
-	return a.WriteOnly
+	return false
 }
 
 // IsRequiredForImport returns false as this behavior is only relevant
@@ -251,9 +244,5 @@ func (a MapNestedAttribute) MapValidators() []validator.Map {
 func (a MapNestedAttribute) ValidateImplementation(ctx context.Context, req fwschema.ValidateImplementationRequest, resp *fwschema.ValidateImplementationResponse) {
 	if a.CustomType == nil && fwtype.ContainsCollectionWithDynamic(a.GetType()) {
 		resp.Diagnostics.Append(fwtype.AttributeCollectionWithDynamicTypeDiag(req.Path))
-	}
-
-	if a.IsWriteOnly() && !fwschema.ContainsAllWriteOnlyChildAttributes(a) {
-		resp.Diagnostics.Append(fwschema.InvalidWriteOnlyNestedAttributeDiag(req.Path))
 	}
 }
