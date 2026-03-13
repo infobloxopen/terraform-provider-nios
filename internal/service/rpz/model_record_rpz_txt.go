@@ -158,7 +158,7 @@ var RecordRpzTxtResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 }
 
-func (m *RecordRpzTxtModel) Expand(ctx context.Context, diags *diag.Diagnostics, isCreate bool) *rpz.RecordRpzTxt {
+func (m *RecordRpzTxtModel) Expand(ctx context.Context, diags *diag.Diagnostics) *rpz.RecordRpzTxt {
 	if m == nil {
 		return nil
 	}
@@ -171,9 +171,7 @@ func (m *RecordRpzTxtModel) Expand(ctx context.Context, diags *diag.Diagnostics,
 		Text:     flex.ExpandStringPointer(m.Text),
 		Ttl:      flex.ExpandInt64Pointer(m.Ttl),
 		UseTtl:   flex.ExpandBoolPointer(m.UseTtl),
-	}
-	if isCreate {
-		to.View = flex.ExpandStringPointer(m.View)
+		View:     flex.ExpandStringPointer(m.View),
 	}
 	return to
 }

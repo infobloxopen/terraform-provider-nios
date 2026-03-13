@@ -14,6 +14,7 @@ import (
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
 	"github.com/infobloxopen/infoblox-nios-go-client/security"
+	"github.com/infobloxopen/terraform-provider-nios/internal/config"
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
@@ -130,7 +131,8 @@ func (d *PermissionDataSource) Read(ctx context.Context, req datasource.ReadRequ
 				ReturnAsObject(1).
 				ReturnFieldsPlus(readableAttributesForPermission).
 				Paging(paging).
-				MaxResults(maxResults)
+				MaxResults(maxResults).
+				ProxySearch(config.GetProxySearch())
 
 			// Add page ID if provided
 			if pageID != "" {

@@ -15,6 +15,7 @@ import (
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
 	"github.com/infobloxopen/infoblox-nios-go-client/dhcp"
 
+	"github.com/infobloxopen/terraform-provider-nios/internal/config"
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
@@ -138,7 +139,8 @@ func (d *FixedaddresstemplateDataSource) Read(ctx context.Context, req datasourc
 				ReturnAsObject(1).
 				ReturnFieldsPlus(readableAttributesForFixedaddresstemplate).
 				Paging(paging).
-				MaxResults(maxResults)
+				MaxResults(maxResults).
+				ProxySearch(config.GetProxySearch())
 
 			// Add page ID if provided
 			if pageID != "" {

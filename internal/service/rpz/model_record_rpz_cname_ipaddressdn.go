@@ -73,7 +73,7 @@ var RecordRpzCnameIpaddressdnResourceSchemaAttributes = map[string]schema.Attrib
 	"canonical": schema.StringAttribute{
 		Required: true,
 		Validators: []validator.String{
-			customvalidator.IsValidFQDN(),
+			customvalidator.IsValidDomainName(),
 		},
 		MarkdownDescription: "The canonical name in FQDN format. This value can be in unicode format.",
 	},
@@ -163,7 +163,7 @@ var RecordRpzCnameIpaddressdnResourceSchemaAttributes = map[string]schema.Attrib
 	},
 }
 
-func (m *RecordRpzCnameIpaddressdnModel) Expand(ctx context.Context, diags *diag.Diagnostics, isCreate bool) *rpz.RecordRpzCnameIpaddressdn {
+func (m *RecordRpzCnameIpaddressdnModel) Expand(ctx context.Context, diags *diag.Diagnostics) *rpz.RecordRpzCnameIpaddressdn {
 	if m == nil {
 		return nil
 	}
@@ -176,9 +176,7 @@ func (m *RecordRpzCnameIpaddressdnModel) Expand(ctx context.Context, diags *diag
 		RpZone:    flex.ExpandStringPointer(m.RpZone),
 		Ttl:       flex.ExpandInt64Pointer(m.Ttl),
 		UseTtl:    flex.ExpandBoolPointer(m.UseTtl),
-	}
-	if isCreate {
-		to.View = flex.ExpandStringPointer(m.View)
+		View:      flex.ExpandStringPointer(m.View),
 	}
 	return to
 }

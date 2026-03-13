@@ -4,16 +4,19 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
 	"github.com/hashicorp/terraform-plugin-framework/provider/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
 	gridclient "github.com/infobloxopen/infoblox-nios-go-client/grid"
 	"github.com/infobloxopen/infoblox-nios-go-client/option"
 
+	"github.com/infobloxopen/terraform-provider-nios/internal/config"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/acl"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/cloud"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/dhcp"
@@ -22,8 +25,11 @@ import (
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/dtc"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/grid"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/ipam"
+	"github.com/infobloxopen/terraform-provider-nios/internal/service/microsoft"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/misc"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/notification"
+	"github.com/infobloxopen/terraform-provider-nios/internal/service/parentalcontrol"
+	"github.com/infobloxopen/terraform-provider-nios/internal/service/rir"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/rpz"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/security"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/smartfolder"
@@ -45,6 +51,8 @@ type NIOSProviderModel struct {
 	NIOSHostURL  types.String `tfsdk:"nios_host_url"`
 	NIOSUsername types.String `tfsdk:"nios_username"`
 	NIOSPassword types.String `tfsdk:"nios_password"`
+	ProxyURL     types.String `tfsdk:"proxy_url"`
+	ProxySearch  types.String `tfsdk:"proxy_search"`
 }
 
 func (p *NIOSProvider) Metadata(_ context.Context, _ provider.MetadataRequest, resp *provider.MetadataResponse) {
@@ -65,6 +73,17 @@ func (p *NIOSProvider) Schema(_ context.Context, _ provider.SchemaRequest, resp 
 			"nios_password": schema.StringAttribute{
 				Optional: true,
 			},
+			"proxy_url": schema.StringAttribute{
+				Description: "Proxy URL to connect to Infoblox NIOS.",
+				Optional:    true,
+			},
+			"proxy_search": schema.StringAttribute{
+				Optional:    true,
+				Description: "Proxy search mode. Allowed values: LOCAL (default), GM.",
+				Validators: []validator.String{
+					stringvalidator.OneOf("LOCAL", "GM"),
+				},
+			},
 		},
 	}
 }
@@ -84,7 +103,11 @@ func (p *NIOSProvider) Configure(ctx context.Context, req provider.ConfigureRequ
 		option.WithNIOSPassword(data.NIOSPassword.ValueString()),
 		option.WithNIOSHostUrl(data.NIOSHostURL.ValueString()),
 		option.WithDebug(true),
+		option.WithProxyURL(data.ProxyURL.ValueString()),
 	)
+
+	// Set ProxySearch configuration
+	config.SetProxySearch(data.ProxySearch.ValueString())
 
 	err := checkAndCreatePreRequisites(ctx, client)
 	if err != nil {
@@ -199,9 +222,13 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 		security.NewFtpuserResource,
 		security.NewSnmpuserResource,
 		security.NewCertificateAuthserviceResource,
+		security.NewSamlAuthserviceResource,
+		security.NewLdapAuthServiceResource,
+		security.NewTacacsplusAuthserviceResource,
 
 		misc.NewRulesetResource,
 		misc.NewBfdtemplateResource,
+		misc.NewDxlEndpointResource,
 
 		smartfolder.NewSmartfolderPersonalResource,
 		smartfolder.NewSmartfolderGlobalResource,
@@ -213,6 +240,7 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 		grid.NewUpgradegroupResource,
 		grid.NewGridServicerestartGroupResource,
 		grid.NewDistributionscheduleResource,
+		grid.NewUpgradescheduleResource,
 
 		discovery.NewDiscoveryCredentialgroupResource,
 		discovery.NewVdiscoverytaskResource,
@@ -234,6 +262,15 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 		rpz.NewRecordRpzCnameClientipaddressResource,
 		rpz.NewRecordRpzCnameIpaddressdnResource,
 		rpz.NewRecordRpzCnameClientipaddressdnResource,
+
+		rir.NewRirOrganizationResource,
+
+		parentalcontrol.NewParentalcontrolAvpResource,
+		parentalcontrol.NewParentalcontrolBlockingpolicyResource,
+
+		microsoft.NewMsserverResource,
+		microsoft.NewMsserverAdsitesSiteResource,
+		microsoft.NewMssuperscopeResource,
 	}
 }
 
@@ -339,9 +376,13 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 		security.NewPermissionDataSource,
 		security.NewSnmpuserDataSource,
 		security.NewCertificateAuthserviceDataSource,
+		security.NewSamlAuthserviceDataSource,
+		security.NewLdapAuthServiceDataSource,
+		security.NewTacacsplusAuthserviceDataSource,
 
 		misc.NewRulesetDataSource,
 		misc.NewBfdtemplateDataSource,
+		misc.NewDxlEndpointDataSource,
 
 		smartfolder.NewSmartfolderPersonalDataSource,
 		smartfolder.NewSmartfolderGlobalDataSource,
@@ -353,12 +394,12 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 		grid.NewUpgradegroupDataSource,
 		grid.NewGridServicerestartGroupDataSource,
 		grid.NewDistributionscheduleDataSource,
+		grid.NewUpgradescheduleDataSource,
 
 		discovery.NewDiscoveryCredentialgroupDataSource,
 		discovery.NewVdiscoverytaskDataSource,
 
 		notification.NewNotificationRuleDataSource,
-
 		notification.NewNotificationRestEndpointDataSource,
 
 		rpz.NewRecordRpzADataSource,
@@ -375,6 +416,15 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 		rpz.NewRecordRpzCnameClientipaddressDataSource,
 		rpz.NewRecordRpzCnameIpaddressdnDataSource,
 		rpz.NewRecordRpzCnameClientipaddressdnDataSource,
+
+		rir.NewRirOrganizationDataSource,
+
+		parentalcontrol.NewParentalcontrolAvpDataSource,
+		parentalcontrol.NewParentalcontrolBlockingpolicyDataSource,
+
+		microsoft.NewMsserverDataSource,
+		microsoft.NewMsserverAdsitesSiteDataSource,
+		microsoft.NewMssuperscopeDataSource,
 	}
 }
 

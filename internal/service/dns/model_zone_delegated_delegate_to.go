@@ -144,7 +144,7 @@ func (m *ZoneDelegatedDelegateToModel) Flatten(ctx context.Context, from *dns.Zo
 	m.SharedWithMsParentDelegation = types.BoolPointerValue(from.SharedWithMsParentDelegation)
 	m.Stealth = types.BoolPointerValue(from.Stealth)
 	m.TsigKey = flex.FlattenStringPointer(from.TsigKey)
-	m.TsigKeyAlg = flex.FlattenStringPointer(from.TsigKeyAlg)
+	m.TsigKeyAlg = flex.FlattenStringPointerNilAsNotEmpty(from.TsigKeyAlg)
 	m.TsigKeyName = flex.FlattenStringPointer(from.TsigKeyName)
 	m.UseTsigKeyName = types.BoolPointerValue(from.UseTsigKeyName)
 }

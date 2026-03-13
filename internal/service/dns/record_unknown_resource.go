@@ -12,6 +12,7 @@ import (
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
 
+	"github.com/infobloxopen/terraform-provider-nios/internal/config"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
@@ -125,6 +126,7 @@ func (r *RecordUnknownResource) Read(ctx context.Context, req resource.ReadReque
 		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
 		ReturnFieldsPlus(readableAttributesForRecordUnknown).
 		ReturnAsObject(1).
+		ProxySearch(config.GetProxySearch()).
 		Execute()
 
 	// If the resource is not found, try searching using Extensible Attributes
@@ -200,6 +202,7 @@ func (r *RecordUnknownResource) ReadByExtAttrs(ctx context.Context, data *Record
 		Extattrfilter(idMap).
 		ReturnAsObject(1).
 		ReturnFieldsPlus(readableAttributesForRecordUnknown).
+		ProxySearch(config.GetProxySearch()).
 		Execute()
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read RecordUnknown by extattrs, got error: %s", err))

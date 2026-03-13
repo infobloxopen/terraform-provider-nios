@@ -209,9 +209,12 @@ var DtcMonitorHttpResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The display name for this DTC monitor.",
 	},
 	"port": schema.Int64Attribute{
-		Optional:            true,
-		Computed:            true,
-		Default:             int64default.StaticInt64(80),
+		Optional: true,
+		Computed: true,
+		Default:  int64default.StaticInt64(80),
+		Validators: []validator.Int64{
+			int64validator.Between(1, 65535),
+		},
 		MarkdownDescription: "Port for HTTP requests.",
 	},
 	"request": schema.StringAttribute{
@@ -320,7 +323,7 @@ func (m *DtcMonitorHttpModel) Flatten(ctx context.Context, from *dtc.DtcMonitorH
 	m.Ref = flex.FlattenStringPointer(from.Ref)
 	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.Ciphers = flex.FlattenStringPointer(from.Ciphers)
-	m.ClientCert = flex.FlattenStringPointer(from.ClientCert)
+	m.ClientCert = flex.FlattenStringPointerNilAsNotEmpty(from.ClientCert)
 	m.Comment = flex.FlattenStringPointer(from.Comment)
 	m.ContentCheck = flex.FlattenStringPointer(from.ContentCheck)
 	m.ContentCheckInput = flex.FlattenStringPointer(from.ContentCheckInput)

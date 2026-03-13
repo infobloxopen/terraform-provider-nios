@@ -14,6 +14,7 @@ import (
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
 
+	"github.com/infobloxopen/terraform-provider-nios/internal/config"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
@@ -108,6 +109,7 @@ func (r *Ipv6dhcpoptiondefinitionResource) Read(ctx context.Context, req resourc
 		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
 		ReturnFieldsPlus(readableAttributesForIpv6dhcpoptiondefinition).
 		ReturnAsObject(1).
+		ProxySearch(config.GetProxySearch()).
 		Execute()
 
 		// Handle not found case
@@ -208,11 +210,16 @@ func (r *Ipv6dhcpoptiondefinitionResource) ValidateConfig(ctx context.Context, r
 		return
 	}
 
+	// For Configuration object, any attributes not defined by the user appear as null, unless derived from another instance.
+	// We perform IsUnknown() check to handle variables from .tfvars that are resolved
+	// during the plan phase rather than validation phase, preventing false validation errors.
+
 	var space string
-	if !data.Space.IsNull() {
-		space = data.Space.ValueString()
-	} else {
+	if !data.Space.IsUnknown() {
 		space = "DHCPv6"
+		if !data.Space.IsNull() {
+			space = data.Space.ValueString()
+		}
 	}
 
 	if !data.Name.IsNull() && !data.Name.IsUnknown() {

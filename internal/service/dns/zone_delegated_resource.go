@@ -12,6 +12,7 @@ import (
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
 
+	"github.com/infobloxopen/terraform-provider-nios/internal/config"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
@@ -125,6 +126,7 @@ func (r *ZoneDelegatedResource) Read(ctx context.Context, req resource.ReadReque
 		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
 		ReturnFieldsPlus(readableAttributesForZoneDelegated).
 		ReturnAsObject(1).
+		ProxySearch(config.GetProxySearch()).
 		Execute()
 
 	// If the resource is not found, try searching using Extensible Attributes
@@ -200,6 +202,7 @@ func (r *ZoneDelegatedResource) ReadByExtAttrs(ctx context.Context, data *ZoneDe
 		Extattrfilter(idMap).
 		ReturnAsObject(1).
 		ReturnFieldsPlus(readableAttributesForZoneDelegated).
+		ProxySearch(config.GetProxySearch()).
 		Execute()
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read ZoneDelegated by extattrs, got error: %s", err))
@@ -326,4 +329,29 @@ func (r *ZoneDelegatedResource) Delete(ctx context.Context, req resource.DeleteR
 func (r *ZoneDelegatedResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("ref"), req.ID)...)
 	resp.Diagnostics.Append(resp.Private.SetKey(ctx, "associate_internal_id", []byte("true"))...)
+}
+
+func (r *ZoneDelegatedResource) ValidateConfig(ctx context.Context, req resource.ValidateConfigRequest, resp *resource.ValidateConfigResponse) {
+	var data ZoneDelegatedModel
+
+	// Read Terraform config data into the model
+	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
+
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	delegateTo := data.DelegateTo
+
+	nsGroup := data.NsGroup
+
+	if delegateTo.IsNull() || delegateTo.IsUnknown() {
+		if nsGroup.IsNull() || nsGroup.IsUnknown() {
+			resp.Diagnostics.AddAttributeError(
+				path.Root("delegate_to"),
+				"Missing Required Configuration",
+				"Either 'delegate_to' must be provided or 'ns_group' must be specified. At least one of these attributes is required.",
+			)
+		}
+	}
 }

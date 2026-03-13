@@ -72,7 +72,7 @@ var RecordRpzCnameIpaddressResourceSchemaAttributes = map[string]schema.Attribut
 		Required:            true,
 		MarkdownDescription: "The canonical name in FQDN format. This value can be in unicode format.",
 		Validators: []validator.String{
-			customvalidator.IsValidFQDN(),
+			customvalidator.IsValidDomainName(customvalidator.WithAllowNullOrEmpty()),
 		},
 	},
 	"comment": schema.StringAttribute{

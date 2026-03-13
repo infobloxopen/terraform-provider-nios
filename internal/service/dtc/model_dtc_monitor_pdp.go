@@ -3,6 +3,7 @@ package dtc
 import (
 	"context"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
@@ -93,9 +94,12 @@ var DtcMonitorPdpResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The display name for this DTC monitor.",
 	},
 	"port": schema.Int64Attribute{
-		Optional:            true,
-		Computed:            true,
-		Default:             int64default.StaticInt64(2123),
+		Optional: true,
+		Computed: true,
+		Default:  int64default.StaticInt64(2123),
+		Validators: []validator.Int64{
+			int64validator.Between(1, 65535),
+		},
 		MarkdownDescription: "The port value for PDP requests.",
 	},
 	"retry_down": schema.Int64Attribute{
