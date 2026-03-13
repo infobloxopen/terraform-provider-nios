@@ -17,7 +17,7 @@ import (
 )
 
 /*
-// TODO : create 2 member for this UT to run
+// INFO : create 2 member for this UT to run
 		  - infoblox.member1 and infoblox.member2
 */
 
@@ -36,7 +36,7 @@ func TestAccGmcgroupResource_basic(t *testing.T) {
 			{
 				Config: testAccGmcgroupBasicConfig(name),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckGmcgroupExists(context.Background(), resourceName, &v),	
+					testAccCheckGmcgroupExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "name", name),
 					resource.TestCheckResourceAttr(resourceName, "gmc_promotion_policy", "SIMULTANEOUSLY"),
 				),
@@ -217,7 +217,7 @@ func TestAccGmcgroupResource_Name(t *testing.T) {
 	var v grid.Gmcgroup
 	name := acctest.RandomNameWithPrefix("gmcgroup")
 	name_update := acctest.RandomNameWithPrefix("gmcgroup_update")
-	
+
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
@@ -247,8 +247,8 @@ func TestAccGmcgroupResource_ScheduledTime(t *testing.T) {
 	var resourceName = "nios_grid_gmcgroup.test_scheduled_time"
 	var v grid.Gmcgroup
 	name := acctest.RandomNameWithPrefix("gmcgroup")
-	scheduled_time1 := time.Now().Add(3 * time.Hour).Unix() 
-	scheduled_time2 := time.Now().Add(4 * time.Hour).Unix() 
+	scheduled_time1 := time.Now().Add(3 * time.Hour).Unix()
+	scheduled_time2 := time.Now().Add(4 * time.Hour).Unix()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },

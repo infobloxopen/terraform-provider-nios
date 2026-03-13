@@ -17,7 +17,7 @@ func TestAccGmcgroupDataSource_Filters(t *testing.T) {
 	resourceName := "nios_grid_gmcgroup.test"
 	var v grid.Gmcgroup
 	name := acctest.RandomNameWithPrefix("gmcgroup")
-	
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
