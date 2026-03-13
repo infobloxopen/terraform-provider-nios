@@ -13,14 +13,14 @@ Retrieves information about existing Gmcgroup objects.
 ## Example Usage
 
 ```terraform
-// Retrieve a specific grid Gmcgroup by filters
+// Retrieve a specific grid GMC Group by filters
 data "nios_grid_gmcgroup" "get_grid_gmcgroup_using_filters" {
   filters = {
     name = "example_gmcgroup_2"
   }
 }
 
-// Retrieve all grid Gmcgroup
+// Retrieve all grid GMC Group
 data "nios_grid_gmcgroup" "get_all_grid_gmcgroup" {}
 ```
 

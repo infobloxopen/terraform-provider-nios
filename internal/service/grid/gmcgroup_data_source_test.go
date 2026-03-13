@@ -51,14 +51,14 @@ func testAccCheckGmcgroupResourceAttrPair(resourceName, dataSourceName string) [
 
 func testAccGmcgroupDataSourceConfigFilters(name string) string {
 	return fmt.Sprintf(`
-resource "nios_grid_gmcgroup" "test" {
-  name = %q
-}
+	resource "nios_grid_gmcgroup" "test" {
+		name = %q
+	}
 
-data "nios_grid_gmcgroup" "test" {
-  filters = {
-	name = nios_grid_gmcgroup.test.name
-  }
-}
+	data "nios_grid_gmcgroup" "test" {
+		filters = {
+			name = nios_grid_gmcgroup.test.name
+		}
+	}
 `, name)
 }

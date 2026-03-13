@@ -36,10 +36,8 @@ func TestAccGmcgroupResource_basic(t *testing.T) {
 			{
 				Config: testAccGmcgroupBasicConfig(name),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckGmcgroupExists(context.Background(), resourceName, &v),
-					// TODO: check and validate these
+					testAccCheckGmcgroupExists(context.Background(), resourceName, &v),	
 					resource.TestCheckResourceAttr(resourceName, "name", name),
-					// Test fields with default value
 					resource.TestCheckResourceAttr(resourceName, "gmc_promotion_policy", "SIMULTANEOUSLY"),
 				),
 			},
@@ -114,6 +112,7 @@ func TestAccGmcgroupResource_Comment(t *testing.T) {
 	var resourceName = "nios_grid_gmcgroup.test_comment"
 	var v grid.Gmcgroup
 	name := acctest.RandomNameWithPrefix("gmcgroup")
+
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
@@ -218,6 +217,7 @@ func TestAccGmcgroupResource_Name(t *testing.T) {
 	var v grid.Gmcgroup
 	name := acctest.RandomNameWithPrefix("gmcgroup")
 	name_update := acctest.RandomNameWithPrefix("gmcgroup_update")
+	
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
