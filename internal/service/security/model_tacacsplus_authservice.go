@@ -64,6 +64,9 @@ var TacacsplusAuthserviceResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional:            true,
 		Computed:            true,
 		Default:             int64default.StaticInt64(1000),
+		Validators: []validator.Int64{
+			int64validator.Between(1, 4294967295),
+		},
 		MarkdownDescription: "The accounting retry period in milliseconds.",
 	},
 	"auth_retries": schema.Int64Attribute{

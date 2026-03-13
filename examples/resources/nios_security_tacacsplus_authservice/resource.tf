@@ -3,11 +3,10 @@ resource "nios_security_tacacsplus_authservice" "tacacsplus_authservice_with_bas
   name = "tacacsplus_authservice1"
   servers = [
     {
-      acct_port      = 1813
-      address        = "2.2.3.1"
-      auth_port      = 1812
-      auth_type      = "PAP"
+      address        = "2.2.3.3"
+      auth_type      = "CHAP"
       disable        = false
+      port           = 49
       use_accounting = false
       use_mgmt_port  = false
       shared_secret  = "test"
@@ -20,17 +19,16 @@ resource "nios_security_tacacsplus_authservice" "tacacsplus_authservice_with_add
   name = "tacacsplus_authservice2"
   servers = [
     {
-      acct_port      = 1813
-      address        = "2.2.3.1"
-      auth_port      = 1812
-      auth_type      = "PAP"
+      address        = "2.2.3.3"
+      auth_type      = "CHAP"
       disable        = false
+      port           = 49
       use_accounting = false
       use_mgmt_port  = false
       shared_secret  = "test"
     }
   ]
-  comment      = "This is a commment"
+  comment      = "Example TACACS Plus Auth Service."
   disable      = false
   acct_retries = 2
   acct_timeout = 2300

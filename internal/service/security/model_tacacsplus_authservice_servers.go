@@ -3,6 +3,7 @@ package security
 import (
 	"context"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -51,13 +52,17 @@ var TacacsplusAuthserviceServersResourceSchemaAttributes = map[string]schema.Att
 		MarkdownDescription: "The valid IP address or FQDN of the TACACS+ server.",
 	},
 	"port": schema.Int64Attribute{
-		Optional:            true,
-		Computed:            true,
-		Default:             int64default.StaticInt64(49),
+		Optional: true,
+		Computed: true,
+		Default:  int64default.StaticInt64(49),
+		Validators: []validator.Int64{
+			int64validator.Between(0, 65535),
+		},
 		MarkdownDescription: "The TACACS+ server port.",
 	},
 	"shared_secret": schema.StringAttribute{
-		Required: true,
+		Required:  true,
+		Sensitive: true,
 		Validators: []validator.String{
 			customvalidator.ValidateTrimmedString(),
 		},
@@ -146,7 +151,6 @@ func (m *TacacsplusAuthserviceServersModel) Flatten(ctx context.Context, from *s
 	}
 	m.Address = flex.FlattenStringPointer(from.Address)
 	m.Port = flex.FlattenInt64Pointer(from.Port)
-	m.SharedSecret = flex.FlattenStringPointer(from.SharedSecret)
 	m.AuthType = flex.FlattenStringPointer(from.AuthType)
 	m.Comment = flex.FlattenStringPointer(from.Comment)
 	m.Disable = types.BoolPointerValue(from.Disable)

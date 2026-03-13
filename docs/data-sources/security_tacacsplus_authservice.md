@@ -63,7 +63,7 @@ Read-Only:
 
 Required:
 
-- `shared_secret` (String) The secret key with which to connect to the TACACS+ server.
+- `shared_secret` (String, Sensitive) The secret key with which to connect to the TACACS+ server.
 
 Optional:
 
