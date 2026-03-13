@@ -83,6 +83,7 @@ Read-Only:
 
 - `ref` (String) The reference to the object.
 - `topology` (String) The DTC Topology the rule belongs to.
+- `uuid` (String) Universally Unique ID assigned for this object.
 - `valid` (Boolean) True if the label in the rule exists in the current Topology DB. Always true for SUBNET rules. Rules with non-existent labels may be configured but will never match.
 
 <a id="nestedatt--result--sources"></a>

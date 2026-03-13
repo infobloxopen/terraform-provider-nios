@@ -224,6 +224,7 @@ resource "nios_ipam_network" "example_func_call" {
 - `unmanaged_count` (Number) The number of unmanaged IP addresses as discovered by network discovery.
 - `utilization` (Number) The network utilization in percentage.
 - `utilization_update` (Number) The timestamp when the utilization statistics were last updated.
+- `uuid` (String) Universally Unique ID assigned for this object.
 
 <a id="nestedatt--cloud_info"></a>
 ### Nested Schema for `cloud_info`

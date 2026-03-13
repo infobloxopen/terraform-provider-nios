@@ -73,6 +73,7 @@ Read-Only:
 - `is_default` (Boolean) The NIOS appliance provides one default network view. You can rename the default view and change its settings, but you cannot delete it. There must always be at least one network view in the appliance.
 - `ms_ad_user_data` (Attributes) The Microsoft Active Directory user related information. (see [below for nested schema](#nestedatt--result--ms_ad_user_data))
 - `ref` (String) The reference to the object.
+- `uuid` (String) Universally Unique ID assigned for this object.
 
 <a id="nestedatt--result--cloud_info"></a>
 ### Nested Schema for `result.cloud_info`
@@ -122,6 +123,10 @@ Optional:
 Required:
 
 - `ref` (String) The reference to the DNS zone object.
+
+Read-Only:
+
+- `uuid` (String) Universally Unique ID assigned for this object.
 
 
 

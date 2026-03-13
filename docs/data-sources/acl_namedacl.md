@@ -54,7 +54,7 @@ Required:
 
 Optional:
 
-- `access_list` (Attributes List) The access control list of IPv4/IPv6 addresses, networks, TSIG-based anonymous access controls, and other named ACLs. (see [below for nested schema](#nestedatt--result--access_list))
+- `access_list` (Attributes List) The access control list of IPv4/IPv6 addresses, networks, TSIG-based anonymous access controls, and other named ACLs (see [below for nested schema](#nestedatt--result--access_list))
 - `comment` (String) Comment for the named ACL; maximum 256 characters.
 - `extattrs` (Map of String) Extensible attributes associated with the object.
 
@@ -63,6 +63,7 @@ Read-Only:
 - `exploded_access_list` (Attributes List) The exploded access list for the named ACL. This list displays all the access control entries in a named ACL and its nested named ACLs, if applicable. (see [below for nested schema](#nestedatt--result--exploded_access_list))
 - `extattrs_all` (Map of String) Extensible attributes associated with the object, including default attributes.
 - `ref` (String) The reference to the object.
+- `uuid` (String) Universally Unique ID assigned for this object.
 
 <a id="nestedatt--result--access_list"></a>
 ### Nested Schema for `result.access_list`

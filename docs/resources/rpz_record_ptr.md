@@ -86,4 +86,5 @@ resource "nios_rpz_record_ptr" "create_record_rpz_ptr_with_ipv6addr" {
 
 - `extattrs_all` (Map of String) Extensible attributes associated with the object, including default attributes.
 - `ref` (String) The reference to the object.
+- `uuid` (String) Universally Unique ID assigned for this object.
 - `zone` (String) The name of the zone in which the record resides. Example: "zone.com". If a view is not specified when searching by zone, the default view is used.

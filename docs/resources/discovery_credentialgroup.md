@@ -29,3 +29,4 @@ resource "nios_discovery_credentialgroup" "discovery_credentialgroup_with_basic_
 ### Read-Only
 
 - `ref` (String) The reference to the object.
+- `uuid` (String) Universally Unique ID assigned for this object.

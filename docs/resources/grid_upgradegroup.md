@@ -58,6 +58,7 @@ resource "nios_grid_upgradegroup" "upgradegroup_with_additional_fields" {
 
 - `ref` (String) The reference to the object.
 - `time_zone` (String) The time zone for scheduling operations.
+- `uuid` (String) Universally Unique ID assigned for this object.
 
 <a id="nestedatt--members"></a>
 ### Nested Schema for `members`

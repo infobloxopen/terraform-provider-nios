@@ -108,6 +108,7 @@ Read-Only:
 - `rpz_last_updated_time` (Number) The timestamp of the last update for zone data.
 - `rpz_priority` (Number) The priority of this response policy zone.
 - `rpz_priority_end` (Number) This number is for UI to identify the end of qualified zone list.
+- `uuid` (String) Universally Unique ID assigned for this object.
 
 <a id="nestedatt--result--external_primaries"></a>
 ### Nested Schema for `result.external_primaries`

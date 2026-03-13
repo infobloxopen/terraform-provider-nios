@@ -88,6 +88,7 @@ Read-Only:
 - `server_name` (String) Gives the server name as reported by itself
 - `synchronization_status` (String) Synchronization status summary
 - `synchronization_status_detail` (String) Detail status if synchronization_status is ERROR
+- `uuid` (String) Universally Unique ID assigned for this object.
 - `version` (String) Version of the Microsoft Server
 
 <a id="nestedatt--result--ad_sites"></a>

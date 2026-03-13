@@ -64,3 +64,4 @@ resource "nios_dtc_record_cname" "record_cname_additional_fields" {
 - `auto_created` (Boolean) Flag that indicates whether this record was automatically created by NIOS.
 - `dns_canonical` (String) The canonical name as server by DNS protocol.
 - `ref` (String) The reference to the object.
+- `uuid` (String) Universally Unique ID assigned for this object.

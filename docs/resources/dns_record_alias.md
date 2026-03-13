@@ -77,6 +77,7 @@ resource "nios_dns_record_alias" "create_alias_record_with_additional_fields" {
 - `extattrs_all` (Map of String) Extensible attributes associated with the object , including default attributes.
 - `last_queried` (Number) The time of the last DNS query in Epoch seconds format.
 - `ref` (String) The reference to the object.
+- `uuid` (String) Universally Unique ID assigned for this object.
 - `zone` (String) The zone in which the record resides.
 
 <a id="nestedatt--aws_rte53_record_info"></a>

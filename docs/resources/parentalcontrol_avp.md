@@ -54,3 +54,4 @@ resource "nios_parentalcontrol_avp" "attribute_value_pair_additional_fields" {
 
 - `ref` (String) The reference to the object.
 - `user_defined` (Boolean) Determines if AVP was defined by user.
+- `uuid` (String) Universally Unique ID assigned for this object.

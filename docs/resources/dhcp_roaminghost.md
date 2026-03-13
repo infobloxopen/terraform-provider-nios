@@ -142,6 +142,7 @@ resource "nios_dhcp_roaminghost" "dhcp_roaminghost_address_type_both" {
 - `extattrs_all` (Map of String) Extensible attributes associated with the object, including default and internal attributes.
 - `ipv6_client_hostname` (String) The client hostname of a DHCP roaming host object. This field specifies the host name that the DHCP client sends to the Infoblox appliance using DHCP option 12.
 - `ref` (String) The reference to the object.
+- `uuid` (String) Universally Unique ID assigned for this object.
 
 <a id="nestedatt--ipv6_options"></a>
 ### Nested Schema for `ipv6_options`

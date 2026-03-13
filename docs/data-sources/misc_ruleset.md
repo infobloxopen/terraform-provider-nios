@@ -54,6 +54,7 @@ Optional:
 Read-Only:
 
 - `ref` (String) The reference to the object.
+- `uuid` (String) Universally Unique ID assigned for this object.
 
 <a id="nestedatt--result--nxdomain_rules"></a>
 ### Nested Schema for `result.nxdomain_rules`

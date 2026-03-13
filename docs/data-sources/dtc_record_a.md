@@ -65,3 +65,4 @@ Read-Only:
 
 - `auto_created` (Boolean) Flag that indicates whether this record was automatically created by NIOS.
 - `ref` (String) The reference to the object.
+- `uuid` (String) Universally Unique ID assigned for this object.

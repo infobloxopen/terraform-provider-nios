@@ -92,6 +92,7 @@ resource "nios_notification_rest_endpoint" "notification_rest_endpoint_with_addi
 - `client_certificate_valid_to` (Number) The timestamp when client certificate for a notification REST endpoint expires.
 - `extattrs_all` (Map of String) Extensible attributes associated with the object , including default attributes.
 - `ref` (String) The reference to the object.
+- `uuid` (String) Universally Unique ID assigned for this object.
 
 <a id="nestedatt--template_instance"></a>
 ### Nested Schema for `template_instance`

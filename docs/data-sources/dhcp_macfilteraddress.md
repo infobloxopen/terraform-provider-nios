@@ -78,3 +78,4 @@ Read-Only:
 - `fingerprint` (String) DHCP fingerprint for the address.
 - `is_registered_user` (Boolean) Determines if the user has been authenticated or not.
 - `ref` (String) The reference to the object.
+- `uuid` (String) Universally Unique ID assigned for this object.

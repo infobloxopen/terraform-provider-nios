@@ -207,6 +207,7 @@ resource "nios_dns_zone_auth" "create_zone5" {
 - `rr_not_queried_enabled_time` (Number) The time data collection for Not Queried Resource Record was enabled for this zone.
 - `use_import_from` (Boolean) Use flag for: import_from
 - `using_srg_associations` (Boolean) This is true if the zone is associated with a shared record group.
+- `uuid` (String) Universally Unique ID assigned for this object.
 - `zone_not_queried_enabled_time` (Number) The time when "DNS Zones Last Queried" was turned on for this zone.
 
 <a id="nestedatt--allow_active_dir"></a>
@@ -235,6 +236,10 @@ Optional:
 - `tsig_key_name` (String) The name of the TSIG key. If 2.x TSIG compatibility is used, this is set to 'tsig_xfer' on retrieval, and ignored on insert or update.
 - `use_tsig_key_name` (Boolean) Use flag for: tsig_key_name
 
+Read-Only:
+
+- `uuid` (String) Universally Unique ID assigned for this object.
+
 
 <a id="nestedatt--allow_transfer"></a>
 ### Nested Schema for `allow_transfer`
@@ -250,6 +255,10 @@ Optional:
 - `tsig_key_name` (String)
 - `use_tsig_key_name` (Boolean) Use flag for: tsig_key_name
 
+Read-Only:
+
+- `uuid` (String) Universally Unique ID assigned for this object.
+
 
 <a id="nestedatt--allow_update"></a>
 ### Nested Schema for `allow_update`
@@ -264,6 +273,10 @@ Optional:
 - `tsig_key_alg` (String) The TSIG key algorithm.
 - `tsig_key_name` (String) The name of the TSIG key. If 2.x TSIG compatibility is used, this is set to 'tsig_xfer' on retrieval, and ignored on insert or update.
 - `use_tsig_key_name` (Boolean) Use flag for: tsig_key_name
+
+Read-Only:
+
+- `uuid` (String) Universally Unique ID assigned for this object.
 
 
 <a id="nestedatt--dnssec_key_params"></a>

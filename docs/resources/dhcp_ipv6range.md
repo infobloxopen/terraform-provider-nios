@@ -115,6 +115,7 @@ resource "nios_dhcp_ipv6range" "create_ipv6range_with_additional_fields" {
 - `extattrs_all` (Map of String) Extensible attributes associated with the object , including default and internal attributes.
 - `ref` (String) The reference to the object.
 - `template` (String) If set on creation, the range will be created according to the values specified in the named template.
+- `uuid` (String) Universally Unique ID assigned for this object.
 
 <a id="nestedatt--cloud_info"></a>
 ### Nested Schema for `cloud_info`

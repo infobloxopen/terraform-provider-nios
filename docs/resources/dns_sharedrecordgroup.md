@@ -62,6 +62,7 @@ resource "nios_dns_sharedrecordgroup" "shared_record_group_with_additional_field
 
 - `extattrs_all` (Map of String) Extensible attributes associated with the object , including default attributes.
 - `ref` (String) The reference to the object.
+- `uuid` (String) Universally Unique ID assigned for this object.
 
 <a id="nestedatt--zone_associations"></a>
 ### Nested Schema for `zone_associations`

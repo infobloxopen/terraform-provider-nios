@@ -53,3 +53,4 @@ Read-Only:
 
 - `option_definitions` (List of String) The list of DHCP IPv6 option definition objects.
 - `ref` (String) The reference to the object.
+- `uuid` (String) Universally Unique ID assigned for this object.

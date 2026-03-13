@@ -72,3 +72,4 @@ resource "nios_dns_sharedrecord_srv" "sharedrecord_srv_additional_fields" {
 - `dns_target` (String) The name for a shared SRV record in punycode format.
 - `extattrs_all` (Map of String) Extensible attributes associated with the object , including default attributes.
 - `ref` (String) The reference to the object.
+- `uuid` (String) Universally Unique ID assigned for this object.

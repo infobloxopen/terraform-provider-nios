@@ -120,6 +120,7 @@ Read-Only:
 - `rir` (String) The registry (RIR) that allocated the IPv6 network container address space.
 - `subscribe_settings` (Attributes) (see [below for nested schema](#nestedatt--result--subscribe_settings))
 - `utilization` (Number) The network container utilization in percentage.
+- `uuid` (String) Universally Unique ID assigned for this object.
 
 <a id="nestedatt--result--cloud_info"></a>
 ### Nested Schema for `result.cloud_info`

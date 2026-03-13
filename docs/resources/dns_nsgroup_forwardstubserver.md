@@ -58,6 +58,7 @@ resource "nios_dns_nsgroup_forwardstubserver" "nsgroup_forward_stub_server_with_
 
 - `extattrs_all` (Map of String) Extensible attributes associated with the object , including default attributes.
 - `ref` (String) The reference to the object.
+- `uuid` (String) Universally Unique ID assigned for this object.
 
 <a id="nestedatt--external_servers"></a>
 ### Nested Schema for `external_servers`

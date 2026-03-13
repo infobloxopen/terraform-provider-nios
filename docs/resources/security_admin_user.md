@@ -81,6 +81,7 @@ resource "nios_security_admin_user" "admin_user_additional_fields" {
 - `extattrs_all` (Map of String) Extensible attributes associated with the object , including default attributes.
 - `ref` (String) The reference to the object.
 - `status` (String) Status of the user account.
+- `uuid` (String) Universally Unique ID assigned for this object.
 
 <a id="nestedatt--ssh_keys"></a>
 ### Nested Schema for `ssh_keys`

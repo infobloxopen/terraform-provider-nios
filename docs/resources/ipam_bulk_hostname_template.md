@@ -39,3 +39,4 @@ resource "nios_ipam_bulk_hostname_template" "bulk_hostname_template2" {
 - `is_grid_default` (Boolean) True if this template is Grid default.
 - `pre_defined` (Boolean) True if this is a pre-defined template, False otherwise.
 - `ref` (String) The reference to the object.
+- `uuid` (String) Universally Unique ID assigned for this object.

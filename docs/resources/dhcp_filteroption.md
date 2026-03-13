@@ -58,6 +58,7 @@ resource "nios_dhcp_filteroption" "filteroption_additional_fields" {
 
 - `extattrs_all` (Map of String) Extensible attributes associated with the object, including default attributes.
 - `ref` (String) The reference to the object.
+- `uuid` (String) Universally Unique ID assigned for this object.
 
 <a id="nestedatt--option_list"></a>
 ### Nested Schema for `option_list`

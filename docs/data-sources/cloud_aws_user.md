@@ -57,3 +57,4 @@ Read-Only:
 - `last_used` (Number) The timestamp when this AWS user credentials was last used.
 - `ref` (String) The reference to the object.
 - `status` (String) Indicate the validity status of this AWS user.
+- `uuid` (String) Universally Unique ID assigned for this object.

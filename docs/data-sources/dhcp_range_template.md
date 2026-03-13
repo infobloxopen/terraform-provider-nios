@@ -121,6 +121,7 @@ Read-Only:
 
 - `extattrs_all` (Map of String) Extensible attributes associated with the object , including default attributes.
 - `ref` (String) The reference to the object.
+- `uuid` (String) Universally Unique ID assigned for this object.
 
 <a id="nestedatt--result--delegated_member"></a>
 ### Nested Schema for `result.delegated_member`

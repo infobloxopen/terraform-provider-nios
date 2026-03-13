@@ -56,6 +56,7 @@ resource "nios_misc_ruleset" "ruleset_with_additional_fields" {
 ### Read-Only
 
 - `ref` (String) The reference to the object.
+- `uuid` (String) Universally Unique ID assigned for this object.
 
 <a id="nestedatt--nxdomain_rules"></a>
 ### Nested Schema for `nxdomain_rules`

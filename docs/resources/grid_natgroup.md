@@ -39,3 +39,4 @@ resource "nios_grid_natgroup" "natgroup_with_additional_config" {
 ### Read-Only
 
 - `ref` (String) The reference to the object.
+- `uuid` (String) Universally Unique ID assigned for this object.

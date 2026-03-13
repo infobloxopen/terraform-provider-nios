@@ -68,3 +68,4 @@ Read-Only:
 - `extattrs_all` (Map of String) Extensible attributes associated with the object , including default and internal attributes.
 - `ref` (String) The reference to the object.
 - `status` (String) Status of VLAN object. Can be Assigned, Unassigned, Reserved.
+- `uuid` (String) Universally Unique ID assigned for this object.

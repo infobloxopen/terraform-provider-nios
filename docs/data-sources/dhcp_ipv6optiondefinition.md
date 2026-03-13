@@ -53,3 +53,4 @@ Optional:
 Read-Only:
 
 - `ref` (String) The reference to the object.
+- `uuid` (String) Universally Unique ID assigned for this object.

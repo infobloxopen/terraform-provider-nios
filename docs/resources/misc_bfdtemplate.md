@@ -49,3 +49,4 @@ resource "nios_misc_bfdtemplate" "bfd_template_with_additional_fields" {
 ### Read-Only
 
 - `ref` (String) The reference to the object.
+- `uuid` (String) Universally Unique ID assigned for this object.

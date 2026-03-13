@@ -154,6 +154,7 @@ Read-Only:
 - `static_hosts` (Number) The number of static DHCP addresses configured in the range.
 - `template` (String) If set on creation, the range will be created according to the values specified in the named template.
 - `total_hosts` (Number) The total number of DHCP addresses configured in the range.
+- `uuid` (String) Universally Unique ID assigned for this object.
 
 <a id="nestedatt--result--cloud_info"></a>
 ### Nested Schema for `result.cloud_info`

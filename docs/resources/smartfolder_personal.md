@@ -59,6 +59,7 @@ resource "nios_smartfolder_personal" "smartfolder_personal_additional_fields" {
 
 - `is_shortcut` (Boolean) Determines whether the personal Smart Folder is a shortcut.
 - `ref` (String) The reference to the object.
+- `uuid` (String) Universally Unique ID assigned for this object.
 
 <a id="nestedatt--group_bys"></a>
 ### Nested Schema for `group_bys`

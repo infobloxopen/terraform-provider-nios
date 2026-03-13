@@ -37,6 +37,7 @@ Read-Only:
 
 - `ref` (String) The reference to the object.
 - `time_zone` (String) The time zone for upgrade start time.
+- `uuid` (String) Universally Unique ID assigned for this object.
 
 <a id="nestedatt--result--upgrade_groups"></a>
 ### Nested Schema for `result.upgrade_groups`

@@ -93,6 +93,7 @@ resource "nios_security_ldap_auth_service" "ldap_authservice_with_additional_fie
 ### Read-Only
 
 - `ref` (String) The reference to the object.
+- `uuid` (String) Universally Unique ID assigned for this object.
 
 <a id="nestedatt--servers"></a>
 ### Nested Schema for `servers`

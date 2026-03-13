@@ -58,6 +58,7 @@ resource "nios_smartfolder_global" "smartfolder_global_additional_fields" {
 ### Read-Only
 
 - `ref` (String) The reference to the object.
+- `uuid` (String) Universally Unique ID assigned for this object.
 
 <a id="nestedatt--group_bys"></a>
 ### Nested Schema for `group_bys`
