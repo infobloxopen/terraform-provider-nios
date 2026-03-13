@@ -15,16 +15,22 @@ import (
 
 type CertificateAuthserviceRemoteLookupServiceModel struct {
 	Ref types.String `tfsdk:"ref"`
+	UUID types.String `tfsdk:"uuid"`
 }
 
 var CertificateAuthserviceRemoteLookupServiceAttrTypes = map[string]attr.Type{
 	"ref": types.StringType,
+	"uuid": types.StringType,
 }
 
 var CertificateAuthserviceRemoteLookupServiceResourceSchemaAttributes = map[string]schema.Attribute{
 	"ref": schema.StringAttribute{
 		Optional:            true,
 		MarkdownDescription: "The reference to the LDAP auth service object.",
+	},
+	"uuid": schema.StringAttribute{
+		Optional:            true,
+		MarkdownDescription: "The uuid to the LDAP auth service object.",
 	},
 }
 
@@ -74,9 +80,11 @@ func (m *CertificateAuthserviceRemoteLookupServiceModel) Flatten(ctx context.Con
 	// Check if OneOf structure exists
 	if from.CertificateAuthserviceRemoteLookupServiceOneOf == nil || from.CertificateAuthserviceRemoteLookupServiceOneOf.Ref == nil {
 		m.Ref = types.StringNull()
+		m.UUID = types.StringNull()
 		return
 	}
 
 	// Extract the Ref from the OneOf structure
 	m.Ref = flex.FlattenStringPointer(from.CertificateAuthserviceRemoteLookupServiceOneOf.Ref)
+	m.UUID = types.StringNull() // UUID is not available in the current structure, set to null
 }
