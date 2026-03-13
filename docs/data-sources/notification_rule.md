@@ -67,6 +67,7 @@ Read-Only:
 - `all_members` (Boolean) Determines whether the notification rule is applied on all members or not. When this is set to False, the notification rule is applied only on selected_members.
 - `ref` (String) The reference to the object.
 - `selected_members` (List of String) The list of the members on which the notification rule is applied. This field is deprecated.
+- `uuid` (String) Universally Unique ID assigned for this object.
 
 <a id="nestedatt--result--template_instance"></a>
 ### Nested Schema for `result.template_instance`

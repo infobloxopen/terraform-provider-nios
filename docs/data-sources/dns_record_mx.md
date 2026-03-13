@@ -79,6 +79,7 @@ Read-Only:
 - `reclaimable` (Boolean) Determines if the record is reclaimable or not.
 - `ref` (String) The reference to the object.
 - `shared_record_group` (String) The name of the shared record group in which the record resides. This field exists only on db_objects if this record is a shared record.
+- `uuid` (String) Universally Unique ID assigned for this object.
 - `zone` (String) The name of the zone in which the record resides. Example: "zone.com". If a view is not specified when searching by zone, the default view is used.
 
 <a id="nestedatt--result--aws_rte53_record_info"></a>

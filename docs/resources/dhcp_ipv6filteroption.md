@@ -69,6 +69,7 @@ resource "nios_dhcp_ipv6filteroption" "dhcp_ipv6filteroption_with_additional_fie
 
 - `extattrs_all` (Map of String) Extensible attributes associated with the object, including default and internal attributes.
 - `ref` (String) The reference to the object.
+- `uuid` (String) Universally Unique ID assigned for this object.
 
 <a id="nestedatt--option_list"></a>
 ### Nested Schema for `option_list`

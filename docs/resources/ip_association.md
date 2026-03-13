@@ -121,3 +121,4 @@ resource "nios_ip_association" "association3" {
 ### Read-Only
 
 - `internal_id` (String) Internal ID of the IP association.
+- `uuid` (String) Universally Unique ID assigned for this object.

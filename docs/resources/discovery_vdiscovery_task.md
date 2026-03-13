@@ -184,6 +184,7 @@ resource "nios_discovery_vdiscovery_task" "gcp_vdiscoverytask" {
 - `ref` (String) The reference to the object.
 - `state` (String) Current state of this task.
 - `state_msg` (String) State message of the complete discovery process.
+- `uuid` (String) Universally Unique ID assigned for this object.
 
 <a id="nestedatt--scheduled_run"></a>
 ### Nested Schema for `scheduled_run`

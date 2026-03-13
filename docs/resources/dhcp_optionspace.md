@@ -47,3 +47,4 @@ resource "nios_dhcp_optiondefinition" "dhcp_option_definition" {
 - `option_definitions` (List of String) The list of DHCP option definition objects.
 - `ref` (String) The reference to the object.
 - `space_type` (String) The type of a DHCP option space object.
+- `uuid` (String) Universally Unique ID assigned for this object.

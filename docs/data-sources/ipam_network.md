@@ -178,6 +178,7 @@ Read-Only:
 - `unmanaged_count` (Number) The number of unmanaged IP addresses as discovered by network discovery.
 - `utilization` (Number) The network utilization in percentage.
 - `utilization_update` (Number) The timestamp when the utilization statistics were last updated.
+- `uuid` (String) Universally Unique ID assigned for this object.
 
 <a id="nestedatt--result--cloud_info"></a>
 ### Nested Schema for `result.cloud_info`

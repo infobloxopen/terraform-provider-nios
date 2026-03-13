@@ -72,3 +72,4 @@ Read-Only:
 - `ref` (String) The reference to the object.
 - `static_hosts` (Number) The number of static DHCP addresses configured in DHCP range objects that belong to the superscope.
 - `total_hosts` (Number) The total number of DHCP addresses configured in DHCP range objects that belong to the superscope.
+- `uuid` (String) Universally Unique ID assigned for this object.

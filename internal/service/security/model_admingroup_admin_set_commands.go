@@ -375,19 +375,19 @@ func (m *AdmingroupAdminSetCommandsModel) Expand(ctx context.Context, diags *dia
 		SetMaintenancemode:           flex.ExpandBoolPointer(m.SetMaintenancemode),
 		SetTransferReportingData:     flex.ExpandBoolPointer(m.SetTransferReportingData),
 		SetTransferSupportbundle:     flex.ExpandBoolPointer(m.SetTransferSupportbundle),
-		SetAnalyticsDatabaseDump:     flex.ExpandBoolPointer(m.SetAnalyticsDatabaseDump),
-		SetAnalyticsParameter:        flex.ExpandBoolPointer(m.SetAnalyticsParameter),
-		SetCollectOldLogs:            flex.ExpandBoolPointer(m.SetCollectOldLogs),
-		SetCoreFilesQuota:            flex.ExpandBoolPointer(m.SetCoreFilesQuota),
-		SetHsmGroup:                  flex.ExpandBoolPointer(m.SetHsmGroup),
-		SetWred:                      flex.ExpandBoolPointer(m.SetWred),
-		SetEnableDohKeyLogging:       flex.ExpandBoolPointer(m.SetEnableDohKeyLogging),
-		SetEnableDotKeyLogging:       flex.ExpandBoolPointer(m.SetEnableDotKeyLogging),
-		SetHotfix:                    flex.ExpandBoolPointer(m.SetHotfix),
-		SetMgm:                       flex.ExpandBoolPointer(m.SetMgm),
-		SetNtpStratum:                flex.ExpandBoolPointer(m.SetNtpStratum),
-		SetPcDomain:                  flex.ExpandBoolPointer(m.SetPcDomain),
-		SetReportFrequency:           flex.ExpandBoolPointer(m.SetReportFrequency),
+		//SetAnalyticsDatabaseDump:     flex.ExpandBoolPointer(m.SetAnalyticsDatabaseDump),
+		SetAnalyticsParameter:  flex.ExpandBoolPointer(m.SetAnalyticsParameter),
+		SetCollectOldLogs:      flex.ExpandBoolPointer(m.SetCollectOldLogs),
+		SetCoreFilesQuota:      flex.ExpandBoolPointer(m.SetCoreFilesQuota),
+		SetHsmGroup:            flex.ExpandBoolPointer(m.SetHsmGroup),
+		SetWred:                flex.ExpandBoolPointer(m.SetWred),
+		SetEnableDohKeyLogging: flex.ExpandBoolPointer(m.SetEnableDohKeyLogging),
+		SetEnableDotKeyLogging: flex.ExpandBoolPointer(m.SetEnableDotKeyLogging),
+		SetHotfix:              flex.ExpandBoolPointer(m.SetHotfix),
+		SetMgm:                 flex.ExpandBoolPointer(m.SetMgm),
+		SetNtpStratum:          flex.ExpandBoolPointer(m.SetNtpStratum),
+		SetPcDomain:            flex.ExpandBoolPointer(m.SetPcDomain),
+		SetReportFrequency:     flex.ExpandBoolPointer(m.SetReportFrequency),
 	}
 	return to
 }
@@ -439,7 +439,7 @@ func (m *AdmingroupAdminSetCommandsModel) Flatten(ctx context.Context, from *sec
 	m.SetMaintenancemode = types.BoolPointerValue(from.SetMaintenancemode)
 	m.SetTransferReportingData = types.BoolPointerValue(from.SetTransferReportingData)
 	m.SetTransferSupportbundle = types.BoolPointerValue(from.SetTransferSupportbundle)
-	m.SetAnalyticsDatabaseDump = types.BoolPointerValue(from.SetAnalyticsDatabaseDump)
+	//m.SetAnalyticsDatabaseDump = types.BoolPointerValue(from.SetAnalyticsDatabaseDump) -> removed in 9.10
 	m.SetAnalyticsParameter = types.BoolPointerValue(from.SetAnalyticsParameter)
 	m.SetCollectOldLogs = types.BoolPointerValue(from.SetCollectOldLogs)
 	m.SetCoreFilesQuota = types.BoolPointerValue(from.SetCoreFilesQuota)

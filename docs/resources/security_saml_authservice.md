@@ -53,6 +53,7 @@ resource "nios_security_saml_authservice" "saml_authservice_with_additional_fiel
 ### Read-Only
 
 - `ref` (String) The reference to the object.
+- `uuid` (String) Universally Unique ID assigned for this object.
 
 <a id="nestedatt--idp"></a>
 ### Nested Schema for `idp`

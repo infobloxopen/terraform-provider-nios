@@ -51,3 +51,4 @@ resource "nios_microsoft_msserver_adsites_site" "msserver_adsites_additional" {
 ### Read-Only
 
 - `ref` (String) The reference to the object.
+- `uuid` (String) Universally Unique ID assigned for this object.

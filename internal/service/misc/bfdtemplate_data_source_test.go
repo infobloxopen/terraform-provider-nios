@@ -39,6 +39,7 @@ func TestAccBfdtemplateDataSource_Filters(t *testing.T) {
 func testAccCheckBfdtemplateResourceAttrPair(resourceName, dataSourceName string) []resource.TestCheckFunc {
 	return []resource.TestCheckFunc{
 		resource.TestCheckResourceAttrPair(resourceName, "ref", dataSourceName, "result.0.ref"),
+		resource.TestCheckResourceAttrPair(resourceName, "uuid", dataSourceName, "result.0.uuid"),
 		resource.TestCheckResourceAttrPair(resourceName, "authentication_key_id", dataSourceName, "result.0.authentication_key_id"),
 		resource.TestCheckResourceAttrPair(resourceName, "authentication_type", dataSourceName, "result.0.authentication_type"),
 		resource.TestCheckResourceAttrPair(resourceName, "detection_multiplier", dataSourceName, "result.0.detection_multiplier"),

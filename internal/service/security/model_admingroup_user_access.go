@@ -21,12 +21,14 @@ type AdmingroupUserAccessModel struct {
 	Address    types.String `tfsdk:"address"`
 	Permission types.String `tfsdk:"permission"`
 	Ref        types.String `tfsdk:"ref"`
+	Uuid       types.String `tfsdk:"uuid"`
 }
 
 var AdmingroupUserAccessAttrTypes = map[string]attr.Type{
 	"address":    types.StringType,
 	"permission": types.StringType,
 	"ref":        types.StringType,
+	"uuid":       types.StringType,
 }
 
 var AdmingroupUserAccessResourceSchemaAttributes = map[string]schema.Attribute{
@@ -98,4 +100,5 @@ func (m *AdmingroupUserAccessModel) Flatten(ctx context.Context, from *security.
 	m.Address = flex.FlattenStringPointer(from.Address)
 	m.Permission = flex.FlattenStringPointer(from.Permission)
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 }

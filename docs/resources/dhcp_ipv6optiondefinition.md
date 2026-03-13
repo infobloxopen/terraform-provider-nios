@@ -59,3 +59,4 @@ resource "nios_dhcp_ipv6optiondefinition" "ipv6_dhcp_option_definition_2" {
 ### Read-Only
 
 - `ref` (String) The reference to the object.
+- `uuid` (String) Universally Unique ID assigned for this object.

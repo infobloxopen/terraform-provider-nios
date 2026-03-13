@@ -137,6 +137,7 @@ Read-Only:
 - `rir` (String) The registry (RIR) that allocated the IPv6 network address space.
 - `template` (String) If set on creation, the network is created according to the values specified in the selected template.
 - `unmanaged_count` (Number) The number of unmanaged IP addresses as discovered by network discovery.
+- `uuid` (String) Universally Unique ID assigned for this object.
 
 <a id="nestedatt--result--cloud_info"></a>
 ### Nested Schema for `result.cloud_info`

@@ -59,6 +59,7 @@ Read-Only:
 - `descendants_action` (Attributes) This option describes the action that must be taken on the extensible attribute by its descendant in case the ‘Inheritable’ flag is set. (see [below for nested schema](#nestedatt--result--descendants_action))
 - `namespace` (String) Namespace for the Extensible Attribute Definition.
 - `ref` (String) The reference to the object.
+- `uuid` (String) Universally Unique ID assigned for this object.
 
 <a id="nestedatt--result--list_values"></a>
 ### Nested Schema for `result.list_values`

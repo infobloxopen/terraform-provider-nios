@@ -50,3 +50,4 @@ resource "nios_dhcp_optiondefinition" "option_definition_with_basic_fields" {
 ### Read-Only
 
 - `ref` (String) The reference to the object.
+- `uuid` (String) Universally Unique ID assigned for this object.

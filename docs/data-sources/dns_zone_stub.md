@@ -91,6 +91,7 @@ Read-Only:
 - `soa_retry` (Number) This indicates how long a secondary server must wait before attempting to recontact the primary server after a connection failure between the two servers occurs.
 - `soa_serial_number` (Number) The serial number in the SOA record incrementally changes every time the record is modified. The Infoblox appliance allows you to change the serial number (in the SOA record) for the primary server so it is higher than the secondary server, thereby ensuring zone transfers come from the primary server.
 - `using_srg_associations` (Boolean) This is true if the zone is associated with a shared record group.
+- `uuid` (String) Universally Unique ID assigned for this object.
 
 <a id="nestedatt--result--stub_from"></a>
 ### Nested Schema for `result.stub_from`

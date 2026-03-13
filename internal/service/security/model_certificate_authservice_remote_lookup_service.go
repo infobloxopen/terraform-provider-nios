@@ -14,17 +14,23 @@ import (
 )
 
 type CertificateAuthserviceRemoteLookupServiceModel struct {
-	Ref types.String `tfsdk:"ref"`
+	Ref  types.String `tfsdk:"ref"`
+	Uuid types.String `tfsdk:"uuid"`
 }
 
 var CertificateAuthserviceRemoteLookupServiceAttrTypes = map[string]attr.Type{
-	"ref": types.StringType,
+	"ref":  types.StringType,
+	"uuid": types.StringType,
 }
 
 var CertificateAuthserviceRemoteLookupServiceResourceSchemaAttributes = map[string]schema.Attribute{
 	"ref": schema.StringAttribute{
 		Optional:            true,
 		MarkdownDescription: "The reference to the LDAP auth service object.",
+	},
+	"uuid": schema.StringAttribute{
+		Optional:            true,
+		MarkdownDescription: "Universally Unique ID assigned for this object.",
 	},
 }
 

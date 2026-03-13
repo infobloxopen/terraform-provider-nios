@@ -201,6 +201,7 @@ resource "nios_ipam_network_container" "example_func_call" {
 - `ref` (String) The reference to the object.
 - `rir` (String) The registry (RIR) that allocated the network container address space.
 - `utilization` (Number) The network container utilization in percentage.
+- `uuid` (String) Universally Unique ID assigned for this object.
 
 <a id="nestedatt--cloud_info"></a>
 ### Nested Schema for `cloud_info`

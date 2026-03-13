@@ -140,6 +140,7 @@ Read-Only:
 - `extattrs_all` (Map of String) Extensible attributes associated with the object , including default attributes.
 - `is_default` (Boolean) The NIOS appliance provides one default DNS view. You can rename the default view and change its settings, but you cannot delete it. There must always be at least one DNS view in the appliance.
 - `ref` (String) The reference to the object.
+- `uuid` (String) Universally Unique ID assigned for this object.
 
 <a id="nestedatt--result--custom_root_name_servers"></a>
 ### Nested Schema for `result.custom_root_name_servers`
@@ -183,6 +184,10 @@ Optional:
 - `permission` (String) The permission to use for this address.
 - `ref` (String) The reference to the Named ACL object.
 
+Read-Only:
+
+- `uuid` (String) Universally Unique ID assigned for this object.
+
 
 <a id="nestedatt--result--fixed_rrset_order_fqdns"></a>
 ### Nested Schema for `result.fixed_rrset_order_fqdns`
@@ -222,6 +227,10 @@ Optional:
 - `tsig_key_name` (String) The name of the TSIG key. If 2.x TSIG compatibility is used, this is set to 'tsig_xfer' on retrieval, and ignored on insert or update.
 - `use_tsig_key_name` (Boolean) Use flag for: tsig_key_name
 
+Read-Only:
+
+- `uuid` (String) Universally Unique ID assigned for this object.
+
 
 <a id="nestedatt--result--match_destinations"></a>
 ### Nested Schema for `result.match_destinations`
@@ -236,6 +245,10 @@ Optional:
 - `tsig_key_alg` (String) The TSIG key algorithm.
 - `tsig_key_name` (String) The name of the TSIG key. If 2.x TSIG compatibility is used, this is set to 'tsig_xfer' on retrieval, and ignored on insert or update.
 - `use_tsig_key_name` (Boolean) Use flag for: tsig_key_name
+
+Read-Only:
+
+- `uuid` (String) Universally Unique ID assigned for this object.
 
 
 <a id="nestedatt--result--response_rate_limiting"></a>

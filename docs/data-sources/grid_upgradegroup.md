@@ -59,6 +59,7 @@ Read-Only:
 
 - `ref` (String) The reference to the object.
 - `time_zone` (String) The time zone for scheduling operations.
+- `uuid` (String) Universally Unique ID assigned for this object.
 
 <a id="nestedatt--result--members"></a>
 ### Nested Schema for `result.members`

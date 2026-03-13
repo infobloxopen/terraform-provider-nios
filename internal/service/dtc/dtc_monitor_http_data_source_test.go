@@ -63,6 +63,7 @@ func TestAccDtcMonitorHttpDataSource_ExtAttrFilters(t *testing.T) {
 func testAccCheckDtcMonitorHttpResourceAttrPair(resourceName, dataSourceName string) []resource.TestCheckFunc {
 	return []resource.TestCheckFunc{
 		resource.TestCheckResourceAttrPair(resourceName, "ref", dataSourceName, "result.0.ref"),
+		resource.TestCheckResourceAttrPair(resourceName, "uuid", dataSourceName, "result.0.uuid"),
 		resource.TestCheckResourceAttrPair(resourceName, "ciphers", dataSourceName, "result.0.ciphers"),
 		resource.TestCheckResourceAttrPair(resourceName, "client_cert", dataSourceName, "result.0.client_cert"),
 		resource.TestCheckResourceAttrPair(resourceName, "comment", dataSourceName, "result.0.comment"),
@@ -117,5 +118,5 @@ data "nios_dtc_monitor_http" "test" {
 	Site = nios_dtc_monitor_http.test.extattrs.Site
   }
 }
-`, name,  extAttrsValue)
+`, name, extAttrsValue)
 }

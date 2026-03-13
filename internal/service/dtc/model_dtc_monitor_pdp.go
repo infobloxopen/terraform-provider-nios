@@ -25,6 +25,7 @@ import (
 
 type DtcMonitorPdpModel struct {
 	Ref         types.String `tfsdk:"ref"`
+	Uuid        types.String `tfsdk:"uuid"`
 	Comment     types.String `tfsdk:"comment"`
 	ExtAttrs    types.Map    `tfsdk:"extattrs"`
 	Interval    types.Int64  `tfsdk:"interval"`
@@ -38,6 +39,7 @@ type DtcMonitorPdpModel struct {
 
 var DtcMonitorPdpAttrTypes = map[string]attr.Type{
 	"ref":          types.StringType,
+	"uuid":         types.StringType,
 	"comment":      types.StringType,
 	"extattrs":     types.MapType{ElemType: types.StringType},
 	"interval":     types.Int64Type,
@@ -53,6 +55,10 @@ var DtcMonitorPdpResourceSchemaAttributes = map[string]schema.Attribute{
 	"ref": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The reference to the object.",
+	},
+	"uuid": schema.StringAttribute{
+		Computed:            true,
+		MarkdownDescription: "Universally Unique ID assigned for this object.",
 	},
 	"comment": schema.StringAttribute{
 		Optional: true,
@@ -161,6 +167,7 @@ func (m *DtcMonitorPdpModel) Flatten(ctx context.Context, from *dtc.DtcMonitorPd
 		*m = DtcMonitorPdpModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.Comment = flex.FlattenStringPointer(from.Comment)
 	m.ExtAttrs = FlattenExtAttrs(ctx, m.ExtAttrs, from.ExtAttrs, diags)
 	m.Interval = flex.FlattenInt64Pointer(from.Interval)

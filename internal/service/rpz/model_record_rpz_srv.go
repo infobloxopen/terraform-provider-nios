@@ -28,6 +28,7 @@ import (
 
 type RecordRpzSrvModel struct {
 	Ref         types.String                             `tfsdk:"ref"`
+	Uuid        types.String                             `tfsdk:"uuid"`
 	Comment     types.String                             `tfsdk:"comment"`
 	Disable     types.Bool                               `tfsdk:"disable"`
 	ExtAttrs    types.Map                                `tfsdk:"extattrs"`
@@ -46,6 +47,7 @@ type RecordRpzSrvModel struct {
 
 var RecordRpzSrvAttrTypes = map[string]attr.Type{
 	"ref":          types.StringType,
+	"uuid":         types.StringType,
 	"comment":      types.StringType,
 	"disable":      types.BoolType,
 	"extattrs":     types.MapType{ElemType: types.StringType},
@@ -66,6 +68,10 @@ var RecordRpzSrvResourceSchemaAttributes = map[string]schema.Attribute{
 	"ref": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The reference to the object.",
+	},
+	"uuid": schema.StringAttribute{
+		Computed:            true,
+		MarkdownDescription: "Universally Unique ID assigned for this object.",
 	},
 	"comment": schema.StringAttribute{
 		Optional: true,
@@ -195,7 +201,7 @@ func (m *RecordRpzSrvModel) Expand(ctx context.Context, diags *diag.Diagnostics)
 		Ttl:      flex.ExpandInt64Pointer(m.Ttl),
 		UseTtl:   flex.ExpandBoolPointer(m.UseTtl),
 		Weight:   flex.ExpandInt64Pointer(m.Weight),
-		View:    flex.ExpandStringPointer(m.View),
+		View:     flex.ExpandStringPointer(m.View),
 	}
 	return to
 }
@@ -220,6 +226,7 @@ func (m *RecordRpzSrvModel) Flatten(ctx context.Context, from *rpz.RecordRpzSrv,
 		*m = RecordRpzSrvModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.Comment = flex.FlattenStringPointer(from.Comment)
 	m.Disable = types.BoolPointerValue(from.Disable)
 	m.ExtAttrs = FlattenExtAttrs(ctx, m.ExtAttrs, from.ExtAttrs, diags)

@@ -40,6 +40,7 @@ func TestAccDtcRecordSrvDataSource_Filters(t *testing.T) {
 func testAccCheckDtcRecordSrvResourceAttrPair(resourceName, dataSourceName string) []resource.TestCheckFunc {
 	return []resource.TestCheckFunc{
 		resource.TestCheckResourceAttrPair(resourceName, "ref", dataSourceName, "result.0.ref"),
+		resource.TestCheckResourceAttrPair(resourceName, "uuid", dataSourceName, "result.0.uuid"),
 		resource.TestCheckResourceAttrPair(resourceName, "comment", dataSourceName, "result.0.comment"),
 		resource.TestCheckResourceAttrPair(resourceName, "disable", dataSourceName, "result.0.disable"),
 		resource.TestCheckResourceAttrPair(resourceName, "dtc_server", dataSourceName, "result.0.dtc_server"),
@@ -54,7 +55,7 @@ func testAccCheckDtcRecordSrvResourceAttrPair(resourceName, dataSourceName strin
 }
 
 func testAccDtcRecordSrvDataSourceConfigFilters(port, priority int, target string, weight int, serverName string) string {
-    config := fmt.Sprintf(`
+	config := fmt.Sprintf(`
 resource "nios_dtc_record_srv" "test" {
     port       = %d
     priority   = %d
@@ -74,5 +75,5 @@ data "nios_dtc_record_srv" "test" {
     depends_on = [nios_dtc_record_srv.test]
 }
 `, port, priority, target, weight, port, priority, target, weight)
-    return strings.Join([]string{testAccBaseWithDtcServer(serverName, "2.2.2.2"), config}, "")
+	return strings.Join([]string{testAccBaseWithDtcServer(serverName, "2.2.2.2"), config}, "")
 }

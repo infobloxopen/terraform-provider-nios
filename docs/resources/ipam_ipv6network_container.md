@@ -157,6 +157,7 @@ resource "nios_ipam_ipv6network_container" "example_func_call" {
 - `rir` (String) The registry (RIR) that allocated the IPv6 network container address space.
 - `subscribe_settings` (Attributes) (see [below for nested schema](#nestedatt--subscribe_settings))
 - `utilization` (Number) The network container utilization in percentage.
+- `uuid` (String) Universally Unique ID assigned for this object.
 
 <a id="nestedatt--cloud_info"></a>
 ### Nested Schema for `cloud_info`

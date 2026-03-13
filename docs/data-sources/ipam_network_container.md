@@ -154,6 +154,7 @@ Read-Only:
 - `ref` (String) The reference to the object.
 - `rir` (String) The registry (RIR) that allocated the network container address space.
 - `utilization` (Number) The network container utilization in percentage.
+- `uuid` (String) Universally Unique ID assigned for this object.
 
 <a id="nestedatt--result--cloud_info"></a>
 ### Nested Schema for `result.cloud_info`

@@ -82,3 +82,4 @@ resource "nios_dhcp_failover" "dhcpfailover_2" {
 - `primary_state` (String) The primary server status of a DHCP failover object.
 - `ref` (String) The reference to the object.
 - `secondary_state` (String) The secondary server status of a DHCP failover object.
+- `uuid` (String) Universally Unique ID assigned for this object.

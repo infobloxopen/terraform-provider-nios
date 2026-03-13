@@ -128,6 +128,7 @@ Read-Only:
 - `extattrs_all` (Map of String) Extensible attributes associated with the object , including default and internal attributes.
 - `ref` (String) The reference to the object.
 - `rir` (String) THe registry (RIR) that allocated the network address space.
+- `uuid` (String) Universally Unique ID assigned for this object.
 
 <a id="nestedatt--result--delegated_member"></a>
 ### Nested Schema for `result.delegated_member`

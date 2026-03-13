@@ -40,6 +40,7 @@ func TestAccUpgradegroupDataSource_Filters(t *testing.T) {
 func testAccCheckUpgradegroupResourceAttrPair(resourceName, dataSourceName string) []resource.TestCheckFunc {
 	return []resource.TestCheckFunc{
 		resource.TestCheckResourceAttrPair(resourceName, "ref", dataSourceName, "result.0.ref"),
+		resource.TestCheckResourceAttrPair(resourceName, "uuid", dataSourceName, "result.0.uuid"),
 		resource.TestCheckResourceAttrPair(resourceName, "comment", dataSourceName, "result.0.comment"),
 		resource.TestCheckResourceAttrPair(resourceName, "distribution_dependent_group", dataSourceName, "result.0.distribution_dependent_group"),
 		resource.TestCheckResourceAttrPair(resourceName, "distribution_policy", dataSourceName, "result.0.distribution_policy"),

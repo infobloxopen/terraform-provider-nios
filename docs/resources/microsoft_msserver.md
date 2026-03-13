@@ -96,6 +96,7 @@ resource "nios_microsoft_msserver" "msserver_with_ad_sites" {
 - `server_name` (String) Gives the server name as reported by itself
 - `synchronization_status` (String) Synchronization status summary
 - `synchronization_status_detail` (String) Detail status if synchronization_status is ERROR
+- `uuid` (String) Universally Unique ID assigned for this object.
 - `version` (String) Version of the Microsoft Server
 
 <a id="nestedatt--ad_sites"></a>

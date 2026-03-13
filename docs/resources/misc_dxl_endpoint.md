@@ -82,6 +82,7 @@ resource "nios_misc_dxl_endpoint" "misc_dxl_endpoint_with_additional_fields" {
 - `client_certificate_valid_to` (Number) The timestamp when the client certificate for a DXL endpoint expires.
 - `extattrs_all` (Map of String) Extensible attributes associated with the object, including default and internal attributes.
 - `ref` (String) The reference to the object.
+- `uuid` (String) Universally Unique ID assigned for this object.
 
 <a id="nestedatt--brokers"></a>
 ### Nested Schema for `brokers`

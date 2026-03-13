@@ -12,8 +12,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
-	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/security"
 
@@ -24,6 +24,8 @@ import (
 
 type TacacsplusAuthserviceModel struct {
 	Ref         types.String `tfsdk:"ref"`
+	Uuid        types.String `tfsdk:"uuid"`
+	UUID        types.String `tfsdk:"uuid"`
 	AcctRetries types.Int64  `tfsdk:"acct_retries"`
 	AcctTimeout types.Int64  `tfsdk:"acct_timeout"`
 	AuthRetries types.Int64  `tfsdk:"auth_retries"`
@@ -36,6 +38,7 @@ type TacacsplusAuthserviceModel struct {
 
 var TacacsplusAuthserviceAttrTypes = map[string]attr.Type{
 	"ref":          types.StringType,
+	"uuid":         types.StringType,
 	"acct_retries": types.Int64Type,
 	"acct_timeout": types.Int64Type,
 	"auth_retries": types.Int64Type,
@@ -51,6 +54,10 @@ var TacacsplusAuthserviceResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed:            true,
 		MarkdownDescription: "The reference to the object.",
 	},
+	"uuid": schema.StringAttribute{
+		Computed:            true,
+		MarkdownDescription: "Universally Unique ID assigned for this object.",
+	},
 	"acct_retries": schema.Int64Attribute{
 		Optional: true,
 		Computed: true,
@@ -61,9 +68,9 @@ var TacacsplusAuthserviceResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The number of the accounting retries before giving up and moving on to the next server.",
 	},
 	"acct_timeout": schema.Int64Attribute{
-		Optional:            true,
-		Computed:            true,
-		Default:             int64default.StaticInt64(1000),
+		Optional: true,
+		Computed: true,
+		Default:  int64default.StaticInt64(1000),
 		Validators: []validator.Int64{
 			int64validator.Between(1, 4294967295),
 		},
@@ -157,6 +164,7 @@ func (m *TacacsplusAuthserviceModel) Flatten(ctx context.Context, from *security
 		*m = TacacsplusAuthserviceModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.AcctRetries = flex.FlattenInt64Pointer(from.AcctRetries)
 	m.AcctTimeout = flex.FlattenInt64Pointer(from.AcctTimeout)
 	m.AuthRetries = flex.FlattenInt64Pointer(from.AuthRetries)

@@ -67,6 +67,7 @@ resource "nios_dtc_server" "create_with_additional_fields" {
 - `extattrs_all` (Map of String) Extensible attributes associated with the object , including default attributes.
 - `health` (Attributes) The health status of DTC Server (see [below for nested schema](#nestedatt--health))
 - `ref` (String) The reference to the object.
+- `uuid` (String) Universally Unique ID assigned for this object.
 
 <a id="nestedatt--monitors"></a>
 ### Nested Schema for `monitors`

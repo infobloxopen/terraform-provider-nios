@@ -45,6 +45,7 @@ resource "nios_grid_distributionschedule" "schedule_with_upgrade_groups" {
 
 - `ref` (String) The reference to the object.
 - `time_zone` (String) Time zone of the distribution start time.
+- `uuid` (String) Universally Unique ID assigned for this object.
 
 <a id="nestedatt--upgrade_groups"></a>
 ### Nested Schema for `upgrade_groups`

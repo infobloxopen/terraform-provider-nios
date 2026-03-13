@@ -26,6 +26,7 @@ import (
 
 type NamedaclModel struct {
 	Ref                types.String `tfsdk:"ref"`
+	Uuid               types.String `tfsdk:"uuid"`
 	AccessList         types.List   `tfsdk:"access_list"`
 	Comment            types.String `tfsdk:"comment"`
 	ExplodedAccessList types.List   `tfsdk:"exploded_access_list"`
@@ -36,6 +37,7 @@ type NamedaclModel struct {
 
 var NamedaclAttrTypes = map[string]attr.Type{
 	"ref":                  types.StringType,
+	"uuid":                 types.StringType,
 	"access_list":          types.ListType{ElemType: types.ObjectType{AttrTypes: NamedaclAccessListAttrTypes}},
 	"comment":              types.StringType,
 	"exploded_access_list": types.ListType{ElemType: types.ObjectType{AttrTypes: NamedaclExplodedAccessListAttrTypes}},
@@ -49,6 +51,10 @@ var NamedaclResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed:            true,
 		MarkdownDescription: "The reference to the object.",
 	},
+	"uuid": schema.StringAttribute{
+		Computed:            true,
+		MarkdownDescription: "Universally Unique ID assigned for this object.",
+	},
 	"access_list": schema.ListNestedAttribute{
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: NamedaclAccessListResourceSchemaAttributes,
@@ -59,7 +65,7 @@ var NamedaclResourceSchemaAttributes = map[string]schema.Attribute{
 			listvalidator.SizeAtLeast(1),
 		},
 		Default:             listdefault.StaticValue(types.ListNull(types.ObjectType{AttrTypes: NamedaclAccessListAttrTypes})),
-		MarkdownDescription: "The access control list of IPv4/IPv6 addresses, networks, TSIG-based anonymous access controls, and other named ACLs.",
+		MarkdownDescription: "The access control list of IPv4/IPv6 addresses, networks, TSIG-based anonymous access controls, and other named ACLs",
 	},
 	"comment": schema.StringAttribute{
 		Optional: true,
@@ -138,6 +144,7 @@ func (m *NamedaclModel) Flatten(ctx context.Context, from *acl.Namedacl, diags *
 		*m = NamedaclModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.AccessList = flex.FlattenFrameworkListNestedBlock(ctx, from.AccessList, NamedaclAccessListAttrTypes, diags, FlattenNamedaclAccessList)
 	m.Comment = flex.FlattenStringPointer(from.Comment)
 	m.ExplodedAccessList = flex.FlattenFrameworkListNestedBlock(ctx, from.ExplodedAccessList, NamedaclExplodedAccessListAttrTypes, diags, FlattenNamedaclExplodedAccessList)

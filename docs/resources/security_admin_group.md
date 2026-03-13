@@ -241,6 +241,7 @@ resource "nios_security_admin_group" "admin_group_with_additional_fields2" {
 - `enable_restricted_user_access` (Boolean) Determines whether the restrictions will be applied to the admin connector level for users of this Admin Group.
 - `extattrs_all` (Map of String) Extensible attributes associated with the object , including default attributes.
 - `ref` (String) The reference to the object.
+- `uuid` (String) Universally Unique ID assigned for this object.
 
 <a id="nestedatt--admin_set_commands"></a>
 ### Nested Schema for `admin_set_commands`

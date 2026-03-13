@@ -66,6 +66,7 @@ func TestAccFingerprintDataSource_ExtAttrFilters(t *testing.T) {
 func testAccCheckFingerprintResourceAttrPair(resourceName, dataSourceName string) []resource.TestCheckFunc {
 	return []resource.TestCheckFunc{
 		resource.TestCheckResourceAttrPair(resourceName, "ref", dataSourceName, "result.0.ref"),
+		resource.TestCheckResourceAttrPair(resourceName, "uuid", dataSourceName, "result.0.uuid"),
 		resource.TestCheckResourceAttrPair(resourceName, "comment", dataSourceName, "result.0.comment"),
 		resource.TestCheckResourceAttrPair(resourceName, "device_class", dataSourceName, "result.0.device_class"),
 		resource.TestCheckResourceAttrPair(resourceName, "disable", dataSourceName, "result.0.disable"),

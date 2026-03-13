@@ -144,6 +144,7 @@ Read-Only:
 - `is_invalid_mac` (Boolean) This flag reflects whether the MAC address for this fixed address is invalid.
 - `ms_ad_user_data` (Attributes) The Microsoft Active Directory user related information. (see [below for nested schema](#nestedatt--result--ms_ad_user_data))
 - `ref` (String) The reference to the object.
+- `uuid` (String) Universally Unique ID assigned for this object.
 
 <a id="nestedatt--result--cli_credentials"></a>
 ### Nested Schema for `result.cli_credentials`

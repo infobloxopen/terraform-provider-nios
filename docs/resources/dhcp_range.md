@@ -173,6 +173,7 @@ resource "nios_dhcp_range" "create_range_with_additional_fields" {
 - `static_hosts` (Number) The number of static DHCP addresses configured in the range.
 - `template` (String) If set on creation, the range will be created according to the values specified in the named template.
 - `total_hosts` (Number) The total number of DHCP addresses configured in the range.
+- `uuid` (String) Universally Unique ID assigned for this object.
 
 <a id="nestedatt--cloud_info"></a>
 ### Nested Schema for `cloud_info`

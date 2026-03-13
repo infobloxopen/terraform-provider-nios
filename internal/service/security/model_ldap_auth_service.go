@@ -22,6 +22,8 @@ import (
 
 type LdapAuthServiceModel struct {
 	Ref                         types.String `tfsdk:"ref"`
+	Uuid                        types.String `tfsdk:"uuid"`
+	UUID                        types.String `tfsdk:"uuid"`
 	Comment                     types.String `tfsdk:"comment"`
 	Disable                     types.Bool   `tfsdk:"disable"`
 	EaMapping                   types.List   `tfsdk:"ea_mapping"`
@@ -39,6 +41,7 @@ type LdapAuthServiceModel struct {
 
 var LdapAuthServiceAttrTypes = map[string]attr.Type{
 	"ref":                            types.StringType,
+	"uuid":                           types.StringType,
 	"comment":                        types.StringType,
 	"disable":                        types.BoolType,
 	"ea_mapping":                     types.ListType{ElemType: types.ObjectType{AttrTypes: LdapAuthServiceEaMappingAttrTypes}},
@@ -58,6 +61,10 @@ var LdapAuthServiceResourceSchemaAttributes = map[string]schema.Attribute{
 	"ref": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The reference to the object.",
+	},
+	"uuid": schema.StringAttribute{
+		Computed:            true,
+		MarkdownDescription: "Universally Unique ID assigned for this object.",
 	},
 	"comment": schema.StringAttribute{
 		Optional: true,
@@ -197,6 +204,7 @@ func (m *LdapAuthServiceModel) Flatten(ctx context.Context, from *security.LdapA
 		*m = LdapAuthServiceModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.Comment = flex.FlattenStringPointer(from.Comment)
 	m.Disable = types.BoolPointerValue(from.Disable)
 	m.EaMapping = flex.FlattenFrameworkListNestedBlock(ctx, from.EaMapping, LdapAuthServiceEaMappingAttrTypes, diags, FlattenLdapAuthServiceEaMapping)

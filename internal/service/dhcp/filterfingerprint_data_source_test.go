@@ -78,6 +78,7 @@ func TestAccFilterfingerprintDataSource_ExtAttrFilters(t *testing.T) {
 func testAccCheckFilterfingerprintResourceAttrPair(resourceName, dataSourceName string) []resource.TestCheckFunc {
 	return []resource.TestCheckFunc{
 		resource.TestCheckResourceAttrPair(resourceName, "ref", dataSourceName, "result.0.ref"),
+		resource.TestCheckResourceAttrPair(resourceName, "uuid", dataSourceName, "result.0.uuid"),
 		resource.TestCheckResourceAttrPair(resourceName, "comment", dataSourceName, "result.0.comment"),
 		resource.TestCheckResourceAttrPair(resourceName, "extattrs", dataSourceName, "result.0.extattrs"),
 		resource.TestCheckResourceAttrPair(resourceName, "fingerprint", dataSourceName, "result.0.fingerprint"),

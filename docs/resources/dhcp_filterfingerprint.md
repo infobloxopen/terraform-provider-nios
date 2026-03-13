@@ -68,3 +68,4 @@ resource "nios_dhcp_filterfingerprint" "dhcp_filterfingerprint_with_additional_f
 
 - `extattrs_all` (Map of String) Extensible attributes associated with the object, including default and internal attributes.
 - `ref` (String) The reference to the object.
+- `uuid` (String) Universally Unique ID assigned for this object.

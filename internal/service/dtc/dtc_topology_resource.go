@@ -412,9 +412,9 @@ func UpdateDtcTopologyRules(ctx context.Context, r *DtcTopologyResource, ruleRef
 		ruleData.SetDestType(*destType)
 	}
 
-	if destLink, ok := res.GetDestinationLinkOk(); ok {
-		ruleData.SetDestinationLink(*destLink.DtcTopologyRuleDestinationLinkOneOf.Ref)
-	}
+	// if destLink, ok := res.GetDestinationLinkOk(); ok {
+	// 	ruleData.SetDestinationLink(*destLink.DtcTopologyRuleDestinationLinkOneOf.Ref)
+	// }
 
 	if returnType, ok := res.GetReturnTypeOk(); ok {
 		ruleData.SetReturnType(*returnType)

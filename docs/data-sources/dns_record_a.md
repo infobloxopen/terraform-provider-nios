@@ -80,6 +80,7 @@ Read-Only:
 - `reclaimable` (Boolean) Determines if the record is reclaimable or not.
 - `ref` (String) The reference to the object.
 - `shared_record_group` (String) The shared record group this record belongs to.
+- `uuid` (String) Universally Unique ID assigned for this object.
 - `zone` (String) The zone in which the record resides.
 
 <a id="nestedatt--result--func_call"></a>

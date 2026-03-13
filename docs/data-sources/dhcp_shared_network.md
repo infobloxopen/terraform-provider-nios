@@ -109,6 +109,7 @@ Read-Only:
 - `ref` (String) The reference to the object.
 - `static_hosts` (Number) The number of static DHCP addresses configured in the shared network.
 - `total_hosts` (Number) The total number of DHCP addresses configured in the shared network.
+- `uuid` (String) Universally Unique ID assigned for this object.
 
 <a id="nestedatt--result--networks"></a>
 ### Nested Schema for `result.networks`

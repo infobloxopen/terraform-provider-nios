@@ -58,3 +58,4 @@ Read-Only:
 
 - `ref` (String) The reference to the object.
 - `user_defined` (Boolean) Determines if AVP was defined by user.
+- `uuid` (String) Universally Unique ID assigned for this object.

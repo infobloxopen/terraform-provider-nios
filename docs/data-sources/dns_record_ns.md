@@ -60,6 +60,7 @@ Read-Only:
 - `last_queried` (Number) The time of the last DNS query in Epoch seconds format.
 - `policy` (String) The host name policy for the record.
 - `ref` (String) The reference to the object.
+- `uuid` (String) Universally Unique ID assigned for this object.
 - `zone` (String) The name of the zone in which the record resides. Example: "zone.com". If a view is not specified when searching by zone, the default view is used.
 
 <a id="nestedatt--result--addresses"></a>

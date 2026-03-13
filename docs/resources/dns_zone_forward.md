@@ -121,6 +121,7 @@ resource "nios_dns_zone_forward" "zone_forward_ipv6_mapping" {
 - `parent` (String) The parent zone of this zone. Note that when searching for reverse zones, the "in-addr.arpa" notation should be used.
 - `ref` (String) The reference to the object.
 - `using_srg_associations` (Boolean) This is true if the zone is associated with a shared record group.
+- `uuid` (String) Universally Unique ID assigned for this object.
 
 <a id="nestedatt--forward_to"></a>
 ### Nested Schema for `forward_to`

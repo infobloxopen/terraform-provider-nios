@@ -94,6 +94,7 @@ Read-Only:
 - `last_queried` (Number) The time of the last DNS query in Epoch seconds format.
 - `ms_ad_user_data` (Attributes) The Microsoft Active Directory user related information. (see [below for nested schema](#nestedatt--result--ms_ad_user_data))
 - `ref` (String) The reference to the object.
+- `uuid` (String) Universally Unique ID assigned for this object.
 - `zone` (String) The name of the zone in which the record resides. Example: "zone.com". If a view is not specified when searching by zone, the default view is used.
 
 <a id="nestedatt--result--cli_credentials"></a>
@@ -153,6 +154,7 @@ Read-Only:
 - `network` (String) The network of the host address, in FQDN/CIDR format.
 - `network_view` (String) The name of the network view in which the host address resides.
 - `ref` (String) The reference to the object.
+- `uuid` (String) Universally Unique ID assigned for this object.
 
 <a id="nestedatt--result--ipv4addrs--func_call"></a>
 ### Nested Schema for `result.ipv4addrs.func_call`
@@ -342,6 +344,7 @@ Read-Only:
 - `network` (String) The network of the host address, in FQDN/CIDR format.
 - `network_view` (String) The name of the network view in which the host address resides.
 - `ref` (String) The reference to the object.
+- `uuid` (String) Universally Unique ID assigned for this object.
 
 <a id="nestedatt--result--ipv6addrs--func_call"></a>
 ### Nested Schema for `result.ipv6addrs.func_call`

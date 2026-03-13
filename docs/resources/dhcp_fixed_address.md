@@ -165,6 +165,7 @@ resource "nios_dhcp_fixed_address" "create_fixed_address_with_func_call" {
 - `is_invalid_mac` (Boolean) This flag reflects whether the MAC address for this fixed address is invalid.
 - `ms_ad_user_data` (Attributes) The Microsoft Active Directory user related information. (see [below for nested schema](#nestedatt--ms_ad_user_data))
 - `ref` (String) The reference to the object.
+- `uuid` (String) Universally Unique ID assigned for this object.
 
 <a id="nestedatt--cli_credentials"></a>
 ### Nested Schema for `cli_credentials`

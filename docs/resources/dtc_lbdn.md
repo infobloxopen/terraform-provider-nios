@@ -129,6 +129,7 @@ resource "nios_dtc_lbdn" "lbdn_additional_fields" {
 - `extattrs_all` (Map of String) Extensible attributes associated with the object , including default attributes.
 - `health` (Attributes) The LBDN health information. (see [below for nested schema](#nestedatt--health))
 - `ref` (String) The reference to the object.
+- `uuid` (String) Universally Unique ID assigned for this object.
 
 <a id="nestedatt--pools"></a>
 ### Nested Schema for `pools`

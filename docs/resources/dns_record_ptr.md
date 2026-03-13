@@ -205,6 +205,7 @@ resource "nios_dns_record_ptr" "create_ptr_record_with_ipv6_arpa" {
 - `reclaimable` (Boolean) Determines if the record is reclaimable or not.
 - `ref` (String) The reference to the object.
 - `shared_record_group` (String) The name of the shared record group in which the record resides. This field exists only on db_objects if this record is a shared record.
+- `uuid` (String) Universally Unique ID assigned for this object.
 - `zone` (String) The name of the zone in which the record resides. For example: "zone.com". If a view is not specified when searching by zone, the default view is used.
 
 <a id="nestedatt--func_call"></a>

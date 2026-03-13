@@ -66,6 +66,7 @@ func TestAccRecordTlsaDataSource_ExtAttrFilters(t *testing.T) {
 func testAccCheckRecordTlsaResourceAttrPair(resourceName, dataSourceName string) []resource.TestCheckFunc {
 	return []resource.TestCheckFunc{
 		resource.TestCheckResourceAttrPair(resourceName, "ref", dataSourceName, "result.0.ref"),
+		resource.TestCheckResourceAttrPair(resourceName, "uuid", dataSourceName, "result.0.uuid"),
 		resource.TestCheckResourceAttrPair(resourceName, "certificate_data", dataSourceName, "result.0.certificate_data"),
 		resource.TestCheckResourceAttrPair(resourceName, "certificate_usage", dataSourceName, "result.0.certificate_usage"),
 		resource.TestCheckResourceAttrPair(resourceName, "cloud_info", dataSourceName, "result.0.cloud_info"),

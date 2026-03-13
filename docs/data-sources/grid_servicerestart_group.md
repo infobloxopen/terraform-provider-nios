@@ -70,6 +70,7 @@ Read-Only:
 - `ref` (String) The reference to the object.
 - `requests` (List of String) The list of requests associated with a restart group.
 - `status` (Attributes) The restart status for a restart group. (see [below for nested schema](#nestedatt--result--status))
+- `uuid` (String) Universally Unique ID assigned for this object.
 
 <a id="nestedatt--result--recurring_schedule"></a>
 ### Nested Schema for `result.recurring_schedule`
@@ -119,3 +120,4 @@ Read-Only:
 - `restarting` (Number) The number of service restarts for corresponding members.
 - `success` (Number) The number of requests associated with successful restarts.
 - `timeouts` (Number) The number of timeout requests.
+- `uuid` (String) Universally Unique ID assigned for this object.

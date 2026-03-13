@@ -87,6 +87,7 @@ resource "nios_cloud_aws_route53_task_group" "awsrte53taskgroup_additional_field
 - `aws_account_ids_file_token` (String) The AWS account IDs file's token.
 - `ref` (String) The reference to the object.
 - `sync_status` (String) Indicate the overall sync status of this task group.
+- `uuid` (String) Universally Unique ID assigned for this object.
 
 <a id="nestedatt--task_list"></a>
 ### Nested Schema for `task_list`
