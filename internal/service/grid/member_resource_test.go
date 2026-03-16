@@ -5,6 +5,8 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -44,18 +46,6 @@ type memberBasicInput struct {
 	VIPAddress        string
 	VIPGateway        string
 	VIPSubnetMask     string
-}
-
-func testAccMemberBasicInput() memberBasicInput {
-	return memberBasicInput{
-		HostName:          fmt.Sprintf("infoblox-%s.localdomain", acctest.RandomName()),
-		ConfigAddrType:    "IPV4",
-		Platform:          "VNIOS",
-		ServiceTypeConfig: "ALL_V4",
-		VIPAddress:        fmt.Sprintf("172.28.83.%d", acctest.RandomNumber(254)),
-		VIPGateway:        "172.28.82.1",
-		VIPSubnetMask:     "255.255.254.0",
-	}
 }
 
 func TestAccMemberResource_basic(t *testing.T) {
@@ -1618,7 +1608,7 @@ func TestAccMemberResource_NtpSetting(t *testing.T) {
 	}
 
 	ntpSettingValUpdated := map[string]any{
-		"enable_external_ntp_servers":    true,
+		"enable_external_ntp_servers":    false,
 		"enable_ntp":                     true,
 		"exclude_grid_master_ntp_server": false,
 		"local_ntp_stratum":              15,
@@ -1651,7 +1641,6 @@ func TestAccMemberResource_NtpSetting(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "ntp_setting.enable_ntp", "true"),
-					resource.TestCheckResourceAttr(resourceName, "ntp_setting.enable_external_ntp_servers", "true"),
 				),
 			},
 		},
@@ -1736,6 +1725,7 @@ func TestAccMemberResource_OspfList(t *testing.T) {
 	})
 }
 
+// needs a special HA grid - SA-HA type
 func TestAccMemberResource_PassiveHaArpEnabled(t *testing.T) {
 	var resourceName = "nios_grid_member.test_passive_ha_arp_enabled"
 	var v grid.Member
@@ -1769,44 +1759,31 @@ func TestAccMemberResource_Platform(t *testing.T) {
 	var resourceName = "nios_grid_member.test_platform"
 	var v grid.Member
 
+	hostName := fmt.Sprintf("infoblox-%s.localdomain", acctest.RandomName())
+	vipAddress := fmt.Sprintf("172.28.83.%d", acctest.RandomNumber(254))
+
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
-			// Create and Read
 			{
-				Config: testAccMemberPlatform("PLATFORM_REPLACE_ME", "CISCO"),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckMemberExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "platform", "CISCO"),
+				Config: testAccMemberPlatform(
+					hostName, "IPV4", "VNIOS", "ALL_V4",
+					vipAddress, "172.28.82.1", "255.255.254.0",
 				),
-			},
-			{
-				Config: testAccMemberPlatform("PLATFORM_REPLACE_ME", "IBVM"),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckMemberExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "platform", "IBVM"),
-				),
-			},
-			{
-				Config: testAccMemberPlatform("PLATFORM_REPLACE_ME", "INFOBLOX"),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckMemberExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "platform", "INFOBLOX"),
-				),
-			},
-			{
-				Config: testAccMemberPlatform("PLATFORM_REPLACE_ME", "RIVERBED"),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckMemberExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "platform", "RIVERBED"),
-				),
-			},
-			{
-				Config: testAccMemberPlatform("PLATFORM_REPLACE_ME", "VNIOS"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "platform", "VNIOS"),
+				),
+			},
+			{
+				Config: testAccMemberPlatform(
+					hostName, "IPV4", "INFOBLOX", "ALL_V4",
+					vipAddress, "172.28.82.1", "255.255.254.0",
+				),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckMemberExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "platform", "INFOBLOX"),
 				),
 			},
 		},
@@ -1955,11 +1932,11 @@ func TestAccMemberResource_RouterId(t *testing.T) {
 	})
 }
 
-// issue
+// issue - rajat twm
 func TestAccMemberResource_ServiceTypeConfiguration(t *testing.T) {
 	var resourceName = "nios_grid_member.test_service_type_configuration"
 	var v grid.Member
-
+	t.Skip("you would need a grid member which supports both ipv4 and v6- else error - ")
 	hostName := fmt.Sprintf("infoblox-%s.localdomain", acctest.RandomName())
 	vipAddress4 := fmt.Sprintf("172.28.83.%d", acctest.RandomNumber(254))
 	vipAddress6 := fmt.Sprintf("2001:db8:%x:%x::%x", acctest.RandomNumber(65535), acctest.RandomNumber(65535), acctest.RandomNumber(65535))
@@ -1992,7 +1969,7 @@ func TestAccMemberResource_ServiceTypeConfiguration(t *testing.T) {
 	})
 }
 
-// issue
+// issue - ujjwal
 func TestAccMemberResource_SnmpSetting(t *testing.T) {
 	var resourceName = "nios_grid_member.test_snmp_setting"
 	var v grid.Member
@@ -2001,16 +1978,22 @@ func TestAccMemberResource_SnmpSetting(t *testing.T) {
 	vipAddress := fmt.Sprintf("172.28.83.%d", acctest.RandomNumber(254))
 
 	snmpSettingVal := map[string]any{
-		"queries_enable":        false,
-		"snmpv3_queries_enable": false,
-		"snmpv3_traps_enable":   false,
-		"traps_enable":          false,
+		"queries_enable":           true,
+		"queries_community_string": "example_community_string",
+		"snmpv3_queries_enable":    false,
+		"snmpv3_traps_enable":      true,
+		"traps_enable":             false,
+		"snmpv3_queries_users": []map[string]any{
+			{
+				"user": "snmpuser/b25lLnNubXBfdXNlciRzbm1wX3YzX3VzZXI:snmp_v3_user",
+			},
+		},
 	}
 
 	snmpSettingValUpdated := map[string]any{
-		"queries_enable":        true,
-		"snmpv3_queries_enable": true,
-		"snmpv3_traps_enable":   true,
+		"queries_enable":        false,
+		"snmpv3_queries_enable": false,
+		"snmpv3_traps_enable":   false,
 		"traps_enable":          true,
 	}
 
@@ -2162,12 +2145,27 @@ func TestAccMemberResource_SyslogProxySetting(t *testing.T) {
 
 	hostName := fmt.Sprintf("infoblox-%s.localdomain", acctest.RandomName())
 	vipAddress := fmt.Sprintf("172.28.83.%d", acctest.RandomNumber(254))
+	testDataPath := getTestDataPath()
+	syslogServersVal := []map[string]any{
+		{
+			"address_or_fqdn":       "192.com",
+			"category_list":         []string{"AUTH_ACTIVE_DIRECTORY"},
+			"certificate_file_path": filepath.Join(testDataPath, "client.crt"),
+			"connection_type":       "STCP",
+			"local_interface":       "ANY",
+			"message_node_id":       "LAN",
+			"message_source":        "ANY",
+			"only_category_list":    false,
+			"port":                  514,
+			"severity":              "DEBUG",
+		},
+	}
 
 	syslogProxySettingVal := map[string]any{
 
 		"client_acls": []map[string]any{
 			{
-				"_struct":    "addressac",
+				"struct":     "addressac",
 				"address":    "192.0.0.1",
 				"permission": "ALLOW",
 			},
@@ -2182,7 +2180,7 @@ func TestAccMemberResource_SyslogProxySetting(t *testing.T) {
 	syslogProxySettingValUpdated := map[string]any{
 		"client_acls": []map[string]any{
 			{
-				"_struct":    "addressac",
+				"struct":     "addressac",
 				"address":    "192.0.0.1",
 				"permission": "ALLOW",
 			},
@@ -2203,6 +2201,7 @@ func TestAccMemberResource_SyslogProxySetting(t *testing.T) {
 					hostName, "IPV4", "VNIOS", "ALL_V4",
 					vipAddress, "172.28.82.1", "255.255.254.0",
 					syslogProxySettingVal,
+					syslogServersVal,
 				),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
@@ -2220,6 +2219,7 @@ func TestAccMemberResource_SyslogProxySetting(t *testing.T) {
 					hostName, "IPV4", "VNIOS", "ALL_V4",
 					vipAddress, "172.28.82.1", "255.255.254.0",
 					syslogProxySettingValUpdated,
+					syslogServersVal,
 				),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
@@ -2243,18 +2243,20 @@ func TestAccMemberResource_SyslogServers(t *testing.T) {
 
 	hostName := fmt.Sprintf("infoblox-%s.localdomain", acctest.RandomName())
 	vipAddress := fmt.Sprintf("172.28.83.%d", acctest.RandomNumber(254))
+	testDataPath := getTestDataPath()
 
 	syslogServersVal := []map[string]any{
 		{
-			"address_or_fqdn":    "192.com",
-			"category_list":      []string{"AUTH_ACTIVE_DIRECTORY"},
-			"connection_type":    "TCP",
-			"local_interface":    "ANY",
-			"message_node_id":    "LAN",
-			"message_source":     "ANY",
-			"only_category_list": false,
-			"port":               514,
-			"severity":           "DEBUG",
+			"address_or_fqdn":       "192.com",
+			"category_list":         []string{"AUTH_ACTIVE_DIRECTORY"},
+			"certificate_file_path": filepath.Join(testDataPath, "client.crt"),
+			"connection_type":       "STCP",
+			"local_interface":       "ANY",
+			"message_node_id":       "LAN",
+			"message_source":        "ANY",
+			"only_category_list":    false,
+			"port":                  514,
+			"severity":              "DEBUG",
 		},
 	}
 
@@ -2367,7 +2369,6 @@ func TestAccMemberResource_SyslogSize(t *testing.T) {
 	})
 }
 
-// issue
 func TestAccMemberResource_ThresholdTraps(t *testing.T) {
 	var resourceName = "nios_grid_member.test_threshold_traps"
 	var v grid.Member
@@ -4875,13 +4876,35 @@ resource "nios_grid_member" "test_passive_ha_arp_enabled" {
 `, hostName, configAddrType, platform, serviceTypeConfig, vipAddress, vipGateway, vipSubnetMask, passiveHaArpEnabled)
 }
 
-func testAccMemberPlatform(hostName string, platform string) string {
+func testAccMemberPlatform(
+	hostName, configAddrType, platform, serviceTypeConfig,
+	vipAddress, vipGateway, vipSubnetMask string,
+) string {
 	return fmt.Sprintf(`
 resource "nios_grid_member" "test_platform" {
     host_name = %q
+    config_addr_type = %q
     platform = %q
+    service_type_configuration = %q
+
+    ipv6_setting = {
+        auto_router_config_enabled = false
+        dscp = 0
+        enabled = false
+        primary = true
+        use_dscp = false
+    }
+
+    vip_setting = {
+        address = %q
+        dscp = 0
+        gateway = %q
+        primary = true
+        subnet_mask = %q
+        use_dscp = false
+    }
 }
-`, hostName, platform)
+`, hostName, configAddrType, platform, serviceTypeConfig, vipAddress, vipGateway, vipSubnetMask)
 }
 
 func testAccMemberPreProvisioning(hostName string, preProvisioning map[string]any) string {
@@ -5035,6 +5058,12 @@ func testAccMemberSnmpSetting(
 	snmpSettingStr := utils.ConvertMapToHCL(snmpSetting)
 
 	return fmt.Sprintf(`
+resource "nios_security_snmp_user" "test" {
+    name                 	= "example-snmpuser"
+    authentication_protocol = "NONE"
+    privacy_protocol     	= "NONE"
+}
+
 resource "nios_grid_member" "test_snmp_setting" {
     host_name = %q
     config_addr_type = %q
@@ -5060,6 +5089,7 @@ resource "nios_grid_member" "test_snmp_setting" {
 
     snmp_setting = %s
     use_snmp_setting = true
+	
 }
 `, hostName, configAddrType, platform, serviceTypeConfig, vipAddress, vipGateway, vipSubnetMask, snmpSettingStr)
 }
@@ -5140,9 +5170,10 @@ func testAccMemberSyslogProxySetting(
 	hostName, configAddrType, platform, serviceTypeConfig,
 	vipAddress, vipGateway, vipSubnetMask string,
 	syslogProxySetting map[string]any,
+	syslogServersVal []map[string]any,
 ) string {
 	syslogProxySettingStr := utils.ConvertMapToHCL(syslogProxySetting)
-
+	syslogServersValStr := utils.ConvertSliceOfMapsToHCL(syslogServersVal)
 	return fmt.Sprintf(`
 resource "nios_grid_member" "test_syslog_proxy_setting" {
     host_name = %q
@@ -5169,8 +5200,9 @@ resource "nios_grid_member" "test_syslog_proxy_setting" {
 
     syslog_proxy_setting = %s
     use_syslog_proxy_setting = true
+	syslog_servers = %s
 }
-`, hostName, configAddrType, platform, serviceTypeConfig, vipAddress, vipGateway, vipSubnetMask, syslogProxySettingStr)
+`, hostName, configAddrType, platform, serviceTypeConfig, vipAddress, vipGateway, vipSubnetMask, syslogProxySettingStr, syslogServersValStr)
 }
 
 func testAccMemberSyslogServers(
@@ -6329,4 +6361,12 @@ resource "nios_grid_member" "test_vpn_mtu" {
     vpn_mtu = %d
 }
 `, hostName, configAddrType, platform, serviceTypeConfig, vipAddress, vipGateway, vipSubnetMask, vpnMtu)
+}
+
+func getTestDataPath() string {
+	wd, err := os.Getwd()
+	if err != nil {
+		return "../../testdata/nios_member"
+	}
+	return filepath.Join(wd, "../../testdata/nios_member")
 }

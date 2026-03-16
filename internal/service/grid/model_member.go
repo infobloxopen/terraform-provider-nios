@@ -882,7 +882,7 @@ func (m *MemberModel) Expand(ctx context.Context, diags *diag.Diagnostics) *grid
 		LomNetworkConfig:                flex.ExpandFrameworkListNestedBlock(ctx, m.LomNetworkConfig, diags, ExpandMemberLomNetworkConfig),
 		LomUsers:                        flex.ExpandFrameworkListNestedBlock(ctx, m.LomUsers, diags, ExpandMemberLomUsers),
 		MasterCandidate:                 flex.ExpandBoolPointer(m.MasterCandidate),
-		MemberServiceCommunication:      flex.ExpandFrameworkListNestedBlock(ctx, m.MemberServiceCommunication, diags, ExpandMemberMemberServiceCommunication),
+		MemberServiceCommunication:      flex.ExpandFrameworkListNestedBlockEmptyAsNil(ctx, m.MemberServiceCommunication, diags, ExpandMemberMemberServiceCommunication),
 		MgmtPortSetting:                 ExpandMemberMgmtPortSetting(ctx, m.MgmtPortSetting, diags),
 		NatSetting:                      ExpandMemberNatSetting(ctx, m.NatSetting, diags),
 		NodeInfo:                        flex.ExpandFrameworkListNestedBlock(ctx, m.NodeInfo, diags, ExpandMemberNodeInfo),
@@ -1006,7 +1006,15 @@ func (m *MemberModel) Flatten(ctx context.Context, from *grid.Member, diags *dia
 	m.SupportAccessEnable = types.BoolPointerValue(from.SupportAccessEnable)
 	m.SupportAccessInfo = flex.FlattenStringPointer(from.SupportAccessInfo)
 	m.SyslogProxySetting = FlattenMemberSyslogProxySetting(ctx, from.SyslogProxySetting, diags)
+	planSyslogServers := m.SyslogServers
 	m.SyslogServers = flex.FlattenFrameworkListNestedBlock(ctx, from.SyslogServers, MemberSyslogServersAttrTypes, diags, FlattenMemberSyslogServers)
+	if !planSyslogServers.IsNull() {
+		result, copyDiags := utils.CopyFieldFromPlanToRespList(ctx, planSyslogServers, m.SyslogServers, "certificate_file_path")
+		if !copyDiags.HasError() {
+			m.SyslogServers = result.(basetypes.ListValue)
+		}
+	}
+	//m.SyslogServers = flex.FlattenFrameworkListNestedBlock(ctx, from.SyslogServers, MemberSyslogServersAttrTypes, diags, FlattenMemberSyslogServers)
 	m.SyslogSize = flex.FlattenInt64Pointer(from.SyslogSize)
 	planList2 := m.ThresholdTraps
 	m.ThresholdTraps = flex.FlattenFrameworkListNestedBlock(ctx, from.ThresholdTraps, MemberThresholdTrapsAttrTypes, diags, FlattenMemberThresholdTraps)

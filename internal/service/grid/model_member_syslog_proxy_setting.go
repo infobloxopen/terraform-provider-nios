@@ -4,12 +4,10 @@ import (
 	"context"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
-	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
@@ -20,17 +18,15 @@ import (
 )
 
 type MemberSyslogProxySettingModel struct {
-	Struct     types.String `tfsdk:"struct"`
-	Enable     types.Bool   `tfsdk:"enable"`
-	TcpEnable  types.Bool   `tfsdk:"tcp_enable"`
-	TcpPort    types.Int64  `tfsdk:"tcp_port"`
-	UdpEnable  types.Bool   `tfsdk:"udp_enable"`
-	UdpPort    types.Int64  `tfsdk:"udp_port"`
-	ClientAcls types.List   `tfsdk:"client_acls"`
+	Enable     types.Bool  `tfsdk:"enable"`
+	TcpEnable  types.Bool  `tfsdk:"tcp_enable"`
+	TcpPort    types.Int64 `tfsdk:"tcp_port"`
+	UdpEnable  types.Bool  `tfsdk:"udp_enable"`
+	UdpPort    types.Int64 `tfsdk:"udp_port"`
+	ClientAcls types.List  `tfsdk:"client_acls"`
 }
 
 var MemberSyslogProxySettingAttrTypes = map[string]attr.Type{
-	"struct":      types.StringType,
 	"enable":      types.BoolType,
 	"tcp_enable":  types.BoolType,
 	"tcp_port":    types.Int64Type,
@@ -40,13 +36,6 @@ var MemberSyslogProxySettingAttrTypes = map[string]attr.Type{
 }
 
 var MemberSyslogProxySettingResourceSchemaAttributes = map[string]schema.Attribute{
-	"struct": schema.StringAttribute{
-		Required: true,
-		Validators: []validator.String{
-			stringvalidator.OneOf("addressac", "tsigac"),
-		},
-		MarkdownDescription: "The struct type of the object. The value must be one of 'addressac' and 'tsigac'.",
-	},
 	"enable": schema.BoolAttribute{
 		Optional:            true,
 		Computed:            true,
@@ -60,9 +49,9 @@ var MemberSyslogProxySettingResourceSchemaAttributes = map[string]schema.Attribu
 		MarkdownDescription: "If set to True, the appliance can receive messages from other devices via TCP.",
 	},
 	"tcp_port": schema.Int64Attribute{
-		Optional:            true,
-		Computed:            true,
-		Default:             int64default.StaticInt64(514),
+		Optional: true,
+		Computed: true,
+		//Default:             int64default.StaticInt64(514),
 		MarkdownDescription: "The TCP port the appliance must listen on.",
 	},
 	"udp_enable": schema.BoolAttribute{
@@ -72,9 +61,9 @@ var MemberSyslogProxySettingResourceSchemaAttributes = map[string]schema.Attribu
 		MarkdownDescription: "If set to True, the appliance can receive messages from other devices via UDP.",
 	},
 	"udp_port": schema.Int64Attribute{
-		Optional:            true,
-		Computed:            true,
-		Default:             int64default.StaticInt64(514),
+		Optional: true,
+		Computed: true,
+		//Default:             int64default.StaticInt64(514),
 		MarkdownDescription: "The UDP port the appliance must listen on.",
 	},
 	"client_acls": schema.ListNestedAttribute{
@@ -107,7 +96,6 @@ func (m *MemberSyslogProxySettingModel) Expand(ctx context.Context, diags *diag.
 		return nil
 	}
 	to := &grid.MemberSyslogProxySetting{
-		//Struct:     flex.ExpandStringPointer(m.Struct),
 		Enable:     flex.ExpandBoolPointer(m.Enable),
 		TcpEnable:  flex.ExpandBoolPointer(m.TcpEnable),
 		TcpPort:    flex.ExpandInt64Pointer(m.TcpPort),
@@ -136,7 +124,6 @@ func (m *MemberSyslogProxySettingModel) Flatten(ctx context.Context, from *grid.
 	if m == nil {
 		*m = MemberSyslogProxySettingModel{}
 	}
-	//m.Struct = flex.FlattenStringPointer(from.Struct)
 	m.Enable = types.BoolPointerValue(from.Enable)
 	m.TcpEnable = types.BoolPointerValue(from.TcpEnable)
 	m.TcpPort = flex.FlattenInt64Pointer(from.TcpPort)

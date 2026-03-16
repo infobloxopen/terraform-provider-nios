@@ -641,6 +641,7 @@ Class | Method | HTTP request | Description
  - [MemberntpsettingntpaclaclistAddressAc](docs/MemberntpsettingntpaclaclistAddressAc.md)
  - [MemberpreprovisioningHardwareInfo](docs/MemberpreprovisioningHardwareInfo.md)
  - [MembersnmpsettingSnmpv3QueriesUsers](docs/MembersnmpsettingSnmpv3QueriesUsers.md)
+ - [MembersnmpsettingSnmpv3QueriesUsersOneOf](docs/MembersnmpsettingSnmpv3QueriesUsersOneOf.md)
  - [MembersnmpsettingTrapReceivers](docs/MembersnmpsettingTrapReceivers.md)
  - [MembersyslogproxysettingClientAcls](docs/MembersyslogproxysettingClientAcls.md)
  - [MemberthreatprotectionnatrulesNatPorts](docs/MemberthreatprotectionnatrulesNatPorts.md)

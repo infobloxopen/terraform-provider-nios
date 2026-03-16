@@ -2,6 +2,7 @@ package grid
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
@@ -18,35 +19,38 @@ import (
 	"github.com/infobloxopen/infoblox-nios-go-client/grid"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
 type MemberSyslogServersModel struct {
-	AddressOrFqdn    types.String `tfsdk:"address_or_fqdn"`
-	Certificate      types.String `tfsdk:"certificate"`
-	CertificateToken types.String `tfsdk:"certificate_token"`
-	ConnectionType   types.String `tfsdk:"connection_type"`
-	Port             types.Int64  `tfsdk:"port"`
-	LocalInterface   types.String `tfsdk:"local_interface"`
-	MessageSource    types.String `tfsdk:"message_source"`
-	MessageNodeId    types.String `tfsdk:"message_node_id"`
-	Severity         types.String `tfsdk:"severity"`
-	CategoryList     types.List   `tfsdk:"category_list"`
-	OnlyCategoryList types.Bool   `tfsdk:"only_category_list"`
+	AddressOrFqdn       types.String `tfsdk:"address_or_fqdn"`
+	Certificate         types.String `tfsdk:"certificate"`
+	CertificateToken    types.String `tfsdk:"certificate_token"`
+	ConnectionType      types.String `tfsdk:"connection_type"`
+	Port                types.Int64  `tfsdk:"port"`
+	LocalInterface      types.String `tfsdk:"local_interface"`
+	MessageSource       types.String `tfsdk:"message_source"`
+	MessageNodeId       types.String `tfsdk:"message_node_id"`
+	Severity            types.String `tfsdk:"severity"`
+	CategoryList        types.List   `tfsdk:"category_list"`
+	OnlyCategoryList    types.Bool   `tfsdk:"only_category_list"`
+	CertificateFilePath types.String `tfsdk:"certificate_file_path"`
 }
 
 var MemberSyslogServersAttrTypes = map[string]attr.Type{
-	"address_or_fqdn":    types.StringType,
-	"certificate":        types.StringType,
-	"certificate_token":  types.StringType,
-	"connection_type":    types.StringType,
-	"port":               types.Int64Type,
-	"local_interface":    types.StringType,
-	"message_source":     types.StringType,
-	"message_node_id":    types.StringType,
-	"severity":           types.StringType,
-	"category_list":      types.ListType{ElemType: types.StringType},
-	"only_category_list": types.BoolType,
+	"address_or_fqdn":       types.StringType,
+	"certificate":           types.StringType,
+	"certificate_token":     types.StringType,
+	"certificate_file_path": types.StringType,
+	"connection_type":       types.StringType,
+	"port":                  types.Int64Type,
+	"local_interface":       types.StringType,
+	"message_source":        types.StringType,
+	"message_node_id":       types.StringType,
+	"severity":              types.StringType,
+	"category_list":         types.ListType{ElemType: types.StringType},
+	"only_category_list":    types.BoolType,
 }
 
 var MemberSyslogServersResourceSchemaAttributes = map[string]schema.Attribute{
@@ -62,6 +66,10 @@ var MemberSyslogServersResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed:            true,
 		Optional:            true,
 		MarkdownDescription: "The token returned by the uploadinit function call in object fileop.",
+	},
+	"certificate_file_path": schema.StringAttribute{
+		Required:            true,
+		MarkdownDescription: "The file path to the certificate.",
 	},
 	"connection_type": schema.StringAttribute{
 		Computed: true,
@@ -191,4 +199,48 @@ func (m *MemberSyslogServersModel) Flatten(ctx context.Context, from *grid.Membe
 	m.Severity = flex.FlattenStringPointer(from.Severity)
 	m.CategoryList = flex.FlattenFrameworkListString(ctx, from.CategoryList, diags)
 	m.OnlyCategoryList = types.BoolPointerValue(from.OnlyCategoryList)
+}
+
+func (r *MemberResource) processSyslogServers(
+	ctx context.Context,
+	syslogServers types.List,
+	diag *diag.Diagnostics,
+) (types.List, bool) {
+	if syslogServers.IsNull() || syslogServers.IsUnknown() {
+		return syslogServers, true
+	}
+
+	baseUrl := r.client.GridAPI.Cfg.NIOSHostURL
+	username := r.client.GridAPI.Cfg.NIOSUsername
+	password := r.client.GridAPI.Cfg.NIOSPassword
+
+	var servers []MemberSyslogServersModel
+	diagResult := syslogServers.ElementsAs(ctx, &servers, false)
+	diag.Append(diagResult...)
+	if diag.HasError() {
+		return syslogServers, false
+	}
+
+	for i, server := range servers {
+		if !server.CertificateFilePath.IsNull() && !server.CertificateFilePath.IsUnknown() {
+			filePath := server.CertificateFilePath.ValueString()
+			token, err := utils.UploadFileWithToken(ctx, baseUrl, filePath, username, password)
+			if err != nil {
+				diag.AddError(
+					"Client Error",
+					fmt.Sprintf("Unable to process certificate file %s, got error: %s", filePath, err),
+				)
+				return syslogServers, false
+			}
+			servers[i].CertificateToken = types.StringValue(token)
+		}
+	}
+
+	listValue, diagResult := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: MemberSyslogServersAttrTypes}, servers)
+	diag.Append(diagResult...)
+	if diag.HasError() {
+		return syslogServers, false
+	}
+
+	return listValue, true
 }
