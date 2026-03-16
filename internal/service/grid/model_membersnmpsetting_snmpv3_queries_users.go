@@ -44,6 +44,10 @@ var MembersnmpsettingSnmpv3QueriesUsersResourceSchemaAttributes = map[string]sch
 		Computed:            true,
 		MarkdownDescription: "The reference to the SNMPv3 user object",
 	},
+	"ref": schema.StringAttribute{
+		Computed:            true,
+		MarkdownDescription: "The reference to the SNMPv3 user object",
+	},
 	"user": schema.StringAttribute{
 		Optional:            true,
 		MarkdownDescription: "The SNMPv3 user.",

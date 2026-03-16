@@ -12,12 +12,10 @@ package grid
 
 import (
 	"encoding/json"
+	"fmt"
 )
 
-// checks if the GridsnmpsettingSnmpv3QueriesUsers type satisfies the MappedNullable interface at compile time
-var _ MappedNullable = &GridsnmpsettingSnmpv3QueriesUsers{}
-
-// GridsnmpsettingSnmpv3QueriesUsers struct for GridsnmpsettingSnmpv3QueriesUsers
+// GridsnmpsettingSnmpv3QueriesUsers - struct for GridsnmpsettingSnmpv3QueriesUsers
 type GridsnmpsettingSnmpv3QueriesUsers struct {
 	// The reference to the SNMPv3 user object
 	Ref *string `json:"_ref,omitempty"`

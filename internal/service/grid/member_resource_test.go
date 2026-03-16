@@ -7,6 +7,8 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -1994,6 +1996,9 @@ func TestAccMemberResource_SnmpSetting(t *testing.T) {
 		"queries_enable":        false,
 		"snmpv3_queries_enable": false,
 		"snmpv3_traps_enable":   false,
+		"queries_enable":        false,
+		"snmpv3_queries_enable": false,
+		"snmpv3_traps_enable":   false,
 		"traps_enable":          true,
 	}
 
@@ -2160,11 +2165,27 @@ func TestAccMemberResource_SyslogProxySetting(t *testing.T) {
 			"severity":              "DEBUG",
 		},
 	}
+	testDataPath := getTestDataPath()
+	syslogServersVal := []map[string]any{
+		{
+			"address_or_fqdn":       "192.com",
+			"category_list":         []string{"AUTH_ACTIVE_DIRECTORY"},
+			"certificate_file_path": filepath.Join(testDataPath, "client.crt"),
+			"connection_type":       "STCP",
+			"local_interface":       "ANY",
+			"message_node_id":       "LAN",
+			"message_source":        "ANY",
+			"only_category_list":    false,
+			"port":                  514,
+			"severity":              "DEBUG",
+		},
+	}
 
 	syslogProxySettingVal := map[string]any{
 
 		"client_acls": []map[string]any{
 			{
+				"struct":     "addressac",
 				"struct":     "addressac",
 				"address":    "192.0.0.1",
 				"permission": "ALLOW",
@@ -2180,6 +2201,7 @@ func TestAccMemberResource_SyslogProxySetting(t *testing.T) {
 	syslogProxySettingValUpdated := map[string]any{
 		"client_acls": []map[string]any{
 			{
+				"struct":     "addressac",
 				"struct":     "addressac",
 				"address":    "192.0.0.1",
 				"permission": "ALLOW",
@@ -2202,6 +2224,7 @@ func TestAccMemberResource_SyslogProxySetting(t *testing.T) {
 					vipAddress, "172.28.82.1", "255.255.254.0",
 					syslogProxySettingVal,
 					syslogServersVal,
+					syslogServersVal,
 				),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
@@ -2219,6 +2242,7 @@ func TestAccMemberResource_SyslogProxySetting(t *testing.T) {
 					hostName, "IPV4", "VNIOS", "ALL_V4",
 					vipAddress, "172.28.82.1", "255.255.254.0",
 					syslogProxySettingValUpdated,
+					syslogServersVal,
 					syslogServersVal,
 				),
 				Check: resource.ComposeTestCheckFunc(
@@ -2244,9 +2268,20 @@ func TestAccMemberResource_SyslogServers(t *testing.T) {
 	hostName := fmt.Sprintf("infoblox-%s.localdomain", acctest.RandomName())
 	vipAddress := fmt.Sprintf("172.28.83.%d", acctest.RandomNumber(254))
 	testDataPath := getTestDataPath()
+	testDataPath := getTestDataPath()
 
 	syslogServersVal := []map[string]any{
 		{
+			"address_or_fqdn":       "192.com",
+			"category_list":         []string{"AUTH_ACTIVE_DIRECTORY"},
+			"certificate_file_path": filepath.Join(testDataPath, "client.crt"),
+			"connection_type":       "STCP",
+			"local_interface":       "ANY",
+			"message_node_id":       "LAN",
+			"message_source":        "ANY",
+			"only_category_list":    false,
+			"port":                  514,
+			"severity":              "DEBUG",
 			"address_or_fqdn":       "192.com",
 			"category_list":         []string{"AUTH_ACTIVE_DIRECTORY"},
 			"certificate_file_path": filepath.Join(testDataPath, "client.crt"),
@@ -5064,6 +5099,12 @@ resource "nios_security_snmp_user" "test" {
     privacy_protocol     	= "NONE"
 }
 
+resource "nios_security_snmp_user" "test" {
+    name                 	= "example-snmpuser"
+    authentication_protocol = "NONE"
+    privacy_protocol     	= "NONE"
+}
+
 resource "nios_grid_member" "test_snmp_setting" {
     host_name = %q
     config_addr_type = %q
@@ -5089,6 +5130,7 @@ resource "nios_grid_member" "test_snmp_setting" {
 
     snmp_setting = %s
     use_snmp_setting = true
+	
 	
 }
 `, hostName, configAddrType, platform, serviceTypeConfig, vipAddress, vipGateway, vipSubnetMask, snmpSettingStr)
@@ -5171,8 +5213,10 @@ func testAccMemberSyslogProxySetting(
 	vipAddress, vipGateway, vipSubnetMask string,
 	syslogProxySetting map[string]any,
 	syslogServersVal []map[string]any,
+	syslogServersVal []map[string]any,
 ) string {
 	syslogProxySettingStr := utils.ConvertMapToHCL(syslogProxySetting)
+	syslogServersValStr := utils.ConvertSliceOfMapsToHCL(syslogServersVal)
 	syslogServersValStr := utils.ConvertSliceOfMapsToHCL(syslogServersVal)
 	return fmt.Sprintf(`
 resource "nios_grid_member" "test_syslog_proxy_setting" {
@@ -5201,7 +5245,9 @@ resource "nios_grid_member" "test_syslog_proxy_setting" {
     syslog_proxy_setting = %s
     use_syslog_proxy_setting = true
 	syslog_servers = %s
+	syslog_servers = %s
 }
+`, hostName, configAddrType, platform, serviceTypeConfig, vipAddress, vipGateway, vipSubnetMask, syslogProxySettingStr, syslogServersValStr)
 `, hostName, configAddrType, platform, serviceTypeConfig, vipAddress, vipGateway, vipSubnetMask, syslogProxySettingStr, syslogServersValStr)
 }
 
@@ -6361,6 +6407,14 @@ resource "nios_grid_member" "test_vpn_mtu" {
     vpn_mtu = %d
 }
 `, hostName, configAddrType, platform, serviceTypeConfig, vipAddress, vipGateway, vipSubnetMask, vpnMtu)
+}
+
+func getTestDataPath() string {
+	wd, err := os.Getwd()
+	if err != nil {
+		return "../../testdata/nios_member"
+	}
+	return filepath.Join(wd, "../../testdata/nios_member")
 }
 
 func getTestDataPath() string {
