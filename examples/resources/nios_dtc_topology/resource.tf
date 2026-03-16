@@ -1,3 +1,19 @@
+terraform {
+  required_providers {
+    nios = {
+      source  = "infobloxopen/nios"
+      version = "1.1.0"
+    }
+  }
+}
+
+provider "nios" {
+  nios_host_url = "https://172.28.82.31"
+  nios_username = "admin"
+  nios_password = "Infoblox@123"
+}
+
+
 // Create an DTC Server (Required as Parent)
 resource "nios_dtc_server" "create_dtc_server" {
   name = "example-server"
@@ -11,12 +27,17 @@ resource "nios_dtc_topology" "create_dtc_topology" {
 
 // Create a DTC Topology with Additional Fields
 resource "nios_dtc_topology" "create_dtc_topology_with_additional_fields" {
-  name    = "example_dtc_topology_2"
+  name    = "example_dtc_topology_7"
   comment = "DTC topology additional"
   rules = [
     {
       dest_type        = "SERVER"
-      destination_link = nios_dtc_server.create_dtc_server.ref
+      destination = [
+        {
+          destination_link = nios_dtc_server.create_dtc_server.ref
+          priority         = 1
+        }
+      ]
     }
   ]
   extattrs = {

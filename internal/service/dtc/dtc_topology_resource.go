@@ -412,9 +412,20 @@ func UpdateDtcTopologyRules(ctx context.Context, r *DtcTopologyResource, ruleRef
 		ruleData.SetDestType(*destType)
 	}
 
-	// if destLink, ok := res.GetDestinationLinkOk(); ok {
-	// 	ruleData.SetDestinationLink(*destLink.DtcTopologyRuleDestinationLinkOneOf.Ref)
-	// }
+	if destination , ok := res.GetDestinationOk(); ok{
+		convertedDest := make([]dtc.DtcTopologyRuleDestination, len(destination))
+		for i , dest := range destination {
+			innerDest := dtc.DtcTopologyRuleDestination{}
+
+			if destLink, ok := dest.GetDestinationLinkOk(); ok {
+				innerDest.DestinationLink = destLink
+			}
+			if priority, ok := dest.GetPriorityOk(); ok {
+				innerDest.Priority = priority
+			}
+			convertedDest[i] = innerDest
+		}
+	}
 
 	if returnType, ok := res.GetReturnTypeOk(); ok {
 		ruleData.SetReturnType(*returnType)
