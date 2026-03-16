@@ -225,7 +225,7 @@ func (r *IPAllocationResource) Read(ctx context.Context, req resource.ReadReques
 
 	apiRes, httpRes, err := r.client.DNSAPI.
 		RecordHostAPI.
-		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Read(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
 		ReturnFieldsPlus(readableAttributesForIPAllocation).
 		ReturnAsObject(1).
 		ProxySearch(config.GetProxySearch()).
@@ -361,6 +361,12 @@ func (r *IPAllocationResource) Update(ctx context.Context, req resource.UpdateRe
 		return
 	}
 
+	diags = req.State.GetAttribute(ctx, path.Root("uuid"), &data.Uuid)
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+		return
+	}
+
 	diags = req.State.GetAttribute(ctx, path.Root("extattrs_all"), &data.ExtAttrsAll)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -395,7 +401,7 @@ func (r *IPAllocationResource) Update(ctx context.Context, req resource.UpdateRe
 	// Read current state from backend to preserve DHCP settings
 	currentApiRes, httpRes, err := r.client.DNSAPI.
 		RecordHostAPI.
-		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Read(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
 		ReturnFieldsPlus(readableAttributesForIPAllocation).
 		ReturnAsObject(1).
 		Execute()
@@ -434,7 +440,7 @@ func (r *IPAllocationResource) Update(ctx context.Context, req resource.UpdateRe
 
 	apiRes, _, err := r.client.DNSAPI.
 		RecordHostAPI.
-		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Update(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
 		RecordHost(*updateReq).
 		ReturnFieldsPlus(readableAttributesForIPAllocation).
 		ReturnAsObject(1).
@@ -514,7 +520,7 @@ func (r *IPAllocationResource) Delete(ctx context.Context, req resource.DeleteRe
 
 	httpRes, err := r.client.DNSAPI.
 		RecordHostAPI.
-		Delete(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Delete(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
 		Execute()
 	if err != nil {
 		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
@@ -549,7 +555,7 @@ func (r *IPAllocationResource) Delete(ctx context.Context, req resource.DeleteRe
 }
 
 func (r *IPAllocationResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("ref"), req.ID)...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("uuid"), req.ID)...)
 	resp.Diagnostics.Append(resp.Private.SetKey(ctx, "associate_internal_id", []byte("true"))...)
 }
 

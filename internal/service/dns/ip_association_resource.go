@@ -96,12 +96,13 @@ func (r *IPAssociationResource) Create(ctx context.Context, req resource.CreateR
 		return
 	}
 
-	hostRecord, ref, internalID, _, err := r.getOrFindHostRecord(ctx, &data)
+	hostRecord, uuid, ref, internalID, _, err := r.getOrFindHostRecord(ctx, &data)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to locate host record, got error: %s", err))
 		return
 	}
 
+	data.Uuid = types.StringValue(uuid)
 	data.Ref = types.StringValue(ref)
 	data.InternalID = types.StringValue(internalID)
 
@@ -128,12 +129,13 @@ func (r *IPAssociationResource) Read(ctx context.Context, req resource.ReadReque
 		return
 	}
 
-	hostRecord, ref, internalID, _, err := r.getOrFindHostRecord(ctx, &data)
+	hostRecord, uuid, ref, internalID, _, err := r.getOrFindHostRecord(ctx, &data)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to locate host record. Please ensure the allocation exists. If you are importing resources, import the allocation first. Original error: %s", err))
 		return
 	}
 
+	data.Uuid = types.StringValue(uuid)
 	data.Ref = types.StringValue(ref)
 	data.InternalID = types.StringValue(internalID)
 
@@ -159,18 +161,25 @@ func (r *IPAssociationResource) Update(ctx context.Context, req resource.UpdateR
 		return
 	}
 
+	diags = req.State.GetAttribute(ctx, path.Root("uuid"), &data.Uuid)
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+		return
+	}
+
 	diags = req.State.GetAttribute(ctx, path.Root("internal_id"), &data.InternalID)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
 	}
 
-	hostRecord, ref, internalID, _, err := r.getOrFindHostRecord(ctx, &data)
+	hostRecord, uuid, ref, internalID, _, err := r.getOrFindHostRecord(ctx, &data)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to locate host record, got error: %s", err))
 		return
 	}
 
+	data.Uuid = types.StringValue(uuid)
 	data.Ref = types.StringValue(ref)
 	data.InternalID = types.StringValue(internalID)
 
@@ -196,7 +205,7 @@ func (r *IPAssociationResource) Delete(ctx context.Context, req resource.DeleteR
 		return
 	}
 
-	hostRecord, _, _, notFound, err := r.getOrFindHostRecord(ctx, &data)
+	hostRecord, _, _, _, notFound, err := r.getOrFindHostRecord(ctx, &data)
 	if err != nil {
 		if notFound {
 			// If the host record is already gone, consider it deleted
@@ -222,19 +231,31 @@ func (r *IPAssociationResource) Delete(ctx context.Context, req resource.DeleteR
 }
 
 func (r *IPAssociationResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	resource.ImportStatePassthroughID(ctx, path.Root("ref"), req, resp)
+	resource.ImportStatePassthroughID(ctx, path.Root("uuid"), req, resp)
 }
 
-func (r *IPAssociationResource) getOrFindHostRecord(ctx context.Context, data *IPAssociationModel) (*dns.RecordHost, string, string, bool, error) {
-	// Always try ref first if it exists
-	if !data.Ref.IsNull() && !data.Ref.IsUnknown() && data.Ref.ValueString() != "" {
-		hostRecord, notFound, err := r.getHostRecordByRef(ctx, data.Ref.ValueString())
+func (r *IPAssociationResource) getOrFindHostRecord(ctx context.Context, data *IPAssociationModel) (*dns.RecordHost, string, string, string, bool, error) {
+	// Always try uuid first if it exists
+	if !data.Uuid.IsNull() && !data.Uuid.IsUnknown() && data.Uuid.ValueString() != "" {
+		hostRecord, notFound, err := r.getHostRecordByIdentifier(ctx, data.Uuid.ValueString())
 		if err == nil {
 			internalID, err := r.extractInternalIDFromExtAttrs(hostRecord)
 			if err != nil {
-				return nil, "", "", notFound, fmt.Errorf("failed to extract internal_id from extensible attributes: %w", err)
+				return nil, "", "", "", notFound, fmt.Errorf("failed to extract internal_id from extensible attributes: %w", err)
 			}
-			return hostRecord, data.Ref.ValueString(), internalID, notFound, nil
+			return hostRecord, data.Uuid.ValueString(), data.Ref.ValueString(), internalID, notFound, nil
+		}
+	}
+
+	// try ref if it exists
+	if !data.Ref.IsNull() && !data.Ref.IsUnknown() && data.Ref.ValueString() != "" {
+		hostRecord, notFound, err := r.getHostRecordByIdentifier(ctx, utils.ExtractResourceRef(data.Ref.ValueString()))
+		if err == nil {
+			internalID, err := r.extractInternalIDFromExtAttrs(hostRecord)
+			if err != nil {
+				return nil, "", "", "", notFound, fmt.Errorf("failed to extract internal_id from extensible attributes: %w", err)
+			}
+			return hostRecord, *hostRecord.Uuid, data.Ref.ValueString(), internalID, notFound, nil
 		}
 	}
 
@@ -242,15 +263,15 @@ func (r *IPAssociationResource) getOrFindHostRecord(ctx context.Context, data *I
 	if !data.InternalID.IsNull() && !data.InternalID.IsUnknown() && data.InternalID.ValueString() != "" {
 		hostRecord, notFound, err := r.getHostRecordByInternalID(ctx, data.InternalID.ValueString())
 		if err != nil {
-			return nil, "", "", notFound, fmt.Errorf("host record not found by ref or internal_id: %w", err)
+			return nil, "", "", "", notFound, fmt.Errorf("host record not found by ref or internal_id: %w", err)
 		}
 		if hostRecord != nil && hostRecord.Ref == nil {
-			return nil, "", "", notFound, fmt.Errorf("nil ref found on host record located by internal_id")
+			return nil, "", "", "", notFound, fmt.Errorf("nil ref found on host record located by internal_id")
 		}
-		return hostRecord, *hostRecord.Ref, data.InternalID.ValueString(), notFound, nil
+		return hostRecord, *hostRecord.Uuid, *hostRecord.Ref, data.InternalID.ValueString(), notFound, nil
 	}
 
-	return nil, "", "", false, fmt.Errorf("both ref and internal_id are empty or null")
+	return nil, "", "", "", false, fmt.Errorf("both ref and internal_id are empty or null")
 }
 
 func (r *IPAssociationResource) extractInternalIDFromExtAttrs(hostRecord *dns.RecordHost) (string, error) {
@@ -268,10 +289,10 @@ func (r *IPAssociationResource) extractInternalIDFromExtAttrs(hostRecord *dns.Re
 	return "", fmt.Errorf("terraform internal ID not found in extensible attributes")
 }
 
-func (r *IPAssociationResource) getHostRecordByRef(ctx context.Context, ref string) (*dns.RecordHost, bool, error) {
+func (r *IPAssociationResource) getHostRecordByIdentifier(ctx context.Context, identifier string) (*dns.RecordHost, bool, error) {
 	apiRes, httpRes, err := r.client.DNSAPI.
 		RecordHostAPI.
-		Read(ctx, utils.ExtractResourceRef(ref)).
+		Read(ctx, identifier).
 		ReturnFieldsPlus(readableAttributesForIPAssociation).
 		ReturnAsObject(1).
 		ProxySearch(config.GetProxySearch()).
@@ -279,9 +300,9 @@ func (r *IPAssociationResource) getHostRecordByRef(ctx context.Context, ref stri
 
 	if err != nil {
 		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
-			return nil, true, fmt.Errorf("host record not found with ref: %s", ref)
+			return nil, true, fmt.Errorf("host record not found with identifier: %s", identifier)
 		}
-		return nil, false, fmt.Errorf("failed to read host record by ref %s: %w", ref, err)
+		return nil, false, fmt.Errorf("failed to read host record by identifier %s: %w", identifier, err)
 	}
 
 	hostRecord := apiRes.GetRecordHostResponseObjectAsResult.GetResult()
@@ -346,19 +367,24 @@ func (r *IPAssociationResource) updateHostRecord(ctx context.Context, hostRec *d
 		ipv6.ConfigureForDhcp = flex.ExpandBoolPointer(data.ConfigureForDhcp)
 	}
 
+	uuid := *updateReq.Uuid
+
 	// Clear out read-only fields that should not be sent in update
 	updateReq.CloudInfo = nil
 	updateReq.CreationTime = nil
 	updateReq.DnsAliases = nil
 	updateReq.DnsName = nil
+	updateReq.Uuid = nil
 	updateReq.LastQueried = nil
 	updateReq.NetworkView = nil
 	updateReq.Zone = nil
 	if len(updateReq.Ipv4addrs) > 0 {
 		updateReq.Ipv4addrs[0].Host = nil
+		updateReq.Ipv4addrs[0].Uuid = nil
 	}
 	if len(updateReq.Ipv6addrs) > 0 {
 		updateReq.Ipv6addrs[0].Host = nil
+		updateReq.Ipv6addrs[0].Uuid = nil
 	}
 	if updateReq.ConfigureForDns != nil && !*updateReq.ConfigureForDns {
 		updateReq.Name = nil
@@ -367,7 +393,7 @@ func (r *IPAssociationResource) updateHostRecord(ctx context.Context, hostRec *d
 
 	apiRes, _, err := r.client.DNSAPI.
 		RecordHostAPI.
-		Update(ctx, utils.ExtractResourceRef(*hostRec.Ref)).
+		Update(ctx, utils.ResolveIdentifier(types.StringValue(uuid), types.StringValue(*hostRec.Ref))).
 		RecordHost(updateReq).
 		ReturnFieldsPlus(readableAttributesForIPAssociation).
 		ReturnAsObject(1).
@@ -409,6 +435,8 @@ func (r *IPAssociationResource) flattenDHCPData(hostRec *dns.RecordHost, data IP
 			data.MatchClient = types.StringValue(*ipv6.MatchClient)
 		}
 	}
+
+	data.Ref = types.StringValue(*hostRec.Ref)
 
 	return data
 }

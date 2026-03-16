@@ -289,7 +289,6 @@ func (m *RecordHostIpv4addrModel) Expand(ctx context.Context, diags *diag.Diagno
 	}
 	to := &dns.RecordHostIpv4addr{
 		Ref:                             flex.ExpandStringPointer(m.Ref),
-		Uuid:                            flex.ExpandStringPointer(m.Uuid),
 		Bootfile:                        flex.ExpandStringPointer(m.Bootfile),
 		Bootserver:                      flex.ExpandStringPointer(m.Bootserver),
 		ConfigureForDhcp:                flex.ExpandBoolPointer(m.ConfigureForDhcp),
