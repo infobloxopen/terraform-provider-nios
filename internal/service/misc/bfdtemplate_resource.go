@@ -16,7 +16,7 @@ import (
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
-var readableAttributesForBfdtemplate = "authentication_key_id,authentication_type,detection_multiplier,min_rx_interval,min_tx_interval,name"
+var readableAttributesForBfdtemplate = "detection_multiplier,min_rx_interval,min_tx_interval,name"
 
 // Ensure provider defined types fully satisfy framework interfaces.
 var _ resource.Resource = &BfdtemplateResource{}

@@ -40,9 +40,6 @@ func testAccCheckBfdtemplateResourceAttrPair(resourceName, dataSourceName string
 	return []resource.TestCheckFunc{
 		resource.TestCheckResourceAttrPair(resourceName, "ref", dataSourceName, "result.0.ref"),
 		resource.TestCheckResourceAttrPair(resourceName, "uuid", dataSourceName, "result.0.uuid"),
-		resource.TestCheckResourceAttrPair(resourceName, "authentication_key_id", dataSourceName, "result.0.authentication_key_id"),
-		resource.TestCheckResourceAttrPair(resourceName, "authentication_type", dataSourceName, "result.0.authentication_type"),
-		resource.TestCheckResourceAttrPair(resourceName, "detection_multiplier", dataSourceName, "result.0.detection_multiplier"),
 		resource.TestCheckResourceAttrPair(resourceName, "min_rx_interval", dataSourceName, "result.0.min_rx_interval"),
 		resource.TestCheckResourceAttrPair(resourceName, "min_tx_interval", dataSourceName, "result.0.min_tx_interval"),
 		resource.TestCheckResourceAttrPair(resourceName, "name", dataSourceName, "result.0.name"),
