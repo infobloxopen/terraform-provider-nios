@@ -136,7 +136,7 @@ func (r *Ipv6fixedaddressResource) Read(ctx context.Context, req resource.ReadRe
 
 	apiRes, httpRes, err := r.client.DHCPAPI.
 		Ipv6fixedaddressAPI.
-		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Read(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
 		ReturnFieldsPlus(readableAttributesForIpv6fixedaddress).
 		ReturnAsObject(1).
 		ProxySearch(config.GetProxySearch()).
@@ -262,6 +262,12 @@ func (r *Ipv6fixedaddressResource) Update(ctx context.Context, req resource.Upda
 		return
 	}
 
+	diags = req.State.GetAttribute(ctx, path.Root("uuid"), &data.Uuid)
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+		return
+	}
+
 	diags = req.State.GetAttribute(ctx, path.Root("extattrs_all"), &data.ExtAttrsAll)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -289,7 +295,7 @@ func (r *Ipv6fixedaddressResource) Update(ctx context.Context, req resource.Upda
 
 	apiRes, _, err := r.client.DHCPAPI.
 		Ipv6fixedaddressAPI.
-		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Update(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
 		Ipv6fixedaddress(*data.Expand(ctx, &resp.Diagnostics, false)).
 		ReturnFieldsPlus(readableAttributesForIpv6fixedaddress).
 		ReturnAsObject(1).
@@ -328,7 +334,7 @@ func (r *Ipv6fixedaddressResource) Delete(ctx context.Context, req resource.Dele
 
 	httpRes, err := r.client.DHCPAPI.
 		Ipv6fixedaddressAPI.
-		Delete(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Delete(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
 		Execute()
 	if err != nil {
 		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
@@ -354,7 +360,7 @@ func (r *Ipv6fixedaddressResource) UpdateFuncCallAttributeName(ctx context.Conte
 }
 
 func (r *Ipv6fixedaddressResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("ref"), req.ID)...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("uuid"), req.ID)...)
 	resp.Diagnostics.Append(resp.Private.SetKey(ctx, "associate_internal_id", []byte("true"))...)
 }
 

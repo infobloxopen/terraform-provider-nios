@@ -104,7 +104,7 @@ func (r *ParentalcontrolBlockingpolicyResource) Read(ctx context.Context, req re
 
 	apiRes, httpRes, err := r.client.ParentalControlAPI.
 		ParentalcontrolBlockingpolicyAPI.
-		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Read(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
 		ReturnFieldsPlus(readableAttributesForParentalcontrolBlockingpolicy).
 		ReturnAsObject(1).
 		ProxySearch(config.GetProxySearch()).
@@ -146,9 +146,15 @@ func (r *ParentalcontrolBlockingpolicyResource) Update(ctx context.Context, req 
 		return
 	}
 
+	diags = req.State.GetAttribute(ctx, path.Root("uuid"), &data.Uuid)
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+		return
+	}
+
 	apiRes, _, err := r.client.ParentalControlAPI.
 		ParentalcontrolBlockingpolicyAPI.
-		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Update(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
 		ParentalcontrolBlockingpolicy(*data.Expand(ctx, &resp.Diagnostics)).
 		ReturnFieldsPlus(readableAttributesForParentalcontrolBlockingpolicy).
 		ReturnAsObject(1).
@@ -178,7 +184,7 @@ func (r *ParentalcontrolBlockingpolicyResource) Delete(ctx context.Context, req 
 
 	httpRes, err := r.client.ParentalControlAPI.
 		ParentalcontrolBlockingpolicyAPI.
-		Delete(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Delete(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
 		Execute()
 	if err != nil {
 		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
@@ -190,5 +196,5 @@ func (r *ParentalcontrolBlockingpolicyResource) Delete(ctx context.Context, req 
 }
 
 func (r *ParentalcontrolBlockingpolicyResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	resource.ImportStatePassthroughID(ctx, path.Root("ref"), req, resp)
+	resource.ImportStatePassthroughID(ctx, path.Root("uuid"), req, resp)
 }

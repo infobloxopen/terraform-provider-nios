@@ -125,7 +125,7 @@ func (r *RecordRpzAIpaddressResource) Read(ctx context.Context, req resource.Rea
 
 	apiRes, httpRes, err := r.client.RPZAPI.
 		RecordRpzAIpaddressAPI.
-		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Read(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
 		ReturnFieldsPlus(readableAttributesForRecordRpzAIpaddress).
 		ReturnAsObject(1).
 		ProxySearch(config.GetProxySearch()).
@@ -252,6 +252,12 @@ func (r *RecordRpzAIpaddressResource) Update(ctx context.Context, req resource.U
 		return
 	}
 
+	diags = req.State.GetAttribute(ctx, path.Root("uuid"), &data.Uuid)
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+		return
+	}
+
 	diags = req.State.GetAttribute(ctx, path.Root("extattrs_all"), &data.ExtAttrsAll)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -280,7 +286,7 @@ func (r *RecordRpzAIpaddressResource) Update(ctx context.Context, req resource.U
 
 	apiRes, _, err := r.client.RPZAPI.
 		RecordRpzAIpaddressAPI.
-		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Update(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
 		RecordRpzAIpaddress(*data.Expand(ctx, &resp.Diagnostics)).
 		ReturnFieldsPlus(readableAttributesForRecordRpzAIpaddress).
 		ReturnAsObject(1).
@@ -320,7 +326,7 @@ func (r *RecordRpzAIpaddressResource) Delete(ctx context.Context, req resource.D
 
 	httpRes, err := r.client.RPZAPI.
 		RecordRpzAIpaddressAPI.
-		Delete(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Delete(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
 		Execute()
 	if err != nil {
 		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
@@ -332,6 +338,6 @@ func (r *RecordRpzAIpaddressResource) Delete(ctx context.Context, req resource.D
 }
 
 func (r *RecordRpzAIpaddressResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("ref"), req.ID)...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("uuid"), req.ID)...)
 	resp.Diagnostics.Append(resp.Private.SetKey(ctx, "associate_internal_id", []byte("true"))...)
 }

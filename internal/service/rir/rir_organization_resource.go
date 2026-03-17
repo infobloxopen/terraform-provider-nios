@@ -150,7 +150,7 @@ func (r *RirOrganizationResource) Read(ctx context.Context, req resource.ReadReq
 
 	apiRes, httpRes, err := r.client.RIRAPI.
 		RirOrganizationAPI.
-		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Read(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
 		ReturnFieldsPlus(readableAttributesForRirOrganization).
 		ReturnAsObject(1).
 		ProxySearch(config.GetProxySearch()).
@@ -192,9 +192,15 @@ func (r *RirOrganizationResource) Update(ctx context.Context, req resource.Updat
 		return
 	}
 
+	diags = req.State.GetAttribute(ctx, path.Root("uuid"), &data.Uuid)
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+		return
+	}
+
 	apiRes, _, err := r.client.RIRAPI.
 		RirOrganizationAPI.
-		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Update(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
 		RirOrganization(*data.Expand(ctx, &resp.Diagnostics)).
 		ReturnFieldsPlus(readableAttributesForRirOrganization).
 		ReturnAsObject(1).
@@ -224,7 +230,7 @@ func (r *RirOrganizationResource) Delete(ctx context.Context, req resource.Delet
 
 	httpRes, err := r.client.RIRAPI.
 		RirOrganizationAPI.
-		Delete(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Delete(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
 		Execute()
 	if err != nil {
 		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
@@ -284,5 +290,5 @@ func (r *RirOrganizationResource) ValidateConfig(ctx context.Context, req resour
 }
 
 func (r *RirOrganizationResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	resource.ImportStatePassthroughID(ctx, path.Root("ref"), req, resp)
+	resource.ImportStatePassthroughID(ctx, path.Root("uuid"), req, resp)
 }

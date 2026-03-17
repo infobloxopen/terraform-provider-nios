@@ -111,7 +111,7 @@ func (r *SharedrecordMxResource) Read(ctx context.Context, req resource.ReadRequ
 
 	apiRes, httpRes, err := r.client.DNSAPI.
 		SharedrecordMxAPI.
-		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Read(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
 		ReturnFieldsPlus(readableAttributesForSharedrecordMx).
 		ReturnAsObject(1).
 		ProxySearch(config.GetProxySearch()).
@@ -159,6 +159,12 @@ func (r *SharedrecordMxResource) Update(ctx context.Context, req resource.Update
 		return
 	}
 
+	diags = req.State.GetAttribute(ctx, path.Root("uuid"), &data.Uuid)
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+		return
+	}
+
 	diags = req.State.GetAttribute(ctx, path.Root("extattrs_all"), &data.ExtAttrsAll)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -174,7 +180,7 @@ func (r *SharedrecordMxResource) Update(ctx context.Context, req resource.Update
 
 	apiRes, _, err := r.client.DNSAPI.
 		SharedrecordMxAPI.
-		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Update(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
 		SharedrecordMx(*data.Expand(ctx, &resp.Diagnostics, false)).
 		ReturnFieldsPlus(readableAttributesForSharedrecordMx).
 		ReturnAsObject(1).
@@ -210,7 +216,7 @@ func (r *SharedrecordMxResource) Delete(ctx context.Context, req resource.Delete
 
 	httpRes, err := r.client.DNSAPI.
 		SharedrecordMxAPI.
-		Delete(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Delete(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
 		Execute()
 	if err != nil {
 		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
@@ -222,5 +228,5 @@ func (r *SharedrecordMxResource) Delete(ctx context.Context, req resource.Delete
 }
 
 func (r *SharedrecordMxResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("ref"), req.ID)...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("uuid"), req.ID)...)
 }

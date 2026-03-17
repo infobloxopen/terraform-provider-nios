@@ -104,7 +104,7 @@ func (r *LdapAuthServiceResource) Read(ctx context.Context, req resource.ReadReq
 
 	apiRes, httpRes, err := r.client.SecurityAPI.
 		LdapAuthServiceAPI.
-		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Read(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
 		ReturnFieldsPlus(readableAttributesForLdapAuthService).
 		ReturnAsObject(1).
 		ProxySearch(config.GetProxySearch()).
@@ -146,9 +146,15 @@ func (r *LdapAuthServiceResource) Update(ctx context.Context, req resource.Updat
 		return
 	}
 
+	diags = req.State.GetAttribute(ctx, path.Root("uuid"), &data.Uuid)
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+		return
+	}
+
 	apiRes, _, err := r.client.SecurityAPI.
 		LdapAuthServiceAPI.
-		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Update(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
 		LdapAuthService(*data.Expand(ctx, &resp.Diagnostics)).
 		ReturnFieldsPlus(readableAttributesForLdapAuthService).
 		ReturnAsObject(1).
@@ -178,7 +184,7 @@ func (r *LdapAuthServiceResource) Delete(ctx context.Context, req resource.Delet
 
 	httpRes, err := r.client.SecurityAPI.
 		LdapAuthServiceAPI.
-		Delete(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Delete(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
 		Execute()
 	if err != nil {
 		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
@@ -190,5 +196,5 @@ func (r *LdapAuthServiceResource) Delete(ctx context.Context, req resource.Delet
 }
 
 func (r *LdapAuthServiceResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	resource.ImportStatePassthroughID(ctx, path.Root("ref"), req, resp)
+	resource.ImportStatePassthroughID(ctx, path.Root("uuid"), req, resp)
 }

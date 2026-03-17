@@ -111,7 +111,7 @@ func (r *SharedrecordCnameResource) Read(ctx context.Context, req resource.ReadR
 
 	apiRes, httpRes, err := r.client.DNSAPI.
 		SharedrecordCnameAPI.
-		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Read(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
 		ReturnFieldsPlus(readableAttributesForSharedrecordCname).
 		ReturnAsObject(1).
 		ProxySearch(config.GetProxySearch()).
@@ -157,6 +157,12 @@ func (r *SharedrecordCnameResource) Update(ctx context.Context, req resource.Upd
 		return
 	}
 
+	diags = req.State.GetAttribute(ctx, path.Root("uuid"), &data.Uuid)
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+		return
+	}
+
 	diags = req.State.GetAttribute(ctx, path.Root("extattrs_all"), &data.ExtAttrsAll)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -172,7 +178,7 @@ func (r *SharedrecordCnameResource) Update(ctx context.Context, req resource.Upd
 
 	apiRes, _, err := r.client.DNSAPI.
 		SharedrecordCnameAPI.
-		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Update(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
 		SharedrecordCname(*data.Expand(ctx, &resp.Diagnostics, false)).
 		ReturnFieldsPlus(readableAttributesForSharedrecordCname).
 		ReturnAsObject(1).
@@ -208,7 +214,7 @@ func (r *SharedrecordCnameResource) Delete(ctx context.Context, req resource.Del
 
 	httpRes, err := r.client.DNSAPI.
 		SharedrecordCnameAPI.
-		Delete(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Delete(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
 		Execute()
 	if err != nil {
 		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
@@ -220,5 +226,5 @@ func (r *SharedrecordCnameResource) Delete(ctx context.Context, req resource.Del
 }
 
 func (r *SharedrecordCnameResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("ref"), req.ID)...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("uuid"), req.ID)...)
 }

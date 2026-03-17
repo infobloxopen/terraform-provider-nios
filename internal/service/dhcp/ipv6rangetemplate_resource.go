@@ -149,7 +149,7 @@ func (r *Ipv6rangetemplateResource) Read(ctx context.Context, req resource.ReadR
 
 	apiRes, httpRes, err := r.client.DHCPAPI.
 		Ipv6rangetemplateAPI.
-		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Read(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
 		ReturnFieldsPlus(readableAttributesForIpv6rangetemplate).
 		ReturnAsObject(1).
 		ProxySearch(config.GetProxySearch()).
@@ -191,9 +191,15 @@ func (r *Ipv6rangetemplateResource) Update(ctx context.Context, req resource.Upd
 		return
 	}
 
+	diags = req.State.GetAttribute(ctx, path.Root("uuid"), &data.Uuid)
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+		return
+	}
+
 	apiRes, _, err := r.client.DHCPAPI.
 		Ipv6rangetemplateAPI.
-		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Update(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
 		Ipv6rangetemplate(*data.Expand(ctx, &resp.Diagnostics)).
 		ReturnFieldsPlus(readableAttributesForIpv6rangetemplate).
 		ReturnAsObject(1).
@@ -223,7 +229,7 @@ func (r *Ipv6rangetemplateResource) Delete(ctx context.Context, req resource.Del
 
 	httpRes, err := r.client.DHCPAPI.
 		Ipv6rangetemplateAPI.
-		Delete(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Delete(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
 		Execute()
 	if err != nil {
 		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
@@ -235,5 +241,5 @@ func (r *Ipv6rangetemplateResource) Delete(ctx context.Context, req resource.Del
 }
 
 func (r *Ipv6rangetemplateResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	resource.ImportStatePassthroughID(ctx, path.Root("ref"), req, resp)
+	resource.ImportStatePassthroughID(ctx, path.Root("uuid"), req, resp)
 }

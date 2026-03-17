@@ -105,7 +105,7 @@ func (r *DiscoveryCredentialgroupResource) Read(ctx context.Context, req resourc
 
 	apiRes, httpRes, err := r.client.DiscoveryAPI.
 		DiscoveryCredentialgroupAPI.
-		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Read(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
 		ReturnFieldsPlus(readableAttributesForDiscoveryCredentialgroup).
 		ReturnAsObject(1).
 		ProxySearch(config.GetProxySearch()).
@@ -150,7 +150,7 @@ func (r *DiscoveryCredentialgroupResource) Update(ctx context.Context, req resou
 
 	apiRes, _, err := r.client.DiscoveryAPI.
 		DiscoveryCredentialgroupAPI.
-		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Update(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
 		DiscoveryCredentialgroup(*data.Expand(ctx, &resp.Diagnostics)).
 		ReturnFieldsPlus(readableAttributesForDiscoveryCredentialgroup).
 		ReturnAsObject(1).
@@ -181,7 +181,7 @@ func (r *DiscoveryCredentialgroupResource) Delete(ctx context.Context, req resou
 
 	httpRes, err := r.client.DiscoveryAPI.
 		DiscoveryCredentialgroupAPI.
-		Delete(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Delete(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
 		Execute()
 	if err != nil {
 		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
@@ -193,5 +193,5 @@ func (r *DiscoveryCredentialgroupResource) Delete(ctx context.Context, req resou
 }
 
 func (r *DiscoveryCredentialgroupResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	resource.ImportStatePassthroughID(ctx, path.Root("ref"), req, resp)
+	resource.ImportStatePassthroughID(ctx, path.Root("uuid"), req, resp)
 }
