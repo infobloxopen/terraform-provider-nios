@@ -101,9 +101,9 @@ func (r *DtcTopologyResource) Create(ctx context.Context, req resource.CreateReq
 	}
 
 	populateTopologyRules(ctx, r.client, &res, &resp.Diagnostics)
-    if resp.Diagnostics.HasError() {
-        return
-    }
+	if resp.Diagnostics.HasError() {
+		return
+	}
 
 	data.Flatten(ctx, &res, &resp.Diagnostics)
 
@@ -176,9 +176,8 @@ func (r *DtcTopologyResource) Read(ctx context.Context, req resource.ReadRequest
 		return
 	}
 
-	r.populateTopologyRules(ctx, &res, &diags)
-
-	if diags.HasError() {
+	populateTopologyRules(ctx, r.client, &res, &resp.Diagnostics)
+	if resp.Diagnostics.HasError() {
 		return
 	}
 
@@ -308,9 +307,9 @@ func (r *DtcTopologyResource) Update(ctx context.Context, req resource.UpdateReq
 	}
 
 	populateTopologyRules(ctx, r.client, &res, &resp.Diagnostics)
-    if resp.Diagnostics.HasError() {
-        return
-    }
+	if resp.Diagnostics.HasError() {
+		return
+	}
 
 	data.Flatten(ctx, &res, &resp.Diagnostics)
 
@@ -393,89 +392,89 @@ func (r *DtcTopologyResource) ValidateConfig(ctx context.Context, req resource.V
 }
 
 func updateDtcTopologyRules(ctx context.Context, client *niosclient.APIClient, ruleRef string, diags *diag.Diagnostics) *dtc.DtcTopologyRulesInnerOneOf1 {
-    apiRes, _, err := client.DTCAPI.
-        DtcTopologyRuleAPI.
-        Read(ctx, utils.ExtractResourceRef(ruleRef)).
-        ReturnFieldsPlus(readableAttributesForDtcTopologyRule).
-        ReturnAsObject(1).
-        Execute()
+	apiRes, _, err := client.DTCAPI.
+		DtcTopologyRuleAPI.
+		Read(ctx, utils.ExtractResourceRef(ruleRef)).
+		ReturnFieldsPlus(readableAttributesForDtcTopologyRule).
+		ReturnAsObject(1).
+		Execute()
 
-    if err != nil {
-        diags.AddError("Client Error", fmt.Sprintf("Unable to read DTC Topology Rules %s", err))
-        return nil
-    }
-    res := apiRes.GetDtcTopologyRuleResponseObjectAsResult.GetResult()
+	if err != nil {
+		diags.AddError("Client Error", fmt.Sprintf("Unable to read DTC Topology Rules %s", err))
+		return nil
+	}
+	res := apiRes.GetDtcTopologyRuleResponseObjectAsResult.GetResult()
 
-    ruleData := &dtc.DtcTopologyRulesInnerOneOf1{}
+	ruleData := &dtc.DtcTopologyRulesInnerOneOf1{}
 
-    if destType, ok := res.GetDestTypeOk(); ok {
-        ruleData.SetDestType(*destType)
-    }
+	if destType, ok := res.GetDestTypeOk(); ok {
+		ruleData.SetDestType(*destType)
+	}
 
-    if destination, ok := res.GetDestinationOk(); ok {
-        convertedDest := make([]dtc.DtcTopologyRuleDestination, len(destination))
-        for i, dest := range destination {
-            innerDest := dtc.DtcTopologyRuleDestination{}
+	if destination, ok := res.GetDestinationOk(); ok {
+		convertedDest := make([]dtc.DtcTopologyRuleDestination, len(destination))
+		for i, dest := range destination {
+			innerDest := dtc.DtcTopologyRuleDestination{}
 
-            if destLink, ok := dest.GetDestinationLinkOk(); ok {
-                innerDest.DestinationLink = destLink
-            }
-            if priority, ok := dest.GetPriorityOk(); ok {
-                innerDest.Priority = priority
-            }
-            convertedDest[i] = innerDest
-        }
-        ruleData.SetDestination(convertedDest)
-    }
+			if destLink, ok := dest.GetDestinationLinkOk(); ok {
+				innerDest.DestinationLink = destLink
+			}
+			if priority, ok := dest.GetPriorityOk(); ok {
+				innerDest.Priority = priority
+			}
+			convertedDest[i] = innerDest
+		}
+		ruleData.SetDestination(convertedDest)
+	}
 
 	if returnType, ok := res.GetReturnTypeOk(); ok {
-        ruleData.SetReturnType(*returnType)
-    }
+		ruleData.SetReturnType(*returnType)
+	}
 
-    if topology, ok := res.GetTopologyOk(); ok {
-        ruleData.SetTopology(*topology)
-    }
+	if topology, ok := res.GetTopologyOk(); ok {
+		ruleData.SetTopology(*topology)
+	}
 
-    if valid, ok := res.GetValidOk(); ok {
-        ruleData.SetValid(*valid)
-    }
+	if valid, ok := res.GetValidOk(); ok {
+		ruleData.SetValid(*valid)
+	}
 
-    if sources, ok := res.GetSourcesOk(); ok {
-        convertedSources := make([]dtc.DtcTopologyRulesInnerOneOf1SourcesInner, len(sources))
-        for i, source := range sources {
-            innerSource := dtc.DtcTopologyRulesInnerOneOf1SourcesInner{}
+	if sources, ok := res.GetSourcesOk(); ok {
+		convertedSources := make([]dtc.DtcTopologyRulesInnerOneOf1SourcesInner, len(sources))
+		for i, source := range sources {
+			innerSource := dtc.DtcTopologyRulesInnerOneOf1SourcesInner{}
 
-            if sourceOp, ok := source.GetSourceOpOk(); ok {
-                innerSource.SourceOp = sourceOp
-            }
-            if sourceType, ok := source.GetSourceTypeOk(); ok {
-                innerSource.SourceType = sourceType
-            }
-            if sourceValue, ok := source.GetSourceValueOk(); ok {
-                innerSource.SourceValue = sourceValue
-            }
+			if sourceOp, ok := source.GetSourceOpOk(); ok {
+				innerSource.SourceOp = sourceOp
+			}
+			if sourceType, ok := source.GetSourceTypeOk(); ok {
+				innerSource.SourceType = sourceType
+			}
+			if sourceValue, ok := source.GetSourceValueOk(); ok {
+				innerSource.SourceValue = sourceValue
+			}
 
-            convertedSources[i] = innerSource
-        }
-        ruleData.SetSources(convertedSources)
-    }
+			convertedSources[i] = innerSource
+		}
+		ruleData.SetSources(convertedSources)
+	}
 
-    return ruleData
+	return ruleData
 }
 
 func populateTopologyRules(ctx context.Context, client *niosclient.APIClient, res *dtc.DtcTopology, diags *diag.Diagnostics) {
-    for i, rule := range res.Rules {
-        ruleRef := rule.DtcTopologyRulesInnerOneOf.Ref
-        if ruleRef == nil {
-            continue
-        }
-        res.Rules[i].DtcTopologyRulesInnerOneOf1 = updateDtcTopologyRules(ctx, client, *ruleRef, diags)
-        if diags.HasError() {
-            return
-        }
-    }
+	for i, rule := range res.Rules {
+		ruleRef := rule.DtcTopologyRulesInnerOneOf.Ref
+		if ruleRef == nil {
+			continue
+		}
+		res.Rules[i].DtcTopologyRulesInnerOneOf1 = updateDtcTopologyRules(ctx, client, *ruleRef, diags)
+		if diags.HasError() {
+			return
+		}
+	}
 }
 
 func (r *DtcTopologyResource) populateTopologyRules(ctx context.Context, res *dtc.DtcTopology, diags *diag.Diagnostics) {
-    populateTopologyRules(ctx, r.client, res, diags)
+	populateTopologyRules(ctx, r.client, res, diags)
 }
