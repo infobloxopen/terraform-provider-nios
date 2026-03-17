@@ -26,7 +26,7 @@ resource "nios_dtc_topology" "create_dtc_topology" {
 
 // Create a DTC Topology with Additional Fields
 resource "nios_dtc_topology" "create_dtc_topology_with_additional_fields" {
-  name    = "example_dtc_topology_7"
+  name    = "example_dtc_topology_2"
   comment = "DTC topology additional"
   rules = [
     {
@@ -35,6 +35,13 @@ resource "nios_dtc_topology" "create_dtc_topology_with_additional_fields" {
         {
           destination_link = nios_dtc_server.create_dtc_server.ref
           priority         = 1
+        }
+      ]
+      sources = [
+        {
+          source_op    = "IS"
+          source_type  = "CONTINENT"
+          source_value = "Africa"
         }
       ]
     }
