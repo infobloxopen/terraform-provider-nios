@@ -157,6 +157,7 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 		dns.NewSharedrecordAResource,
 		dns.NewSharedrecordCnameResource,
 		dns.NewSharedrecordAaaaResource,
+		dns.NewRecordSvcbResource,
 
 		dhcp.NewFixedaddressResource,
 		dhcp.NewSharednetworkResource,
@@ -310,6 +311,7 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 		dns.NewSharedrecordADataSource,
 		dns.NewSharedrecordCnameDataSource,
 		dns.NewSharedrecordAaaaDataSource,
+		dns.NewRecordSvcbDataSource,
 
 		dhcp.NewFixedaddressDataSource,
 		dhcp.NewSharednetworkDataSource,
