@@ -299,7 +299,7 @@ func (m *RecordCnameModel) Flatten(ctx context.Context, from *dns.RecordCname, d
 	m.Reclaimable = types.BoolPointerValue(from.Reclaimable)
 	planRrPreconditionInstructions := m.RrPreconditionInstructions
 	m.RrPreconditionInstructions = flex.FlattenFrameworkListNestedBlock(ctx, from.RrPreconditionInstructions, RecordCnameRrPreconditionInstructionsAttrTypes, diags, FlattenRecordCnameRrPreconditionInstructions)
-	if !planRrPreconditionInstructions.IsNull() {
+	if !planRrPreconditionInstructions.IsUnknown() && !planRrPreconditionInstructions.IsNull() {
 		m.RrPreconditionInstructions = planRrPreconditionInstructions
 	}
 	m.SharedRecordGroup = flex.FlattenStringPointer(from.SharedRecordGroup)

@@ -87,7 +87,7 @@ func (m *RecordCnameRrPreconditionInstructionsModel) Expand(ctx context.Context,
 		Condition: flex.ExpandStringPointer(m.Condition),
 		Name:      flex.ExpandStringPointer(m.Name),
 		Type:      flex.ExpandStringPointer(m.Type),
-		Rdata:     flex.ExpandStringPointer(m.Rdata),
+		Rdata:     flex.ExpandStringPointerEmptyAsNil(m.Rdata),
 		Action:    flex.ExpandStringPointer(m.Action),
 	}
 	return to
