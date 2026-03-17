@@ -38,7 +38,7 @@ func (r *SyslogEndpointResource) Metadata(ctx context.Context, req resource.Meta
 
 func (r *SyslogEndpointResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "",
+		MarkdownDescription: "Manages a Syslog Endpoint.",
 		Attributes:          SyslogEndpointResourceSchemaAttributes,
 	}
 }
@@ -343,6 +343,7 @@ func (r *SyslogEndpointResource) ImportState(ctx context.Context, req resource.I
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("ref"), req.ID)...)
 	resp.Diagnostics.Append(resp.Private.SetKey(ctx, "associate_internal_id", []byte("true"))...)
 }
+
 func (r *SyslogEndpointResource) processCertificatePath(ctx context.Context, data *SyslogEndpointModel, diags *diag.Diagnostics) bool {
 	// Get connection details from client configuration
 	baseUrl := r.client.MiscAPI.Cfg.NIOSHostURL
