@@ -39,9 +39,6 @@ resource "nios_misc_bfdtemplate" "bfd_template_with_additional_fields" {
 
 ### Optional
 
-- `authentication_key` (String, Sensitive) The authentication key for BFD protocol message-digest authentication.
-- `authentication_key_id` (Number) The authentication key identifier for BFD protocol authentication. Valid values are between 1 and 255.
-- `authentication_type` (String) The authentication type for BFD protocol.
 - `detection_multiplier` (Number) The detection time multiplier value for BFD protocol. The negotiated transmit interval, multiplied by this value, provides the detection time for the receiving system in asynchronous BFD mode. Valid values are between 3 and 50.
 - `min_rx_interval` (Number) The minimum receive time (in seconds) for BFD protocol. Valid values are between 50 and 9999.
 - `min_tx_interval` (Number) The minimum transmission time (in seconds) for BFD protocol. Valid values are between 50 and 9999.
