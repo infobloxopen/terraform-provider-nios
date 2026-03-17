@@ -177,6 +177,13 @@ func (d *DtcTopologyDataSource) Read(ctx context.Context, req datasource.ReadReq
 	}
 	tflog.Info(ctx, fmt.Sprintf("Query complete: Total Number of Pages %d : Total results retrieved %d", pageCount, len(allResults)))
 
+	for i := range allResults {
+        populateTopologyRules(ctx, d.client, &allResults[i], &resp.Diagnostics)
+        if resp.Diagnostics.HasError() {
+            return
+        }
+    }
+
 	// Process the results
 	data.FlattenResults(ctx, allResults, &resp.Diagnostics)
 
