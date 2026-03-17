@@ -425,6 +425,7 @@ func UpdateDtcTopologyRules(ctx context.Context, r *DtcTopologyResource, ruleRef
 			}
 			convertedDest[i] = innerDest
 		}
+		ruleData.SetDestination(convertedDest)
 	}
 
 	if returnType, ok := res.GetReturnTypeOk(); ok {
