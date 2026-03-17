@@ -277,7 +277,7 @@ func (m *RecordHostIpv6addrModel) Expand(ctx context.Context, diags *diag.Diagno
 		Ipv6prefixBits:       flex.ExpandInt64Pointer(m.Ipv6prefixBits),
 		LogicFilterRules:     flex.ExpandFrameworkListNestedBlock(ctx, m.LogicFilterRules, diags, ExpandRecordHostIpv6addrLogicFilterRules),
 		Mac:                  flex.ExpandStringPointer(m.Mac),
-		MatchClient:          flex.ExpandStringPointer(m.MatchClient),
+		MatchClient:          flex.ExpandStringPointerEmptyAsNil(m.MatchClient),
 		MsAdUserData:         ExpandRecordHostIpv6addrMsAdUserData(ctx, m.MsAdUserData, diags),
 		Options:              flex.ExpandFrameworkListNestedBlock(ctx, m.Options, diags, ExpandRecordHostIpv6addrOptions),
 		PreferredLifetime:    flex.ExpandInt64Pointer(m.PreferredLifetime),

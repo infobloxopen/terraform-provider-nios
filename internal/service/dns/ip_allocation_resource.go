@@ -361,12 +361,6 @@ func (r *IPAllocationResource) Update(ctx context.Context, req resource.UpdateRe
 		return
 	}
 
-	diags = req.State.GetAttribute(ctx, path.Root("uuid"), &data.Uuid)
-	if diags.HasError() {
-		resp.Diagnostics.Append(diags...)
-		return
-	}
-
 	diags = req.State.GetAttribute(ctx, path.Root("extattrs_all"), &data.ExtAttrsAll)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -399,9 +393,10 @@ func (r *IPAllocationResource) Update(ctx context.Context, req resource.UpdateRe
 	}
 
 	// Read current state from backend to preserve DHCP settings
+	// NOTE: Updating via ref here, as uuid will get changed on update call (NIOS behavior)
 	currentApiRes, httpRes, err := r.client.DNSAPI.
 		RecordHostAPI.
-		Read(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
+		Read(ctx, utils.ResolveIdentifier(types.StringNull(), data.Ref)).
 		ReturnFieldsPlus(readableAttributesForIPAllocation).
 		ReturnAsObject(1).
 		Execute()

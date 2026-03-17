@@ -300,7 +300,7 @@ func (m *RecordHostIpv4addrModel) Expand(ctx context.Context, diags *diag.Diagno
 		FuncCall:                        ExpandFuncCall(ctx, m.FuncCall, diags),
 		LogicFilterRules:                flex.ExpandFrameworkListNestedBlock(ctx, m.LogicFilterRules, diags, ExpandRecordHostIpv4addrLogicFilterRules),
 		Mac:                             flex.ExpandStringPointer(m.Mac),
-		MatchClient:                     flex.ExpandStringPointer(m.MatchClient),
+		MatchClient:                     flex.ExpandStringPointerEmptyAsNil(m.MatchClient),
 		MsAdUserData:                    ExpandRecordHostIpv4addrMsAdUserData(ctx, m.MsAdUserData, diags),
 		Nextserver:                      flex.ExpandStringPointer(m.Nextserver),
 		Options:                         flex.ExpandFrameworkListNestedBlock(ctx, m.Options, diags, ExpandRecordHostIpv4addrOptions),
