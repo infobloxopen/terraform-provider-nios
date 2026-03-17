@@ -3,12 +3,12 @@
 page_title: "nios_misc_syslog_endpoint Data Source - nios"
 subcategory: "MISC"
 description: |-
-  
+  Retrieves information about existing Syslog Endpoints.
 ---
 
 # nios_misc_syslog_endpoint (Data Source)
 
-
+Retrieves information about existing Syslog Endpoints.
 
 ## Example Usage
 

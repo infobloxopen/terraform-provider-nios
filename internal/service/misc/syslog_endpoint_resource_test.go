@@ -15,6 +15,14 @@ import (
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
+/*	GMs to be present -
+		infoblox.grid_master_candidate1
+		infoblox.grid_master_candidate2
+	Template to be added to Grid - Version5_Syslog_Session_Template and Version5_Syslog_Session_Template1
+	Special chars and whitespaces are not accepted in Name
+	Address should be in valid IPv4 address.
+*/
+
 var readableAttributesForSyslogEndpoint = "extattrs,log_level,name,outbound_member_type,outbound_members,syslog_servers,template_instance,timeout,vendor_identifier,wapi_user_name"
 
 func TestAccSyslogEndpointResource_basic(t *testing.T) {
@@ -36,7 +44,6 @@ func TestAccSyslogEndpointResource_basic(t *testing.T) {
 				Config: testAccSyslogEndpointBasicConfig(name, outboundMemberType, syslogServer, connectionType, format, certificateFilePath),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSyslogEndpointExists(context.Background(), resourceName, &v),
-					// TODO: check and validate these
 					resource.TestCheckResourceAttr(resourceName, "name", name),
 					resource.TestCheckResourceAttr(resourceName, "outbound_member_type", outboundMemberType),
 					resource.TestCheckResourceAttr(resourceName, "syslog_servers.#", "1"),
@@ -263,10 +270,10 @@ func TestAccSyslogEndpointResource_SyslogServers(t *testing.T) {
 	var v misc.SyslogEndpoint
 	name := "syslogservers"
 	outboundMemberType := "GM"
-	syslogServer := "10.1.1.1"
+	syslogServer := "1.1.1.1"
 	connectionType := "udp"
 	format := "formatted"
-	updatedSyslogServer := "10.1.1.2"
+	updatedSyslogServer := "10.1.1.12"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -539,7 +546,6 @@ func testAccCheckSyslogEndpointDisappears(ctx context.Context, v *misc.SyslogEnd
 }
 
 func testAccSyslogEndpointBasicConfig(name string, outboundMemberType string, syslogServer string, connectionType string, format string, certificateFilePath string) string {
-	// TODO: create basic resource with required fields
 	return fmt.Sprintf(`
 resource "nios_misc_syslog_endpoint" "test" {
     name = %q

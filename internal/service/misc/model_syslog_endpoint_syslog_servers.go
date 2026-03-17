@@ -3,6 +3,7 @@ package misc
 import (
 	"context"
 
+	"github.com/hashicorp/terraform-plugin-framework-nettypes/iptypes"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -19,20 +20,20 @@ import (
 )
 
 type SyslogEndpointSyslogServersModel struct {
-	Address             types.String `tfsdk:"address"`
-	ConnectionType      types.String `tfsdk:"connection_type"`
-	Port                types.Int64  `tfsdk:"port"`
-	Hostname            types.String `tfsdk:"hostname"`
-	Format              types.String `tfsdk:"format"`
-	Facility            types.String `tfsdk:"facility"`
-	Severity            types.String `tfsdk:"severity"`
-	Certificate         types.Object `tfsdk:"certificate"`
-	CertificateToken    types.String `tfsdk:"certificate_token"`
-	CertificateFilePath types.String `tfsdk:"certificate_file_path"`
+	Address             iptypes.IPAddress `tfsdk:"address"`
+	ConnectionType      types.String      `tfsdk:"connection_type"`
+	Port                types.Int64       `tfsdk:"port"`
+	Hostname            types.String      `tfsdk:"hostname"`
+	Format              types.String      `tfsdk:"format"`
+	Facility            types.String      `tfsdk:"facility"`
+	Severity            types.String      `tfsdk:"severity"`
+	Certificate         types.Object      `tfsdk:"certificate"`
+	CertificateToken    types.String      `tfsdk:"certificate_token"`
+	CertificateFilePath types.String      `tfsdk:"certificate_file_path"`
 }
 
 var SyslogEndpointSyslogServersAttrTypes = map[string]attr.Type{
-	"address":               types.StringType,
+	"address":               iptypes.IPAddressType{},
 	"connection_type":       types.StringType,
 	"port":                  types.Int64Type,
 	"hostname":              types.StringType,
@@ -47,6 +48,7 @@ var SyslogEndpointSyslogServersAttrTypes = map[string]attr.Type{
 var SyslogEndpointSyslogServersResourceSchemaAttributes = map[string]schema.Attribute{
 	"address": schema.StringAttribute{
 		Required:            true,
+		CustomType:          iptypes.IPAddressType{},
 		MarkdownDescription: "Syslog Server IP address",
 	},
 	"connection_type": schema.StringAttribute{
@@ -133,7 +135,7 @@ func (m *SyslogEndpointSyslogServersModel) Expand(ctx context.Context, diags *di
 		return nil
 	}
 	to := &misc.SyslogEndpointSyslogServers{
-		Address:          flex.ExpandStringPointer(m.Address),
+		Address:          flex.ExpandIPAddress(m.Address),
 		ConnectionType:   flex.ExpandStringPointer(m.ConnectionType),
 		Port:             flex.ExpandInt64Pointer(m.Port),
 		Hostname:         flex.ExpandStringPointer(m.Hostname),
@@ -163,7 +165,7 @@ func (m *SyslogEndpointSyslogServersModel) Flatten(ctx context.Context, from *mi
 	if m == nil {
 		*m = SyslogEndpointSyslogServersModel{}
 	}
-	m.Address = flex.FlattenStringPointer(from.Address)
+	m.Address = flex.FlattenIPAddress(from.Address)
 	m.ConnectionType = flex.FlattenStringPointer(from.ConnectionType)
 	m.Port = flex.FlattenInt64Pointer(from.Port)
 	m.Hostname = flex.FlattenStringPointer(from.Hostname)

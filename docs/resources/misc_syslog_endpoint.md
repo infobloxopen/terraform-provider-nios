@@ -3,12 +3,12 @@
 page_title: "nios_misc_syslog_endpoint Resource - nios"
 subcategory: "MISC"
 description: |-
-  
+  Manages a Syslog Endpoint.
 ---
 
 # nios_misc_syslog_endpoint (Resource)
 
-
+Manages a Syslog Endpoint.
 
 ## Example Usage
 

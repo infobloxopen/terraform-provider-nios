@@ -87,9 +87,9 @@ resource "nios_misc_syslog_endpoint" "test" {
 }
 
 data "nios_misc_syslog_endpoint" "test" {
-  filters = {
-	 name = nios_misc_syslog_endpoint.test.name
-	 outbound_member_type = nios_misc_syslog_endpoint.test.outbound_member_type
+	filters = {
+		name = nios_misc_syslog_endpoint.test.name
+		outbound_member_type = nios_misc_syslog_endpoint.test.outbound_member_type
   }
 }
 `, name, outboundMemberType)
@@ -98,16 +98,16 @@ data "nios_misc_syslog_endpoint" "test" {
 func testAccSyslogEndpointDataSourceConfigExtAttrFilters(name string, outboundMemberType string, extAttrsValue string) string {
 	return fmt.Sprintf(`
 resource "nios_misc_syslog_endpoint" "test" {
-  name = %q
-  outbound_member_type = %q
-  extattrs = {
-    Site = %q
+	name = %q
+	outbound_member_type = %q
+	extattrs = {
+	Site = %q
   } 
 }
 
 data "nios_misc_syslog_endpoint" "test" {
-  extattrfilters = {
-	Site = nios_misc_syslog_endpoint.test.extattrs.Site
+	extattrfilters = {
+		Site = nios_misc_syslog_endpoint.test.extattrs.Site
   }
 }
 `, name, outboundMemberType, extAttrsValue)
