@@ -74,7 +74,7 @@ Required:
 
 Optional:
 
-- `destination_link` (String) The reference to the destination object.
+- `destination` (Attributes List) The reference to the destination object. (see [below for nested schema](#nestedatt--result--rules--destination))
 - `return_type` (String) The type of the return value for this source.
 - `sources` (Attributes List) Conditions for matching sources. (see [below for nested schema](#nestedatt--result--rules--sources))
 
@@ -82,6 +82,18 @@ Read-Only:
 
 - `topology` (String) The topology for this rule.
 - `valid` (Boolean) Indicates whether the rule is valid.
+
+<a id="nestedatt--result--rules--destination"></a>
+### Nested Schema for `result.rules.destination`
+
+Required:
+
+- `destination_link` (String) The reference to the destination DTC pool or DTC server.
+
+Optional:
+
+- `priority` (Number) Priority.
+
 
 <a id="nestedatt--result--rules--sources"></a>
 ### Nested Schema for `result.rules.sources`

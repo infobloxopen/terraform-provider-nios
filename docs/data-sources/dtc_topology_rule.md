@@ -75,7 +75,7 @@ data "nios_dtc_topology_rule" "get_all_topology_rules" {
 Optional:
 
 - `dest_type` (String) The type of the destination for this DTC Topology rule.
-- `destination_link` (String) The link to the destination for this DTC Topology rule.
+- `destination` (Attributes List) The link to the destination for this DTC Topology rule. (see [below for nested schema](#nestedatt--result--destination))
 - `return_type` (String) Type of the DNS response for rule.
 - `sources` (Attributes List) The conditions for matching sources. Should be empty to set rule as default destination. (see [below for nested schema](#nestedatt--result--sources))
 
@@ -85,6 +85,18 @@ Read-Only:
 - `topology` (String) The DTC Topology the rule belongs to.
 - `uuid` (String) Universally Unique ID assigned for this object.
 - `valid` (Boolean) True if the label in the rule exists in the current Topology DB. Always true for SUBNET rules. Rules with non-existent labels may be configured but will never match.
+
+<a id="nestedatt--result--destination"></a>
+### Nested Schema for `result.destination`
+
+Required:
+
+- `destination_link` (String) The reference to the destination DTC pool or DTC server.
+
+Optional:
+
+- `priority` (Number) Priority.
+
 
 <a id="nestedatt--result--sources"></a>
 ### Nested Schema for `result.sources`

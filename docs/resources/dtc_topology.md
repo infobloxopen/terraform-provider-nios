@@ -26,12 +26,17 @@ resource "nios_dtc_topology" "create_dtc_topology" {
 
 // Create a DTC Topology with Additional Fields
 resource "nios_dtc_topology" "create_dtc_topology_with_additional_fields" {
-  name    = "example_dtc_topology_2"
+  name    = "example_dtc_topology_7"
   comment = "DTC topology additional"
   rules = [
     {
-      dest_type        = "SERVER"
-      destination_link = nios_dtc_server.create_dtc_server.ref
+      dest_type = "SERVER"
+      destination = [
+        {
+          destination_link = nios_dtc_server.create_dtc_server.ref
+          priority         = 1
+        }
+      ]
     }
   ]
   extattrs = {
@@ -68,7 +73,7 @@ Required:
 
 Optional:
 
-- `destination_link` (String) The reference to the destination object.
+- `destination` (Attributes List) The reference to the destination object. (see [below for nested schema](#nestedatt--rules--destination))
 - `return_type` (String) The type of the return value for this source.
 - `sources` (Attributes List) Conditions for matching sources. (see [below for nested schema](#nestedatt--rules--sources))
 
@@ -76,6 +81,18 @@ Read-Only:
 
 - `topology` (String) The topology for this rule.
 - `valid` (Boolean) Indicates whether the rule is valid.
+
+<a id="nestedatt--rules--destination"></a>
+### Nested Schema for `rules.destination`
+
+Required:
+
+- `destination_link` (String) The reference to the destination DTC pool or DTC server.
+
+Optional:
+
+- `priority` (Number) Priority.
+
 
 <a id="nestedatt--rules--sources"></a>
 ### Nested Schema for `rules.sources`
