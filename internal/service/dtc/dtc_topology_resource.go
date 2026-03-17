@@ -475,6 +475,3 @@ func populateTopologyRules(ctx context.Context, client *niosclient.APIClient, re
 	}
 }
 
-func (r *DtcTopologyResource) populateTopologyRules(ctx context.Context, res *dtc.DtcTopology, diags *diag.Diagnostics) {
-	populateTopologyRules(ctx, r.client, res, diags)
-}
