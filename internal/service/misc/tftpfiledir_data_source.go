@@ -18,6 +18,7 @@ import (
 	"github.com/infobloxopen/terraform-provider-nios/internal/config"
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
+	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces.
@@ -55,9 +56,12 @@ func (d *TftpfiledirDataSource) Schema(ctx context.Context, req datasource.Schem
 		MarkdownDescription: "Retrieves information about existing TFTP file/directory objects.",
 		Attributes: map[string]schema.Attribute{
 			"filters": schema.MapAttribute{
-				Description: "Filters are used to return a more specific list of results. Filters can be used to match resources by specific attributes, e.g. name. If you specify multiple filters, the results returned will have only resources that match all the specified filters.",
+				Description: "Filters are used to return a more specific list of results. Filters can be used to match resources by specific attributes, e.g. name. If you specify multiple filters, the results returned will have only resources that match all the specified filters. The `directory` filter is a required and must be specified for searching TFTP File/Dir objects.",
 				ElementType: types.StringType,
-				Optional:    true,
+				Required:    true,
+				Validators: []validator.Map{
+					customvalidator.MapContainsKey("directory"),
+				},
 			},
 			"result": schema.ListNestedAttribute{
 				NestedObject: schema.NestedAttributeObject{

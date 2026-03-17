@@ -73,7 +73,7 @@ var TftpfiledirResourceSchemaAttributes = map[string]schema.Attribute{
 		Validators: []validator.String{
 			stringvalidator.OneOf("DIRECTORY", "FILE"),
 		},
-		MarkdownDescription: "The type of TFTP file system entity (directory or file).",
+		MarkdownDescription: "The type of TFTP file system entity (directory or file). TYPE `FILE` is not supported through terraform provider and is reserved for future use.",
 	},
 	"vtftp_dir_members": schema.ListNestedAttribute{
 		NestedObject: schema.NestedAttributeObject{
@@ -93,12 +93,14 @@ func (m *TftpfiledirModel) Expand(ctx context.Context, diags *diag.Diagnostics, 
 		return nil
 	}
 	to := &misc.Tftpfiledir{
-		Name:            flex.ExpandStringPointer(m.Name),
-		VtftpDirMembers: flex.ExpandFrameworkListNestedBlock(ctx, m.VtftpDirMembers, diags, ExpandTftpfiledirVtftpDirMembers),
+		Name: flex.ExpandStringPointer(m.Name),
 	}
 	if isCreate {
 		to.Directory = flex.ExpandStringPointer(m.Directory)
 		to.Type = flex.ExpandStringPointer(m.Type)
+	}
+	if !isCreate {
+		to.VtftpDirMembers = flex.ExpandFrameworkListNestedBlock(ctx, m.VtftpDirMembers, diags, ExpandTftpfiledirVtftpDirMembers)
 	}
 	return to
 }

@@ -59,6 +59,7 @@ resource "nios_misc_tftpfiledir" "test" {
 data "nios_misc_tftpfiledir" "test" {
   filters = {
 	name = nios_misc_tftpfiledir.test.name
+	directory = nios_misc_tftpfiledir.test.directory
   }
 }
 `, name, type_)

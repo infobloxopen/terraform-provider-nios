@@ -50,21 +50,25 @@ var TftpfiledirVtftpDirMembersResourceSchemaAttributes = map[string]schema.Attri
 		MarkdownDescription: "The IP type of the virtual TFTP root directory.",
 	},
 	"address": schema.StringAttribute{
+		CustomType:          iptypes.IPAddressType{},
 		Computed:            true,
 		Optional:            true,
 		MarkdownDescription: "The IP address of the clients which will see the virtual TFTP directory as the root directory.",
 	},
 	"start_address": schema.StringAttribute{
+		CustomType:          iptypes.IPAddressType{},
 		Computed:            true,
 		Optional:            true,
 		MarkdownDescription: "The start IP address of the range within which the clients will see the virtual TFTP directory as the root directory.",
 	},
 	"end_address": schema.StringAttribute{
+		CustomType:          iptypes.IPAddressType{},
 		Computed:            true,
 		Optional:            true,
 		MarkdownDescription: "The end IP address of the range within which the clients will see the virtual TFTP directory as the root directory.",
 	},
 	"network": schema.StringAttribute{
+		//CustomType:          iptypes.IPAddressType{},
 		Computed:            true,
 		Optional:            true,
 		MarkdownDescription: "The IP address of network the clients from which will see the virtual TFTP directory as the root directory.",

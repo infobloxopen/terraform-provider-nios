@@ -15,6 +15,11 @@ import (
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
+// TODO
+// Support for 'FILE' type needs to be added with function call in order to enable related tests.
+
+// Setup Required - Enable `Allow these clients perform file transfers` for `Any` client for the Member `infoblox.localdomain` in Data Management > File Distribution > Grid Members
+
 var readableAttributesForTftpfiledir = "directory,is_synced_to_gm,last_modify,name,type,vtftp_dir_members"
 
 func TestAccTftpfiledirResource_basic(t *testing.T) {
@@ -22,7 +27,7 @@ func TestAccTftpfiledirResource_basic(t *testing.T) {
 	var v misc.Tftpfiledir
 	name := acctest.RandomNameWithPrefix("tftpfiledir")
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
@@ -47,7 +52,7 @@ func TestAccTftpfiledirResource_disappears(t *testing.T) {
 	var v misc.Tftpfiledir
 	name := acctest.RandomNameWithPrefix("tftpfiledir")
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		CheckDestroy:             testAccCheckTftpfiledirDestroy(context.Background(), &v),
@@ -69,7 +74,7 @@ func TestAccTftpfiledirResource_Import(t *testing.T) {
 	var v misc.Tftpfiledir
 	name := acctest.RandomNameWithPrefix("tftpfiledir")
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
@@ -108,16 +113,16 @@ func TestAccTftpfiledirResource_Directory(t *testing.T) {
 	var v misc.Tftpfiledir
 	name := acctest.RandomNameWithPrefix("tftpfiledir")
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccTftpfiledirDirectory(name, "DIRECTORY", "/filedir"),
+				Config: testAccTftpfiledirDirectory(name, "DIRECTORY", "/ftpusers"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckTftpfiledirExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "directory", "/filedir"),
+					resource.TestCheckResourceAttr(resourceName, "directory", "/ftpusers"),
 				),
 			},
 			// Skip Update testing as this field cannot be updated
@@ -131,7 +136,7 @@ func TestAccTftpfiledirResource_Name(t *testing.T) {
 	name := acctest.RandomNameWithPrefix("tftpfiledir")
 	name2 := acctest.RandomNameWithPrefix("tftpfiledir")
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
@@ -157,11 +162,12 @@ func TestAccTftpfiledirResource_Name(t *testing.T) {
 }
 
 func TestAccTftpfiledirResource_Type(t *testing.T) {
+	t.Skip("Skipping this test as 'FILE' type support needs to be added with function call")
 	var resourceName = "nios_misc_tftpfiledir.test_type"
 	var v misc.Tftpfiledir
 	name := acctest.RandomNameWithPrefix("tftpfiledir")
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
@@ -186,30 +192,25 @@ func TestAccTftpfiledirResource_VtftpDirMembers(t *testing.T) {
 		{
 			"member":  "infoblox.localdomain",
 			"ip_type": "ADDRESS",
-			"address": "192.168.1.1",
-		},
-		{
-			"member":  "infoblox.localdomain",
-			"ip_type": "NETWORK",
-			"network": "192.168.1.1",
-			"cidr":    24,
+			"address": "10.0.0.103",
 		},
 		{
 			"member":        "infoblox.localdomain",
 			"ip_type":       "RANGE",
-			"start_address": "192.168.1.1",
-			"end_address":   "192.168.1.10",
+			"start_address": "10.0.0.170",
+			"end_address":   "10.0.0.180",
 		},
 	}
 	vtftpDirMembersValUpdated := []map[string]any{
 		{
 			"member":  "infoblox.localdomain",
-			"ip_type": "ADDRESS",
-			//"address": "192.168.1.1",
+			"ip_type": "NETWORK",
+			"network": "10.0.0.0",
+			"cidr":    24,
 		},
 	}
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
@@ -220,15 +221,11 @@ func TestAccTftpfiledirResource_VtftpDirMembers(t *testing.T) {
 					testAccCheckTftpfiledirExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "vtftp_dir_members.0.member", "infoblox.localdomain"),
 					resource.TestCheckResourceAttr(resourceName, "vtftp_dir_members.0.ip_type", "ADDRESS"),
-					resource.TestCheckResourceAttr(resourceName, "vtftp_dir_members.0.address", "192.168.1.1"),
+					resource.TestCheckResourceAttr(resourceName, "vtftp_dir_members.0.address", "10.0.0.103"),
 					resource.TestCheckResourceAttr(resourceName, "vtftp_dir_members.1.member", "infoblox.localdomain"),
-					resource.TestCheckResourceAttr(resourceName, "vtftp_dir_members.1.ip_type", "NETWORK"),
-					resource.TestCheckResourceAttr(resourceName, "vtftp_dir_members.1.network", "192.168.1.1"),
-					resource.TestCheckResourceAttr(resourceName, "vtftp_dir_members.1.cidr", "24"),
-					resource.TestCheckResourceAttr(resourceName, "vtftp_dir_members.2.member", "infoblox.localdomain"),
-					resource.TestCheckResourceAttr(resourceName, "vtftp_dir_members.2.ip_type", "RANGE"),
-					resource.TestCheckResourceAttr(resourceName, "vtftp_dir_members.2.start_address", "192.168.1.1"),
-					resource.TestCheckResourceAttr(resourceName, "vtftp_dir_members.2.end_address", "192.168.1.10"),
+					resource.TestCheckResourceAttr(resourceName, "vtftp_dir_members.1.ip_type", "RANGE"),
+					resource.TestCheckResourceAttr(resourceName, "vtftp_dir_members.1.start_address", "10.0.0.170"),
+					resource.TestCheckResourceAttr(resourceName, "vtftp_dir_members.1.end_address", "10.0.0.180"),
 				),
 			},
 			// Update and Read
@@ -236,8 +233,10 @@ func TestAccTftpfiledirResource_VtftpDirMembers(t *testing.T) {
 				Config: testAccTftpfiledirVtftpDirMembers(name, "DIRECTORY", vtftpDirMembersValUpdated),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckTftpfiledirExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "vtftp_dir_members.0.member", "infoblox.localdomain"),
-					resource.TestCheckResourceAttr(resourceName, "vtftp_dir_members.0.ip_type", "ADDRESS")),
+					resource.TestCheckResourceAttr(resourceName, "vtftp_dir_members.0.ip_type", "NETWORK"),
+					resource.TestCheckResourceAttr(resourceName, "vtftp_dir_members.0.network", "10.0.0.0"),
+					resource.TestCheckResourceAttr(resourceName, "vtftp_dir_members.0.cidr", "24"),
+				),
 			},
 			// Delete testing automatically occurs in TestCase
 		},

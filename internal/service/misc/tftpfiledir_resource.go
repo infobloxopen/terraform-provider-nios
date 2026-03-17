@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -21,6 +22,7 @@ var readableAttributesForTftpfiledir = "directory,is_synced_to_gm,last_modify,na
 // Ensure provider defined types fully satisfy framework interfaces.
 var _ resource.Resource = &TftpfiledirResource{}
 var _ resource.ResourceWithImportState = &TftpfiledirResource{}
+var _ resource.ResourceWithValidateConfig = &TftpfiledirResource{}
 
 func NewTftpfiledirResource() resource.Resource {
 	return &TftpfiledirResource{}
@@ -80,13 +82,33 @@ func (r *TftpfiledirResource) Create(ctx context.Context, req resource.CreateReq
 		ReturnAsObject(1).
 		Execute()
 	if err != nil {
+		if strings.Contains(err.Error(), "The operation failed: Failed system call") {
+			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create Tftpfiledir. This error may occur if the TFTP directory '%s' specified in the 'directory' attribute does not exist on the Infoblox appliance. Please ensure that the directory exists and has the appropriate permissions, then try again.", data.Directory.ValueString()))
+			return
+		}
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create Tftpfiledir, got error: %s", err))
 		return
 	}
 
 	res := apiRes.CreateTftpfiledirResponseAsObject.GetResult()
 
-	data.Flatten(ctx, &res, &resp.Diagnostics)
+	if !data.VtftpDirMembers.IsUnknown() && !data.VtftpDirMembers.IsNull() {
+		apiRes2, _, err2 := r.client.MiscAPI.
+			TftpfiledirAPI.
+			Update(ctx, utils.ExtractResourceRef(*res.Ref)).
+			Tftpfiledir(*data.Expand(ctx, &resp.Diagnostics, false)).
+			ReturnFieldsPlus(readableAttributesForTftpfiledir).
+			ReturnAsObject(1).
+			Execute()
+		if err2 != nil {
+			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update Tftpfiledir, got error: %s", err2))
+			return
+		}
+		res2 := apiRes2.UpdateTftpfiledirResponseAsObject.GetResult()
+		data.Flatten(ctx, &res2, &resp.Diagnostics)
+	} else {
+		data.Flatten(ctx, &res, &resp.Diagnostics)
+	}
 
 	// Save data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
@@ -186,6 +208,21 @@ func (r *TftpfiledirResource) Delete(ctx context.Context, req resource.DeleteReq
 		}
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete Tftpfiledir, got error: %s", err))
 		return
+	}
+}
+
+func (r *TftpfiledirResource) ValidateConfig(ctx context.Context, req resource.ValidateConfigRequest, resp *resource.ValidateConfigResponse) {
+	var data TftpfiledirModel
+	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	if data.Type.ValueString() == "FILE" {
+		resp.Diagnostics.AddError(
+			"Invalid Configuration",
+			"File Type is currently not supported for TFTP file system entities.",
+		)
 	}
 }
 
