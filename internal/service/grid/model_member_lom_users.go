@@ -87,10 +87,10 @@ func ExpandMemberLomUsers(ctx context.Context, o types.Object, diags *diag.Diagn
 	if diags.HasError() {
 		return nil
 	}
-	return m.Expand(ctx, diags)
+	return m.Expand(ctx, diags, true)
 }
 
-func (m *MemberLomUsersModel) Expand(ctx context.Context, diags *diag.Diagnostics) *grid.MemberLomUsers {
+func (m *MemberLomUsersModel) Expand(ctx context.Context, diags *diag.Diagnostics, isCreate bool) *grid.MemberLomUsers {
 	if m == nil {
 		return nil
 	}
@@ -100,7 +100,10 @@ func (m *MemberLomUsersModel) Expand(ctx context.Context, diags *diag.Diagnostic
 		Disable: flex.ExpandBoolPointer(m.Disable),
 		Comment: flex.ExpandStringPointer(m.Comment),
 	}
-	// TODO: Password is non-updatable, Please create an IsCreate Block for the same
+	if isCreate {
+		to.Password = flex.ExpandStringPointer(m.Password)
+	}
+
 	return to
 }
 

@@ -91,7 +91,7 @@ func (m *MemberNatSettingModel) Flatten(ctx context.Context, from *grid.MemberNa
 	if m == nil {
 		*m = MemberNatSettingModel{}
 	}
-	//m.Enabled = types.BoolPointerValue(from.Enabled)
+	m.Enabled = types.BoolPointerValue(from.Enabled)
 	m.ExternalVirtualIp = flex.FlattenStringPointer(from.ExternalVirtualIp)
 	m.Group = flex.FlattenStringPointer(from.Group)
 }

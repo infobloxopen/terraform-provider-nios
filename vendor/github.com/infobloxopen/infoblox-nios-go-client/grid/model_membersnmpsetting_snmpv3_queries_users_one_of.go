@@ -17,24 +17,10 @@ import (
 // checks if the MembersnmpsettingSnmpv3QueriesUsersOneOf type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &MembersnmpsettingSnmpv3QueriesUsersOneOf{}
 
-// MembersnmpsettingSnmpv3QueriesUsersOneOf struct for MembersnmpsettingSnmpv3QueriesUsersOneOf
+// MembersnmpsettingSnmpv3QueriesUsersOneOf The reference to the SNMPv3 user object
 type MembersnmpsettingSnmpv3QueriesUsersOneOf struct {
 	// The reference to the SNMPv3 user object
-	Ref *string `json:"_ref,omitempty"`
-	// The SNMPv3 user.
-	User *string `json:"user,omitempty"`
-	// The authentication protocol to be used for this user.
-	AuthenticationProtocol *string `json:"authentication_protocol,omitempty"`
-	// A descriptive comment for the SNMPv3 User.
-	Comment *string `json:"comment,omitempty"`
-	// Determines if SNMPv3 user is disabled or not.
-	Disable *bool `json:"disable,omitempty"`
-	// Extensible attributes associated with the object. For valid values for extensible attributes, see {extattrs:values}.
-	ExtAttrs *map[string]ExtAttrs `json:"extattrs,omitempty"`
-	// The name of the user.
-	Name *string `json:"name,omitempty"`
-	// The privacy protocol to be used for this user.
-	PrivacyProtocol      *string `json:"privacy_protocol,omitempty"`
+	User                 *string `json:"user,omitempty"`
 	AdditionalProperties map[string]interface{}
 }
 
@@ -55,38 +41,6 @@ func NewMembersnmpsettingSnmpv3QueriesUsersOneOf() *MembersnmpsettingSnmpv3Queri
 func NewMembersnmpsettingSnmpv3QueriesUsersOneOfWithDefaults() *MembersnmpsettingSnmpv3QueriesUsersOneOf {
 	this := MembersnmpsettingSnmpv3QueriesUsersOneOf{}
 	return &this
-}
-
-// GetRef returns the Ref field value if set, zero value otherwise.
-func (o *MembersnmpsettingSnmpv3QueriesUsersOneOf) GetRef() string {
-	if o == nil || IsNil(o.Ref) {
-		var ret string
-		return ret
-	}
-	return *o.Ref
-}
-
-// GetRefOk returns a tuple with the Ref field value if set, nil otherwise
-// and a boolean to check if the value has been set.
-func (o *MembersnmpsettingSnmpv3QueriesUsersOneOf) GetRefOk() (*string, bool) {
-	if o == nil || IsNil(o.Ref) {
-		return nil, false
-	}
-	return o.Ref, true
-}
-
-// HasRef returns a boolean if a field has been set.
-func (o *MembersnmpsettingSnmpv3QueriesUsersOneOf) HasRef() bool {
-	if o != nil && !IsNil(o.Ref) {
-		return true
-	}
-
-	return false
-}
-
-// SetRef gets a reference to the given string and assigns it to the Ref field.
-func (o *MembersnmpsettingSnmpv3QueriesUsersOneOf) SetRef(v string) {
-	o.Ref = &v
 }
 
 // GetUser returns the User field value if set, zero value otherwise.
@@ -121,198 +75,6 @@ func (o *MembersnmpsettingSnmpv3QueriesUsersOneOf) SetUser(v string) {
 	o.User = &v
 }
 
-// GetAuthenticationProtocol returns the AuthenticationProtocol field value if set, zero value otherwise.
-func (o *MembersnmpsettingSnmpv3QueriesUsersOneOf) GetAuthenticationProtocol() string {
-	if o == nil || IsNil(o.AuthenticationProtocol) {
-		var ret string
-		return ret
-	}
-	return *o.AuthenticationProtocol
-}
-
-// GetAuthenticationProtocolOk returns a tuple with the AuthenticationProtocol field value if set, nil otherwise
-// and a boolean to check if the value has been set.
-func (o *MembersnmpsettingSnmpv3QueriesUsersOneOf) GetAuthenticationProtocolOk() (*string, bool) {
-	if o == nil || IsNil(o.AuthenticationProtocol) {
-		return nil, false
-	}
-	return o.AuthenticationProtocol, true
-}
-
-// HasAuthenticationProtocol returns a boolean if a field has been set.
-func (o *MembersnmpsettingSnmpv3QueriesUsersOneOf) HasAuthenticationProtocol() bool {
-	if o != nil && !IsNil(o.AuthenticationProtocol) {
-		return true
-	}
-
-	return false
-}
-
-// SetAuthenticationProtocol gets a reference to the given string and assigns it to the AuthenticationProtocol field.
-func (o *MembersnmpsettingSnmpv3QueriesUsersOneOf) SetAuthenticationProtocol(v string) {
-	o.AuthenticationProtocol = &v
-}
-
-// GetComment returns the Comment field value if set, zero value otherwise.
-func (o *MembersnmpsettingSnmpv3QueriesUsersOneOf) GetComment() string {
-	if o == nil || IsNil(o.Comment) {
-		var ret string
-		return ret
-	}
-	return *o.Comment
-}
-
-// GetCommentOk returns a tuple with the Comment field value if set, nil otherwise
-// and a boolean to check if the value has been set.
-func (o *MembersnmpsettingSnmpv3QueriesUsersOneOf) GetCommentOk() (*string, bool) {
-	if o == nil || IsNil(o.Comment) {
-		return nil, false
-	}
-	return o.Comment, true
-}
-
-// HasComment returns a boolean if a field has been set.
-func (o *MembersnmpsettingSnmpv3QueriesUsersOneOf) HasComment() bool {
-	if o != nil && !IsNil(o.Comment) {
-		return true
-	}
-
-	return false
-}
-
-// SetComment gets a reference to the given string and assigns it to the Comment field.
-func (o *MembersnmpsettingSnmpv3QueriesUsersOneOf) SetComment(v string) {
-	o.Comment = &v
-}
-
-// GetDisable returns the Disable field value if set, zero value otherwise.
-func (o *MembersnmpsettingSnmpv3QueriesUsersOneOf) GetDisable() bool {
-	if o == nil || IsNil(o.Disable) {
-		var ret bool
-		return ret
-	}
-	return *o.Disable
-}
-
-// GetDisableOk returns a tuple with the Disable field value if set, nil otherwise
-// and a boolean to check if the value has been set.
-func (o *MembersnmpsettingSnmpv3QueriesUsersOneOf) GetDisableOk() (*bool, bool) {
-	if o == nil || IsNil(o.Disable) {
-		return nil, false
-	}
-	return o.Disable, true
-}
-
-// HasDisable returns a boolean if a field has been set.
-func (o *MembersnmpsettingSnmpv3QueriesUsersOneOf) HasDisable() bool {
-	if o != nil && !IsNil(o.Disable) {
-		return true
-	}
-
-	return false
-}
-
-// SetDisable gets a reference to the given bool and assigns it to the Disable field.
-func (o *MembersnmpsettingSnmpv3QueriesUsersOneOf) SetDisable(v bool) {
-	o.Disable = &v
-}
-
-// GetExtAttrs returns the ExtAttrs field value if set, zero value otherwise.
-func (o *MembersnmpsettingSnmpv3QueriesUsersOneOf) GetExtAttrs() map[string]ExtAttrs {
-	if o == nil || IsNil(o.ExtAttrs) {
-		var ret map[string]ExtAttrs
-		return ret
-	}
-	return *o.ExtAttrs
-}
-
-// GetExtAttrsOk returns a tuple with the ExtAttrs field value if set, nil otherwise
-// and a boolean to check if the value has been set.
-func (o *MembersnmpsettingSnmpv3QueriesUsersOneOf) GetExtAttrsOk() (*map[string]ExtAttrs, bool) {
-	if o == nil || IsNil(o.ExtAttrs) {
-		return nil, false
-	}
-	return o.ExtAttrs, true
-}
-
-// HasExtAttrs returns a boolean if a field has been set.
-func (o *MembersnmpsettingSnmpv3QueriesUsersOneOf) HasExtAttrs() bool {
-	if o != nil && !IsNil(o.ExtAttrs) {
-		return true
-	}
-
-	return false
-}
-
-// SetExtAttrs gets a reference to the given map[string]ExtAttrs and assigns it to the ExtAttrs field.
-func (o *MembersnmpsettingSnmpv3QueriesUsersOneOf) SetExtAttrs(v map[string]ExtAttrs) {
-	o.ExtAttrs = &v
-}
-
-// GetName returns the Name field value if set, zero value otherwise.
-func (o *MembersnmpsettingSnmpv3QueriesUsersOneOf) GetName() string {
-	if o == nil || IsNil(o.Name) {
-		var ret string
-		return ret
-	}
-	return *o.Name
-}
-
-// GetNameOk returns a tuple with the Name field value if set, nil otherwise
-// and a boolean to check if the value has been set.
-func (o *MembersnmpsettingSnmpv3QueriesUsersOneOf) GetNameOk() (*string, bool) {
-	if o == nil || IsNil(o.Name) {
-		return nil, false
-	}
-	return o.Name, true
-}
-
-// HasName returns a boolean if a field has been set.
-func (o *MembersnmpsettingSnmpv3QueriesUsersOneOf) HasName() bool {
-	if o != nil && !IsNil(o.Name) {
-		return true
-	}
-
-	return false
-}
-
-// SetName gets a reference to the given string and assigns it to the Name field.
-func (o *MembersnmpsettingSnmpv3QueriesUsersOneOf) SetName(v string) {
-	o.Name = &v
-}
-
-// GetPrivacyProtocol returns the PrivacyProtocol field value if set, zero value otherwise.
-func (o *MembersnmpsettingSnmpv3QueriesUsersOneOf) GetPrivacyProtocol() string {
-	if o == nil || IsNil(o.PrivacyProtocol) {
-		var ret string
-		return ret
-	}
-	return *o.PrivacyProtocol
-}
-
-// GetPrivacyProtocolOk returns a tuple with the PrivacyProtocol field value if set, nil otherwise
-// and a boolean to check if the value has been set.
-func (o *MembersnmpsettingSnmpv3QueriesUsersOneOf) GetPrivacyProtocolOk() (*string, bool) {
-	if o == nil || IsNil(o.PrivacyProtocol) {
-		return nil, false
-	}
-	return o.PrivacyProtocol, true
-}
-
-// HasPrivacyProtocol returns a boolean if a field has been set.
-func (o *MembersnmpsettingSnmpv3QueriesUsersOneOf) HasPrivacyProtocol() bool {
-	if o != nil && !IsNil(o.PrivacyProtocol) {
-		return true
-	}
-
-	return false
-}
-
-// SetPrivacyProtocol gets a reference to the given string and assigns it to the PrivacyProtocol field.
-func (o *MembersnmpsettingSnmpv3QueriesUsersOneOf) SetPrivacyProtocol(v string) {
-	o.PrivacyProtocol = &v
-}
-
 func (o MembersnmpsettingSnmpv3QueriesUsersOneOf) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
@@ -323,29 +85,8 @@ func (o MembersnmpsettingSnmpv3QueriesUsersOneOf) MarshalJSON() ([]byte, error) 
 
 func (o MembersnmpsettingSnmpv3QueriesUsersOneOf) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
-	if !IsNil(o.Ref) {
-		toSerialize["_ref"] = o.Ref
-	}
 	if !IsNil(o.User) {
 		toSerialize["user"] = o.User
-	}
-	if !IsNil(o.AuthenticationProtocol) {
-		toSerialize["authentication_protocol"] = o.AuthenticationProtocol
-	}
-	if !IsNil(o.Comment) {
-		toSerialize["comment"] = o.Comment
-	}
-	if !IsNil(o.Disable) {
-		toSerialize["disable"] = o.Disable
-	}
-	if !IsNil(o.ExtAttrs) {
-		toSerialize["extattrs"] = o.ExtAttrs
-	}
-	if !IsNil(o.Name) {
-		toSerialize["name"] = o.Name
-	}
-	if !IsNil(o.PrivacyProtocol) {
-		toSerialize["privacy_protocol"] = o.PrivacyProtocol
 	}
 
 	for key, value := range o.AdditionalProperties {
@@ -369,14 +110,7 @@ func (o *MembersnmpsettingSnmpv3QueriesUsersOneOf) UnmarshalJSON(data []byte) (e
 	additionalProperties := make(map[string]interface{})
 
 	if err = json.Unmarshal(data, &additionalProperties); err == nil {
-		delete(additionalProperties, "_ref")
 		delete(additionalProperties, "user")
-		delete(additionalProperties, "authentication_protocol")
-		delete(additionalProperties, "comment")
-		delete(additionalProperties, "disable")
-		delete(additionalProperties, "extattrs")
-		delete(additionalProperties, "name")
-		delete(additionalProperties, "privacy_protocol")
 		o.AdditionalProperties = additionalProperties
 	}
 

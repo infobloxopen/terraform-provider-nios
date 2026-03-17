@@ -17,8 +17,8 @@ import (
 
 // MembersnmpsettingSnmpv3QueriesUsers - struct for MembersnmpsettingSnmpv3QueriesUsers
 type MembersnmpsettingSnmpv3QueriesUsers struct {
-	MembersnmpsettingSnmpv3QueriesUsersOneOf *MembersnmpsettingSnmpv3QueriesUsersOneOf
-	String                                   *string
+	MembersnmpsettingSnmpv3QueriesUsersOneOf  *MembersnmpsettingSnmpv3QueriesUsersOneOf
+	MembersnmpsettingSnmpv3QueriesUsersOneOf1 *MembersnmpsettingSnmpv3QueriesUsersOneOf1
 }
 
 // MembersnmpsettingSnmpv3QueriesUsersOneOfAsMembersnmpsettingSnmpv3QueriesUsers is a convenience function that returns MembersnmpsettingSnmpv3QueriesUsersOneOf wrapped in MembersnmpsettingSnmpv3QueriesUsers
@@ -28,10 +28,10 @@ func MembersnmpsettingSnmpv3QueriesUsersOneOfAsMembersnmpsettingSnmpv3QueriesUse
 	}
 }
 
-// stringAsMembersnmpsettingSnmpv3QueriesUsers is a convenience function that returns string wrapped in MembersnmpsettingSnmpv3QueriesUsers
-func StringAsMembersnmpsettingSnmpv3QueriesUsers(v *string) MembersnmpsettingSnmpv3QueriesUsers {
+// MembersnmpsettingSnmpv3QueriesUsersOneOf1AsMembersnmpsettingSnmpv3QueriesUsers is a convenience function that returns MembersnmpsettingSnmpv3QueriesUsersOneOf1 wrapped in MembersnmpsettingSnmpv3QueriesUsers
+func MembersnmpsettingSnmpv3QueriesUsersOneOf1AsMembersnmpsettingSnmpv3QueriesUsers(v *MembersnmpsettingSnmpv3QueriesUsersOneOf1) MembersnmpsettingSnmpv3QueriesUsers {
 	return MembersnmpsettingSnmpv3QueriesUsers{
-		String: v,
+		MembersnmpsettingSnmpv3QueriesUsersOneOf1: v,
 	}
 }
 
@@ -52,23 +52,23 @@ func (dst *MembersnmpsettingSnmpv3QueriesUsers) UnmarshalJSON(data []byte) error
 		dst.MembersnmpsettingSnmpv3QueriesUsersOneOf = nil
 	}
 
-	// try to unmarshal data into String
-	err = newStrictDecoder(data).Decode(&dst.String)
+	// try to unmarshal data into MembersnmpsettingSnmpv3QueriesUsersOneOf1
+	err = newStrictDecoder(data).Decode(&dst.MembersnmpsettingSnmpv3QueriesUsersOneOf1)
 	if err == nil {
-		jsonString, _ := json.Marshal(dst.String)
-		if string(jsonString) == "{}" { // empty struct
-			dst.String = nil
+		jsonMembersnmpsettingSnmpv3QueriesUsersOneOf1, _ := json.Marshal(dst.MembersnmpsettingSnmpv3QueriesUsersOneOf1)
+		if string(jsonMembersnmpsettingSnmpv3QueriesUsersOneOf1) == "{}" { // empty struct
+			dst.MembersnmpsettingSnmpv3QueriesUsersOneOf1 = nil
 		} else {
 			match++
 		}
 	} else {
-		dst.String = nil
+		dst.MembersnmpsettingSnmpv3QueriesUsersOneOf1 = nil
 	}
 
 	if match > 1 { // more than 1 match
 		// reset to nil
 		dst.MembersnmpsettingSnmpv3QueriesUsersOneOf = nil
-		dst.String = nil
+		dst.MembersnmpsettingSnmpv3QueriesUsersOneOf1 = nil
 
 		return fmt.Errorf("data matches more than one schema in oneOf(MembersnmpsettingSnmpv3QueriesUsers)")
 	} else if match == 1 {
@@ -84,8 +84,8 @@ func (src MembersnmpsettingSnmpv3QueriesUsers) MarshalJSON() ([]byte, error) {
 		return json.Marshal(&src.MembersnmpsettingSnmpv3QueriesUsersOneOf)
 	}
 
-	if src.String != nil {
-		return json.Marshal(&src.String)
+	if src.MembersnmpsettingSnmpv3QueriesUsersOneOf1 != nil {
+		return json.Marshal(&src.MembersnmpsettingSnmpv3QueriesUsersOneOf1)
 	}
 
 	return nil, nil // no data in oneOf schemas
@@ -100,8 +100,8 @@ func (obj *MembersnmpsettingSnmpv3QueriesUsers) GetActualInstance() interface{} 
 		return obj.MembersnmpsettingSnmpv3QueriesUsersOneOf
 	}
 
-	if obj.String != nil {
-		return obj.String
+	if obj.MembersnmpsettingSnmpv3QueriesUsersOneOf1 != nil {
+		return obj.MembersnmpsettingSnmpv3QueriesUsersOneOf1
 	}
 
 	// all schemas are nil

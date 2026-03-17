@@ -3,12 +3,9 @@ package grid
 import (
 	"context"
 
-	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapdefault"
-	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
@@ -44,10 +41,6 @@ var MembersnmpsettingSnmpv3QueriesUsersResourceSchemaAttributes = map[string]sch
 		Computed:            true,
 		MarkdownDescription: "The reference to the SNMPv3 user object",
 	},
-	"ref": schema.StringAttribute{
-		Computed:            true,
-		MarkdownDescription: "The reference to the SNMPv3 user object",
-	},
 	"user": schema.StringAttribute{
 		Optional:            true,
 		MarkdownDescription: "The SNMPv3 user.",
@@ -67,10 +60,10 @@ var MembersnmpsettingSnmpv3QueriesUsersResourceSchemaAttributes = map[string]sch
 	"extattrs": schema.MapAttribute{
 		ElementType: types.StringType,
 		Computed:    true,
-		Default:     mapdefault.StaticValue(types.MapNull(types.StringType)),
-		Validators: []validator.Map{
-			mapvalidator.SizeAtLeast(1),
-		},
+		//Default:     mapdefault.StaticValue(types.MapNull(types.StringType)),
+		// Validators: []validator.Map{
+		// 	mapvalidator.SizeAtLeast(1),
+		// },
 		MarkdownDescription: "Extensible attributes associated with the object. For valid values for extensible attributes, see {extattrs:values}.",
 	},
 	"name": schema.StringAttribute{
@@ -99,9 +92,17 @@ func (m *MembersnmpsettingSnmpv3QueriesUsersModel) Expand(ctx context.Context, d
 	if m == nil {
 		return nil
 	}
-	to := &grid.MembersnmpsettingSnmpv3QueriesUsers{
-		User: flex.ExpandStringPointer(m.User),
+	var oneOf *grid.MembersnmpsettingSnmpv3QueriesUsersOneOf
+	if !m.User.IsNull() && !m.User.IsUnknown() {
+		oneOf = &grid.MembersnmpsettingSnmpv3QueriesUsersOneOf{
+			User: flex.ExpandStringPointer(m.User),
+		}
 	}
+
+	to := &grid.MembersnmpsettingSnmpv3QueriesUsers{
+		MembersnmpsettingSnmpv3QueriesUsersOneOf: oneOf,
+	}
+
 	return to
 }
 
@@ -123,12 +124,12 @@ func (m *MembersnmpsettingSnmpv3QueriesUsersModel) Flatten(ctx context.Context, 
 	if m == nil {
 		*m = MembersnmpsettingSnmpv3QueriesUsersModel{}
 	}
-	m.Ref = flex.FlattenStringPointer(from.Ref)
-	m.User = flex.FlattenStringPointer(from.User)
-	m.AuthenticationProtocol = flex.FlattenStringPointer(from.AuthenticationProtocol)
-	m.Comment = flex.FlattenStringPointer(from.Comment)
-	m.Disable = types.BoolPointerValue(from.Disable)
-	m.ExtAttrs = FlattenExtAttrs(ctx, m.ExtAttrs, from.ExtAttrs, diags)
-	m.Name = flex.FlattenStringPointer(from.Name)
-	m.PrivacyProtocol = flex.FlattenStringPointer(from.PrivacyProtocol)
+	m.User = flex.FlattenStringPointer(from.MembersnmpsettingSnmpv3QueriesUsersOneOf1.User.Ref)
+	m.Ref = flex.FlattenStringPointer(from.MembersnmpsettingSnmpv3QueriesUsersOneOf1.User.Ref)
+	m.AuthenticationProtocol = flex.FlattenStringPointer(from.MembersnmpsettingSnmpv3QueriesUsersOneOf1.User.AuthenticationProtocol)
+	m.Comment = flex.FlattenStringPointer(from.MembersnmpsettingSnmpv3QueriesUsersOneOf1.User.Comment)
+	m.Disable = types.BoolPointerValue(from.MembersnmpsettingSnmpv3QueriesUsersOneOf1.User.Disable)
+	m.ExtAttrs = FlattenExtAttrs(ctx, m.ExtAttrs, from.MembersnmpsettingSnmpv3QueriesUsersOneOf1.User.ExtAttrs, diags)
+	m.Name = flex.FlattenStringPointer(from.MembersnmpsettingSnmpv3QueriesUsersOneOf1.User.Name)
+	m.PrivacyProtocol = flex.FlattenStringPointer(from.MembersnmpsettingSnmpv3QueriesUsersOneOf1.User.PrivacyProtocol)
 }
