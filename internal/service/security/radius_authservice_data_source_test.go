@@ -76,9 +76,9 @@ resource "nios_security_radius_authservice" "test" {
 }
 
 data "nios_security_radius_authservice" "test" {
-  filters = {
-	name = nios_security_radius_authservice.test.name
-  }
+	filters = {
+		name = nios_security_radius_authservice.test.name
+  	}
 }
 `, name, serversString)
 }
