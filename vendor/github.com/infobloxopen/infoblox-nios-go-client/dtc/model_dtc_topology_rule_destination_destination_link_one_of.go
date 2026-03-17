@@ -19,11 +19,11 @@ var _ MappedNullable = &DtcTopologyRuleDestinationDestinationLinkOneOf{}
 
 // DtcTopologyRuleDestinationDestinationLinkOneOf struct for DtcTopologyRuleDestinationDestinationLinkOneOf
 type DtcTopologyRuleDestinationDestinationLinkOneOf struct {
-	// The reference to the LDAP auth service object.
+	// The reference to the object.
 	Ref *string `json:"_ref,omitempty"`
-	// The host of server.
+	// The host IP of server.
 	Host *string `json:"host,omitempty"`
-	// The name of the LDAP auth service object.
+	// The name of the server.
 	Name                 *string `json:"name,omitempty"`
 	AdditionalProperties map[string]interface{}
 }
