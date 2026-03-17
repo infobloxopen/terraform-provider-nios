@@ -52,15 +52,15 @@ func testAccCheckTftpfiledirResourceAttrPair(resourceName, dataSourceName string
 func testAccTftpfiledirDataSourceConfigFilters(name, type_ string) string {
 	return fmt.Sprintf(`
 resource "nios_misc_tftpfiledir" "test" {
-  name = %q
-  type = %q
+	name = %q
+	type = %q
 }
 
 data "nios_misc_tftpfiledir" "test" {
-  filters = {
-	name = nios_misc_tftpfiledir.test.name
-	directory = nios_misc_tftpfiledir.test.directory
-  }
+	filters = {
+		name = nios_misc_tftpfiledir.test.name
+		directory = nios_misc_tftpfiledir.test.directory
+	}
 }
 `, name, type_)
 }

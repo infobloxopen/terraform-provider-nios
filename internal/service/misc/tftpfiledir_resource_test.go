@@ -317,8 +317,8 @@ func testAccTftpfiledirImportStateIdFunc(resourceName string) resource.ImportSta
 func testAccTftpfiledirBasicConfig(name, type_ string) string {
 	return fmt.Sprintf(`
 resource "nios_misc_tftpfiledir" "test" {
-    name = %q
-    type = %q
+	name = %q
+	type = %q
 }
 `, name, type_)
 }
@@ -326,9 +326,9 @@ resource "nios_misc_tftpfiledir" "test" {
 func testAccTftpfiledirDirectory(name string, type_ string, directory string) string {
 	return fmt.Sprintf(`
 resource "nios_misc_tftpfiledir" "test_directory" {
-    name = %q
-    type = %q
-    directory = %q
+	name = %q
+	type = %q
+	directory = %q
 }
 `, name, type_, directory)
 }
@@ -336,8 +336,8 @@ resource "nios_misc_tftpfiledir" "test_directory" {
 func testAccTftpfiledirName(name string, type_ string) string {
 	return fmt.Sprintf(`
 resource "nios_misc_tftpfiledir" "test_name" {
-    name = %q
-    type = %q
+	name = %q
+	type = %q
 }
 `, name, type_)
 }
@@ -345,8 +345,8 @@ resource "nios_misc_tftpfiledir" "test_name" {
 func testAccTftpfiledirType(name string, type_ string) string {
 	return fmt.Sprintf(`
 resource "nios_misc_tftpfiledir" "test_type" {
-    name = %q
-    type = %q
+	name = %q
+	type = %q
 }
 `, name, type_)
 }
@@ -355,9 +355,9 @@ func testAccTftpfiledirVtftpDirMembers(name string, type_ string, vtftpDirMember
 	vtftpDirMembersStr := utils.ConvertSliceOfMapsToHCL(vtftpDirMembers)
 	return fmt.Sprintf(`
 resource "nios_misc_tftpfiledir" "test_vtftp_dir_members" {
-    name = %q
-    type = %q
-    vtftp_dir_members = %s
+	name = %q
+	type = %q
+	vtftp_dir_members = %s
 }
 `, name, type_, vtftpDirMembersStr)
 }
