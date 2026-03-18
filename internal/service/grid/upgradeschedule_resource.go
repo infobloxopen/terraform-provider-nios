@@ -154,7 +154,7 @@ func (r *UpgradescheduleResource) Read(ctx context.Context, req resource.ReadReq
 
 	apiRes, httpRes, err := r.client.GridAPI.
 		UpgradescheduleAPI.
-		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Read(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
 		ReturnFieldsPlus(readableAttributesForUpgradeschedule).
 		ReturnAsObject(1).
 		ProxySearch(config.GetProxySearch()).
@@ -196,9 +196,15 @@ func (r *UpgradescheduleResource) Update(ctx context.Context, req resource.Updat
 		return
 	}
 
+	diags = req.State.GetAttribute(ctx, path.Root("uuid"), &data.Uuid)
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+		return
+	}
+
 	apiRes, _, err := r.client.GridAPI.
 		UpgradescheduleAPI.
-		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Update(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
 		Upgradeschedule(*data.Expand(ctx, &resp.Diagnostics)).
 		ReturnFieldsPlus(readableAttributesForUpgradeschedule).
 		ReturnAsObject(1).
@@ -222,5 +228,5 @@ func (r *UpgradescheduleResource) Delete(ctx context.Context, req resource.Delet
 }
 
 func (r *UpgradescheduleResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	resource.ImportStatePassthroughID(ctx, path.Root("ref"), req, resp)
+	resource.ImportStatePassthroughID(ctx, path.Root("uuid"), req, resp)
 }

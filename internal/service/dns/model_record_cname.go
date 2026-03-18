@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
@@ -25,57 +26,59 @@ import (
 )
 
 type RecordCnameModel struct {
-	Ref                types.String `tfsdk:"ref"`
-	Uuid               types.String `tfsdk:"uuid"`
-	AwsRte53RecordInfo types.Object `tfsdk:"aws_rte53_record_info"`
-	Canonical          types.String `tfsdk:"canonical"`
-	CloudInfo          types.Object `tfsdk:"cloud_info"`
-	Comment            types.String `tfsdk:"comment"`
-	CreationTime       types.Int64  `tfsdk:"creation_time"`
-	Creator            types.String `tfsdk:"creator"`
-	DdnsPrincipal      types.String `tfsdk:"ddns_principal"`
-	DdnsProtected      types.Bool   `tfsdk:"ddns_protected"`
-	Disable            types.Bool   `tfsdk:"disable"`
-	DnsCanonical       types.String `tfsdk:"dns_canonical"`
-	DnsName            types.String `tfsdk:"dns_name"`
-	ExtAttrs           types.Map    `tfsdk:"extattrs"`
-	ExtAttrsAll        types.Map    `tfsdk:"extattrs_all"`
-	ForbidReclamation  types.Bool   `tfsdk:"forbid_reclamation"`
-	LastQueried        types.Int64  `tfsdk:"last_queried"`
-	Name               types.String `tfsdk:"name"`
-	Reclaimable        types.Bool   `tfsdk:"reclaimable"`
-	SharedRecordGroup  types.String `tfsdk:"shared_record_group"`
-	Ttl                types.Int64  `tfsdk:"ttl"`
-	UseTtl             types.Bool   `tfsdk:"use_ttl"`
-	View               types.String `tfsdk:"view"`
-	Zone               types.String `tfsdk:"zone"`
+	Ref                        types.String `tfsdk:"ref"`
+	Uuid                       types.String `tfsdk:"uuid"`
+	AwsRte53RecordInfo         types.Object `tfsdk:"aws_rte53_record_info"`
+	Canonical                  types.String `tfsdk:"canonical"`
+	CloudInfo                  types.Object `tfsdk:"cloud_info"`
+	Comment                    types.String `tfsdk:"comment"`
+	CreationTime               types.Int64  `tfsdk:"creation_time"`
+	Creator                    types.String `tfsdk:"creator"`
+	DdnsPrincipal              types.String `tfsdk:"ddns_principal"`
+	DdnsProtected              types.Bool   `tfsdk:"ddns_protected"`
+	Disable                    types.Bool   `tfsdk:"disable"`
+	DnsCanonical               types.String `tfsdk:"dns_canonical"`
+	DnsName                    types.String `tfsdk:"dns_name"`
+	ExtAttrs                   types.Map    `tfsdk:"extattrs"`
+	ForbidReclamation          types.Bool   `tfsdk:"forbid_reclamation"`
+	LastQueried                types.Int64  `tfsdk:"last_queried"`
+	Name                       types.String `tfsdk:"name"`
+	Reclaimable                types.Bool   `tfsdk:"reclaimable"`
+	RrPreconditionInstructions types.List   `tfsdk:"rr_precondition_instructions"`
+	SharedRecordGroup          types.String `tfsdk:"shared_record_group"`
+	Ttl                        types.Int64  `tfsdk:"ttl"`
+	UseTtl                     types.Bool   `tfsdk:"use_ttl"`
+	View                       types.String `tfsdk:"view"`
+	Zone                       types.String `tfsdk:"zone"`
+	ExtAttrsAll                types.Map    `tfsdk:"extattrs_all"`
 }
 
 var RecordCnameAttrTypes = map[string]attr.Type{
-	"ref":                   types.StringType,
-	"uuid":                  types.StringType,
-	"aws_rte53_record_info": types.ObjectType{AttrTypes: RecordCnameAwsRte53RecordInfoAttrTypes},
-	"canonical":             types.StringType,
-	"cloud_info":            types.ObjectType{AttrTypes: RecordCnameCloudInfoAttrTypes},
-	"comment":               types.StringType,
-	"creation_time":         types.Int64Type,
-	"creator":               types.StringType,
-	"ddns_principal":        types.StringType,
-	"ddns_protected":        types.BoolType,
-	"disable":               types.BoolType,
-	"dns_canonical":         types.StringType,
-	"dns_name":              types.StringType,
-	"extattrs":              types.MapType{ElemType: types.StringType},
-	"extattrs_all":          types.MapType{ElemType: types.StringType},
-	"forbid_reclamation":    types.BoolType,
-	"last_queried":          types.Int64Type,
-	"name":                  types.StringType,
-	"reclaimable":           types.BoolType,
-	"shared_record_group":   types.StringType,
-	"ttl":                   types.Int64Type,
-	"use_ttl":               types.BoolType,
-	"view":                  types.StringType,
-	"zone":                  types.StringType,
+	"ref":                          types.StringType,
+	"uuid":                         types.StringType,
+	"aws_rte53_record_info":        types.ObjectType{AttrTypes: RecordCnameAwsRte53RecordInfoAttrTypes},
+	"canonical":                    types.StringType,
+	"cloud_info":                   types.ObjectType{AttrTypes: RecordCnameCloudInfoAttrTypes},
+	"comment":                      types.StringType,
+	"creation_time":                types.Int64Type,
+	"creator":                      types.StringType,
+	"ddns_principal":               types.StringType,
+	"ddns_protected":               types.BoolType,
+	"disable":                      types.BoolType,
+	"dns_canonical":                types.StringType,
+	"dns_name":                     types.StringType,
+	"extattrs":                     types.MapType{ElemType: types.StringType},
+	"forbid_reclamation":           types.BoolType,
+	"last_queried":                 types.Int64Type,
+	"name":                         types.StringType,
+	"reclaimable":                  types.BoolType,
+	"rr_precondition_instructions": types.ListType{ElemType: types.ObjectType{AttrTypes: RecordCnameRrPreconditionInstructionsAttrTypes}},
+	"shared_record_group":          types.StringType,
+	"ttl":                          types.Int64Type,
+	"use_ttl":                      types.BoolType,
+	"view":                         types.StringType,
+	"zone":                         types.StringType,
+	"extattrs_all":                 types.MapType{ElemType: types.StringType},
 }
 
 var RecordCnameResourceSchemaAttributes = map[string]schema.Attribute{
@@ -190,6 +193,17 @@ var RecordCnameResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed:            true,
 		MarkdownDescription: "Determines if the record is reclaimable or not.",
 	},
+	"rr_precondition_instructions": schema.ListNestedAttribute{
+		NestedObject: schema.NestedAttributeObject{
+			Attributes: RecordCnameRrPreconditionInstructionsResourceSchemaAttributes,
+		},
+		Validators: []validator.List{
+			listvalidator.SizeAtLeast(1),
+		},
+		Optional:            true,
+		Computed:            true,
+		MarkdownDescription: "List of pre-condition instructions for CNAME record creation.",
+	},
 	"shared_record_group": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The name of the shared record group in which the record resides. This field exists only on db_objects if this record is a shared record.",
@@ -227,17 +241,18 @@ func (m *RecordCnameModel) Expand(ctx context.Context, diags *diag.Diagnostics, 
 		return nil
 	}
 	to := &dns.RecordCname{
-		Canonical:         flex.ExpandStringPointer(m.Canonical),
-		Comment:           flex.ExpandStringPointer(m.Comment),
-		Creator:           flex.ExpandStringPointer(m.Creator),
-		DdnsPrincipal:     flex.ExpandStringPointer(m.DdnsPrincipal),
-		DdnsProtected:     flex.ExpandBoolPointer(m.DdnsProtected),
-		Disable:           flex.ExpandBoolPointer(m.Disable),
-		ExtAttrs:          ExpandExtAttrs(ctx, m.ExtAttrs, diags),
-		ForbidReclamation: flex.ExpandBoolPointer(m.ForbidReclamation),
-		Name:              flex.ExpandStringPointer(m.Name),
-		Ttl:               flex.ExpandInt64Pointer(m.Ttl),
-		UseTtl:            flex.ExpandBoolPointer(m.UseTtl),
+		Canonical:                  flex.ExpandStringPointer(m.Canonical),
+		Comment:                    flex.ExpandStringPointer(m.Comment),
+		Creator:                    flex.ExpandStringPointer(m.Creator),
+		DdnsPrincipal:              flex.ExpandStringPointer(m.DdnsPrincipal),
+		DdnsProtected:              flex.ExpandBoolPointer(m.DdnsProtected),
+		Disable:                    flex.ExpandBoolPointer(m.Disable),
+		ExtAttrs:                   ExpandExtAttrs(ctx, m.ExtAttrs, diags),
+		ForbidReclamation:          flex.ExpandBoolPointer(m.ForbidReclamation),
+		Name:                       flex.ExpandStringPointer(m.Name),
+		RrPreconditionInstructions: flex.ExpandFrameworkListNestedBlock(ctx, m.RrPreconditionInstructions, diags, ExpandRecordCnameRrPreconditionInstructions),
+		Ttl:                        flex.ExpandInt64Pointer(m.Ttl),
+		UseTtl:                     flex.ExpandBoolPointer(m.UseTtl),
 	}
 	if isCreate {
 		to.View = flex.ExpandStringPointer(m.View)
@@ -282,6 +297,11 @@ func (m *RecordCnameModel) Flatten(ctx context.Context, from *dns.RecordCname, d
 	m.LastQueried = flex.FlattenInt64Pointer(from.LastQueried)
 	m.Name = flex.FlattenStringPointer(from.Name)
 	m.Reclaimable = types.BoolPointerValue(from.Reclaimable)
+	planRrPreconditionInstructions := m.RrPreconditionInstructions
+	m.RrPreconditionInstructions = flex.FlattenFrameworkListNestedBlock(ctx, from.RrPreconditionInstructions, RecordCnameRrPreconditionInstructionsAttrTypes, diags, FlattenRecordCnameRrPreconditionInstructions)
+	if !planRrPreconditionInstructions.IsUnknown() && !planRrPreconditionInstructions.IsNull() {
+		m.RrPreconditionInstructions = planRrPreconditionInstructions
+	}
 	m.SharedRecordGroup = flex.FlattenStringPointer(from.SharedRecordGroup)
 	m.Ttl = flex.FlattenInt64Pointer(from.Ttl)
 	m.UseTtl = types.BoolPointerValue(from.UseTtl)

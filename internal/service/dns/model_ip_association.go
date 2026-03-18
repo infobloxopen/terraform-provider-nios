@@ -3,6 +3,7 @@ package dns
 import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
@@ -35,10 +36,18 @@ var IPAssociationAttrTypes = map[string]attr.Type{
 
 var IpAssociationResourceSchemaAttributes = map[string]schema.Attribute{
 	"ref": schema.StringAttribute{
-		Required:            true,
+		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The reference to the object.",
+		Validators: []validator.String{
+			stringvalidator.AtLeastOneOf(
+				path.MatchRoot("ref"),
+				path.MatchRoot("uuid"),
+			),
+		},
 	},
 	"uuid": schema.StringAttribute{
+		Optional:            true,
 		Computed:            true,
 		MarkdownDescription: "Universally Unique ID assigned for this object.",
 	},

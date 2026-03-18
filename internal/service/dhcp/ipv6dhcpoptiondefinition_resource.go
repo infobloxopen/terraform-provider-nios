@@ -106,7 +106,7 @@ func (r *Ipv6dhcpoptiondefinitionResource) Read(ctx context.Context, req resourc
 
 	apiRes, httpRes, err := r.client.DHCPAPI.
 		Ipv6dhcpoptiondefinitionAPI.
-		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Read(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
 		ReturnFieldsPlus(readableAttributesForIpv6dhcpoptiondefinition).
 		ReturnAsObject(1).
 		ProxySearch(config.GetProxySearch()).
@@ -150,6 +150,12 @@ func (r *Ipv6dhcpoptiondefinitionResource) Update(ctx context.Context, req resou
 		return
 	}
 
+	diags = req.State.GetAttribute(ctx, path.Root("uuid"), &data.Uuid)
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+		return
+	}
+
 	// Update ref if space has changed
 	if !data.Space.Equal(stateData.Space) {
 		r.updateRefIfSpaceChanged(ctx, resp, &data, &stateData)
@@ -160,7 +166,7 @@ func (r *Ipv6dhcpoptiondefinitionResource) Update(ctx context.Context, req resou
 
 	apiRes, _, err := r.client.DHCPAPI.
 		Ipv6dhcpoptiondefinitionAPI.
-		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Update(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
 		Ipv6dhcpoptiondefinition(*data.Expand(ctx, &resp.Diagnostics)).
 		ReturnFieldsPlus(readableAttributesForIpv6dhcpoptiondefinition).
 		ReturnAsObject(1).
@@ -190,7 +196,7 @@ func (r *Ipv6dhcpoptiondefinitionResource) Delete(ctx context.Context, req resou
 
 	httpRes, err := r.client.DHCPAPI.
 		Ipv6dhcpoptiondefinitionAPI.
-		Delete(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Delete(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
 		Execute()
 	if err != nil {
 		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
@@ -245,7 +251,7 @@ func (r *Ipv6dhcpoptiondefinitionResource) ValidateConfig(ctx context.Context, r
 }
 
 func (r *Ipv6dhcpoptiondefinitionResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	resource.ImportStatePassthroughID(ctx, path.Root("ref"), req, resp)
+	resource.ImportStatePassthroughID(ctx, path.Root("uuid"), req, resp)
 }
 
 // updateRefIfSpaceChanged updates the ref if the option space name changes by

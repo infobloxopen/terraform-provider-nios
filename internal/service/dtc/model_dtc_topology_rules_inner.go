@@ -18,21 +18,21 @@ import (
 )
 
 type DtcTopologyRulesInnerModel struct {
-	DestType        types.String `tfsdk:"dest_type"`
-	DestinationLink types.String `tfsdk:"destination_link"`
-	ReturnType      types.String `tfsdk:"return_type"`
-	Topology        types.String `tfsdk:"topology"`
-	Valid           types.Bool   `tfsdk:"valid"`
-	Sources         types.List   `tfsdk:"sources"`
+	DestType    types.String `tfsdk:"dest_type"`
+	Destination types.List   `tfsdk:"destination"`
+	ReturnType  types.String `tfsdk:"return_type"`
+	Topology    types.String `tfsdk:"topology"`
+	Valid       types.Bool   `tfsdk:"valid"`
+	Sources     types.List   `tfsdk:"sources"`
 }
 
 var DtcTopologyRulesInnerAttrTypes = map[string]attr.Type{
-	"dest_type":        types.StringType,
-	"destination_link": types.StringType,
-	"return_type":      types.StringType,
-	"topology":         types.StringType,
-	"valid":            types.BoolType,
-	"sources":          types.ListType{ElemType: types.ObjectType{AttrTypes: DtcTopologyRulesInnerOneOf1SourcesInnerAttrTypes}},
+	"dest_type":   types.StringType,
+	"destination": types.ListType{ElemType: types.ObjectType{AttrTypes: DtcTopologyRuleDestinationAttrTypes}},
+	"return_type": types.StringType,
+	"topology":    types.StringType,
+	"valid":       types.BoolType,
+	"sources":     types.ListType{ElemType: types.ObjectType{AttrTypes: DtcTopologyRulesInnerOneOf1SourcesInnerAttrTypes}},
 }
 
 var DtcTopologyRulesInnerResourceSchemaAttributes = map[string]schema.Attribute{
@@ -43,7 +43,13 @@ var DtcTopologyRulesInnerResourceSchemaAttributes = map[string]schema.Attribute{
 		},
 		MarkdownDescription: "The type of the destination for this rule.",
 	},
-	"destination_link": schema.StringAttribute{
+	"destination": schema.ListNestedAttribute{
+		NestedObject: schema.NestedAttributeObject{
+			Attributes: DtcTopologyRuleDestinationResourceSchemaAttributes,
+		},
+		Validators: []validator.List{
+			listvalidator.SizeAtLeast(1),
+		},
 		Optional:            true,
 		Computed:            true,
 		MarkdownDescription: "The reference to the destination object.",
@@ -95,10 +101,10 @@ func (m *DtcTopologyRulesInnerModel) Expand(ctx context.Context, diags *diag.Dia
 	}
 	to := &dtc.DtcTopologyRulesInner{
 		DtcTopologyRulesInnerOneOf1: &dtc.DtcTopologyRulesInnerOneOf1{
-			DestType:        flex.ExpandStringPointer(m.DestType),
-			DestinationLink: flex.ExpandStringPointer(m.DestinationLink),
-			ReturnType:      flex.ExpandStringPointer(m.ReturnType),
-			Sources:         flex.ExpandFrameworkListNestedBlock(ctx, m.Sources, diags, ExpandDtcTopologyRulesInnerOneOf1SourcesInner),
+			DestType:    flex.ExpandStringPointer(m.DestType),
+			Destination: flex.ExpandFrameworkListNestedBlock(ctx, m.Destination, diags, ExpandDtcTopologyRuleDestination),
+			ReturnType:  flex.ExpandStringPointer(m.ReturnType),
+			Sources:     flex.ExpandFrameworkListNestedBlock(ctx, m.Sources, diags, ExpandDtcTopologyRulesInnerOneOf1SourcesInner),
 		},
 	}
 	return to
@@ -124,7 +130,7 @@ func (m *DtcTopologyRulesInnerModel) Flatten(ctx context.Context, from *dtc.DtcT
 	}
 
 	m.DestType = flex.FlattenStringPointer(from.DtcTopologyRulesInnerOneOf1.DestType)
-	m.DestinationLink = flex.FlattenStringPointer(from.DtcTopologyRulesInnerOneOf1.DestinationLink)
+	m.Destination = flex.FlattenFrameworkListNestedBlock(ctx, from.DtcTopologyRulesInnerOneOf1.Destination, DtcTopologyRuleDestinationAttrTypes, diags, FlattenDtcTopologyRuleDestination)
 	m.ReturnType = flex.FlattenStringPointer(from.DtcTopologyRulesInnerOneOf1.ReturnType)
 	m.Topology = flex.FlattenStringPointer(from.DtcTopologyRulesInnerOneOf1.Topology)
 	m.Valid = types.BoolPointerValue(from.DtcTopologyRulesInnerOneOf1.Valid)

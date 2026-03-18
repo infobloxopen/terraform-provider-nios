@@ -123,7 +123,7 @@ func (r *DtcMonitorPdpResource) Read(ctx context.Context, req resource.ReadReque
 
 	apiRes, httpRes, err := r.client.DTCAPI.
 		DtcMonitorPdpAPI.
-		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Read(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
 		ReturnFieldsPlus(readableAttributesForDtcMonitorPdp).
 		ReturnAsObject(1).
 		ProxySearch(config.GetProxySearch()).
@@ -249,6 +249,12 @@ func (r *DtcMonitorPdpResource) Update(ctx context.Context, req resource.UpdateR
 		return
 	}
 
+	diags = req.State.GetAttribute(ctx, path.Root("uuid"), &data.Uuid)
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+		return
+	}
+
 	diags = req.State.GetAttribute(ctx, path.Root("extattrs_all"), &data.ExtAttrsAll)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -276,7 +282,7 @@ func (r *DtcMonitorPdpResource) Update(ctx context.Context, req resource.UpdateR
 
 	apiRes, _, err := r.client.DTCAPI.
 		DtcMonitorPdpAPI.
-		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Update(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
 		DtcMonitorPdp(*data.Expand(ctx, &resp.Diagnostics)).
 		ReturnFieldsPlus(readableAttributesForDtcMonitorPdp).
 		ReturnAsObject(1).
@@ -315,7 +321,7 @@ func (r *DtcMonitorPdpResource) Delete(ctx context.Context, req resource.DeleteR
 
 	httpRes, err := r.client.DTCAPI.
 		DtcMonitorPdpAPI.
-		Delete(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Delete(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
 		Execute()
 	if err != nil {
 		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
@@ -327,6 +333,6 @@ func (r *DtcMonitorPdpResource) Delete(ctx context.Context, req resource.DeleteR
 }
 
 func (r *DtcMonitorPdpResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("ref"), req.ID)...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("uuid"), req.ID)...)
 	resp.Diagnostics.Append(resp.Private.SetKey(ctx, "associate_internal_id", []byte("true"))...)
 }

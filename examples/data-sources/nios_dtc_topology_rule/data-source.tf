@@ -9,12 +9,13 @@ resource "nios_dtc_topology" "create_dtc_topology" {
   name = "example_dtc_topology_2"
   rules = [
     {
-      dest_type        = "SERVER"
-      destination_link = nios_dtc_server.create_dtc_server.ref
-    },
-    {
-      dest_type        = "SERVER"
-      destination_link = nios_dtc_server.create_dtc_server.ref
+      dest_type = "SERVER"
+      destination = [
+        {
+          destination_link = nios_dtc_server.create_dtc_server.ref
+          priority         = 1
+        }
+      ]
       sources = [
         {
           source_op    = "IS",

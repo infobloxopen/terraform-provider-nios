@@ -150,7 +150,7 @@ var RecordAliasResourceSchemaAttributes = map[string]schema.Attribute{
 	"target_type": schema.StringAttribute{
 		Required: true,
 		Validators: []validator.String{
-			stringvalidator.OneOf("A", "AAAA", "MX", "NAPTR", "PTR", "SPF", "SRV", "TXT"),
+			stringvalidator.OneOf("A", "AAAA", "MX", "NAPTR", "PTR", "SPF", "SRV", "TXT", "CAA"),
 		},
 		MarkdownDescription: "Target type.",
 	},

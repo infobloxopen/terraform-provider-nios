@@ -329,7 +329,7 @@ func (r *VdiscoverytaskResource) Read(ctx context.Context, req resource.ReadRequ
 
 	apiRes, httpRes, err := r.client.DiscoveryAPI.
 		VdiscoverytaskAPI.
-		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Read(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
 		ReturnFieldsPlus(readableAttributesForVdiscoverytask).
 		ReturnAsObject(1).
 		ProxySearch(config.GetProxySearch()).
@@ -371,6 +371,12 @@ func (r *VdiscoverytaskResource) Update(ctx context.Context, req resource.Update
 		return
 	}
 
+	diags = req.State.GetAttribute(ctx, path.Root("uuid"), &data.Uuid)
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+		return
+	}
+
 	// Process GCP service account file if provided
 	if data.DriverType.ValueString() == "GCP" {
 		if !r.processGCPServiceAccountFile(ctx, &data, &resp.Diagnostics) {
@@ -387,7 +393,7 @@ func (r *VdiscoverytaskResource) Update(ctx context.Context, req resource.Update
 
 	apiRes, _, err := r.client.DiscoveryAPI.
 		VdiscoverytaskAPI.
-		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Update(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
 		Vdiscoverytask(*data.Expand(ctx, &resp.Diagnostics)).
 		ReturnFieldsPlus(readableAttributesForVdiscoverytask).
 		ReturnAsObject(1).
@@ -417,7 +423,7 @@ func (r *VdiscoverytaskResource) Delete(ctx context.Context, req resource.Delete
 
 	httpRes, err := r.client.DiscoveryAPI.
 		VdiscoverytaskAPI.
-		Delete(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Delete(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
 		Execute()
 	if err != nil {
 		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
@@ -429,7 +435,7 @@ func (r *VdiscoverytaskResource) Delete(ctx context.Context, req resource.Delete
 }
 
 func (r *VdiscoverytaskResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	resource.ImportStatePassthroughID(ctx, path.Root("ref"), req, resp)
+	resource.ImportStatePassthroughID(ctx, path.Root("uuid"), req, resp)
 }
 
 // function that will process your GCP service account file and return the token

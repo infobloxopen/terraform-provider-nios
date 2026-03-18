@@ -125,7 +125,7 @@ func (r *FilterfingerprintResource) Read(ctx context.Context, req resource.ReadR
 
 	apiRes, httpRes, err := r.client.DHCPAPI.
 		FilterfingerprintAPI.
-		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Read(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
 		ReturnFieldsPlus(readableAttributesForFilterfingerprint).
 		ReturnAsObject(1).
 		ProxySearch(config.GetProxySearch()).
@@ -253,6 +253,12 @@ func (r *FilterfingerprintResource) Update(ctx context.Context, req resource.Upd
 		return
 	}
 
+	diags = req.State.GetAttribute(ctx, path.Root("uuid"), &data.Uuid)
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+		return
+	}
+
 	diags = req.State.GetAttribute(ctx, path.Root("extattrs_all"), &data.ExtAttrsAll)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -281,7 +287,7 @@ func (r *FilterfingerprintResource) Update(ctx context.Context, req resource.Upd
 
 	apiRes, _, err := r.client.DHCPAPI.
 		FilterfingerprintAPI.
-		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Update(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
 		Filterfingerprint(*data.Expand(ctx, &resp.Diagnostics)).
 		ReturnFieldsPlus(readableAttributesForFilterfingerprint).
 		ReturnAsObject(1).
@@ -321,7 +327,7 @@ func (r *FilterfingerprintResource) Delete(ctx context.Context, req resource.Del
 
 	httpRes, err := r.client.DHCPAPI.
 		FilterfingerprintAPI.
-		Delete(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Delete(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
 		Execute()
 	if err != nil {
 		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
@@ -333,6 +339,6 @@ func (r *FilterfingerprintResource) Delete(ctx context.Context, req resource.Del
 }
 
 func (r *FilterfingerprintResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("ref"), req.ID)...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("uuid"), req.ID)...)
 	resp.Diagnostics.Append(resp.Private.SetKey(ctx, "associate_internal_id", []byte("true"))...)
 }

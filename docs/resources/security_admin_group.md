@@ -250,7 +250,6 @@ Optional:
 
 - `et_bfd` (Boolean) If True then CLI user has permission to run the command
 - `set_admin_group_acl` (Boolean) If True then CLI user has permission to run the command
-- `set_analytics_database_dump` (Boolean) If True then CLI user has permission to run the command
 - `set_analytics_parameter` (Boolean) If True then CLI user has permission to run the command
 - `set_bfd` (Boolean) If True then CLI user has permission to run the command
 - `set_bgp` (Boolean) If True then CLI user has permission to run the command
@@ -278,6 +277,7 @@ Optional:
 - `set_ocsp` (Boolean) If True then CLI user has permission to run the command
 - `set_pc_domain` (Boolean) If True then CLI user has permission to run the command
 - `set_purge_restart_objects` (Boolean) If True then CLI user has permission to run the command
+- `set_query_logging_warnings` (Boolean) If True then CLI user has permission to run the command
 - `set_report_frequency` (Boolean) If True then CLI user has permission to run the command
 - `set_reporting_user_capabilities` (Boolean) If True then CLI user has permission to run the command
 - `set_rpz_recursive_only` (Boolean) If True then CLI user has permission to run the command
@@ -303,7 +303,6 @@ Read-Only:
 Optional:
 
 - `show_admin_group_acl` (Boolean) If True then CLI user has permission to run the command
-- `show_analytics_database_dumps` (Boolean) If True then CLI user has permission to run the command
 - `show_analytics_parameter` (Boolean) If True then CLI user has permission to run the command
 - `show_arp` (Boolean) If True then CLI user has permission to run the command
 - `show_bfd` (Boolean) If True then CLI user has permission to run the command
@@ -336,6 +335,7 @@ Optional:
 - `show_pmap` (Boolean) If True then CLI user has permission to run the command
 - `show_process` (Boolean) If True then CLI user has permission to run the command
 - `show_pstack` (Boolean) If True then CLI user has permission to run the command
+- `show_query_logging_warnings` (Boolean) If True then CLI user has permission to run the command
 - `show_report_frequency` (Boolean) If True then CLI user has permission to run the command
 - `show_reporting_user_capabilities` (Boolean) If True then CLI user has permission to run the command
 - `show_rpz_recursive_only` (Boolean) If True then CLI user has permission to run the command
@@ -874,3 +874,7 @@ Optional:
 - `address` (String) The address this rule applies to or "Any".
 - `permission` (String) The permission to use for this address.
 - `ref` (String) The reference of the ACL object.
+
+Read-Only:
+
+- `uuid` (String) Universally Unique ID assigned for this object.

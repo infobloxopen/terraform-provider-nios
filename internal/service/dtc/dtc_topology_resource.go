@@ -100,11 +100,11 @@ func (r *DtcTopologyResource) Create(ctx context.Context, req resource.CreateReq
 		return
 	}
 
-	r.populateTopologyRules(ctx, &res, &diags)
-
-	if diags.HasError() {
+	populateTopologyRules(ctx, r.client, &res, &resp.Diagnostics)
+	if resp.Diagnostics.HasError() {
 		return
 	}
+
 	data.Flatten(ctx, &res, &resp.Diagnostics)
 
 	// Save data into Terraform state
@@ -130,7 +130,7 @@ func (r *DtcTopologyResource) Read(ctx context.Context, req resource.ReadRequest
 
 	apiRes, httpRes, err := r.client.DTCAPI.
 		DtcTopologyAPI.
-		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Read(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
 		ReturnFieldsPlus(readableAttributesForDtcTopology).
 		ReturnAsObject(1).
 		ProxySearch(config.GetProxySearch()).
@@ -176,9 +176,8 @@ func (r *DtcTopologyResource) Read(ctx context.Context, req resource.ReadRequest
 		return
 	}
 
-	r.populateTopologyRules(ctx, &res, &diags)
-
-	if diags.HasError() {
+	populateTopologyRules(ctx, r.client, &res, &resp.Diagnostics)
+	if resp.Diagnostics.HasError() {
 		return
 	}
 
@@ -262,6 +261,12 @@ func (r *DtcTopologyResource) Update(ctx context.Context, req resource.UpdateReq
 		return
 	}
 
+	diags = req.State.GetAttribute(ctx, path.Root("uuid"), &data.Uuid)
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+		return
+	}
+
 	diags = req.State.GetAttribute(ctx, path.Root("extattrs_all"), &data.ExtAttrsAll)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -289,7 +294,7 @@ func (r *DtcTopologyResource) Update(ctx context.Context, req resource.UpdateReq
 
 	apiRes, _, err := r.client.DTCAPI.
 		DtcTopologyAPI.
-		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Update(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
 		DtcTopology(*data.Expand(ctx, &resp.Diagnostics)).
 		ReturnFieldsPlus(readableAttributesForDtcTopology).
 		ReturnAsObject(1).
@@ -307,9 +312,8 @@ func (r *DtcTopologyResource) Update(ctx context.Context, req resource.UpdateReq
 		return
 	}
 
-	r.populateTopologyRules(ctx, &res, &diags)
-
-	if diags.HasError() {
+	populateTopologyRules(ctx, r.client, &res, &resp.Diagnostics)
+	if resp.Diagnostics.HasError() {
 		return
 	}
 
@@ -334,7 +338,7 @@ func (r *DtcTopologyResource) Delete(ctx context.Context, req resource.DeleteReq
 
 	httpRes, err := r.client.DTCAPI.
 		DtcTopologyAPI.
-		Delete(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Delete(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
 		Execute()
 	if err != nil {
 		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
@@ -346,7 +350,7 @@ func (r *DtcTopologyResource) Delete(ctx context.Context, req resource.DeleteReq
 }
 
 func (r *DtcTopologyResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("ref"), req.ID)...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("uuid"), req.ID)...)
 	resp.Diagnostics.Append(resp.Private.SetKey(ctx, "associate_internal_id", []byte("true"))...)
 }
 
@@ -393,8 +397,8 @@ func (r *DtcTopologyResource) ValidateConfig(ctx context.Context, req resource.V
 	}
 }
 
-func UpdateDtcTopologyRules(ctx context.Context, r *DtcTopologyResource, ruleRef string, diags *diag.Diagnostics) *dtc.DtcTopologyRulesInnerOneOf1 {
-	apiRes, _, err := r.client.DTCAPI.
+func updateDtcTopologyRules(ctx context.Context, client *niosclient.APIClient, ruleRef string, diags *diag.Diagnostics) *dtc.DtcTopologyRulesInnerOneOf1 {
+	apiRes, _, err := client.DTCAPI.
 		DtcTopologyRuleAPI.
 		Read(ctx, utils.ExtractResourceRef(ruleRef)).
 		ReturnFieldsPlus(readableAttributesForDtcTopologyRule).
@@ -403,6 +407,7 @@ func UpdateDtcTopologyRules(ctx context.Context, r *DtcTopologyResource, ruleRef
 
 	if err != nil {
 		diags.AddError("Client Error", fmt.Sprintf("Unable to read DTC Topology Rules %s", err))
+		return nil
 	}
 	res := apiRes.GetDtcTopologyRuleResponseObjectAsResult.GetResult()
 
@@ -412,9 +417,21 @@ func UpdateDtcTopologyRules(ctx context.Context, r *DtcTopologyResource, ruleRef
 		ruleData.SetDestType(*destType)
 	}
 
-	// if destLink, ok := res.GetDestinationLinkOk(); ok {
-	// 	ruleData.SetDestinationLink(*destLink.DtcTopologyRuleDestinationLinkOneOf.Ref)
-	// }
+	if destination, ok := res.GetDestinationOk(); ok {
+		convertedDest := make([]dtc.DtcTopologyRuleDestination, len(destination))
+		for i, dest := range destination {
+			innerDest := dtc.DtcTopologyRuleDestination{}
+
+			if destLink, ok := dest.GetDestinationLinkOk(); ok {
+				innerDest.DestinationLink = destLink
+			}
+			if priority, ok := dest.GetPriorityOk(); ok {
+				innerDest.Priority = priority
+			}
+			convertedDest[i] = innerDest
+		}
+		ruleData.SetDestination(convertedDest)
+	}
 
 	if returnType, ok := res.GetReturnTypeOk(); ok {
 		ruleData.SetReturnType(*returnType)
@@ -451,12 +468,16 @@ func UpdateDtcTopologyRules(ctx context.Context, r *DtcTopologyResource, ruleRef
 	return ruleData
 }
 
-func (r *DtcTopologyResource) populateTopologyRules(ctx context.Context, res *dtc.DtcTopology, diags *diag.Diagnostics) {
+func populateTopologyRules(ctx context.Context, client *niosclient.APIClient, res *dtc.DtcTopology, diags *diag.Diagnostics) {
 	for i, rule := range res.Rules {
 		ruleRef := rule.DtcTopologyRulesInnerOneOf.Ref
 		if ruleRef == nil {
 			continue
 		}
-		res.Rules[i].DtcTopologyRulesInnerOneOf1 = UpdateDtcTopologyRules(ctx, r, *ruleRef, diags)
+		res.Rules[i].DtcTopologyRulesInnerOneOf1 = updateDtcTopologyRules(ctx, client, *ruleRef, diags)
+		if diags.HasError() {
+			return
+		}
 	}
 }
+

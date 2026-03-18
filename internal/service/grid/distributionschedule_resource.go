@@ -153,7 +153,7 @@ func (r *DistributionscheduleResource) Read(ctx context.Context, req resource.Re
 
 	apiRes, httpRes, err := r.client.GridAPI.
 		DistributionscheduleAPI.
-		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Read(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
 		ReturnFieldsPlus(readableAttributesForDistributionschedule).
 		ReturnAsObject(1).
 		ProxySearch(config.GetProxySearch()).
@@ -197,9 +197,15 @@ func (r *DistributionscheduleResource) Update(ctx context.Context, req resource.
 		return
 	}
 
+	diags = req.State.GetAttribute(ctx, path.Root("uuid"), &data.Uuid)
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+		return
+	}
+
 	apiRes, _, err := r.client.GridAPI.
 		DistributionscheduleAPI.
-		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Update(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
 		Distributionschedule(*data.Expand(ctx, &resp.Diagnostics)).
 		ReturnFieldsPlus(readableAttributesForDistributionschedule).
 		ReturnAsObject(1).
@@ -223,5 +229,5 @@ func (r *DistributionscheduleResource) Delete(ctx context.Context, req resource.
 }
 
 func (r *DistributionscheduleResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	resource.ImportStatePassthroughID(ctx, path.Root("ref"), req, resp)
+	resource.ImportStatePassthroughID(ctx, path.Root("uuid"), req, resp)
 }
