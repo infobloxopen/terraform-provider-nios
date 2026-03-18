@@ -127,7 +127,7 @@ func (d *RecordHttpsDataSource) Read(ctx context.Context, req datasource.ReadReq
 				paging = data.Paging.ValueInt32()
 			}
 
-			//Increment the page count
+			// Increment the page count
 			pageCount++
 
 			request := d.client.DNSAPI.
