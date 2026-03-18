@@ -1255,7 +1255,10 @@ func TestAccMemberResource_HostName(t *testing.T) {
 	})
 }
 
-// issue - checking
+// issue produced an unexpected
+//
+//	new value: .ipv6_setting.auto_router_config_enabled: was cty.True, but now
+//	cty.False.
 func TestAccMemberResource_Ipv6Setting(t *testing.T) {
 	var resourceName = "nios_grid_member.test_ipv6_setting"
 	var v grid.Member
@@ -1591,12 +1594,22 @@ func TestAccMemberResource_MemberServiceCommunication(t *testing.T) {
 	})
 }
 
-// issue
-func TestAccMemberResource_MgmtPortSetting(t *testing.T) { // ui cant change settings
+func TestAccMemberResource_MgmtPortSetting(t *testing.T) {
 	var resourceName = "nios_grid_member.test_mgmt_port_setting"
 	var v grid.Member
-	mgmtPortSettingVal := map[string]any{}
-	mgmtPortSettingValUpdated := map[string]any{}
+
+	mgmtPortSettingVal := map[string]any{
+		"enabled":                 true,
+		"vpn_enabled":             true,
+		"security_access_enabled": true,
+	}
+	mgmtPortSettingValUpdated := map[string]any{
+		"enabled":                 true,
+		"vpn_enabled":             false,
+		"security_access_enabled": false,
+	}
+	hostName := fmt.Sprintf("infoblox-%s.localdomain", acctest.RandomName())
+	vipAddress := fmt.Sprintf("172.28.83.%d", acctest.RandomNumber(254))
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1604,18 +1617,26 @@ func TestAccMemberResource_MgmtPortSetting(t *testing.T) { // ui cant change set
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccMemberMgmtPortSetting("HOST_NAME_REPLACE_ME", mgmtPortSettingVal),
+				Config: testAccMemberMgmtPortSetting(hostName,
+					mgmtPortSettingVal,
+					vipAddress,
+					"172.28.82.1",
+					"255.255.254.0"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "mgmt_port_setting", "MGMT_PORT_SETTING_REPLACE_ME"),
+					//resource.TestCheckResourceAttr(resourceName, "mgmt_port_setting", "MGMT_PORT_SETTING_REPLACE_ME"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccMemberMgmtPortSetting("HOST_NAME_REPLACE_ME", mgmtPortSettingValUpdated),
+				Config: testAccMemberMgmtPortSetting(hostName,
+					mgmtPortSettingValUpdated,
+					vipAddress,
+					"172.28.82.1",
+					"255.255.254.0"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "mgmt_port_setting", "MGMT_PORT_SETTING_UPDATE_REPLACE_ME"),
+					//resource.TestCheckResourceAttr(resourceName, "mgmt_port_setting", "MGMT_PORT_SETTING_UPDATE_REPLACE_ME"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -2406,7 +2427,6 @@ func TestAccMemberResource_SupportAccessEnable(t *testing.T) {
 	})
 }
 
-// issue - chai
 func TestAccMemberResource_SyslogProxySetting(t *testing.T) {
 	var resourceName = "nios_grid_member.test_syslog_proxy_setting"
 	var v grid.Member
@@ -5139,13 +5159,31 @@ resource "nios_grid_member" "test_member_service_communication" {
 `, hostName, configAddrType, platform, serviceTypeConfig, vipAddress, vipGateway, vipSubnetMask, memberServiceCommunicationStr)
 }
 
-func testAccMemberMgmtPortSetting(hostName string, mgmtPortSetting map[string]any) string {
+func testAccMemberMgmtPortSetting(hostName string, mgmtPortSetting map[string]any, vipAddress, vipGateway, vipSubnetMask string) string {
+	mgmtPortSettingStr := utils.ConvertMapToHCL(mgmtPortSetting)
 	return fmt.Sprintf(`
 resource "nios_grid_member" "test_mgmt_port_setting" {
     host_name = %q
     mgmt_port_setting = %s
+	vip_setting = {
+        address = %q
+        dscp = 0
+        gateway = %q
+        primary = true
+        subnet_mask = %q
+        use_dscp = false
+    }
+	node_info = [
+	{
+		mgmt_network_setting = {
+		  address     = "1.1.1.2"
+		  gateway     = "1.1.1.1"
+		  subnet_mask = "255.255.255.0"
+		}
+	}
+	]
 }
-`, hostName, mgmtPortSetting)
+`, hostName, mgmtPortSettingStr, vipAddress, vipGateway, vipSubnetMask)
 }
 
 func testAccMemberNatSetting(

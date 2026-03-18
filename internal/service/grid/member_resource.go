@@ -382,12 +382,57 @@ func (r *MemberResource) ValidateConfig(ctx context.Context, req resource.Valida
 	}
 
 	if !data.HaOnCloud.IsNull() && !data.HaOnCloud.IsUnknown() {
-		// enable_ha must be true when ha_on_cloud is provided
 		if data.EnableHa.IsNull() || data.EnableHa.IsUnknown() || data.EnableHa.ValueBool() == false {
 			resp.Diagnostics.AddError("Validation Error", "enable_ha must be true when ha_on_cloud is provided")
 		}
 	}
 
+	mgmtCheckComplete := false
+	if !data.NodeInfo.IsNull() && !data.NodeInfo.IsUnknown() {
+		var nodeInfo []MemberNodeInfoModel
+		diags := data.NodeInfo.ElementsAs(ctx, &nodeInfo, false)
+		resp.Diagnostics.Append(diags...)
+		if resp.Diagnostics.HasError() {
+			return
+		}
+
+		if len(nodeInfo) > 0 && (!nodeInfo[0].MgmtNetworkSetting.IsNull() && !nodeInfo[0].MgmtNetworkSetting.IsUnknown()) {
+			if data.MgmtPortSetting.IsNull() || data.MgmtPortSetting.IsUnknown() || data.MgmtPortSetting.Attributes()["enabled"].String() != "true" {
+				resp.Diagnostics.AddError("Validation Error", "node_info.mgmt_network_setting is set but mgmt_port_setting.enabled is not true")
+			} else {
+				mgmtCheckComplete = true
+			}
+		}
+	}
+
+	if !data.MgmtPortSetting.IsNull() && !data.MgmtPortSetting.IsUnknown() {
+		mgmtPortSetting := data.MgmtPortSetting.Attributes()
+
+		if mgmtPortSetting["enabled"].String() == "true" {
+
+			if !mgmtCheckComplete {
+
+				var nodeInfo []MemberNodeInfoModel
+				diags := data.NodeInfo.ElementsAs(ctx, &nodeInfo, false)
+				resp.Diagnostics.Append(diags...)
+				if resp.Diagnostics.HasError() {
+					return
+				}
+
+				if data.NodeInfo.IsNull() || len(nodeInfo) == 0 ||
+					(len(nodeInfo) > 0 && (nodeInfo[0].MgmtNetworkSetting.IsNull() || nodeInfo[0].MgmtNetworkSetting.IsUnknown()) &&
+						(nodeInfo[0].V6MgmtNetworkSetting.IsNull() || nodeInfo[0].V6MgmtNetworkSetting.IsUnknown())) {
+					resp.Diagnostics.AddError("Validation Error", "Either node_info.mgmt_network_setting or node.v6_mgmt_network_setting must be set when mgmt_port_setting.enabled is true")
+				}
+			}
+		}
+
+		if mgmtPortSetting["vpn_enabled"].String() == "true" {
+			if mgmtPortSetting["enabled"].IsNull() || mgmtPortSetting["enabled"].IsUnknown() || mgmtPortSetting["enabled"].String() != "true" {
+				resp.Diagnostics.AddError("Validation Error", "enabled must be true when vpn_enabled is true in mgmt_port_setting")
+			}
+		}
+	}
 
 }
 

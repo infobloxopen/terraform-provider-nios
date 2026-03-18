@@ -9,8 +9,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
@@ -44,6 +42,7 @@ var MembernodeinfoMgmtNetworkSettingAttrTypes = map[string]attr.Type{
 	"use_dscp":        types.BoolType,
 }
 
+// Defaults Removed Due to conflicts with Mgmt Network Settings
 var MembernodeinfoMgmtNetworkSettingResourceSchemaAttributes = map[string]schema.Attribute{
 	"address": schema.StringAttribute{
 		CustomType:          iptypes.IPv4AddressType{},
@@ -69,13 +68,11 @@ var MembernodeinfoMgmtNetworkSettingResourceSchemaAttributes = map[string]schema
 	"primary": schema.BoolAttribute{
 		Optional:            true,
 		Computed:            true,
-		Default:             booldefault.StaticBool(true),
 		MarkdownDescription: "Determines if the current address is the primary VLAN address or not.",
 	},
 	"dscp": schema.Int64Attribute{
 		Optional: true,
 		Computed: true,
-		Default:  int64default.StaticInt64(0),
 		Validators: []validator.Int64{
 			int64validator.AlsoRequires(path.MatchRoot("use_dscp")),
 		},
@@ -94,7 +91,6 @@ var MembernodeinfoMgmtNetworkSettingResourceSchemaAttributes = map[string]schema
 	"use_dscp": schema.BoolAttribute{
 		Optional:            true,
 		Computed:            true,
-		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Use flag for: dscp",
 	},
 }
