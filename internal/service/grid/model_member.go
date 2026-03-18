@@ -1038,7 +1038,6 @@ func (m *MemberModel) Flatten(ctx context.Context, from *grid.Member, diags *dia
 			m.SyslogServers = result.(basetypes.ListValue)
 		}
 	}
-	//m.SyslogServers = flex.FlattenFrameworkListNestedBlock(ctx, from.SyslogServers, MemberSyslogServersAttrTypes, diags, FlattenMemberSyslogServers)
 	m.SyslogSize = flex.FlattenInt64Pointer(from.SyslogSize)
 	planList2 := m.ThresholdTraps
 	m.ThresholdTraps = flex.FlattenFrameworkListNestedBlock(ctx, from.ThresholdTraps, MemberThresholdTrapsAttrTypes, diags, FlattenMemberThresholdTraps)

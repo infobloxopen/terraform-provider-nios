@@ -2418,7 +2418,7 @@ func TestAccMemberResource_SyslogProxySetting(t *testing.T) {
 				"permission": "ALLOW",
 			},
 		},
-		"enable":     false,
+		"enable":     true,
 		"tcp_enable": false,
 		"tcp_port":   514,
 		"udp_enable": true,
@@ -2540,7 +2540,7 @@ func TestAccMemberResource_SyslogServers(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "syslog_servers.#", "1"),
-					resource.TestCheckResourceAttr(resourceName, "syslog_servers.0.connection_type", "TCP"),
+					resource.TestCheckResourceAttr(resourceName, "syslog_servers.0.connection_type", "STCP"),
 					resource.TestCheckResourceAttr(resourceName, "syslog_servers.0.port", "514"),
 					resource.TestCheckResourceAttr(resourceName, "syslog_servers.0.severity", "DEBUG"),
 					resource.TestCheckResourceAttr(resourceName, "use_syslog_proxy_setting", "true"),
