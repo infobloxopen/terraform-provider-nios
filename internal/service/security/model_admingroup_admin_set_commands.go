@@ -44,7 +44,7 @@ type AdmingroupAdminSetCommandsModel struct {
 	SetMaintenancemode           types.Bool `tfsdk:"set_maintenancemode"`
 	SetTransferReportingData     types.Bool `tfsdk:"set_transfer_reporting_data"`
 	SetTransferSupportbundle     types.Bool `tfsdk:"set_transfer_supportbundle"`
-	SetAnalyticsDatabaseDump     types.Bool `tfsdk:"set_analytics_database_dump"`
+	SetQueryLoggingWarnings      types.Bool `tfsdk:"set_query_logging_warnings"`
 	SetAnalyticsParameter        types.Bool `tfsdk:"set_analytics_parameter"`
 	SetCollectOldLogs            types.Bool `tfsdk:"set_collect_old_logs"`
 	SetCoreFilesQuota            types.Bool `tfsdk:"set_core_files_quota"`
@@ -91,7 +91,7 @@ var AdmingroupAdminSetCommandsAttrTypes = map[string]attr.Type{
 	"set_maintenancemode":               types.BoolType,
 	"set_transfer_reporting_data":       types.BoolType,
 	"set_transfer_supportbundle":        types.BoolType,
-	"set_analytics_database_dump":       types.BoolType,
+	"set_query_logging_warnings":        types.BoolType,
 	"set_analytics_parameter":           types.BoolType,
 	"set_collect_old_logs":              types.BoolType,
 	"set_core_files_quota":              types.BoolType,
@@ -254,7 +254,7 @@ var AdmingroupAdminSetCommandsResourceSchemaAttributes = map[string]schema.Attri
 		Computed:            true,
 		MarkdownDescription: "If True then CLI user has permission to run the command",
 	},
-	"set_analytics_database_dump": schema.BoolAttribute{
+	"set_query_logging_warnings": schema.BoolAttribute{
 		Optional:            true,
 		Computed:            true,
 		MarkdownDescription: "If True then CLI user has permission to run the command",
@@ -375,19 +375,19 @@ func (m *AdmingroupAdminSetCommandsModel) Expand(ctx context.Context, diags *dia
 		SetMaintenancemode:           flex.ExpandBoolPointer(m.SetMaintenancemode),
 		SetTransferReportingData:     flex.ExpandBoolPointer(m.SetTransferReportingData),
 		SetTransferSupportbundle:     flex.ExpandBoolPointer(m.SetTransferSupportbundle),
-		//SetAnalyticsDatabaseDump:     flex.ExpandBoolPointer(m.SetAnalyticsDatabaseDump),
-		SetAnalyticsParameter:  flex.ExpandBoolPointer(m.SetAnalyticsParameter),
-		SetCollectOldLogs:      flex.ExpandBoolPointer(m.SetCollectOldLogs),
-		SetCoreFilesQuota:      flex.ExpandBoolPointer(m.SetCoreFilesQuota),
-		SetHsmGroup:            flex.ExpandBoolPointer(m.SetHsmGroup),
-		SetWred:                flex.ExpandBoolPointer(m.SetWred),
-		SetEnableDohKeyLogging: flex.ExpandBoolPointer(m.SetEnableDohKeyLogging),
-		SetEnableDotKeyLogging: flex.ExpandBoolPointer(m.SetEnableDotKeyLogging),
-		SetHotfix:              flex.ExpandBoolPointer(m.SetHotfix),
-		SetMgm:                 flex.ExpandBoolPointer(m.SetMgm),
-		SetNtpStratum:          flex.ExpandBoolPointer(m.SetNtpStratum),
-		SetPcDomain:            flex.ExpandBoolPointer(m.SetPcDomain),
-		SetReportFrequency:     flex.ExpandBoolPointer(m.SetReportFrequency),
+		SetQueryLoggingWarnings:      flex.ExpandBoolPointer(m.SetQueryLoggingWarnings),
+		SetAnalyticsParameter:        flex.ExpandBoolPointer(m.SetAnalyticsParameter),
+		SetCollectOldLogs:            flex.ExpandBoolPointer(m.SetCollectOldLogs),
+		SetCoreFilesQuota:            flex.ExpandBoolPointer(m.SetCoreFilesQuota),
+		SetHsmGroup:                  flex.ExpandBoolPointer(m.SetHsmGroup),
+		SetWred:                      flex.ExpandBoolPointer(m.SetWred),
+		SetEnableDohKeyLogging:       flex.ExpandBoolPointer(m.SetEnableDohKeyLogging),
+		SetEnableDotKeyLogging:       flex.ExpandBoolPointer(m.SetEnableDotKeyLogging),
+		SetHotfix:                    flex.ExpandBoolPointer(m.SetHotfix),
+		SetMgm:                       flex.ExpandBoolPointer(m.SetMgm),
+		SetNtpStratum:                flex.ExpandBoolPointer(m.SetNtpStratum),
+		SetPcDomain:                  flex.ExpandBoolPointer(m.SetPcDomain),
+		SetReportFrequency:           flex.ExpandBoolPointer(m.SetReportFrequency),
 	}
 	return to
 }
@@ -439,7 +439,7 @@ func (m *AdmingroupAdminSetCommandsModel) Flatten(ctx context.Context, from *sec
 	m.SetMaintenancemode = types.BoolPointerValue(from.SetMaintenancemode)
 	m.SetTransferReportingData = types.BoolPointerValue(from.SetTransferReportingData)
 	m.SetTransferSupportbundle = types.BoolPointerValue(from.SetTransferSupportbundle)
-	//m.SetAnalyticsDatabaseDump = types.BoolPointerValue(from.SetAnalyticsDatabaseDump) -> removed in 9.10
+	m.SetQueryLoggingWarnings = types.BoolPointerValue(from.SetQueryLoggingWarnings)
 	m.SetAnalyticsParameter = types.BoolPointerValue(from.SetAnalyticsParameter)
 	m.SetCollectOldLogs = types.BoolPointerValue(from.SetCollectOldLogs)
 	m.SetCoreFilesQuota = types.BoolPointerValue(from.SetCoreFilesQuota)

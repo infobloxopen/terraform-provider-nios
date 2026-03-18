@@ -62,6 +62,7 @@ Optional:
 - `disable` (Boolean) Determines if the record is disabled or not. False means that the record is enabled.
 - `extattrs` (Map of String) Extensible attributes associated with the object.
 - `forbid_reclamation` (Boolean) Determines if the reclamation is allowed for the record or not.
+- `rr_precondition_instructions` (Attributes List) List of pre-condition instructions for CNAME record creation. (see [below for nested schema](#nestedatt--result--rr_precondition_instructions))
 - `ttl` (Number) The Time To Live (TTL) value for record. A 32-bit unsigned integer that represents the duration, in seconds, for which the record is valid (cached). Zero indicates that the record should not be cached.
 - `use_ttl` (Boolean) Use flag for: ttl
 - `view` (String) The name of the DNS view in which the record resides. Example: "external".
@@ -80,6 +81,21 @@ Read-Only:
 - `shared_record_group` (String) The name of the shared record group in which the record resides. This field exists only on db_objects if this record is a shared record.
 - `uuid` (String) Universally Unique ID assigned for this object.
 - `zone` (String) The name of the zone in which the record resides. Example: "zone.com". If a view is not specified when searching by zone, the default view is used.
+
+<a id="nestedatt--result--rr_precondition_instructions"></a>
+### Nested Schema for `result.rr_precondition_instructions`
+
+Required:
+
+- `action` (String) Action to perform if condition is met: none or delete.
+- `condition` (String) Condition type: exist or notexist.
+- `name` (String) Record name
+- `type` (String) Record type
+
+Optional:
+
+- `rdata` (String) Record data (optional)
+
 
 <a id="nestedatt--result--aws_rte53_record_info"></a>
 ### Nested Schema for `result.aws_rte53_record_info`
