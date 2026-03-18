@@ -1,20 +1,20 @@
 package grid
 
 import (
-	"context"
+	//"context"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
-	"github.com/hashicorp/terraform-plugin-framework/diag"
+	//"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
+	// "github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
-	"github.com/infobloxopen/infoblox-nios-go-client/grid"
+	// "github.com/infobloxopen/infoblox-nios-go-client/grid"
 
-	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	// "github.com/infobloxopen/terraform-provider-nios/internal/flex"
 )
 
 type GridsnmpsettingSnmpv3QueriesUsersOneOfModel struct {
@@ -73,25 +73,25 @@ var GridsnmpsettingSnmpv3QueriesUsersOneOfResourceSchemaAttributes = map[string]
 	},
 }
 
-func ExpandGridsnmpsettingSnmpv3QueriesUsersOneOf(ctx context.Context, o types.Object, diags *diag.Diagnostics) *grid.GridsnmpsettingSnmpv3QueriesUsersOneOf {
-	if o.IsNull() || o.IsUnknown() {
-		return nil
-	}
-	var m GridsnmpsettingSnmpv3QueriesUsersOneOfModel
-	diags.Append(o.As(ctx, &m, basetypes.ObjectAsOptions{})...)
-	if diags.HasError() {
-		return nil
-	}
-	return m.Expand(ctx, diags)
-}
+// func ExpandGridsnmpsettingSnmpv3QueriesUsersOneOf(ctx context.Context, o types.Object, diags *diag.Diagnostics) *grid.GridsnmpsettingSnmpv3QueriesUsersOneOf {
+// 	if o.IsNull() || o.IsUnknown() {
+// 		return nil
+// 	}
+// 	var m GridsnmpsettingSnmpv3QueriesUsersOneOfModel
+// 	diags.Append(o.As(ctx, &m, basetypes.ObjectAsOptions{})...)
+// 	if diags.HasError() {
+// 		return nil
+// 	}
+// 	return m.Expand(ctx, diags)
+// }
 
-func (m *GridsnmpsettingSnmpv3QueriesUsersOneOfModel) Expand(ctx context.Context, diags *diag.Diagnostics) *grid.GridsnmpsettingSnmpv3QueriesUsersOneOf {
-	if m == nil {
-		return nil
-	}
-	to := &grid.GridsnmpsettingSnmpv3QueriesUsersOneOf{}
-	return to
-}
+// func (m *GridsnmpsettingSnmpv3QueriesUsersOneOfModel) Expand(ctx context.Context, diags *diag.Diagnostics) *grid.GridsnmpsettingSnmpv3QueriesUsersOneOf {
+// 	if m == nil {
+// 		return nil
+// 	}
+// 	to := &grid.GridsnmpsettingSnmpv3QueriesUsersOneOf{}
+// 	return to
+// }
 
 // func FlattenGridsnmpsettingSnmpv3QueriesUsersOneOf(ctx context.Context, from *grid.GridsnmpsettingSnmpv3QueriesUsersOneOf, diags *diag.Diagnostics) types.Object {
 // 	if from == nil {
@@ -104,18 +104,18 @@ func (m *GridsnmpsettingSnmpv3QueriesUsersOneOfModel) Expand(ctx context.Context
 // 	return t
 // }
 
-func (m *GridsnmpsettingSnmpv3QueriesUsersOneOfModel) Flatten(ctx context.Context, from *grid.GridsnmpsettingSnmpv3QueriesUsersOneOf, diags *diag.Diagnostics) {
-	if from == nil {
-		return
-	}
-	if m == nil {
-		*m = GridsnmpsettingSnmpv3QueriesUsersOneOfModel{}
-	}
-	m.Ref = flex.FlattenStringPointer(from.Ref)
-	m.AuthenticationProtocol = flex.FlattenStringPointer(from.AuthenticationProtocol)
-	m.Comment = flex.FlattenStringPointer(from.Comment)
-	m.Disable = types.BoolPointerValue(from.Disable)
-	m.ExtAttrs = FlattenExtAttrs(ctx, m.ExtAttrs, from.ExtAttrs, diags)
-	m.Name = flex.FlattenStringPointer(from.Name)
-	m.PrivacyProtocol = flex.FlattenStringPointer(from.PrivacyProtocol)
-}
+// func (m *GridsnmpsettingSnmpv3QueriesUsersOneOfModel) Flatten(ctx context.Context, from *grid.GridsnmpsettingSnmpv3QueriesUsersOneOf, diags *diag.Diagnostics) {
+// 	if from == nil {
+// 		return
+// 	}
+// 	if m == nil {
+// 		*m = GridsnmpsettingSnmpv3QueriesUsersOneOfModel{}
+// 	}
+// 	m.Ref = flex.FlattenStringPointer(from.Ref)
+// 	m.AuthenticationProtocol = flex.FlattenStringPointer(from.AuthenticationProtocol)
+// 	m.Comment = flex.FlattenStringPointer(from.Comment)
+// 	m.Disable = types.BoolPointerValue(from.Disable)
+// 	m.ExtAttrs = FlattenExtAttrs(ctx, m.ExtAttrs, from.ExtAttrs, diags)
+// 	m.Name = flex.FlattenStringPointer(from.Name)
+// 	m.PrivacyProtocol = flex.FlattenStringPointer(from.PrivacyProtocol)
+// }
