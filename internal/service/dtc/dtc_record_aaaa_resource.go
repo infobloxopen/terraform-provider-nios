@@ -103,7 +103,7 @@ func (r *DtcRecordAaaaResource) Read(ctx context.Context, req resource.ReadReque
 
 	apiRes, httpRes, err := r.client.DTCAPI.
 		DtcRecordAaaaAPI.
-		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Read(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
 		ReturnFieldsPlus(readableAttributesForDtcRecordAaaa).
 		ReturnAsObject(1).
 		ProxySearch(config.GetProxySearch()).
@@ -145,9 +145,15 @@ func (r *DtcRecordAaaaResource) Update(ctx context.Context, req resource.UpdateR
 		return
 	}
 
+	diags = req.State.GetAttribute(ctx, path.Root("uuid"), &data.Uuid)
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+		return
+	}
+
 	apiRes, _, err := r.client.DTCAPI.
 		DtcRecordAaaaAPI.
-		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Update(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
 		DtcRecordAaaa(*data.Expand(ctx, &resp.Diagnostics, false)).
 		ReturnFieldsPlus(readableAttributesForDtcRecordAaaa).
 		ReturnAsObject(1).
@@ -177,7 +183,7 @@ func (r *DtcRecordAaaaResource) Delete(ctx context.Context, req resource.DeleteR
 
 	httpRes, err := r.client.DTCAPI.
 		DtcRecordAaaaAPI.
-		Delete(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Delete(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
 		Execute()
 	if err != nil {
 		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
@@ -189,5 +195,5 @@ func (r *DtcRecordAaaaResource) Delete(ctx context.Context, req resource.DeleteR
 }
 
 func (r *DtcRecordAaaaResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	resource.ImportStatePassthroughID(ctx, path.Root("ref"), req, resp)
+	resource.ImportStatePassthroughID(ctx, path.Root("uuid"), req, resp)
 }

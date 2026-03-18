@@ -123,7 +123,7 @@ func (r *RecordTlsaResource) Read(ctx context.Context, req resource.ReadRequest,
 
 	apiRes, httpRes, err := r.client.DNSAPI.
 		RecordTlsaAPI.
-		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Read(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
 		ReturnFieldsPlus(readableAttributesForRecordTlsa).
 		ReturnAsObject(1).
 		ProxySearch(config.GetProxySearch()).
@@ -249,6 +249,12 @@ func (r *RecordTlsaResource) Update(ctx context.Context, req resource.UpdateRequ
 		return
 	}
 
+	diags = req.State.GetAttribute(ctx, path.Root("uuid"), &data.Uuid)
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+		return
+	}
+
 	diags = req.State.GetAttribute(ctx, path.Root("extattrs_all"), &data.ExtAttrsAll)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -275,7 +281,7 @@ func (r *RecordTlsaResource) Update(ctx context.Context, req resource.UpdateRequ
 
 	apiRes, _, err := r.client.DNSAPI.
 		RecordTlsaAPI.
-		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Update(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
 		RecordTlsa(*data.Expand(ctx, &resp.Diagnostics)).
 		ReturnFieldsPlus(readableAttributesForRecordTlsa).
 		ReturnAsObject(1).
@@ -315,7 +321,7 @@ func (r *RecordTlsaResource) Delete(ctx context.Context, req resource.DeleteRequ
 
 	httpRes, err := r.client.DNSAPI.
 		RecordTlsaAPI.
-		Delete(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Delete(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
 		Execute()
 	if err != nil {
 		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
@@ -327,6 +333,6 @@ func (r *RecordTlsaResource) Delete(ctx context.Context, req resource.DeleteRequ
 }
 
 func (r *RecordTlsaResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("ref"), req.ID)...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("uuid"), req.ID)...)
 	resp.Diagnostics.Append(resp.Private.SetKey(ctx, "associate_internal_id", []byte("true"))...)
 }

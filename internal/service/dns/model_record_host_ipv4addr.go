@@ -289,7 +289,6 @@ func (m *RecordHostIpv4addrModel) Expand(ctx context.Context, diags *diag.Diagno
 	}
 	to := &dns.RecordHostIpv4addr{
 		Ref:                             flex.ExpandStringPointer(m.Ref),
-		Uuid:                            flex.ExpandStringPointer(m.Uuid),
 		Bootfile:                        flex.ExpandStringPointer(m.Bootfile),
 		Bootserver:                      flex.ExpandStringPointer(m.Bootserver),
 		ConfigureForDhcp:                flex.ExpandBoolPointer(m.ConfigureForDhcp),
@@ -301,7 +300,7 @@ func (m *RecordHostIpv4addrModel) Expand(ctx context.Context, diags *diag.Diagno
 		FuncCall:                        ExpandFuncCall(ctx, m.FuncCall, diags),
 		LogicFilterRules:                flex.ExpandFrameworkListNestedBlock(ctx, m.LogicFilterRules, diags, ExpandRecordHostIpv4addrLogicFilterRules),
 		Mac:                             flex.ExpandStringPointer(m.Mac),
-		MatchClient:                     flex.ExpandStringPointer(m.MatchClient),
+		MatchClient:                     flex.ExpandStringPointerEmptyAsNil(m.MatchClient),
 		MsAdUserData:                    ExpandRecordHostIpv4addrMsAdUserData(ctx, m.MsAdUserData, diags),
 		Nextserver:                      flex.ExpandStringPointer(m.Nextserver),
 		Options:                         flex.ExpandFrameworkListNestedBlock(ctx, m.Options, diags, ExpandRecordHostIpv4addrOptions),

@@ -112,7 +112,7 @@ func (r *DhcpoptionspaceResource) Read(ctx context.Context, req resource.ReadReq
 
 	apiRes, httpRes, err := r.client.DHCPAPI.
 		DhcpoptionspaceAPI.
-		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Read(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
 		ReturnFieldsPlus(readableAttributesForDhcpoptionspace).
 		ReturnAsObject(1).
 		ProxySearch(config.GetProxySearch()).
@@ -154,9 +154,15 @@ func (r *DhcpoptionspaceResource) Update(ctx context.Context, req resource.Updat
 		return
 	}
 
+	diags = req.State.GetAttribute(ctx, path.Root("uuid"), &data.Uuid)
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+		return
+	}
+
 	apiRes, _, err := r.client.DHCPAPI.
 		DhcpoptionspaceAPI.
-		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Update(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
 		Dhcpoptionspace(*data.Expand(ctx, &resp.Diagnostics)).
 		ReturnFieldsPlus(readableAttributesForDhcpoptionspace).
 		ReturnAsObject(1).
@@ -187,7 +193,7 @@ func (r *DhcpoptionspaceResource) Delete(ctx context.Context, req resource.Delet
 	err := retry.RetryContext(ctx, OptionSpaceOperationTimeout, func() *retry.RetryError {
 		httpRes, err := r.client.DHCPAPI.
 			DhcpoptionspaceAPI.
-			Delete(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+			Delete(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
 			Execute()
 		if err != nil {
 			if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
@@ -207,5 +213,5 @@ func (r *DhcpoptionspaceResource) Delete(ctx context.Context, req resource.Delet
 }
 
 func (r *DhcpoptionspaceResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	resource.ImportStatePassthroughID(ctx, path.Root("ref"), req, resp)
+	resource.ImportStatePassthroughID(ctx, path.Root("uuid"), req, resp)
 }

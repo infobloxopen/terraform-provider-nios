@@ -126,7 +126,7 @@ func (r *GridServicerestartGroupResource) Read(ctx context.Context, req resource
 
 	apiRes, httpRes, err := r.client.GridAPI.
 		GridServicerestartGroupAPI.
-		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Read(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
 		ReturnFieldsPlus(readableAttributesForGridServicerestartGroup).
 		ReturnAsObject(1).
 		ProxySearch(config.GetProxySearch()).
@@ -252,6 +252,12 @@ func (r *GridServicerestartGroupResource) Update(ctx context.Context, req resour
 		return
 	}
 
+	diags = req.State.GetAttribute(ctx, path.Root("uuid"), &data.Uuid)
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+		return
+	}
+
 	diags = req.State.GetAttribute(ctx, path.Root("extattrs_all"), &data.ExtAttrsAll)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -278,7 +284,7 @@ func (r *GridServicerestartGroupResource) Update(ctx context.Context, req resour
 
 	apiRes, _, err := r.client.GridAPI.
 		GridServicerestartGroupAPI.
-		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Update(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
 		GridServicerestartGroup(*data.Expand(ctx, &resp.Diagnostics)).
 		ReturnFieldsPlus(readableAttributesForGridServicerestartGroup).
 		ReturnAsObject(1).
@@ -318,7 +324,7 @@ func (r *GridServicerestartGroupResource) Delete(ctx context.Context, req resour
 
 	httpRes, err := r.client.GridAPI.
 		GridServicerestartGroupAPI.
-		Delete(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Delete(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
 		Execute()
 	if err != nil {
 		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
@@ -393,6 +399,6 @@ func (r *GridServicerestartGroupResource) ValidateConfig(ctx context.Context, re
 }
 
 func (r *GridServicerestartGroupResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("ref"), req.ID)...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("uuid"), req.ID)...)
 	resp.Diagnostics.Append(resp.Private.SetKey(ctx, "associate_internal_id", []byte("true"))...)
 }

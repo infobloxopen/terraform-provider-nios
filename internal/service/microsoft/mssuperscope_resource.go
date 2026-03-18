@@ -125,7 +125,7 @@ func (r *MssuperscopeResource) Read(ctx context.Context, req resource.ReadReques
 
 	apiRes, httpRes, err := r.client.MicrosoftAPI.
 		MssuperscopeAPI.
-		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Read(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
 		ReturnFieldsPlus(readableAttributesForMssuperscope).
 		ReturnAsObject(1).
 		ProxySearch(config.GetProxySearch()).
@@ -253,6 +253,12 @@ func (r *MssuperscopeResource) Update(ctx context.Context, req resource.UpdateRe
 		return
 	}
 
+	diags = req.State.GetAttribute(ctx, path.Root("uuid"), &data.Uuid)
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+		return
+	}
+
 	diags = req.State.GetAttribute(ctx, path.Root("extattrs_all"), &data.ExtAttrsAll)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -281,7 +287,7 @@ func (r *MssuperscopeResource) Update(ctx context.Context, req resource.UpdateRe
 
 	apiRes, _, err := r.client.MicrosoftAPI.
 		MssuperscopeAPI.
-		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Update(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
 		Mssuperscope(*data.Expand(ctx, &resp.Diagnostics)).
 		ReturnFieldsPlus(readableAttributesForMssuperscope).
 		ReturnAsObject(1).
@@ -321,7 +327,7 @@ func (r *MssuperscopeResource) Delete(ctx context.Context, req resource.DeleteRe
 
 	httpRes, err := r.client.MicrosoftAPI.
 		MssuperscopeAPI.
-		Delete(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Delete(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
 		Execute()
 	if err != nil {
 		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
@@ -333,6 +339,6 @@ func (r *MssuperscopeResource) Delete(ctx context.Context, req resource.DeleteRe
 }
 
 func (r *MssuperscopeResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("ref"), req.ID)...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("uuid"), req.ID)...)
 	resp.Diagnostics.Append(resp.Private.SetKey(ctx, "associate_internal_id", []byte("true"))...)
 }

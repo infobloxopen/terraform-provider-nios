@@ -125,7 +125,7 @@ func (r *Ipv6networktemplateResource) Read(ctx context.Context, req resource.Rea
 
 	apiRes, httpRes, err := r.client.IPAMAPI.
 		Ipv6networktemplateAPI.
-		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Read(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
 		ReturnFieldsPlus(readableAttributesForIpv6networktemplate).
 		ReturnAsObject(1).
 		ProxySearch(config.GetProxySearch()).
@@ -251,6 +251,12 @@ func (r *Ipv6networktemplateResource) Update(ctx context.Context, req resource.U
 		return
 	}
 
+	diags = req.State.GetAttribute(ctx, path.Root("uuid"), &data.Uuid)
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+		return
+	}
+
 	diags = req.State.GetAttribute(ctx, path.Root("extattrs_all"), &data.ExtAttrsAll)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -278,7 +284,7 @@ func (r *Ipv6networktemplateResource) Update(ctx context.Context, req resource.U
 
 	apiRes, _, err := r.client.IPAMAPI.
 		Ipv6networktemplateAPI.
-		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Update(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
 		Ipv6networktemplate(*data.Expand(ctx, &resp.Diagnostics)).
 		ReturnFieldsPlus(readableAttributesForIpv6networktemplate).
 		ReturnAsObject(1).
@@ -317,7 +323,7 @@ func (r *Ipv6networktemplateResource) Delete(ctx context.Context, req resource.D
 
 	httpRes, err := r.client.IPAMAPI.
 		Ipv6networktemplateAPI.
-		Delete(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Delete(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
 		Execute()
 	if err != nil {
 		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
@@ -507,6 +513,6 @@ func (r *Ipv6networktemplateResource) ValidateConfig(ctx context.Context, req re
 }
 
 func (r *Ipv6networktemplateResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("ref"), req.ID)...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("uuid"), req.ID)...)
 	resp.Diagnostics.Append(resp.Private.SetKey(ctx, "associate_internal_id", []byte("true"))...)
 }

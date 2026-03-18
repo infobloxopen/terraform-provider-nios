@@ -883,3 +883,11 @@ func ReorderAndFilterDHCPOptions(
 
 	return newList, &diags
 }
+
+// ResolveIdentifier returns the uuid if it's not null/unknown/empty, otherwise it returns the ref
+func ResolveIdentifier(uuid, ref types.String) string {
+	if !uuid.IsNull() && !uuid.IsUnknown() && uuid.ValueString() != "" {
+		return uuid.ValueString()
+	}
+	return ExtractResourceRef(ref.ValueString())
+}

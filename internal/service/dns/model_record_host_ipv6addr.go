@@ -265,7 +265,6 @@ func (m *RecordHostIpv6addrModel) Expand(ctx context.Context, diags *diag.Diagno
 	}
 	to := &dns.RecordHostIpv6addr{
 		Ref:                  flex.ExpandStringPointer(m.Ref),
-		Uuid:                 flex.ExpandStringPointer(m.Uuid),
 		AddressType:          flex.ExpandStringPointer(m.AddressType),
 		ConfigureForDhcp:     flex.ExpandBoolPointer(m.ConfigureForDhcp),
 		DiscoveredData:       ExpandRecordHostIpv6addrDiscoveredData(ctx, m.DiscoveredData, diags),
@@ -278,7 +277,7 @@ func (m *RecordHostIpv6addrModel) Expand(ctx context.Context, diags *diag.Diagno
 		Ipv6prefixBits:       flex.ExpandInt64Pointer(m.Ipv6prefixBits),
 		LogicFilterRules:     flex.ExpandFrameworkListNestedBlock(ctx, m.LogicFilterRules, diags, ExpandRecordHostIpv6addrLogicFilterRules),
 		Mac:                  flex.ExpandStringPointer(m.Mac),
-		MatchClient:          flex.ExpandStringPointer(m.MatchClient),
+		MatchClient:          flex.ExpandStringPointerEmptyAsNil(m.MatchClient),
 		MsAdUserData:         ExpandRecordHostIpv6addrMsAdUserData(ctx, m.MsAdUserData, diags),
 		Options:              flex.ExpandFrameworkListNestedBlock(ctx, m.Options, diags, ExpandRecordHostIpv6addrOptions),
 		PreferredLifetime:    flex.ExpandInt64Pointer(m.PreferredLifetime),

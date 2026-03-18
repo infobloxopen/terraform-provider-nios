@@ -123,7 +123,7 @@ func (r *NsgroupResource) Read(ctx context.Context, req resource.ReadRequest, re
 
 	apiRes, httpRes, err := r.client.DNSAPI.
 		NsgroupAPI.
-		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Read(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
 		ReturnFieldsPlus(readableAttributesForNsgroup).
 		ReturnAsObject(1).
 		ProxySearch(config.GetProxySearch()).
@@ -249,6 +249,12 @@ func (r *NsgroupResource) Update(ctx context.Context, req resource.UpdateRequest
 		return
 	}
 
+	diags = req.State.GetAttribute(ctx, path.Root("uuid"), &data.Uuid)
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+		return
+	}
+
 	diags = req.State.GetAttribute(ctx, path.Root("extattrs_all"), &data.ExtAttrsAll)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -275,7 +281,7 @@ func (r *NsgroupResource) Update(ctx context.Context, req resource.UpdateRequest
 
 	apiRes, _, err := r.client.DNSAPI.
 		NsgroupAPI.
-		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Update(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
 		Nsgroup(*data.Expand(ctx, &resp.Diagnostics, false)).
 		ReturnFieldsPlus(readableAttributesForNsgroup).
 		ReturnAsObject(1).
@@ -315,7 +321,7 @@ func (r *NsgroupResource) Delete(ctx context.Context, req resource.DeleteRequest
 
 	httpRes, err := r.client.DNSAPI.
 		NsgroupAPI.
-		Delete(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Delete(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
 		Execute()
 	if err != nil {
 		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
@@ -327,6 +333,6 @@ func (r *NsgroupResource) Delete(ctx context.Context, req resource.DeleteRequest
 }
 
 func (r *NsgroupResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("ref"), req.ID)...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("uuid"), req.ID)...)
 	resp.Diagnostics.Append(resp.Private.SetKey(ctx, "associate_internal_id", []byte("true"))...)
 }

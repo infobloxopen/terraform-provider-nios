@@ -105,7 +105,7 @@ func (r *ExtensibleattributedefResource) Read(ctx context.Context, req resource.
 
 	apiRes, httpRes, err := r.client.GridAPI.
 		ExtensibleattributedefAPI.
-		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Read(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
 		ReturnFieldsPlus(readableAttributesForExtensibleattributedef).
 		ReturnAsObject(1).
 		ProxySearch(config.GetProxySearch()).
@@ -147,9 +147,15 @@ func (r *ExtensibleattributedefResource) Update(ctx context.Context, req resourc
 		return
 	}
 
+	diags = req.State.GetAttribute(ctx, path.Root("uuid"), &data.Uuid)
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+		return
+	}
+
 	apiRes, _, err := r.client.GridAPI.
 		ExtensibleattributedefAPI.
-		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Update(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
 		Extensibleattributedef(*data.Expand(ctx, &resp.Diagnostics, false)).
 		ReturnFieldsPlus(readableAttributesForExtensibleattributedef).
 		ReturnAsObject(1).
@@ -179,7 +185,7 @@ func (r *ExtensibleattributedefResource) Delete(ctx context.Context, req resourc
 
 	httpRes, err := r.client.GridAPI.
 		ExtensibleattributedefAPI.
-		Delete(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Delete(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
 		Execute()
 	if err != nil {
 		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
@@ -236,5 +242,5 @@ func (r *ExtensibleattributedefResource) ValidateConfig(ctx context.Context, req
 }
 
 func (r *ExtensibleattributedefResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	resource.ImportStatePassthroughID(ctx, path.Root("ref"), req, resp)
+	resource.ImportStatePassthroughID(ctx, path.Root("uuid"), req, resp)
 }

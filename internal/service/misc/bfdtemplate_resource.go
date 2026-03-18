@@ -104,7 +104,7 @@ func (r *BfdtemplateResource) Read(ctx context.Context, req resource.ReadRequest
 
 	apiRes, httpRes, err := r.client.MiscAPI.
 		BfdtemplateAPI.
-		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Read(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
 		ReturnFieldsPlus(readableAttributesForBfdtemplate).
 		ReturnAsObject(1).
 		ProxySearch(config.GetProxySearch()).
@@ -146,9 +146,15 @@ func (r *BfdtemplateResource) Update(ctx context.Context, req resource.UpdateReq
 		return
 	}
 
+	diags = req.State.GetAttribute(ctx, path.Root("uuid"), &data.Uuid)
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+		return
+	}
+
 	apiRes, _, err := r.client.MiscAPI.
 		BfdtemplateAPI.
-		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Update(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
 		Bfdtemplate(*data.Expand(ctx, &resp.Diagnostics)).
 		ReturnFieldsPlus(readableAttributesForBfdtemplate).
 		ReturnAsObject(1).
@@ -178,7 +184,7 @@ func (r *BfdtemplateResource) Delete(ctx context.Context, req resource.DeleteReq
 
 	httpRes, err := r.client.MiscAPI.
 		BfdtemplateAPI.
-		Delete(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Delete(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
 		Execute()
 	if err != nil {
 		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
@@ -190,5 +196,5 @@ func (r *BfdtemplateResource) Delete(ctx context.Context, req resource.DeleteReq
 }
 
 func (r *BfdtemplateResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	resource.ImportStatePassthroughID(ctx, path.Root("ref"), req, resp)
+	resource.ImportStatePassthroughID(ctx, path.Root("uuid"), req, resp)
 }
