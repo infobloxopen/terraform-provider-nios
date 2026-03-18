@@ -104,7 +104,7 @@ func (r *NatgroupResource) Read(ctx context.Context, req resource.ReadRequest, r
 
 	apiRes, httpRes, err := r.client.GridAPI.
 		NatgroupAPI.
-		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Read(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
 		ReturnFieldsPlus(readableAttributesForNatgroup).
 		ReturnAsObject(1).
 		ProxySearch(config.GetProxySearch()).
@@ -146,9 +146,15 @@ func (r *NatgroupResource) Update(ctx context.Context, req resource.UpdateReques
 		return
 	}
 
+	diags = req.State.GetAttribute(ctx, path.Root("uuid"), &data.Uuid)
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+		return
+	}
+
 	apiRes, _, err := r.client.GridAPI.
 		NatgroupAPI.
-		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Update(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
 		Natgroup(*data.Expand(ctx, &resp.Diagnostics)).
 		ReturnFieldsPlus(readableAttributesForNatgroup).
 		ReturnAsObject(1).
@@ -178,7 +184,7 @@ func (r *NatgroupResource) Delete(ctx context.Context, req resource.DeleteReques
 
 	httpRes, err := r.client.GridAPI.
 		NatgroupAPI.
-		Delete(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Delete(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
 		Execute()
 	if err != nil {
 		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
@@ -190,5 +196,5 @@ func (r *NatgroupResource) Delete(ctx context.Context, req resource.DeleteReques
 }
 
 func (r *NatgroupResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	resource.ImportStatePassthroughID(ctx, path.Root("ref"), req, resp)
+	resource.ImportStatePassthroughID(ctx, path.Root("uuid"), req, resp)
 }

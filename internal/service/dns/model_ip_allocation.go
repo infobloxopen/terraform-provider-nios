@@ -406,7 +406,6 @@ func (m *IPAllocationModel) Expand(ctx context.Context, diags *diag.Diagnostics)
 	}
 	to := &dns.RecordHost{
 		Ref:                      flex.ExpandStringPointer(m.Ref),
-		Uuid:                     flex.ExpandStringPointer(m.Uuid),
 		Aliases:                  flex.ExpandFrameworkListString(ctx, m.Aliases, diags),
 		AllowTelnet:              flex.ExpandBoolPointer(m.AllowTelnet),
 		CliCredentials:           flex.ExpandFrameworkListNestedBlock(ctx, m.CliCredentials, diags, ExpandRecordHostCliCredentials),

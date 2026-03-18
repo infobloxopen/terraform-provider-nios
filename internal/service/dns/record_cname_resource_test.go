@@ -15,7 +15,7 @@ import (
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
-var readableAttributesForRecordCname = "aws_rte53_record_info,canonical,cloud_info,comment,creation_time,creator,ddns_principal,ddns_protected,disable,dns_canonical,dns_name,extattrs,forbid_reclamation,last_queried,name,reclaimable,shared_record_group,ttl,use_ttl,view,zone"
+var readableAttributesForRecordCname = "aws_rte53_record_info,canonical,cloud_info,comment,creation_time,creator,ddns_principal,ddns_protected,disable,dns_canonical,dns_name,extattrs,forbid_reclamation,last_queried,name,reclaimable,shared_record_group,ttl,use_ttl,view,zone,rr_precondition_instructions"
 
 func TestAccRecordCnameResource_basic(t *testing.T) {
 	var resourceName = "nios_dns_record_cname.test"
@@ -358,6 +358,44 @@ func TestAccRecordCnameResource_Name(t *testing.T) {
 	})
 }
 
+func TestAccRecordCnameResource_RrPreconditionInstructions(t *testing.T) {
+	var resourceName = "nios_dns_record_cname.test_rr_precondition_instructions"
+	var v dns.RecordCname
+	name := acctest.RandomName() + ".example.com"
+	canonical := acctest.RandomNameWithPrefix("test-cname") + ".example.com"
+	ipv4addr := acctest.RandomIP()
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// Step 1: Create A record
+			{
+				Config: testAccRecordCnameRrPreconditionInstructionsStepA(name, ipv4addr),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("nios_dns_record_a.test_a_to_replace", "name", name),
+					resource.TestCheckResourceAttr("nios_dns_record_a.test_a_to_replace", "ipv4addr", ipv4addr),
+				),
+			},
+			// Step 2: Replace A record with CNAME using rr_precondition_instructions
+			{
+				Config: testAccRecordCnameRrPreconditionInstructions(name, canonical),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckRecordCnameExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "canonical", canonical),
+					resource.TestCheckResourceAttr(resourceName, "name", name),
+					resource.TestCheckResourceAttr(resourceName, "rr_precondition_instructions.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "rr_precondition_instructions.0.condition", "exist"),
+					resource.TestCheckResourceAttr(resourceName, "rr_precondition_instructions.0.name", name),
+					resource.TestCheckResourceAttr(resourceName, "rr_precondition_instructions.0.type", "A"),
+					resource.TestCheckResourceAttr(resourceName, "rr_precondition_instructions.0.action", "delete"),
+				),
+			},
+			// Delete testing automatically occurs in TestCase
+		},
+	})
+}
+
 func TestAccRecordCnameResource_Ttl(t *testing.T) {
 	var resourceName = "nios_dns_record_cname.test_ttl"
 	var v dns.RecordCname
@@ -591,6 +629,32 @@ resource "nios_dns_record_cname" "test_name" {
 	view      = %q
 }
 `, canonical, name, view)
+}
+
+func testAccRecordCnameRrPreconditionInstructionsStepA(name, ipv4addr string) string {
+	return fmt.Sprintf(`
+resource "nios_dns_record_a" "test_a_to_replace" {
+	name     = %q
+	ipv4addr = %q
+}
+`, name, ipv4addr)
+}
+
+func testAccRecordCnameRrPreconditionInstructions(name, canonical string) string {
+	return fmt.Sprintf(`
+resource "nios_dns_record_cname" "test_rr_precondition_instructions" {
+	canonical = %q
+	name      = %q
+	rr_precondition_instructions = [
+		{
+			condition = "exist"
+			name      = %q
+			type      = "A"
+			action    = "delete"
+		}
+	]
+}
+`, canonical, name, name)
 }
 
 func testAccRecordCnameTtl(canonical, name, view string, ttl int32, useTTL bool) string {

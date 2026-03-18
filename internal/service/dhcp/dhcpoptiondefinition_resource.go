@@ -105,7 +105,7 @@ func (r *DhcpoptiondefinitionResource) Read(ctx context.Context, req resource.Re
 
 	apiRes, httpRes, err := r.client.DHCPAPI.
 		DhcpoptiondefinitionAPI.
-		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Read(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
 		ReturnFieldsPlus(readableAttributesForDhcpoptiondefinition).
 		ReturnAsObject(1).
 		ProxySearch(config.GetProxySearch()).
@@ -149,6 +149,12 @@ func (r *DhcpoptiondefinitionResource) Update(ctx context.Context, req resource.
 		return
 	}
 
+	diags = req.State.GetAttribute(ctx, path.Root("uuid"), &data.Uuid)
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+		return
+	}
+
 	// Update ref if option space has changed
 	if !data.Space.Equal(stateData.Space) {
 		r.updateRefIfOptionSpaceChanged(ctx, resp, &data, &stateData)
@@ -159,7 +165,7 @@ func (r *DhcpoptiondefinitionResource) Update(ctx context.Context, req resource.
 
 	apiRes, _, err := r.client.DHCPAPI.
 		DhcpoptiondefinitionAPI.
-		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Update(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
 		Dhcpoptiondefinition(*data.Expand(ctx, &resp.Diagnostics)).
 		ReturnFieldsPlus(readableAttributesForDhcpoptiondefinition).
 		ReturnAsObject(1).
@@ -189,7 +195,7 @@ func (r *DhcpoptiondefinitionResource) Delete(ctx context.Context, req resource.
 
 	httpRes, err := r.client.DHCPAPI.
 		DhcpoptiondefinitionAPI.
-		Delete(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Delete(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
 		Execute()
 	if err != nil {
 		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
@@ -201,7 +207,7 @@ func (r *DhcpoptiondefinitionResource) Delete(ctx context.Context, req resource.
 }
 
 func (r *DhcpoptiondefinitionResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	resource.ImportStatePassthroughID(ctx, path.Root("ref"), req, resp)
+	resource.ImportStatePassthroughID(ctx, path.Root("uuid"), req, resp)
 }
 
 // updateRefIfOptionSpaceChanged updates the ref if the option space name changes by

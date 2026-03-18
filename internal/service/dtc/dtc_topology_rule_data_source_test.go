@@ -53,7 +53,12 @@ resource "nios_dtc_topology" "test" {
   rules = [
     {
       dest_type        = "SERVER"
-      destination_link = nios_dtc_server.create_dtc_server.ref
+      destination = [
+        		{
+          			destination_link = nios_dtc_server.create_dtc_server.ref
+          			priority         = 1
+        		}
+			]
 	  sources  = [
         {
             source_op   = "IS",

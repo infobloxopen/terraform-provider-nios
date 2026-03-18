@@ -112,7 +112,7 @@ func (r *Ipv6dhcpoptionspaceResource) Read(ctx context.Context, req resource.Rea
 
 	apiRes, httpRes, err := r.client.DHCPAPI.
 		Ipv6dhcpoptionspaceAPI.
-		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Read(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
 		ReturnFieldsPlus(readableAttributesForIpv6dhcpoptionspace).
 		ReturnAsObject(1).
 		ProxySearch(config.GetProxySearch()).
@@ -154,9 +154,15 @@ func (r *Ipv6dhcpoptionspaceResource) Update(ctx context.Context, req resource.U
 		return
 	}
 
+	diags = req.State.GetAttribute(ctx, path.Root("uuid"), &data.Uuid)
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+		return
+	}
+
 	apiRes, _, err := r.client.DHCPAPI.
 		Ipv6dhcpoptionspaceAPI.
-		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Update(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
 		Ipv6dhcpoptionspace(*data.Expand(ctx, &resp.Diagnostics)).
 		ReturnFieldsPlus(readableAttributesForIpv6dhcpoptionspace).
 		ReturnAsObject(1).
@@ -187,7 +193,7 @@ func (r *Ipv6dhcpoptionspaceResource) Delete(ctx context.Context, req resource.D
 	err := retry.RetryContext(ctx, Ipv6OptionSpaceOperationTimeout, func() *retry.RetryError {
 		httpRes, err := r.client.DHCPAPI.
 			Ipv6dhcpoptionspaceAPI.
-			Delete(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+			Delete(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
 			Execute()
 		if err != nil {
 			if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
@@ -207,5 +213,5 @@ func (r *Ipv6dhcpoptionspaceResource) Delete(ctx context.Context, req resource.D
 }
 
 func (r *Ipv6dhcpoptionspaceResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	resource.ImportStatePassthroughID(ctx, path.Root("ref"), req, resp)
+	resource.ImportStatePassthroughID(ctx, path.Root("uuid"), req, resp)
 }

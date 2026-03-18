@@ -15,8 +15,20 @@ resource "nios_dtc_topology" "create_dtc_topology_with_additional_fields" {
   comment = "DTC topology additional"
   rules = [
     {
-      dest_type        = "SERVER"
-      destination_link = nios_dtc_server.create_dtc_server.ref
+      dest_type = "SERVER"
+      destination = [
+        {
+          destination_link = nios_dtc_server.create_dtc_server.ref
+          priority         = 1
+        }
+      ]
+      sources = [
+        {
+          source_op    = "IS"
+          source_type  = "CONTINENT"
+          source_value = "Africa"
+        }
+      ]
     }
   ]
   extattrs = {

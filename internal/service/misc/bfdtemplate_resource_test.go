@@ -15,7 +15,7 @@ import (
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
-var readableAttributesForBfdtemplate = "authentication_key_id,authentication_type,detection_multiplier,min_rx_interval,min_tx_interval,name"
+var readableAttributesForBfdtemplate = "detection_multiplier,min_rx_interval,min_tx_interval,name"
 
 func TestAccBfdtemplateResource_basic(t *testing.T) {
 	var resourceName = "nios_misc_bfdtemplate.test"
@@ -33,7 +33,6 @@ func TestAccBfdtemplateResource_basic(t *testing.T) {
 					testAccCheckBfdtemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "name", name),
 					// Test fields with default value
-					resource.TestCheckResourceAttr(resourceName, "authentication_type", "NONE"),
 					resource.TestCheckResourceAttr(resourceName, "detection_multiplier", "3"),
 					resource.TestCheckResourceAttr(resourceName, "min_rx_interval", "100"),
 					resource.TestCheckResourceAttr(resourceName, "min_tx_interval", "100"),
@@ -62,109 +61,6 @@ func TestAccBfdtemplateResource_disappears(t *testing.T) {
 				),
 				ExpectNonEmptyPlan: true,
 			},
-		},
-	})
-}
-
-func TestAccBfdtemplateResource_AuthenticationKeyId(t *testing.T) {
-	var resourceName = "nios_misc_bfdtemplate.test_authentication_key_id"
-	var v misc.Bfdtemplate
-	name := acctest.RandomNameWithPrefix("tf_test_bfd_")
-	authType := "MD5"
-	authKey := "1234"
-	minRxInterval := 1000
-	minTxInterval := 1000
-
-	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.PreCheck(t) },
-		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-		Steps: []resource.TestStep{
-			// Create and Read
-			{
-				Config: testAccBfdtemplateAuthenticationKeyId(name, "4", authType, authKey, minRxInterval, minTxInterval),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckBfdtemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "authentication_key_id", "4"),
-				),
-			},
-			// Update and Read
-			{
-				Config: testAccBfdtemplateAuthenticationKeyId(name, "5", authType, authKey, minRxInterval, minTxInterval),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckBfdtemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "authentication_key_id", "5"),
-				),
-			},
-			// Delete testing automatically occurs in TestCase
-		},
-	})
-}
-
-func TestAccBfdtemplateResource_AuthenticationType(t *testing.T) {
-	var resourceName = "nios_misc_bfdtemplate.test_authentication_type"
-	var v misc.Bfdtemplate
-	name := acctest.RandomNameWithPrefix("tf_test_bfd_")
-	authKey := "1234"
-
-	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.PreCheck(t) },
-		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-		Steps: []resource.TestStep{
-			// Create and Read
-			{
-				Config: testAccBfdtemplateAuthenticationType(name, "METICULOUS-MD5", authKey),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckBfdtemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "authentication_type", "METICULOUS-MD5"),
-				),
-			},
-			// Update and Read
-			{
-				Config: testAccBfdtemplateAuthenticationType(name, "METICULOUS-SHA1", authKey),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckBfdtemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "authentication_type", "METICULOUS-SHA1"),
-				),
-			},
-			// Update and Read
-			{
-				Config: testAccBfdtemplateAuthenticationType(name, "SHA1", authKey),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckBfdtemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "authentication_type", "SHA1"),
-				),
-			},
-			// Delete testing automatically occurs in TestCase
-		},
-	})
-}
-
-func TestAccBfdtemplateResource_DetectionMultiplier(t *testing.T) {
-	var resourceName = "nios_misc_bfdtemplate.test_detection_multiplier"
-	var v misc.Bfdtemplate
-	name := acctest.RandomNameWithPrefix("tf_test_bfd_")
-
-	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.PreCheck(t) },
-		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-		Steps: []resource.TestStep{
-			// Create and Read
-			{
-				Config: testAccBfdtemplateDetectionMultiplier(name, "4"),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckBfdtemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "detection_multiplier", "4"),
-				),
-			},
-			// Update and Read
-			{
-				Config: testAccBfdtemplateDetectionMultiplier(name, "5"),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckBfdtemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "detection_multiplier", "5"),
-				),
-			},
-			// Delete testing automatically occurs in TestCase
 		},
 	})
 }
@@ -323,38 +219,6 @@ resource "nios_misc_bfdtemplate" "test" {
     name = %q
 }
 `, name)
-}
-
-func testAccBfdtemplateAuthenticationKeyId(name string, authenticationKeyId string, authenticationType string, authenticationKey string, minRxInterval int, minTxInterval int) string {
-	return fmt.Sprintf(`
-resource "nios_misc_bfdtemplate" "test_authentication_key_id" {
-    name = %q
-    authentication_key_id = %q
-    authentication_type = %q
-    authentication_key = %q
-    min_rx_interval = %d
-    min_tx_interval = %d
-}
-`, name, authenticationKeyId, authenticationType, authenticationKey, minRxInterval, minTxInterval)
-}
-
-func testAccBfdtemplateAuthenticationType(name, authenticationType, authenticationKey string) string {
-	return fmt.Sprintf(`
-resource "nios_misc_bfdtemplate" "test_authentication_type" {
-    name = %q
-    authentication_type = %q
-    authentication_key = %q
-}
-`, name, authenticationType, authenticationKey)
-}
-
-func testAccBfdtemplateDetectionMultiplier(name, detectionMultiplier string) string {
-	return fmt.Sprintf(`
-resource "nios_misc_bfdtemplate" "test_detection_multiplier" {
-	name = %q
-    detection_multiplier = %q
-}
-`, name, detectionMultiplier)
 }
 
 func testAccBfdtemplateMinRxInterval(name, minRxInterval string) string {

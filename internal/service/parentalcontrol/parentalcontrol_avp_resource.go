@@ -138,7 +138,7 @@ func (r *ParentalcontrolAvpResource) Read(ctx context.Context, req resource.Read
 
 	apiRes, httpRes, err := r.client.ParentalControlAPI.
 		ParentalcontrolAvpAPI.
-		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Read(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
 		ReturnFieldsPlus(readableAttributesForParentalcontrolAvp).
 		ReturnAsObject(1).
 		ProxySearch(config.GetProxySearch()).
@@ -180,9 +180,15 @@ func (r *ParentalcontrolAvpResource) Update(ctx context.Context, req resource.Up
 		return
 	}
 
+	diags = req.State.GetAttribute(ctx, path.Root("uuid"), &data.Uuid)
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+		return
+	}
+
 	apiRes, _, err := r.client.ParentalControlAPI.
 		ParentalcontrolAvpAPI.
-		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Update(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
 		ParentalcontrolAvp(*data.Expand(ctx, &resp.Diagnostics)).
 		ReturnFieldsPlus(readableAttributesForParentalcontrolAvp).
 		ReturnAsObject(1).
@@ -212,7 +218,7 @@ func (r *ParentalcontrolAvpResource) Delete(ctx context.Context, req resource.De
 
 	httpRes, err := r.client.ParentalControlAPI.
 		ParentalcontrolAvpAPI.
-		Delete(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Delete(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
 		Execute()
 	if err != nil {
 		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
@@ -224,5 +230,5 @@ func (r *ParentalcontrolAvpResource) Delete(ctx context.Context, req resource.De
 }
 
 func (r *ParentalcontrolAvpResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	resource.ImportStatePassthroughID(ctx, path.Root("ref"), req, resp)
+	resource.ImportStatePassthroughID(ctx, path.Root("uuid"), req, resp)
 }

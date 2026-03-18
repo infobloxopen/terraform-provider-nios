@@ -333,7 +333,12 @@ resource "nios_dtc_topology" "test_rules" {
     rules = [
         {
             dest_type = "SERVER"
-            destination_link = nios_dtc_server.test_server.ref
+            destination = [
+        		{
+          			destination_link = nios_dtc_server.test_server.ref
+          			priority         = 1
+        		}
+			]
         }
     ]
 }
@@ -363,7 +368,12 @@ resource "nios_dtc_topology" "test_rules_pool" {
     rules = [
         {
             dest_type = "POOL"
-            destination_link = nios_dtc_pool.test_pool.ref
+			destination = [
+        		{
+          			destination_link = nios_dtc_pool.test_pool.ref
+          			priority         = 1
+        		}
+			]
         }
     ]
 }

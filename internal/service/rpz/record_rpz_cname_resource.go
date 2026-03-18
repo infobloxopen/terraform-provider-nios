@@ -124,7 +124,7 @@ func (r *RecordRpzCnameResource) Read(ctx context.Context, req resource.ReadRequ
 
 	apiRes, httpRes, err := r.client.RPZAPI.
 		RecordRpzCnameAPI.
-		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Read(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
 		ReturnFieldsPlus(readableAttributesForRecordRpzCname).
 		ReturnAsObject(1).
 		ProxySearch(config.GetProxySearch()).
@@ -250,6 +250,12 @@ func (r *RecordRpzCnameResource) Update(ctx context.Context, req resource.Update
 		return
 	}
 
+	diags = req.State.GetAttribute(ctx, path.Root("uuid"), &data.Uuid)
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+		return
+	}
+
 	diags = req.State.GetAttribute(ctx, path.Root("extattrs_all"), &data.ExtAttrsAll)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -278,7 +284,7 @@ func (r *RecordRpzCnameResource) Update(ctx context.Context, req resource.Update
 
 	apiRes, _, err := r.client.RPZAPI.
 		RecordRpzCnameAPI.
-		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Update(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
 		RecordRpzCname(*data.Expand(ctx, &resp.Diagnostics)).
 		ReturnFieldsPlus(readableAttributesForRecordRpzCname).
 		ReturnAsObject(1).
@@ -317,7 +323,7 @@ func (r *RecordRpzCnameResource) Delete(ctx context.Context, req resource.Delete
 
 	httpRes, err := r.client.RPZAPI.
 		RecordRpzCnameAPI.
-		Delete(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Delete(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
 		Execute()
 	if err != nil {
 		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
@@ -329,6 +335,6 @@ func (r *RecordRpzCnameResource) Delete(ctx context.Context, req resource.Delete
 }
 
 func (r *RecordRpzCnameResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("ref"), req.ID)...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("uuid"), req.ID)...)
 	resp.Diagnostics.Append(resp.Private.SetKey(ctx, "associate_internal_id", []byte("true"))...)
 }

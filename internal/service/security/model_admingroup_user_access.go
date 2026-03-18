@@ -53,6 +53,10 @@ var AdmingroupUserAccessResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed:            true,
 		MarkdownDescription: "The reference of the ACL object.",
 	},
+	"uuid": schema.StringAttribute{
+		Computed:            true,
+		MarkdownDescription: "Universally Unique ID assigned for this object.",
+	},
 }
 
 func ExpandAdmingroupUserAccess(ctx context.Context, o types.Object, diags *diag.Diagnostics) *security.AdmingroupUserAccess {
@@ -74,7 +78,6 @@ func (m *AdmingroupUserAccessModel) Expand(ctx context.Context, diags *diag.Diag
 	to := &security.AdmingroupUserAccess{
 		Address:    flex.ExpandStringPointer(m.Address),
 		Permission: flex.ExpandStringPointer(m.Permission),
-		Ref:        flex.ExpandStringPointer(m.Ref),
 	}
 	return to
 }
