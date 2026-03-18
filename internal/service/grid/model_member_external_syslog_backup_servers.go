@@ -3,6 +3,7 @@ package grid
 import (
 	"context"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -57,16 +58,17 @@ var MemberExternalSyslogBackupServersResourceSchemaAttributes = map[string]schem
 		MarkdownDescription: "If set to True, the syslog backup server is enabled.",
 	},
 	"password": schema.StringAttribute{
-		Computed:            true,
-		Optional:            true,
+		Required:            true,
 		Sensitive:           true,
-		Default:             stringdefault.StaticString(""),
 		MarkdownDescription: "The password of the backup syslog server.",
 	},
 	"port": schema.Int64Attribute{
-		Optional:            true,
-		Computed:            true,
-		Default:             int64default.StaticInt64(22),
+		Optional: true,
+		Computed: true,
+		Default:  int64default.StaticInt64(22),
+		Validators: []validator.Int64{
+			int64validator.Between(0, 65535),
+		},
 		MarkdownDescription: "The port used to connect to the backup syslog server.",
 	},
 	"protocol": schema.StringAttribute{
@@ -79,8 +81,7 @@ var MemberExternalSyslogBackupServersResourceSchemaAttributes = map[string]schem
 		MarkdownDescription: "The transport protocol used to connect to the backup syslog server.",
 	},
 	"username": schema.StringAttribute{
-		Computed: true,
-		Optional: true,
+		Required: true,
 		Validators: []validator.String{
 			customvalidator.ValidateTrimmedString(),
 		},
@@ -140,4 +141,5 @@ func (m *MemberExternalSyslogBackupServersModel) Flatten(ctx context.Context, fr
 	m.Port = flex.FlattenInt64Pointer(from.Port)
 	m.Protocol = flex.FlattenStringPointer(from.Protocol)
 	m.Username = flex.FlattenStringPointer(from.Username)
+	m.Password = flex.FlattenStringPointer(from.Password)
 }

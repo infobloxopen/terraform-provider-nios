@@ -1,18 +1,3 @@
-terraform {
-  required_providers {
-    nios = {
-      source  = "infobloxopen/nios"
-      version = "1.0.0"
-    }
-  }
-}
-
-provider "nios" {
-  nios_host_url = "https://172.28.83.68"
-  nios_username = "admin"
-  nios_password = "Infoblox@123"
-}
-
 resource "nios_grid_member" "test_enable_ha" {
   host_name                  = "infoblox-ha-node.localdomain"
   config_addr_type           = "IPV4"

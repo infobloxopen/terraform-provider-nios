@@ -21,6 +21,7 @@ var readableAttributesForMember = "active_position,additional_ip_list,automated_
 // Ensure provider defined types fully satisfy framework interfaces.
 var _ resource.Resource = &MemberResource{}
 var _ resource.ResourceWithImportState = &MemberResource{}
+var _ resource.ResourceWithValidateConfig = &MemberResource{}
 
 func NewMemberResource() resource.Resource {
 	return &MemberResource{}
@@ -81,12 +82,12 @@ func (r *MemberResource) Create(ctx context.Context, req resource.CreateRequest,
 	}
 
 	if !data.SyslogServers.IsNull() && !data.SyslogServers.IsUnknown() {
-        processedList, ok := r.processSyslogServers(ctx, data.SyslogServers, &resp.Diagnostics)
-        if !ok {
-            return
-        }
-        data.SyslogServers = processedList
-    }
+		processedList, ok := r.processSyslogServers(ctx, data.SyslogServers, &resp.Diagnostics)
+		if !ok {
+			return
+		}
+		data.SyslogServers = processedList
+	}
 
 	apiRes, _, err := r.client.GridAPI.
 		MemberAPI.
@@ -254,12 +255,12 @@ func (r *MemberResource) Update(ctx context.Context, req resource.UpdateRequest,
 		return
 	}
 	if !data.SyslogServers.IsNull() && !data.SyslogServers.IsUnknown() {
-        processedList, ok := r.processSyslogServers(ctx, data.SyslogServers, &resp.Diagnostics)
-        if !ok {
-            return
-        }
-        data.SyslogServers = processedList
-    }
+		processedList, ok := r.processSyslogServers(ctx, data.SyslogServers, &resp.Diagnostics)
+		if !ok {
+			return
+		}
+		data.SyslogServers = processedList
+	}
 
 	planExtAttrs := data.ExtAttrs
 	diags = req.State.GetAttribute(ctx, path.Root("ref"), &data.Ref)
@@ -345,6 +346,49 @@ func (r *MemberResource) Delete(ctx context.Context, req resource.DeleteRequest,
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete Member, got error: %s", err))
 		return
 	}
+}
+
+func (r *MemberResource) ValidateConfig(ctx context.Context, req resource.ValidateConfigRequest, resp *resource.ValidateConfigResponse) {
+	var data MemberModel
+
+	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	if !data.EmailSetting.IsNull() && !data.EmailSetting.IsUnknown() {
+		emailSetting := data.EmailSetting.Attributes()
+		if emailSetting["use_authentication"].String() == "true" {
+			if emailSetting["password"].IsNull() || emailSetting["password"].IsUnknown() {
+				resp.Diagnostics.AddError("Validation Error", "Password must be provided when use_authentication is true")
+			}
+			if emailSetting["from_address"].IsNull() || emailSetting["from_address"].IsUnknown() {
+				resp.Diagnostics.AddError("Validation Error", "From address must be provided when use_authentication is true")
+			}
+			if emailSetting["address"].IsNull() || emailSetting["address"].IsUnknown() {
+				resp.Diagnostics.AddError("Validation Error", "Address must be provided when use_authentication is true")
+			}
+			if emailSetting["smtps"].String() == "true" {
+				if emailSetting["port_number"].IsNull() || emailSetting["port_number"].IsUnknown() {
+					resp.Diagnostics.AddError("Validation Error", "Port must be provided when email_settings.smtps is true")
+				} else {
+					port := emailSetting["port_number"].String()
+					if port != "587" && port != "2525" {
+						resp.Diagnostics.AddError("Validation Error", "Port must be either 587 or 2525 when email_settings.smtps is true")
+					}
+				}
+			}
+		}
+	}
+
+	if !data.HaOnCloud.IsNull() && !data.HaOnCloud.IsUnknown() {
+		// enable_ha must be true when ha_on_cloud is provided
+		if data.EnableHa.IsNull() || data.EnableHa.IsUnknown() || data.EnableHa.ValueBool() == false {
+			resp.Diagnostics.AddError("Validation Error", "enable_ha must be true when ha_on_cloud is provided")
+		}
+	}
+
+
 }
 
 func (r *MemberResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {

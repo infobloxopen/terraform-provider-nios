@@ -44,9 +44,9 @@ var MemberEmailSettingAttrTypes = map[string]attr.Type{
 
 var MemberEmailSettingResourceSchemaAttributes = map[string]schema.Attribute{
 	"enabled": schema.BoolAttribute{
-		Optional:            true,
-		Computed:            true,
-		Default:             booldefault.StaticBool(false),
+		Optional: true,
+		Computed: true,
+		//Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Determines if email notification is enabled or not.",
 	},
 	"from_address": schema.StringAttribute{
@@ -77,7 +77,6 @@ var MemberEmailSettingResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The relay name or IP address.",
 	},
 	"password": schema.StringAttribute{
-		Computed:            true,
 		Optional:            true,
 		MarkdownDescription: "Password to validate from address",
 	},
@@ -123,7 +122,7 @@ func (m *MemberEmailSettingModel) Expand(ctx context.Context, diags *diag.Diagno
 		Address:           flex.ExpandStringPointer(m.Address),
 		RelayEnabled:      flex.ExpandBoolPointer(m.RelayEnabled),
 		Relay:             flex.ExpandStringPointer(m.Relay),
-		Password:          flex.ExpandStringPointer(m.Password),
+		Password:          flex.ExpandStringPointerEmptyAsNil(m.Password),
 		Smtps:             flex.ExpandBoolPointer(m.Smtps),
 		PortNumber:        flex.ExpandInt64Pointer(m.PortNumber),
 		UseAuthentication: flex.ExpandBoolPointer(m.UseAuthentication),
@@ -157,4 +156,5 @@ func (m *MemberEmailSettingModel) Flatten(ctx context.Context, from *grid.Member
 	m.Smtps = types.BoolPointerValue(from.Smtps)
 	m.PortNumber = flex.FlattenInt64Pointer(from.PortNumber)
 	m.UseAuthentication = types.BoolPointerValue(from.UseAuthentication)
+	//m.Password = flex.FlattenStringPointer(from.Password)
 }

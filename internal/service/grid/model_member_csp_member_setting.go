@@ -67,7 +67,7 @@ var MemberCspMemberSettingResourceSchemaAttributes = map[string]schema.Attribute
 		Computed: true,
 		Optional: true,
 		Validators: []validator.String{
-			stringvalidator.AlsoRequires(path.MatchRoot("use_csp_dns_resolver")),
+			stringvalidator.AlsoRequires(path.MatchRelative().AtParent().AtName("use_csp_dns_resolver")),
 		},
 		MarkdownDescription: "IP address of DNS resolver in DFP",
 	},

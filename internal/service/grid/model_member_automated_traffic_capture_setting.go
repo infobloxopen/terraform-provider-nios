@@ -12,6 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
+	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/grid"
 
@@ -98,10 +99,12 @@ var MemberAutomatedTrafficCaptureSettingResourceSchemaAttributes = map[string]sc
 		MarkdownDescription: "User name for accessing the FTP/SCP server.",
 	},
 	"password": schema.StringAttribute{
-		Sensitive:           true,
-		Optional:            true,
-		Computed:            true,
-		Default:             stringdefault.StaticString(""),
+		Sensitive: true,
+		Optional:  true,
+		Computed:  true,
+		Validators: []validator.String{
+			customvalidator.ValidateTrimmedString(),
+		},
 		MarkdownDescription: "Password for accessing the FTP/SCP server. This field is not readable.",
 	},
 }
@@ -164,5 +167,4 @@ func (m *MemberAutomatedTrafficCaptureSettingModel) Flatten(ctx context.Context,
 	m.TrafficCaptureDirectory = flex.FlattenStringPointer(from.TrafficCaptureDirectory)
 	m.SupportBundleDirectory = flex.FlattenStringPointer(from.SupportBundleDirectory)
 	m.Username = flex.FlattenStringPointer(from.Username)
-	m.Password = flex.FlattenStringPointer(from.Password)
 }

@@ -394,9 +394,12 @@ var MemberResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The host name of the Grid member.",
 	},
 	"ipv6_setting": schema.SingleNestedAttribute{
-		Attributes:          MemberIpv6SettingResourceSchemaAttributes,
-		Computed:            true,
-		Optional:            true,
+		Attributes: MemberIpv6SettingResourceSchemaAttributes,
+		Computed:   true,
+		Optional:   true,
+		Validators: []validator.Object{
+			objectvalidator.AtLeastOneOf(path.MatchRoot("ipv6_setting"), path.MatchRoot("vip_setting")),
+		},
 		MarkdownDescription: "IPV6 setting for member.",
 	},
 	"ipv6_static_routes": schema.ListNestedAttribute{
@@ -966,13 +969,27 @@ func (m *MemberModel) Flatten(ctx context.Context, from *grid.Member, diags *dia
 	m.CspMemberSetting = FlattenMemberCspMemberSetting(ctx, from.CspMemberSetting, diags)
 	m.DnsResolverSetting = FlattenMemberDnsResolverSetting(ctx, from.DnsResolverSetting, diags)
 	m.Dscp = flex.FlattenInt64Pointer(from.Dscp)
+	planEmailSetting := m.EmailSetting
 	m.EmailSetting = FlattenMemberEmailSetting(ctx, from.EmailSetting, diags)
+	if !planEmailSetting.IsUnknown() {
+		emailSettingVal, diags := utils.CopyFieldFromPlanToRespObject(ctx, planEmailSetting, m.EmailSetting, "password")
+		if !diags.HasError() {
+			m.EmailSetting = emailSettingVal.(types.Object)
+		}
+	}
 	m.EnableHa = types.BoolPointerValue(from.EnableHa)
 	m.EnableLom = types.BoolPointerValue(from.EnableLom)
 	m.EnableMemberRedirect = types.BoolPointerValue(from.EnableMemberRedirect)
 	m.EnableRoApiAccess = types.BoolPointerValue(from.EnableRoApiAccess)
 	m.ExtAttrs = FlattenExtAttrs(ctx, m.ExtAttrs, from.ExtAttrs, diags)
+	planExternalSyslogBackupServers := m.ExternalSyslogBackupServers
 	m.ExternalSyslogBackupServers = flex.FlattenFrameworkListNestedBlock(ctx, from.ExternalSyslogBackupServers, MemberExternalSyslogBackupServersAttrTypes, diags, FlattenMemberExternalSyslogBackupServers)
+	if !planExternalSyslogBackupServers.IsUnknown() {
+		externalSyslogBackupServersVal, diags := utils.CopyFieldFromPlanToRespList(ctx, planExternalSyslogBackupServers, m.ExternalSyslogBackupServers, "password")
+		if !diags.HasError() {
+			m.ExternalSyslogBackupServers = externalSyslogBackupServersVal.(basetypes.ListValue)
+		}
+	}
 	m.ExternalSyslogServerEnable = types.BoolPointerValue(from.ExternalSyslogServerEnable)
 	m.HaCloudPlatform = flex.FlattenStringPointer(from.HaCloudPlatform)
 	m.HaOnCloud = types.BoolPointerValue(from.HaOnCloud)
