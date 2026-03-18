@@ -46,7 +46,8 @@ var MemberLomUsersResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The LOM user name.",
 	},
 	"password": schema.StringAttribute{
-		Required: true,
+		Required:  true,
+		Sensitive: true,
 		PlanModifiers: []planmodifier.String{
 			planmodifiers.ImmutableString(),
 		},
@@ -87,21 +88,19 @@ func ExpandMemberLomUsers(ctx context.Context, o types.Object, diags *diag.Diagn
 	if diags.HasError() {
 		return nil
 	}
-	return m.Expand(ctx, diags, true)
+	return m.Expand(ctx, diags)
 }
 
-func (m *MemberLomUsersModel) Expand(ctx context.Context, diags *diag.Diagnostics, isCreate bool) *grid.MemberLomUsers {
+func (m *MemberLomUsersModel) Expand(ctx context.Context, diags *diag.Diagnostics) *grid.MemberLomUsers {
 	if m == nil {
 		return nil
 	}
 	to := &grid.MemberLomUsers{
-		Name:    flex.ExpandStringPointer(m.Name),
-		Role:    flex.ExpandStringPointer(m.Role),
-		Disable: flex.ExpandBoolPointer(m.Disable),
-		Comment: flex.ExpandStringPointer(m.Comment),
-	}
-	if isCreate {
-		to.Password = flex.ExpandStringPointer(m.Password)
+		Name:     flex.ExpandStringPointer(m.Name),
+		Role:     flex.ExpandStringPointer(m.Role),
+		Disable:  flex.ExpandBoolPointer(m.Disable),
+		Password: flex.ExpandStringPointer(m.Password),
+		Comment:  flex.ExpandStringPointer(m.Comment),
 	}
 
 	return to

@@ -245,7 +245,8 @@ func TestAccMemberResource_AdditionalIpList(t *testing.T) { //works
 		},
 	})
 }
-//issue password is senstive
+
+// issue password is senstive
 func TestAccMemberResource_AutomatedTrafficCaptureSetting(t *testing.T) {
 	var resourceName = "nios_grid_member.test_automated_traffic_capture_setting"
 	var v grid.Member
@@ -314,9 +315,9 @@ func TestAccMemberResource_AutomatedTrafficCaptureSetting(t *testing.T) {
 			},
 		},
 	})
-} 
+}
 
-//work
+// work
 func TestAccMemberResource_BgpAs(t *testing.T) {
 	var resourceName = "nios_grid_member.test_bgp_as"
 	var v grid.Member
@@ -419,7 +420,7 @@ func TestAccMemberResource_BgpAs(t *testing.T) {
 	})
 }
 
-//work
+// work
 func TestAccMemberResource_Comment(t *testing.T) {
 	var resourceName = "nios_grid_member.test_comment"
 	var v grid.Member
@@ -513,9 +514,8 @@ func TestAccMemberResource_ConfigAddrType(t *testing.T) {
 			},
 		},
 	})
-} 
+}
 
-//
 func TestAccMemberResource_CspAccessKey(t *testing.T) {
 	var resourceName = "nios_grid_member.test_csp_access_key"
 	var v grid.Member
@@ -549,7 +549,7 @@ func TestAccMemberResource_CspAccessKey(t *testing.T) {
 }
 
 // getting error via wapi - IB.Data.Conflict:CSP test connectivity failed: 'Could not perform Test Connection on offline member.')",
-//issue
+// issue
 func TestAccMemberResource_CspMemberSetting(t *testing.T) {
 	var resourceName = "nios_grid_member.test_csp_member_setting"
 	var v grid.Member
@@ -614,7 +614,7 @@ func TestAccMemberResource_CspMemberSetting(t *testing.T) {
 	})
 }
 
-//works
+// works
 func TestAccMemberResource_DnsResolverSetting(t *testing.T) {
 	var resourceName = "nios_grid_member.test_dns_resolver_setting"
 	var v grid.Member
@@ -679,7 +679,8 @@ func TestAccMemberResource_DnsResolverSetting(t *testing.T) {
 		},
 	})
 }
-//works
+
+// works
 func TestAccMemberResource_Dscp(t *testing.T) {
 	var resourceName = "nios_grid_member.test_dscp"
 	var v grid.Member
@@ -734,7 +735,8 @@ func TestAccMemberResource_Dscp(t *testing.T) {
 		},
 	})
 }
-//works
+
+// works
 func TestAccMemberResource_EmailSetting(t *testing.T) {
 	var resourceName = "nios_grid_member.test_email_setting"
 	var v grid.Member
@@ -808,7 +810,8 @@ func TestAccMemberResource_EmailSetting(t *testing.T) {
 		},
 	})
 }
-//works
+
+// works
 func TestAccMemberResource_EnableHa(t *testing.T) {
 	var resourceName = "nios_grid_member.test_enable_ha"
 	var v grid.Member
@@ -836,7 +839,8 @@ func TestAccMemberResource_EnableHa(t *testing.T) {
 		},
 	})
 }
-//works
+
+// works
 func TestAccMemberResource_EnableLom(t *testing.T) {
 	var resourceName = "nios_grid_member.test_enable_lom"
 	var v grid.Member
@@ -885,7 +889,8 @@ func TestAccMemberResource_EnableLom(t *testing.T) {
 		},
 	})
 }
-//works
+
+// works
 func TestAccMemberResource_EnableMemberRedirect(t *testing.T) {
 	var resourceName = "nios_grid_member.test_enable_member_redirect"
 	var v grid.Member
@@ -981,7 +986,8 @@ func TestAccMemberResource_EnableRoApiAccess(t *testing.T) {
 		},
 	})
 }
-//works
+
+// works
 func TestAccMemberResource_ExtAttrs(t *testing.T) {
 	var resourceName = "nios_grid_member.test_extattrs"
 	var v grid.Member
@@ -1035,7 +1041,7 @@ func TestAccMemberResource_ExtAttrs(t *testing.T) {
 	})
 }
 
-// /pasword issue
+// /works
 func TestAccMemberResource_ExternalSyslogBackupServers(t *testing.T) {
 	var resourceName = "nios_grid_member.test_external_syslog_backup_servers"
 	var v grid.Member
@@ -1056,13 +1062,13 @@ func TestAccMemberResource_ExternalSyslogBackupServers(t *testing.T) {
 	}
 	externalSyslogBackupServersValUpdated := []map[string]any{
 		{
-			"address":        "192.0.2.20",
-			"directory_path": "/var/log/backup2",
-			"enable":         false,
-			"port":           22,
-			"protocol":       "SCP",
-			"username":       "admin2",
-			"password":       "Password456!",
+			"address_or_fqdn": "192.0.2.20",
+			"directory_path":  "/var/log/backup2",
+			"enable":          false,
+			"port":            22,
+			"protocol":        "SCP",
+			"username":        "admin2",
+			"password":        "Password123!",
 		},
 	}
 
@@ -1084,7 +1090,7 @@ func TestAccMemberResource_ExternalSyslogBackupServers(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "external_syslog_backup_servers.#", "1"),
-					resource.TestCheckResourceAttr(resourceName, "external_syslog_backup_servers.0.address", "192.0.2.10"),
+					resource.TestCheckResourceAttr(resourceName, "external_syslog_backup_servers.0.address_or_fqdn", "192.0.2.10"),
 					resource.TestCheckResourceAttr(resourceName, "external_syslog_backup_servers.0.protocol", "FTP"),
 					resource.TestCheckResourceAttr(resourceName, "external_syslog_backup_servers.0.port", "21"),
 					resource.TestCheckResourceAttr(resourceName, "external_syslog_backup_servers.0.enable", "true"),
@@ -1105,7 +1111,7 @@ func TestAccMemberResource_ExternalSyslogBackupServers(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "external_syslog_backup_servers.#", "1"),
-					resource.TestCheckResourceAttr(resourceName, "external_syslog_backup_servers.0.address", "192.0.2.20"),
+					resource.TestCheckResourceAttr(resourceName, "external_syslog_backup_servers.0.address_or_fqdn", "192.0.2.20"),
 					resource.TestCheckResourceAttr(resourceName, "external_syslog_backup_servers.0.protocol", "SCP"),
 					resource.TestCheckResourceAttr(resourceName, "external_syslog_backup_servers.0.port", "22"),
 					resource.TestCheckResourceAttr(resourceName, "external_syslog_backup_servers.0.enable", "false"),
@@ -1116,7 +1122,7 @@ func TestAccMemberResource_ExternalSyslogBackupServers(t *testing.T) {
 	})
 }
 
-//issue - checking
+// issue - checking
 func TestAccMemberResource_HaCloudPlatform(t *testing.T) {
 	var resourceName = "nios_grid_member.test_ha_cloud_platform"
 	var v grid.Member
@@ -1151,7 +1157,7 @@ func TestAccMemberResource_HaCloudPlatform(t *testing.T) {
 	})
 }
 
-//issue - checking
+// issue - checking
 func TestAccMemberResource_HaOnCloud(t *testing.T) {
 	var resourceName = "nios_grid_member.test_ha_on_cloud"
 	var v grid.Member
@@ -1228,11 +1234,10 @@ func TestAccMemberResource_HostName(t *testing.T) {
 	})
 }
 
-// issue - checking
 func TestAccMemberResource_Ipv6Setting(t *testing.T) {
 	var resourceName = "nios_grid_member.test_ipv6_setting"
 	var v grid.Member
-
+	t.Skip("need actual member with hardware licence - DSCP cannot be configured on an IB-UNKNOWN appliance. wapi will not set vaule even if you set")
 	hostName := fmt.Sprintf("infoblox-%s.localdomain", acctest.RandomName())
 	vipAddress := fmt.Sprintf("172.28.83.%d", acctest.RandomNumber(254))
 
@@ -1241,7 +1246,7 @@ func TestAccMemberResource_Ipv6Setting(t *testing.T) {
 		"dscp":                       0,
 		"enabled":                    false,
 		"primary":                    true,
-		"use_dscp":                   false,
+		"use_dscp":                   true,
 	}
 	ipv6SettingValUpdated := map[string]any{
 		"auto_router_config_enabled": true,
@@ -1293,7 +1298,7 @@ func TestAccMemberResource_Ipv6Setting(t *testing.T) {
 	})
 }
 
-//pending
+// pending
 func TestAccMemberResource_Ipv6StaticRoutes(t *testing.T) {
 	var resourceName = "nios_grid_member.test_ipv6_static_routes"
 	var v grid.Member
@@ -1324,7 +1329,8 @@ func TestAccMemberResource_Ipv6StaticRoutes(t *testing.T) {
 		},
 	})
 }
-//pending
+
+// pending
 func TestAccMemberResource_Lan2Enabled(t *testing.T) {
 	var resourceName = "nios_grid_member.test_lan2_enabled"
 	var v grid.Member
@@ -1354,7 +1360,7 @@ func TestAccMemberResource_Lan2Enabled(t *testing.T) {
 	})
 }
 
-//pending
+// pending
 func TestAccMemberResource_Lan2PortSetting(t *testing.T) {
 	var resourceName = "nios_grid_member.test_lan2_port_setting"
 	var v grid.Member
@@ -1385,7 +1391,8 @@ func TestAccMemberResource_Lan2PortSetting(t *testing.T) {
 		},
 	})
 }
-//pending
+
+// pending
 func TestAccMemberResource_LomNetworkConfig(t *testing.T) {
 	var resourceName = "nios_grid_member.test_lom_network_config"
 	var v grid.Member
@@ -1417,7 +1424,7 @@ func TestAccMemberResource_LomNetworkConfig(t *testing.T) {
 	})
 }
 
-// password issue
+// works
 func TestAccMemberResource_LomUsers(t *testing.T) {
 	var resourceName = "nios_grid_member.test_lom_users"
 	var v grid.Member
@@ -1462,7 +1469,7 @@ func TestAccMemberResource_LomUsers(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "lom_users.#", "1"),
-					resource.TestCheckResourceAttr(resourceName, "lom_users.0.name", "anil1"),
+					resource.TestCheckResourceAttr(resourceName, "lom_users.0.name", "LOMuser1"),
 					resource.TestCheckResourceAttr(resourceName, "lom_users.0.role", "USER"),
 					resource.TestCheckResourceAttr(resourceName, "lom_users.0.disable", "false"),
 				),
@@ -1482,7 +1489,7 @@ func TestAccMemberResource_LomUsers(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "lom_users.#", "1"),
-					resource.TestCheckResourceAttr(resourceName, "lom_users.0.name", "anil1"),
+					resource.TestCheckResourceAttr(resourceName, "lom_users.0.name", "LOMuser1"),
 					resource.TestCheckResourceAttr(resourceName, "lom_users.0.role", "USER"),
 					resource.TestCheckResourceAttr(resourceName, "lom_users.0.disable", "true"),
 				),
@@ -1492,8 +1499,8 @@ func TestAccMemberResource_LomUsers(t *testing.T) {
 	})
 }
 
-//issue
-// "text": "Cannot delete or add member services. only edit "   
+// issue
+// "text": "Cannot delete or add member services. only edit "
 func TestAccMemberResource_MemberServiceCommunication(t *testing.T) {
 	var resourceName = "nios_grid_member.test_member_service_communication"
 	var v grid.Member
@@ -1562,7 +1569,7 @@ func TestAccMemberResource_MemberServiceCommunication(t *testing.T) {
 	})
 }
 
-//issue
+// issue
 func TestAccMemberResource_MgmtPortSetting(t *testing.T) { // ui cant change settings
 	var resourceName = "nios_grid_member.test_mgmt_port_setting"
 	var v grid.Member
@@ -1815,7 +1822,7 @@ func TestAccMemberResource_NtpSetting(t *testing.T) { //works
 	})
 }
 
-//works
+// works
 func TestAccMemberResource_OspfList(t *testing.T) {
 	var resourceName = "nios_grid_member.test_ospf_list"
 	var v grid.Member
@@ -1959,7 +1966,7 @@ func TestAccMemberResource_Platform(t *testing.T) { //works
 	})
 }
 
-// unable to get pre_provisioning - only edit and delete can be done 
+// unable to get pre_provisioning - only edit and delete can be done
 func TestAccMemberResource_PreProvisioning(t *testing.T) {
 	var resourceName = "nios_grid_member.test"
 	var v grid.Member
@@ -2280,7 +2287,7 @@ func TestAccMemberResource_SnmpSetting(t *testing.T) { //works
 	})
 }
 
-// dont know how to do set on UI///issue - rajat 
+// dont know how to do set on UI///issue - rajat
 func TestAccMemberResource_StaticRoutes(t *testing.T) {
 	var resourceName = "nios_grid_member.test_static_routes"
 	var v grid.Member
@@ -2338,7 +2345,8 @@ func TestAccMemberResource_StaticRoutes(t *testing.T) {
 		},
 	})
 }
-//works
+
+// works
 func TestAccMemberResource_SupportAccessEnable(t *testing.T) {
 	var resourceName = "nios_grid_member.test_support_access_enable"
 	var v grid.Member
@@ -2562,7 +2570,7 @@ func TestAccMemberResource_SyslogServers(t *testing.T) {
 	})
 }
 
-//works
+// works
 func TestAccMemberResource_SyslogSize(t *testing.T) {
 	var resourceName = "nios_grid_member.test_syslog_size"
 	var v grid.Member
@@ -2609,7 +2617,8 @@ func TestAccMemberResource_SyslogSize(t *testing.T) {
 		},
 	})
 }
-//works
+
+// works
 func TestAccMemberResource_ThresholdTraps(t *testing.T) {
 	var resourceName = "nios_grid_member.test_threshold_traps"
 	var v grid.Member
@@ -2669,7 +2678,8 @@ func TestAccMemberResource_ThresholdTraps(t *testing.T) {
 		},
 	})
 }
-//works
+
+// works
 func TestAccMemberResource_TimeZone(t *testing.T) {
 	var resourceName = "nios_grid_member.test_time_zone"
 	var v grid.Member
@@ -2716,7 +2726,8 @@ func TestAccMemberResource_TimeZone(t *testing.T) {
 		},
 	})
 }
-//works
+
+// works
 func TestAccMemberResource_TrafficCaptureAuthDnsSetting(t *testing.T) {
 	var resourceName = "nios_grid_member.test_traffic_capture_auth_dns_setting"
 	var v grid.Member
@@ -2770,7 +2781,8 @@ func TestAccMemberResource_TrafficCaptureAuthDnsSetting(t *testing.T) {
 		},
 	})
 }
-//works
+
+// works
 func TestAccMemberResource_TrafficCaptureChrSetting(t *testing.T) {
 	var resourceName = "nios_grid_member.test_traffic_capture_chr_setting"
 	var v grid.Member
@@ -2822,7 +2834,8 @@ func TestAccMemberResource_TrafficCaptureChrSetting(t *testing.T) {
 		},
 	})
 }
-//works
+
+// works
 func TestAccMemberResource_TrafficCaptureQpsSetting(t *testing.T) {
 	var resourceName = "nios_grid_member.test_traffic_capture_qps_setting"
 	var v grid.Member
@@ -2925,7 +2938,8 @@ func TestAccMemberResource_TrafficCaptureRecDnsSetting(t *testing.T) {
 		},
 	})
 }
-//works
+
+// works
 func TestAccMemberResource_TrafficCaptureRecQueriesSetting(t *testing.T) {
 	var resourceName = "nios_grid_member.test_traffic_capture_rec_queries_setting"
 	var v grid.Member
@@ -3071,6 +3085,7 @@ func TestAccMemberResource_UpgradeGroup(t *testing.T) {
 		},
 	})
 }
+
 // works
 func TestAccMemberResource_UseAutomatedTrafficCapture(t *testing.T) {
 	var resourceName = "nios_grid_member.test_use_automated_traffic_capture"
@@ -3118,7 +3133,8 @@ func TestAccMemberResource_UseAutomatedTrafficCapture(t *testing.T) {
 		},
 	})
 }
-//works
+
+// works
 func TestAccMemberResource_UseDnsResolverSetting(t *testing.T) {
 	var resourceName = "nios_grid_member.test_use_dns_resolver_setting"
 	var v grid.Member
@@ -3165,6 +3181,7 @@ func TestAccMemberResource_UseDnsResolverSetting(t *testing.T) {
 		},
 	})
 }
+
 // works
 func TestAccMemberResource_UseDscp(t *testing.T) {
 	var resourceName = "nios_grid_member.test_use_dscp"
@@ -3212,6 +3229,7 @@ func TestAccMemberResource_UseDscp(t *testing.T) {
 		},
 	})
 }
+
 // works
 func TestAccMemberResource_UseEmailSetting(t *testing.T) {
 	var resourceName = "nios_grid_member.test_use_email_setting"
@@ -3259,6 +3277,7 @@ func TestAccMemberResource_UseEmailSetting(t *testing.T) {
 		},
 	})
 }
+
 // works
 func TestAccMemberResource_UseEnableLom(t *testing.T) {
 	var resourceName = "nios_grid_member.test_use_enable_lom"
@@ -3306,6 +3325,7 @@ func TestAccMemberResource_UseEnableLom(t *testing.T) {
 		},
 	})
 }
+
 // works
 func TestAccMemberResource_UseEnableMemberRedirect(t *testing.T) {
 	var resourceName = "nios_grid_member.test_use_enable_member_redirect"
@@ -3353,6 +3373,7 @@ func TestAccMemberResource_UseEnableMemberRedirect(t *testing.T) {
 		},
 	})
 }
+
 // works
 func TestAccMemberResource_UseExternalSyslogBackupServers(t *testing.T) {
 	var resourceName = "nios_grid_member.test_use_external_syslog_backup_servers"
@@ -3400,6 +3421,7 @@ func TestAccMemberResource_UseExternalSyslogBackupServers(t *testing.T) {
 		},
 	})
 }
+
 // works
 func TestAccMemberResource_UseRemoteConsoleAccessEnable(t *testing.T) {
 	var resourceName = "nios_grid_member.test_use_remote_console_access_enable"
@@ -3495,6 +3517,7 @@ func TestAccMemberResource_UseSnmpSetting(t *testing.T) {
 		},
 	})
 }
+
 // works
 func TestAccMemberResource_UseSupportAccessEnable(t *testing.T) {
 	var resourceName = "nios_grid_member.test_use_support_access_enable"
@@ -3542,6 +3565,7 @@ func TestAccMemberResource_UseSupportAccessEnable(t *testing.T) {
 		},
 	})
 }
+
 // works
 func TestAccMemberResource_UseSyslogProxySetting(t *testing.T) {
 	var resourceName = "nios_grid_member.test_use_syslog_proxy_setting"
@@ -3589,6 +3613,7 @@ func TestAccMemberResource_UseSyslogProxySetting(t *testing.T) {
 		},
 	})
 }
+
 // works
 func TestAccMemberResource_UseThresholdTraps(t *testing.T) {
 	var resourceName = "nios_grid_member.test_use_threshold_traps"
@@ -3636,6 +3661,7 @@ func TestAccMemberResource_UseThresholdTraps(t *testing.T) {
 		},
 	})
 }
+
 // works
 func TestAccMemberResource_UseTimeZone(t *testing.T) {
 	var resourceName = "nios_grid_member.test_use_time_zone"
@@ -3683,6 +3709,7 @@ func TestAccMemberResource_UseTimeZone(t *testing.T) {
 		},
 	})
 }
+
 // works
 func TestAccMemberResource_UseTrafficCaptureAuthDns(t *testing.T) {
 	var resourceName = "nios_grid_member.test_use_traffic_capture_auth_dns"
@@ -3730,6 +3757,7 @@ func TestAccMemberResource_UseTrafficCaptureAuthDns(t *testing.T) {
 		},
 	})
 }
+
 // works
 func TestAccMemberResource_UseTrafficCaptureChr(t *testing.T) {
 	var resourceName = "nios_grid_member.test_use_traffic_capture_chr"
@@ -3777,6 +3805,7 @@ func TestAccMemberResource_UseTrafficCaptureChr(t *testing.T) {
 		},
 	})
 }
+
 // works
 func TestAccMemberResource_UseTrafficCaptureQps(t *testing.T) {
 	var resourceName = "nios_grid_member.test_use_traffic_capture_qps"
@@ -3824,6 +3853,7 @@ func TestAccMemberResource_UseTrafficCaptureQps(t *testing.T) {
 		},
 	})
 }
+
 // works
 func TestAccMemberResource_UseTrafficCaptureRecDns(t *testing.T) {
 	var resourceName = "nios_grid_member.test_use_traffic_capture_rec_dns"
@@ -3871,6 +3901,7 @@ func TestAccMemberResource_UseTrafficCaptureRecDns(t *testing.T) {
 		},
 	})
 }
+
 // works
 func TestAccMemberResource_UseTrafficCaptureRecQueries(t *testing.T) {
 	var resourceName = "nios_grid_member.test_use_traffic_capture_rec_queries"
@@ -3918,6 +3949,7 @@ func TestAccMemberResource_UseTrafficCaptureRecQueries(t *testing.T) {
 		},
 	})
 }
+
 // works
 func TestAccMemberResource_UseTrapNotifications(t *testing.T) {
 	var resourceName = "nios_grid_member.test_use_trap_notifications"
@@ -3965,6 +3997,7 @@ func TestAccMemberResource_UseTrapNotifications(t *testing.T) {
 		},
 	})
 }
+
 // works
 func TestAccMemberResource_UseV4Vrrp(t *testing.T) {
 	var resourceName = "nios_grid_member.test_use_v4_vrrp"
@@ -4012,6 +4045,7 @@ func TestAccMemberResource_UseV4Vrrp(t *testing.T) {
 		},
 	})
 }
+
 // works
 func TestAccMemberResource_MasterCandidate(t *testing.T) {
 	var resourceName = "nios_grid_member.test_master_candidate"
@@ -4063,6 +4097,7 @@ func TestAccMemberResource_MasterCandidate(t *testing.T) {
 		},
 	})
 }
+
 // works
 func TestAccMemberResource_VipSetting(t *testing.T) {
 	var resourceName = "nios_grid_member.test_vip_setting"
@@ -4124,6 +4159,7 @@ func TestAccMemberResource_VipSetting(t *testing.T) {
 		},
 	})
 }
+
 // works
 func TestAccMemberResource_VpnMtu(t *testing.T) {
 	var resourceName = "nios_grid_member.test_vpn_mtu"
@@ -4932,6 +4968,7 @@ resource "nios_grid_member" "test_ipv6_setting" {
         subnet_mask = %q
         use_dscp = false
     }
+		use_dscp = true
 }
 `, hostName, configAddrType, platform, serviceTypeConfig, ipv6SettingStr, vipAddress, vipGateway, vipSubnetMask)
 }

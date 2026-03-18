@@ -9,6 +9,7 @@ import (
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -17,6 +18,7 @@ import (
 	"github.com/infobloxopen/infoblox-nios-go-client/grid"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	planmodifiers "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/immutable"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
@@ -57,10 +59,14 @@ var MemberExternalSyslogBackupServersResourceSchemaAttributes = map[string]schem
 		MarkdownDescription: "If set to True, the syslog backup server is enabled.",
 	},
 	"password": schema.StringAttribute{
-		Computed:            true,
-		Optional:            true,
-		Sensitive:           true,
-		Default:             stringdefault.StaticString(""),
+		Required:  true,
+		Sensitive: true,
+		PlanModifiers: []planmodifier.String{
+			planmodifiers.ImmutableString(),
+		},
+		Validators: []validator.String{
+			customvalidator.ValidateTrimmedString(),
+		},
 		MarkdownDescription: "The password of the backup syslog server.",
 	},
 	"port": schema.Int64Attribute{

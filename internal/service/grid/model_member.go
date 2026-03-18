@@ -958,7 +958,15 @@ func (m *MemberModel) Flatten(ctx context.Context, from *grid.Member, diags *dia
 	m.Ref = flex.FlattenStringPointer(from.Ref)
 	m.ActivePosition = flex.FlattenStringPointer(from.ActivePosition)
 	m.AdditionalIpList = flex.FlattenFrameworkListNestedBlock(ctx, from.AdditionalIpList, MemberAdditionalIpListAttrTypes, diags, FlattenMemberAdditionalIpList)
+	// m.AutomatedTrafficCaptureSetting = FlattenMemberAutomatedTrafficCaptureSetting(ctx, from.AutomatedTrafficCaptureSetting, diags)
+	planAutomatedTrafficCaptureSetting := m.AutomatedTrafficCaptureSetting
 	m.AutomatedTrafficCaptureSetting = FlattenMemberAutomatedTrafficCaptureSetting(ctx, from.AutomatedTrafficCaptureSetting, diags)
+	if !planAutomatedTrafficCaptureSetting.IsNull() {
+		result, copyDiags := utils.CopyFieldFromPlanToRespObject(ctx, planAutomatedTrafficCaptureSetting, m.AutomatedTrafficCaptureSetting, "password")
+		if !copyDiags.HasError() {
+			m.AutomatedTrafficCaptureSetting = result.(basetypes.ObjectValue)
+		}
+	}
 	m.BgpAs = flex.FlattenFrameworkListNestedBlock(ctx, from.BgpAs, MemberBgpAsAttrTypes, diags, FlattenMemberBgpAs)
 	m.Comment = flex.FlattenStringPointer(from.Comment)
 	m.ConfigAddrType = flex.FlattenStringPointer(from.ConfigAddrType)
@@ -972,7 +980,15 @@ func (m *MemberModel) Flatten(ctx context.Context, from *grid.Member, diags *dia
 	m.EnableMemberRedirect = types.BoolPointerValue(from.EnableMemberRedirect)
 	m.EnableRoApiAccess = types.BoolPointerValue(from.EnableRoApiAccess)
 	m.ExtAttrs = FlattenExtAttrs(ctx, m.ExtAttrs, from.ExtAttrs, diags)
+	//m.ExternalSyslogBackupServers = flex.FlattenFrameworkListNestedBlock(ctx, from.ExternalSyslogBackupServers, MemberExternalSyslogBackupServersAttrTypes, diags, FlattenMemberExternalSyslogBackupServers)
+	planExternalSyslogBackupServers := m.ExternalSyslogBackupServers
 	m.ExternalSyslogBackupServers = flex.FlattenFrameworkListNestedBlock(ctx, from.ExternalSyslogBackupServers, MemberExternalSyslogBackupServersAttrTypes, diags, FlattenMemberExternalSyslogBackupServers)
+	if !planExternalSyslogBackupServers.IsNull() {
+		result, copyDiags := utils.CopyFieldFromPlanToRespList(ctx, planExternalSyslogBackupServers, m.ExternalSyslogBackupServers, "password")
+		if !copyDiags.HasError() {
+			m.ExternalSyslogBackupServers = result.(basetypes.ListValue)
+		}
+	}
 	m.ExternalSyslogServerEnable = types.BoolPointerValue(from.ExternalSyslogServerEnable)
 	m.HaCloudPlatform = flex.FlattenStringPointer(from.HaCloudPlatform)
 	m.HaOnCloud = types.BoolPointerValue(from.HaOnCloud)
@@ -983,7 +999,15 @@ func (m *MemberModel) Flatten(ctx context.Context, from *grid.Member, diags *dia
 	m.Lan2Enabled = types.BoolPointerValue(from.Lan2Enabled)
 	m.Lan2PortSetting = FlattenMemberLan2PortSetting(ctx, from.Lan2PortSetting, diags)
 	m.LomNetworkConfig = flex.FlattenFrameworkListNestedBlock(ctx, from.LomNetworkConfig, MemberLomNetworkConfigAttrTypes, diags, FlattenMemberLomNetworkConfig)
+	//m.LomUsers = flex.FlattenFrameworkListNestedBlock(ctx, from.LomUsers, MemberLomUsersAttrTypes, diags, FlattenMemberLomUsers)
+	planLomUser := m.LomUsers
 	m.LomUsers = flex.FlattenFrameworkListNestedBlock(ctx, from.LomUsers, MemberLomUsersAttrTypes, diags, FlattenMemberLomUsers)
+	if !planLomUser.IsNull() {
+		result, diags := utils.CopyFieldFromPlanToRespList(ctx, planLomUser, m.LomUsers, "password")
+		if !diags.HasError() {
+			m.LomUsers = result.(basetypes.ListValue)
+		}
+	}
 	m.MasterCandidate = types.BoolPointerValue(from.MasterCandidate)
 	m.MemberServiceCommunication = flex.FlattenFrameworkListNestedBlock(ctx, from.MemberServiceCommunication, MemberMemberServiceCommunicationAttrTypes, diags, FlattenMemberMemberServiceCommunication)
 	m.MgmtPortSetting = FlattenMemberMgmtPortSetting(ctx, from.MgmtPortSetting, diags)

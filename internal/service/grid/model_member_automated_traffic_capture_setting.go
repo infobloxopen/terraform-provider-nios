@@ -98,10 +98,18 @@ var MemberAutomatedTrafficCaptureSettingResourceSchemaAttributes = map[string]sc
 		MarkdownDescription: "User name for accessing the FTP/SCP server.",
 	},
 	"password": schema.StringAttribute{
-		Sensitive:           true,
-		Optional:            true,
-		Computed:            true,
-		Default:             stringdefault.StaticString(""),
+		Sensitive: true,
+		Optional:  true,
+		Computed:  true,
+		Default:   stringdefault.StaticString(""), // test case will fail if you make it imutable
+		// Required:  true,
+		// Sensitive: true,
+		// PlanModifiers: []planmodifier.String{
+		// 	planmodifiers.ImmutableString(),
+		// },
+		// Validators: []validator.String{
+		// 	customvalidator.ValidateTrimmedString(),
+		// },
 		MarkdownDescription: "Password for accessing the FTP/SCP server. This field is not readable.",
 	},
 }
