@@ -314,7 +314,7 @@ func (r *IPAssociationResource) getHostRecordByInternalID(ctx context.Context, i
 		terraformInternalIDEA: internalID,
 	}
 
-	apiRes, httpRes, err := r.client.DNSAPI.
+	apiRes, _, err := r.client.DNSAPI.
 		RecordHostAPI.
 		List(ctx).
 		Extattrfilter(searchFilter).
@@ -323,15 +323,12 @@ func (r *IPAssociationResource) getHostRecordByInternalID(ctx context.Context, i
 		Execute()
 
 	if err != nil {
-		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
-			return nil, true, fmt.Errorf("host record not found with internal_id: %s", internalID)
-		}
 		return nil, false, fmt.Errorf("failed to search host record by internal_id %s: %w", internalID, err)
 	}
 
 	results := apiRes.ListRecordHostResponseObject.GetResult()
 	if len(results) == 0 {
-		return nil, false, fmt.Errorf("no host record found with internal_id: %s", internalID)
+		return nil, true, fmt.Errorf("no host record found with internal_id: %s", internalID)
 	}
 
 	return &results[0], false, nil
@@ -391,11 +388,11 @@ func (r *IPAssociationResource) updateHostRecord(ctx context.Context, hostRec *d
 		updateReq.View = nil
 	}
 
+	// NOTE: Since UUID update with return fields is not supported, perform a separate GET after update to retrieve the latest state.
 	apiRes, _, err := r.client.DNSAPI.
 		RecordHostAPI.
 		Update(ctx, utils.ResolveIdentifier(types.StringValue(uuid), types.StringValue(*hostRec.Ref))).
 		RecordHost(updateReq).
-		ReturnFieldsPlus(readableAttributesForIPAssociation).
 		ReturnAsObject(1).
 		Execute()
 
@@ -404,7 +401,21 @@ func (r *IPAssociationResource) updateHostRecord(ctx context.Context, hostRec *d
 	}
 
 	result := apiRes.UpdateRecordHostResponseAsObject.GetResult()
-	return &result, nil
+
+	getRes, _, err := r.client.DNSAPI.
+		RecordHostAPI.
+		Read(ctx, utils.ResolveIdentifier(types.StringValue(*result.Uuid), types.StringValue(*result.Ref))).
+		ReturnFieldsPlus(readableAttributesForIPAssociation).
+		ReturnAsObject(1).
+		ProxySearch(config.GetProxySearch()).
+		Execute()
+	if err != nil {
+		return nil, err
+	}
+
+	getResObj := getRes.GetRecordHostResponseObjectAsResult.GetResult()
+
+	return &getResObj, nil
 }
 
 func (r *IPAssociationResource) flattenDHCPData(hostRec *dns.RecordHost, data IPAssociationModel) IPAssociationModel {

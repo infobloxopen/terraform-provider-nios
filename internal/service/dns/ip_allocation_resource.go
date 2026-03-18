@@ -361,6 +361,12 @@ func (r *IPAllocationResource) Update(ctx context.Context, req resource.UpdateRe
 		return
 	}
 
+	diags = req.State.GetAttribute(ctx, path.Root("uuid"), &data.Uuid)
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+		return
+	}
+
 	diags = req.State.GetAttribute(ctx, path.Root("extattrs_all"), &data.ExtAttrsAll)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -393,10 +399,9 @@ func (r *IPAllocationResource) Update(ctx context.Context, req resource.UpdateRe
 	}
 
 	// Read current state from backend to preserve DHCP settings
-	// NOTE: Updating via ref here, as uuid will get changed on update call (NIOS behavior)
 	currentApiRes, httpRes, err := r.client.DNSAPI.
 		RecordHostAPI.
-		Read(ctx, utils.ResolveIdentifier(types.StringNull(), data.Ref)).
+		Read(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
 		ReturnFieldsPlus(readableAttributesForIPAllocation).
 		ReturnAsObject(1).
 		Execute()
@@ -433,11 +438,11 @@ func (r *IPAllocationResource) Update(ctx context.Context, req resource.UpdateRe
 	preserveDHCPSettings(updateReq, &currentHost)
 	updateReq.NetworkView = nil
 
+	// NOTE: Since UUID update with return fields is not supported, perform a separate GET after update to retrieve the latest state.
 	apiRes, _, err := r.client.DNSAPI.
 		RecordHostAPI.
 		Update(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
 		RecordHost(*updateReq).
-		ReturnFieldsPlus(readableAttributesForIPAllocation).
 		ReturnAsObject(1).
 		Execute()
 	if err != nil {
@@ -447,13 +452,27 @@ func (r *IPAllocationResource) Update(ctx context.Context, req resource.UpdateRe
 
 	res := apiRes.UpdateRecordHostResponseAsObject.GetResult()
 
-	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, planExtAttrs, *res.ExtAttrs)
+	getRes, _, err := r.client.DNSAPI.
+		RecordHostAPI.
+		Read(ctx, utils.ResolveIdentifier(types.StringValue(*res.Uuid), types.StringValue(*res.Ref))).
+		ReturnFieldsPlus(readableAttributesForIPAllocation).
+		ReturnAsObject(1).
+		ProxySearch(config.GetProxySearch()).
+		Execute()
+	if err != nil {
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read RecordHost after update, got error: %s", err))
+		return
+	}
+
+	getResObj := getRes.GetRecordHostResponseObjectAsResult.GetResult()
+
+	getResObj.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, planExtAttrs, *getResObj.ExtAttrs)
 	if diags.HasError() {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while update RecordHost due inherited Extensible attributes, got error: %s", diags))
 		return
 	}
 
-	data.Flatten(ctx, &res, &resp.Diagnostics)
+	data.Flatten(ctx, &getResObj, &resp.Diagnostics)
 
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
