@@ -92,16 +92,15 @@ func testAccCheckRecordSvcbResourceAttrPair(resourceName, dataSourceName string)
 func testAccRecordSvcbDataSourceConfigFilters(zoneFqdn, name, priority string) string {
 	config := fmt.Sprintf(`
 resource "nios_dns_record_svcb" "test" {
-	 name = "%s.%s"
-	 target_name = nios_dns_zone_auth.test.fqdn
-     priority = %q
-    
+	name = "%s.%s"
+	target_name = nios_dns_zone_auth.test.fqdn
+	priority = %q
 }
 
 data "nios_dns_record_svcb" "test" {
-  filters = {
-	 name = nios_dns_record_svcb.test.name
-  }
+	filters = {
+		name = nios_dns_record_svcb.test.name
+  	}
 }
 `, name, zoneFqdn, priority)
 	return strings.Join([]string{testAccBaseWithZone(zoneFqdn), config}, "")
@@ -110,18 +109,18 @@ data "nios_dns_record_svcb" "test" {
 func testAccRecordSvcbDataSourceConfigExtAttrFilters(zoneFqdn, name, priority, extAttrsValue string) string {
 	config := fmt.Sprintf(`
 resource "nios_dns_record_svcb" "test" {
-  name = "%s.%s"
-  target_name = nios_dns_zone_auth.test.fqdn
-  priority = %q
-  extattrs = {
-    Site = %q
-  } 
+	name = "%s.%s"
+	target_name = nios_dns_zone_auth.test.fqdn
+	priority = %q
+	extattrs = {
+		Site = %q
+	} 
 }
 
 data "nios_dns_record_svcb" "test" {
-  extattrfilters = {
-	Site = nios_dns_record_svcb.test.extattrs.Site
-  }
+	extattrfilters = {
+		Site = nios_dns_record_svcb.test.extattrs.Site
+	}
 }
 `, name, zoneFqdn, priority, extAttrsValue)
 	return strings.Join([]string{testAccBaseWithZone(zoneFqdn), config}, "")

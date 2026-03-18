@@ -10,7 +10,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
-	
+
 	"github.com/infobloxopen/infoblox-nios-go-client/dns"
 	"github.com/infobloxopen/terraform-provider-nios/internal/acctest"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
@@ -593,9 +593,9 @@ func testAccCheckRecordSvcbDisappears(ctx context.Context, v *dns.RecordSvcb) re
 func testAccRecordSvcbBasicConfig(zoneFqdn, name, priority string) string {
 	config := fmt.Sprintf(`
 resource "nios_dns_record_svcb" "test" {
-   name = "%s.%s"
-   priority = %q
-   target_name = nios_dns_zone_auth.test.fqdn
+	name = "%s.%s"
+	priority = %q
+	target_name = nios_dns_zone_auth.test.fqdn
 }
 `, name, zoneFqdn, priority)
 	return strings.Join([]string{testAccBaseWithZone(zoneFqdn), config}, "")
@@ -604,10 +604,10 @@ resource "nios_dns_record_svcb" "test" {
 func testAccRecordSvcbComment(zoneFqdn, name, priority, comment string) string {
 	config := fmt.Sprintf(`
 resource "nios_dns_record_svcb" "test_comment" {
-   name = "%s.%s"
-   priority = %q
-   target_name = nios_dns_zone_auth.test.fqdn
-   comment = %q
+	name = "%s.%s"
+	priority = %q
+	target_name = nios_dns_zone_auth.test.fqdn
+	comment = %q
 }
 `, name, zoneFqdn, priority, comment)
 	return strings.Join([]string{testAccBaseWithZone(zoneFqdn), config}, "")
@@ -616,10 +616,10 @@ resource "nios_dns_record_svcb" "test_comment" {
 func testAccRecordSvcbCreator(zoneFqdn, name, priority, creator string) string {
 	config := fmt.Sprintf(`
 resource "nios_dns_record_svcb" "test_creator" {
-   name = "%s.%s"
-   priority = %q
-   target_name = nios_dns_zone_auth.test.fqdn
-   creator = %q
+	name = "%s.%s"
+	priority = %q
+	target_name = nios_dns_zone_auth.test.fqdn
+	creator = %q
 }
 `, name, zoneFqdn, priority, creator)
 	return strings.Join([]string{testAccBaseWithZone(zoneFqdn), config}, "")
@@ -628,10 +628,10 @@ resource "nios_dns_record_svcb" "test_creator" {
 func testAccRecordSvcbDdnsPrincipal(zoneFqdn, name, priority, ddnsPrincipal string) string {
 	config := fmt.Sprintf(`
 resource "nios_dns_record_svcb" "test_ddns_principal" {
-   name = "%s.%s"
-   priority = %q
-   target_name = nios_dns_zone_auth.test.fqdn
-   ddns_principal = %q
+	name = "%s.%s"
+	priority = %q
+	target_name = nios_dns_zone_auth.test.fqdn
+	ddns_principal = %q
 }
 `, name, zoneFqdn, priority, ddnsPrincipal)
 	return strings.Join([]string{testAccBaseWithZone(zoneFqdn), config}, "")
@@ -640,10 +640,10 @@ resource "nios_dns_record_svcb" "test_ddns_principal" {
 func testAccRecordSvcbDdnsProtected(zoneFqdn, name, priority, ddnsProtected string) string {
 	config := fmt.Sprintf(`
 resource "nios_dns_record_svcb" "test_ddns_protected" {
-   name = "%s.%s"
-   priority = %q
-   target_name = nios_dns_zone_auth.test.fqdn
-   ddns_protected = %q
+	name = "%s.%s"
+	priority = %q
+	target_name = nios_dns_zone_auth.test.fqdn
+	ddns_protected = %q
 }
 `, name, zoneFqdn, priority, ddnsProtected)
 	return strings.Join([]string{testAccBaseWithZone(zoneFqdn), config}, "")
@@ -652,10 +652,10 @@ resource "nios_dns_record_svcb" "test_ddns_protected" {
 func testAccRecordSvcbDisable(zoneFqdn, name, priority, disable string) string {
 	config := fmt.Sprintf(`
 resource "nios_dns_record_svcb" "test_disable" {
-   name = "%s.%s"
-   priority = %q
-   target_name = nios_dns_zone_auth.test.fqdn
-   disable = %q
+	name = "%s.%s"
+	priority = %q
+	target_name = nios_dns_zone_auth.test.fqdn
+	disable = %q
 }
 `, name, zoneFqdn, priority, disable)
 	return strings.Join([]string{testAccBaseWithZone(zoneFqdn), config}, "")
@@ -665,10 +665,10 @@ func testAccRecordSvcbExtAttrs(zoneFqdn, name, priority string, extAttrs map[str
 	extAttrsStr := utils.ConvertMapToHCL(extAttrs)
 	config := fmt.Sprintf(`
 resource "nios_dns_record_svcb" "test_extattrs" {
-   name = "%s.%s"
-   priority = %q
-   target_name = nios_dns_zone_auth.test.fqdn
-   extattrs = %s
+	name = "%s.%s"
+	priority = %q
+	target_name = nios_dns_zone_auth.test.fqdn
+	extattrs = %s
 }
 `, name, zoneFqdn, priority, extAttrsStr)
 	return strings.Join([]string{testAccBaseWithZone(zoneFqdn), config}, "")
@@ -677,10 +677,10 @@ resource "nios_dns_record_svcb" "test_extattrs" {
 func testAccRecordSvcbForbidReclamation(zoneFqdn, name, priority, forbidReclamation string) string {
 	config := fmt.Sprintf(`
 resource "nios_dns_record_svcb" "test_forbid_reclamation" {
-   name = "%s.%s"
-   priority = %q
-   target_name = nios_dns_zone_auth.test.fqdn
-   forbid_reclamation = %q
+	name = "%s.%s"
+	priority = %q
+	target_name = nios_dns_zone_auth.test.fqdn
+	forbid_reclamation = %q
 }
 `, name, zoneFqdn, priority, forbidReclamation)
 	return strings.Join([]string{testAccBaseWithZone(zoneFqdn), config}, "")
@@ -689,9 +689,9 @@ resource "nios_dns_record_svcb" "test_forbid_reclamation" {
 func testAccRecordSvcbName(zoneFqdn, name, priority string) string {
 	config := fmt.Sprintf(`
 resource "nios_dns_record_svcb" "test_name" {
-   name = "%s.%s"
-   priority = %q
-   target_name = nios_dns_zone_auth.test.fqdn
+	name = "%s.%s"
+	priority = %q
+	target_name = nios_dns_zone_auth.test.fqdn
 }
 `, name, zoneFqdn, priority)
 	return strings.Join([]string{testAccBaseWithZone(zoneFqdn), config}, "")
@@ -700,9 +700,9 @@ resource "nios_dns_record_svcb" "test_name" {
 func testAccRecordSvcbPriority(zoneFqdn, name, priority string) string {
 	config := fmt.Sprintf(`
 resource "nios_dns_record_svcb" "test_priority" {
-   name = "%s.%s"
-   priority = %q
-   target_name = nios_dns_zone_auth.test.fqdn
+	name = "%s.%s"
+	priority = %q
+	target_name = nios_dns_zone_auth.test.fqdn
 }
 `, name, zoneFqdn, priority)
 	return strings.Join([]string{testAccBaseWithZone(zoneFqdn), config}, "")
@@ -712,10 +712,10 @@ func testAccRecordSvcbSvcParameters(zoneFqdn, name, priority string, svcParamete
 	svcParamsStr := utils.ConvertSliceOfMapsToHCL(svcParameters)
 	config := fmt.Sprintf(`
 resource "nios_dns_record_svcb" "test_svc_parameters" {
-   name = "%s.%s"
-   priority = %q
-   target_name = nios_dns_zone_auth.test.fqdn
-   svc_parameters = %s
+	name = "%s.%s"
+	priority = %q
+	target_name = nios_dns_zone_auth.test.fqdn
+	svc_parameters = %s
 }
 `, name, zoneFqdn, priority, svcParamsStr)
 	return strings.Join([]string{testAccBaseWithZone(zoneFqdn), config}, "")
@@ -724,10 +724,10 @@ resource "nios_dns_record_svcb" "test_svc_parameters" {
 func testAccRecordSvcbTargetName(zoneFqdn, name, priority, targetName string) string {
 	config := fmt.Sprintf(`
 resource "nios_dns_record_svcb" "test_target_name" {
-   name = "%s.%s"
-   priority = %q
-   target_name = %q
-   depends_on = [nios_dns_zone_auth.test]
+	name = "%s.%s"
+	priority = %q
+	target_name = %q
+	depends_on = [nios_dns_zone_auth.test]
 }
 `, name, zoneFqdn, priority, targetName)
 	return strings.Join([]string{testAccBaseWithZone(zoneFqdn), config}, "")
@@ -736,11 +736,11 @@ resource "nios_dns_record_svcb" "test_target_name" {
 func testAccRecordSvcbTtl(zoneFqdn, name, priority, ttl, useTtl string) string {
 	config := fmt.Sprintf(`
 resource "nios_dns_record_svcb" "test_ttl" {
-   name = "%s.%s"
-   priority = %q
-   target_name = nios_dns_zone_auth.test.fqdn
-   ttl = %q
-   use_ttl = %q
+	name = "%s.%s"
+	priority = %q
+	target_name = nios_dns_zone_auth.test.fqdn
+	ttl = %q
+	use_ttl = %q
 }
 `, name, zoneFqdn, priority, ttl, useTtl)
 	return strings.Join([]string{testAccBaseWithZone(zoneFqdn), config}, "")
@@ -749,11 +749,11 @@ resource "nios_dns_record_svcb" "test_ttl" {
 func testAccRecordSvcbUseTtl(zoneFqdn, name, priority, ttl, useTtl string) string {
 	config := fmt.Sprintf(`
 resource "nios_dns_record_svcb" "test_use_ttl" {
-   name = "%s.%s"
-   priority = %q
-   target_name = nios_dns_zone_auth.test.fqdn
-   ttl = %q
-   use_ttl = %q
+	name = "%s.%s"
+	priority = %q
+	target_name = nios_dns_zone_auth.test.fqdn
+	ttl = %q
+	use_ttl = %q
 }
 `, name, zoneFqdn, priority, ttl, useTtl)
 	return strings.Join([]string{testAccBaseWithZone(zoneFqdn), config}, "")

@@ -127,7 +127,7 @@ func (d *RecordSvcbDataSource) Read(ctx context.Context, req datasource.ReadRequ
 				paging = data.Paging.ValueInt32()
 			}
 
-			//Increment the page count
+			// Increment the page count
 			pageCount++
 
 			request := d.client.DNSAPI.
