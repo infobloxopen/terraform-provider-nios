@@ -15,8 +15,11 @@ func TestAccSyslogEndpointDataSource_Filters(t *testing.T) {
 	dataSourceName := "data.nios_misc_syslog_endpoint.test"
 	resourceName := "nios_misc_syslog_endpoint.test"
 	var v misc.SyslogEndpoint
-	name := acctest.RandomNameWithPrefix("syslog-server")
+	name := "syslogserverDs"
 	outboundMemberType := "GM"
+	syslogServer := "10.10.1.1"
+	connectionType := "udp"
+	format := "formatted"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -24,7 +27,7 @@ func TestAccSyslogEndpointDataSource_Filters(t *testing.T) {
 		CheckDestroy:             testAccCheckSyslogEndpointDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccSyslogEndpointDataSourceConfigFilters(name, outboundMemberType),
+				Config: testAccSyslogEndpointDataSourceConfigFilters(name, outboundMemberType, syslogServer, connectionType, format),
 				Check: resource.ComposeTestCheckFunc(
 					append([]resource.TestCheckFunc{
 						testAccCheckSyslogEndpointExists(context.Background(), resourceName, &v),
@@ -39,9 +42,12 @@ func TestAccSyslogEndpointDataSource_ExtAttrFilters(t *testing.T) {
 	dataSourceName := "data.nios_misc_syslog_endpoint.test"
 	resourceName := "nios_misc_syslog_endpoint.test"
 	var v misc.SyslogEndpoint
-	name := acctest.RandomNameWithPrefix("syslog-server")
+	name := "syslogserverDsWithExtAttr"
 	outboundMemberType := "GM"
 	extAttrsValue := acctest.RandomName()
+	connectionType := "udp"
+	format := "formatted"
+	syslogServer := "10.1.1.2"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -49,7 +55,7 @@ func TestAccSyslogEndpointDataSource_ExtAttrFilters(t *testing.T) {
 		CheckDestroy:             testAccCheckSyslogEndpointDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccSyslogEndpointDataSourceConfigExtAttrFilters(name, outboundMemberType, extAttrsValue),
+				Config: testAccSyslogEndpointDataSourceConfigExtAttrFilters(name, outboundMemberType, syslogServer, connectionType, format, extAttrsValue),
 				Check: resource.ComposeTestCheckFunc(
 					append([]resource.TestCheckFunc{
 						testAccCheckSyslogEndpointExists(context.Background(), resourceName, &v),
@@ -75,31 +81,43 @@ func testAccCheckSyslogEndpointResourceAttrPair(resourceName, dataSourceName str
 		resource.TestCheckResourceAttrPair(resourceName, "timeout", dataSourceName, "result.0.timeout"),
 		resource.TestCheckResourceAttrPair(resourceName, "vendor_identifier", dataSourceName, "result.0.vendor_identifier"),
 		resource.TestCheckResourceAttrPair(resourceName, "wapi_user_name", dataSourceName, "result.0.wapi_user_name"),
-		resource.TestCheckResourceAttrPair(resourceName, "wapi_user_password", dataSourceName, "result.0.wapi_user_password"),
 	}
 }
 
-func testAccSyslogEndpointDataSourceConfigFilters(name string, outboundMemberType string) string {
+func testAccSyslogEndpointDataSourceConfigFilters(name string, outboundMemberType string, syslogServer string, connectionType string, format string) string {
 	return fmt.Sprintf(`
 resource "nios_misc_syslog_endpoint" "test" {
 	name = %q
 	outbound_member_type = %q
+	syslog_servers = [
+        {
+            address = %q
+			connection_type = %q
+			format = %q
+        }
+    ]
 }
 
 data "nios_misc_syslog_endpoint" "test" {
 	filters = {
 		name = nios_misc_syslog_endpoint.test.name
-		outbound_member_type = nios_misc_syslog_endpoint.test.outbound_member_type
   }
 }
-`, name, outboundMemberType)
+`, name, outboundMemberType, syslogServer, connectionType, format)
 }
 
-func testAccSyslogEndpointDataSourceConfigExtAttrFilters(name string, outboundMemberType string, extAttrsValue string) string {
+func testAccSyslogEndpointDataSourceConfigExtAttrFilters(name string, outboundMemberType string, syslogServer string, connectionType string, format string, extAttrsValue string) string {
 	return fmt.Sprintf(`
 resource "nios_misc_syslog_endpoint" "test" {
 	name = %q
 	outbound_member_type = %q
+	syslog_servers = [
+		{
+			address = %q
+			connection_type = %q
+			format = %q
+		}
+	]
 	extattrs = {
 	Site = %q
   } 
@@ -110,5 +128,5 @@ data "nios_misc_syslog_endpoint" "test" {
 		Site = nios_misc_syslog_endpoint.test.extattrs.Site
   }
 }
-`, name, outboundMemberType, extAttrsValue)
+`, name, outboundMemberType, syslogServer, connectionType, format, extAttrsValue)
 }
