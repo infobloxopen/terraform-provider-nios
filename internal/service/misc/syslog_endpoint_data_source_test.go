@@ -90,18 +90,18 @@ resource "nios_misc_syslog_endpoint" "test" {
 	name = %q
 	outbound_member_type = %q
 	syslog_servers = [
-        {
-            address = %q
+		{
+			address = %q
 			connection_type = %q
 			format = %q
-        }
-    ]
+		}
+	]
 }
 
 data "nios_misc_syslog_endpoint" "test" {
 	filters = {
 		name = nios_misc_syslog_endpoint.test.name
-  }
+	}
 }
 `, name, outboundMemberType, syslogServer, connectionType, format)
 }
@@ -119,14 +119,14 @@ resource "nios_misc_syslog_endpoint" "test" {
 		}
 	]
 	extattrs = {
-	Site = %q
-  } 
+		Site = %q
+	}
 }
 
 data "nios_misc_syslog_endpoint" "test" {
 	extattrfilters = {
 		Site = nios_misc_syslog_endpoint.test.extattrs.Site
-  }
+	}
 }
 `, name, outboundMemberType, syslogServer, connectionType, format, extAttrsValue)
 }
