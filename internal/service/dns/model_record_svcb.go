@@ -26,7 +26,7 @@ import (
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
-type RecordHttpsModel struct {
+type RecordSvcbModel struct {
 	Ref                types.String `tfsdk:"ref"`
 	Uuid               types.String `tfsdk:"uuid"`
 	AwsRte53RecordInfo types.Object `tfsdk:"aws_rte53_record_info"`
@@ -52,11 +52,11 @@ type RecordHttpsModel struct {
 	ExtAttrsAll        types.Map    `tfsdk:"extattrs_all"`
 }
 
-var RecordHttpsAttrTypes = map[string]attr.Type{
+var RecordSvcbAttrTypes = map[string]attr.Type{
 	"ref":                   types.StringType,
 	"uuid":                  types.StringType,
-	"aws_rte53_record_info": types.ObjectType{AttrTypes: RecordHttpsAwsRte53RecordInfoAttrTypes},
-	"cloud_info":            types.ObjectType{AttrTypes: RecordHttpsCloudInfoAttrTypes},
+	"aws_rte53_record_info": types.ObjectType{AttrTypes: RecordSvcbAwsRte53RecordInfoAttrTypes},
+	"cloud_info":            types.ObjectType{AttrTypes: RecordSvcbCloudInfoAttrTypes},
 	"comment":               types.StringType,
 	"creation_time":         types.Int64Type,
 	"creator":               types.StringType,
@@ -69,7 +69,7 @@ var RecordHttpsAttrTypes = map[string]attr.Type{
 	"name":                  types.StringType,
 	"priority":              types.Int64Type,
 	"reclaimable":           types.BoolType,
-	"svc_parameters":        types.ListType{ElemType: types.ObjectType{AttrTypes: RecordHttpsSvcParametersAttrTypes}},
+	"svc_parameters":        types.ListType{ElemType: types.ObjectType{AttrTypes: RecordSvcbSvcParametersAttrTypes}},
 	"target_name":           types.StringType,
 	"ttl":                   types.Int64Type,
 	"use_ttl":               types.BoolType,
@@ -78,7 +78,7 @@ var RecordHttpsAttrTypes = map[string]attr.Type{
 	"extattrs_all":          types.MapType{ElemType: types.StringType},
 }
 
-var RecordHttpsResourceSchemaAttributes = map[string]schema.Attribute{
+var RecordSvcbResourceSchemaAttributes = map[string]schema.Attribute{
 	"ref": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The reference to the object.",
@@ -88,11 +88,11 @@ var RecordHttpsResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "Universally Unique ID assigned for this object",
 	},
 	"aws_rte53_record_info": schema.SingleNestedAttribute{
-		Attributes: RecordHttpsAwsRte53RecordInfoResourceSchemaAttributes,
+		Attributes: RecordSvcbAwsRte53RecordInfoResourceSchemaAttributes,
 		Computed:   true,
 	},
 	"cloud_info": schema.SingleNestedAttribute{
-		Attributes: RecordHttpsCloudInfoResourceSchemaAttributes,
+		Attributes: RecordSvcbCloudInfoResourceSchemaAttributes,
 		Computed:   true,
 	},
 	"comment": schema.StringAttribute{
@@ -162,14 +162,14 @@ var RecordHttpsResourceSchemaAttributes = map[string]schema.Attribute{
 			customvalidator.ValidateTrimmedString(),
 			customvalidator.IsValidDomainName(),
 		},
-		MarkdownDescription: "The name for a HTTPS record in FQDN format. This value can be in unicode format. Regular expression search is not supported for unicode values.",
+		MarkdownDescription: "The name for a SVCB record in FQDN format. This value can be in unicode format. Regular expression search is not supported for unicode values.",
 	},
 	"priority": schema.Int64Attribute{
 		Required: true,
 		Validators: []validator.Int64{
 			int64validator.Between(0, 65535),
 		},
-		MarkdownDescription: "The priority of the HTTPS record. Valid values are from 0 to 65535 (inclusive), in 32-bit unsigned integer format.",
+		MarkdownDescription: "The priority of the SVCB record. Valid values are from 0 to 65535 (inclusive), in 32-bit unsigned integer format.",
 	},
 	"reclaimable": schema.BoolAttribute{
 		Computed:            true,
@@ -177,7 +177,7 @@ var RecordHttpsResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"svc_parameters": schema.ListNestedAttribute{
 		NestedObject: schema.NestedAttributeObject{
-			Attributes: RecordHttpsSvcParametersResourceSchemaAttributes,
+			Attributes: RecordSvcbSvcParametersResourceSchemaAttributes,
 		},
 		Validators: []validator.List{
 			listvalidator.SizeAtLeast(1),
@@ -233,24 +233,26 @@ var RecordHttpsResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 }
 
-func (m *RecordHttpsModel) Expand(ctx context.Context, diags *diag.Diagnostics, isCreate bool) *dns.RecordHttps {
+func (m *RecordSvcbModel) Expand(ctx context.Context, diags *diag.Diagnostics, isCreate bool) *dns.RecordSvcb {
 	if m == nil {
 		return nil
 	}
-	to := &dns.RecordHttps{
-		Comment:           flex.ExpandStringPointer(m.Comment),
-		Creator:           flex.ExpandStringPointer(m.Creator),
-		DdnsPrincipal:     flex.ExpandStringPointer(m.DdnsPrincipal),
-		DdnsProtected:     flex.ExpandBoolPointer(m.DdnsProtected),
-		Disable:           flex.ExpandBoolPointer(m.Disable),
-		ExtAttrs:          ExpandExtAttrs(ctx, m.ExtAttrs, diags),
-		ForbidReclamation: flex.ExpandBoolPointer(m.ForbidReclamation),
-		Name:              flex.ExpandStringPointer(m.Name),
-		Priority:          flex.ExpandInt64Pointer(m.Priority),
-		SvcParameters:     flex.ExpandFrameworkListNestedBlock(ctx, m.SvcParameters, diags, ExpandRecordHttpsSvcParameters),
-		TargetName:        flex.ExpandStringPointer(m.TargetName),
-		Ttl:               flex.ExpandInt64Pointer(m.Ttl),
-		UseTtl:            flex.ExpandBoolPointer(m.UseTtl),
+	to := &dns.RecordSvcb{
+		AwsRte53RecordInfo: ExpandRecordSvcbAwsRte53RecordInfo(ctx, m.AwsRte53RecordInfo, diags),
+		CloudInfo:          ExpandRecordSvcbCloudInfo(ctx, m.CloudInfo, diags),
+		Comment:            flex.ExpandStringPointer(m.Comment),
+		Creator:            flex.ExpandStringPointer(m.Creator),
+		DdnsPrincipal:      flex.ExpandStringPointer(m.DdnsPrincipal),
+		DdnsProtected:      flex.ExpandBoolPointer(m.DdnsProtected),
+		Disable:            flex.ExpandBoolPointer(m.Disable),
+		ExtAttrs:           ExpandExtAttrs(ctx, m.ExtAttrs, diags),
+		ForbidReclamation:  flex.ExpandBoolPointer(m.ForbidReclamation),
+		Name:               flex.ExpandStringPointer(m.Name),
+		Priority:           flex.ExpandInt64Pointer(m.Priority),
+		SvcParameters:      flex.ExpandFrameworkListNestedBlock(ctx, m.SvcParameters, diags, ExpandRecordSvcbSvcParameters),
+		TargetName:         flex.ExpandStringPointer(m.TargetName),
+		Ttl:                flex.ExpandInt64Pointer(m.Ttl),
+		UseTtl:             flex.ExpandBoolPointer(m.UseTtl),
 	}
 	if isCreate {
 		to.View = flex.ExpandStringPointer(m.View)
@@ -258,29 +260,29 @@ func (m *RecordHttpsModel) Expand(ctx context.Context, diags *diag.Diagnostics, 
 	return to
 }
 
-func FlattenRecordHttps(ctx context.Context, from *dns.RecordHttps, diags *diag.Diagnostics) types.Object {
+func FlattenRecordSvcb(ctx context.Context, from *dns.RecordSvcb, diags *diag.Diagnostics) types.Object {
 	if from == nil {
-		return types.ObjectNull(RecordHttpsAttrTypes)
+		return types.ObjectNull(RecordSvcbAttrTypes)
 	}
-	m := RecordHttpsModel{}
+	m := RecordSvcbModel{}
 	m.Flatten(ctx, from, diags)
 	m.ExtAttrsAll = types.MapNull(types.StringType)
-	t, d := types.ObjectValueFrom(ctx, RecordHttpsAttrTypes, m)
+	t, d := types.ObjectValueFrom(ctx, RecordSvcbAttrTypes, m)
 	diags.Append(d...)
 	return t
 }
 
-func (m *RecordHttpsModel) Flatten(ctx context.Context, from *dns.RecordHttps, diags *diag.Diagnostics) {
+func (m *RecordSvcbModel) Flatten(ctx context.Context, from *dns.RecordSvcb, diags *diag.Diagnostics) {
 	if from == nil {
 		return
 	}
 	if m == nil {
-		*m = RecordHttpsModel{}
+		*m = RecordSvcbModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
 	m.Uuid = flex.FlattenStringPointer(from.Uuid)
-	m.AwsRte53RecordInfo = FlattenRecordHttpsAwsRte53RecordInfo(ctx, from.AwsRte53RecordInfo, diags)
-	m.CloudInfo = FlattenRecordHttpsCloudInfo(ctx, from.CloudInfo, diags)
+	m.AwsRte53RecordInfo = FlattenRecordSvcbAwsRte53RecordInfo(ctx, from.AwsRte53RecordInfo, diags)
+	m.CloudInfo = FlattenRecordSvcbCloudInfo(ctx, from.CloudInfo, diags)
 	m.Comment = flex.FlattenStringPointer(from.Comment)
 	m.CreationTime = flex.FlattenInt64Pointer(from.CreationTime)
 	m.Creator = flex.FlattenStringPointer(from.Creator)
@@ -293,7 +295,7 @@ func (m *RecordHttpsModel) Flatten(ctx context.Context, from *dns.RecordHttps, d
 	m.Name = flex.FlattenStringPointer(from.Name)
 	m.Priority = flex.FlattenInt64Pointer(from.Priority)
 	m.Reclaimable = types.BoolPointerValue(from.Reclaimable)
-	m.SvcParameters = flex.FlattenFrameworkListNestedBlock(ctx, from.SvcParameters, RecordHttpsSvcParametersAttrTypes, diags, FlattenRecordHttpsSvcParameters)
+	m.SvcParameters = flex.FlattenFrameworkListNestedBlock(ctx, from.SvcParameters, RecordSvcbSvcParametersAttrTypes, diags, FlattenRecordSvcbSvcParameters)
 	m.TargetName = flex.FlattenStringPointer(from.TargetName)
 	m.Ttl = flex.FlattenInt64Pointer(from.Ttl)
 	m.UseTtl = types.BoolPointerValue(from.UseTtl)

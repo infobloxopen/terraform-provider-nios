@@ -1,27 +1,27 @@
 // Create an Auth Zone (Required as Parent)
 resource "nios_dns_zone_auth" "parent_auth_zone" {
-  fqdn        = "example.com"
+  fqdn        = "example1.com"
   zone_format = "FORWARD"
   view        = "default"
-  comment     = "Parent zone for HTTPS records"
+  comment     = "Parent zone for SVCB records"
 }
 
-// Create Record HTTPS with Basic Fields
-resource "nios_dns_record_https" "record_https_basic_fields" {
-  name        = "example-https-record.${nios_dns_zone_auth.parent_auth_zone.fqdn}"
+// Create Record SVCB with Basic Fields
+resource "nios_dns_record_svcb" "record_svcb_basic_fields" {
+  name        = "example-svcb-record.${nios_dns_zone_auth.parent_auth_zone.fqdn}"
   target_name = "example.target.${nios_dns_zone_auth.parent_auth_zone.fqdn}"
-  priority    = 101
+  priority    = 10
 }
 
-// Create Record HTTPS with Additional Fields
-resource "nios_dns_record_https" "record_https_additional_fields" {
-  name        = "example-https-record-1.${nios_dns_zone_auth.parent_auth_zone.fqdn}"
+// Create Record SVCB with Additional Fields
+resource "nios_dns_record_svcb" "record_svcb_additional_fields" {
+  name        = "example-svcb-record-1.${nios_dns_zone_auth.parent_auth_zone.fqdn}"
   target_name = "example_updated.target.${nios_dns_zone_auth.parent_auth_zone.fqdn}"
   priority    = 20
 
   // Additional Fields
   creator            = "DYNAMIC"
-  comment            = "Example HTTPS record"
+  comment            = "Example SVCB record"
   ddns_principal     = "example_principal"
   ddns_protected     = true
   disable            = false
@@ -46,21 +46,21 @@ resource "nios_dns_record_https" "record_https_additional_fields" {
       "mandatory" : true,
       "svc_key" : "port",
       "svc_value" : [
-        "112"
+        "110"
       ]
     },
     {
       "mandatory" : false,
       "svc_key" : "ipv4hint",
       "svc_value" : [
-        "11.11.1.0"
+        "11.11.1.1"
       ]
     },
     {
       "mandatory" : false,
       "svc_key" : "ipv6hint",
       "svc_value" : [
-        "124::99:0"
+        "123::99:0"
       ]
     }
   ]

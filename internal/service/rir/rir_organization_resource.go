@@ -251,10 +251,6 @@ func (r *RirOrganizationResource) ValidateConfig(ctx context.Context, req resour
 		return
 	}
 
-	if data.ExtAttrs.IsUnknown() || data.ExtAttrs.IsNull() {
-		resp.Diagnostics.AddError("Extensible Attributes Required to create RIR Organization", "Extensible attributes such as `RIPE Admin Contact`,`RIPE Country`,`RIPE Technical Contact`,`RIPE Email` are required to create a RIR organization.")
-	}
-
 	if !data.Rir.IsUnknown() && !data.Rir.IsNull() && data.Rir.ValueString() == "RIPE" {
 		var extattrsMap map[string]string
 		resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("extattrs"), &extattrsMap)...)

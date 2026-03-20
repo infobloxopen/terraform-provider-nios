@@ -16,13 +16,13 @@ import (
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
-var readableAttributesForRecordHttps = "aws_rte53_record_info,cloud_info,comment,creation_time,creator,ddns_principal,ddns_protected,disable,extattrs,forbid_reclamation,last_queried,name,priority,reclaimable,svc_parameters,target_name,ttl,use_ttl,view,zone"
+var readableAttributesForRecordSvcb = "aws_rte53_record_info,cloud_info,comment,creation_time,creator,ddns_principal,ddns_protected,disable,extattrs,forbid_reclamation,last_queried,name,priority,reclaimable,svc_parameters,target_name,ttl,use_ttl,view,zone"
 
-func TestAccRecordHttpsResource_basic(t *testing.T) {
-	var resourceName = "nios_dns_record_https.test"
-	var v dns.RecordHttps
+func TestAccRecordSvcbResource_basic(t *testing.T) {
+	var resourceName = "nios_dns_record_svcb.test"
+	var v dns.RecordSvcb
 	zoneFqdn := acctest.RandomNameWithPrefix("test-zone") + ".com"
-	name := acctest.RandomNameWithPrefix("record-https")
+	name := acctest.RandomNameWithPrefix("record_svcb")
 	priority := "10"
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -30,9 +30,9 @@ func TestAccRecordHttpsResource_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRecordHttpsBasicConfig(zoneFqdn, name, priority),
+				Config: testAccRecordSvcbBasicConfig(zoneFqdn, name, priority),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckRecordHttpsExists(context.Background(), resourceName, &v),
+					testAccCheckRecordSvcbExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "name", name+"."+zoneFqdn),
 					resource.TestCheckResourceAttr(resourceName, "priority", priority),
 					resource.TestCheckResourceAttr(resourceName, "target_name", zoneFqdn),
@@ -52,22 +52,22 @@ func TestAccRecordHttpsResource_basic(t *testing.T) {
 	})
 }
 
-func TestAccRecordHttpsResource_disappears(t *testing.T) {
-	resourceName := "nios_dns_record_https.test"
-	var v dns.RecordHttps
+func TestAccRecordSvcbResource_disappears(t *testing.T) {
+	resourceName := "nios_dns_record_svcb.test"
+	var v dns.RecordSvcb
 	zoneFqdn := acctest.RandomNameWithPrefix("test-zone") + ".com"
-	name := acctest.RandomNameWithPrefix("record-https")
+	name := acctest.RandomNameWithPrefix("record_svcb")
 	priority := "10"
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-		CheckDestroy:             testAccCheckRecordHttpsDestroy(context.Background(), &v),
+		CheckDestroy:             testAccCheckRecordSvcbDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccRecordHttpsBasicConfig(zoneFqdn, name, priority),
+				Config: testAccRecordSvcbBasicConfig(zoneFqdn, name, priority),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckRecordHttpsExists(context.Background(), resourceName, &v),
-					testAccCheckRecordHttpsDisappears(context.Background(), &v),
+					testAccCheckRecordSvcbExists(context.Background(), resourceName, &v),
+					testAccCheckRecordSvcbDisappears(context.Background(), &v),
 				),
 				ExpectNonEmptyPlan: true,
 			},
@@ -75,11 +75,11 @@ func TestAccRecordHttpsResource_disappears(t *testing.T) {
 	})
 }
 
-func TestAccRecordHttpsResource_Comment(t *testing.T) {
-	var resourceName = "nios_dns_record_https.test_comment"
-	var v dns.RecordHttps
+func TestAccRecordSvcbResource_Comment(t *testing.T) {
+	var resourceName = "nios_dns_record_svcb.test_comment"
+	var v dns.RecordSvcb
 	zoneFqdn := acctest.RandomNameWithPrefix("test-zone") + ".com"
-	name := acctest.RandomNameWithPrefix("record-https")
+	name := acctest.RandomNameWithPrefix("record_svcb")
 	priority := "10"
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -87,18 +87,18 @@ func TestAccRecordHttpsResource_Comment(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRecordHttpsComment(zoneFqdn, name, priority, "Example HTTPS Record"),
+				Config: testAccRecordSvcbComment(zoneFqdn, name, priority, "Example SVCB Record"),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckRecordHttpsExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "comment", "Example HTTPS Record"),
+					testAccCheckRecordSvcbExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "comment", "Example SVCB Record"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccRecordHttpsComment(zoneFqdn, name, priority, "Example HTTPS Record Updated"),
+				Config: testAccRecordSvcbComment(zoneFqdn, name, priority, "Example SVCB Record Updated"),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckRecordHttpsExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "comment", "Example HTTPS Record Updated"),
+					testAccCheckRecordSvcbExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "comment", "Example SVCB Record Updated"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -106,11 +106,11 @@ func TestAccRecordHttpsResource_Comment(t *testing.T) {
 	})
 }
 
-func TestAccRecordHttpsResource_Creator(t *testing.T) {
-	var resourceName = "nios_dns_record_https.test_creator"
-	var v dns.RecordHttps
+func TestAccRecordSvcbResource_Creator(t *testing.T) {
+	var resourceName = "nios_dns_record_svcb.test_creator"
+	var v dns.RecordSvcb
 	zoneFqdn := acctest.RandomNameWithPrefix("test-zone") + ".com"
-	name := acctest.RandomNameWithPrefix("record-https")
+	name := acctest.RandomNameWithPrefix("record_svcb")
 	priority := "10"
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -118,17 +118,17 @@ func TestAccRecordHttpsResource_Creator(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRecordHttpsCreator(zoneFqdn, name, priority, "STATIC"),
+				Config: testAccRecordSvcbCreator(zoneFqdn, name, priority, "STATIC"),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckRecordHttpsExists(context.Background(), resourceName, &v),
+					testAccCheckRecordSvcbExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "creator", "STATIC"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccRecordHttpsCreator(zoneFqdn, name, priority, "DYNAMIC"),
+				Config: testAccRecordSvcbCreator(zoneFqdn, name, priority, "DYNAMIC"),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckRecordHttpsExists(context.Background(), resourceName, &v),
+					testAccCheckRecordSvcbExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "creator", "DYNAMIC"),
 				),
 			},
@@ -137,31 +137,31 @@ func TestAccRecordHttpsResource_Creator(t *testing.T) {
 	})
 }
 
-func TestAccRecordHttpsResource_DdnsPrincipal(t *testing.T) {
-	var resourceName = "nios_dns_record_https.test_ddns_principal"
-	var v dns.RecordHttps
+func TestAccRecordSvcbResource_DdnsPrincipal(t *testing.T) {
+	var resourceName = "nios_dns_record_svcb.test_ddns_principal"
+	var v dns.RecordSvcb
 	zoneFqdn := acctest.RandomNameWithPrefix("test-zone") + ".com"
-	name := acctest.RandomNameWithPrefix("record-https")
+	name := acctest.RandomNameWithPrefix("record_svcb")
 	priority := "10"
-	ddnsPrincipal1 := acctest.RandomNameWithPrefix("test-ddns-principal")
-	ddnsPrincipal2 := acctest.RandomNameWithPrefix("test-ddns-principal")
+	ddnsPrincipal1 := acctest.RandomNameWithPrefix("ddns_principal")
+	ddnsPrincipal2 := acctest.RandomNameWithPrefix("ddns_principal")
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRecordHttpsDdnsPrincipal(zoneFqdn, name, priority, ddnsPrincipal1),
+				Config: testAccRecordSvcbDdnsPrincipal(zoneFqdn, name, priority, ddnsPrincipal1),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckRecordHttpsExists(context.Background(), resourceName, &v),
+					testAccCheckRecordSvcbExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "ddns_principal", ddnsPrincipal1),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccRecordHttpsDdnsPrincipal(zoneFqdn, name, priority, ddnsPrincipal2),
+				Config: testAccRecordSvcbDdnsPrincipal(zoneFqdn, name, priority, ddnsPrincipal2),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckRecordHttpsExists(context.Background(), resourceName, &v),
+					testAccCheckRecordSvcbExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "ddns_principal", ddnsPrincipal2),
 				),
 			},
@@ -170,11 +170,11 @@ func TestAccRecordHttpsResource_DdnsPrincipal(t *testing.T) {
 	})
 }
 
-func TestAccRecordHttpsResource_DdnsProtected(t *testing.T) {
-	var resourceName = "nios_dns_record_https.test_ddns_protected"
-	var v dns.RecordHttps
+func TestAccRecordSvcbResource_DdnsProtected(t *testing.T) {
+	var resourceName = "nios_dns_record_svcb.test_ddns_protected"
+	var v dns.RecordSvcb
 	zoneFqdn := acctest.RandomNameWithPrefix("test-zone") + ".com"
-	name := acctest.RandomNameWithPrefix("record-https")
+	name := acctest.RandomNameWithPrefix("record_svcb")
 	priority := "10"
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -182,17 +182,17 @@ func TestAccRecordHttpsResource_DdnsProtected(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRecordHttpsDdnsProtected(zoneFqdn, name, priority, "true"),
+				Config: testAccRecordSvcbDdnsProtected(zoneFqdn, name, priority, "true"),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckRecordHttpsExists(context.Background(), resourceName, &v),
+					testAccCheckRecordSvcbExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "ddns_protected", "true"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccRecordHttpsDdnsProtected(zoneFqdn, name, priority, "false"),
+				Config: testAccRecordSvcbDdnsProtected(zoneFqdn, name, priority, "false"),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckRecordHttpsExists(context.Background(), resourceName, &v),
+					testAccCheckRecordSvcbExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "ddns_protected", "false"),
 				),
 			},
@@ -201,11 +201,11 @@ func TestAccRecordHttpsResource_DdnsProtected(t *testing.T) {
 	})
 }
 
-func TestAccRecordHttpsResource_Disable(t *testing.T) {
-	var resourceName = "nios_dns_record_https.test_disable"
-	var v dns.RecordHttps
+func TestAccRecordSvcbResource_Disable(t *testing.T) {
+	var resourceName = "nios_dns_record_svcb.test_disable"
+	var v dns.RecordSvcb
 	zoneFqdn := acctest.RandomNameWithPrefix("test-zone") + ".com"
-	name := acctest.RandomNameWithPrefix("record-https")
+	name := acctest.RandomNameWithPrefix("record_svcb")
 	priority := "10"
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -213,17 +213,17 @@ func TestAccRecordHttpsResource_Disable(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRecordHttpsDisable(zoneFqdn, name, priority, "true"),
+				Config: testAccRecordSvcbDisable(zoneFqdn, name, priority, "true"),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckRecordHttpsExists(context.Background(), resourceName, &v),
+					testAccCheckRecordSvcbExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "disable", "true"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccRecordHttpsDisable(zoneFqdn, name, priority, "false"),
+				Config: testAccRecordSvcbDisable(zoneFqdn, name, priority, "false"),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckRecordHttpsExists(context.Background(), resourceName, &v),
+					testAccCheckRecordSvcbExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "disable", "false"),
 				),
 			},
@@ -232,36 +232,36 @@ func TestAccRecordHttpsResource_Disable(t *testing.T) {
 	})
 }
 
-func TestAccRecordHttpsResource_ExtAttrs(t *testing.T) {
-	var resourceName = "nios_dns_record_https.test_extattrs"
-	var v dns.RecordHttps
+func TestAccRecordSvcbResource_ExtAttrs(t *testing.T) {
+	var resourceName = "nios_dns_record_svcb.test_extattrs"
+	var v dns.RecordSvcb
 	zoneFqdn := acctest.RandomNameWithPrefix("test-zone") + ".com"
-	name := acctest.RandomNameWithPrefix("record-https")
+	name := acctest.RandomNameWithPrefix("record_svcb")
 	priority := "10"
-	extAttrs1 := acctest.RandomName()
-	extAttrs2 := acctest.RandomName()
+	extAttrValue1 := acctest.RandomName()
+	extAttrValue2 := acctest.RandomName()
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRecordHttpsExtAttrs(zoneFqdn, name, priority, map[string]any{
-					"Site": extAttrs1,
+				Config: testAccRecordSvcbExtAttrs(zoneFqdn, name, priority, map[string]any{
+					"Site": extAttrValue1,
 				}),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckRecordHttpsExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "extattrs.Site", extAttrs1),
+					testAccCheckRecordSvcbExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "extattrs.Site", extAttrValue1),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccRecordHttpsExtAttrs(zoneFqdn, name, priority, map[string]any{
-					"Site": extAttrs2,
+				Config: testAccRecordSvcbExtAttrs(zoneFqdn, name, priority, map[string]any{
+					"Site": extAttrValue2,
 				}),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckRecordHttpsExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "extattrs.Site", extAttrs2),
+					testAccCheckRecordSvcbExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "extattrs.Site", extAttrValue2),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -269,11 +269,11 @@ func TestAccRecordHttpsResource_ExtAttrs(t *testing.T) {
 	})
 }
 
-func TestAccRecordHttpsResource_ForbidReclamation(t *testing.T) {
-	var resourceName = "nios_dns_record_https.test_forbid_reclamation"
-	var v dns.RecordHttps
+func TestAccRecordSvcbResource_ForbidReclamation(t *testing.T) {
+	var resourceName = "nios_dns_record_svcb.test_forbid_reclamation"
+	var v dns.RecordSvcb
 	zoneFqdn := acctest.RandomNameWithPrefix("test-zone") + ".com"
-	name := acctest.RandomNameWithPrefix("record-https")
+	name := acctest.RandomNameWithPrefix("record_svcb")
 	priority := "10"
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -281,17 +281,17 @@ func TestAccRecordHttpsResource_ForbidReclamation(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRecordHttpsForbidReclamation(zoneFqdn, name, priority, "true"),
+				Config: testAccRecordSvcbForbidReclamation(zoneFqdn, name, priority, "true"),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckRecordHttpsExists(context.Background(), resourceName, &v),
+					testAccCheckRecordSvcbExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "forbid_reclamation", "true"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccRecordHttpsForbidReclamation(zoneFqdn, name, priority, "false"),
+				Config: testAccRecordSvcbForbidReclamation(zoneFqdn, name, priority, "false"),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckRecordHttpsExists(context.Background(), resourceName, &v),
+					testAccCheckRecordSvcbExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "forbid_reclamation", "false"),
 				),
 			},
@@ -300,12 +300,12 @@ func TestAccRecordHttpsResource_ForbidReclamation(t *testing.T) {
 	})
 }
 
-func TestAccRecordHttpsResource_Name(t *testing.T) {
-	var resourceName = "nios_dns_record_https.test_name"
-	var v dns.RecordHttps
+func TestAccRecordSvcbResource_Name(t *testing.T) {
+	var resourceName = "nios_dns_record_svcb.test_name"
+	var v dns.RecordSvcb
 	zoneFqdn := acctest.RandomNameWithPrefix("test-zone") + ".com"
-	name1 := acctest.RandomNameWithPrefix("record-https")
-	name2 := acctest.RandomNameWithPrefix("record-https")
+	name1 := acctest.RandomNameWithPrefix("record_svcb")
+	name2 := acctest.RandomNameWithPrefix("record_svcb")
 	priority := "10"
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -313,17 +313,17 @@ func TestAccRecordHttpsResource_Name(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRecordHttpsName(zoneFqdn, name1, priority),
+				Config: testAccRecordSvcbName(zoneFqdn, name1, priority),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckRecordHttpsExists(context.Background(), resourceName, &v),
+					testAccCheckRecordSvcbExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "name", name1+"."+zoneFqdn),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccRecordHttpsName(zoneFqdn, name2, priority),
+				Config: testAccRecordSvcbName(zoneFqdn, name2, priority),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckRecordHttpsExists(context.Background(), resourceName, &v),
+					testAccCheckRecordSvcbExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "name", name2+"."+zoneFqdn),
 				),
 			},
@@ -332,11 +332,11 @@ func TestAccRecordHttpsResource_Name(t *testing.T) {
 	})
 }
 
-func TestAccRecordHttpsResource_Priority(t *testing.T) {
-	var resourceName = "nios_dns_record_https.test_priority"
-	var v dns.RecordHttps
+func TestAccRecordSvcbResource_Priority(t *testing.T) {
+	var resourceName = "nios_dns_record_svcb.test_priority"
+	var v dns.RecordSvcb
 	zoneFqdn := acctest.RandomNameWithPrefix("test-zone") + ".com"
-	name := acctest.RandomNameWithPrefix("record-https")
+	name := acctest.RandomNameWithPrefix("record_svcb")
 	priority1 := "10"
 	priority2 := "20"
 	resource.ParallelTest(t, resource.TestCase{
@@ -345,17 +345,17 @@ func TestAccRecordHttpsResource_Priority(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRecordHttpsPriority(zoneFqdn, name, priority1),
+				Config: testAccRecordSvcbPriority(zoneFqdn, name, priority1),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckRecordHttpsExists(context.Background(), resourceName, &v),
+					testAccCheckRecordSvcbExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "priority", priority1),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccRecordHttpsPriority(zoneFqdn, name, priority2),
+				Config: testAccRecordSvcbPriority(zoneFqdn, name, priority2),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckRecordHttpsExists(context.Background(), resourceName, &v),
+					testAccCheckRecordSvcbExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "priority", priority2),
 				),
 			},
@@ -364,11 +364,11 @@ func TestAccRecordHttpsResource_Priority(t *testing.T) {
 	})
 }
 
-func TestAccRecordHttpsResource_SvcParameters(t *testing.T) {
-	var resourceName = "nios_dns_record_https.test_svc_parameters"
-	var v dns.RecordHttps
+func TestAccRecordSvcbResource_SvcParameters(t *testing.T) {
+	var resourceName = "nios_dns_record_svcb.test_svc_parameters"
+	var v dns.RecordSvcb
 	zoneFqdn := acctest.RandomNameWithPrefix("test-zone") + ".com"
-	name := acctest.RandomNameWithPrefix("record-https")
+	name := acctest.RandomNameWithPrefix("record_svcb")
 	priority := "10"
 	svcParameters1 := []map[string]any{
 		{
@@ -405,9 +405,9 @@ func TestAccRecordHttpsResource_SvcParameters(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRecordHttpsSvcParameters(zoneFqdn, name, priority, svcParameters1),
+				Config: testAccRecordSvcbSvcParameters(zoneFqdn, name, priority, svcParameters1),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckRecordHttpsExists(context.Background(), resourceName, &v),
+					testAccCheckRecordSvcbExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "svc_parameters.#", "3"),
 					resource.TestCheckResourceAttr(resourceName, "svc_parameters.0.mandatory", "true"),
 					resource.TestCheckResourceAttr(resourceName, "svc_parameters.0.svc_key", "port"),
@@ -421,9 +421,9 @@ func TestAccRecordHttpsResource_SvcParameters(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRecordHttpsSvcParameters(zoneFqdn, name, priority, svcParameters2),
+				Config: testAccRecordSvcbSvcParameters(zoneFqdn, name, priority, svcParameters2),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckRecordHttpsExists(context.Background(), resourceName, &v),
+					testAccCheckRecordSvcbExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "svc_parameters.#", "2"),
 					resource.TestCheckResourceAttr(resourceName, "svc_parameters.0.mandatory", "true"),
 					resource.TestCheckResourceAttr(resourceName, "svc_parameters.0.svc_key", "port"),
@@ -437,11 +437,11 @@ func TestAccRecordHttpsResource_SvcParameters(t *testing.T) {
 	})
 }
 
-func TestAccRecordHttpsResource_TargetName(t *testing.T) {
-	var resourceName = "nios_dns_record_https.test_target_name"
-	var v dns.RecordHttps
+func TestAccRecordSvcbResource_TargetName(t *testing.T) {
+	var resourceName = "nios_dns_record_svcb.test_target_name"
+	var v dns.RecordSvcb
 	zoneFqdn := acctest.RandomNameWithPrefix("test-zone") + ".com"
-	name := acctest.RandomNameWithPrefix("record-https")
+	name := acctest.RandomNameWithPrefix("record_svcb")
 	priority := "10"
 	targetName1 := "example." + zoneFqdn
 	targetName2 := "example1." + zoneFqdn
@@ -451,17 +451,17 @@ func TestAccRecordHttpsResource_TargetName(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRecordHttpsTargetName(zoneFqdn, name, priority, targetName1),
+				Config: testAccRecordSvcbTargetName(zoneFqdn, name, priority, targetName1),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckRecordHttpsExists(context.Background(), resourceName, &v),
+					testAccCheckRecordSvcbExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "target_name", targetName1),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccRecordHttpsTargetName(zoneFqdn, name, priority, targetName2),
+				Config: testAccRecordSvcbTargetName(zoneFqdn, name, priority, targetName2),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckRecordHttpsExists(context.Background(), resourceName, &v),
+					testAccCheckRecordSvcbExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "target_name", targetName2),
 				),
 			},
@@ -470,11 +470,11 @@ func TestAccRecordHttpsResource_TargetName(t *testing.T) {
 	})
 }
 
-func TestAccRecordHttpsResource_Ttl(t *testing.T) {
-	var resourceName = "nios_dns_record_https.test_ttl"
-	var v dns.RecordHttps
+func TestAccRecordSvcbResource_Ttl(t *testing.T) {
+	var resourceName = "nios_dns_record_svcb.test_ttl"
+	var v dns.RecordSvcb
 	zoneFqdn := acctest.RandomNameWithPrefix("test-zone") + ".com"
-	name := acctest.RandomNameWithPrefix("record-https")
+	name := acctest.RandomNameWithPrefix("record_svcb")
 	priority := "10"
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -482,18 +482,18 @@ func TestAccRecordHttpsResource_Ttl(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRecordHttpsTtl(zoneFqdn, name, priority, "200", "true"),
+				Config: testAccRecordSvcbTtl(zoneFqdn, name, priority, "10", "true"),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckRecordHttpsExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ttl", "200"),
+					testAccCheckRecordSvcbExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "ttl", "10"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccRecordHttpsTtl(zoneFqdn, name, priority, "300", "true"),
+				Config: testAccRecordSvcbTtl(zoneFqdn, name, priority, "20", "true"),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckRecordHttpsExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ttl", "300"),
+					testAccCheckRecordSvcbExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "ttl", "20"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -501,11 +501,11 @@ func TestAccRecordHttpsResource_Ttl(t *testing.T) {
 	})
 }
 
-func TestAccRecordHttpsResource_UseTtl(t *testing.T) {
-	var resourceName = "nios_dns_record_https.test_use_ttl"
-	var v dns.RecordHttps
+func TestAccRecordSvcbResource_UseTtl(t *testing.T) {
+	var resourceName = "nios_dns_record_svcb.test_use_ttl"
+	var v dns.RecordSvcb
 	zoneFqdn := acctest.RandomNameWithPrefix("test-zone") + ".com"
-	name := acctest.RandomNameWithPrefix("record-https")
+	name := acctest.RandomNameWithPrefix("record_svcb")
 	priority := "10"
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -513,17 +513,17 @@ func TestAccRecordHttpsResource_UseTtl(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRecordHttpsUseTtl(zoneFqdn, name, priority, "100", "true"),
+				Config: testAccRecordSvcbUseTtl(zoneFqdn, name, priority, "30", "true"),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckRecordHttpsExists(context.Background(), resourceName, &v),
+					testAccCheckRecordSvcbExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_ttl", "true"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccRecordHttpsUseTtl(zoneFqdn, name, priority, "100", "false"),
+				Config: testAccRecordSvcbUseTtl(zoneFqdn, name, priority, "30", "false"),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckRecordHttpsExists(context.Background(), resourceName, &v),
+					testAccCheckRecordSvcbExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_ttl", "false"),
 				),
 			},
@@ -532,7 +532,7 @@ func TestAccRecordHttpsResource_UseTtl(t *testing.T) {
 	})
 }
 
-func testAccCheckRecordHttpsExists(ctx context.Context, resourceName string, v *dns.RecordHttps) resource.TestCheckFunc {
+func testAccCheckRecordSvcbExists(ctx context.Context, resourceName string, v *dns.RecordSvcb) resource.TestCheckFunc {
 	// Verify the resource exists in the cloud
 	return func(state *terraform.State) error {
 		rs, ok := state.RootModule().Resources[resourceName]
@@ -540,30 +540,30 @@ func testAccCheckRecordHttpsExists(ctx context.Context, resourceName string, v *
 			return fmt.Errorf("not found: %s", resourceName)
 		}
 		apiRes, _, err := acctest.NIOSClient.DNSAPI.
-			RecordHttpsAPI.
+			RecordSvcbAPI.
 			Read(ctx, utils.ExtractResourceRef(rs.Primary.Attributes["ref"])).
-			ReturnFieldsPlus(readableAttributesForRecordHttps).
+			ReturnFieldsPlus(readableAttributesForRecordSvcb).
 			ReturnAsObject(1).
 			Execute()
 		if err != nil {
 			return err
 		}
-		if !apiRes.GetRecordHttpsResponseObjectAsResult.HasResult() {
+		if !apiRes.GetRecordSvcbResponseObjectAsResult.HasResult() {
 			return fmt.Errorf("expected result to be returned: %s", resourceName)
 		}
-		*v = apiRes.GetRecordHttpsResponseObjectAsResult.GetResult()
+		*v = apiRes.GetRecordSvcbResponseObjectAsResult.GetResult()
 		return nil
 	}
 }
 
-func testAccCheckRecordHttpsDestroy(ctx context.Context, v *dns.RecordHttps) resource.TestCheckFunc {
+func testAccCheckRecordSvcbDestroy(ctx context.Context, v *dns.RecordSvcb) resource.TestCheckFunc {
 	// Verify the resource was destroyed
 	return func(state *terraform.State) error {
 		_, httpRes, err := acctest.NIOSClient.DNSAPI.
-			RecordHttpsAPI.
+			RecordSvcbAPI.
 			Read(ctx, utils.ExtractResourceRef(*v.Ref)).
 			ReturnAsObject(1).
-			ReturnFieldsPlus(readableAttributesForRecordHttps).
+			ReturnFieldsPlus(readableAttributesForRecordSvcb).
 			Execute()
 		if err != nil {
 			if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
@@ -576,11 +576,11 @@ func testAccCheckRecordHttpsDestroy(ctx context.Context, v *dns.RecordHttps) res
 	}
 }
 
-func testAccCheckRecordHttpsDisappears(ctx context.Context, v *dns.RecordHttps) resource.TestCheckFunc {
+func testAccCheckRecordSvcbDisappears(ctx context.Context, v *dns.RecordSvcb) resource.TestCheckFunc {
 	// Delete the resource externally to verify disappears test
 	return func(state *terraform.State) error {
 		_, err := acctest.NIOSClient.DNSAPI.
-			RecordHttpsAPI.
+			RecordSvcbAPI.
 			Delete(ctx, utils.ExtractResourceRef(*v.Ref)).
 			Execute()
 		if err != nil {
@@ -590,9 +590,9 @@ func testAccCheckRecordHttpsDisappears(ctx context.Context, v *dns.RecordHttps) 
 	}
 }
 
-func testAccRecordHttpsBasicConfig(zoneFqdn, name, priority string) string {
+func testAccRecordSvcbBasicConfig(zoneFqdn, name, priority string) string {
 	config := fmt.Sprintf(`
-resource "nios_dns_record_https" "test" {
+resource "nios_dns_record_svcb" "test" {
 	name = "%s.%s"
 	priority = %q
 	target_name = nios_dns_zone_auth.test.fqdn
@@ -601,9 +601,9 @@ resource "nios_dns_record_https" "test" {
 	return strings.Join([]string{testAccBaseWithZone(zoneFqdn), config}, "")
 }
 
-func testAccRecordHttpsComment(zoneFqdn, name, priority, comment string) string {
+func testAccRecordSvcbComment(zoneFqdn, name, priority, comment string) string {
 	config := fmt.Sprintf(`
-resource "nios_dns_record_https" "test_comment" {
+resource "nios_dns_record_svcb" "test_comment" {
 	name = "%s.%s"
 	priority = %q
 	target_name = nios_dns_zone_auth.test.fqdn
@@ -613,9 +613,9 @@ resource "nios_dns_record_https" "test_comment" {
 	return strings.Join([]string{testAccBaseWithZone(zoneFqdn), config}, "")
 }
 
-func testAccRecordHttpsCreator(zoneFqdn, name, priority, creator string) string {
+func testAccRecordSvcbCreator(zoneFqdn, name, priority, creator string) string {
 	config := fmt.Sprintf(`
-resource "nios_dns_record_https" "test_creator" {
+resource "nios_dns_record_svcb" "test_creator" {
 	name = "%s.%s"
 	priority = %q
 	target_name = nios_dns_zone_auth.test.fqdn
@@ -625,9 +625,9 @@ resource "nios_dns_record_https" "test_creator" {
 	return strings.Join([]string{testAccBaseWithZone(zoneFqdn), config}, "")
 }
 
-func testAccRecordHttpsDdnsPrincipal(zoneFqdn, name, priority, ddnsPrincipal string) string {
+func testAccRecordSvcbDdnsPrincipal(zoneFqdn, name, priority, ddnsPrincipal string) string {
 	config := fmt.Sprintf(`
-resource "nios_dns_record_https" "test_ddns_principal" {
+resource "nios_dns_record_svcb" "test_ddns_principal" {
 	name = "%s.%s"
 	priority = %q
 	target_name = nios_dns_zone_auth.test.fqdn
@@ -637,9 +637,9 @@ resource "nios_dns_record_https" "test_ddns_principal" {
 	return strings.Join([]string{testAccBaseWithZone(zoneFqdn), config}, "")
 }
 
-func testAccRecordHttpsDdnsProtected(zoneFqdn, name, priority, ddnsProtected string) string {
+func testAccRecordSvcbDdnsProtected(zoneFqdn, name, priority, ddnsProtected string) string {
 	config := fmt.Sprintf(`
-resource "nios_dns_record_https" "test_ddns_protected" {
+resource "nios_dns_record_svcb" "test_ddns_protected" {
 	name = "%s.%s"
 	priority = %q
 	target_name = nios_dns_zone_auth.test.fqdn
@@ -649,9 +649,9 @@ resource "nios_dns_record_https" "test_ddns_protected" {
 	return strings.Join([]string{testAccBaseWithZone(zoneFqdn), config}, "")
 }
 
-func testAccRecordHttpsDisable(zoneFqdn, name, priority, disable string) string {
+func testAccRecordSvcbDisable(zoneFqdn, name, priority, disable string) string {
 	config := fmt.Sprintf(`
-resource "nios_dns_record_https" "test_disable" {
+resource "nios_dns_record_svcb" "test_disable" {
 	name = "%s.%s"
 	priority = %q
 	target_name = nios_dns_zone_auth.test.fqdn
@@ -661,10 +661,10 @@ resource "nios_dns_record_https" "test_disable" {
 	return strings.Join([]string{testAccBaseWithZone(zoneFqdn), config}, "")
 }
 
-func testAccRecordHttpsExtAttrs(zoneFqdn, name, priority string, extAttrs map[string]any) string {
+func testAccRecordSvcbExtAttrs(zoneFqdn, name, priority string, extAttrs map[string]any) string {
 	extAttrsStr := utils.ConvertMapToHCL(extAttrs)
 	config := fmt.Sprintf(`
-resource "nios_dns_record_https" "test_extattrs" {
+resource "nios_dns_record_svcb" "test_extattrs" {
 	name = "%s.%s"
 	priority = %q
 	target_name = nios_dns_zone_auth.test.fqdn
@@ -674,9 +674,9 @@ resource "nios_dns_record_https" "test_extattrs" {
 	return strings.Join([]string{testAccBaseWithZone(zoneFqdn), config}, "")
 }
 
-func testAccRecordHttpsForbidReclamation(zoneFqdn, name, priority, forbidReclamation string) string {
+func testAccRecordSvcbForbidReclamation(zoneFqdn, name, priority, forbidReclamation string) string {
 	config := fmt.Sprintf(`
-resource "nios_dns_record_https" "test_forbid_reclamation" {
+resource "nios_dns_record_svcb" "test_forbid_reclamation" {
 	name = "%s.%s"
 	priority = %q
 	target_name = nios_dns_zone_auth.test.fqdn
@@ -686,9 +686,9 @@ resource "nios_dns_record_https" "test_forbid_reclamation" {
 	return strings.Join([]string{testAccBaseWithZone(zoneFqdn), config}, "")
 }
 
-func testAccRecordHttpsName(zoneFqdn, name, priority string) string {
+func testAccRecordSvcbName(zoneFqdn, name, priority string) string {
 	config := fmt.Sprintf(`
-resource "nios_dns_record_https" "test_name" {
+resource "nios_dns_record_svcb" "test_name" {
 	name = "%s.%s"
 	priority = %q
 	target_name = nios_dns_zone_auth.test.fqdn
@@ -697,9 +697,9 @@ resource "nios_dns_record_https" "test_name" {
 	return strings.Join([]string{testAccBaseWithZone(zoneFqdn), config}, "")
 }
 
-func testAccRecordHttpsPriority(zoneFqdn, name, priority string) string {
+func testAccRecordSvcbPriority(zoneFqdn, name, priority string) string {
 	config := fmt.Sprintf(`
-resource "nios_dns_record_https" "test_priority" {
+resource "nios_dns_record_svcb" "test_priority" {
 	name = "%s.%s"
 	priority = %q
 	target_name = nios_dns_zone_auth.test.fqdn
@@ -708,10 +708,10 @@ resource "nios_dns_record_https" "test_priority" {
 	return strings.Join([]string{testAccBaseWithZone(zoneFqdn), config}, "")
 }
 
-func testAccRecordHttpsSvcParameters(zoneFqdn, name, priority string, svcParameters []map[string]any) string {
+func testAccRecordSvcbSvcParameters(zoneFqdn, name, priority string, svcParameters []map[string]any) string {
 	svcParamsStr := utils.ConvertSliceOfMapsToHCL(svcParameters)
 	config := fmt.Sprintf(`
-resource "nios_dns_record_https" "test_svc_parameters" {
+resource "nios_dns_record_svcb" "test_svc_parameters" {
 	name = "%s.%s"
 	priority = %q
 	target_name = nios_dns_zone_auth.test.fqdn
@@ -721,9 +721,9 @@ resource "nios_dns_record_https" "test_svc_parameters" {
 	return strings.Join([]string{testAccBaseWithZone(zoneFqdn), config}, "")
 }
 
-func testAccRecordHttpsTargetName(zoneFqdn, name, priority, targetName string) string {
+func testAccRecordSvcbTargetName(zoneFqdn, name, priority, targetName string) string {
 	config := fmt.Sprintf(`
-resource "nios_dns_record_https" "test_target_name" {
+resource "nios_dns_record_svcb" "test_target_name" {
 	name = "%s.%s"
 	priority = %q
 	target_name = %q
@@ -733,9 +733,9 @@ resource "nios_dns_record_https" "test_target_name" {
 	return strings.Join([]string{testAccBaseWithZone(zoneFqdn), config}, "")
 }
 
-func testAccRecordHttpsTtl(zoneFqdn, name, priority, ttl, useTtl string) string {
+func testAccRecordSvcbTtl(zoneFqdn, name, priority, ttl, useTtl string) string {
 	config := fmt.Sprintf(`
-resource "nios_dns_record_https" "test_ttl" {
+resource "nios_dns_record_svcb" "test_ttl" {
 	name = "%s.%s"
 	priority = %q
 	target_name = nios_dns_zone_auth.test.fqdn
@@ -746,9 +746,9 @@ resource "nios_dns_record_https" "test_ttl" {
 	return strings.Join([]string{testAccBaseWithZone(zoneFqdn), config}, "")
 }
 
-func testAccRecordHttpsUseTtl(zoneFqdn, name, priority, ttl, useTtl string) string {
+func testAccRecordSvcbUseTtl(zoneFqdn, name, priority, ttl, useTtl string) string {
 	config := fmt.Sprintf(`
-resource "nios_dns_record_https" "test_use_ttl" {
+resource "nios_dns_record_svcb" "test_use_ttl" {
 	name = "%s.%s"
 	priority = %q
 	target_name = nios_dns_zone_auth.test.fqdn
