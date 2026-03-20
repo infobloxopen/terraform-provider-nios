@@ -49,6 +49,7 @@ data "nios_rir_organization" "get_all_rir_organizations" {}
 
 Required:
 
+- `extattrs` (Map of String) Extensible attributes associated with the object.
 - `id` (String) The RIR organization identifier. Valid Examples for ID are ORG-CA1-RIPE or ORG-CB2-TEST
 - `maintainer` (String) The RIR organization maintainer.
 - `name` (String) The RIR organization name.
@@ -57,7 +58,6 @@ Required:
 
 Optional:
 
-- `extattrs` (Map of String) Extensible attributes associated with the object.
 - `rir` (String) The RIR associated with RIR organization.
 
 Read-Only:

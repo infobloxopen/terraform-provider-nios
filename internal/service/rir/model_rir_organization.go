@@ -9,7 +9,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -55,12 +54,9 @@ var RirOrganizationResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "Universally Unique ID assigned for this object.",
 	},
 	"extattrs": schema.MapAttribute{
-		Optional:    true,
-		Computed:    true,
+		Required:    true,
 		ElementType: types.StringType,
-		Default:     mapdefault.StaticValue(types.MapNull(types.StringType)),
 		Validators: []validator.Map{
-			mapvalidator.SizeAtLeast(1),
 			customvalidator.MapContainsKey("RIPE Admin Contact"),
 			customvalidator.MapContainsKey("RIPE Country"),
 			customvalidator.MapContainsKey("RIPE Technical Contact"),
@@ -88,6 +84,8 @@ var RirOrganizationResourceSchemaAttributes = map[string]schema.Attribute{
 		Required: true,
 		Validators: []validator.String{
 			customvalidator.ValidateTrimmedString(),
+			stringvalidator.LengthBetween(0, 256),
+			stringvalidator.RegexMatches(regexp.MustCompile(`^[A-Za-z0-9_-]+$`), "- Invalid Organization Name. A valid organization name can only contain letters, numbers, underscores, or hyphens."),
 		},
 		MarkdownDescription: "The RIR organization name.",
 	},
