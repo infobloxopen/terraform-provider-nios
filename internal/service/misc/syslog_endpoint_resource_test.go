@@ -15,13 +15,15 @@ import (
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
-/*	GMs to be present -
-		infoblox.grid_master_candidate1
-		infoblox.grid_master_candidate2
-	Template to be added to Grid - Version5_Syslog_Session_Template and Version5_Syslog_Session_Template1
-	Special chars and whitespaces are not accepted in Name
-	Address should be in valid IPv4 address.
-*/
+// NOTE:
+// - The following Grid Masters (GMs) must be present:
+// - infoblox.grid_master_candidate1
+// - infoblox.grid_master_candidate2
+// - The following templates must be added to the Grid:
+// - Version5_Syslog_Session_Template
+// - Version5_Syslog_Session_Template1
+// - Special characters and whitespaces are not accepted in the "name" field.
+// - The "address" field must be a valid IPv4 address.
 
 var readableAttributesForSyslogEndpoint = "extattrs,log_level,name,outbound_member_type,outbound_members,syslog_servers,template_instance,timeout,vendor_identifier,wapi_user_name"
 
