@@ -225,6 +225,7 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 		security.NewSamlAuthserviceResource,
 		security.NewLdapAuthServiceResource,
 		security.NewTacacsplusAuthserviceResource,
+		security.NewRadiusAuthserviceResource,
 
 		misc.NewRulesetResource,
 		misc.NewBfdtemplateResource,
@@ -379,6 +380,7 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 		security.NewSamlAuthserviceDataSource,
 		security.NewLdapAuthServiceDataSource,
 		security.NewTacacsplusAuthserviceDataSource,
+		security.NewRadiusAuthserviceDataSource,
 
 		misc.NewRulesetDataSource,
 		misc.NewBfdtemplateDataSource,
