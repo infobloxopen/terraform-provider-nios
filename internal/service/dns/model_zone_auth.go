@@ -990,6 +990,10 @@ var ZoneAuthResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed: true,
 		Validators: []validator.Int64{
 			int64validator.AlsoRequires(path.MatchRoot("set_soa_serial_number")),
+			int64validator.AtLeastOneOf(
+				path.MatchRoot("grid_primary"),
+				path.MatchRoot("ns_group"),
+			),
 		},
 		MarkdownDescription: "The serial number in the SOA record incrementally changes every time the record is modified. The Infoblox appliance allows you to change the serial number (in the SOA record) for the primary server so it is higher than the secondary server, thereby ensuring zone transfers come from the primary server (as they should). To change the serial number you need to set a new value at \"soa_serial_number\" and pass \"set_soa_serial_number\" as True.",
 	},
@@ -1130,6 +1134,12 @@ var ZoneAuthResourceSchemaAttributes = map[string]schema.Attribute{
 	"use_soa_email": schema.BoolAttribute{
 		Optional:            true,
 		Computed:            true,
+		Validators: []validator.Bool{
+			boolvalidator.AtLeastOneOf(
+				path.MatchRoot("grid_primary"),
+				path.MatchRoot("ns_group"),
+			),
+		},
 		MarkdownDescription: "Use flag for: soa_email",
 	},
 	"using_srg_associations": schema.BoolAttribute{
