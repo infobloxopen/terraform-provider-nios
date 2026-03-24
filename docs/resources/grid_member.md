@@ -68,6 +68,7 @@ resource "nios_grid_member" "test_enable_ha" {
 - `bgp_as` (Attributes List) The BGP configuration for anycast for a Grid member. (see [below for nested schema](#nestedatt--bgp_as))
 - `comment` (String) A descriptive comment of the Grid member.
 - `config_addr_type` (String) Address configuration type.
+- `configure_csp_member_setting` (Boolean) Used to manage CSP Member Setting. Set to true to manage CSP Member Setting. This is required as changes to CSP Member Setting will trigger a test connection.
 - `csp_access_key` (List of String) CSP portal on-prem host access key
 - `csp_member_setting` (Attributes) csp setting at member level. Test Setting will be performed for any change under CSP_member_setting. (see [below for nested schema](#nestedatt--csp_member_setting))
 - `dns_resolver_setting` (Attributes) DNS resolver setting for member. (see [below for nested schema](#nestedatt--dns_resolver_setting))

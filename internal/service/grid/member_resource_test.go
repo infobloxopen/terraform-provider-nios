@@ -5423,42 +5423,6 @@ resource "nios_grid_member" "test_master_candidate" {
 `, hostName, configAddrType, platform, serviceTypeConfig, vipAddress, vipGateway, vipSubnetMask, masterCandidate, ipv6SettingStr)
 }
 
-func testAccMemberMemberServiceCommunication(
-	hostName, configAddrType, platform, serviceTypeConfig,
-	vipAddress, vipGateway, vipSubnetMask string,
-	memberServiceCommunication []map[string]any,
-) string {
-	memberServiceCommunicationStr := utils.ConvertSliceOfMapsToHCL(memberServiceCommunication)
-
-	return fmt.Sprintf(`
-resource "nios_grid_member" "test_member_service_communication" {
-    host_name = %q
-    config_addr_type = %q
-    platform = %q
-    service_type_configuration = %q
-
-    ipv6_setting = {
-        auto_router_config_enabled = false
-        dscp = 0
-        enabled = false
-        primary = true
-        use_dscp = false
-    }
-
-    vip_setting = {
-        address = %q
-        dscp = 0
-        gateway = %q
-        primary = true
-        subnet_mask = %q
-        use_dscp = false
-    }
-
-    member_service_communication = %s
-}
-`, hostName, configAddrType, platform, serviceTypeConfig, vipAddress, vipGateway, vipSubnetMask, memberServiceCommunicationStr)
-}
-
 func testAccMemberMgmtPortSetting(hostName string, mgmtPortSetting map[string]any, vipAddress, vipGateway, vipSubnetMask string) string {
 	mgmtPortSettingStr := utils.ConvertMapToHCL(mgmtPortSetting)
 	return fmt.Sprintf(`

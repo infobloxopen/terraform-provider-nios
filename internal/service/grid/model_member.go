@@ -40,6 +40,7 @@ type MemberModel struct {
 	ConfigAddrType                  types.String `tfsdk:"config_addr_type"`
 	CspAccessKey                    types.List   `tfsdk:"csp_access_key"`
 	CspMemberSetting                types.Object `tfsdk:"csp_member_setting"`
+	ConfigureCspMemberSetting       types.Bool   `tfsdk:"configure_csp_member_setting"`
 	DnsResolverSetting              types.Object `tfsdk:"dns_resolver_setting"`
 	Dscp                            types.Int64  `tfsdk:"dscp"`
 	EmailSetting                    types.Object `tfsdk:"email_setting"`
@@ -128,6 +129,7 @@ var MemberAttrTypes = map[string]attr.Type{
 	"config_addr_type":                    types.StringType,
 	"csp_access_key":                      types.ListType{ElemType: types.StringType},
 	"csp_member_setting":                  types.ObjectType{AttrTypes: MemberCspMemberSettingAttrTypes},
+	"configure_csp_member_setting":        types.BoolType,
 	"dns_resolver_setting":                types.ObjectType{AttrTypes: MemberDnsResolverSettingAttrTypes},
 	"dscp":                                types.Int64Type,
 	"email_setting":                       types.ObjectType{AttrTypes: MemberEmailSettingAttrTypes},
@@ -284,6 +286,12 @@ var MemberResourceSchemaAttributes = map[string]schema.Attribute{
 			objectvalidator.AlsoRequires(path.MatchRoot("use_dns_resolver_setting")),
 		},
 		MarkdownDescription: "DNS resolver setting for member.",
+	},
+	"configure_csp_member_setting": schema.BoolAttribute{
+		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
+		MarkdownDescription: "Used to manage CSP Member Setting. Set to true to manage CSP Member Setting. This is required as changes to CSP Member Setting will trigger a test connection.",
 	},
 	"dscp": schema.Int64Attribute{
 		Optional: true,
@@ -857,42 +865,40 @@ func (m *MemberModel) Expand(ctx context.Context, diags *diag.Diagnostics, isCre
 		return nil
 	}
 	to := &grid.Member{
-		AdditionalIpList:               flex.ExpandFrameworkListNestedBlock(ctx, m.AdditionalIpList, diags, ExpandMemberAdditionalIpList),
-		AutomatedTrafficCaptureSetting: ExpandMemberAutomatedTrafficCaptureSetting(ctx, m.AutomatedTrafficCaptureSetting, diags),
-		BgpAs:                          flex.ExpandFrameworkListNestedBlock(ctx, m.BgpAs, diags, ExpandMemberBgpAs),
-		Comment:                        flex.ExpandStringPointer(m.Comment),
-		ConfigAddrType:                 flex.ExpandStringPointer(m.ConfigAddrType),
-		CspAccessKey:                   flex.ExpandFrameworkListStringEmptyAsNil(ctx, m.CspAccessKey, diags),
-		CspMemberSetting:               ExpandMemberCspMemberSetting(ctx, m.CspMemberSetting, diags),
-		DnsResolverSetting:             ExpandMemberDnsResolverSetting(ctx, m.DnsResolverSetting, diags),
-		Dscp:                           flex.ExpandInt64Pointer(m.Dscp),
-		EmailSetting:                   ExpandMemberEmailSetting(ctx, m.EmailSetting, diags),
-		EnableHa:                       flex.ExpandBoolPointer(m.EnableHa),
-		EnableLom:                      flex.ExpandBoolPointer(m.EnableLom),
-		EnableMemberRedirect:           flex.ExpandBoolPointer(m.EnableMemberRedirect),
-		EnableRoApiAccess:              flex.ExpandBoolPointer(m.EnableRoApiAccess),
-		ExtAttrs:                       ExpandExtAttrs(ctx, m.ExtAttrs, diags),
-		ExternalSyslogBackupServers:    flex.ExpandFrameworkListNestedBlock(ctx, m.ExternalSyslogBackupServers, diags, ExpandMemberExternalSyslogBackupServers),
-		ExternalSyslogServerEnable:     flex.ExpandBoolPointer(m.ExternalSyslogServerEnable),
-		HaCloudPlatform:                ExpandHACloudPlatform(m.HaCloudPlatform),
-		HaOnCloud:                      flex.ExpandBoolPointer(m.HaOnCloud),
-		HostName:                       flex.ExpandStringPointer(m.HostName),
-		Ipv6Setting:                    ExpandMemberIpv6Setting(ctx, m.Ipv6Setting, diags),
-		Ipv6StaticRoutes:               flex.ExpandFrameworkListNestedBlock(ctx, m.Ipv6StaticRoutes, diags, ExpandMemberIpv6StaticRoutes),
-		Lan2Enabled:                    flex.ExpandBoolPointer(m.Lan2Enabled),
-		Lan2PortSetting:                ExpandMemberLan2PortSetting(ctx, m.Lan2PortSetting, diags),
-		LomNetworkConfig:               flex.ExpandFrameworkListNestedBlock(ctx, m.LomNetworkConfig, diags, ExpandMemberLomNetworkConfig),
-		LomUsers:                       flex.ExpandFrameworkListNestedBlock(ctx, m.LomUsers, diags, ExpandMemberLomUsers),
-		MasterCandidate:                flex.ExpandBoolPointer(m.MasterCandidate),
-		MemberServiceCommunication:     flex.ExpandFrameworkListNestedBlockEmptyAsNil(ctx, m.MemberServiceCommunication, diags, ExpandMemberMemberServiceCommunication),
-		MgmtPortSetting:                ExpandMemberMgmtPortSetting(ctx, m.MgmtPortSetting, diags),
-		NatSetting:                     ExpandMemberNatSetting(ctx, m.NatSetting, diags),
-		NodeInfo:                       flex.ExpandFrameworkListNestedBlock(ctx, m.NodeInfo, diags, ExpandMemberNodeInfo),
-		NtpSetting:                     ExpandMemberNtpSetting(ctx, m.NtpSetting, diags),
-		OspfList:                       flex.ExpandFrameworkListNestedBlock(ctx, m.OspfList, diags, ExpandMemberOspfList),
-		PassiveHaArpEnabled:            flex.ExpandBoolPointer(m.PassiveHaArpEnabled),
-		Platform:                       flex.ExpandStringPointer(m.Platform),
-		//PreProvisioning:                 ExpandMemberPreProvisioning(ctx, m.PreProvisioning, diags),
+		AdditionalIpList:                flex.ExpandFrameworkListNestedBlock(ctx, m.AdditionalIpList, diags, ExpandMemberAdditionalIpList),
+		AutomatedTrafficCaptureSetting:  ExpandMemberAutomatedTrafficCaptureSetting(ctx, m.AutomatedTrafficCaptureSetting, diags),
+		BgpAs:                           flex.ExpandFrameworkListNestedBlock(ctx, m.BgpAs, diags, ExpandMemberBgpAs),
+		Comment:                         flex.ExpandStringPointer(m.Comment),
+		ConfigAddrType:                  flex.ExpandStringPointer(m.ConfigAddrType),
+		CspAccessKey:                    flex.ExpandFrameworkListStringEmptyAsNil(ctx, m.CspAccessKey, diags),
+		DnsResolverSetting:              ExpandMemberDnsResolverSetting(ctx, m.DnsResolverSetting, diags),
+		Dscp:                            flex.ExpandInt64Pointer(m.Dscp),
+		EmailSetting:                    ExpandMemberEmailSetting(ctx, m.EmailSetting, diags),
+		EnableHa:                        flex.ExpandBoolPointer(m.EnableHa),
+		EnableLom:                       flex.ExpandBoolPointer(m.EnableLom),
+		EnableMemberRedirect:            flex.ExpandBoolPointer(m.EnableMemberRedirect),
+		EnableRoApiAccess:               flex.ExpandBoolPointer(m.EnableRoApiAccess),
+		ExtAttrs:                        ExpandExtAttrs(ctx, m.ExtAttrs, diags),
+		ExternalSyslogBackupServers:     flex.ExpandFrameworkListNestedBlock(ctx, m.ExternalSyslogBackupServers, diags, ExpandMemberExternalSyslogBackupServers),
+		ExternalSyslogServerEnable:      flex.ExpandBoolPointer(m.ExternalSyslogServerEnable),
+		HaCloudPlatform:                 ExpandHACloudPlatform(m.HaCloudPlatform),
+		HaOnCloud:                       flex.ExpandBoolPointer(m.HaOnCloud),
+		HostName:                        flex.ExpandStringPointer(m.HostName),
+		Ipv6Setting:                     ExpandMemberIpv6Setting(ctx, m.Ipv6Setting, diags),
+		Ipv6StaticRoutes:                flex.ExpandFrameworkListNestedBlock(ctx, m.Ipv6StaticRoutes, diags, ExpandMemberIpv6StaticRoutes),
+		Lan2Enabled:                     flex.ExpandBoolPointer(m.Lan2Enabled),
+		Lan2PortSetting:                 ExpandMemberLan2PortSetting(ctx, m.Lan2PortSetting, diags),
+		LomNetworkConfig:                flex.ExpandFrameworkListNestedBlock(ctx, m.LomNetworkConfig, diags, ExpandMemberLomNetworkConfig),
+		LomUsers:                        flex.ExpandFrameworkListNestedBlock(ctx, m.LomUsers, diags, ExpandMemberLomUsers),
+		MasterCandidate:                 flex.ExpandBoolPointer(m.MasterCandidate),
+		MemberServiceCommunication:      flex.ExpandFrameworkListNestedBlockEmptyAsNil(ctx, m.MemberServiceCommunication, diags, ExpandMemberMemberServiceCommunication),
+		MgmtPortSetting:                 ExpandMemberMgmtPortSetting(ctx, m.MgmtPortSetting, diags),
+		NatSetting:                      ExpandMemberNatSetting(ctx, m.NatSetting, diags),
+		NodeInfo:                        flex.ExpandFrameworkListNestedBlock(ctx, m.NodeInfo, diags, ExpandMemberNodeInfo),
+		NtpSetting:                      ExpandMemberNtpSetting(ctx, m.NtpSetting, diags),
+		OspfList:                        flex.ExpandFrameworkListNestedBlock(ctx, m.OspfList, diags, ExpandMemberOspfList),
+		PassiveHaArpEnabled:             flex.ExpandBoolPointer(m.PassiveHaArpEnabled),
+		Platform:                        flex.ExpandStringPointer(m.Platform),
 		PreserveIfOwnsDelegation:        flex.ExpandBoolPointer(m.PreserveIfOwnsDelegation),
 		RemoteConsoleAccessEnable:       flex.ExpandBoolPointer(m.RemoteConsoleAccessEnable),
 		RouterId:                        flex.ExpandInt64Pointer(m.RouterId),
@@ -938,6 +944,10 @@ func (m *MemberModel) Expand(ctx context.Context, diags *diag.Diagnostics, isCre
 
 	if !isCreate {
 		to.PreProvisioning = ExpandMemberPreProvisioning(ctx, m.PreProvisioning, diags)
+	}
+
+	if m.ConfigureCspMemberSetting.ValueBool() {
+		to.CspMemberSetting = ExpandMemberCspMemberSetting(ctx, m.CspMemberSetting, diags)
 	}
 
 	return to
@@ -1002,7 +1012,7 @@ func (m *MemberModel) Flatten(ctx context.Context, from *grid.Member, diags *dia
 		}
 	}
 	m.ExternalSyslogServerEnable = types.BoolPointerValue(from.ExternalSyslogServerEnable)
-	m.HaCloudPlatform = flex.FlattenStringPointer(from.HaCloudPlatform)
+	m.HaCloudPlatform = FlattenHACloudPlatform(from.HaCloudPlatform)
 	m.HaOnCloud = types.BoolPointerValue(from.HaOnCloud)
 	m.HostName = flex.FlattenStringPointer(from.HostName)
 	m.Ipv6Setting = FlattenMemberIpv6Setting(ctx, from.Ipv6Setting, diags)
@@ -1102,4 +1112,14 @@ func ExpandHACloudPlatform(v types.String) *string {
 		return nil
 	}
 	return v.ValueStringPointer()
+}
+
+func FlattenHACloudPlatform(s *string) types.String {
+	if s == nil {
+		return types.StringValue("")
+	}
+	if *s == "None" {
+		return types.StringNull()
+	}
+	return types.StringValue(*s)
 }
