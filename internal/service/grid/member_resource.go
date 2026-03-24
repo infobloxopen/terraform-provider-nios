@@ -398,7 +398,7 @@ func (r *MemberResource) ValidateConfig(ctx context.Context, req resource.Valida
 	}
 
 	if !data.HaOnCloud.IsNull() && !data.HaOnCloud.IsUnknown() {
-		if data.EnableHa.IsNull() || data.EnableHa.IsUnknown() || data.EnableHa.ValueBool() == false {
+		if data.EnableHa.IsNull() || data.EnableHa.IsUnknown() || !data.EnableHa.ValueBool() {
 			resp.Diagnostics.AddError("Validation Error", "enable_ha must be true when ha_on_cloud is provided")
 		}
 	}
@@ -477,22 +477,22 @@ func (r *MemberResource) ValidateConfig(ctx context.Context, req resource.Valida
 	}
 
 	if !data.SyslogProxySetting.IsNull() && !data.SyslogProxySetting.IsUnknown() {
-		if data.ExternalSyslogServerEnable.IsNull() || data.ExternalSyslogServerEnable.IsUnknown() || data.ExternalSyslogServerEnable.ValueBool() == false {
+		if data.ExternalSyslogServerEnable.IsNull() || data.ExternalSyslogServerEnable.IsUnknown() || !data.ExternalSyslogServerEnable.ValueBool() {
 			resp.Diagnostics.AddError("Validation Error", "external_syslog_server_enable must be true when syslog_proxy_setting is provided")
 		}
 	}
 
 	if !data.Lan2PortSetting.IsNull() && !data.Lan2PortSetting.IsUnknown() {
-		if data.Lan2Enabled.IsNull() || data.Lan2Enabled.IsUnknown() || data.Lan2Enabled.ValueBool() == false {
+		if data.Lan2Enabled.IsNull() || data.Lan2Enabled.IsUnknown() || !data.Lan2Enabled.ValueBool() {
 			resp.Diagnostics.AddError("Validation Error", "lan2_enabled must be true when lan2_port_setting is provided")
 		}
 	} else {
-		if !data.Lan2Enabled.IsNull() && !data.Lan2Enabled.IsUnknown() && data.Lan2Enabled.ValueBool() == true {
+		if !data.Lan2Enabled.IsNull() && !data.Lan2Enabled.IsUnknown() && data.Lan2Enabled.ValueBool() {
 			resp.Diagnostics.AddError("Validation Error", "lan2_port_setting must be provided when lan2_enabled is true")
 		}
 	}
 
-	if !data.HaOnCloud.IsUnknown() && !data.HaOnCloud.IsNull() && data.HaOnCloud.ValueBool() == true {
+	if !data.HaOnCloud.IsUnknown() && !data.HaOnCloud.IsNull() && data.HaOnCloud.ValueBool() {
 		if data.Platform.IsNull() || data.Platform.IsUnknown() || data.Platform.ValueString() != "VNIOS" {
 			resp.Diagnostics.AddError("Validation Error", "platform must be set to 'vNIOS' when ha_on_cloud is true")
 		}
@@ -553,7 +553,7 @@ func (r *MemberResource) ValidateConfig(ctx context.Context, req resource.Valida
 	}
 
 	if !data.EnableHa.IsNull() && !data.EnableHa.IsUnknown() {
-		if data.EnableHa.ValueBool() == true {
+		if data.EnableHa.ValueBool() {
 			if data.RouterId.IsNull() || data.RouterId.IsUnknown() {
 				resp.Diagnostics.AddError("Validation Error", "router_id must be provided when enable_ha is true")
 			}

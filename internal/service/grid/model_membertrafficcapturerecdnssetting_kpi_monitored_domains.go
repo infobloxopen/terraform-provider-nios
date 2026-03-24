@@ -33,7 +33,7 @@ var MembertrafficcapturerecdnssettingKpiMonitoredDomainsResourceSchemaAttributes
 		Computed: true,
 		Optional: true,
 		Validators: []validator.String{
-			customvalidator.IsValidFQDN(),
+			customvalidator.IsValidDomainName(),
 		},
 		MarkdownDescription: "Domain name (FQDN to Query).",
 	},

@@ -5193,16 +5193,6 @@ resource "nios_grid_member" "test_external_syslog_backup_servers" {
 `, hostName, configAddrType, platform, serviceTypeConfig, vipAddress, vipGateway, vipSubnetMask, externalSyslogBackupServersStr)
 }
 
-func testAccMemberExternalSyslogServerEnable(hostName string, externalSyslogServerEnable string) string {
-	return fmt.Sprintf(`
-resource "nios_grid_member" "test_external_syslog_server_enable" {
-    host_name = %q
-    external_syslog_server_enable = %q
-    use_syslog_proxy_setting = true
-}
-`, hostName, externalSyslogServerEnable)
-}
-
 func testAccMemberHaCloudPlatform(hostName string, haCloudPlatform string, vipAddress, vipGateway, vipSubnetMask string) string {
 	return fmt.Sprintf(`
 resource "nios_grid_member" "test_ha_cloud_platform" {
@@ -6406,10 +6396,7 @@ func testAccMemberTrafficCaptureRecDnsSetting(
 	trafficCaptureRecDnsSetting map[string]any,
 ) string {
 	trafficCaptureRecDnsSettingStr := utils.ConvertMapToHCL(trafficCaptureRecDnsSetting)
-	enabledv6 := true
-	if configAddrType == "IPV4" {
-		enabledv6 = false
-	}
+	enabledv6 := configAddrType != "IPV4"
 	ipv6SettingStr := ""
 	if configAddrType != "IPV4" {
 		ipv6SettingStr = fmt.Sprintf("enabled = %t\n\t\tvirtual_ip = %q\n\t\tgateway = \"2001::1\"\n\t\tcidr_prefix = 8", enabledv6, ipv6SettingIP)
