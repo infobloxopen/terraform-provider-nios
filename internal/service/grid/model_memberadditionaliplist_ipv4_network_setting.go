@@ -66,8 +66,7 @@ var MemberadditionaliplistIpv4NetworkSettingResourceSchemaAttributes = map[strin
 		MarkdownDescription: "The identifier for the VLAN. Valid values are from 1 to 4096.",
 	},
 	"primary": schema.BoolAttribute{
-		Computed: true,
-		//Default:             booldefault.StaticBool(true),
+		Computed:            true,
 		MarkdownDescription: "Determines if the current address is the primary VLAN address or not.",
 	},
 	"dscp": schema.Int64Attribute{

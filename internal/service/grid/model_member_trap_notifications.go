@@ -32,7 +32,7 @@ var MemberTrapNotificationsAttrTypes = map[string]attr.Type{
 var MemberTrapNotificationsResourceSchemaAttributes = map[string]schema.Attribute{
 	"trap_type": schema.StringAttribute{
 		Optional: true,
-		Computed: true, //https://infoblox.atlassian.net/browse/NIOS-109172
+		Computed: true,
 		Validators: []validator.String{
 			stringvalidator.OneOf("AnalyticsRPZ", "AutomatedTrafficCapture", "BFD", "BGP", "Backup", "CPU", "CaptivePortal", "CiscoISEServer", "Clear", "CloudAPI", "CloudDNSsync", "Cluster", "Controld", "DHCP", "DNS", "DNSAttack", "DNSIntegrityCheck", "DNSIntegrityCheckConnection", "Database", "DisconnectedGrid", "Discovery", "DiscoveryConflict", "DiscoveryUnmanaged", "Disk", "DuplicateIP", "ENAT", "FDUsage", "FTP", "Fan", "HA", "HAOnCloud", "HSM", "HTTP", "IFMAP", "IMC", "IMCGRPCServer", "IPAMUtilization", "IPMIDevice", "LCD", "LDAPServers", "License", "Login", "MGM", "MSServer", "Memory", "NTP", "Network", "OCSPResponders", "OSPF", "OSPF6", "Outbound", "PowerSupply", "RAID", "RIRSWIP", "RPZHitRate", "RecursiveClients", "Reporting", "RootFS", "SNMP", "SSH", "SerialConsole", "SwapUsage", "Syslog", "System", "TFTP", "Taxii", "ThreatInsight", "ThreatProtection", "TmpFS"),
 		},

@@ -26,10 +26,9 @@ var MemberntpsettingntpaclAcListAttrTypes = map[string]attr.Type{
 
 var MemberntpsettingntpaclAcListResourceSchemaAttributes = map[string]schema.Attribute{
 	"address_ac": schema.SingleNestedAttribute{
-		Attributes: MemberntpsettingntpaclaclistAddressAcResourceSchemaAttributes,
-		Optional:   true,
-		// TODO: Generator could not find a description for this field.
-		MarkdownDescription: "",
+		Attributes:          MemberntpsettingntpaclaclistAddressAcResourceSchemaAttributes,
+		Optional:            true,
+		MarkdownDescription: "The client address/network with access control.",
 	},
 	"service": schema.StringAttribute{
 		Computed:            true,

@@ -515,38 +515,6 @@ func ConvertMapToHCL(data map[string]any) string {
 	return fmt.Sprintf("{\n%s\n}", strings.Join(keyValues, "\n"))
 }
 
-// renderHCLValue converts a Go value into its Terraform HCL literal representation.
-// It supports nested maps/lists and preserves list types (for example []string, []any)
-// so values are not incorrectly serialized as quoted strings.
-// func renderHCLValue(value any) string {
-// 	switch v := value.(type) {
-// 	case []map[string]any:
-// 		return ConvertSliceOfMapsToHCL(v)
-// 	case map[string]any:
-// 		return ConvertMapToHCL(v)
-// 	case []string:
-// 		return ConvertStringSliceToHCL(v)
-// 	case []any:
-// 		items := make([]string, 0, len(v))
-// 		for _, e := range v {
-// 			items = append(items, renderHCLValue(e))
-// 		}
-// 		return fmt.Sprintf("[%s]", strings.Join(items, ", "))
-// 	case string:
-// 		return fmt.Sprintf("%q", v)
-// 	case bool:
-// 		return fmt.Sprintf("%t", v)
-// 	case int, int8, int16, int32, int64:
-// 		return fmt.Sprintf("%d", v)
-// 	case uint, uint8, uint16, uint32, uint64:
-// 		return fmt.Sprintf("%d", v)
-// 	case float32, float64:
-// 		return fmt.Sprintf("%v", v)
-// 	default:
-// 		return fmt.Sprintf("%q", fmt.Sprintf("%v", v))
-// 	}
-// }
-
 // ToUnixWithTimezone converts a naive datetime string (without offset) into a Unix timestamp
 func ToUnixWithTimezone(datetimeStr string) (int64, error) {
 	tUTC, err := time.ParseInLocation(NaiveDatetimeLayout, datetimeStr, time.UTC)

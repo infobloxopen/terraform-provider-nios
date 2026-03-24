@@ -58,12 +58,8 @@ var MembersnmpsettingSnmpv3QueriesUsersResourceSchemaAttributes = map[string]sch
 		MarkdownDescription: "Determines if SNMPv3 user is disabled or not.",
 	},
 	"extattrs": schema.MapAttribute{
-		ElementType: types.StringType,
-		Computed:    true,
-		//Default:     mapdefault.StaticValue(types.MapNull(types.StringType)),
-		// Validators: []validator.Map{
-		// 	mapvalidator.SizeAtLeast(1),
-		// },
+		ElementType:         types.StringType,
+		Computed:            true,
 		MarkdownDescription: "Extensible attributes associated with the object. For valid values for extensible attributes, see {extattrs:values}.",
 	},
 	"name": schema.StringAttribute{

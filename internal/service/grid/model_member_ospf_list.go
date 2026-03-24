@@ -97,11 +97,9 @@ var MemberOspfListResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "Determines if auto calculate cost is enabled or not.",
 	},
 	"comment": schema.StringAttribute{
-		Computed: true,
-		Optional: true,
-		Default:  stringdefault.StaticString(""),
-		// TODO: Default exists , but generator cannot determine the value.
-		// Default: "",
+		Computed:            true,
+		Optional:            true,
+		Default:             stringdefault.StaticString(""),
 		MarkdownDescription: "A descriptive comment of the OSPF configuration.",
 	},
 	"cost": schema.Int64Attribute{

@@ -35,6 +35,7 @@ var MemberSyslogProxySettingAttrTypes = map[string]attr.Type{
 	"client_acls": types.ListType{ElemType: types.ObjectType{AttrTypes: MembersyslogproxysettingClientAclsAttrTypes}},
 }
 
+// Defaults removed due to incorrect default values
 var MemberSyslogProxySettingResourceSchemaAttributes = map[string]schema.Attribute{
 	"enable": schema.BoolAttribute{
 		Optional:            true,
@@ -43,21 +44,18 @@ var MemberSyslogProxySettingResourceSchemaAttributes = map[string]schema.Attribu
 		MarkdownDescription: "If set to True, the member receives syslog messages from specified devices, such as syslog servers and routers, and then forwards these messages to an external syslog server.",
 	},
 	"tcp_enable": schema.BoolAttribute{
-		Optional: true,
-		Computed: true,
-		//Default:             booldefault.StaticBool(false), wapi bug - https://infoblox.atlassian.net/browse/NIOS-109166
+		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "If set to True, the appliance can receive messages from other devices via TCP.",
 	},
 	"tcp_port": schema.Int64Attribute{
-		Optional: true,
-		Computed: true,
-		//Default:             int64default.StaticInt64(514),
+		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The TCP port the appliance must listen on.",
 	},
 	"udp_enable": schema.BoolAttribute{
-		Optional: true,
-		Computed: true,
-		//Default:             booldefault.StaticBool(false), wapi bug - https://infoblox.atlassian.net/browse/NIOS-109166
+		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "If set to True, the appliance can receive messages from other devices via UDP.",
 	},
 	"udp_port": schema.Int64Attribute{

@@ -297,7 +297,6 @@ func TestAccMemberResource_AutomatedTrafficCaptureSetting(t *testing.T) {
 	})
 }
 
-// work
 func TestAccMemberResource_BgpAs(t *testing.T) {
 	var resourceName = "nios_grid_member.test_bgp_as"
 	var v grid.Member
@@ -400,7 +399,6 @@ func TestAccMemberResource_BgpAs(t *testing.T) {
 	})
 }
 
-// work
 func TestAccMemberResource_Comment(t *testing.T) {
 	var resourceName = "nios_grid_member.test_comment"
 	var v grid.Member
@@ -495,12 +493,14 @@ func TestAccMemberResource_ConfigAddrType(t *testing.T) {
 	})
 }
 
-func TestAccMemberResource_CspAccessKey(t *testing.T) { //107
+func TestAccMemberResource_CspAccessKey(t *testing.T) {
 	var resourceName = "nios_grid_member.test_csp_access_key"
 	var v grid.Member
 	t.Skip("Insertion and update not allowed for csp access key")
-	cspAccessKeyVal := []string{"CSP_ACCESS_KEY_REPLACE_ME1", "CSP_ACCESS_KEY_REPLACE_ME2"}
-	cspAccessKeyValUpdated := []string{"CSP_ACCESS_KEY_REPLACE_ME1", "CSP_ACCESS_KEY_REPLACE_ME2"}
+	vipAddress := "172.28.83.107"
+	hostName := fmt.Sprintf("infoblox-%s.localdomain", acctest.RandomName())
+	cspAccessKeyVal := []string{"CSP_ACCESS_KEY_REPLACE_ME1"}
+	cspAccessKeyValUpdated := []string{"CSP_ACCESS_KEY_REPLACE_ME1"}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -508,7 +508,14 @@ func TestAccMemberResource_CspAccessKey(t *testing.T) { //107
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccMemberCspAccessKey("HOST_NAME_REPLACE_ME", cspAccessKeyVal),
+				Config: testAccMemberCspAccessKey(hostName,
+					"IPV4",
+					"VNIOS",
+					"ALL_V4",
+					vipAddress,
+					"172.28.82.1",
+					"255.255.254.0",
+					cspAccessKeyVal),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "csp_access_key", "CSP_ACCESS_KEY_REPLACE_ME"),
@@ -516,7 +523,14 @@ func TestAccMemberResource_CspAccessKey(t *testing.T) { //107
 			},
 			// Update and Read
 			{
-				Config: testAccMemberCspAccessKey("HOST_NAME_REPLACE_ME", cspAccessKeyValUpdated),
+				Config: testAccMemberCspAccessKey(hostName,
+					"IPV4",
+					"VNIOS",
+					"ALL_V4",
+					vipAddress,
+					"172.28.82.1",
+					"255.255.254.0",
+					cspAccessKeyValUpdated),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "csp_access_key", "CSP_ACCESS_KEY_UPDATE_REPLACE_ME"),
@@ -528,7 +542,7 @@ func TestAccMemberResource_CspAccessKey(t *testing.T) { //107
 }
 
 func TestAccMemberResource_CspMemberSetting(t *testing.T) {
-	t.Skip("CSP member setting cannot be updated due to member being offline, needs to be tested with online member")
+	t.Skip("CSP member setting cannot be updated due to member being offline")
 	var resourceName = "nios_grid_member.test_csp_member_setting"
 	var v grid.Member
 
@@ -536,7 +550,7 @@ func TestAccMemberResource_CspMemberSetting(t *testing.T) {
 	vipAddress := "172.28.83.108"
 
 	cspMemberSettingVal := map[string]any{
-		"csp_dns_resolver":     "52.119.40.101",
+		"csp_dns_resolver":     "2.2.2.2",
 		"use_csp_dns_resolver": false,
 		"use_csp_https_proxy":  false,
 		"use_csp_join_token":   false,
@@ -565,11 +579,10 @@ func TestAccMemberResource_CspMemberSetting(t *testing.T) {
 				),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "host_name", hostName),
-					resource.TestCheckResourceAttr(resourceName, "config_addr_type", "IPV4"),
-					resource.TestCheckResourceAttr(resourceName, "platform", "VNIOS"),
-					resource.TestCheckResourceAttr(resourceName, "service_type_configuration", "ALL_V4"),
-					// resource.TestCheckResourceAttr(resourceName, "csp_member_setting.csp_dns_resolver", "8.8.8.8"),
+					resource.TestCheckResourceAttr(resourceName, "csp_member_setting.csp_dns_resolver", "2.2.2.2"),
+					resource.TestCheckResourceAttr(resourceName, "csp_member_setting.use_csp_dns_resolver", "false"),
+					resource.TestCheckResourceAttr(resourceName, "csp_member_setting.use_csp_https_proxy", "false"),
+					resource.TestCheckResourceAttr(resourceName, "csp_member_setting.use_csp_join_token", "false"),
 				),
 			},
 			{
@@ -585,7 +598,10 @@ func TestAccMemberResource_CspMemberSetting(t *testing.T) {
 				),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
-					//resource.TestCheckResourceAttr(resourceName, "csp_member_setting.csp_dns_resolver", "1.1.1.1"),
+					resource.TestCheckResourceAttr(resourceName, "csp_member_setting.csp_dns_resolver", "1.1.1.1"),
+					resource.TestCheckResourceAttr(resourceName, "csp_member_setting.use_csp_dns_resolver", "true"),
+					resource.TestCheckResourceAttr(resourceName, "csp_member_setting.use_csp_https_proxy", "true"),
+					resource.TestCheckResourceAttr(resourceName, "csp_member_setting.use_csp_join_token", "true"),
 				),
 			},
 		},
@@ -626,9 +642,6 @@ func TestAccMemberResource_DnsResolverSetting(t *testing.T) {
 				),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "host_name", hostName),
-					resource.TestCheckResourceAttr(resourceName, "config_addr_type", "IPV4"),
-					resource.TestCheckResourceAttr(resourceName, "platform", "VNIOS"),
 					resource.TestCheckResourceAttr(resourceName, "service_type_configuration", "ALL_V4"),
 					resource.TestCheckResourceAttr(resourceName, "dns_resolver_setting.resolvers.0", "10.0.0.1"),
 					resource.TestCheckResourceAttr(resourceName, "dns_resolver_setting.search_domains.0", "a.com"),
@@ -651,6 +664,7 @@ func TestAccMemberResource_DnsResolverSetting(t *testing.T) {
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "dns_resolver_setting.resolvers.0", "10.0.0.2"),
 					resource.TestCheckResourceAttr(resourceName, "dns_resolver_setting.search_domains.0", "b.com"),
+					resource.TestCheckResourceAttr(resourceName, "use_dns_resolver_setting", "true"),
 				),
 			},
 		},
@@ -1200,7 +1214,6 @@ func TestAccMemberResource_HaOnCloud(t *testing.T) {
 	})
 }
 
-// work
 func TestAccMemberResource_HostName(t *testing.T) {
 	var resourceName = "nios_grid_member.test_host_name"
 	var v grid.Member
@@ -1672,7 +1685,9 @@ func TestAccMemberResource_MgmtPortSetting(t *testing.T) {
 					"255.255.254.0"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
-					//resource.TestCheckResourceAttr(resourceName, "mgmt_port_setting", "MGMT_PORT_SETTING_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "mgmt_port_setting.enabled", "true"),
+					resource.TestCheckResourceAttr(resourceName, "mgmt_port_setting.vpn_enabled", "true"),
+					resource.TestCheckResourceAttr(resourceName, "mgmt_port_setting.security_access_enabled", "true"),
 				),
 			},
 			// Update and Read
@@ -1684,14 +1699,16 @@ func TestAccMemberResource_MgmtPortSetting(t *testing.T) {
 					"255.255.254.0"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
-					//resource.TestCheckResourceAttr(resourceName, "mgmt_port_setting", "MGMT_PORT_SETTING_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "mgmt_port_setting.enabled", "true"),
+					resource.TestCheckResourceAttr(resourceName, "mgmt_port_setting.vpn_enabled", "false"),
+					resource.TestCheckResourceAttr(resourceName, "mgmt_port_setting.security_access_enabled", "false"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
 		},
 	})
 }
-func TestAccMemberResource_NatSetting(t *testing.T) { // work
+func TestAccMemberResource_NatSetting(t *testing.T) {
 	var resourceName = "nios_grid_member.test_nat_setting"
 	var v grid.Member
 
@@ -1832,8 +1849,8 @@ func TestAccMemberResource_NodeInfo(t *testing.T) {
 	nodeInfoMGMTIPv4 := []map[string]any{
 		{
 			"mgmt_network_setting": map[string]any{
-				"address":     "1.1.1.2",
-				"gateway":     "1.1.1.1",
+				"address":     "172.28.82.254",
+				"gateway":     "172.28.82.1",
 				"subnet_mask": "255.255.255.0",
 			},
 			"mgmt_physical_setting": mgmgtPhysicalSetting,
@@ -1885,8 +1902,8 @@ func TestAccMemberResource_NodeInfo(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "node_info.#", "1"),
-					resource.TestCheckResourceAttr(resourceName, "node_info.0.mgmt_network_setting.address", "1.1.1.2"),
-					resource.TestCheckResourceAttr(resourceName, "node_info.0.mgmt_network_setting.gateway", "1.1.1.1"),
+					resource.TestCheckResourceAttr(resourceName, "node_info.0.mgmt_network_setting.address", "172.28.82.254"),
+					resource.TestCheckResourceAttr(resourceName, "node_info.0.mgmt_network_setting.gateway", "172.28.82.1"),
 					resource.TestCheckResourceAttr(resourceName, "node_info.0.mgmt_network_setting.subnet_mask", "255.255.255.0"),
 					resource.TestCheckResourceAttr(resourceName, "node_info.0.mgmt_physical_setting.auto_port_setting_enabled", "false"),
 					resource.TestCheckResourceAttr(resourceName, "node_info.0.mgmt_physical_setting.speed", "100"),
@@ -2063,7 +2080,6 @@ func TestAccMemberResource_OspfList(t *testing.T) {
 	})
 }
 
-// needs a special HA grid - SA-HA type - deploying and checking ..
 func TestAccMemberResource_PassiveHaArpEnabled(t *testing.T) {
 	var resourceName = "nios_grid_member.test_passive_ha_arp_enabled"
 	var v grid.Member
@@ -2128,7 +2144,6 @@ func TestAccMemberResource_Platform(t *testing.T) {
 	})
 }
 
-// unable to get pre_provisioning - only edit and delete can be done
 func TestAccMemberResource_PreProvisioning(t *testing.T) {
 	var resourceName = "nios_grid_member.test"
 	var v grid.Member
@@ -2157,44 +2172,8 @@ func TestAccMemberResource_PreProvisioning(t *testing.T) {
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
-			// Create without pre_provisioning
-			//{
-			//	Config: testAccMemberPreProvisioningUpdate(
-			//		hostName,
-			//		"IPV4",
-			//		"VNIOS",
-			//		"ALL_V4",
-			//		vipAddress,
-			//		"172.28.82.1",
-			//		"255.255.254.0",
-			//		preProvisioningVal,
-			//	),
-			//	Check: resource.ComposeTestCheckFunc(
-			//		testAccCheckMemberExists(context.Background(), resourceName, &v),
-			//		resource.TestCheckResourceAttr(resourceName, "host_name", hostName),
-			//		resource.TestCheckResourceAttr(resourceName, "config_addr_type", "IPV4"),
-			//		resource.TestCheckResourceAttr(resourceName, "platform", "VNIOS"),
-			//		resource.TestCheckResourceAttr(resourceName, "service_type_configuration", "ALL_V4"),
-			//
-			//		// ipv6_setting validations
-			//		resource.TestCheckResourceAttr(resourceName, "ipv6_setting.auto_router_config_enabled", "false"),
-			//		resource.TestCheckResourceAttr(resourceName, "ipv6_setting.dscp", "0"),
-			//		resource.TestCheckResourceAttr(resourceName, "ipv6_setting.enabled", "false"),
-			//		resource.TestCheckResourceAttr(resourceName, "ipv6_setting.primary", "true"),
-			//		resource.TestCheckResourceAttr(resourceName, "ipv6_setting.use_dscp", "false"),
-			//
-			//		// vip_setting validations
-			//		resource.TestCheckResourceAttr(resourceName, "vip_setting.address", vipAddress),
-			//		resource.TestCheckResourceAttr(resourceName, "vip_setting.dscp", "0"),
-			//		resource.TestCheckResourceAttr(resourceName, "vip_setting.gateway", "172.28.82.1"),
-			//		resource.TestCheckResourceAttr(resourceName, "vip_setting.primary", "true"),
-			//		resource.TestCheckResourceAttr(resourceName, "vip_setting.subnet_mask", "255.255.254.0"),
-			//		resource.TestCheckResourceAttr(resourceName, "vip_setting.use_dscp", "false"),
-			//	),
-			//},
-			// Update with pre_provisioning
 			{
-				Config: testAccMemberPreProvisioningUpdate(
+				Config: testAccMemberPreProvisioning(
 					hostName,
 					"IPV4",
 					"INFOBLOX",
@@ -2213,7 +2192,7 @@ func TestAccMemberResource_PreProvisioning(t *testing.T) {
 			},
 			// Update pre_provisioning with new values
 			{
-				Config: testAccMemberPreProvisioningUpdate(
+				Config: testAccMemberPreProvisioning(
 					hostName,
 					"IPV4",
 					"VNIOS",
@@ -2545,18 +2524,6 @@ func TestAccMemberResource_SyslogProxySetting(t *testing.T) {
 		},
 	}
 
-	_ = []map[string]any{
-		{
-			"address_or_fqdn": "192.0.2.10",
-			"directory_path":  "/var/log/backup",
-			"enable":          true,
-			"port":            21,
-			"protocol":        "FTP",
-			"username":        "admin1",
-			"password":        "Password123!",
-		},
-	}
-
 	syslogProxySettingVal := map[string]any{
 
 		"client_acls": []map[string]any{
@@ -2577,7 +2544,7 @@ func TestAccMemberResource_SyslogProxySetting(t *testing.T) {
 		"client_acls": []map[string]any{
 			{
 				"struct":     "addressac",
-				"address":    "192.0.0.1",
+				"address":    "19.0.0.1",
 				"permission": "ALLOW",
 			},
 		},
@@ -2601,13 +2568,16 @@ func TestAccMemberResource_SyslogProxySetting(t *testing.T) {
 				),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
-					// resource.TestCheckResourceAttr(resourceName, "syslog_proxy_setting.client_acls.#", "1"),
-					// resource.TestCheckResourceAttr(resourceName, "syslog_proxy_setting.enable", "false"),
-					// resource.TestCheckResourceAttr(resourceName, "syslog_proxy_setting.tcp_enable", "false"),
-					// resource.TestCheckResourceAttr(resourceName, "syslog_proxy_setting.tcp_port", "514"),
-					// resource.TestCheckResourceAttr(resourceName, "syslog_proxy_setting.udp_enable", "true"),
-					// resource.TestCheckResourceAttr(resourceName, "syslog_proxy_setting.udp_port", "514"),
-					// resource.TestCheckResourceAttr(resourceName, "use_syslog_proxy_setting", "true"),
+					resource.TestCheckResourceAttr(resourceName, "syslog_proxy_setting.client_acls.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "syslog_proxy_setting.client_acls.0.struct", "addressac"),
+					resource.TestCheckResourceAttr(resourceName, "syslog_proxy_setting.client_acls.0.address", "192.0.0.1"),
+					resource.TestCheckResourceAttr(resourceName, "syslog_proxy_setting.client_acls.0.permission", "ALLOW"),
+					resource.TestCheckResourceAttr(resourceName, "syslog_proxy_setting.enable", "false"),
+					resource.TestCheckResourceAttr(resourceName, "syslog_proxy_setting.tcp_enable", "false"),
+					resource.TestCheckResourceAttr(resourceName, "syslog_proxy_setting.tcp_port", "514"),
+					resource.TestCheckResourceAttr(resourceName, "syslog_proxy_setting.udp_enable", "true"),
+					resource.TestCheckResourceAttr(resourceName, "syslog_proxy_setting.udp_port", "514"),
+					resource.TestCheckResourceAttr(resourceName, "use_syslog_proxy_setting", "true"),
 				),
 			},
 			{
@@ -2619,13 +2589,16 @@ func TestAccMemberResource_SyslogProxySetting(t *testing.T) {
 				),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
-					// resource.TestCheckResourceAttr(resourceName, "syslog_proxy_setting.client_acls.#", "1"),
-					// resource.TestCheckResourceAttr(resourceName, "syslog_proxy_setting.enable", "true"),
-					// resource.TestCheckResourceAttr(resourceName, "syslog_proxy_setting.tcp_enable", "true"),
-					// resource.TestCheckResourceAttr(resourceName, "syslog_proxy_setting.tcp_port", "1514"),
-					// resource.TestCheckResourceAttr(resourceName, "syslog_proxy_setting.udp_enable", "false"),
-					// resource.TestCheckResourceAttr(resourceName, "syslog_proxy_setting.udp_port", "514"),
-					// resource.TestCheckResourceAttr(resourceName, "use_syslog_proxy_setting", "true"),
+					resource.TestCheckResourceAttr(resourceName, "syslog_proxy_setting.client_acls.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "syslog_proxy_setting.client_acls.0.struct", "addressac"),
+					resource.TestCheckResourceAttr(resourceName, "syslog_proxy_setting.client_acls.0.address", "19.0.0.1"),
+					resource.TestCheckResourceAttr(resourceName, "syslog_proxy_setting.client_acls.0.permission", "ALLOW"),
+					resource.TestCheckResourceAttr(resourceName, "syslog_proxy_setting.enable", "true"),
+					resource.TestCheckResourceAttr(resourceName, "syslog_proxy_setting.tcp_enable", "true"),
+					resource.TestCheckResourceAttr(resourceName, "syslog_proxy_setting.tcp_port", "1514"),
+					resource.TestCheckResourceAttr(resourceName, "syslog_proxy_setting.udp_enable", "false"),
+					resource.TestCheckResourceAttr(resourceName, "syslog_proxy_setting.udp_port", "514"),
+					resource.TestCheckResourceAttr(resourceName, "use_syslog_proxy_setting", "true"),
 				),
 			},
 		},
@@ -4405,6 +4378,7 @@ func TestAccMemberResource_Import(t *testing.T) {
 				ImportState:                          true,
 				ImportStateIdFunc:                    testAccMemberImportStateIdFunc(resourceName),
 				ImportStateVerify:                    true,
+				ImportStateVerifyIgnore:              []string{"configure_csp_member_setting"},
 				ImportStateVerifyIdentifierAttribute: "ref",
 				PlanOnly:                             true,
 			},
@@ -4414,7 +4388,7 @@ func TestAccMemberResource_Import(t *testing.T) {
 				ImportState:                          true,
 				ImportStateIdFunc:                    testAccMemberImportStateIdFunc(resourceName),
 				ImportStateVerify:                    true,
-				ImportStateVerifyIgnore:              []string{"extattrs_all"},
+				ImportStateVerifyIgnore:              []string{"extattrs_all", "configure_csp_member_setting"},
 				ImportStateVerifyIdentifierAttribute: "ref",
 			},
 			// Delete testing automatically occurs in TestCase
@@ -4726,14 +4700,34 @@ resource "nios_grid_member" "test_config_addr_type" {
 `, hostName, configAddrType, platform, serviceTypeConfig, ipv6SettingAddress, ipv6SettingGateway, ipv6SettingCIDRPrefix, useV4Vrrp)
 }
 
-func testAccMemberCspAccessKey(hostName string, cspAccessKey []string) string {
+func testAccMemberCspAccessKey(hostName, configAddrType, platform, serviceTypeConfig, vipAddress, vipGateway, vipSubnetMask string, cspAccessKey []string) string {
 	cspAccessKeyStr := utils.ConvertStringSliceToHCL(cspAccessKey)
 	return fmt.Sprintf(`
 resource "nios_grid_member" "test_csp_access_key" {
     host_name = %q
+	config_addr_type = %q
+    platform = %q
+    service_type_configuration = %q
+    
+    ipv6_setting = {
+        auto_router_config_enabled = false
+        dscp = 0
+        enabled = false
+        primary = true
+        use_dscp = false
+    }
+    
+    vip_setting = {
+        address = %q
+        dscp = 0
+        gateway = %q
+        primary = true
+        subnet_mask = %q
+        use_dscp = false
+    }
     csp_access_key = %s
 }
-`, hostName, cspAccessKeyStr)
+`, hostName, configAddrType, platform, serviceTypeConfig, vipAddress, vipGateway, vipSubnetMask, cspAccessKeyStr)
 }
 
 func testAccMemberCspMemberSetting(
@@ -4813,7 +4807,7 @@ resource "nios_grid_member" "test_dns_resolver_setting" {
 func testAccMemberDscp(
 	hostName, configAddrType, platform, serviceTypeConfig,
 	vipAddress, vipGateway, vipSubnetMask string,
-	dscp int, use_dscp bool,
+	dscp int, useDSCP bool,
 ) string {
 	return fmt.Sprintf(`
 resource "nios_grid_member" "test_dscp" {
@@ -4842,7 +4836,7 @@ resource "nios_grid_member" "test_dscp" {
     dscp = %d
     use_dscp = %t
 }
-`, hostName, configAddrType, platform, serviceTypeConfig, vipAddress, vipGateway, vipSubnetMask, dscp, use_dscp)
+`, hostName, configAddrType, platform, serviceTypeConfig, vipAddress, vipGateway, vipSubnetMask, dscp, useDSCP)
 }
 
 func testAccMemberEmailSetting(
@@ -5700,7 +5694,7 @@ resource "nios_grid_member" "test_platform" {
 `, hostName, configAddrType, platform, serviceTypeConfig, vipAddress, vipGateway, vipSubnetMask)
 }
 
-func testAccMemberPreProvisioningUpdate(
+func testAccMemberPreProvisioning(
 	hostName, configAddrType, platform, serviceTypeConfig,
 	vipAddress, vipGateway, vipSubnetMask string,
 	preProvisioning map[string]any,
@@ -6006,7 +6000,6 @@ func testAccMemberSyslogProxySetting(
 ) string {
 	syslogProxySettingStr := utils.ConvertMapToHCL(syslogProxySetting)
 	syslogServersValStr := utils.ConvertSliceOfMapsToHCL(syslogServersVal)
-	//externalSyslogBackupServersStr := utils.ConvertSliceOfMapsToHCL(externalSyslogBackupServers)
 	return fmt.Sprintf(`
 resource "nios_grid_member" "test_syslog_proxy_setting" {
     host_name = %q
@@ -7209,7 +7202,7 @@ resource "nios_grid_member" "test_vpn_mtu" {
 func getTestDataPath() string {
 	wd, err := os.Getwd()
 	if err != nil {
-		return "../../testdata/nios_member"
+		return "../../testdata/nios_grid_member"
 	}
-	return filepath.Join(wd, "../../testdata/nios_member")
+	return filepath.Join(wd, "../../testdata/nios_grid_member")
 }

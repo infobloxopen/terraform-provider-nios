@@ -189,7 +189,6 @@ func (r *UpgradegroupResource) Delete(ctx context.Context, req resource.DeleteRe
 	}
 }
 
-// Add a validate config to 	// if members is provided, every element of the list it contains member attributes. This is to prevent user from providing an empty list of members which would cause the API to return an error.
 func (r *UpgradegroupResource) ValidateConfig(ctx context.Context, req resource.ValidateConfigRequest, resp *resource.ValidateConfigResponse) {
 	var data UpgradegroupModel
 

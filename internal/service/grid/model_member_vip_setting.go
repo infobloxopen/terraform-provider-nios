@@ -39,6 +39,7 @@ var MemberVipSettingAttrTypes = map[string]attr.Type{
 	"use_dscp":        types.BoolType,
 }
 
+// Defaults Intentionally removed due to config issues
 var MemberVipSettingResourceSchemaAttributes = map[string]schema.Attribute{
 	"address": schema.StringAttribute{
 		CustomType:          iptypes.IPAddressType{},
@@ -61,18 +62,13 @@ var MemberVipSettingResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The identifier for the VLAN. Valid values are from 1 to 4096.",
 	},
 	"primary": schema.BoolAttribute{
-		Optional: true,
-		Computed: true,
-		// Default:             booldefault.StaticBool(true),
+		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "Determines if the current address is the primary VLAN address or not.",
 	},
 	"dscp": schema.Int64Attribute{
-		Optional: true,
-		Computed: true,
-		// Default:  int64default.StaticInt64(0),
-		// Validators: []validator.Int64{
-		// 	int64validator.AlsoRequires(path.MatchRoot("use_dscp")),
-		// },
+		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The DSCP (Differentiated Services Code Point) value determines relative priorities for the type of services on your network. The appliance implements QoS (Quality of Service) rules based on this configuration. Valid values are from 0 to 63.",
 	},
 	"lan_subnet_mask": schema.StringAttribute{
@@ -86,9 +82,8 @@ var MemberVipSettingResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "LAN gateway only for GCP HA.",
 	},
 	"use_dscp": schema.BoolAttribute{
-		Optional: true,
-		Computed: true,
-		// Default:             booldefault.StaticBool(false),
+		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "Use flag for: dscp",
 	},
 }

@@ -518,7 +518,6 @@ func (r *MemberResource) ValidateConfig(ctx context.Context, req resource.Valida
 
 	if !data.ConfigAddrType.IsNull() && !data.ConfigAddrType.IsUnknown() && data.ConfigAddrType.ValueString() == "IPV4" {
 		if !data.Ipv6Setting.IsNull() && !data.Ipv6Setting.IsUnknown() {
-			// ipv6_setting.virtual_ip , gatway and cidr_prefix should not be set when config_addr_type is IPV4
 			if !data.Ipv6Setting.Attributes()["virtual_ip"].IsNull() && !data.Ipv6Setting.Attributes()["virtual_ip"].IsUnknown() {
 				resp.Diagnostics.AddError("Validation Error", "ipv6_setting.virtual_ip cannot be set when config_addr_type is set to IPV4")
 			}

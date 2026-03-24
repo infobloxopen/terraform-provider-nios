@@ -31,26 +31,20 @@ var MemberThresholdTrapsAttrTypes = map[string]attr.Type{
 var MemberThresholdTrapsResourceSchemaAttributes = map[string]schema.Attribute{
 	"trap_type": schema.StringAttribute{
 		Computed: true,
-		Optional: true, //https://infoblox.atlassian.net/browse/NIOS-109174
+		Optional: true,
 		Validators: []validator.String{
 			stringvalidator.OneOf("CpuUsage", "DBObjects", "Disk", "ExtStorage", "FDUsage", "FastpathDroppedTraffic", "Fastpathmbuffdepletion", "IPAMUtilization", "Memory", "NetworkCapacity", "RPZHitRate", "RecursiveClients", "Reporting", "ReportingVolume", "Rootfs", "SwapUsage", "TcpUdpFloodAlertRate", "TcpUdpFloodDropRate", "ThreatProtectionDroppedTraffic", "ThreatProtectionTotalTraffic", "Tmpfs"),
 		},
 		MarkdownDescription: "Determines the type of a given trap.",
 	},
 	"trap_reset": schema.Int64Attribute{
-		Optional: true,
-		Computed: true,
-		// Default:  int64default.StaticInt64(COMPLEX),
-		// TODO: Default exists , but generator cannot determine the value.
-		// Default: "",
+		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "Determines the threshold value to reset the trap.",
 	},
 	"trap_trigger": schema.Int64Attribute{
-		Optional: true,
-		Computed: true,
-		// Default:  int64default.StaticInt64(COMPLEX),
-		// TODO: Default exists , but generator cannot determine the value.
-		// Default: "",
+		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "Determines the threshold value to trigger the trap.",
 	},
 }
