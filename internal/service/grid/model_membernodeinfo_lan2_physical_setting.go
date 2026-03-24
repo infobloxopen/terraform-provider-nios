@@ -70,8 +70,8 @@ func (m *MembernodeinfoLan2PhysicalSettingModel) Expand(ctx context.Context, dia
 	}
 	to := &grid.MembernodeinfoLan2PhysicalSetting{
 		AutoPortSettingEnabled: flex.ExpandBoolPointer(m.AutoPortSettingEnabled),
-		Speed:                  flex.ExpandStringPointer(m.Speed),
-		Duplex:                 flex.ExpandStringPointer(m.Duplex),
+		Speed:                  flex.ExpandStringPointerEmptyAsNil(m.Speed),
+		Duplex:                 flex.ExpandStringPointerEmptyAsNil(m.Duplex),
 	}
 	return to
 }

@@ -44,9 +44,8 @@ var MemberEmailSettingAttrTypes = map[string]attr.Type{
 
 var MemberEmailSettingResourceSchemaAttributes = map[string]schema.Attribute{
 	"enabled": schema.BoolAttribute{
-		Optional: true,
-		Computed: true,
-		//Default:             booldefault.StaticBool(false),
+		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "Determines if email notification is enabled or not.",
 	},
 	"from_address": schema.StringAttribute{

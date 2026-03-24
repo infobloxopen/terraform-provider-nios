@@ -86,7 +86,7 @@ func (m *MemberTrafficCaptureAuthDnsSettingModel) Expand(ctx context.Context, di
 		AuthDnsLatencyThreshold:      flex.ExpandInt64Pointer(m.AuthDnsLatencyThreshold),
 		AuthDnsLatencyReset:          flex.ExpandInt64Pointer(m.AuthDnsLatencyReset),
 		AuthDnsLatencyListenOnSource: flex.ExpandStringPointer(m.AuthDnsLatencyListenOnSource),
-		AuthDnsLatencyListenOnIp:     flex.ExpandStringPointer(m.AuthDnsLatencyListenOnIp),
+		AuthDnsLatencyListenOnIp:     flex.ExpandStringPointerEmptyAsNil(m.AuthDnsLatencyListenOnIp),
 	}
 	return to
 }

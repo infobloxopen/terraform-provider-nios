@@ -70,8 +70,8 @@ func (m *MemberLomNetworkConfigModel) Expand(ctx context.Context, diags *diag.Di
 	}
 	to := &grid.MemberLomNetworkConfig{
 		Address:    flex.ExpandIPv4Address(m.Address),
-		Gateway:    flex.ExpandStringPointer(m.Gateway),
-		SubnetMask: flex.ExpandStringPointer(m.SubnetMask),
+		Gateway:    flex.ExpandStringPointerEmptyAsNil(m.Gateway),
+		SubnetMask: flex.ExpandStringPointerEmptyAsNil(m.SubnetMask),
 	}
 	return to
 }

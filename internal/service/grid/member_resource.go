@@ -397,7 +397,7 @@ func (r *MemberResource) ValidateConfig(ctx context.Context, req resource.Valida
 		}
 	}
 
-	if !data.HaOnCloud.IsNull() && !data.HaOnCloud.IsUnknown() {
+	if !data.HaOnCloud.IsNull() && !data.HaOnCloud.IsUnknown() && data.HaOnCloud.ValueBool() {
 		if data.EnableHa.IsNull() || data.EnableHa.IsUnknown() || !data.EnableHa.ValueBool() {
 			resp.Diagnostics.AddError("Validation Error", "enable_ha must be true when ha_on_cloud is provided")
 		}
@@ -483,12 +483,20 @@ func (r *MemberResource) ValidateConfig(ctx context.Context, req resource.Valida
 	}
 
 	if !data.Lan2PortSetting.IsNull() && !data.Lan2PortSetting.IsUnknown() {
-		if data.Lan2Enabled.IsNull() || data.Lan2Enabled.IsUnknown() || !data.Lan2Enabled.ValueBool() {
-			resp.Diagnostics.AddError("Validation Error", "lan2_enabled must be true when lan2_port_setting is provided")
+		if data.Lan2PortSetting.Attributes()["enabled"].String() == "true" {
+			if !data.Lan2Enabled.IsNull() && !data.Lan2Enabled.IsUnknown() && !data.Lan2Enabled.ValueBool() {
+				resp.Diagnostics.AddError("Validation Error", "lan2_enabled must be true when lan2_port_setting.enabled is true")
+			}
+		} else if !data.Lan2PortSetting.Attributes()["network_setting"].IsNull() && !data.Lan2PortSetting.Attributes()["network_setting"].IsUnknown() {
+			resp.Diagnostics.AddError("Validation Error", "lan2_port_setting.network_setting cannot be set when lan2_port_setting.enabled is false or not set")
+		} else if !data.Lan2PortSetting.Attributes()["v6_network_setting"].IsNull() && !data.Lan2PortSetting.Attributes()["v6_network_setting"].IsUnknown() {
+			resp.Diagnostics.AddError("Validation Error", "lan2_port_setting.v6_network_setting cannot be set when lan2_port_setting.enabled is false or not set")
+		} else if !data.Lan2Enabled.IsNull() && !data.Lan2Enabled.IsUnknown() && data.Lan2Enabled.ValueBool() {
+			resp.Diagnostics.AddError("Validation Error", "lan2_enabled can be set to true only when lan2_port_setting.enabled is true")
 		}
 	} else {
 		if !data.Lan2Enabled.IsNull() && !data.Lan2Enabled.IsUnknown() && data.Lan2Enabled.ValueBool() {
-			resp.Diagnostics.AddError("Validation Error", "lan2_port_setting must be provided when lan2_enabled is true")
+			resp.Diagnostics.AddError("Validation Error", "lan2_enabled can be set to true only when lan2_port_setting is set and lan2_port_setting.enabled is true")
 		}
 	}
 

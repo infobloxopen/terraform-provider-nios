@@ -77,7 +77,7 @@ func (m *MemberntpsettingNtpAclModel) Expand(ctx context.Context, diags *diag.Di
 	to := &grid.MemberntpsettingNtpAcl{
 		AclType:  flex.ExpandStringPointer(m.AclType),
 		AcList:   flex.ExpandFrameworkListNestedBlock(ctx, m.AcList, diags, ExpandMemberntpsettingntpaclAcList),
-		NamedAcl: flex.ExpandStringPointer(m.NamedAcl),
+		NamedAcl: flex.ExpandStringPointerEmptyAsNil(m.NamedAcl),
 		Service:  flex.ExpandStringPointer(m.Service),
 	}
 	return to

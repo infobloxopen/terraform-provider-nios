@@ -3,6 +3,7 @@ package grid
 import (
 	"context"
 
+	"github.com/hashicorp/terraform-plugin-framework-nettypes/iptypes"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -17,24 +18,25 @@ import (
 )
 
 type MemberNatSettingModel struct {
-	Enabled           types.Bool   `tfsdk:"enabled"`
-	ExternalVirtualIp types.String `tfsdk:"external_virtual_ip"`
-	Group             types.String `tfsdk:"group"`
+	Enabled           types.Bool          `tfsdk:"enabled"`
+	ExternalVirtualIp iptypes.IPv4Address `tfsdk:"external_virtual_ip"`
+	Group             types.String        `tfsdk:"group"`
 }
 
 var MemberNatSettingAttrTypes = map[string]attr.Type{
 	"enabled":             types.BoolType,
-	"external_virtual_ip": types.StringType,
+	"external_virtual_ip": iptypes.IPv4AddressType{},
 	"group":               types.StringType,
 }
 
 var MemberNatSettingResourceSchemaAttributes = map[string]schema.Attribute{
 	"enabled": schema.BoolAttribute{
 		Optional:            true,
-		Computed:            true, // making it computed as backend returns false
+		Computed:            true,
 		MarkdownDescription: "Determines if NAT should be enabled.",
 	},
 	"external_virtual_ip": schema.StringAttribute{
+		CustomType:          iptypes.IPv4AddressType{},
 		Computed:            true,
 		Optional:            true,
 		MarkdownDescription: "External IP address for NAT.",
@@ -67,8 +69,8 @@ func (m *MemberNatSettingModel) Expand(ctx context.Context, diags *diag.Diagnost
 	}
 	to := &grid.MemberNatSetting{
 		Enabled:           flex.ExpandBoolPointer(m.Enabled),
-		ExternalVirtualIp: flex.ExpandStringPointer(m.ExternalVirtualIp),
-		Group:             flex.ExpandStringPointer(m.Group),
+		ExternalVirtualIp: flex.ExpandIPv4Address(m.ExternalVirtualIp),
+		Group:             flex.ExpandStringPointerEmptyAsNil(m.Group),
 	}
 	return to
 }
@@ -92,6 +94,6 @@ func (m *MemberNatSettingModel) Flatten(ctx context.Context, from *grid.MemberNa
 		*m = MemberNatSettingModel{}
 	}
 	m.Enabled = types.BoolPointerValue(from.Enabled)
-	m.ExternalVirtualIp = flex.FlattenStringPointer(from.ExternalVirtualIp)
+	m.ExternalVirtualIp = flex.FlattenIPv4Address(from.ExternalVirtualIp)
 	m.Group = flex.FlattenStringPointer(from.Group)
 }

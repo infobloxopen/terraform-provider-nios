@@ -417,10 +417,10 @@ var MemberResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed:            true,
 		MarkdownDescription: "Determines if a Grid member supports DSCP (Differentiated Services Code Point).",
 	},
+	// Default removed as value is determined by lan2_port_setting
 	"lan2_enabled": schema.BoolAttribute{
 		Optional:            true,
 		Computed:            true,
-		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "If this is set to \"true\", the LAN2 port is enabled as an independent port or as a port for failover purposes.",
 	},
 	"lan2_port_setting": schema.SingleNestedAttribute{
@@ -878,7 +878,7 @@ func (m *MemberModel) Expand(ctx context.Context, diags *diag.Diagnostics, isCre
 		ExtAttrs:                       ExpandExtAttrs(ctx, m.ExtAttrs, diags),
 		ExternalSyslogBackupServers:    flex.ExpandFrameworkListNestedBlock(ctx, m.ExternalSyslogBackupServers, diags, ExpandMemberExternalSyslogBackupServers),
 		ExternalSyslogServerEnable:     flex.ExpandBoolPointer(m.ExternalSyslogServerEnable),
-		HaCloudPlatform:                flex.ExpandStringPointer(m.HaCloudPlatform),
+		HaCloudPlatform:                ExpandHACloudPlatform(m.HaCloudPlatform),
 		HaOnCloud:                      flex.ExpandBoolPointer(m.HaOnCloud),
 		HostName:                       flex.ExpandStringPointer(m.HostName),
 		Ipv6Setting:                    ExpandMemberIpv6Setting(ctx, m.Ipv6Setting, diags),
@@ -1099,4 +1099,11 @@ func (m *MemberModel) Flatten(ctx context.Context, from *grid.Member, diags *dia
 	m.UseV4Vrrp = types.BoolPointerValue(from.UseV4Vrrp)
 	m.VipSetting = FlattenMemberVipSetting(ctx, from.VipSetting, diags)
 	m.VpnMtu = flex.FlattenInt64Pointer(from.VpnMtu)
+}
+
+func ExpandHACloudPlatform(v types.String) *string {
+	if v.IsNull() || v.IsUnknown() || v.ValueString() == "None" {
+		return nil
+	}
+	return v.ValueStringPointer()
 }

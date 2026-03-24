@@ -153,7 +153,7 @@ func (m *MemberNodeInfoModel) Expand(ctx context.Context, diags *diag.Diagnostic
 		LanHaPortSetting:     ExpandMembernodeinfoLanHaPortSetting(ctx, m.LanHaPortSetting, diags),
 		MgmtPhysicalSetting:  ExpandMembernodeinfoMgmtPhysicalSetting(ctx, m.MgmtPhysicalSetting, diags),
 		Lan2PhysicalSetting:  ExpandMembernodeinfoLan2PhysicalSetting(ctx, m.Lan2PhysicalSetting, diags),
-		NatExternalIp:        flex.ExpandStringPointer(m.NatExternalIp),
+		NatExternalIp:        flex.ExpandStringPointerEmptyAsNil(m.NatExternalIp),
 		V6MgmtNetworkSetting: ExpandMembernodeinfoV6MgmtNetworkSetting(ctx, m.V6MgmtNetworkSetting, diags),
 	}
 	return to

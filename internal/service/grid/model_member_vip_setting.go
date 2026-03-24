@@ -116,8 +116,8 @@ func (m *MemberVipSettingModel) Expand(ctx context.Context, diags *diag.Diagnost
 		VlanId:        flex.ExpandInt64Pointer(m.VlanId),
 		Primary:       flex.ExpandBoolPointer(m.Primary),
 		Dscp:          flex.ExpandInt64Pointer(m.Dscp),
-		LanSubnetMask: flex.ExpandStringPointer(m.LanSubnetMask),
-		LanGateway:    flex.ExpandStringPointer(m.LanGateway),
+		LanSubnetMask: flex.ExpandStringPointerEmptyAsNil(m.LanSubnetMask),
+		LanGateway:    flex.ExpandStringPointerEmptyAsNil(m.LanGateway),
 		UseDscp:       flex.ExpandBoolPointer(m.UseDscp),
 	}
 	return to

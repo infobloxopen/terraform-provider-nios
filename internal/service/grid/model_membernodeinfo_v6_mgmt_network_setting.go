@@ -104,7 +104,7 @@ func (m *MembernodeinfoV6MgmtNetworkSettingModel) Expand(ctx context.Context, di
 		Enabled:                 flex.ExpandBoolPointer(m.Enabled),
 		VirtualIp:               flex.ExpandIPv6Address(m.VirtualIp),
 		CidrPrefix:              flex.ExpandInt64Pointer(m.CidrPrefix),
-		Gateway:                 flex.ExpandStringPointer(m.Gateway),
+		Gateway:                 flex.ExpandStringPointerEmptyAsNil(m.Gateway),
 		AutoRouterConfigEnabled: flex.ExpandBoolPointer(m.AutoRouterConfigEnabled),
 	}
 	return to

@@ -102,7 +102,7 @@ func (m *MemberCspMemberSettingModel) Expand(ctx context.Context, diags *diag.Di
 		UseCspDnsResolver: flex.ExpandBoolPointer(m.UseCspDnsResolver),
 		UseCspHttpsProxy:  flex.ExpandBoolPointer(m.UseCspHttpsProxy),
 		CspJoinToken:      flex.ExpandStringPointer(m.CspJoinToken),
-		CspDnsResolver:    flex.ExpandStringPointer(m.CspDnsResolver),
+		CspDnsResolver:    flex.ExpandStringPointerEmptyAsNil(m.CspDnsResolver),
 		CspHttpsProxy:     flex.ExpandStringPointer(m.CspHttpsProxy),
 	}
 	return to

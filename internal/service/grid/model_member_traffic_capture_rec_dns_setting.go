@@ -100,7 +100,7 @@ func (m *MemberTrafficCaptureRecDnsSettingModel) Expand(ctx context.Context, dia
 		RecDnsLatencyThreshold:      flex.ExpandInt64Pointer(m.RecDnsLatencyThreshold),
 		RecDnsLatencyReset:          flex.ExpandInt64Pointer(m.RecDnsLatencyReset),
 		RecDnsLatencyListenOnSource: flex.ExpandStringPointer(m.RecDnsLatencyListenOnSource),
-		RecDnsLatencyListenOnIp:     flex.ExpandStringPointer(m.RecDnsLatencyListenOnIp),
+		RecDnsLatencyListenOnIp:     flex.ExpandStringPointerEmptyAsNil(m.RecDnsLatencyListenOnIp),
 		KpiMonitoredDomains:         flex.ExpandFrameworkListNestedBlock(ctx, m.KpiMonitoredDomains, diags, ExpandMembertrafficcapturerecdnssettingKpiMonitoredDomains),
 	}
 	return to

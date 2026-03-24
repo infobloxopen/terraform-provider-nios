@@ -62,8 +62,8 @@ func (m *MembernodeinfolanhaportsettingLanPortSettingModel) Expand(ctx context.C
 	}
 	to := &grid.MembernodeinfolanhaportsettingLanPortSetting{
 		AutoPortSettingEnabled: flex.ExpandBoolPointer(m.AutoPortSettingEnabled),
-		Speed:                  flex.ExpandStringPointer(m.Speed),
-		Duplex:                 flex.ExpandStringPointer(m.Duplex),
+		Speed:                  flex.ExpandStringPointerEmptyAsNil(m.Speed),
+		Duplex:                 flex.ExpandStringPointerEmptyAsNil(m.Duplex),
 	}
 	return to
 }

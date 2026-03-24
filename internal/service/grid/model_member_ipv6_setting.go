@@ -122,7 +122,7 @@ func (m *MemberIpv6SettingModel) Expand(ctx context.Context, diags *diag.Diagnos
 		Enabled:                 flex.ExpandBoolPointer(m.Enabled),
 		VirtualIp:               flex.ExpandIPv6Address(m.VirtualIp),
 		CidrPrefix:              flex.ExpandInt64Pointer(m.CidrPrefix),
-		Gateway:                 flex.ExpandStringPointer(m.Gateway),
+		Gateway:                 flex.ExpandStringPointerEmptyAsNil(m.Gateway),
 		AutoRouterConfigEnabled: flex.ExpandBoolPointer(m.AutoRouterConfigEnabled),
 		VlanId:                  flex.ExpandInt64Pointer(m.VlanId),
 		Primary:                 flex.ExpandBoolPointer(m.Primary),
