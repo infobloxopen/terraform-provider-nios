@@ -92,7 +92,7 @@ func (r *MemberResource) Create(ctx context.Context, req resource.CreateRequest,
 	apiRes, _, err := r.client.GridAPI.
 		MemberAPI.
 		Create(ctx).
-		Member(*data.Expand(ctx, &resp.Diagnostics)).
+		Member(*data.Expand(ctx, &resp.Diagnostics, true)).
 		ReturnFieldsPlus(readableAttributesForMember).
 		ReturnAsObject(1).
 		Execute()
@@ -102,6 +102,22 @@ func (r *MemberResource) Create(ctx context.Context, req resource.CreateRequest,
 	}
 
 	res := apiRes.CreateMemberResponseAsObject.GetResult()
+
+	if !data.PreProvisioning.IsUnknown() && !data.PreProvisioning.IsNull() {
+		apiRes2, _, err2 := r.client.GridAPI.
+			MemberAPI.
+			Update(ctx, utils.ExtractResourceRef(*res.Ref)).
+			Member(*data.Expand(ctx, &resp.Diagnostics, false)).
+			ReturnFieldsPlus(readableAttributesForMember).
+			ReturnAsObject(1).
+			Execute()
+		if err2 != nil {
+			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to Create Member with pre-provisioning or syslog proxy settings, got error: %s", err2))
+			return
+		}
+		res = apiRes2.UpdateMemberResponseAsObject.GetResult()
+	}
+
 	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.ExtAttrs)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -298,7 +314,7 @@ func (r *MemberResource) Update(ctx context.Context, req resource.UpdateRequest,
 	apiRes, _, err := r.client.GridAPI.
 		MemberAPI.
 		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
-		Member(*data.Expand(ctx, &resp.Diagnostics)).
+		Member(*data.Expand(ctx, &resp.Diagnostics, false)).
 		ReturnFieldsPlus(readableAttributesForMember).
 		ReturnAsObject(1).
 		Execute()
@@ -396,6 +412,32 @@ func (r *MemberResource) ValidateConfig(ctx context.Context, req resource.Valida
 			return
 		}
 
+		for _, node := range nodeInfo {
+			if !node.V6MgmtNetworkSetting.IsNull() && !node.V6MgmtNetworkSetting.IsUnknown() {
+				v6MgmtNetworkSetting := node.V6MgmtNetworkSetting.Attributes()
+				if v6MgmtNetworkSetting["auto_router_config_enabled"].String() == "true" {
+					if !v6MgmtNetworkSetting["gateway"].IsNull() && !v6MgmtNetworkSetting["gateway"].IsUnknown() {
+						resp.Diagnostics.AddError("Validation Error", "node_info.v6_mgmt_network_setting.gateway cannot be set when node_info.v6_mgmt_network_setting.auto_router_config_enabled is true")
+					}
+				}
+			}
+			if !node.MgmtPhysicalSetting.IsNull() && !node.MgmtPhysicalSetting.IsUnknown() {
+				mgmtPhysicalSetting := node.MgmtPhysicalSetting.Attributes()
+				if mgmtPhysicalSetting["auto_port_setting_enabled"].String() == "true" {
+					if (!mgmtPhysicalSetting["speed"].IsNull() && !mgmtPhysicalSetting["speed"].IsUnknown()) || (!mgmtPhysicalSetting["duplex"].IsNull() && !mgmtPhysicalSetting["duplex"].IsUnknown()) {
+						resp.Diagnostics.AddError("Validation Error", "node_info.mgmt_physical_setting.speed and node_info.mgmt_physical_setting.duplex cannot be set when node_info.mgmt_physical_setting.auto_port_setting_enabled is true")
+					}
+				} else {
+					if mgmtPhysicalSetting["speed"].IsNull() || mgmtPhysicalSetting["speed"].IsUnknown() {
+						resp.Diagnostics.AddError("Validation Error", "node_info.mgmt_physical_setting.speed must be set when node_info.mgmt_physical_setting.auto_port_setting_enabled is false")
+					}
+					if mgmtPhysicalSetting["duplex"].IsNull() || mgmtPhysicalSetting["duplex"].IsUnknown() {
+						resp.Diagnostics.AddError("Validation Error", "node_info.mgmt_physical_setting.duplex must be set when node_info.mgmt_physical_setting.auto_port_setting_enabled is false")
+					}
+				}
+			}
+		}
+
 		if len(nodeInfo) > 0 && (!nodeInfo[0].MgmtNetworkSetting.IsNull() && !nodeInfo[0].MgmtNetworkSetting.IsUnknown()) {
 			if data.MgmtPortSetting.IsNull() || data.MgmtPortSetting.IsUnknown() || data.MgmtPortSetting.Attributes()["enabled"].String() != "true" {
 				resp.Diagnostics.AddError("Validation Error", "node_info.mgmt_network_setting is set but mgmt_port_setting.enabled is not true")
@@ -422,7 +464,7 @@ func (r *MemberResource) ValidateConfig(ctx context.Context, req resource.Valida
 				if data.NodeInfo.IsNull() || len(nodeInfo) == 0 ||
 					(len(nodeInfo) > 0 && (nodeInfo[0].MgmtNetworkSetting.IsNull() || nodeInfo[0].MgmtNetworkSetting.IsUnknown()) &&
 						(nodeInfo[0].V6MgmtNetworkSetting.IsNull() || nodeInfo[0].V6MgmtNetworkSetting.IsUnknown())) {
-					resp.Diagnostics.AddError("Validation Error", "Either node_info.mgmt_network_setting or node.v6_mgmt_network_setting must be set when mgmt_port_setting.enabled is true")
+					resp.Diagnostics.AddError("Validation Error", "Either node_info.mgmt_network_setting or node_info.v6_mgmt_network_setting must be set when mgmt_port_setting.enabled is true")
 				}
 			}
 		}
@@ -434,6 +476,93 @@ func (r *MemberResource) ValidateConfig(ctx context.Context, req resource.Valida
 		}
 	}
 
+	if !data.SyslogProxySetting.IsNull() && !data.SyslogProxySetting.IsUnknown() {
+		if data.ExternalSyslogServerEnable.IsNull() || data.ExternalSyslogServerEnable.IsUnknown() || data.ExternalSyslogServerEnable.ValueBool() == false {
+			resp.Diagnostics.AddError("Validation Error", "external_syslog_server_enable must be true when syslog_proxy_setting is provided")
+		}
+	}
+
+	if !data.Lan2PortSetting.IsNull() && !data.Lan2PortSetting.IsUnknown() {
+		if data.Lan2Enabled.IsNull() || data.Lan2Enabled.IsUnknown() || data.Lan2Enabled.ValueBool() == false {
+			resp.Diagnostics.AddError("Validation Error", "lan2_enabled must be true when lan2_port_setting is provided")
+		}
+	} else {
+		if !data.Lan2Enabled.IsNull() && !data.Lan2Enabled.IsUnknown() && data.Lan2Enabled.ValueBool() == true {
+			resp.Diagnostics.AddError("Validation Error", "lan2_port_setting must be provided when lan2_enabled is true")
+		}
+	}
+
+	if !data.HaOnCloud.IsUnknown() && !data.HaOnCloud.IsNull() && data.HaOnCloud.ValueBool() == true {
+		if data.Platform.IsNull() || data.Platform.IsUnknown() || data.Platform.ValueString() != "VNIOS" {
+			resp.Diagnostics.AddError("Validation Error", "platform must be set to 'vNIOS' when ha_on_cloud is true")
+		}
+	}
+
+	if !data.ConfigAddrType.IsNull() && !data.ConfigAddrType.IsUnknown() && (data.ConfigAddrType.ValueString() == "IPV6" || data.ConfigAddrType.ValueString() == "BOTH") {
+		if data.Ipv6Setting.IsNull() || data.Ipv6Setting.IsUnknown() {
+			resp.Diagnostics.AddError("Validation Error", "ipv6_setting must be provided when config_addr_type is set to IPV6 or BOTH")
+		} else {
+			if data.Ipv6Setting.Attributes()["enabled"].IsNull() || data.Ipv6Setting.Attributes()["enabled"].IsUnknown() || data.Ipv6Setting.Attributes()["enabled"].String() != "true" {
+				resp.Diagnostics.AddError("Validation Error", "ipv6_setting.enabled must be true when config_addr_type is set to IPV6 or BOTH")
+			}
+		}
+	}
+
+	if !data.ConfigAddrType.IsNull() && !data.ConfigAddrType.IsUnknown() && data.ConfigAddrType.ValueString() == "IPV4" {
+		if !data.Ipv6Setting.IsNull() && !data.Ipv6Setting.IsUnknown() {
+			// ipv6_setting.virtual_ip , gatway and cidr_prefix should not be set when config_addr_type is IPV4
+			if !data.Ipv6Setting.Attributes()["virtual_ip"].IsNull() && !data.Ipv6Setting.Attributes()["virtual_ip"].IsUnknown() {
+				resp.Diagnostics.AddError("Validation Error", "ipv6_setting.virtual_ip cannot be set when config_addr_type is set to IPV4")
+			}
+			if !data.Ipv6Setting.Attributes()["gateway"].IsNull() && !data.Ipv6Setting.Attributes()["gateway"].IsUnknown() {
+				resp.Diagnostics.AddError("Validation Error", "ipv6_setting.gateway cannot be set when config_addr_type is set to IPV4")
+			}
+			if !data.Ipv6Setting.Attributes()["cidr_prefix"].IsNull() && !data.Ipv6Setting.Attributes()["cidr_prefix"].IsUnknown() {
+				resp.Diagnostics.AddError("Validation Error", "ipv6_setting.cidr_prefix cannot be set when config_addr_type is set to IPV4")
+			}
+			if !data.Ipv6Setting.Attributes()["enabled"].IsNull() && !data.Ipv6Setting.Attributes()["enabled"].IsUnknown() && data.Ipv6Setting.Attributes()["enabled"].String() != "false" {
+				resp.Diagnostics.AddError("Validation Error", "ipv6_setting.enabled must be false when config_addr_type is set to IPV4")
+			}
+		}
+	}
+
+	if !data.ConfigAddrType.IsNull() && !data.ConfigAddrType.IsUnknown() && data.ConfigAddrType.ValueString() == "IPV6" {
+		if !data.VipSetting.IsNull() && !data.VipSetting.IsUnknown() {
+			if !data.VipSetting.Attributes()["subnet_mask"].IsNull() && !data.VipSetting.Attributes()["subnet_mask"].IsUnknown() {
+				resp.Diagnostics.AddError("Validation Error", "vip_setting.subnet_mask cannot be set when config_addr_type is set to IPV6")
+			}
+			if !data.VipSetting.Attributes()["gateway"].IsNull() && !data.VipSetting.Attributes()["gateway"].IsUnknown() {
+				resp.Diagnostics.AddError("Validation Error", "vip_setting.gateway cannot be set when config_addr_type is set to IPV6")
+			}
+			if !data.VipSetting.Attributes()["address"].IsNull() && !data.VipSetting.Attributes()["address"].IsUnknown() {
+				resp.Diagnostics.AddError("Validation Error", "vip_setting.address cannot be set when config_addr_type is set to IPV6")
+			}
+		}
+		if !data.ServiceTypeConfiguration.IsNull() && !data.ServiceTypeConfiguration.IsUnknown() && data.ServiceTypeConfiguration.ValueString() == "ALL_V4" {
+			resp.Diagnostics.AddError("Validation Error", "service_type_configuration cannot be set to ALL_V4 when config_addr_type is set to IPV6")
+		}
+	}
+
+	if !data.Ipv6Setting.IsNull() && !data.Ipv6Setting.IsUnknown() {
+		ipv6Setting := data.Ipv6Setting.Attributes()
+		if ipv6Setting["auto_router_config_enabled"].String() == "true" {
+			if !ipv6Setting["gateway"].IsNull() && !ipv6Setting["gateway"].IsUnknown() {
+				resp.Diagnostics.AddError("Validation Error", "gateway cannot be set when ipv6_setting.auto_router_config_enabled is true")
+			}
+		}
+	}
+
+	if !data.EnableHa.IsNull() && !data.EnableHa.IsUnknown() {
+		if data.EnableHa.ValueBool() == true {
+			if data.RouterId.IsNull() || data.RouterId.IsUnknown() {
+				resp.Diagnostics.AddError("Validation Error", "router_id must be provided when enable_ha is true")
+			}
+		} else {
+			if !data.RouterId.IsNull() && !data.RouterId.IsUnknown() {
+				resp.Diagnostics.AddError("Validation Error", "router_id cannot not be set when enable_ha is false")
+			}
+		}
+	}
 }
 
 func (r *MemberResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {

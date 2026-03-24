@@ -156,5 +156,4 @@ func (m *MemberEmailSettingModel) Flatten(ctx context.Context, from *grid.Member
 	m.Smtps = types.BoolPointerValue(from.Smtps)
 	m.PortNumber = flex.FlattenInt64Pointer(from.PortNumber)
 	m.UseAuthentication = types.BoolPointerValue(from.UseAuthentication)
-	//m.Password = flex.FlattenStringPointer(from.Password)
 }

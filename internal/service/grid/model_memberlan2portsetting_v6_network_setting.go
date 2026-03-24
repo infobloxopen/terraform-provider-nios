@@ -10,7 +10,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
@@ -47,6 +46,7 @@ var Memberlan2portsettingV6NetworkSettingAttrTypes = map[string]attr.Type{
 var Memberlan2portsettingV6NetworkSettingResourceSchemaAttributes = map[string]schema.Attribute{
 	"enabled": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "Determines if IPv6 networking should be enabled.",
 	},
 	"virtual_ip": schema.StringAttribute{
@@ -81,7 +81,6 @@ var Memberlan2portsettingV6NetworkSettingResourceSchemaAttributes = map[string]s
 	"dscp": schema.Int64Attribute{
 		Optional: true,
 		Computed: true,
-		Default:  int64default.StaticInt64(0),
 		Validators: []validator.Int64{
 			int64validator.AlsoRequires(path.MatchRoot("use_dscp")),
 		},
@@ -90,7 +89,6 @@ var Memberlan2portsettingV6NetworkSettingResourceSchemaAttributes = map[string]s
 	"use_dscp": schema.BoolAttribute{
 		Optional:            true,
 		Computed:            true,
-		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Use flag for: dscp",
 	},
 }

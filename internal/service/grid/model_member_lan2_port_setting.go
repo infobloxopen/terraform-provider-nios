@@ -38,6 +38,7 @@ var MemberLan2PortSettingAttrTypes = map[string]attr.Type{
 var MemberLan2PortSettingResourceSchemaAttributes = map[string]schema.Attribute{
 	"virtual_router_id": schema.Int64Attribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "If the 'enabled' field is set to True, this defines the virtual router ID for the LAN2 port.",
 	},
 	"enabled": schema.BoolAttribute{

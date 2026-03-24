@@ -7,12 +7,14 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/grid"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	planmodifiers "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/immutable"
 )
 
 type MemberIpv6StaticRoutesModel struct {
@@ -29,9 +31,12 @@ var MemberIpv6StaticRoutesAttrTypes = map[string]attr.Type{
 
 var MemberIpv6StaticRoutesResourceSchemaAttributes = map[string]schema.Attribute{
 	"address": schema.StringAttribute{
-		CustomType:          iptypes.IPv6AddressType{},
-		Computed:            true,
-		Optional:            true,
+		CustomType: iptypes.IPv6AddressType{},
+		Computed:   true,
+		Optional:   true,
+		PlanModifiers: []planmodifier.String{
+			planmodifiers.ImmutableString(),
+		},
 		MarkdownDescription: "IPv6 address.",
 	},
 	"cidr": schema.Int64Attribute{

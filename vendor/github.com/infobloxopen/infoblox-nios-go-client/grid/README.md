@@ -604,6 +604,8 @@ Class | Method | HTTP request | Description
  - [MemberStaticRoutes](docs/MemberStaticRoutes.md)
  - [MemberSyslogProxySetting](docs/MemberSyslogProxySetting.md)
  - [MemberSyslogServers](docs/MemberSyslogServers.md)
+ - [MemberSyslogServersCertificate](docs/MemberSyslogServersCertificate.md)
+ - [MemberSyslogServersCertificateOneOf](docs/MemberSyslogServersCertificateOneOf.md)
  - [MemberThreatinsight](docs/MemberThreatinsight.md)
  - [MemberThreatprotection](docs/MemberThreatprotection.md)
  - [MemberThreatprotectionNatRules](docs/MemberThreatprotectionNatRules.md)

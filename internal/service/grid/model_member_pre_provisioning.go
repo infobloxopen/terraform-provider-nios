@@ -32,7 +32,8 @@ var MemberPreProvisioningResourceSchemaAttributes = map[string]schema.Attribute{
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: MemberpreprovisioningHardwareInfoResourceSchemaAttributes,
 		},
-		Required: true,
+		Optional: true,
+		Computed: true,
 		Validators: []validator.List{
 			listvalidator.SizeAtLeast(1),
 		},

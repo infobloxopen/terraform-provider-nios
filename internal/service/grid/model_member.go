@@ -553,7 +553,11 @@ var MemberResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "If set to True, superuser admins can access the Infoblox CLI from a remote location using an SSH (Secure Shell) v2 client.",
 	},
 	"router_id": schema.Int64Attribute{
-		Optional:            true,
+		Optional: true,
+		Computed: true,
+		Validators: []validator.Int64{
+			int64validator.Between(1, 255),
+		},
 		MarkdownDescription: "Virutal router identifier. Provide this ID if \"ha_enabled\" is set to \"true\". This is a unique VRID number (from 1 to 255) for the local subnet.",
 	},
 	"service_status": schema.ListNestedAttribute{
@@ -622,7 +626,6 @@ var MemberResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional: true,
 		Validators: []validator.List{
 			listvalidator.SizeAtLeast(1),
-			listvalidator.AlsoRequires(path.MatchRoot("use_syslog_proxy_setting")),
 		},
 		MarkdownDescription: "The list of external syslog servers.",
 	},
@@ -853,47 +856,47 @@ var MemberResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 }
 
-func (m *MemberModel) Expand(ctx context.Context, diags *diag.Diagnostics) *grid.Member {
+func (m *MemberModel) Expand(ctx context.Context, diags *diag.Diagnostics, isCreate bool) *grid.Member {
 	if m == nil {
 		return nil
 	}
 	to := &grid.Member{
-		AdditionalIpList:                flex.ExpandFrameworkListNestedBlock(ctx, m.AdditionalIpList, diags, ExpandMemberAdditionalIpList),
-		AutomatedTrafficCaptureSetting:  ExpandMemberAutomatedTrafficCaptureSetting(ctx, m.AutomatedTrafficCaptureSetting, diags),
-		BgpAs:                           flex.ExpandFrameworkListNestedBlock(ctx, m.BgpAs, diags, ExpandMemberBgpAs),
-		Comment:                         flex.ExpandStringPointer(m.Comment),
-		ConfigAddrType:                  flex.ExpandStringPointer(m.ConfigAddrType),
-		CspAccessKey:                    flex.ExpandFrameworkListStringEmptyAsNil(ctx, m.CspAccessKey, diags),
-		CspMemberSetting:                ExpandMemberCspMemberSetting(ctx, m.CspMemberSetting, diags),
-		DnsResolverSetting:              ExpandMemberDnsResolverSetting(ctx, m.DnsResolverSetting, diags),
-		Dscp:                            flex.ExpandInt64Pointer(m.Dscp),
-		EmailSetting:                    ExpandMemberEmailSetting(ctx, m.EmailSetting, diags),
-		EnableHa:                        flex.ExpandBoolPointer(m.EnableHa),
-		EnableLom:                       flex.ExpandBoolPointer(m.EnableLom),
-		EnableMemberRedirect:            flex.ExpandBoolPointer(m.EnableMemberRedirect),
-		EnableRoApiAccess:               flex.ExpandBoolPointer(m.EnableRoApiAccess),
-		ExtAttrs:                        ExpandExtAttrs(ctx, m.ExtAttrs, diags),
-		ExternalSyslogBackupServers:     flex.ExpandFrameworkListNestedBlock(ctx, m.ExternalSyslogBackupServers, diags, ExpandMemberExternalSyslogBackupServers),
-		ExternalSyslogServerEnable:      flex.ExpandBoolPointer(m.ExternalSyslogServerEnable),
-		HaCloudPlatform:                 flex.ExpandStringPointer(m.HaCloudPlatform),
-		HaOnCloud:                       flex.ExpandBoolPointer(m.HaOnCloud),
-		HostName:                        flex.ExpandStringPointer(m.HostName),
-		Ipv6Setting:                     ExpandMemberIpv6Setting(ctx, m.Ipv6Setting, diags),
-		Ipv6StaticRoutes:                flex.ExpandFrameworkListNestedBlock(ctx, m.Ipv6StaticRoutes, diags, ExpandMemberIpv6StaticRoutes),
-		Lan2Enabled:                     flex.ExpandBoolPointer(m.Lan2Enabled),
-		Lan2PortSetting:                 ExpandMemberLan2PortSetting(ctx, m.Lan2PortSetting, diags),
-		LomNetworkConfig:                flex.ExpandFrameworkListNestedBlock(ctx, m.LomNetworkConfig, diags, ExpandMemberLomNetworkConfig),
-		LomUsers:                        flex.ExpandFrameworkListNestedBlock(ctx, m.LomUsers, diags, ExpandMemberLomUsers),
-		MasterCandidate:                 flex.ExpandBoolPointer(m.MasterCandidate),
-		MemberServiceCommunication:      flex.ExpandFrameworkListNestedBlockEmptyAsNil(ctx, m.MemberServiceCommunication, diags, ExpandMemberMemberServiceCommunication),
-		MgmtPortSetting:                 ExpandMemberMgmtPortSetting(ctx, m.MgmtPortSetting, diags),
-		NatSetting:                      ExpandMemberNatSetting(ctx, m.NatSetting, diags),
-		NodeInfo:                        flex.ExpandFrameworkListNestedBlock(ctx, m.NodeInfo, diags, ExpandMemberNodeInfo),
-		NtpSetting:                      ExpandMemberNtpSetting(ctx, m.NtpSetting, diags),
-		OspfList:                        flex.ExpandFrameworkListNestedBlock(ctx, m.OspfList, diags, ExpandMemberOspfList),
-		PassiveHaArpEnabled:             flex.ExpandBoolPointer(m.PassiveHaArpEnabled),
-		Platform:                        flex.ExpandStringPointer(m.Platform),
-		PreProvisioning:                 ExpandMemberPreProvisioning(ctx, m.PreProvisioning, diags),
+		AdditionalIpList:               flex.ExpandFrameworkListNestedBlock(ctx, m.AdditionalIpList, diags, ExpandMemberAdditionalIpList),
+		AutomatedTrafficCaptureSetting: ExpandMemberAutomatedTrafficCaptureSetting(ctx, m.AutomatedTrafficCaptureSetting, diags),
+		BgpAs:                          flex.ExpandFrameworkListNestedBlock(ctx, m.BgpAs, diags, ExpandMemberBgpAs),
+		Comment:                        flex.ExpandStringPointer(m.Comment),
+		ConfigAddrType:                 flex.ExpandStringPointer(m.ConfigAddrType),
+		CspAccessKey:                   flex.ExpandFrameworkListStringEmptyAsNil(ctx, m.CspAccessKey, diags),
+		CspMemberSetting:               ExpandMemberCspMemberSetting(ctx, m.CspMemberSetting, diags),
+		DnsResolverSetting:             ExpandMemberDnsResolverSetting(ctx, m.DnsResolverSetting, diags),
+		Dscp:                           flex.ExpandInt64Pointer(m.Dscp),
+		EmailSetting:                   ExpandMemberEmailSetting(ctx, m.EmailSetting, diags),
+		EnableHa:                       flex.ExpandBoolPointer(m.EnableHa),
+		EnableLom:                      flex.ExpandBoolPointer(m.EnableLom),
+		EnableMemberRedirect:           flex.ExpandBoolPointer(m.EnableMemberRedirect),
+		EnableRoApiAccess:              flex.ExpandBoolPointer(m.EnableRoApiAccess),
+		ExtAttrs:                       ExpandExtAttrs(ctx, m.ExtAttrs, diags),
+		ExternalSyslogBackupServers:    flex.ExpandFrameworkListNestedBlock(ctx, m.ExternalSyslogBackupServers, diags, ExpandMemberExternalSyslogBackupServers),
+		ExternalSyslogServerEnable:     flex.ExpandBoolPointer(m.ExternalSyslogServerEnable),
+		HaCloudPlatform:                flex.ExpandStringPointer(m.HaCloudPlatform),
+		HaOnCloud:                      flex.ExpandBoolPointer(m.HaOnCloud),
+		HostName:                       flex.ExpandStringPointer(m.HostName),
+		Ipv6Setting:                    ExpandMemberIpv6Setting(ctx, m.Ipv6Setting, diags),
+		Ipv6StaticRoutes:               flex.ExpandFrameworkListNestedBlock(ctx, m.Ipv6StaticRoutes, diags, ExpandMemberIpv6StaticRoutes),
+		Lan2Enabled:                    flex.ExpandBoolPointer(m.Lan2Enabled),
+		Lan2PortSetting:                ExpandMemberLan2PortSetting(ctx, m.Lan2PortSetting, diags),
+		LomNetworkConfig:               flex.ExpandFrameworkListNestedBlock(ctx, m.LomNetworkConfig, diags, ExpandMemberLomNetworkConfig),
+		LomUsers:                       flex.ExpandFrameworkListNestedBlock(ctx, m.LomUsers, diags, ExpandMemberLomUsers),
+		MasterCandidate:                flex.ExpandBoolPointer(m.MasterCandidate),
+		MemberServiceCommunication:     flex.ExpandFrameworkListNestedBlockEmptyAsNil(ctx, m.MemberServiceCommunication, diags, ExpandMemberMemberServiceCommunication),
+		MgmtPortSetting:                ExpandMemberMgmtPortSetting(ctx, m.MgmtPortSetting, diags),
+		NatSetting:                     ExpandMemberNatSetting(ctx, m.NatSetting, diags),
+		NodeInfo:                       flex.ExpandFrameworkListNestedBlock(ctx, m.NodeInfo, diags, ExpandMemberNodeInfo),
+		NtpSetting:                     ExpandMemberNtpSetting(ctx, m.NtpSetting, diags),
+		OspfList:                       flex.ExpandFrameworkListNestedBlock(ctx, m.OspfList, diags, ExpandMemberOspfList),
+		PassiveHaArpEnabled:            flex.ExpandBoolPointer(m.PassiveHaArpEnabled),
+		Platform:                       flex.ExpandStringPointer(m.Platform),
+		//PreProvisioning:                 ExpandMemberPreProvisioning(ctx, m.PreProvisioning, diags),
 		PreserveIfOwnsDelegation:        flex.ExpandBoolPointer(m.PreserveIfOwnsDelegation),
 		RemoteConsoleAccessEnable:       flex.ExpandBoolPointer(m.RemoteConsoleAccessEnable),
 		RouterId:                        flex.ExpandInt64Pointer(m.RouterId),
@@ -936,6 +939,11 @@ func (m *MemberModel) Expand(ctx context.Context, diags *diag.Diagnostics) *grid
 		VipSetting:                      ExpandMemberVipSetting(ctx, m.VipSetting, diags),
 		VpnMtu:                          flex.ExpandInt64Pointer(m.VpnMtu),
 	}
+
+	if !isCreate {
+		to.PreProvisioning = ExpandMemberPreProvisioning(ctx, m.PreProvisioning, diags)
+	}
+
 	return to
 }
 
@@ -961,7 +969,14 @@ func (m *MemberModel) Flatten(ctx context.Context, from *grid.Member, diags *dia
 	m.Ref = flex.FlattenStringPointer(from.Ref)
 	m.ActivePosition = flex.FlattenStringPointer(from.ActivePosition)
 	m.AdditionalIpList = flex.FlattenFrameworkListNestedBlock(ctx, from.AdditionalIpList, MemberAdditionalIpListAttrTypes, diags, FlattenMemberAdditionalIpList)
+	planAutomatedTrafficCaptureSetting := m.AutomatedTrafficCaptureSetting
 	m.AutomatedTrafficCaptureSetting = FlattenMemberAutomatedTrafficCaptureSetting(ctx, from.AutomatedTrafficCaptureSetting, diags)
+	if !planAutomatedTrafficCaptureSetting.IsUnknown() {
+		automatedTrafficCaptureSettingVal, diags := utils.CopyFieldFromPlanToRespObject(ctx, planAutomatedTrafficCaptureSetting, m.AutomatedTrafficCaptureSetting, "password")
+		if !diags.HasError() {
+			m.AutomatedTrafficCaptureSetting = automatedTrafficCaptureSettingVal.(types.Object)
+		}
+	}
 	m.BgpAs = flex.FlattenFrameworkListNestedBlock(ctx, from.BgpAs, MemberBgpAsAttrTypes, diags, FlattenMemberBgpAs)
 	m.Comment = flex.FlattenStringPointer(from.Comment)
 	m.ConfigAddrType = flex.FlattenStringPointer(from.ConfigAddrType)
@@ -1000,7 +1015,14 @@ func (m *MemberModel) Flatten(ctx context.Context, from *grid.Member, diags *dia
 	m.Lan2Enabled = types.BoolPointerValue(from.Lan2Enabled)
 	m.Lan2PortSetting = FlattenMemberLan2PortSetting(ctx, from.Lan2PortSetting, diags)
 	m.LomNetworkConfig = flex.FlattenFrameworkListNestedBlock(ctx, from.LomNetworkConfig, MemberLomNetworkConfigAttrTypes, diags, FlattenMemberLomNetworkConfig)
+	planLomUsers := m.LomUsers
 	m.LomUsers = flex.FlattenFrameworkListNestedBlock(ctx, from.LomUsers, MemberLomUsersAttrTypes, diags, FlattenMemberLomUsers)
+	if !planLomUsers.IsUnknown() {
+		lomUsersVal, diags := utils.CopyFieldFromPlanToRespList(ctx, planLomUsers, m.LomUsers, "password")
+		if !diags.HasError() {
+			m.LomUsers = lomUsersVal.(basetypes.ListValue)
+		}
+	}
 	m.MasterCandidate = types.BoolPointerValue(from.MasterCandidate)
 	m.MemberServiceCommunication = flex.FlattenFrameworkListNestedBlock(ctx, from.MemberServiceCommunication, MemberMemberServiceCommunicationAttrTypes, diags, FlattenMemberMemberServiceCommunication)
 	m.MgmtPortSetting = FlattenMemberMgmtPortSetting(ctx, from.MgmtPortSetting, diags)
@@ -1031,7 +1053,6 @@ func (m *MemberModel) Flatten(ctx context.Context, from *grid.Member, diags *dia
 			m.SyslogServers = result.(basetypes.ListValue)
 		}
 	}
-	//m.SyslogServers = flex.FlattenFrameworkListNestedBlock(ctx, from.SyslogServers, MemberSyslogServersAttrTypes, diags, FlattenMemberSyslogServers)
 	m.SyslogSize = flex.FlattenInt64Pointer(from.SyslogSize)
 	planList2 := m.ThresholdTraps
 	m.ThresholdTraps = flex.FlattenFrameworkListNestedBlock(ctx, from.ThresholdTraps, MemberThresholdTrapsAttrTypes, diags, FlattenMemberThresholdTraps)
@@ -1041,14 +1062,12 @@ func (m *MemberModel) Flatten(ctx context.Context, from *grid.Member, diags *dia
 			m.ThresholdTraps = reOrderedList.(basetypes.ListValue)
 		}
 	}
-	// m.ThresholdTraps = flex.FlattenFrameworkListNestedBlock(ctx, from.ThresholdTraps, MemberThresholdTrapsAttrTypes, diags, FlattenMemberThresholdTraps)
 	m.TimeZone = flex.FlattenStringPointer(from.TimeZone)
 	m.TrafficCaptureAuthDnsSetting = FlattenMemberTrafficCaptureAuthDnsSetting(ctx, from.TrafficCaptureAuthDnsSetting, diags)
 	m.TrafficCaptureChrSetting = FlattenMemberTrafficCaptureChrSetting(ctx, from.TrafficCaptureChrSetting, diags)
 	m.TrafficCaptureQpsSetting = FlattenMemberTrafficCaptureQpsSetting(ctx, from.TrafficCaptureQpsSetting, diags)
 	m.TrafficCaptureRecDnsSetting = FlattenMemberTrafficCaptureRecDnsSetting(ctx, from.TrafficCaptureRecDnsSetting, diags)
 	m.TrafficCaptureRecQueriesSetting = FlattenMemberTrafficCaptureRecQueriesSetting(ctx, from.TrafficCaptureRecQueriesSetting, diags)
-
 	planList := m.TrapNotifications
 	m.TrapNotifications = flex.FlattenFrameworkListNestedBlock(ctx, from.TrapNotifications, MemberTrapNotificationsAttrTypes, diags, FlattenMemberTrapNotifications)
 	if !planList.IsUnknown() {
@@ -1057,8 +1076,6 @@ func (m *MemberModel) Flatten(ctx context.Context, from *grid.Member, diags *dia
 			m.TrapNotifications = reOrderedList.(basetypes.ListValue)
 		}
 	}
-	// m.TrapNotifications = flex.FlattenFrameworkListNestedBlock(ctx, from.TrapNotifications, MemberTrapNotificationsAttrTypes, diags, FlattenMemberTrapNotifications)
-
 	m.UpgradeGroup = flex.FlattenStringPointer(from.UpgradeGroup)
 	m.UseAutomatedTrafficCapture = types.BoolPointerValue(from.UseAutomatedTrafficCapture)
 	m.UseDnsResolverSetting = types.BoolPointerValue(from.UseDnsResolverSetting)

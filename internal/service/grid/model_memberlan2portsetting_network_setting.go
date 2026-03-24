@@ -9,8 +9,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
@@ -68,15 +66,13 @@ var Memberlan2portsettingNetworkSettingResourceSchemaAttributes = map[string]sch
 	"primary": schema.BoolAttribute{
 		Optional:            true,
 		Computed:            true,
-		Default:             booldefault.StaticBool(true),
 		MarkdownDescription: "Determines if the current address is the primary VLAN address or not.",
 	},
 	"dscp": schema.Int64Attribute{
 		Optional: true,
 		Computed: true,
-		Default:  int64default.StaticInt64(0),
 		Validators: []validator.Int64{
-			int64validator.AlsoRequires(path.MatchRoot("use_dscp")),
+			int64validator.AlsoRequires(path.MatchRelative().AtParent().AtName("use_dscp")),
 		},
 		MarkdownDescription: "The DSCP (Differentiated Services Code Point) value determines relative priorities for the type of services on your network. The appliance implements QoS (Quality of Service) rules based on this configuration. Valid values are from 0 to 63.",
 	},
@@ -93,7 +89,6 @@ var Memberlan2portsettingNetworkSettingResourceSchemaAttributes = map[string]sch
 	"use_dscp": schema.BoolAttribute{
 		Optional:            true,
 		Computed:            true,
-		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Use flag for: dscp",
 	},
 }

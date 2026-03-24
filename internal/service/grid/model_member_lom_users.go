@@ -8,7 +8,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -17,7 +16,6 @@ import (
 	"github.com/infobloxopen/infoblox-nios-go-client/grid"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
-	planmodifiers "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/immutable"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
@@ -46,10 +44,8 @@ var MemberLomUsersResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The LOM user name.",
 	},
 	"password": schema.StringAttribute{
-		Required: true,
-		PlanModifiers: []planmodifier.String{
-			planmodifiers.ImmutableString(),
-		},
+		Required:  true,
+		Sensitive: true,
 		Validators: []validator.String{
 			customvalidator.ValidateTrimmedString(),
 		},
@@ -95,15 +91,12 @@ func (m *MemberLomUsersModel) Expand(ctx context.Context, diags *diag.Diagnostic
 		return nil
 	}
 	to := &grid.MemberLomUsers{
-		Name:    flex.ExpandStringPointer(m.Name),
-		Role:    flex.ExpandStringPointer(m.Role),
-		Disable: flex.ExpandBoolPointer(m.Disable),
-		Comment: flex.ExpandStringPointer(m.Comment),
+		Name:     flex.ExpandStringPointer(m.Name),
+		Role:     flex.ExpandStringPointer(m.Role),
+		Disable:  flex.ExpandBoolPointer(m.Disable),
+		Comment:  flex.ExpandStringPointer(m.Comment),
+		Password: flex.ExpandStringPointer(m.Password),
 	}
-	if isCreate {
-		to.Password = flex.ExpandStringPointer(m.Password)
-	}
-
 	return to
 }
 

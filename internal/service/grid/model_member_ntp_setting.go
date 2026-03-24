@@ -91,7 +91,7 @@ var MemberNtpSettingResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed:   true,
 		Optional:   true,
 		Validators: []validator.Object{
-			objectvalidator.AlsoRequires(path.MatchRoot("use_ntp_acl")),
+			objectvalidator.AlsoRequires(path.MatchRelative().AtParent().AtName("use_ntp_acl")),
 		},
 		MarkdownDescription: "The NTP access control settings.",
 	},
@@ -100,7 +100,7 @@ var MemberNtpSettingResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed: true,
 		Default:  booldefault.StaticBool(false),
 		Validators: []validator.Bool{
-			boolvalidator.AlsoRequires(path.MatchRoot("use_ntp_kod")),
+			boolvalidator.AlsoRequires(path.MatchRelative().AtParent().AtName("use_ntp_kod")),
 		},
 		MarkdownDescription: "Determines whether the Kiss-o'-Death packets are enabled or disabled.",
 	},

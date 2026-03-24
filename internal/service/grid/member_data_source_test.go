@@ -12,24 +12,6 @@ import (
 	"github.com/infobloxopen/terraform-provider-nios/internal/acctest"
 )
 
-/*
-// Retrieve a specific grid Member by filters
-data "nios_grid_member" "get_grid_member_using_filters" {
-  filters = {
-    host_name = "HOST_NAME_REPLACE_ME"
-  }
-}
-// Retrieve specific grid Member using Extensible Attributes
-data "nios_grid_member" "get_grid_member_using_extensible_attributes" {
-  extattrfilters = {
-    Site = "location-1"
-  }
-}
-
-// Retrieve all grid Member
-data "nios_grid_member" "get_all_grid_member" {}
-*/
-
 func TestAccMemberDataSource_Filters(t *testing.T) {
 	dataSourceName := "data.nios_grid_member.test"
 	resourceName := "nios_grid_member.test"

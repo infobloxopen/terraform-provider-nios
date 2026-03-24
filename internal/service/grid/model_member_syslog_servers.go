@@ -68,7 +68,8 @@ var MemberSyslogServersResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The token returned by the uploadinit function call in object fileop.",
 	},
 	"certificate_file_path": schema.StringAttribute{
-		Required:            true,
+		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The file path to the certificate.",
 	},
 	"connection_type": schema.StringAttribute{
@@ -189,7 +190,7 @@ func (m *MemberSyslogServersModel) Flatten(ctx context.Context, from *grid.Membe
 		*m = MemberSyslogServersModel{}
 	}
 	m.AddressOrFqdn = flex.FlattenStringPointer(from.AddressOrFqdn)
-	m.Certificate = flex.FlattenStringPointer(from.Certificate)
+	m.Certificate = FlattenMemberSyslogServersCertificate(ctx, from.Certificate, diags)
 	m.CertificateToken = flex.FlattenStringPointer(from.CertificateToken)
 	m.ConnectionType = flex.FlattenStringPointer(from.ConnectionType)
 	m.Port = flex.FlattenInt64Pointer(from.Port)
@@ -199,6 +200,16 @@ func (m *MemberSyslogServersModel) Flatten(ctx context.Context, from *grid.Membe
 	m.Severity = flex.FlattenStringPointer(from.Severity)
 	m.CategoryList = flex.FlattenFrameworkListString(ctx, from.CategoryList, diags)
 	m.OnlyCategoryList = types.BoolPointerValue(from.OnlyCategoryList)
+}
+
+func FlattenMemberSyslogServersCertificate(ctx context.Context, from *grid.MemberSyslogServersCertificate, diags *diag.Diagnostics) types.String {
+	if from == nil {
+		return types.StringNull()
+	}
+	if from.MemberSyslogServersCertificateOneOf == nil {
+		return types.StringNull()
+	}
+	return flex.FlattenStringPointer(from.MemberSyslogServersCertificateOneOf.Ref)
 }
 
 func (r *MemberResource) processSyslogServers(

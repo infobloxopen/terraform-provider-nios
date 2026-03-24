@@ -4,12 +4,9 @@ import (
 	"context"
 
 	"github.com/hashicorp/terraform-plugin-framework-nettypes/iptypes"
-	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
-	"github.com/hashicorp/terraform-plugin-framework/path"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
@@ -51,6 +48,7 @@ var MembernodeinfoV6MgmtNetworkSettingResourceSchemaAttributes = map[string]sche
 	"virtual_ip": schema.StringAttribute{
 		CustomType:          iptypes.IPv6AddressType{},
 		Computed:            true,
+		Optional:            true,
 		MarkdownDescription: "IPv6 address.",
 	},
 	"cidr_prefix": schema.Int64Attribute{
@@ -69,29 +67,19 @@ var MembernodeinfoV6MgmtNetworkSettingResourceSchemaAttributes = map[string]sche
 		MarkdownDescription: "Determines if automatic router configuration should be enabled.",
 	},
 	"vlan_id": schema.Int64Attribute{
-		Optional:            true,
 		Computed:            true,
 		MarkdownDescription: "The identifier for the VLAN. Valid values are from 1 to 4096.",
 	},
 	"primary": schema.BoolAttribute{
-		Optional: true,
-		Computed: true,
-		// Default:             booldefault.StaticBool(true), - wapi bug https://infoblox.atlassian.net/browse/NIOS-109167
+		Computed:            true,
 		MarkdownDescription: "Determines if the current address is the primary VLAN address or not.",
 	},
 	"dscp": schema.Int64Attribute{
-		Optional: true,
-		Computed: true,
-		// Default:  int64default.StaticInt64(0), - wapi bug https://infoblox.atlassian.net/browse/NIOS-109167
-		Validators: []validator.Int64{
-			int64validator.AlsoRequires(path.MatchRoot("use_dscp")),
-		},
+		Computed:            true,
 		MarkdownDescription: "The DSCP (Differentiated Services Code Point) value determines relative priorities for the type of services on your network. The appliance implements QoS (Quality of Service) rules based on this configuration. Valid values are from 0 to 63.",
 	},
 	"use_dscp": schema.BoolAttribute{
-		Optional: true,
-		Computed: true,
-		// Default:             booldefault.StaticBool(false), - wapi bug https://infoblox.atlassian.net/browse/NIOS-109167
+		Computed:            true,
 		MarkdownDescription: "Use flag for: dscp",
 	},
 }
@@ -118,10 +106,6 @@ func (m *MembernodeinfoV6MgmtNetworkSettingModel) Expand(ctx context.Context, di
 		CidrPrefix:              flex.ExpandInt64Pointer(m.CidrPrefix),
 		Gateway:                 flex.ExpandStringPointer(m.Gateway),
 		AutoRouterConfigEnabled: flex.ExpandBoolPointer(m.AutoRouterConfigEnabled),
-		VlanId:                  flex.ExpandInt64Pointer(m.VlanId),
-		Primary:                 flex.ExpandBoolPointer(m.Primary),
-		Dscp:                    flex.ExpandInt64Pointer(m.Dscp),
-		UseDscp:                 flex.ExpandBoolPointer(m.UseDscp),
 	}
 	return to
 }
