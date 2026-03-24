@@ -1642,76 +1642,6 @@ func TestAccMemberResource_LomUsers(t *testing.T) {
 	})
 }
 
-// issue
-// "text": "Cannot delete or add member services. only edit "
-func TestAccMemberResource_MemberServiceCommunication(t *testing.T) {
-	var resourceName = "nios_grid_member.test_member_service_communication"
-	var v grid.Member
-
-	hostName := fmt.Sprintf("infoblox-%s.localdomain", acctest.RandomName())
-	vipAddress := "172.28.83.127"
-
-	memberServiceCommunicationVal := []map[string]any{
-		{
-			"service": "GRID_BACKUP",
-			"type":    "IPV4",
-		},
-	}
-
-	memberServiceCommunicationValUpdated := []map[string]any{
-		{
-			"service": "GRID_BACKUP",
-			"type":    "IPV6",
-		},
-	}
-
-	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.PreCheck(t) },
-		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-		Steps: []resource.TestStep{
-			// Create and Read
-			{
-				Config: testAccMemberMemberServiceCommunication(
-					hostName,
-					"IPV4",
-					"VNIOS",
-					"ALL_V4",
-					vipAddress,
-					"172.28.82.1",
-					"255.255.254.0",
-					memberServiceCommunicationVal,
-				),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckMemberExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "member_service_communication.#", "1"),
-					resource.TestCheckResourceAttr(resourceName, "member_service_communication.0.service", "GRID_BACKUP"),
-					resource.TestCheckResourceAttr(resourceName, "member_service_communication.0.type", "IPV4"),
-				),
-			},
-			// Update and Read
-			{
-				Config: testAccMemberMemberServiceCommunication(
-					hostName,
-					"IPV4",
-					"VNIOS",
-					"ALL_V4",
-					vipAddress,
-					"172.28.82.1",
-					"255.255.254.0",
-					memberServiceCommunicationValUpdated,
-				),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckMemberExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "member_service_communication.#", "1"),
-					resource.TestCheckResourceAttr(resourceName, "member_service_communication.0.service", "GRID_BACKUP"),
-					resource.TestCheckResourceAttr(resourceName, "member_service_communication.0.type", "IPV6"),
-				),
-			},
-			// Delete testing automatically occurs in TestCase
-		},
-	})
-}
-
 func TestAccMemberResource_MgmtPortSetting(t *testing.T) {
 	var resourceName = "nios_grid_member.test_mgmt_port_setting"
 	var v grid.Member
@@ -2420,7 +2350,7 @@ func TestAccMemberResource_ServiceTypeConfiguration(t *testing.T) {
 	var v grid.Member
 	hostName := fmt.Sprintf("infoblox-%s.localdomain", acctest.RandomName())
 	vipAddress4 := "172.28.83.139"
-	vipAddress6 := fmt.Sprintf("2001:db8:%x:%x::%x", acctest.RandomNumber(65535), acctest.RandomNumber(65535), acctest.RandomNumber(65535))
+	networkSettingAddress6 := fmt.Sprintf("2001:db8:%x:%x::%x", acctest.RandomNumber(65535), acctest.RandomNumber(65535), acctest.RandomNumber(65535))
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -2428,7 +2358,7 @@ func TestAccMemberResource_ServiceTypeConfiguration(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccMemberServiceTypeConfiguration(
-					hostName, "IPV4", "VNIOS", "ALL_V4",
+					hostName, "IPV4", "VNIOS", "ALL_V4", networkSettingAddress6,
 					vipAddress4, "172.28.82.1", "255.255.254.0",
 				),
 				Check: resource.ComposeTestCheckFunc(
@@ -2438,8 +2368,8 @@ func TestAccMemberResource_ServiceTypeConfiguration(t *testing.T) {
 			},
 			{
 				Config: testAccMemberServiceTypeConfiguration(
-					hostName, "IPV6", "VNIOS", "ALL_V6",
-					vipAddress6, "2001::1", "64",
+					hostName, "IPV6", "VNIOS", "ALL_V6", networkSettingAddress6,
+					vipAddress4, "2001::1", "64",
 				),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
@@ -5948,9 +5878,18 @@ resource "nios_grid_member" "test_router_id" {
 }
 
 func testAccMemberServiceTypeConfiguration(
-	hostName, configAddrType, platform, serviceTypeConfiguration,
+	hostName, configAddrType, platform, serviceTypeConfiguration, ipv6SettingIP,
 	vipAddress, vipGateway, vipSubnetMask string,
 ) string {
+	enabledV6 := configAddrType != "IPV4"
+	ipv6SettingStr := ""
+	if configAddrType != "IPV4" {
+		ipv6SettingStr = fmt.Sprintf("enabled = %t\n\t\tvirtual_ip = %q\n\t\tgateway = \"2001::1\"\n\t\tcidr_prefix = 8", enabledV6, ipv6SettingIP)
+	}
+	vipSettingStr := ""
+	if configAddrType == "IPV4" {
+		vipSettingStr = fmt.Sprintf("\t\taddress = %q\n\t\tgateway = %q\n\t\tsubnet_mask = %q", vipAddress, vipGateway, vipSubnetMask)
+	}
 	return fmt.Sprintf(`
 resource "nios_grid_member" "test_service_type_configuration" {
     host_name = %q
@@ -5961,21 +5900,19 @@ resource "nios_grid_member" "test_service_type_configuration" {
     ipv6_setting = {
         auto_router_config_enabled = false
         dscp = 0
-        enabled = false
+        %s
         primary = true
         use_dscp = false
     }
 
     vip_setting = {
-        address = %q
-        dscp = 0
-        gateway = %q
-        primary = true
-        subnet_mask = %q
+        %s
         use_dscp = false
+		primary = true
+		dscp = 0
     }
 }
-`, hostName, configAddrType, platform, serviceTypeConfiguration, vipAddress, vipGateway, vipSubnetMask)
+`, hostName, configAddrType, platform, serviceTypeConfiguration, ipv6SettingStr, vipSettingStr)
 }
 
 func testAccMemberSnmpSetting(

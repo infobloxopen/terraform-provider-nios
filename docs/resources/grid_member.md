@@ -89,7 +89,6 @@ resource "nios_grid_member" "test_enable_ha" {
 - `lom_network_config` (Attributes List) The Network configurations for LOM. (see [below for nested schema](#nestedatt--lom_network_config))
 - `lom_users` (Attributes List) The list of LOM users. (see [below for nested schema](#nestedatt--lom_users))
 - `master_candidate` (Boolean) Determines if a Grid member is a Grid Master Candidate or not. This flag enables the Grid member to assume the role of the Grid Master as a disaster recovery measure.
-- `member_service_communication` (Attributes List) Configure communication type for various services. (see [below for nested schema](#nestedatt--member_service_communication))
 - `mgmt_port_setting` (Attributes) Settings for the member MGMT port. (see [below for nested schema](#nestedatt--mgmt_port_setting))
 - `nat_setting` (Attributes) NAT settings for the member. (see [below for nested schema](#nestedatt--nat_setting))
 - `node_info` (Attributes List) The node information list with detailed status report on the operations of the Grid Member, mgmt_port_setting must be enabled when configuring the MGMT Port using the node_info field. (see [below for nested schema](#nestedatt--node_info))
@@ -145,6 +144,7 @@ resource "nios_grid_member" "test_enable_ha" {
 - `active_position` (String) The active server of a Grid member.
 - `extattrs_all` (Map of String) Extensible attributes associated with the object, including default and internal attributes.
 - `is_dscp_capable` (Boolean) Determines if a Grid member supports DSCP (Differentiated Services Code Point).
+- `member_service_communication` (Attributes List) Configure communication type for various services. (see [below for nested schema](#nestedatt--member_service_communication))
 - `mmdb_ea_build_time` (Number) Extensible attributes Topology database build time.
 - `mmdb_geoip_build_time` (Number) GeoIP Topology database build time.
 - `ref` (String) The reference to the object.
@@ -407,19 +407,6 @@ Optional:
 - `comment` (String) The descriptive comment for the LOM user.
 - `disable` (Boolean) Determines whether the LOM user is disabled.
 - `role` (String) The LOM user role which specifies the list of actions that are allowed for the user.
-
-
-<a id="nestedatt--member_service_communication"></a>
-### Nested Schema for `member_service_communication`
-
-Optional:
-
-- `service` (String) The service for a Grid member.
-- `type` (String) Communication type.
-
-Read-Only:
-
-- `option` (String) The option for communication type.
 
 
 <a id="nestedatt--mgmt_port_setting"></a>
@@ -910,6 +897,16 @@ Optional:
 - `subnet_mask` (String) The subnet mask for the Grid Member.
 - `use_dscp` (Boolean) Use flag for: dscp
 - `vlan_id` (Number) The identifier for the VLAN. Valid values are from 1 to 4096.
+
+
+<a id="nestedatt--member_service_communication"></a>
+### Nested Schema for `member_service_communication`
+
+Read-Only:
+
+- `option` (String) The option for communication type.
+- `service` (String) The service for a Grid member.
+- `type` (String) Communication type.
 
 
 <a id="nestedatt--service_status"></a>

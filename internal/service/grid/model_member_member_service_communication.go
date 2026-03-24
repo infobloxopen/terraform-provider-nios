@@ -3,11 +3,9 @@ package grid
 import (
 	"context"
 
-	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
@@ -30,19 +28,11 @@ var MemberMemberServiceCommunicationAttrTypes = map[string]attr.Type{
 
 var MemberMemberServiceCommunicationResourceSchemaAttributes = map[string]schema.Attribute{
 	"service": schema.StringAttribute{
-		Computed: true,
-		Optional: true,
-		Validators: []validator.String{
-			stringvalidator.OneOf("AD", "GRID", "GRID_BACKUP", "MAIL", "NTP", "OCSP", "REPORTING", "REPORTING_BACKUP"),
-		},
+		Computed:            true,
 		MarkdownDescription: "The service for a Grid member.",
 	},
 	"type": schema.StringAttribute{
-		Computed: true,
-		Optional: true,
-		Validators: []validator.String{
-			stringvalidator.OneOf("IPV4", "IPV6"),
-		},
+		Computed:            true,
 		MarkdownDescription: "Communication type.",
 	},
 	"option": schema.StringAttribute{
@@ -67,10 +57,7 @@ func (m *MemberMemberServiceCommunicationModel) Expand(ctx context.Context, diag
 	if m == nil {
 		return nil
 	}
-	to := &grid.MemberMemberServiceCommunication{
-		Service: flex.ExpandStringPointer(m.Service),
-		Type:    flex.ExpandStringPointer(m.Type),
-	}
+	to := &grid.MemberMemberServiceCommunication{}
 	return to
 }
 

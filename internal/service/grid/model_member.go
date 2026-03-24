@@ -461,11 +461,7 @@ var MemberResourceSchemaAttributes = map[string]schema.Attribute{
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: MemberMemberServiceCommunicationResourceSchemaAttributes,
 		},
-		Computed: true,
-		Optional: true,
-		Validators: []validator.List{
-			listvalidator.SizeAtLeast(1),
-		},
+		Computed:            true,
 		MarkdownDescription: "Configure communication type for various services.",
 	},
 	"mgmt_port_setting": schema.SingleNestedAttribute{
