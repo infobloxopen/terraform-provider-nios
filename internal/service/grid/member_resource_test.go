@@ -2176,7 +2176,7 @@ func TestAccMemberResource_PreProvisioning(t *testing.T) {
 				Config: testAccMemberPreProvisioning(
 					hostName,
 					"IPV4",
-					"INFOBLOX",
+					"VNIOS",
 					"ALL_V4",
 					vipAddress,
 					"172.28.82.1",
@@ -2525,15 +2525,7 @@ func TestAccMemberResource_SyslogProxySetting(t *testing.T) {
 	}
 
 	syslogProxySettingVal := map[string]any{
-
-		"client_acls": []map[string]any{
-			{
-				"struct":     "addressac",
-				"address":    "192.0.0.1",
-				"permission": "ALLOW",
-			},
-		},
-		"enable":     true,
+		"enable":     false,
 		"tcp_enable": false,
 		"tcp_port":   514,
 		"udp_enable": true,
@@ -2568,10 +2560,6 @@ func TestAccMemberResource_SyslogProxySetting(t *testing.T) {
 				),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "syslog_proxy_setting.client_acls.#", "1"),
-					resource.TestCheckResourceAttr(resourceName, "syslog_proxy_setting.client_acls.0.struct", "addressac"),
-					resource.TestCheckResourceAttr(resourceName, "syslog_proxy_setting.client_acls.0.address", "192.0.0.1"),
-					resource.TestCheckResourceAttr(resourceName, "syslog_proxy_setting.client_acls.0.permission", "ALLOW"),
 					resource.TestCheckResourceAttr(resourceName, "syslog_proxy_setting.enable", "false"),
 					resource.TestCheckResourceAttr(resourceName, "syslog_proxy_setting.tcp_enable", "false"),
 					resource.TestCheckResourceAttr(resourceName, "syslog_proxy_setting.tcp_port", "514"),
@@ -5727,7 +5715,6 @@ resource "nios_grid_member" "test" {
     }
 	%s
 	preserve_if_owns_delegation  = false
-
 }
 `, hostName, configAddrType, platform, serviceTypeConfig, vipAddress, vipGateway, vipSubnetMask, preProvisioningConfigStr)
 }

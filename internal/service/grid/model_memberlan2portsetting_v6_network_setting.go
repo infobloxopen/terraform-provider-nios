@@ -82,7 +82,7 @@ var Memberlan2portsettingV6NetworkSettingResourceSchemaAttributes = map[string]s
 		Optional: true,
 		Computed: true,
 		Validators: []validator.Int64{
-			int64validator.AlsoRequires(path.MatchRoot("use_dscp")),
+			int64validator.AlsoRequires(path.MatchRelative().AtParent().AtName("use_dscp")),
 		},
 		MarkdownDescription: "The DSCP (Differentiated Services Code Point) value determines relative priorities for the type of services on your network. The appliance implements QoS (Quality of Service) rules based on this configuration. Valid values are from 0 to 63.",
 	},

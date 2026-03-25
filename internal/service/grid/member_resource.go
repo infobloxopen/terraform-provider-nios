@@ -440,7 +440,7 @@ func (r *MemberResource) ValidateConfig(ctx context.Context, req resource.Valida
 
 		if len(nodeInfo) > 0 && (!nodeInfo[0].MgmtNetworkSetting.IsNull() && !nodeInfo[0].MgmtNetworkSetting.IsUnknown()) {
 			if data.MgmtPortSetting.IsNull() || data.MgmtPortSetting.IsUnknown() || data.MgmtPortSetting.Attributes()["enabled"].String() != "true" {
-				resp.Diagnostics.AddError("Validation Error", "node_info.mgmt_network_setting is set but mgmt_port_setting.enabled is not true")
+				resp.Diagnostics.AddError("Validation Error", "node_info.mgmt_network_setting can be set only when mgmt_port_setting.enabled is set to true")
 			} else {
 				mgmtCheckComplete = true
 			}
@@ -476,9 +476,9 @@ func (r *MemberResource) ValidateConfig(ctx context.Context, req resource.Valida
 		}
 	}
 
-	if !data.SyslogProxySetting.IsNull() && !data.SyslogProxySetting.IsUnknown() {
+	if !data.SyslogProxySetting.IsNull() && !data.SyslogProxySetting.IsUnknown() && data.SyslogProxySetting.Attributes()["enable"].String() == "true" {
 		if data.ExternalSyslogServerEnable.IsNull() || data.ExternalSyslogServerEnable.IsUnknown() || !data.ExternalSyslogServerEnable.ValueBool() {
-			resp.Diagnostics.AddError("Validation Error", "external_syslog_server_enable must be true when syslog_proxy_setting is provided")
+			resp.Diagnostics.AddError("Validation Error", "external_syslog_server_enable must be true when syslog_proxy_setting.enabled is true")
 		}
 	}
 
@@ -567,6 +567,82 @@ func (r *MemberResource) ValidateConfig(ctx context.Context, req resource.Valida
 		} else {
 			if !data.RouterId.IsNull() && !data.RouterId.IsUnknown() {
 				resp.Diagnostics.AddError("Validation Error", "router_id cannot not be set when enable_ha is false")
+			}
+		}
+	}
+
+	if !data.ThresholdTraps.IsNull() && !data.ThresholdTraps.IsUnknown() {
+		var thresholdTraps []MemberThresholdTrapsModel
+		diags := data.ThresholdTraps.ElementsAs(ctx, &thresholdTraps, false)
+		resp.Diagnostics.Append(diags...)
+		if resp.Diagnostics.HasError() {
+			return
+		}
+
+		allowedTrapTypes := []string{"CpuUsage", "DBObjects", "Disk", "ExtStorage", "FDUsage", "FastpathDroppedTraffic",
+			"Fastpathmbuffdepletion", "IPAMUtilization", "Memory", "NetworkCapacity", "RPZHitRate",
+			"RecursiveClients", "Reporting", "ReportingVolume", "Rootfs", "SwapUsage", "TcpUdpFloodAlertRate",
+			"TcpUdpFloodDropRate", "ThreatProtectionDroppedTraffic", "ThreatProtectionTotalTraffic", "Tmpfs"}
+
+		additionalTrapsforGM := []string{"DBWrites"}
+		allowedTrapTypesMap := make(map[string]bool)
+		additionalTrapsforGMMap := make(map[string]bool)
+		for _, trapType := range allowedTrapTypes {
+			allowedTrapTypesMap[trapType] = true
+		}
+		for _, trapType := range additionalTrapsforGM {
+			additionalTrapsforGMMap[trapType] = true
+		}
+
+		for i, trap := range thresholdTraps {
+			if trap.TrapType.IsNull() || trap.TrapType.IsUnknown() {
+				resp.Diagnostics.AddError("Validation Error", fmt.Sprintf("trap_type must be provided for threshold_traps[%d]", i))
+			} else if !allowedTrapTypesMap[trap.TrapType.ValueString()] {
+				if !data.UpgradeGroup.IsNull() && !data.UpgradeGroup.IsUnknown() && data.UpgradeGroup.ValueString() == "Grid Master" && additionalTrapsforGMMap[trap.TrapType.ValueString()] {
+					continue
+				}
+				resp.Diagnostics.AddError("Validation Error", fmt.Sprintf("trap_type value '%s' is not valid for threshold_traps[%d]. Valid Values are: %v", trap.TrapType.ValueString(), i, allowedTrapTypes))
+			}
+		}
+	}
+
+	if !data.TrapNotifications.IsNull() && !data.TrapNotifications.IsUnknown() {
+		var trapNotifications []MemberTrapNotificationsModel
+		diags := data.TrapNotifications.ElementsAs(ctx, &trapNotifications, false)
+		resp.Diagnostics.Append(diags...)
+		if resp.Diagnostics.HasError() {
+			return
+		}
+
+		allowedTrapTypes := []string{"AnalyticsRPZ", "WATCHFRR", "DFP", "AutomatedTrafficCapture", "BFD",
+			"BGP", "Backup", "CPU", "CaptivePortal", "CiscoISEServer", "Clear", "CloudAPI", "CloudDNSsync",
+			"Cluster", "Controld", "DHCP", "DNS", "DNSAttack", "DNSIntegrityCheck", "DNSIntegrityCheckConnection",
+			"Database", "DisconnectedGrid", "Discovery", "DiscoveryConflict", "DiscoveryUnmanaged", "Disk",
+			"DuplicateIP", "ENAT", "FDUsage", "FTP", "Fan", "HA", "HAOnCloud", "HSM", "HTTP",
+			"IFMAP", "IMC", "IMCGRPCServer", "IPAMUtilization", "IPMIDevice", "LCD", "LDAPServers",
+			"License", "Login", "MGM", "MSServer", "Memory", "NTP", "Network", "OCSPResponders", "OSPF",
+			"OSPF6", "Outbound", "PowerSupply", "RAID", "RIRSWIP", "RPZHitRate", "RecursiveClients",
+			"Reporting", "RootFS", "SNMP", "SSH", "SerialConsole", "SwapUsage", "Syslog", "System",
+			"TFTP", "Taxii", "ThreatInsight", "ThreatProtection", "TmpFS"}
+
+		additionalTrapsforGM := []string{"DBActivity", "WATCHFRR"}
+		allowedTrapTypesMap := make(map[string]bool)
+		additionalTrapsforGMMap := make(map[string]bool)
+		for _, trapType := range allowedTrapTypes {
+			allowedTrapTypesMap[trapType] = true
+		}
+		for _, trapType := range additionalTrapsforGM {
+			additionalTrapsforGMMap[trapType] = true
+		}
+
+		for i, trap := range trapNotifications {
+			if trap.TrapType.IsNull() || trap.TrapType.IsUnknown() {
+				resp.Diagnostics.AddError("Validation Error", fmt.Sprintf("trap_type must be provided for trap_notifications[%d]", i))
+			} else if !allowedTrapTypesMap[trap.TrapType.ValueString()] {
+				if !data.UpgradeGroup.IsNull() && !data.UpgradeGroup.IsUnknown() && data.UpgradeGroup.ValueString() == "Grid Master" && additionalTrapsforGMMap[trap.TrapType.ValueString()] {
+					continue
+				}
+				resp.Diagnostics.AddError("Validation Error", fmt.Sprintf("trap_type value '%s' is not valid for trap_notifications[%d]. Valid Values are: %v", trap.TrapType.ValueString(), i, allowedTrapTypes))
 			}
 		}
 	}

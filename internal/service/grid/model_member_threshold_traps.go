@@ -3,11 +3,9 @@ package grid
 import (
 	"context"
 
-	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
@@ -30,11 +28,8 @@ var MemberThresholdTrapsAttrTypes = map[string]attr.Type{
 
 var MemberThresholdTrapsResourceSchemaAttributes = map[string]schema.Attribute{
 	"trap_type": schema.StringAttribute{
-		Computed: true,
-		Optional: true,
-		Validators: []validator.String{
-			stringvalidator.OneOf("CpuUsage", "DBObjects", "Disk", "ExtStorage", "FDUsage", "FastpathDroppedTraffic", "Fastpathmbuffdepletion", "IPAMUtilization", "Memory", "NetworkCapacity", "RPZHitRate", "RecursiveClients", "Reporting", "ReportingVolume", "Rootfs", "SwapUsage", "TcpUdpFloodAlertRate", "TcpUdpFloodDropRate", "ThreatProtectionDroppedTraffic", "ThreatProtectionTotalTraffic", "Tmpfs"),
-		},
+		Computed:            true,
+		Optional:            true,
 		MarkdownDescription: "Determines the type of a given trap.",
 	},
 	"trap_reset": schema.Int64Attribute{
