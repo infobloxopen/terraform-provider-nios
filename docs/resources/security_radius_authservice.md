@@ -50,7 +50,7 @@ resource "nios_security_radius_authservice" "radius_authservice_with_additional_
   auth_retries      = 8
   auth_timeout      = 1200
   cache_ttl         = 3000
-  comment           = "This is a commment"
+  comment           = "This is a comment"
   disable           = false
   enable_cache      = true
   mode              = "ROUND_ROBIN"

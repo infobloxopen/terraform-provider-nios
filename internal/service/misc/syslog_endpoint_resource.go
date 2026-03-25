@@ -22,6 +22,7 @@ var readableAttributesForSyslogEndpoint = "extattrs,log_level,name,outbound_memb
 // Ensure provider defined types fully satisfy framework interfaces.
 var _ resource.Resource = &SyslogEndpointResource{}
 var _ resource.ResourceWithImportState = &SyslogEndpointResource{}
+var _ resource.ResourceWithValidateConfig = &SyslogEndpointResource{}
 
 func NewSyslogEndpointResource() resource.Resource {
 	return &SyslogEndpointResource{}
