@@ -20,8 +20,8 @@ subcategory: "{{- $group := index (split .Name "_") 1 -}}
   GRID
 {{- else if eq $group "ipam" -}}
   IPAM
-{{- else if eq $group "microsoftserver" -}}
-  MICROSOFT SERVER
+{{- else if eq $group "microsoft" -}}
+  MICROSOFT
 {{- else if eq $group "misc" -}}
   MISC
 {{- else if eq $group "notification" -}}
