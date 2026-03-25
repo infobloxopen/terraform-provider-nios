@@ -402,10 +402,10 @@ func (r *SyslogEndpointResource) ValidateConfig(ctx context.Context, req resourc
 
 	for _, server := range syslogServers {
 		if server.ConnectionType.ValueString() == "stcp" {
-			if server.CertificateFilePath.IsNull() {
+			if server.CertificateFilePath.IsNull() || server.CertificateFilePath.IsUnknown() || server.CertificateFilePath.ValueString() == "" {
 				resp.Diagnostics.AddError(
 					"Invalid Syslog Server Configuration",
-					"Syslog servers with STCP connection type must have a certificate specified either through certificate or certificate_file_path.",
+					"Syslog servers with STCP connection type must have a certificate file path specified through certificate_file_path.",
 				)
 			}
 		}
