@@ -579,7 +579,7 @@ Optional:
 
 Optional:
 
-- `address_ac` (Attributes) (see [below for nested schema](#nestedatt--result--ntp_setting--ntp_acl--ac_list--address_ac))
+- `address_ac` (Attributes) The client address/network with access control. (see [below for nested schema](#nestedatt--result--ntp_setting--ntp_acl--ac_list--address_ac))
 - `service` (String) The type of service with access control.
 
 <a id="nestedatt--result--ntp_setting--ntp_acl--ac_list--address_ac"></a>
