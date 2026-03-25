@@ -115,9 +115,7 @@ func (m *RecordHostSnmp3CredentialModel) Flatten(ctx context.Context, from *dns.
 	}
 	m.User = flex.FlattenStringPointer(from.User)
 	m.AuthenticationProtocol = flex.FlattenStringPointer(from.AuthenticationProtocol)
-	m.AuthenticationPassword = flex.FlattenStringPointer(from.AuthenticationPassword)
 	m.PrivacyProtocol = flex.FlattenStringPointer(from.PrivacyProtocol)
-	m.PrivacyPassword = flex.FlattenStringPointer(from.PrivacyPassword)
 	m.Comment = flex.FlattenStringPointer(from.Comment)
 	m.CredentialGroup = flex.FlattenStringPointer(from.CredentialGroup)
 }

@@ -41,6 +41,11 @@ type IPAllocationResource struct {
 	client *niosclient.APIClient
 }
 
+type secretsHashState struct {
+	AuthHash string `json:"auth_hash"`
+	PrivHash string `json:"priv_hash"`
+}
+
 func (r *IPAllocationResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_" + "ip_allocation"
 }
@@ -138,20 +143,46 @@ func (r *IPAllocationResource) ModifyPlan(
 
 		// plannedHash is set to prev.Hash by default and only recomputed if secrets are explicitly provided
 		plannedHash := prev.Hash
-		type secrets struct {
-			Auth string `json:"auth"`
-			Priv string `json:"priv"`
-		}
-		data, _ := json.Marshal(secrets{
-			Auth: authPwd.ValueString(),
-			Priv: privPwd.ValueString(),
-		})
-		if computeNewHash {
-			h := sha256.New()
-			h.Write(data)
-			plannedHash = hex.EncodeToString(h.Sum(nil))
-		}
 
+		// Track independent hashes for each secret in private state.
+		// This allows rotating one secret without overwriting the other's hash
+		// with an empty-string-derived value when it is not provided in config.
+		// Start from any previously stored hashes, if present.
+		prevHashes := secretsHashState{}
+		if prev.Hash != "" {
+			// Best-effort parse; if this fails, treat prev.Hash as a legacy value and
+			// leave prevHashes at its zero value so that we will recompute as needed.
+			_ = json.Unmarshal([]byte(prev.Hash), &prevHashes)
+		}
+		plannedHashes := prevHashes
+
+		if computeNewHash {
+			// Update authentication password hash only when the value is known in the plan.
+			if !authPwd.IsUnknown() {
+				if authPwd.IsNull() {
+					// Explicitly cleared.
+					plannedHashes.AuthHash = ""
+				} else {
+					h := sha256.New()
+					h.Write([]byte(authPwd.ValueString()))
+					plannedHashes.AuthHash = hex.EncodeToString(h.Sum(nil))
+				}
+			}
+			// Update privacy password hash only when the value is known in the plan.
+			if !privPwd.IsUnknown() {
+				if privPwd.IsNull() {
+					// Explicitly cleared.
+					plannedHashes.PrivHash = ""
+				} else {
+					h := sha256.New()
+					h.Write([]byte(privPwd.ValueString()))
+					plannedHashes.PrivHash = hex.EncodeToString(h.Sum(nil))
+				}
+			}
+			if data, err := json.Marshal(plannedHashes); err == nil {
+				plannedHash = string(data)
+			}
+		}
 		// 5) Decide whether to bump revision and what to store in PRIVATE STATE
 		// Cases:
 		//  A) Added (stateHas=false, planHas=true)      -> bump
@@ -301,21 +332,6 @@ func (r *IPAllocationResource) Create(ctx context.Context, req resource.CreateRe
 	// Save original IPv6 function call attributes
 	savedIPv6FuncCalls := r.saveNestedFuncCallAttrs(data.Ipv6addrs)
 
-	var plan IPAllocationModel
-
-	resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-
-	// Build API payload: include write-only values from plan/config if set
-	// (Plan includes them as null; read from config directly if needed)
-	var cfg IPAllocationModel
-	resp.Diagnostics.Append(req.Config.Get(ctx, &cfg)...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-
 	var planSnmp3 types.Object
 	snmp3SecretRevision := types.Int64Value(0)
 
@@ -336,29 +352,41 @@ func (r *IPAllocationResource) Create(ctx context.Context, req resource.CreateRe
 		if !authPwd.IsNull() || !privPwd.IsNull() {
 			if !authPwd.IsNull() && !authPwd.IsUnknown() {
 				ap = authPwd.ValueString()
+				createRequest.Snmp3Credential.AuthenticationPassword = &ap
 			}
 			if !privPwd.IsNull() && !privPwd.IsUnknown() {
 				pp = privPwd.ValueString()
+				createRequest.Snmp3Credential.PrivacyPassword = &pp
 			}
-			type secrets struct {
-				Auth string `json:"auth"`
-				Priv string `json:"priv"`
+			secretData := secretsHashState{}
+			if !authPwd.IsUnknown() {
+				if authPwd.IsNull() {
+					// Explicitly cleared.
+					secretData.AuthHash = ""
+				} else {
+					h := sha256.New()
+					h.Write([]byte(authPwd.ValueString()))
+					secretData.AuthHash = hex.EncodeToString(h.Sum(nil))
+				}
 			}
-			secretData, _ := json.Marshal(secrets{
-				Auth: ap,
-				Priv: pp,
-			})
-			h := sha256.New()
-			h.Write(secretData)
-			val := map[string]string{"algo": "sha256", "hash": hex.EncodeToString(h.Sum(nil))}
-			b, err := json.Marshal(val)
+			if !privPwd.IsUnknown() {
+				if privPwd.IsNull() {
+					// Explicitly cleared.
+					secretData.PrivHash = ""
+				} else {
+					h := sha256.New()
+					h.Write([]byte(privPwd.ValueString()))
+					secretData.PrivHash = hex.EncodeToString(h.Sum(nil))
+				}
+			}
+			secretDataJSON, _ := json.Marshal(secretData)
+			val := map[string]string{"algo": "sha256", "hash": string(secretDataJSON)}
+			hashSecrets, err := json.Marshal(val)
 			if err != nil {
 				resp.Diagnostics.AddError("Private State Marshal Error", err.Error())
 				return
 			}
-			resp.Diagnostics.Append(resp.Private.SetKey(ctx, "snmp3_secrets_hash", b)...)
-			createRequest.Snmp3Credential.PrivacyPassword = &pp
-			createRequest.Snmp3Credential.AuthenticationPassword = &ap
+			resp.Diagnostics.Append(resp.Private.SetKey(ctx, "snmp3_secrets_hash", hashSecrets)...)
 		}
 	}
 
@@ -381,7 +409,6 @@ func (r *IPAllocationResource) Create(ctx context.Context, req resource.CreateRe
 		return
 	}
 
-	//resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("snmp3_secret_revision"), snmp3SecretRevision)...)
 	data.Snmp3SecretRevision = snmp3SecretRevision
 	data.Flatten(ctx, &res, &resp.Diagnostics)
 
