@@ -374,7 +374,6 @@ func (r *DhcpfailoverResource) ValidateConfig(ctx context.Context, req resource.
 	if primaryServerType == "EXTERNAL" {
 		primaryValue := data.Primary.ValueString()
 		if primaryValue != "" {
-			primaryValue = data.Primary.ValueString()
 			ip := net.ParseIP(primaryValue)
 			if ip == nil || ip.To4() == nil {
 				resp.Diagnostics.AddError(
