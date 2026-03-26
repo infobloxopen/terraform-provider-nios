@@ -23,7 +23,7 @@ func TestAccMemberDataSource_Filters(t *testing.T) {
 		CheckDestroy:             testAccCheckMemberDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccMemberDataSourceConfigFilters("HOST_NAME_REPLACE_ME"),
+				Config: testAccMemberDataSourceConfigFilters("member-ds-filter-test.com"),
 				Check: resource.ComposeTestCheckFunc(
 					append([]resource.TestCheckFunc{
 						testAccCheckMemberExists(context.Background(), resourceName, &v),
@@ -39,13 +39,15 @@ func TestAccMemberDataSource_ExtAttrFilters(t *testing.T) {
 	resourceName := "nios_grid_member.test"
 	var v grid.Member
 
+	hostName := fmt.Sprintf("infoblox-%s.localdomain", acctest.RandomName())
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		CheckDestroy:             testAccCheckMemberDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccMemberDataSourceConfigExtAttrFilters("HOST_NAME_REPLACE_ME", acctest.RandomName()),
+				Config: testAccMemberDataSourceConfigExtAttrFilters(hostName, acctest.RandomName()),
 				Check: resource.ComposeTestCheckFunc(
 					append([]resource.TestCheckFunc{
 						testAccCheckMemberExists(context.Background(), resourceName, &v),
@@ -150,12 +152,32 @@ func testAccCheckMemberResourceAttrPair(resourceName, dataSourceName string) []r
 func testAccMemberDataSourceConfigFilters(hostName string) string {
 	return fmt.Sprintf(`
 resource "nios_grid_member" "test" {
-  host_name = %q
+  host_name = %[1]q
+  config_addr_type = "IPV4"
+  platform = "VNIOS"
+  service_type_configuration = "ALL_V4"
+
+  ipv6_setting = {
+    auto_router_config_enabled = false
+    dscp = 0
+    enabled = false
+    primary = true
+    use_dscp = false
+  }
+
+  vip_setting = {
+    address = "172.28.83.100"
+    dscp = 0
+    gateway = "172.28.82.1"
+    primary = true
+    subnet_mask = "255.255.254.0"
+    use_dscp = false
+  }
 }
 
 data "nios_grid_member" "test" {
   filters = {
-	host_name = nios_grid_member.test.host_name
+    host_name = nios_grid_member.test.host_name
   }
 }
 `, hostName)
@@ -164,9 +186,30 @@ data "nios_grid_member" "test" {
 func testAccMemberDataSourceConfigExtAttrFilters(hostName, extAttrsValue string) string {
 	return fmt.Sprintf(`
 resource "nios_grid_member" "test" {
-  host_name = %q
+  host_name = %[1]q
+  config_addr_type = "IPV4"
+  platform = "VNIOS"
+  service_type_configuration = "ALL_V4"
+
+  ipv6_setting = {
+    auto_router_config_enabled = false
+    dscp = 0
+    enabled = false
+    primary = true
+    use_dscp = false
+  }
+
+  vip_setting = {
+    address = "172.28.83.101"
+    dscp = 0
+    gateway = "172.28.82.1"
+    primary = true
+    subnet_mask = "255.255.254.0"
+    use_dscp = false
+  }
+
   extattrs = {
-    Site = %q
+    Site = %[2]q
   } 
 }
 
