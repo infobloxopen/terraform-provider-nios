@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/hashicorp/terraform-plugin-framework-nettypes/iptypes"
+	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -73,7 +74,10 @@ var TftpfiledirVtftpDirMembersResourceSchemaAttributes = map[string]schema.Attri
 		MarkdownDescription: "The IP address of network the clients from which will see the virtual TFTP directory as the root directory.",
 	},
 	"cidr": schema.Int64Attribute{
-		Optional:            true,
+		Optional: true,
+		Validators: []validator.Int64{
+			int64validator.Between(0, 128),
+		},
 		MarkdownDescription: "The CIDR of network the clients from which will see the virtual TFTP directory as the root directory.",
 	},
 }
