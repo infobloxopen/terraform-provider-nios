@@ -135,6 +135,21 @@ func (r *ZoneAuthResource) ValidateConfig(ctx context.Context, req resource.Vali
 			)
 		}
 	}
+
+	// Attribute ns_group can't be specified when any of primary or secondary server is specified
+	if !data.NsGroup.IsNull() && !data.NsGroup.IsUnknown() {
+		if (!data.GridPrimary.IsNull() && !data.GridPrimary.IsUnknown()) ||
+			(!data.ExternalPrimaries.IsNull() && !data.ExternalPrimaries.IsUnknown()) ||
+			(!data.MsPrimaries.IsNull() && !data.MsPrimaries.IsUnknown()) ||
+			(!data.GridSecondaries.IsNull() && !data.GridSecondaries.IsUnknown()) ||
+			(!data.ExternalSecondaries.IsNull() && !data.ExternalSecondaries.IsUnknown()) ||
+			(!data.MsSecondaries.IsNull() && !data.MsSecondaries.IsUnknown()) {
+			resp.Diagnostics.AddError(
+				"NS Group Not Allowed",
+				"The ns_group attribute cannot be specified when any of primary (grid_primary, external_primaries, or ms_primaries) or secondary server (grid_secondaries, external_secondaries, or ms_secondaries) is specified. Please remove the ns_group attribute or the primary/secondary server attributes.",
+			)
+		}
+	}
 }
 
 func (r *ZoneAuthResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
