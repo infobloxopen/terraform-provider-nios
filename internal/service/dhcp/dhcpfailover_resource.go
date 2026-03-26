@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"regexp"
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -355,6 +356,27 @@ func (r *DhcpfailoverResource) ValidateConfig(ctx context.Context, req resource.
 			"Invalid Server Types",
 			"Both primary_server_type and secondary_server_type cannot be set to EXTERNAL.",
 		)
+	}
+
+	regex := `^((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.|$)){4}$`
+	if secondaryServerType == "EXTERNAL" {
+		secondaryValue := data.Secondary.ValueString()
+		if secondaryValue != "" && !regexp.MustCompile(regex).MatchString(secondaryValue) {
+			resp.Diagnostics.AddError(
+				"Invalid Secondary Server",
+				"secondary must be a valid IPv4 address when secondary_server_type is set to EXTERNAL.",
+			)
+		}
+	}
+
+	if primaryServerType == "EXTERNAL" {
+		primaryValue := data.Primary.ValueString()
+		if primaryValue != "" && !regexp.MustCompile(regex).MatchString(primaryValue) {
+			resp.Diagnostics.AddError(
+				"Invalid Primary Server",
+				"primary must be a valid IPv4 address when primary_server_type is set to EXTERNAL.",
+			)
+		}
 	}
 
 }
