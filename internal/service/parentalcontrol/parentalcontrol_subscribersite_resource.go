@@ -83,7 +83,7 @@ func (r *ParentalcontrolSubscribersiteResource) Create(ctx context.Context, req 
 	apiRes, _, err := r.client.ParentalControlAPI.
 		ParentalcontrolSubscribersiteAPI.
 		Create(ctx).
-		ParentalcontrolSubscribersite(*data.Expand(ctx, &resp.Diagnostics)).
+		ParentalcontrolSubscribersite(*data.Expand(ctx, &resp.Diagnostics, true)).
 		ReturnFieldsPlus(readableAttributesForParentalcontrolSubscribersite).
 		ReturnAsObject(1).
 		Execute()
@@ -281,7 +281,7 @@ func (r *ParentalcontrolSubscribersiteResource) Update(ctx context.Context, req 
 	apiRes, _, err := r.client.ParentalControlAPI.
 		ParentalcontrolSubscribersiteAPI.
 		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
-		ParentalcontrolSubscribersite(*data.Expand(ctx, &resp.Diagnostics)).
+		ParentalcontrolSubscribersite(*data.Expand(ctx, &resp.Diagnostics, false)).
 		ReturnFieldsPlus(readableAttributesForParentalcontrolSubscribersite).
 		ReturnAsObject(1).
 		Execute()

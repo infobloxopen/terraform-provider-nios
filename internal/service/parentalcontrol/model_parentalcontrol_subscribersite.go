@@ -21,6 +21,7 @@ import (
 	"github.com/infobloxopen/infoblox-nios-go-client/parentalcontrol"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	planmodifiers "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/immutable"
 	importmod "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/import"
 )
 
@@ -234,7 +235,10 @@ var ParentalcontrolSubscribersiteResourceSchemaAttributes = map[string]schema.At
 		MarkdownDescription: "The list of MSP for the site.",
 	},
 	"name": schema.StringAttribute{
-		Required:            true,
+		Required: true,
+		PlanModifiers: []planmodifier.String{
+			planmodifiers.ImmutableString(),
+		},
 		MarkdownDescription: "The name of the site.",
 	},
 	"nas_gateways": schema.ListNestedAttribute{
@@ -302,7 +306,7 @@ var ParentalcontrolSubscribersiteResourceSchemaAttributes = map[string]schema.At
 	},
 }
 
-func (m *ParentalcontrolSubscribersiteModel) Expand(ctx context.Context, diags *diag.Diagnostics) *parentalcontrol.ParentalcontrolSubscribersite {
+func (m *ParentalcontrolSubscribersiteModel) Expand(ctx context.Context, diags *diag.Diagnostics, isCreate bool) *parentalcontrol.ParentalcontrolSubscribersite {
 	if m == nil {
 		return nil
 	}
@@ -325,7 +329,6 @@ func (m *ParentalcontrolSubscribersiteModel) Expand(ctx context.Context, diags *
 		MaximumSubscribers:       flex.ExpandInt64Pointer(m.MaximumSubscribers),
 		Members:                  flex.ExpandFrameworkListNestedBlock(ctx, m.Members, diags, ExpandParentalcontrolSubscribersiteMembers),
 		Msps:                     flex.ExpandFrameworkListNestedBlock(ctx, m.Msps, diags, ExpandParentalcontrolSubscribersiteMsps),
-		Name:                     flex.ExpandStringPointer(m.Name),
 		NasGateways:              flex.ExpandFrameworkListNestedBlock(ctx, m.NasGateways, diags, ExpandParentalcontrolSubscribersiteNasGateways),
 		NasPort:                  flex.ExpandInt64Pointer(m.NasPort),
 		ProxyRpzPassthru:         flex.ExpandBoolPointer(m.ProxyRpzPassthru),
@@ -333,6 +336,9 @@ func (m *ParentalcontrolSubscribersiteModel) Expand(ctx context.Context, diags *
 		StopAnycast:              flex.ExpandBoolPointer(m.StopAnycast),
 		StrictNat:                flex.ExpandBoolPointer(m.StrictNat),
 		SubscriberCollectionType: flex.ExpandStringPointer(m.SubscriberCollectionType),
+	}
+	if isCreate {
+		to.Name = flex.ExpandStringPointer(m.Name)
 	}
 	return to
 }
