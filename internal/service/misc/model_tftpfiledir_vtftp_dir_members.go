@@ -68,7 +68,6 @@ var TftpfiledirVtftpDirMembersResourceSchemaAttributes = map[string]schema.Attri
 		MarkdownDescription: "The end IP address of the range within which the clients will see the virtual TFTP directory as the root directory.",
 	},
 	"network": schema.StringAttribute{
-		//CustomType:          iptypes.IPAddressType{},
 		Computed:            true,
 		Optional:            true,
 		MarkdownDescription: "The IP address of network the clients from which will see the virtual TFTP directory as the root directory.",

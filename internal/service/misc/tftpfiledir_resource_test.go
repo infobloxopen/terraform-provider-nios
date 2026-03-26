@@ -16,9 +16,11 @@ import (
 )
 
 // TODO
-// Support for 'FILE' type needs to be added with function call in order to enable related tests.
+// Support for 'FILE' type needs to be added with function call and tests need to be updated accordingly.
 
-// Setup Required - Enable `Allow these clients perform file transfers` for `Any` client for the Member `infoblox.localdomain` in Data Management > File Distribution > Grid Members
+// Setup Required :
+// In the Infoblox UI , navigate to Data Management > File Distribution > Grid Members > i
+// For the member `infoblox.localdomain`, enable `Allow these clients perform file transfers` for `Any` client.
 
 var readableAttributesForTftpfiledir = "directory,is_synced_to_gm,last_modify,name,type,vtftp_dir_members"
 
