@@ -82,7 +82,7 @@ var SyslogEndpointSyslogServersResourceSchemaAttributes = map[string]schema.Attr
 			stringvalidator.OneOf("formatted", "raw"),
 		},
 		Default:             stringdefault.StaticString("raw"),
-		MarkdownDescription: "Format vlues for syslog endpoint server",
+		MarkdownDescription: "Format values for syslog endpoint server",
 	},
 	"facility": schema.StringAttribute{
 		Computed: true,
@@ -105,7 +105,7 @@ var SyslogEndpointSyslogServersResourceSchemaAttributes = map[string]schema.Attr
 	"certificate": schema.SingleNestedAttribute{
 		Computed:            true,
 		Attributes:          SyslogEndpointSyslogServersCertificateResourceSchemaAttributes,
-		MarkdownDescription: "Reference for creating sysog endpoint server.",
+		MarkdownDescription: "Reference for creating syslog endpoint server.",
 	},
 	"certificate_token": schema.StringAttribute{
 		Computed:            true,
