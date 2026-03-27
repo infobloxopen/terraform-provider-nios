@@ -608,34 +608,42 @@ func TestAccParentalcontrolSubscribersiteResource_Members(t *testing.T) {
 	})
 }
 
-//func TestAccParentalcontrolSubscribersiteResource_Msps(t *testing.T) {
-//	var resourceName = "nios_parentalcontrol_subscribersite.test_msps"
-//	var v parentalcontrol.ParentalcontrolSubscribersite
-//
-//	resource.ParallelTest(t, resource.TestCase{
-//		PreCheck:                 func() { acctest.PreCheck(t) },
-//		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-//		Steps: []resource.TestStep{
-//			// Create and Read
-//			{
-//				Config: testAccParentalcontrolSubscribersiteMsps("MSPS_REPLACE_ME"),
-//				Check: resource.ComposeTestCheckFunc(
-//					testAccCheckParentalcontrolSubscribersiteExists(context.Background(), resourceName, &v),
-//					resource.TestCheckResourceAttr(resourceName, "msps", "MSPS_REPLACE_ME"),
-//				),
-//			},
-//			// Update and Read
-//			{
-//				Config: testAccParentalcontrolSubscribersiteMsps("MSPS_UPDATE_REPLACE_ME"),
-//				Check: resource.ComposeTestCheckFunc(
-//					testAccCheckParentalcontrolSubscribersiteExists(context.Background(), resourceName, &v),
-//					resource.TestCheckResourceAttr(resourceName, "msps", "MSPS_UPDATE_REPLACE_ME"),
-//				),
-//			},
-//			// Delete testing automatically occurs in TestCase
-//		},
-//	})
-//}
+func TestAccParentalcontrolSubscribersiteResource_Msps(t *testing.T) {
+	var resourceName = "nios_parentalcontrol_subscribersite.test_msps"
+	var v parentalcontrol.ParentalcontrolSubscribersite
+	name := acctest.RandomNameWithPrefix("subscriber-site")
+	msps1 := []map[string]any{
+		{"ip_address": "12.13.15.15"},
+	}
+	msps2 := []map[string]any{
+		{"ip_address": "12.13.15.16"},
+	}
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// Create and Read
+			{
+				Config: testAccParentalcontrolSubscribersiteMsps(name, msps1, "12.13.155.15"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckParentalcontrolSubscribersiteExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "msps.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "msps.0.ip_address", "12.13.15.15"),
+				),
+			},
+			// Update and Read
+			{
+				Config: testAccParentalcontrolSubscribersiteMsps(name, msps2, "12.13.155.15"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckParentalcontrolSubscribersiteExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "msps.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "msps.0.ip_address", "12.13.15.16"),
+				),
+			},
+			// Delete testing automatically occurs in TestCase
+		},
+	})
+}
 
 func TestAccParentalcontrolSubscribersiteResource_NasGateways(t *testing.T) {
 	var resourceName = "nios_parentalcontrol_subscribersite.test_nas_gateways"
@@ -713,13 +721,16 @@ func TestAccParentalcontrolSubscribersiteResource_ProxyRpzPassthru(t *testing.T)
 	var resourceName = "nios_parentalcontrol_subscribersite.test_proxy_rpz_passthru"
 	var v parentalcontrol.ParentalcontrolSubscribersite
 	name := acctest.RandomNameWithPrefix("subscriber-site")
+	msps := []map[string]any{
+		{"ip_address": "12.13.15.15"},
+	}
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccParentalcontrolSubscribersiteProxyRpzPassthru(name, "true"),
+				Config: testAccParentalcontrolSubscribersiteProxyRpzPassthru(name, "true", "12.13.14.18", msps),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckParentalcontrolSubscribersiteExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "proxy_rpz_passthru", "true"),
@@ -727,7 +738,7 @@ func TestAccParentalcontrolSubscribersiteResource_ProxyRpzPassthru(t *testing.T)
 			},
 			// Update and Read
 			{
-				Config: testAccParentalcontrolSubscribersiteProxyRpzPassthru(name, "false"),
+				Config: testAccParentalcontrolSubscribersiteProxyRpzPassthru(name, "false", "12.13.14.19", msps),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckParentalcontrolSubscribersiteExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "proxy_rpz_passthru", "false"),
@@ -738,34 +749,42 @@ func TestAccParentalcontrolSubscribersiteResource_ProxyRpzPassthru(t *testing.T)
 	})
 }
 
-//func TestAccParentalcontrolSubscribersiteResource_Spms(t *testing.T) {
-//	var resourceName = "nios_parentalcontrol_subscribersite.test_spms"
-//	var v parentalcontrol.ParentalcontrolSubscribersite
-//
-//	resource.ParallelTest(t, resource.TestCase{
-//		PreCheck:                 func() { acctest.PreCheck(t) },
-//		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-//		Steps: []resource.TestStep{
-//			// Create and Read
-//			{
-//				Config: testAccParentalcontrolSubscribersiteSpms("SPMS_REPLACE_ME"),
-//				Check: resource.ComposeTestCheckFunc(
-//					testAccCheckParentalcontrolSubscribersiteExists(context.Background(), resourceName, &v),
-//					resource.TestCheckResourceAttr(resourceName, "spms", "SPMS_REPLACE_ME"),
-//				),
-//			},
-//			// Update and Read
-//			{
-//				Config: testAccParentalcontrolSubscribersiteSpms("SPMS_UPDATE_REPLACE_ME"),
-//				Check: resource.ComposeTestCheckFunc(
-//					testAccCheckParentalcontrolSubscribersiteExists(context.Background(), resourceName, &v),
-//					resource.TestCheckResourceAttr(resourceName, "spms", "SPMS_UPDATE_REPLACE_ME"),
-//				),
-//			},
-//			// Delete testing automatically occurs in TestCase
-//		},
-//	})
-//}
+func TestAccParentalcontrolSubscribersiteResource_Spms(t *testing.T) {
+	var resourceName = "nios_parentalcontrol_subscribersite.test_spms"
+	var v parentalcontrol.ParentalcontrolSubscribersite
+	name := acctest.RandomNameWithPrefix("subscriber-site")
+	spms1 := []map[string]any{
+		{"ip_address": "12.13.14.15"},
+	}
+	spms2 := []map[string]any{
+		{"ip_address": "12.13.14.16"},
+	}
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// Create and Read
+			{
+				Config: testAccParentalcontrolSubscribersiteSpms(name, spms1, "12.12.122.12"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckParentalcontrolSubscribersiteExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "spms.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "spms.0.ip_address", "12.13.14.15"),
+				),
+			},
+			// Update and Read
+			{
+				Config: testAccParentalcontrolSubscribersiteSpms(name, spms2, "12.12.122.12"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckParentalcontrolSubscribersiteExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "spms.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "spms.0.ip_address", "12.13.14.16"),
+				),
+			},
+			// Delete testing automatically occurs in TestCase
+		},
+	})
+}
 
 func TestAccParentalcontrolSubscribersiteResource_StopAnycast(t *testing.T) {
 	var resourceName = "nios_parentalcontrol_subscribersite.test_stop_anycast"
@@ -1055,21 +1074,15 @@ resource "nios_parentalcontrol_subscribersite" "test_members" {
 `, name, membersStr)
 }
 
-func testAccParentalcontrolSubscribersiteMsps(name, msps string) string {
+func testAccParentalcontrolSubscribersiteMsps(name string, msps []map[string]any, blockingIpv4Vip2 string) string {
+	mspsStr := utils.ConvertSliceOfMapsToHCL(msps)
 	return fmt.Sprintf(`
 resource "nios_parentalcontrol_subscribersite" "test_msps" {
     name = %q
-    msps = %q
+    msps = %s
+    blocking_ipv4_vip2 = %q
 }
-`, name, msps)
-}
-
-func testAccParentalcontrolSubscribersiteName(name string) string {
-	return fmt.Sprintf(`
-resource "nios_parentalcontrol_subscribersite" "test_name" {
-    name = %q
-}
-`, name)
+`, name, mspsStr, blockingIpv4Vip2)
 }
 
 func testAccParentalcontrolSubscribersiteNasGateways(name string, nasGateways []map[string]any) string {
@@ -1091,22 +1104,27 @@ resource "nios_parentalcontrol_subscribersite" "test_nas_port" {
 `, name, nasPort)
 }
 
-func testAccParentalcontrolSubscribersiteProxyRpzPassthru(name, proxyRpzPassthru string) string {
+func testAccParentalcontrolSubscribersiteProxyRpzPassthru(name, proxyRpzPassthru, blockingIpv4Vip2 string, msps []map[string]any) string {
+	mspsStr := utils.ConvertSliceOfMapsToHCL(msps)
 	return fmt.Sprintf(`
 resource "nios_parentalcontrol_subscribersite" "test_proxy_rpz_passthru" {
     name = %q
     proxy_rpz_passthru = %q
+    blocking_ipv4_vip2 = %q
+	msps = %s
 }
-`, name, proxyRpzPassthru)
+`, name, proxyRpzPassthru, blockingIpv4Vip2, mspsStr)
 }
 
-func testAccParentalcontrolSubscribersiteSpms(name, spms string) string {
+func testAccParentalcontrolSubscribersiteSpms(name string, spms []map[string]any, blockingIpv4Vip2 string) string {
+	spmsStr := utils.ConvertSliceOfMapsToHCL(spms)
 	return fmt.Sprintf(`
 resource "nios_parentalcontrol_subscribersite" "test_spms" {
     name = %q
-    spms = %q
+    spms = %s
+    blocking_ipv4_vip2 = %q
 }
-`, name, spms)
+`, name, spmsStr, blockingIpv4Vip2)
 }
 
 func testAccParentalcontrolSubscribersiteStopAnycast(name, stopAnycast string) string {
