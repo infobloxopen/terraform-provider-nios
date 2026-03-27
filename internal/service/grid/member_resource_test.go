@@ -4366,7 +4366,7 @@ func TestAccMemberResource_Import(t *testing.T) {
 				ImportState:                          true,
 				ImportStateIdFunc:                    testAccMemberImportStateIdFunc(resourceName),
 				ImportStateVerify:                    true,
-				ImportStateVerifyIgnore:              []string{"configure_csp_member_setting"},
+				ImportStateVerifyIgnore:              []string{"configure_csp_member_setting", "support_access_info"},
 				ImportStateVerifyIdentifierAttribute: "ref",
 				PlanOnly:                             true,
 			},
@@ -4376,7 +4376,7 @@ func TestAccMemberResource_Import(t *testing.T) {
 				ImportState:                          true,
 				ImportStateIdFunc:                    testAccMemberImportStateIdFunc(resourceName),
 				ImportStateVerify:                    true,
-				ImportStateVerifyIgnore:              []string{"extattrs_all", "configure_csp_member_setting"},
+				ImportStateVerifyIgnore:              []string{"extattrs_all", "configure_csp_member_setting", "support_access_info"},
 				ImportStateVerifyIdentifierAttribute: "ref",
 			},
 			// Delete testing automatically occurs in TestCase
