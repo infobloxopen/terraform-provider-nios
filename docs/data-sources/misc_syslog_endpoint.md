@@ -81,14 +81,14 @@ Optional:
 - `certificate_file_path` (String) The file path to the certificate.
 - `connection_type` (String) Connection type values
 - `facility` (String) Facility values for syslog endpoint server
-- `format` (String) Format vlues for syslog endpoint server
+- `format` (String) Format values for syslog endpoint server
 - `hostname` (String) List of hostnames
 - `port` (Number) The port this server listens on.
 - `severity` (String) Severity values for syslog endpoint server.
 
 Read-Only:
 
-- `certificate` (Attributes) Reference for creating sysog endpoint server. (see [below for nested schema](#nestedatt--result--syslog_servers--certificate))
+- `certificate` (Attributes) Reference for creating syslog endpoint server. (see [below for nested schema](#nestedatt--result--syslog_servers--certificate))
 - `certificate_token` (String) The token returned by the uploadinit function call in object fileop.
 
 <a id="nestedatt--result--syslog_servers--certificate"></a>
