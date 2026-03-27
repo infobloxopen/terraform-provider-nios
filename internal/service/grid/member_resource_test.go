@@ -1188,25 +1188,25 @@ func TestAccMemberResource_HaOnCloud(t *testing.T) {
 			// Create and Read
 			{
 				Config: testAccMemberHaOnCloud(hostName,
-					"true",
+					"false", "None",
 					vipAddress,
 					"172.28.82.1",
-					"255.255.254.0"),
+					"255.255.254.0", "false", 0),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ha_on_cloud", "true"),
+					resource.TestCheckResourceAttr(resourceName, "ha_on_cloud", "false"),
 				),
 			},
 			// Update and Read
 			{
 				Config: testAccMemberHaOnCloud(hostName,
-					"false",
+					"true", "AWS",
 					vipAddress,
 					"172.28.82.1",
-					"255.255.254.0"),
+					"255.255.254.0", "true", 115),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ha_on_cloud", "false"),
+					resource.TestCheckResourceAttr(resourceName, "ha_on_cloud", "true"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -2145,6 +2145,7 @@ func TestAccMemberResource_Platform(t *testing.T) {
 }
 
 func TestAccMemberResource_PreProvisioning(t *testing.T) {
+	t.Skip("Skipping test due to NIOS-109825")
 	var resourceName = "nios_grid_member.test"
 	var v grid.Member
 	hostName := fmt.Sprintf("infoblox-%s.localdomain", acctest.RandomName())
@@ -5122,13 +5123,38 @@ resource "nios_grid_member" "test_ha_cloud_platform" {
 `, hostName, haCloudPlatform, vipAddress, vipGateway, vipSubnetMask)
 }
 
-func testAccMemberHaOnCloud(hostName string, haOnCloud string, vipAddress, vipGateway, vipSubnetMask string) string {
+func testAccMemberHaOnCloud(hostName string, haOnCloud string, haCloudPlatform, vipAddress, vipGateway, vipSubnetMask, enableHA string, routerID int) string {
+	routerIDStr := ""
+	haNodeInfoStr := ""
+	haCloudPlatformStr := ""
+	haOnCloudStr := fmt.Sprintf("ha_on_cloud = %q", haOnCloud)
+	enableHAStr := fmt.Sprintf("enable_ha = %q", enableHA)
+	if enableHA == "true" {
+		routerIDStr = fmt.Sprintf("router_id = %d", routerID)
+		haNodeInfoStr = `node_info = [
+			{
+				lan_ha_port_setting = {
+					ha_cloud_attribute = "1"
+					ha_ip_address      = "172.28.83.230"
+					mgmt_lan           = "172.28.83.231"
+				}
+			},
+			{
+				lan_ha_port_setting = {
+					ha_cloud_attribute = "2"
+					ha_ip_address      = "172.28.83.232"
+					mgmt_lan           = "172.28.83.233"
+				}
+			}
+		]`
+		haCloudPlatformStr = fmt.Sprintf("ha_cloud_platform = %q", haCloudPlatform)
+	}
 	return fmt.Sprintf(`
 resource "nios_grid_member" "test_ha_on_cloud" {
     host_name = %q
-    ha_on_cloud = %q
+    %s
 	platform = "VNIOS"
-	ha_cloud_platform = "AWS"
+	%s
 	vip_setting = {
 		address = %q
 		dscp = 0
@@ -5137,51 +5163,15 @@ resource "nios_grid_member" "test_ha_on_cloud" {
 		subnet_mask = %q
 		use_dscp = false
 	}
-	node_info = [
-    {
-      lan_ha_port_setting = {
-        ha_cloud_attribute = "UNK"
-        ha_ip_address = "172.28.82.11"
-        ha_port_setting = {
-          auto_port_setting_enabled = true
-          speed = "10"
-        }
-        lan_port_setting = {
-          auto_port_setting_enabled = true
-        }
-        mgmt_lan = "172.28.82.32"
-      }
-    },
-    {
-      lan_ha_port_setting = {
-        ha_cloud_attribute = "UNK"
-        ha_ip_address = "172.28.82.41"
-        ha_port_setting = {
-          auto_port_setting_enabled = true
-          speed = "10"
-        }
-        lan_port_setting = {
-          auto_port_setting_enabled = true
-        }
-        mgmt_lan = "172.28.82.43"
-      }
-    }
-  ]
-	enable_ha = true
-	router_id = 112
-	lan2_port_setting = {
-		virtual_router_id = 10
-		enabled = true
-		network_setting = {
-        address = "172.29.82.15"
-        gateway = "172.29.82.1"
-        primary = true
-        subnet_mask = "255.255.0.0"
-		}
-    }
-	lan2_enabled = true
+	%s
+	%s
+	%s
+	dns_resolver_setting = {
+		search_domains = ["5.5.5.5"]
+	}
+	use_dns_resolver_setting = true
 }
-`, hostName, haOnCloud, vipAddress, vipGateway, vipSubnetMask)
+`, hostName, haOnCloudStr, haCloudPlatformStr, vipAddress, vipGateway, vipSubnetMask, haNodeInfoStr, enableHAStr, routerIDStr)
 }
 
 func testAccMemberHostName(
