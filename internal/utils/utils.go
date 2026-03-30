@@ -447,6 +447,8 @@ func ConvertSliceOfMapsToHCL(data []map[string]any) string {
 				formattedValue = nestedHCL
 			case map[string]any:
 				formattedValue = ConvertMapToHCL(v)
+			case []string:
+				formattedValue = ConvertStringSliceToHCL(v)
 			case string:
 				formattedValue = fmt.Sprintf("%q", v)
 			case int, int64, float64:

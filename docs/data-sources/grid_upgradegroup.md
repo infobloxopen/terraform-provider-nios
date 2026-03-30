@@ -64,9 +64,9 @@ Read-Only:
 <a id="nestedatt--result--members"></a>
 ### Nested Schema for `result.members`
 
-Required:
+Optional:
 
-- `member` (String) The upgrade group member name.
+- `member` (String) The upgrade group member name. This is Required when creating a new upgrade group member.
 
 Read-Only:
 
