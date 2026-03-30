@@ -36,7 +36,6 @@ resource "nios_grid_join" "member_join" {
   depends_on      = [nios_grid_member.example_grid_member]
 }
 
-
 // Create an Offline Member with IPV6 config
 resource "nios_grid_member" "example_grid_member" {
   host_name        = "infoblox.member2"

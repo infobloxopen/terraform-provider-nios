@@ -91,29 +91,25 @@ func (r *GridJoinResource) Create(ctx context.Context, req resource.CreateReques
 	// Check for 200 response with HTML body indicating member is already joined to a grid master
 	if err != nil && httpResp != nil && httpResp.StatusCode == 200 {
 		if httpResp.Body != nil {
-			bodyBytes, readErr := io.ReadAll(httpResp.Body)
 			defer httpResp.Body.Close()
+			bodyBytes, readErr := io.ReadAll(httpResp.Body)
 			if readErr == nil {
 				bodyStr := string(bodyBytes)
-				// If response is HTML redirect, member is already joined
-				if strings.Contains(bodyStr, "<HTML>") && strings.Contains(bodyStr, "REFRESH") {
-					// Extract URL from HTML redirect
-					masterURL := ""
-					if urlStart := strings.Index(bodyStr, "URL="); urlStart != -1 {
-						urlStart += 4
-						urlEnd := strings.IndexAny(bodyStr[urlStart:], "\"'")
-						if urlEnd != -1 {
-							masterURL = strings.TrimSpace(bodyStr[urlStart : urlStart+urlEnd])
-						}
-					}
+				bodyLower := strings.ToLower(bodyStr)
 
-					var errorMsg string
+				isHTMLResponse := strings.Contains(httpResp.Header.Get("Content-Type"), "text/html")
+				isHTML := strings.Contains(bodyLower, "<html")
+				hasMetaRefresh := strings.Contains(bodyLower, "http-equiv=\"refresh\"")
+
+				// If response is HTML redirect, member is already joined
+				if isHTMLResponse && isHTML && hasMetaRefresh {
+					// Extract URL from HTML redirect
+					masterURL := extractRedirectURL(bodyStr)
+					errorMsg := "Member is already part of another grid."
 					if masterURL != "" {
 						errorMsg = fmt.Sprintf("The member is already part of grid master: %s", masterURL)
 					}
-
 					resp.Diagnostics.AddError("Grid Join Failed", errorMsg)
-					resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 					return
 				}
 			}
@@ -129,7 +125,7 @@ func (r *GridJoinResource) Create(ctx context.Context, req resource.CreateReques
 	}
 
 	// Normal 200 response - grid join initiated
-	tflog.Debug(ctx, "Grid join Initiated", map[string]any{
+	tflog.Debug(ctx, "Grid join initiated successfully. Please verify the grid status manually through the NIOS GUI to confirm the member has joined. If the join operation fails, manual intervention may be required to troubleshoot connectivity issues, credentials, or grid configuration.", map[string]any{
 		"member_ip": data.MemberIP.ValueString(),
 		"master":    data.Master.ValueString(),
 		"grid_name": data.GridName.ValueString(),
@@ -140,40 +136,32 @@ func (r *GridJoinResource) Create(ctx context.Context, req resource.CreateReques
 }
 
 func (r *GridJoinResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	var data GridJoinModel
-
-	// Read Terraform prior state data into the model
-	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
-
-	if resp.Diagnostics.HasError() {
-		return
-	}
-
-	// Save updated data into Terraform state
-	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+	// Read does not perform any verification of the grid join status.
+	// The grid join operation is a one-time action.
 }
 
 func (r *GridJoinResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data GridJoinModel
-
-	// Read Terraform plan data into the model
-	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
-
-	if resp.Diagnostics.HasError() {
-		return
-	}
-
-	// Save updated data into Terraform state
-	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+	// Update is not supported as all grid join attributes are immutable.
 }
 
 func (r *GridJoinResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	var data GridJoinModel
+	// Delete only removes the resource from Terraform state without making any API call.
+	// To actually unjoin a member from the grid, you must delete the corresponding nios_grid_member resource,
+	// which will remove the member from the grid and make it a standalone Grid.
+	// This resource does not directly support unjoining a member through deletion.
+}
 
-	// Read Terraform prior state data into the model
-	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
-
-	if resp.Diagnostics.HasError() {
-		return
+func extractRedirectURL(body string) string {
+	idx := strings.Index(strings.ToLower(body), "url=")
+	if idx == -1 {
+		return ""
 	}
+
+	start := idx + 4
+	end := strings.IndexAny(body[start:], "\"'")
+	if end == -1 {
+		return ""
+	}
+
+	return strings.TrimSpace(body[start : start+end])
 }
