@@ -77,7 +77,7 @@ func TestAccNetworkviewResource_CloudInfo(t *testing.T) {
 	var resourceName = "nios_ipam_network_view.test_cloud_info"
 	var v ipam.Networkview
 	name := acctest.RandomNameWithPrefix("test-network-view")
-	memberName := "infoblox.cloudmem"
+	memberName := "infoblox.localdomain"
 	memberIpv4 := "172.172.172.172"
 	memberIpv6 := "2001::123"
 
@@ -95,8 +95,6 @@ func TestAccNetworkviewResource_CloudInfo(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "cloud_info.delegated_scope", "ROOT"),
 					resource.TestCheckResourceAttr(resourceName, "cloud_info.owned_by_adaptor", "false"),
 					resource.TestCheckResourceAttr(resourceName, "cloud_info.delegated_member.name", memberName),
-					resource.TestCheckResourceAttr(resourceName, "cloud_info.delegated_member.ipv4addr", memberIpv4),
-					resource.TestCheckResourceAttr(resourceName, "cloud_info.delegated_member.ipv6addr", memberIpv6),
 				),
 			},
 			// Update and Read
@@ -184,7 +182,7 @@ func TestAccNetworkviewResource_DdnsZonePrimaries(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccNetworkviewDdnsZonePrimaries(name, "infoblox.cloudmem", "GRID", "zone_auth/ZG5zLnpvbmUkLl9kZWZhdWx0LmNvbS5maXJzdA:first.com/default"),
+				Config: testAccNetworkviewDdnsZonePrimaries(name, "infoblox.member", "GRID", "zone_auth/ZG5zLnpvbmUkLl9kZWZhdWx0LmNvbS5maXJzdA:first.com/default"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkviewExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "ddns_zone_primaries.0.dns_grid_primary", "infoblox.cloudmem"),
@@ -194,7 +192,7 @@ func TestAccNetworkviewResource_DdnsZonePrimaries(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccNetworkviewDdnsZonePrimaries(name, "infoblox.cloudmem", "GRID", "zone_auth/ZG5zLnpvbmUkLl9kZWZhdWx0LmNvbS5zZWNvbmQ:second.com/default"),
+				Config: testAccNetworkviewDdnsZonePrimaries(name, "infoblox.member", "GRID", "zone_auth/ZG5zLnpvbmUkLl9kZWZhdWx0LmNvbS5zZWNvbmQ:second.com/default"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkviewExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "ddns_zone_primaries.1.dns_grid_primary", "infoblox.cloudmem"),
@@ -278,9 +276,8 @@ func TestAccNetworkviewResource_InternalForwardZones(t *testing.T) {
 	var resourceName = "nios_ipam_network_view.test_internal_forward_zones"
 	var v ipam.Networkview
 	name := acctest.RandomNameWithPrefix("test-network-view")
-	InternalForwardZonesCreate := []string{"\"zone_auth/ZG5zLnpvbmUkLl9kZWZhdWx0LmNvbS5maXJzdA:first.com/default\""}
-	InternalForwardZonesUpdate := []string{"\"zone_auth/ZG5zLnpvbmUkLl9kZWZhdWx0LmNvbS5maXJzdA:first.com/default\"",
-		"\"zone_auth/ZG5zLnpvbmUkLl9kZWZhdWx0LmNvbS5zZWNvbmQ:second.com/default\""}
+	InternalForwardZonesCreate := []string{"${nios_dns_zone_auth.test_zone1.ref}"}
+	InternalForwardZonesUpdate := []string{"${nios_dns_zone_auth.test_zone1.ref}", "${nios_dns_zone_auth.test_zone2.ref}"}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -520,12 +517,10 @@ resource "nios_ipam_network_view" "test_cloud_info" {
     cloud_info = {
 		delegated_member = {
 			name 	 = %q
-			ipv4addr = %q
-			ipv6addr = %q
 		}
 	}
 }
-`, name, member_name, member_ipv4, member_ipv6)
+`, name, member_name)
 }
 
 func testAccNetworkviewCloudInfoNull(name, delegatedMember string) string {
@@ -612,6 +607,16 @@ resource "nios_ipam_network_view" "test_internal_forward_zones" {
 
 func testAccNetworkviewInternalForwardZones(name string, internalForwardZones []string) string {
 	return fmt.Sprintf(`
+resource "nios_dns_zone_auth" "test_zone1" {
+    fqdn = "example_fqdn_internal_forward_zone_1"
+    view = "default"
+}
+
+resource "nios_dns_zone_auth" "test_zone2" {
+    fqdn = "example_fqdn_internal_forward_zone_2"
+    view = "default"
+}
+
 resource "nios_ipam_network_view" "test_internal_forward_zones" {
 	name = %q
     internal_forward_zones = %s

@@ -594,20 +594,26 @@ resource "nios_dns_record_a" "test_forbid_reclamation" {
 
 func testAccRecordAFuncCall(name, view, attributeName, objFunc, parameters, resultField, object, objectParameters, comment string) string {
 	return fmt.Sprintf(`
+resource "nios_ipam_network" "test_func_call" {
+    network = %[7]q
+	network_view = "default"
+}
+
 resource "nios_dns_record_a" "test_func_call" {
-	name = %q
-	view = %q
+	name = %[1]q
+	view = %[2]q
 	func_call = {
-		"attribute_name" = %q
-		"object_function" = %q
-		"result_field" = %q
-		"object" = %q
+		"attribute_name" = %[3]q
+		"object_function" = %[4]q
+		"result_field" = %[5]q
+		"object" = %[6]q
 		"object_parameters" = {
-			"network" = %q
+			"network" = %[7]q
 			"network_view" = "default"
 		}
 	}
-	comment = %q
+	comment = %[8]q
+	depends_on = [nios_ipam_network.test_func_call]
 }
 `, name, view, attributeName, objFunc, resultField, object, objectParameters, comment)
 }

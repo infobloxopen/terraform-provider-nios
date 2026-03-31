@@ -16,7 +16,7 @@ import (
 )
 
 // TODO: OBJECTS TO BE PRESENT IN GRID FOR TESTS
-// A NIOS grid with 2 members - infoblox.172_28_82_110 , infoblox.172_28_83_25
+// A NIOS grid with 2 members - infoblox.172_28_82_110 , infoblox.member
 var readableAttributesForNsgroup = "comment,extattrs,external_primaries,external_secondaries,grid_primary,grid_secondaries,is_grid_default,is_multimaster,name,use_external_primary"
 
 func TestAccNsgroupResource_basic(t *testing.T) {
@@ -25,7 +25,7 @@ func TestAccNsgroupResource_basic(t *testing.T) {
 	name := acctest.RandomNameWithPrefix("ns-group")
 	gridPrimary := []map[string]any{
 		{
-			"name": "infoblox.172_28_83_208",
+			"name": "infoblox.localdomain",
 		},
 	}
 
@@ -40,7 +40,7 @@ func TestAccNsgroupResource_basic(t *testing.T) {
 					testAccCheckNsgroupExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "name", name),
 					resource.TestCheckResourceAttr(resourceName, "grid_primary.#", "1"),
-					resource.TestCheckResourceAttr(resourceName, "grid_primary.0.name", "infoblox.172_28_83_208"),
+					resource.TestCheckResourceAttr(resourceName, "grid_primary.0.name", "infoblox.localdomain"),
 					// Test fields with default value
 					resource.TestCheckResourceAttr(resourceName, "comment", ""),
 					resource.TestCheckResourceAttr(resourceName, "is_grid_default", "false"),
@@ -60,7 +60,7 @@ func TestAccNsgroupResource_disappears(t *testing.T) {
 	name := acctest.RandomNameWithPrefix("ns-group")
 	gridPrimary := []map[string]any{
 		{
-			"name": "infoblox.172_28_83_208",
+			"name": "infoblox.localdomain",
 		},
 	}
 
@@ -87,7 +87,7 @@ func TestAccNsgroupResource_Comment(t *testing.T) {
 	name := acctest.RandomNameWithPrefix("ns-group")
 	gridPrimary := []map[string]any{
 		{
-			"name": "infoblox.172_28_83_208",
+			"name": "infoblox.localdomain",
 		},
 	}
 	comment := "This is a test comment"
@@ -124,7 +124,7 @@ func TestAccNsgroupResource_ExtAttrs(t *testing.T) {
 	name := acctest.RandomNameWithPrefix("ns-group")
 	gridPrimary := []map[string]any{
 		{
-			"name": "infoblox.172_28_83_208",
+			"name": "infoblox.localdomain",
 		},
 	}
 	extAttrValue1 := acctest.RandomName()
@@ -171,7 +171,7 @@ func TestAccNsgroupResource_ExternalPrimaries(t *testing.T) {
 	}
 	gridSecondaries := []map[string]any{
 		{
-			"name": "infoblox.172_28_83_208",
+			"name": "infoblox.localdomain",
 		},
 	}
 	externalPrimariesUpdate := []map[string]any{
@@ -214,7 +214,7 @@ func TestAccNsgroupResource_ExternalSecondaries(t *testing.T) {
 	name := acctest.RandomNameWithPrefix("ns-group")
 	gridPrimary := []map[string]any{
 		{
-			"name": "infoblox.172_28_83_208",
+			"name": "infoblox.localdomain",
 		},
 	}
 	externalSecondaries := []map[string]any{
@@ -263,12 +263,12 @@ func TestAccNsgroupResource_GridPrimary(t *testing.T) {
 	name := acctest.RandomNameWithPrefix("ns-group")
 	gridPrimary := []map[string]any{
 		{
-			"name": "infoblox.172_28_83_208",
+			"name": "infoblox.localdomain",
 		},
 	}
 	gridPrimaryUpdate := []map[string]any{
 		{
-			"name": "infoblox.172_28_83_25",
+			"name": "infoblox.member",
 		},
 	}
 
@@ -281,7 +281,7 @@ func TestAccNsgroupResource_GridPrimary(t *testing.T) {
 				Config: testAccNsgroupGridPrimary(name, gridPrimary),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNsgroupExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "grid_primary.0.name", "infoblox.172_28_83_208"),
+					resource.TestCheckResourceAttr(resourceName, "grid_primary.0.name", "infoblox.localdomain"),
 				),
 			},
 			// Update and Read
@@ -289,7 +289,7 @@ func TestAccNsgroupResource_GridPrimary(t *testing.T) {
 				Config: testAccNsgroupGridPrimary(name, gridPrimaryUpdate),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNsgroupExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "grid_primary.0.name", "infoblox.172_28_83_25"),
+					resource.TestCheckResourceAttr(resourceName, "grid_primary.0.name", "infoblox.member"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -303,7 +303,7 @@ func TestAccNsgroupResource_GridSecondaries(t *testing.T) {
 	name := acctest.RandomNameWithPrefix("ns-group")
 	gridSecondaries := []map[string]any{
 		{
-			"name": "infoblox.172_28_83_208",
+			"name": "infoblox.localdomain",
 		},
 	}
 	externalPrimaries := []map[string]any{
@@ -314,7 +314,7 @@ func TestAccNsgroupResource_GridSecondaries(t *testing.T) {
 	}
 	gridSecondariesUpdate := []map[string]any{
 		{
-			"name": "infoblox.172_28_83_25",
+			"name": "infoblox.member",
 		},
 	}
 
@@ -335,7 +335,7 @@ func TestAccNsgroupResource_GridSecondaries(t *testing.T) {
 				Config: testAccNsgroupGridSecondaries(name, externalPrimaries, gridSecondariesUpdate),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNsgroupExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "grid_secondaries.0.name", "infoblox.172_28_83_25"),
+					resource.TestCheckResourceAttr(resourceName, "grid_secondaries.0.name", "infoblox.member"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -349,7 +349,7 @@ func TestAccNsgroupResource_IsGridDefault(t *testing.T) {
 	name := acctest.RandomNameWithPrefix("ns-group")
 	gridPrimary := []map[string]any{
 		{
-			"name": "infoblox.172_28_83_208",
+			"name": "infoblox.localdomain",
 		},
 	}
 
@@ -384,10 +384,10 @@ func TestAccNsgroupResource_IsMultimaster(t *testing.T) {
 	name := acctest.RandomNameWithPrefix("ns-group")
 	gridPrimary := []map[string]any{
 		{
-			"name": "infoblox.172_28_83_208",
+			"name": "infoblox.localdomain",
 		},
 		{
-			"name": "infoblox.172_28_83_25",
+			"name": "infoblox.member",
 		},
 	}
 
@@ -414,7 +414,7 @@ func TestAccNsgroupResource_Name(t *testing.T) {
 	name := acctest.RandomNameWithPrefix("ns-group")
 	gridPrimary := []map[string]any{
 		{
-			"name": "infoblox.172_28_83_208",
+			"name": "infoblox.localdomain",
 		},
 	}
 	nameUpdate := acctest.RandomNameWithPrefix("ns-group")
@@ -450,12 +450,12 @@ func TestAccNsgroupResource_UseExternalPrimary(t *testing.T) {
 	name := acctest.RandomNameWithPrefix("ns-group")
 	gridSecondaries := []map[string]any{
 		{
-			"name": "infoblox.172_28_83_208",
+			"name": "infoblox.localdomain",
 		},
 	}
 	gridPrimary := []map[string]any{
 		{
-			"name": "infoblox.172_28_83_25",
+			"name": "infoblox.member",
 		},
 	}
 	externalPrimaries := []map[string]any{

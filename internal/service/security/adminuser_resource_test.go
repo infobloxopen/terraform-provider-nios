@@ -695,7 +695,6 @@ func testAccCheckAdminuserDisappears(ctx context.Context, v *security.Adminuser)
 }
 
 func testAccAdminuserBasicConfig(name, password, adminGroups string) string {
-	// TODO: create basic resource with required fields
 	return fmt.Sprintf(`
 resource "nios_security_admin_user" "test" {
   name = %q

@@ -19,7 +19,7 @@ func TestAccNsgroupDataSource_Filters(t *testing.T) {
 	name := acctest.RandomNameWithPrefix("ns-group")
 	gridPrimary := []map[string]any{
 		{
-			"name": "infoblox.172_28_83_208",
+			"name": "infoblox.localdomain",
 		},
 	}
 
@@ -47,7 +47,7 @@ func TestAccNsgroupDataSource_ExtAttrFilters(t *testing.T) {
 	name := acctest.RandomNameWithPrefix("ns-group")
 	gridPrimary := []map[string]any{
 		{
-			"name": "infoblox.172_28_83_208",
+			"name": "infoblox.localdomain",
 		},
 	}
 	extAttrValue := acctest.RandomName()

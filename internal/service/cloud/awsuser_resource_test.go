@@ -19,6 +19,7 @@ var readableAttributesForAwsuser = "access_key_id,account_id,govcloud_enabled,la
 
 // TODO: OBJECTS TO BE PRESENT IN GRID FOR TESTS
 // Admin User - aws1, aws2
+
 func TestAccAwsuserResource_basic(t *testing.T) {
 	var resourceName = "nios_cloud_aws_user.test"
 	var v cloud.Awsuser
@@ -395,6 +396,11 @@ resource "nios_cloud_aws_user" "test_name" {
 
 func testAccAwsuserNiosUserName(accountId, accessKeyId, name, niosUserName, secretAccessKey string) string {
 	return fmt.Sprintf(`
+resource "nios_security_admin_user" "admin-user-test2" {
+  name = "aws2"
+  password = "ExamplePassword@123"
+  admin_groups = ["admin-group"]
+}
 resource "nios_cloud_aws_user" "test_nios_user_name" {
     account_id = %q
     access_key_id = %q

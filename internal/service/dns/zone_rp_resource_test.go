@@ -198,7 +198,7 @@ func TestAccZoneRpResource_ExternalPrimaries(t *testing.T) {
 	}
 	gridSecondary := []map[string]any{
 		{
-			"name": "member.com",
+			"name": "infoblox.member",
 		},
 	}
 
@@ -249,7 +249,7 @@ func TestAccZoneRpResource_ExternalSecondaries(t *testing.T) {
 	}
 	gridPrimary := []map[string]any{
 		{
-			"name": "member.com",
+			"name": "infoblox.member",
 		},
 	}
 	updatedExternalSecondaries := []map[string]any{
@@ -378,7 +378,7 @@ func TestAccZoneRpResource_GridPrimary(t *testing.T) {
 	zoneFqdn := acctest.RandomNameWithPrefix("zone-rp") + ".com"
 	gridPrimary := []map[string]any{
 		{
-			"name":    "member.com",
+			"name":    "infoblox.member",
 			"stealth": false,
 		},
 	}
@@ -388,7 +388,7 @@ func TestAccZoneRpResource_GridPrimary(t *testing.T) {
 			"stealth": true,
 		},
 		{
-			"name":    "member.com",
+			"name":    "infoblox.member",
 			"stealth": false,
 		},
 	}
@@ -403,7 +403,7 @@ func TestAccZoneRpResource_GridPrimary(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneRpExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "grid_primary.#", "1"),
-					resource.TestCheckResourceAttr(resourceName, "grid_primary.0.name", "member.com")),
+					resource.TestCheckResourceAttr(resourceName, "grid_primary.0.name", "infoblox.member")),
 			},
 			// Update and Read
 			{
@@ -413,7 +413,7 @@ func TestAccZoneRpResource_GridPrimary(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "grid_primary.#", "2"),
 					resource.TestCheckResourceAttr(resourceName, "grid_primary.0.name", "infoblox.localdomain"),
 					resource.TestCheckResourceAttr(resourceName, "grid_primary.0.stealth", "true"),
-					resource.TestCheckResourceAttr(resourceName, "grid_primary.1.name", "member.com"),
+					resource.TestCheckResourceAttr(resourceName, "grid_primary.1.name", "infoblox.member"),
 					resource.TestCheckResourceAttr(resourceName, "grid_primary.1.stealth", "false"),
 				),
 			},
@@ -433,7 +433,7 @@ func TestAccZoneRpResource_GridSecondaries(t *testing.T) {
 	}
 	gridSecondary := []map[string]any{
 		{
-			"name":                       "member.com",
+			"name":                       "infoblox.member",
 			"stealth":                    false,
 			"grid_replicate":             true,
 			"lead":                       false,
@@ -442,7 +442,7 @@ func TestAccZoneRpResource_GridSecondaries(t *testing.T) {
 	}
 	updatedgridPrimary := []map[string]any{
 		{
-			"name": "member.com",
+			"name": "infoblox.member",
 		},
 	}
 	updatedGridSecondary := []map[string]any{
@@ -461,7 +461,7 @@ func TestAccZoneRpResource_GridSecondaries(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneRpExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "grid_secondaries.#", "1"),
-					resource.TestCheckResourceAttr(resourceName, "grid_secondaries.0.name", "member.com"),
+					resource.TestCheckResourceAttr(resourceName, "grid_secondaries.0.name", "infoblox.member"),
 					resource.TestCheckResourceAttr(resourceName, "grid_secondaries.0.stealth", "false"),
 					resource.TestCheckResourceAttr(resourceName, "grid_secondaries.0.grid_replicate", "true"),
 					resource.TestCheckResourceAttr(resourceName, "grid_secondaries.0.lead", "false"),
@@ -595,7 +595,7 @@ func TestAccZoneRpResource_NsGroup(t *testing.T) {
 	zoneFqdn := acctest.RandomNameWithPrefix("zone-rp") + ".com"
 	gridPrimary := []map[string]any{
 		{
-			"name": "member.com",
+			"name": "infoblox.member",
 		},
 	}
 
@@ -977,7 +977,7 @@ func TestAccZoneRpResource_SoaEmail(t *testing.T) {
 	zoneFqdn := acctest.RandomNameWithPrefix("zone-rp") + ".com"
 	gridPrimary := []map[string]any{
 		{
-			"name": "member.com",
+			"name": "infoblox.member",
 		},
 	}
 

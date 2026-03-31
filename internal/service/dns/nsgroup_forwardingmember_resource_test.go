@@ -163,7 +163,7 @@ func TestAccNsgroupForwardingmemberResource_ForwardingServers(t *testing.T) {
 	}
 	forwardingServersUpdate := []map[string]any{
 		{
-			"name":                    "member.com",
+			"name":                    "infoblox.member",
 			"use_override_forwarders": true,
 			"forward_to": []map[string]any{
 				{

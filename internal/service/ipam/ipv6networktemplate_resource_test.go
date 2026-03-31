@@ -430,12 +430,10 @@ func TestAccIpv6networktemplateResource_DelegatedMember(t *testing.T) {
 	var v ipam.Ipv6networktemplate
 	name := acctest.RandomNameWithPrefix("network-template")
 	delegatedMemberVal := map[string]any{
-		"name":     "infoblox.member",
-		"ipv4addr": "6.6.6.6",
+		"name": "infoblox.member",
 	}
 	delegatedMemberValUpdated := map[string]any{
-		"name":     "infoblox.localdomain",
-		"ipv4addr": "1.1.1.1",
+		"name": "infoblox.localdomain",
 	}
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -715,7 +713,7 @@ func TestAccIpv6networktemplateResource_Members(t *testing.T) {
 	}
 	membersValUpdated := []map[string]any{
 		{
-			"name": "infoblox.member2",
+			"name": "infoblox.member",
 		},
 	}
 
