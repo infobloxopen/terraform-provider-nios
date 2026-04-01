@@ -173,6 +173,10 @@ Required:
 
 - `ref` (String) Reference to the Network.
 
+Read-Only:
+
+- `uuid` (String) Universally Unique ID assigned for this object.
+
 
 <a id="nestedatt--logic_filter_rules"></a>
 ### Nested Schema for `logic_filter_rules`
