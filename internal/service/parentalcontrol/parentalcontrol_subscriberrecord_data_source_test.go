@@ -15,14 +15,19 @@ func TestAccParentalcontrolSubscriberrecordDataSource_Filters(t *testing.T) {
 	dataSourceName := "data.nios_parentalcontrol_subscriberrecord.test"
 	resourceName := "nios_parentalcontrol_subscriberrecord.test"
 	var v parentalcontrol.ParentalcontrolSubscriberrecord
-
+	ipAddr := acctest.RandomIP()
+	site := "site1"
+	subscriberId := "IMSI=12345"
+	ipsd := "N/A"
+	localId := "N/A"
+	prefix := "32"
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		CheckDestroy:             testAccCheckParentalcontrolSubscriberrecordDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccParentalcontrolSubscriberrecordDataSourceConfigFilters(),
+				Config: testAccParentalcontrolSubscriberrecordDataSourceConfigFilters(ipAddr, ipsd, localId, prefix, site, subscriberId),
 				Check: resource.ComposeTestCheckFunc(
 					append([]resource.TestCheckFunc{
 						testAccCheckParentalcontrolSubscriberrecordExists(context.Background(), resourceName, &v),
@@ -66,15 +71,21 @@ func testAccCheckParentalcontrolSubscriberrecordResourceAttrPair(resourceName, d
 	}
 }
 
-func testAccParentalcontrolSubscriberrecordDataSourceConfigFilters() string {
+func testAccParentalcontrolSubscriberrecordDataSourceConfigFilters(ipAddr, ipsd, localId, prefix, site, subscriberId string) string {
 	return fmt.Sprintf(`
 resource "nios_parentalcontrol_subscriberrecord" "test" {
+	ip_addr = %q
+	ipsd = %q
+	localid = %q
+	prefix = %q
+	site = %q
+	subscriber_id = %q
 }
 
 data "nios_parentalcontrol_subscriberrecord" "test" {
   filters = {
-	 = nios_parentalcontrol_subscriberrecord.test.
+	 site = nios_parentalcontrol_subscriberrecord.test.site
   }
 }
-`)
+`, ipAddr, ipsd, localId, prefix, site, subscriberId)
 }

@@ -37,7 +37,7 @@ func (r *ParentalcontrolSubscriberrecordResource) Metadata(ctx context.Context, 
 
 func (r *ParentalcontrolSubscriberrecordResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "",
+		MarkdownDescription: "Manages a Parental Control Subscriber Record.",
 		Attributes:          ParentalcontrolSubscriberrecordResourceSchemaAttributes,
 	}
 }
@@ -110,7 +110,7 @@ func (r *ParentalcontrolSubscriberrecordResource) Read(ctx context.Context, req 
 		ProxySearch(config.GetProxySearch()).
 		Execute()
 
-		// Handle not found case
+	// Handle not found case
 	if err != nil {
 		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
 			// Resource no longer exists, remove from state
