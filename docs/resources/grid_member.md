@@ -13,7 +13,7 @@ Manages a Member resource object.
 ## Example Usage
 
 ```terraform
-// Create an Member with Basic Fields
+// Create a Member with Basic Fields
 resource "nios_grid_member" "example_member_with_basic_fields" {
   host_name                  = "member-node.localdomain"
   config_addr_type           = "IPV4"
@@ -38,7 +38,7 @@ resource "nios_grid_member" "example_member_with_basic_fields" {
   }
 }
 
-// Create an Member with additional Fields
+// Create a Member with additional Fields
 resource "nios_grid_member" "example_member_with_additional_fields" {
   host_name                  = "member2-node.localdomain"
   config_addr_type           = "IPV4"
