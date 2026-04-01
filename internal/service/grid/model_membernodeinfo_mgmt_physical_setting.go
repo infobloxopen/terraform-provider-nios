@@ -32,7 +32,7 @@ var MembernodeinfoMgmtPhysicalSettingResourceSchemaAttributes = map[string]schem
 	"auto_port_setting_enabled": schema.BoolAttribute{
 		Optional:            true,
 		Computed:            true,
-		MarkdownDescription: "Enable or disalbe the auto port setting.",
+		MarkdownDescription: "Enable or disable the auto port setting.",
 	},
 	"speed": schema.StringAttribute{
 		Computed: true,

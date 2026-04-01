@@ -72,5 +72,4 @@ resource "nios_grid_member" "example_member_with_additional_fields" {
       }
     }
   ]
-  nat_setting = false
 }

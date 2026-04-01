@@ -450,7 +450,7 @@ Read-Only:
 
 Optional:
 
-- `auto_port_setting_enabled` (Boolean) Enable or disalbe the auto port setting.
+- `auto_port_setting_enabled` (Boolean) Enable or disable the auto port setting.
 - `duplex` (String) The port duplex; if speed is 1000, duplex must be FULL.
 - `speed` (String) The port speed; if speed is 1000, duplex is FULL.
 
@@ -472,7 +472,7 @@ Optional:
 
 Optional:
 
-- `auto_port_setting_enabled` (Boolean) Enable or disalbe the auto port setting.
+- `auto_port_setting_enabled` (Boolean) Enable or disable the auto port setting.
 - `duplex` (String) The port duplex; if speed is 1000, duplex must be FULL.
 - `speed` (String) The port speed; if speed is 1000, duplex is FULL.
 
@@ -482,7 +482,7 @@ Optional:
 
 Optional:
 
-- `auto_port_setting_enabled` (Boolean) Enable or disalbe the auto port setting.
+- `auto_port_setting_enabled` (Boolean) Enable or disable the auto port setting.
 - `duplex` (String) The port duplex; if speed is 1000, duplex must be FULL.
 - `speed` (String) The port speed; if speed is 1000, duplex is FULL.
 
@@ -509,7 +509,7 @@ Optional:
 
 Optional:
 
-- `auto_port_setting_enabled` (Boolean) Enable or disalbe the auto port setting.
+- `auto_port_setting_enabled` (Boolean) Enable or disable the auto port setting.
 - `duplex` (String) The port duplex; if speed is 1000, duplex must be FULL.
 - `speed` (String) The port speed; if speed is 1000, duplex is FULL.
 
@@ -807,7 +807,7 @@ Optional:
 
 - `auth_dns_latency_listen_on_ip` (String) The DNS listen-on IP address used if auth_dns_latency_on_source is IP.
 - `auth_dns_latency_listen_on_source` (String) The local IP DNS service is listen on (for authoritative DNS latency trigger).
-- `auth_dns_latency_reset` (Number) Authoritative DNS latency above which traffic capture will stopped.
+- `auth_dns_latency_reset` (Number) Authoritative DNS latency above which traffic capture will be stopped.
 - `auth_dns_latency_threshold` (Number) Authoritative DNS latency below which traffic capture will be triggered.
 - `auth_dns_latency_trigger_enable` (Boolean) Enabling trigger automated traffic capture based on authoritative DNS latency.
 
