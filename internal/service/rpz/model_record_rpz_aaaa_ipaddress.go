@@ -149,7 +149,7 @@ var RecordRpzAaaaIpaddressResourceSchemaAttributes = map[string]schema.Attribute
 	},
 }
 
-func (m *RecordRpzAaaaIpaddressModel) Expand(ctx context.Context, diags *diag.Diagnostics, isCreate bool) *rpz.RecordRpzAaaaIpaddress {
+func (m *RecordRpzAaaaIpaddressModel) Expand(ctx context.Context, diags *diag.Diagnostics) *rpz.RecordRpzAaaaIpaddress {
 	if m == nil {
 		return nil
 	}
@@ -162,9 +162,7 @@ func (m *RecordRpzAaaaIpaddressModel) Expand(ctx context.Context, diags *diag.Di
 		RpZone:   flex.ExpandStringPointer(m.RpZone),
 		Ttl:      flex.ExpandInt64Pointer(m.Ttl),
 		UseTtl:   flex.ExpandBoolPointer(m.UseTtl),
-	}
-	if isCreate {
-		to.View = flex.ExpandStringPointer(m.View)
+		View:     flex.ExpandStringPointer(m.View),
 	}
 	return to
 }

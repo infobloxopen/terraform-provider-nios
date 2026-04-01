@@ -393,7 +393,7 @@ Optional:
 
 Optional:
 
-- `vlan` (Map of String) Reference to the underlying StaticVlan object vlan.
+- `vlan` (String) Reference to the underlying StaticVlan object vlan.
 
 Read-Only:
 

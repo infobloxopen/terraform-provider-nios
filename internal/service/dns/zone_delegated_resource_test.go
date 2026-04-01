@@ -568,6 +568,19 @@ func testAccCheckZoneDelegatedDisappears(ctx context.Context, v *dns.ZoneDelegat
 	}
 }
 
+func testAccZoneDelegatedImportStateIdFunc(resourceName string) resource.ImportStateIdFunc {
+	return func(s *terraform.State) (string, error) {
+		rs, ok := s.RootModule().Resources[resourceName]
+		if !ok {
+			return "", fmt.Errorf("not found: %s", resourceName)
+		}
+		if rs.Primary.Attributes["ref"] == "" {
+			return "", fmt.Errorf("ref is not set")
+		}
+		return rs.Primary.Attributes["ref"], nil
+	}
+}
+
 func testAccZoneDelegatedBasicConfig(fqdn, delegateToName, delegateToAddress string) string {
 	return fmt.Sprintf(`
 resource "nios_dns_zone_delegated" "test" {
@@ -797,4 +810,43 @@ resource "nios_dns_zone_delegated" "test_zone_format" {
     zone_format = %q
 }
 `, fqdn, delegateToName, delegateToAddress, zoneFormat)
+}
+
+func TestAccZoneDelegatedResource_Import(t *testing.T) {
+	var resourceName = "nios_dns_zone_delegated.test"
+	var v dns.ZoneDelegated
+	fqdn := acctest.RandomNameWithPrefix("zone-delegated") + ".example.com"
+	delegatedToName := acctest.RandomNameWithPrefix("zone-delegated") + ".com"
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccZoneDelegatedBasicConfig(fqdn, delegatedToName, "10.0.0.1"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckZoneDelegatedExists(context.Background(), resourceName, &v),
+				),
+			},
+			// Import with PlanOnly to detect differences
+			{
+				ResourceName:                         resourceName,
+				ImportState:                          true,
+				ImportStateIdFunc:                    testAccZoneDelegatedImportStateIdFunc(resourceName),
+				ImportStateVerify:                    true,
+				ImportStateVerifyIdentifierAttribute: "ref",
+				PlanOnly:                             true,
+			},
+			// Import and Verify
+			{
+				ResourceName:                         resourceName,
+				ImportState:                          true,
+				ImportStateIdFunc:                    testAccZoneDelegatedImportStateIdFunc(resourceName),
+				ImportStateVerify:                    true,
+				ImportStateVerifyIgnore:              []string{"extattrs_all"},
+				ImportStateVerifyIdentifierAttribute: "ref",
+			},
+			// Delete testing automatically occurs in TestCase
+		},
+	})
 }
