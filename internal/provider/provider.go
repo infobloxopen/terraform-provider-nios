@@ -233,6 +233,7 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 		misc.NewTftpfiledirResource,
 		misc.NewSyslogEndpointResource,
 		misc.NewSyslogEndpointResource,
+		misc.NewSyslogEndpointResource,
 
 		smartfolder.NewSmartfolderPersonalResource,
 		smartfolder.NewSmartfolderGlobalResource,
@@ -389,6 +390,7 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 		misc.NewBfdtemplateDataSource,
 		misc.NewDxlEndpointDataSource,
 		misc.NewTftpfiledirDataSource,
+		misc.NewSyslogEndpointDataSource,
 		misc.NewSyslogEndpointDataSource,
 		misc.NewSyslogEndpointDataSource,
 
