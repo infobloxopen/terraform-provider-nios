@@ -1404,7 +1404,7 @@ func TestAccIpv6fixedaddressResource_UseValidLifetime(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccIpv6fixedaddressUseValidLifetime(ipv6addr, duid, networkView, ipv6Network, true),
+				Config: testAccIpv6fixedaddressUseValidLifetime(ipv6addr, duid, networkView, ipv6Network, true, "50000"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6fixedaddressExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_valid_lifetime", "true"),
@@ -1412,7 +1412,7 @@ func TestAccIpv6fixedaddressResource_UseValidLifetime(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccIpv6fixedaddressUseValidLifetime(ipv6addr, duid, networkView, ipv6Network, false),
+				Config: testAccIpv6fixedaddressUseValidLifetime(ipv6addr, duid, networkView, ipv6Network, false, "50000"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6fixedaddressExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_valid_lifetime", "false"),
@@ -1929,7 +1929,9 @@ resource "nios_dhcp_ipv6fixedaddress" "test_preferred_lifetime" {
     ipv6addr = %q
     duid = %q
     preferred_lifetime = %d
+	valid_lifetime = 43200
     use_preferred_lifetime = true
+	use_valid_lifetime = true
     network = nios_ipam_ipv6network.test_ipv6_network.network
     network_view = nios_ipam_network_view.parent_network_view.name
 }
@@ -2121,16 +2123,17 @@ resource "nios_dhcp_ipv6fixedaddress" "test_use_snmp_credential" {
 	return strings.Join([]string{testAccBaseNetworkWithView(networkView, ipv6Network), config}, "")
 }
 
-func testAccIpv6fixedaddressUseValidLifetime(ipv6addr, duid, networkView, ipv6Network string, useValidLifetime bool) string {
+func testAccIpv6fixedaddressUseValidLifetime(ipv6addr, duid, networkView, ipv6Network string, useValidLifetime bool, validLifeTime string) string {
 	config := fmt.Sprintf(`
 resource "nios_dhcp_ipv6fixedaddress" "test_use_valid_lifetime" {
     ipv6addr = %q
     duid = %q
     use_valid_lifetime = %t
+	valid_lifetime = %s
     network = nios_ipam_ipv6network.test_ipv6_network.network
     network_view = nios_ipam_network_view.parent_network_view.name
 }
-`, ipv6addr, duid, useValidLifetime)
+`, ipv6addr, duid, useValidLifetime, validLifeTime)
 	return strings.Join([]string{testAccBaseNetworkWithView(networkView, ipv6Network), config}, "")
 }
 

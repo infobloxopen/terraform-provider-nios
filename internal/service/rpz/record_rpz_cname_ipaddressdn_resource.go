@@ -83,7 +83,7 @@ func (r *RecordRpzCnameIpaddressdnResource) Create(ctx context.Context, req reso
 	apiRes, _, err := r.client.RPZAPI.
 		RecordRpzCnameIpaddressdnAPI.
 		Create(ctx).
-		RecordRpzCnameIpaddressdn(*data.Expand(ctx, &resp.Diagnostics, true)).
+		RecordRpzCnameIpaddressdn(*data.Expand(ctx, &resp.Diagnostics)).
 		ReturnFieldsPlus(readableAttributesForRecordRpzCnameIpaddressdn).
 		ReturnAsObject(1).
 		Execute()
@@ -281,7 +281,7 @@ func (r *RecordRpzCnameIpaddressdnResource) Update(ctx context.Context, req reso
 	apiRes, _, err := r.client.RPZAPI.
 		RecordRpzCnameIpaddressdnAPI.
 		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
-		RecordRpzCnameIpaddressdn(*data.Expand(ctx, &resp.Diagnostics, false)).
+		RecordRpzCnameIpaddressdn(*data.Expand(ctx, &resp.Diagnostics)).
 		ReturnFieldsPlus(readableAttributesForRecordRpzCnameIpaddressdn).
 		ReturnAsObject(1).
 		Execute()

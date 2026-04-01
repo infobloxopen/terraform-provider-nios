@@ -836,6 +836,8 @@ resource "nios_dhcp_ipv6fixedaddresstemplate" "test_preferred_lifetime" {
     name = %q
     preferred_lifetime = %q
     use_preferred_lifetime = %q
+	valid_lifetime = 43200
+	use_valid_lifetime = true
 }
 `, name, preferredLifetime, usePreferredLifetime)
 }
@@ -889,6 +891,8 @@ resource "nios_dhcp_ipv6fixedaddresstemplate" "test_use_preferred_lifetime" {
     name = %q
     use_preferred_lifetime = %q
     preferred_lifetime = %q
+	valid_lifetime = 43200
+	use_valid_lifetime = true
 }
 `, name, usePreferredLifetime, preferredLifetime)
 }

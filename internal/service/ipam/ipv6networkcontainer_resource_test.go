@@ -1321,7 +1321,7 @@ func TestAccIpv6networkcontainerResource_UsePreferredLifetime(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccIpv6networkcontainerUsePreferredLifetime(network, "false"),
+				Config: testAccIpv6networkcontainerUsePreferredLifetime(network, "false", "100"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networkcontainerExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_preferred_lifetime", "false"),
@@ -1330,7 +1330,7 @@ func TestAccIpv6networkcontainerResource_UsePreferredLifetime(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccIpv6networkcontainerUsePreferredLifetime(network, "true"),
+				Config: testAccIpv6networkcontainerUsePreferredLifetime(network, "true", "100"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networkcontainerExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_preferred_lifetime", "true"),
@@ -1408,19 +1408,19 @@ func TestAccIpv6networkcontainerResource_UseValidLifetime(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccIpv6networkcontainerUseValidLifetime(network, "false"),
+				Config: testAccIpv6networkcontainerUseValidLifetime(network, "true", "28000"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networkcontainerExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_valid_lifetime", "false"),
+					resource.TestCheckResourceAttr(resourceName, "use_valid_lifetime", "true"),
 					resource.TestCheckResourceAttr(resourceName, "network", network),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccIpv6networkcontainerUseValidLifetime(network, "true"),
+				Config: testAccIpv6networkcontainerUseValidLifetime(network, "false", "28000"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networkcontainerExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_valid_lifetime", "true"),
+					resource.TestCheckResourceAttr(resourceName, "use_valid_lifetime", "false"),
 					resource.TestCheckResourceAttr(resourceName, "network", network),
 				),
 			},
@@ -1767,6 +1767,8 @@ resource "nios_ipam_ipv6network_container" "test_preferred_lifetime" {
     network = %q
     preferred_lifetime = %q
     use_preferred_lifetime = %q
+	valid_lifetime = 43200
+	use_valid_lifetime = true
 }
 `, network, preferredLifetime, usePreferredLifetime)
 }
@@ -1917,13 +1919,16 @@ resource "nios_ipam_ipv6network_container" "test_use_options" {
 `, network, useOptions)
 }
 
-func testAccIpv6networkcontainerUsePreferredLifetime(network, usePreferredLifetime string) string {
+func testAccIpv6networkcontainerUsePreferredLifetime(network, usePreferredLifetime, preferredLifetime string) string {
 	return fmt.Sprintf(`
 resource "nios_ipam_ipv6network_container" "test_use_preferred_lifetime" {
     network = %q
     use_preferred_lifetime = %q
+    preferred_lifetime = %q
+	valid_lifetime = 43200
+	use_valid_lifetime = true
 }
-`, network, usePreferredLifetime)
+`, network, usePreferredLifetime, preferredLifetime)
 }
 
 func testAccIpv6networkcontainerUseSubscribeSettings(network, useSubscribeSettings string) string {
@@ -1944,13 +1949,14 @@ resource "nios_ipam_ipv6network_container" "test_use_update_dns_on_lease_renewal
 `, network, useUpdateDnsOnLeaseRenewal)
 }
 
-func testAccIpv6networkcontainerUseValidLifetime(network, useValidLifetime string) string {
+func testAccIpv6networkcontainerUseValidLifetime(network, useValidLifetime, validLifetime string) string {
 	return fmt.Sprintf(`
 resource "nios_ipam_ipv6network_container" "test_use_valid_lifetime" {
     network = %q
     use_valid_lifetime = %q
+    valid_lifetime = %q
 }
-`, network, useValidLifetime)
+`, network, useValidLifetime, validLifetime)
 }
 
 func testAccIpv6networkcontainerUseZoneAssociations(network, useZoneAssociations string) string {
