@@ -82,17 +82,17 @@ func (m *DtcTopologyRuleDestinationModel) Flatten(ctx context.Context, from *dtc
 }
 
 func ExpandDtcTopologyRuleDestinationLink(ctx context.Context, o types.String, diags *diag.Diagnostics) *dtc.DtcTopologyRuleDestinationDestinationLink {
-    if o.IsNull() || o.IsUnknown() {
-        return nil
-    }
-    return &dtc.DtcTopologyRuleDestinationDestinationLink{
-        String: flex.ExpandStringPointer(o),
-    }
+	if o.IsNull() || o.IsUnknown() {
+		return nil
+	}
+	return &dtc.DtcTopologyRuleDestinationDestinationLink{
+		String: flex.ExpandStringPointer(o),
+	}
 }
 
 func FlattenDtcTopologyRuleDestinationLink(ctx context.Context, from *dtc.DtcTopologyRuleDestinationDestinationLink, diags *diag.Diagnostics) types.String {
-    if from == nil {
-        return types.StringNull()
-    }
-    return flex.FlattenStringPointer(from.String)
+	if from == nil {
+		return types.StringNull()
+	}
+	return flex.FlattenStringPointer(from.String)
 }

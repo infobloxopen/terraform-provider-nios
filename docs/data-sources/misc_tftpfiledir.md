@@ -56,6 +56,7 @@ Read-Only:
 - `is_synced_to_gm` (Boolean) Determines whether the TFTP entity is synchronized to Grid Master.
 - `last_modify` (Number) The time when the file or directory was last modified.
 - `ref` (String) The reference to the object.
+- `uuid` (String) Universally Unique ID assigned for this object.
 
 <a id="nestedatt--result--vtftp_dir_members"></a>
 ### Nested Schema for `result.vtftp_dir_members`

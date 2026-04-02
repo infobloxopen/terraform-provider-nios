@@ -33,19 +33,19 @@ func (v equalsFieldValidator) ValidateString(ctx context.Context, req validator.
 	}
 
 	var otherVal types.String
-    matchPaths, diags := req.Config.PathMatches(ctx, v.expression)
-    resp.Diagnostics.Append(diags...)
-    if resp.Diagnostics.HasError() {
-        return
-    }
-    if len(matchPaths) == 0 {
-        return
-    }
-    diags = req.Config.GetAttribute(ctx, matchPaths[0], &otherVal)
-    resp.Diagnostics.Append(diags...)
-    if resp.Diagnostics.HasError() {
-        return
-    }
+	matchPaths, diags := req.Config.PathMatches(ctx, v.expression)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+	if len(matchPaths) == 0 {
+		return
+	}
+	diags = req.Config.GetAttribute(ctx, matchPaths[0], &otherVal)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
 
 	if otherVal.IsNull() || otherVal.IsUnknown() {
 		return

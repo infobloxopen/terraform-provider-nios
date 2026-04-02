@@ -21,6 +21,7 @@ import (
 
 type TftpfiledirModel struct {
 	Ref             types.String `tfsdk:"ref"`
+	Uuid            types.String `tfsdk:"uuid"`
 	Directory       types.String `tfsdk:"directory"`
 	IsSyncedToGm    types.Bool   `tfsdk:"is_synced_to_gm"`
 	LastModify      types.Int64  `tfsdk:"last_modify"`
@@ -31,6 +32,7 @@ type TftpfiledirModel struct {
 
 var TftpfiledirAttrTypes = map[string]attr.Type{
 	"ref":               types.StringType,
+	"uuid":              types.StringType,
 	"directory":         types.StringType,
 	"is_synced_to_gm":   types.BoolType,
 	"last_modify":       types.Int64Type,
@@ -43,6 +45,10 @@ var TftpfiledirResourceSchemaAttributes = map[string]schema.Attribute{
 	"ref": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The reference to the object.",
+	},
+	"uuid": schema.StringAttribute{
+		Computed:            true,
+		MarkdownDescription: "Universally Unique ID assigned for this object.",
 	},
 	"directory": schema.StringAttribute{
 		Computed: true,
@@ -124,6 +130,7 @@ func (m *TftpfiledirModel) Flatten(ctx context.Context, from *misc.Tftpfiledir, 
 		*m = TftpfiledirModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.Directory = flex.FlattenStringPointer(from.Directory)
 	m.IsSyncedToGm = types.BoolPointerValue(from.IsSyncedToGm)
 	m.LastModify = flex.FlattenInt64Pointer(from.LastModify)

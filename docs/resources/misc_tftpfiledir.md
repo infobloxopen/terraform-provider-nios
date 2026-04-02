@@ -54,6 +54,7 @@ resource "nios_misc_tftpfiledir" "misc_tftpfiledir_with_additional_fields" {
 - `is_synced_to_gm` (Boolean) Determines whether the TFTP entity is synchronized to Grid Master.
 - `last_modify` (Number) The time when the file or directory was last modified.
 - `ref` (String) The reference to the object.
+- `uuid` (String) Universally Unique ID assigned for this object.
 
 <a id="nestedatt--vtftp_dir_members"></a>
 ### Nested Schema for `vtftp_dir_members`

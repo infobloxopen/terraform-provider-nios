@@ -71,6 +71,7 @@ resource "nios_misc_syslog_endpoint" "syslogendpoint_2" {
 
 - `extattrs_all` (Map of String) Extensible attributes associated with the object, including default attributes.
 - `ref` (String) The reference to the object.
+- `uuid` (String) Universally Unique ID assigned for this object.
 
 <a id="nestedatt--syslog_servers"></a>
 ### Nested Schema for `syslog_servers`

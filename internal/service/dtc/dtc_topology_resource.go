@@ -480,4 +480,3 @@ func populateTopologyRules(ctx context.Context, client *niosclient.APIClient, re
 		}
 	}
 }
-
