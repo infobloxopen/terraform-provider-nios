@@ -25,7 +25,7 @@ import (
 
 type RadiusAuthserviceModel struct {
 	Ref              types.String `tfsdk:"ref"`
-	Uuid        types.String `tfsdk:"uuid"`
+	Uuid             types.String `tfsdk:"uuid"`
 	AcctRetries      types.Int64  `tfsdk:"acct_retries"`
 	AcctTimeout      types.Int64  `tfsdk:"acct_timeout"`
 	AuthRetries      types.Int64  `tfsdk:"auth_retries"`
@@ -42,7 +42,7 @@ type RadiusAuthserviceModel struct {
 
 var RadiusAuthserviceAttrTypes = map[string]attr.Type{
 	"ref":               types.StringType,
-	"uuid":        types.StringType,
+	"uuid":              types.StringType,
 	"acct_retries":      types.Int64Type,
 	"acct_timeout":      types.Int64Type,
 	"auth_retries":      types.Int64Type,

@@ -21,7 +21,7 @@ import (
 
 type TftpfiledirModel struct {
 	Ref             types.String `tfsdk:"ref"`
-	Uuid        types.String `tfsdk:"uuid"`
+	Uuid            types.String `tfsdk:"uuid"`
 	Directory       types.String `tfsdk:"directory"`
 	IsSyncedToGm    types.Bool   `tfsdk:"is_synced_to_gm"`
 	LastModify      types.Int64  `tfsdk:"last_modify"`
@@ -32,7 +32,7 @@ type TftpfiledirModel struct {
 
 var TftpfiledirAttrTypes = map[string]attr.Type{
 	"ref":               types.StringType,
-	"uuid":        types.StringType,
+	"uuid":              types.StringType,
 	"directory":         types.StringType,
 	"is_synced_to_gm":   types.BoolType,
 	"last_modify":       types.Int64Type,

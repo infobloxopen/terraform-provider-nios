@@ -28,7 +28,7 @@ import (
 
 type SyslogEndpointModel struct {
 	Ref                types.String `tfsdk:"ref"`
-	Uuid        types.String `tfsdk:"uuid"`
+	Uuid               types.String `tfsdk:"uuid"`
 	ExtAttrs           types.Map    `tfsdk:"extattrs"`
 	LogLevel           types.String `tfsdk:"log_level"`
 	Name               types.String `tfsdk:"name"`
@@ -45,7 +45,7 @@ type SyslogEndpointModel struct {
 
 var SyslogEndpointAttrTypes = map[string]attr.Type{
 	"ref":                  types.StringType,
-	"uuid":        types.StringType,
+	"uuid":                 types.StringType,
 	"extattrs":             types.MapType{ElemType: types.StringType},
 	"log_level":            types.StringType,
 	"name":                 types.StringType,
