@@ -822,12 +822,12 @@ func TestAccMemberResource_EnableHa(t *testing.T) {
 				Config: testAccMemberEnableHa(
 					hostName, "IPV4", "VNIOS", "ALL_V4",
 					vipAddress, "172.28.82.1", "255.255.254.0",
-					true, 112,
+					true, 197,
 				),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "enable_ha", "true"),
-					resource.TestCheckResourceAttr(resourceName, "router_id", "112"),
+					resource.TestCheckResourceAttr(resourceName, "router_id", "197"),
 					resource.TestCheckResourceAttr(resourceName, "node_info.#", "2"),
 				),
 			},
@@ -2100,7 +2100,7 @@ func TestAccMemberResource_PassiveHaArpEnabled(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "enable_ha", "true"),
-					resource.TestCheckResourceAttr(resourceName, "router_id", "112"),
+					resource.TestCheckResourceAttr(resourceName, "router_id", "198"),
 					resource.TestCheckResourceAttr(resourceName, "node_info.#", "2"),
 					resource.TestCheckResourceAttr(resourceName, "passive_ha_arp_enabled", "true"),
 				),
@@ -2303,22 +2303,22 @@ func TestAccMemberResource_RouterId(t *testing.T) {
 				Config: testAccMemberRouterId(
 					hostName, "IPV4", "VNIOS", "ALL_V4",
 					vipAddress, "172.28.82.1", "255.255.254.0",
-					111,
+					199,
 				),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "router_id", "111"),
+					resource.TestCheckResourceAttr(resourceName, "router_id", "199"),
 				),
 			},
 			{
 				Config: testAccMemberRouterId(
 					hostName, "IPV4", "VNIOS", "ALL_V4",
 					vipAddress, "172.28.82.1", "255.255.254.0",
-					112,
+					201,
 				),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "router_id", "112"),
+					resource.TestCheckResourceAttr(resourceName, "router_id", "201"),
 				),
 			},
 		},
@@ -5604,7 +5604,7 @@ resource "nios_grid_member" "test_passive_ha_arp_enabled" {
     }
 
     enable_ha = true
-    router_id = 112
+    router_id = 198
     passive_ha_arp_enabled = %t
 
     node_info = [
