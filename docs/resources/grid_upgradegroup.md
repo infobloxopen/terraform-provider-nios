@@ -63,9 +63,9 @@ resource "nios_grid_upgradegroup" "upgradegroup_with_additional_fields" {
 <a id="nestedatt--members"></a>
 ### Nested Schema for `members`
 
-Required:
+Optional:
 
-- `member` (String) The upgrade group member name.
+- `member` (String) The upgrade group member name. This is Required when creating a new upgrade group member.
 
 Read-Only:
 

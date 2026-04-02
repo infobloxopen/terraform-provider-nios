@@ -195,6 +195,34 @@ func (r *UpgradegroupResource) Delete(ctx context.Context, req resource.DeleteRe
 	}
 }
 
+func (r *UpgradegroupResource) ValidateConfig(ctx context.Context, req resource.ValidateConfigRequest, resp *resource.ValidateConfigResponse) {
+	var data UpgradegroupModel
+
+	// Read Terraform plan data into the model
+	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
+
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	if !data.Members.IsNull() && !data.Members.IsUnknown() {
+		var members []UpgradegroupMembersModel
+		diags := data.Members.ElementsAs(ctx, &members, false)
+		resp.Diagnostics.Append(diags...)
+		if resp.Diagnostics.HasError() {
+			return
+		}
+		for i, member := range members {
+			if member.Member.IsNull() || member.Member.IsUnknown() {
+				resp.Diagnostics.AddError(
+					"Validation Error",
+					fmt.Sprintf("members.%d.member must be provided", i),
+				)
+			}
+		}
+	}
+}
+
 func (r *UpgradegroupResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("uuid"), req, resp)
 }
