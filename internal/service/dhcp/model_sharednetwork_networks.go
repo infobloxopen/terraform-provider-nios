@@ -29,6 +29,10 @@ var SharednetworkNetworksResourceSchemaAttributes = map[string]schema.Attribute{
 		Required:            true,
 		MarkdownDescription: "Reference to the Network.",
 	},
+	"uuid": schema.StringAttribute{
+		Computed:            true,
+		MarkdownDescription: "Universally Unique ID assigned for this object.",
+	},
 }
 
 func ExpandSharednetworkNetworks(ctx context.Context, o types.Object, diags *diag.Diagnostics) *dhcp.SharednetworkNetworks {
