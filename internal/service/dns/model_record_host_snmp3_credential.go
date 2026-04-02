@@ -45,6 +45,7 @@ var RecordHostSnmp3CredentialResourceSchemaAttributes = map[string]schema.Attrib
 	},
 	"authentication_password": schema.StringAttribute{
 		Optional:            true,
+		WriteOnly:           true,
 		MarkdownDescription: "Authentication password for the SNMPv3 user.",
 	},
 	"privacy_protocol": schema.StringAttribute{
@@ -53,6 +54,7 @@ var RecordHostSnmp3CredentialResourceSchemaAttributes = map[string]schema.Attrib
 	},
 	"privacy_password": schema.StringAttribute{
 		Optional:            true,
+		WriteOnly:           true,
 		MarkdownDescription: "Privacy password for the SNMPv3 user.",
 	},
 	"comment": schema.StringAttribute{
@@ -113,9 +115,7 @@ func (m *RecordHostSnmp3CredentialModel) Flatten(ctx context.Context, from *dns.
 	}
 	m.User = flex.FlattenStringPointer(from.User)
 	m.AuthenticationProtocol = flex.FlattenStringPointer(from.AuthenticationProtocol)
-	m.AuthenticationPassword = flex.FlattenStringPointer(from.AuthenticationPassword)
 	m.PrivacyProtocol = flex.FlattenStringPointer(from.PrivacyProtocol)
-	m.PrivacyPassword = flex.FlattenStringPointer(from.PrivacyPassword)
 	m.Comment = flex.FlattenStringPointer(from.Comment)
 	m.CredentialGroup = flex.FlattenStringPointer(from.CredentialGroup)
 }
