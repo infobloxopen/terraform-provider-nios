@@ -25,6 +25,7 @@ import (
 
 type RadiusAuthserviceModel struct {
 	Ref              types.String `tfsdk:"ref"`
+	Uuid        types.String `tfsdk:"uuid"`
 	AcctRetries      types.Int64  `tfsdk:"acct_retries"`
 	AcctTimeout      types.Int64  `tfsdk:"acct_timeout"`
 	AuthRetries      types.Int64  `tfsdk:"auth_retries"`
@@ -41,6 +42,7 @@ type RadiusAuthserviceModel struct {
 
 var RadiusAuthserviceAttrTypes = map[string]attr.Type{
 	"ref":               types.StringType,
+	"uuid":        types.StringType,
 	"acct_retries":      types.Int64Type,
 	"acct_timeout":      types.Int64Type,
 	"auth_retries":      types.Int64Type,
@@ -59,6 +61,10 @@ var RadiusAuthserviceResourceSchemaAttributes = map[string]schema.Attribute{
 	"ref": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The reference to the object.",
+	},
+	"uuid": schema.StringAttribute{
+		Computed:            true,
+		MarkdownDescription: "Universally Unique ID assigned for this object.",
 	},
 	"acct_retries": schema.Int64Attribute{
 		Optional:            true,
@@ -185,6 +191,7 @@ func (m *RadiusAuthserviceModel) Flatten(ctx context.Context, from *security.Rad
 		*m = RadiusAuthserviceModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.AcctRetries = flex.FlattenInt64Pointer(from.AcctRetries)
 	m.AcctTimeout = flex.FlattenInt64Pointer(from.AcctTimeout)
 	m.AuthRetries = flex.FlattenInt64Pointer(from.AuthRetries)

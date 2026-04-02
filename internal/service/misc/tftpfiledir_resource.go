@@ -126,7 +126,7 @@ func (r *TftpfiledirResource) Read(ctx context.Context, req resource.ReadRequest
 
 	apiRes, httpRes, err := r.client.MiscAPI.
 		TftpfiledirAPI.
-		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Read(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
 		ReturnFieldsPlus(readableAttributesForTftpfiledir).
 		ReturnAsObject(1).
 		ProxySearch(config.GetProxySearch()).
@@ -168,9 +168,15 @@ func (r *TftpfiledirResource) Update(ctx context.Context, req resource.UpdateReq
 		return
 	}
 
+	diags = req.State.GetAttribute(ctx, path.Root("uuid"), &data.Uuid)
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+		return
+	}
+
 	apiRes, _, err := r.client.MiscAPI.
 		TftpfiledirAPI.
-		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Update(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
 		Tftpfiledir(*data.Expand(ctx, &resp.Diagnostics, false)).
 		ReturnFieldsPlus(readableAttributesForTftpfiledir).
 		ReturnAsObject(1).
@@ -200,7 +206,7 @@ func (r *TftpfiledirResource) Delete(ctx context.Context, req resource.DeleteReq
 
 	httpRes, err := r.client.MiscAPI.
 		TftpfiledirAPI.
-		Delete(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Delete(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
 		Execute()
 	if err != nil {
 		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
@@ -227,5 +233,5 @@ func (r *TftpfiledirResource) ValidateConfig(ctx context.Context, req resource.V
 }
 
 func (r *TftpfiledirResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	resource.ImportStatePassthroughID(ctx, path.Root("ref"), req, resp)
+	resource.ImportStatePassthroughID(ctx, path.Root("uuid"), req, resp)
 }

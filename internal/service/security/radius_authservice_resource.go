@@ -104,7 +104,7 @@ func (r *RadiusAuthserviceResource) Read(ctx context.Context, req resource.ReadR
 
 	apiRes, httpRes, err := r.client.SecurityAPI.
 		RadiusAuthserviceAPI.
-		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Read(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
 		ReturnFieldsPlus(readableAttributesForRadiusAuthservice).
 		ReturnAsObject(1).
 		ProxySearch(config.GetProxySearch()).
@@ -146,9 +146,15 @@ func (r *RadiusAuthserviceResource) Update(ctx context.Context, req resource.Upd
 		return
 	}
 
+	diags = req.State.GetAttribute(ctx, path.Root("uuid"), &data.Uuid)
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+		return
+	}
+
 	apiRes, _, err := r.client.SecurityAPI.
 		RadiusAuthserviceAPI.
-		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Update(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
 		RadiusAuthservice(*data.Expand(ctx, &resp.Diagnostics)).
 		ReturnFieldsPlus(readableAttributesForRadiusAuthservice).
 		ReturnAsObject(1).
@@ -178,7 +184,7 @@ func (r *RadiusAuthserviceResource) Delete(ctx context.Context, req resource.Del
 
 	httpRes, err := r.client.SecurityAPI.
 		RadiusAuthserviceAPI.
-		Delete(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Delete(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
 		Execute()
 	if err != nil {
 		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
@@ -190,5 +196,5 @@ func (r *RadiusAuthserviceResource) Delete(ctx context.Context, req resource.Del
 }
 
 func (r *RadiusAuthserviceResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	resource.ImportStatePassthroughID(ctx, path.Root("ref"), req, resp)
+	resource.ImportStatePassthroughID(ctx, path.Root("uuid"), req, resp)
 }
