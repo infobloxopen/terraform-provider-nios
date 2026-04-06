@@ -632,8 +632,8 @@ func TestAccParentalcontrolSubscriberrecordResource_ParentalControlPolicy(t *tes
 	ipsd := "N/A"
 	localId := "N/A"
 	prefix := "32"
-	parentalControlPolicy1 := "00000000000000000000000000020040"
-	parentalControlPolicy2 := "00000000000000000000000000020041"
+	parentalControlPolicy1 := "104"
+	parentalControlPolicy2 := "101"
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
@@ -917,18 +917,18 @@ func TestAccParentalcontrolSubscriberrecordResource_WpcCategoryPolicy(t *testing
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccParentalcontrolSubscriberrecordWpcCategoryPolicy(ipAddr, ipsd, localId, prefix, site, subscriberId, "01"),
+				Config: testAccParentalcontrolSubscriberrecordWpcCategoryPolicy(ipAddr, ipsd, localId, prefix, site, subscriberId, "1"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckParentalcontrolSubscriberrecordExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "wpc_category_policy", "01"),
+					resource.TestCheckResourceAttr(resourceName, "wpc_category_policy", "1"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccParentalcontrolSubscriberrecordWpcCategoryPolicy(ipAddr, ipsd, localId, prefix, site, subscriberId, "02"),
+				Config: testAccParentalcontrolSubscriberrecordWpcCategoryPolicy(ipAddr, ipsd, localId, prefix, site, subscriberId, "2"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckParentalcontrolSubscriberrecordExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "wpc_category_policy", "02"),
+					resource.TestCheckResourceAttr(resourceName, "wpc_category_policy", "2"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
