@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -16,6 +17,8 @@ import (
 )
 
 var readableAttributesForParentalcontrolSubscribersite = "abss,api_members,api_port,block_size,blocking_ipv4_vip1,blocking_ipv4_vip2,blocking_ipv6_vip1,blocking_ipv6_vip2,comment,dca_sub_bw_list,dca_sub_query_count,enable_global_allow_list_rpz,enable_rpz_filtering_bypass,extattrs,first_port,global_allow_list_rpz,maximum_subscribers,members,msps,name,nas_gateways,nas_port,proxy_rpz_passthru,spms,stop_anycast,strict_nat,subscriber_collection_type"
+
+// TODO : Required parents for the execution of tests - members (infoblox.localdomain, infoblox.member1)
 
 func TestAccParentalcontrolSubscribersiteResource_basic(t *testing.T) {
 	var resourceName = "nios_parentalcontrol_subscribersite.test"
@@ -81,16 +84,20 @@ func TestAccParentalcontrolSubscribersiteResource_Abss(t *testing.T) {
 	var resourceName = "nios_parentalcontrol_subscribersite.test_abss"
 	var v parentalcontrol.ParentalcontrolSubscribersite
 	name := acctest.RandomNameWithPrefix("subscriber-site")
+	blockingPolicy1 := acctest.RandomNameWithPrefix("blocking-policy-")
+	blockingPolicy2 := acctest.RandomNameWithPrefix("blocking-policy-")
+	value1 := acctest.Random32Hexadecimal()
+	value2 := acctest.Random32Hexadecimal()
 	abss1 := []map[string]any{
 		{
 			"ip_address":      "12.12.1.1",
-			"blocking_policy": "policy1",
+			"blocking_policy": blockingPolicy1,
 		},
 	}
 	abss2 := []map[string]any{
 		{
 			"ip_address":      "12.12.10.10",
-			"blocking_policy": "policy2",
+			"blocking_policy": blockingPolicy2,
 		},
 	}
 	resource.ParallelTest(t, resource.TestCase{
@@ -99,7 +106,7 @@ func TestAccParentalcontrolSubscribersiteResource_Abss(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccParentalcontrolSubscribersiteAbss(name, abss1),
+				Config: testAccParentalcontrolSubscribersiteAbss(name, abss1, blockingPolicy1, value1),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckParentalcontrolSubscribersiteExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "abss.#", "1"),
@@ -109,7 +116,7 @@ func TestAccParentalcontrolSubscribersiteResource_Abss(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccParentalcontrolSubscribersiteAbss(name, abss2),
+				Config: testAccParentalcontrolSubscribersiteAbss(name, abss2, blockingPolicy2, value2),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckParentalcontrolSubscribersiteExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "abss.#", "1"),
@@ -127,10 +134,10 @@ func TestAccParentalcontrolSubscribersiteResource_ApiMembers(t *testing.T) {
 	var v parentalcontrol.ParentalcontrolSubscribersite
 	name := acctest.RandomNameWithPrefix("subscriber-site")
 	apiMembers1 := []map[string]any{
-		{"name": "local.member1"},
+		{"name": "infoblox.localdomain"},
 	}
 	apiMembers2 := []map[string]any{
-		{"name": "local.member2"},
+		{"name": "infoblox.member1"},
 	}
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -142,7 +149,7 @@ func TestAccParentalcontrolSubscribersiteResource_ApiMembers(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckParentalcontrolSubscribersiteExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "api_members.#", "1"),
-					resource.TestCheckResourceAttr(resourceName, "api_members.0.name", "local.member1"),
+					resource.TestCheckResourceAttr(resourceName, "api_members.0.name", "infoblox.localdomain"),
 				),
 			},
 			// Update and Read
@@ -151,7 +158,7 @@ func TestAccParentalcontrolSubscribersiteResource_ApiMembers(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckParentalcontrolSubscribersiteExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "api_members.#", "1"),
-					resource.TestCheckResourceAttr(resourceName, "api_members.0.name", "local.member2"),
+					resource.TestCheckResourceAttr(resourceName, "api_members.0.name", "infoblox.member1"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -576,10 +583,10 @@ func TestAccParentalcontrolSubscribersiteResource_Members(t *testing.T) {
 	var v parentalcontrol.ParentalcontrolSubscribersite
 	name := acctest.RandomNameWithPrefix("subscriber-site")
 	members1 := []map[string]any{
-		{"name": "local.member1"},
+		{"name": "infoblox.localdomain"},
 	}
 	members2 := []map[string]any{
-		{"name": "local.member2"},
+		{"name": "infoblox.member1"},
 	}
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -591,7 +598,7 @@ func TestAccParentalcontrolSubscribersiteResource_Members(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckParentalcontrolSubscribersiteExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "members.#", "1"),
-					resource.TestCheckResourceAttr(resourceName, "members.0.name", "local.member1"),
+					resource.TestCheckResourceAttr(resourceName, "members.0.name", "infoblox.localdomain"),
 				),
 			},
 			// Update and Read
@@ -600,7 +607,7 @@ func TestAccParentalcontrolSubscribersiteResource_Members(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckParentalcontrolSubscribersiteExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "members.#", "1"),
-					resource.TestCheckResourceAttr(resourceName, "members.0.name", "local.member2"),
+					resource.TestCheckResourceAttr(resourceName, "members.0.name", "infoblox.member1"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -911,14 +918,16 @@ resource "nios_parentalcontrol_subscribersite" "test" {
 `, name)
 }
 
-func testAccParentalcontrolSubscribersiteAbss(name string, abss []map[string]any) string {
+func testAccParentalcontrolSubscribersiteAbss(name string, abss []map[string]any, blockingPolicy, value string) string {
 	abssStr := utils.ConvertSliceOfMapsToHCL(abss)
-	return fmt.Sprintf(`
+	config := fmt.Sprintf(`
 resource "nios_parentalcontrol_subscribersite" "test_abss" {
     name = %q
     abss = %s
+	depends_on = [nios_parentalcontrol_blockingpolicy.test_blocking_policy]
 }
 `, name, abssStr)
+	return strings.Join([]string{testAccParentBlockingPolicy(blockingPolicy, value), config}, "")
 }
 
 func testAccParentalcontrolSubscribersiteApiMembers(name string, apiMembers []map[string]any) string {
@@ -926,9 +935,10 @@ func testAccParentalcontrolSubscribersiteApiMembers(name string, apiMembers []ma
 	return fmt.Sprintf(`
 resource "nios_parentalcontrol_subscribersite" "test_api_members" {
     name = %q
+	members = %s
     api_members = %s
 }
-`, name, apiMembersStr)
+`, name, apiMembersStr, apiMembersStr)
 }
 
 func testAccParentalcontrolSubscribersiteBlockSize(name, blockSize string) string {
@@ -1143,4 +1153,13 @@ resource "nios_parentalcontrol_subscribersite" "test_strict_nat" {
     strict_nat = %q
 }
 `, name, strictNat)
+}
+
+func testAccParentBlockingPolicy(name, value string) string {
+	return fmt.Sprintf(`
+resource "nios_parentalcontrol_blockingpolicy" "test_blocking_policy" {
+	name = %q
+	value = %q
+}
+`, name, value)
 }
