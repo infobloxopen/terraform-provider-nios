@@ -191,18 +191,18 @@ func TestAccParentalcontrolSubscriberrecordResource_Ans1(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccParentalcontrolSubscriberrecordAns1(ipAddr, ipsd, localId, prefix, site, subscriberId, "User-LastName=DOE"),
+				Config: testAccParentalcontrolSubscriberrecordAns1(ipAddr, ipsd, localId, prefix, site, subscriberId, "IMEI=1234567890"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckParentalcontrolSubscriberrecordExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ans1", "User-LastName=DOE"),
+					resource.TestCheckResourceAttr(resourceName, "ans1", "IMEI=1234567890"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccParentalcontrolSubscriberrecordAns1(ipAddr, ipsd, localId, prefix, site, subscriberId, "User-LastName=DOE_UPDATED"),
+				Config: testAccParentalcontrolSubscriberrecordAns1(ipAddr, ipsd, localId, prefix, site, subscriberId, "IMEI=1234567890_UPDATED"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckParentalcontrolSubscriberrecordExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ans1", "User-LastName=DOE_UPDATED"),
+					resource.TestCheckResourceAttr(resourceName, "ans1", "IMEI=1234567890_UPDATED"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -225,18 +225,18 @@ func TestAccParentalcontrolSubscriberrecordResource_Ans2(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccParentalcontrolSubscriberrecordAns2(ipAddr, ipsd, localId, prefix, site, subscriberId, "User-Address=123 Main St"),
+				Config: testAccParentalcontrolSubscriberrecordAns2(ipAddr, ipsd, localId, prefix, site, subscriberId, "IMSI=12345"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckParentalcontrolSubscriberrecordExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ans2", "User-Address=123 Main St"),
+					resource.TestCheckResourceAttr(resourceName, "ans2", "IMSI=12345"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccParentalcontrolSubscriberrecordAns2(ipAddr, ipsd, localId, prefix, site, subscriberId, "User-Address=125 Main St"),
+				Config: testAccParentalcontrolSubscriberrecordAns2(ipAddr, ipsd, localId, prefix, site, subscriberId, "IMSI=12345_UPDATED"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckParentalcontrolSubscriberrecordExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ans2", "User-Address=125 Main St"),
+					resource.TestCheckResourceAttr(resourceName, "ans2", "IMSI=12345_UPDATED"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -259,18 +259,18 @@ func TestAccParentalcontrolSubscriberrecordResource_Ans3(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccParentalcontrolSubscriberrecordAns3(ipAddr, ipsd, localId, prefix, site, subscriberId, "User-City=Country1"),
+				Config: testAccParentalcontrolSubscriberrecordAns3(ipAddr, ipsd, localId, prefix, site, subscriberId, "LocalId=11011"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckParentalcontrolSubscriberrecordExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ans3", "User-City=Country1"),
+					resource.TestCheckResourceAttr(resourceName, "ans3", "LocalId=11011"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccParentalcontrolSubscriberrecordAns3(ipAddr, ipsd, localId, prefix, site, subscriberId, "User-City=Country2"),
+				Config: testAccParentalcontrolSubscriberrecordAns3(ipAddr, ipsd, localId, prefix, site, subscriberId, "LocalId=11010101"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckParentalcontrolSubscriberrecordExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ans3", "User-City=Country2"),
+					resource.TestCheckResourceAttr(resourceName, "ans3", "LocalId=11010101"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -293,18 +293,18 @@ func TestAccParentalcontrolSubscriberrecordResource_Ans4(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccParentalcontrolSubscriberrecordAns4(ipAddr, ipsd, localId, prefix, site, subscriberId, "User-Id=12345"),
+				Config: testAccParentalcontrolSubscriberrecordAns4(ipAddr, ipsd, localId, prefix, site, subscriberId, "MSISDN=12345"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckParentalcontrolSubscriberrecordExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ans4", "User-Id=12345"),
+					resource.TestCheckResourceAttr(resourceName, "ans4", "MSISDN=12345"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccParentalcontrolSubscriberrecordAns4(ipAddr, ipsd, localId, prefix, site, subscriberId, "User-Id=67890"),
+				Config: testAccParentalcontrolSubscriberrecordAns4(ipAddr, ipsd, localId, prefix, site, subscriberId, "MSISDN=67890"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckParentalcontrolSubscriberrecordExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ans4", "User-Id=67890"),
+					resource.TestCheckResourceAttr(resourceName, "ans4", "MSISDN=67890"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -327,18 +327,18 @@ func TestAccParentalcontrolSubscriberrecordResource_BlackList(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccParentalcontrolSubscriberrecordBlackList(ipAddr, ipsd, localId, prefix, site, subscriberId, ""),
+				Config: testAccParentalcontrolSubscriberrecordBlackList(ipAddr, ipsd, localId, prefix, site, subscriberId, "facebook.com,bad.com,verybad.com"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckParentalcontrolSubscriberrecordExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "black_list", "BLACK_LIST_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "black_list", "facebook.com,bad.com,verybad.com"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccParentalcontrolSubscriberrecordBlackList(ipAddr, ipsd, localId, prefix, site, subscriberId, "BLACK_LIST_UPDATE_REPLACE_ME"),
+				Config: testAccParentalcontrolSubscriberrecordBlackList(ipAddr, ipsd, localId, prefix, site, subscriberId, "wapi.com,info.com"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckParentalcontrolSubscriberrecordExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "black_list", "BLACK_LIST_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "black_list", "wapi.com,info.com"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -604,18 +604,18 @@ func TestAccParentalcontrolSubscriberrecordResource_OpCode(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccParentalcontrolSubscriberrecordOpCode(ipAddr, ipsd, localId, prefix, site, subscriberId, "OP_CODE_REPLACE_ME"),
+				Config: testAccParentalcontrolSubscriberrecordOpCode(ipAddr, ipsd, localId, prefix, site, subscriberId, "101"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckParentalcontrolSubscriberrecordExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "op_code", "OP_CODE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "op_code", "101"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccParentalcontrolSubscriberrecordOpCode(ipAddr, ipsd, localId, prefix, site, subscriberId, "OP_CODE_UPDATE_REPLACE_ME"),
+				Config: testAccParentalcontrolSubscriberrecordOpCode(ipAddr, ipsd, localId, prefix, site, subscriberId, "110"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckParentalcontrolSubscriberrecordExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "op_code", "OP_CODE_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "op_code", "110"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -883,18 +883,18 @@ func TestAccParentalcontrolSubscriberrecordResource_WhiteList(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccParentalcontrolSubscriberrecordWhiteList(ipAddr, ipsd, localId, prefix, site, subscriberId, "WHITE_LIST_REPLACE_ME"),
+				Config: testAccParentalcontrolSubscriberrecordWhiteList(ipAddr, ipsd, localId, prefix, site, subscriberId, "info.com,good.com"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckParentalcontrolSubscriberrecordExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "white_list", "WHITE_LIST_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "white_list", "info.com,good.com"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccParentalcontrolSubscriberrecordWhiteList(ipAddr, ipsd, localId, prefix, site, subscriberId, "WHITE_LIST_UPDATE_REPLACE_ME"),
+				Config: testAccParentalcontrolSubscriberrecordWhiteList(ipAddr, ipsd, localId, prefix, site, subscriberId, "wapi.com"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckParentalcontrolSubscriberrecordExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "white_list", "WHITE_LIST_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "white_list", "wapi.com"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -1115,6 +1115,7 @@ resource "nios_parentalcontrol_subscriberrecord" "test_black_list" {
 	site = %q
 	subscriber_id = %q
 	black_list = %q
+	bwflag = true
 }
 `, ipAddr, ipsd, localId, prefix, site, subscriberId, blackList)
 }
@@ -1333,6 +1334,7 @@ resource "nios_parentalcontrol_subscriberrecord" "test_white_list" {
 	site = %q
 	subscriber_id = %q
 	white_list = %q
+	bwflag = true
 }
 `, ipAddr, ipsd, localId, prefix, site, subscriberId, whiteList)
 }

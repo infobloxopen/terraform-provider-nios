@@ -3,14 +3,15 @@ package parentalcontrol
 import (
 	"context"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/parentalcontrol"
-
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 )
 
@@ -113,8 +114,11 @@ var ParentalcontrolSubscriberrecordResourceSchemaAttributes = map[string]schema.
 		MarkdownDescription: "ans4",
 	},
 	"black_list": schema.StringAttribute{
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
+		Validators: []validator.String{
+			stringvalidator.AlsoRequires(path.MatchRoot("bwflag")),
+		},
 		MarkdownDescription: "black_list",
 	},
 	"bwflag": schema.BoolAttribute{
@@ -187,8 +191,11 @@ var ParentalcontrolSubscriberrecordResourceSchemaAttributes = map[string]schema.
 		MarkdownDescription: "unknown_category_policy",
 	},
 	"white_list": schema.StringAttribute{
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
+		Validators: []validator.String{
+			stringvalidator.AlsoRequires(path.MatchRoot("bwflag")),
+		},
 		MarkdownDescription: "white_list",
 	},
 	"wpc_category_policy": schema.StringAttribute{
@@ -196,18 +203,6 @@ var ParentalcontrolSubscriberrecordResourceSchemaAttributes = map[string]schema.
 		Computed:            true,
 		MarkdownDescription: "wpc_category_policy",
 	},
-}
-
-func ExpandParentalcontrolSubscriberrecord(ctx context.Context, o types.Object, diags *diag.Diagnostics) *parentalcontrol.ParentalcontrolSubscriberrecord {
-	if o.IsNull() || o.IsUnknown() {
-		return nil
-	}
-	var m ParentalcontrolSubscriberrecordModel
-	diags.Append(o.As(ctx, &m, basetypes.ObjectAsOptions{})...)
-	if diags.HasError() {
-		return nil
-	}
-	return m.Expand(ctx, diags)
 }
 
 func (m *ParentalcontrolSubscriberrecordModel) Expand(ctx context.Context, diags *diag.Diagnostics) *parentalcontrol.ParentalcontrolSubscriberrecord {
@@ -231,17 +226,39 @@ func (m *ParentalcontrolSubscriberrecordModel) Expand(ctx context.Context, diags
 		Localid:                flex.ExpandStringPointer(m.Localid),
 		NasContextual:          flex.ExpandStringPointer(m.NasContextual),
 		OpCode:                 flex.ExpandStringPointer(m.OpCode),
-		ParentalControlPolicy:  flex.ExpandStringPointer(m.ParentalControlPolicy),
+		ParentalControlPolicy:  PadLeftZero(m.ParentalControlPolicy),
 		Prefix:                 flex.ExpandInt64Pointer(m.Prefix),
 		ProxyAll:               flex.ExpandBoolPointer(m.ProxyAll),
 		Site:                   flex.ExpandStringPointer(m.Site),
 		SubscriberId:           flex.ExpandStringPointer(m.SubscriberId),
-		SubscriberSecurePolicy: flex.ExpandStringPointer(m.SubscriberSecurePolicy),
+		SubscriberSecurePolicy: PadLeftZero(m.SubscriberSecurePolicy),
 		UnknownCategoryPolicy:  flex.ExpandBoolPointer(m.UnknownCategoryPolicy),
 		WhiteList:              flex.ExpandStringPointer(m.WhiteList),
-		WpcCategoryPolicy:      flex.ExpandStringPointer(m.WpcCategoryPolicy),
+		WpcCategoryPolicy:      PadLeftZero(m.WpcCategoryPolicy),
 	}
 	return to
+}
+
+func PadLeftZero(policy types.String) *string {
+	if policy.IsNull() {
+		return nil
+	}
+	value := policy.ValueString()
+	if len(value)%2 != 0 {
+		value = "0" + value
+	}
+	return &value
+}
+
+func NormalizePadding(policy *string) types.String {
+	if policy == nil {
+		return types.StringNull()
+	}
+	value := *policy
+	if len(value) > 1 && value[0] == '0' {
+		value = value[1:]
+	}
+	return types.StringValue(value)
 }
 
 func FlattenParentalcontrolSubscriberrecord(ctx context.Context, from *parentalcontrol.ParentalcontrolSubscriberrecord, diags *diag.Diagnostics) types.Object {
@@ -279,13 +296,13 @@ func (m *ParentalcontrolSubscriberrecordModel) Flatten(ctx context.Context, from
 	m.Localid = flex.FlattenStringPointer(from.Localid)
 	m.NasContextual = flex.FlattenStringPointer(from.NasContextual)
 	m.OpCode = flex.FlattenStringPointer(from.OpCode)
-	m.ParentalControlPolicy = flex.FlattenStringPointer(from.ParentalControlPolicy)
+	m.ParentalControlPolicy = NormalizePadding(from.ParentalControlPolicy)
 	m.Prefix = flex.FlattenInt64Pointer(from.Prefix)
 	m.ProxyAll = types.BoolPointerValue(from.ProxyAll)
 	m.Site = flex.FlattenStringPointer(from.Site)
 	m.SubscriberId = flex.FlattenStringPointer(from.SubscriberId)
-	m.SubscriberSecurePolicy = flex.FlattenStringPointer(from.SubscriberSecurePolicy)
+	m.SubscriberSecurePolicy = NormalizePadding(from.SubscriberSecurePolicy)
 	m.UnknownCategoryPolicy = types.BoolPointerValue(from.UnknownCategoryPolicy)
 	m.WhiteList = flex.FlattenStringPointer(from.WhiteList)
-	m.WpcCategoryPolicy = flex.FlattenStringPointer(from.WpcCategoryPolicy)
+	m.WpcCategoryPolicy = NormalizePadding(from.WpcCategoryPolicy)
 }

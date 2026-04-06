@@ -62,6 +62,27 @@ func (r *ParentalcontrolSubscriberrecordResource) Configure(ctx context.Context,
 	r.client = client
 }
 
+func (r *ParentalcontrolSubscriberrecordResource) ValidateConfig(ctx context.Context, req resource.ValidateConfigRequest, resp *resource.ValidateConfigResponse) {
+
+	var data ParentalcontrolSubscriberrecordModel
+	// Read Terraform plan data into the model
+	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	// Check if white_list or blacklist are provided and bwflag is set to true, if not return error
+	if !data.WhiteList.IsNull() || !data.BlackList.IsNull() {
+		if data.Bwflag.IsNull() || data.Bwflag.ValueBool() == false {
+			resp.Diagnostics.AddError(
+				"Invalid Configuration",
+				"bwflag must be set to true when white_list or black_list is provided.",
+			)
+			return
+		}
+	}
+}
+
 func (r *ParentalcontrolSubscriberrecordResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var data ParentalcontrolSubscriberrecordModel
 
