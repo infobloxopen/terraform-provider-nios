@@ -91,7 +91,6 @@ func (r *GridJoinResource) Create(ctx context.Context, req resource.CreateReques
 	// Check for 200 response with HTML body indicating member is already joined to a grid master
 	if err != nil && httpResp != nil && httpResp.StatusCode == 200 {
 		if httpResp.Body != nil {
-			defer httpResp.Body.Close()
 			bodyBytes, readErr := io.ReadAll(httpResp.Body)
 			if readErr == nil {
 				bodyStr := string(bodyBytes)
