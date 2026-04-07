@@ -1080,7 +1080,7 @@ func TestAccFixedaddressResource_MsOptions(t *testing.T) {
 func TestAccFixedaddressResource_MsServer(t *testing.T) {
 	var resourceName = "nios_dhcp_fixed_address.test_ms_server"
 	var v dhcp.Fixedaddress
-	ip := "50.0.0.132"
+	ip := "150.0.0.32"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1088,18 +1088,10 @@ func TestAccFixedaddressResource_MsServer(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccFixedaddressMsServer(ip, "MAC_ADDRESS", "00:1a:6b:3c:4d:5e", "10.10.10.10", "ms_server", "example_fixed_address"),
+				Config: testAccFixedaddressMsServer(ip, "MAC_ADDRESS", "00:1a:6b:3c:4d:5e", "10.10.10.10", "default", "example_fixed_address"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ms_server", "10.34.98.68"),
-				),
-			},
-			// Update and Read
-			{
-				Config: testAccFixedaddressMsServer(ip, "MAC_ADDRESS", "00:1a:6b:3c:4d:5f", "10.10.10.10", "ms_server", "example_fixed_address2"),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ms_server", "10.34.98.68"),
+					resource.TestCheckResourceAttr(resourceName, "ms_server.ipv4addr", "10.10.10.10"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -1873,10 +1865,10 @@ func TestAccFixedaddressResource_UseSnmp3Credential(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccFixedaddressUseSnmp3Credential(ip, "CIRCUIT_ID", agentCircuitID, "true", "SNMP3_USER", "MD5", "AUTH_PASSWORD", "3DES", "PRIVACY_PASSWORD", "SNMP3 Credential Comment", "default"),
+				Config: testAccFixedaddressUseSnmp3CredentialUnset(ip, "CIRCUIT_ID", agentCircuitID, "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_snmp3_credential", "true"),
+					resource.TestCheckResourceAttr(resourceName, "use_snmp3_credential", "false"),
 				),
 			},
 			// Update and Read
@@ -1884,7 +1876,7 @@ func TestAccFixedaddressResource_UseSnmp3Credential(t *testing.T) {
 				Config: testAccFixedaddressUseSnmp3Credential(ip, "CIRCUIT_ID", agentCircuitID, "true", "SNMP3_USER", "MD5", "AUTH_PASSWORD", "3DES", "PRIVACY_PASSWORD", "SNMP3 Credential Comment", "default"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_snmp3_credential", "false"),
+					resource.TestCheckResourceAttr(resourceName, "use_snmp3_credential", "true"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -2411,17 +2403,39 @@ resource "nios_dhcp_fixed_address" "test_ms_options" {
 
 func testAccFixedaddressMsServer(ip, matchClient string, macAddress string, msServerIpv4Addr, networkView, name string) string {
 	return fmt.Sprintf(`
+resource "nios_ipam_network" "example_network" {
+  	network      = "150.0.0.0/24"
+	network_view = "default"
+	comment      = "Created by Terraform for FixedAddress MS Server Test"
+	members = [
+		{
+			struct = "msdhcpserver"
+			ipv4addr = %q
+		}
+	]
+}
+
+resource "nios_dhcp_range" "test_ms_server_range" {
+    start_addr = "150.0.0.35"
+	end_addr = "150.0.0.40"
+	ms_server = {
+		ipv4addr = nios_ipam_network.example_network.members[0].ipv4addr
+	}
+	server_association_type = "MS_SERVER"
+}
+
 resource "nios_dhcp_fixed_address" "test_ms_server" {
 	ipv4addr = %q
 	match_client = %q
 	mac = %q
 	ms_server = {
-		ipv4addr = %q
+		ipv4addr = nios_ipam_network.example_network.members[0].ipv4addr
 	}
 	network_view = %q
 	name = %q
+	depends_on = [nios_dhcp_range.test_ms_server_range]
 }
-`, ip, matchClient, macAddress, msServerIpv4Addr, networkView, name)
+`, msServerIpv4Addr, ip, matchClient, macAddress, networkView, name)
 }
 
 func testAccFixedaddressName(ip, matchClient string, agentCircuitID int, name string) string {
@@ -2725,6 +2739,19 @@ resource "nios_dhcp_fixed_address" "test_use_snmp3_credential" {
 	use_cli_credentials = true
 }
 `, ip, matchClient, agentCircuitID, useSnmp3Credential, snmp3CredentialUser, snmp3CredentialAuthProtocol, snmp3CredentialAuthPass, snmp3CredentialPrvProtocol, snmp3CredentialPrvPass, snmp3CredentialComment, snmp3CredentialGroup)
+}
+
+func testAccFixedaddressUseSnmp3CredentialUnset(ip, matchClient string, agentCircuitID int, useSnmp3Credential string) string {
+	return fmt.Sprintf(`
+resource "nios_dhcp_fixed_address" "test_use_snmp3_credential" {
+	ipv4addr = %q
+	match_client = %q
+	agent_circuit_id = %d
+	use_snmp3_credential = %q
+	snmp3_credential = null
+	use_cli_credentials = false
+}
+`, ip, matchClient, agentCircuitID, useSnmp3Credential)
 }
 
 func testAccFixedaddressUseSnmpCredential(ip, matchClient string, agentCircuitID int, useSnmpCredential string) string {

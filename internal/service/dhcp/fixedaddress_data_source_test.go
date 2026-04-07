@@ -67,7 +67,7 @@ func TestAccFixedaddressDataSource_MsServerStruct(t *testing.T) {
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccFixedaddressDataSourcConfigeMsServerStruct("msdhcpserver", "10.10.10.10"),
+				Config: testAccFixedaddressDataSourcConfigeMsServerStruct("msdhcpserver", "example_server"),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(dataSourceName, "result.#", "1"),
 				),

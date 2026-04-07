@@ -327,12 +327,10 @@ func TestAccRangetemplateResource_DelegatedMember(t *testing.T) {
 	numberOfAdresses := 100
 	offset := 50
 	delegatedMember := map[string]string{
-		"name":     "infoblox.172_28_82_12",
-		"ipv4addr": "172.28.82.12",
+		"name": "infoblox.localdomain",
 	}
 	delegatedMemberUpdated := map[string]string{
-		"name":     "infoblox.172_28_82_218",
-		"ipv4addr": "172.28.82.218",
+		"name": "infoblox.member",
 	}
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -344,8 +342,7 @@ func TestAccRangetemplateResource_DelegatedMember(t *testing.T) {
 				Config: testAccRangetemplateDelegatedMember(delegatedMember, name, numberOfAdresses, offset),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangetemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "delegated_member.name", "infoblox.172_28_82_12"),
-					resource.TestCheckResourceAttr(resourceName, "delegated_member.ipv4addr", "172.28.82.12"),
+					resource.TestCheckResourceAttr(resourceName, "delegated_member.name", "infoblox.localdomain"),
 				),
 			},
 			// Update and Read
@@ -353,8 +350,7 @@ func TestAccRangetemplateResource_DelegatedMember(t *testing.T) {
 				Config: testAccRangetemplateDelegatedMember(delegatedMemberUpdated, name, numberOfAdresses, offset),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangetemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "delegated_member.name", "infoblox.172_28_82_218"),
-					resource.TestCheckResourceAttr(resourceName, "delegated_member.ipv4addr", "172.28.82.218"),
+					resource.TestCheckResourceAttr(resourceName, "delegated_member.name", "infoblox.member"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -718,8 +714,8 @@ func TestAccRangetemplateResource_FailoverAssociation(t *testing.T) {
 	name := acctest.RandomNameWithPrefix("range-template")
 	numberOfAdresses := 100
 	offset := 50
-	failoverAssociation := "failover_association"
-	failoverAssociationUpdated := "failover_association_1"
+	failoverAssociation := "example_failover_association"
+	failoverAssociationUpdated := "example_failover_association1"
 	serverAssociationType := "FAILOVER"
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -756,13 +752,13 @@ func TestAccRangetemplateResource_FingerprintFilterRules(t *testing.T) {
 	offset := 50
 	fingerPrintRules := []map[string]any{
 		{
-			"filter":     "finger_print_filter1",
+			"filter":     "test_filter_fingerprint",
 			"permission": "Allow",
 		},
 	}
 	fingerPrintRulesUpdated := []map[string]any{
 		{
-			"filter":     "finger_print_filter1",
+			"filter":     "test_filter_fingerprint1",
 			"permission": "Deny",
 		},
 	}
@@ -777,7 +773,7 @@ func TestAccRangetemplateResource_FingerprintFilterRules(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangetemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "fingerprint_filter_rules.#", "1"),
-					resource.TestCheckResourceAttr(resourceName, "fingerprint_filter_rules.0.filter", "finger_print_filter1"),
+					resource.TestCheckResourceAttr(resourceName, "fingerprint_filter_rules.0.filter", "test_filter_fingerprint"),
 					resource.TestCheckResourceAttr(resourceName, "fingerprint_filter_rules.0.permission", "Allow"),
 				),
 			},
@@ -787,7 +783,7 @@ func TestAccRangetemplateResource_FingerprintFilterRules(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangetemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "fingerprint_filter_rules.#", "1"),
-					resource.TestCheckResourceAttr(resourceName, "fingerprint_filter_rules.0.filter", "finger_print_filter1"),
+					resource.TestCheckResourceAttr(resourceName, "fingerprint_filter_rules.0.filter", "test_filter_fingerprint1"),
 					resource.TestCheckResourceAttr(resourceName, "fingerprint_filter_rules.0.permission", "Deny"),
 				),
 			},
@@ -981,13 +977,13 @@ func TestAccRangetemplateResource_LogicFilterRules(t *testing.T) {
 	offset := 50
 	logicFilterRules := []map[string]any{
 		{
-			"filter": "option_filter",
+			"filter": "example-option-filter-1",
 			"type":   "Option",
 		},
 	}
 	logicFilterRulesUpdated := []map[string]any{
 		{
-			"filter": "option_logic_filter",
+			"filter": "example-option-filter-2",
 			"type":   "Option",
 		},
 	}
@@ -1002,7 +998,7 @@ func TestAccRangetemplateResource_LogicFilterRules(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangetemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "logic_filter_rules.#", "1"),
-					resource.TestCheckResourceAttr(resourceName, "logic_filter_rules.0.filter", "option_filter"),
+					resource.TestCheckResourceAttr(resourceName, "logic_filter_rules.0.filter", "example-option-filter-1"),
 					resource.TestCheckResourceAttr(resourceName, "logic_filter_rules.0.type", "Option"),
 				),
 			},
@@ -1012,7 +1008,7 @@ func TestAccRangetemplateResource_LogicFilterRules(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangetemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "logic_filter_rules.#", "1"),
-					resource.TestCheckResourceAttr(resourceName, "logic_filter_rules.0.filter", "option_logic_filter"),
+					resource.TestCheckResourceAttr(resourceName, "logic_filter_rules.0.filter", "example-option-filter-2"),
 					resource.TestCheckResourceAttr(resourceName, "logic_filter_rules.0.type", "Option"),
 				),
 			},
@@ -1109,7 +1105,7 @@ func TestAccRangetemplateResource_MacFilterRules(t *testing.T) {
 	}
 	macFilterRulesUpdated := []map[string]any{
 		{
-			"filter":     "mac_filter",
+			"filter":     "mac_filter2",
 			"permission": "Deny",
 		},
 	}
@@ -1134,7 +1130,7 @@ func TestAccRangetemplateResource_MacFilterRules(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangetemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "mac_filter_rules.#", "1"),
-					resource.TestCheckResourceAttr(resourceName, "mac_filter_rules.0.filter", "mac_filter"),
+					resource.TestCheckResourceAttr(resourceName, "mac_filter_rules.0.filter", "mac_filter2"),
 					resource.TestCheckResourceAttr(resourceName, "mac_filter_rules.0.permission", "Deny"),
 				),
 			},
@@ -1152,12 +1148,10 @@ func TestAccRangetemplateResource_Member(t *testing.T) {
 	offset := 50
 
 	member := map[string]string{
-		"name":     "infoblox.172_28_82_12",
-		"ipv4addr": "172.28.82.12",
+		"name": "infoblox.localdomain",
 	}
 	memberUpdated := map[string]string{
-		"name":     "infoblox.172_28_82_218",
-		"ipv4addr": "172.28.82.218",
+		"name": "infoblox.member",
 	}
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -1169,8 +1163,7 @@ func TestAccRangetemplateResource_Member(t *testing.T) {
 				Config: testAccRangetemplateMember(member, name, numberOfAdresses, offset),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangetemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "member.name", "infoblox.172_28_82_12"),
-					resource.TestCheckResourceAttr(resourceName, "member.ipv4addr", "172.28.82.12"),
+					resource.TestCheckResourceAttr(resourceName, "member.name", "infoblox.localdomain"),
 				),
 			},
 			// Update and Read
@@ -1178,8 +1171,7 @@ func TestAccRangetemplateResource_Member(t *testing.T) {
 				Config: testAccRangetemplateMember(memberUpdated, name, numberOfAdresses, offset),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangetemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "member.name", "infoblox.172_28_82_218"),
-					resource.TestCheckResourceAttr(resourceName, "member.ipv4addr", "172.28.82.218"),
+					resource.TestCheckResourceAttr(resourceName, "member.name", "infoblox.member"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -1460,13 +1452,13 @@ func TestAccRangetemplateResource_OptionFilterRules(t *testing.T) {
 	offset := 50
 	optionFilterRules := []map[string]any{
 		{
-			"filter":     "option_filter",
+			"filter":     "example-option-filter-1",
 			"permission": "Allow",
 		},
 	}
 	optionFilterRulesUpdated := []map[string]any{
 		{
-			"filter":     "option_filter",
+			"filter":     "example-option-filter-2",
 			"permission": "Deny",
 		},
 	}
@@ -1481,7 +1473,7 @@ func TestAccRangetemplateResource_OptionFilterRules(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangetemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "option_filter_rules.#", "1"),
-					resource.TestCheckResourceAttr(resourceName, "option_filter_rules.0.filter", "option_filter"),
+					resource.TestCheckResourceAttr(resourceName, "option_filter_rules.0.filter", "example-option-filter-1"),
 					resource.TestCheckResourceAttr(resourceName, "option_filter_rules.0.permission", "Allow"),
 				),
 			},
@@ -1491,7 +1483,7 @@ func TestAccRangetemplateResource_OptionFilterRules(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangetemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "option_filter_rules.#", "1"),
-					resource.TestCheckResourceAttr(resourceName, "option_filter_rules.0.filter", "option_filter"),
+					resource.TestCheckResourceAttr(resourceName, "option_filter_rules.0.filter", "example-option-filter-2"),
 					resource.TestCheckResourceAttr(resourceName, "option_filter_rules.0.permission", "Deny"),
 				),
 			},
@@ -1688,7 +1680,7 @@ func TestAccRangetemplateResource_ServerAssociationType(t *testing.T) {
 	offset := 50
 	servserAssociationType := "FAILOVER"
 	servserAssociationTypeUpdated := "NONE"
-	failoverAssociation := "failover_association"
+	failoverAssociation := "example_failover_association"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },

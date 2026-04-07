@@ -23,7 +23,7 @@ func TestAccRecordPtrDataSource_Filters(t *testing.T) {
 		CheckDestroy:             testAccCheckRecordPtrDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccRecordPtrDataSourceConfigFilters("192.168.10.22", ptrDName, "default"),
+				Config: testAccRecordPtrDataSourceConfigFilters("192.168.10.122", ptrDName, "default"),
 				Check: resource.ComposeTestCheckFunc(
 					append([]resource.TestCheckFunc{
 						testAccCheckRecordPtrExists(context.Background(), resourceName, &v),
@@ -47,7 +47,7 @@ func TestAccRecordPtrDataSource_ExtAttrFilters(t *testing.T) {
 		CheckDestroy:             testAccCheckRecordPtrDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccRecordPtrDataSourceConfigExtAttrFilters("192.168.10.22", ptrDName, "default", extAttrValue),
+				Config: testAccRecordPtrDataSourceConfigExtAttrFilters("192.168.10.123", ptrDName, "default", extAttrValue),
 				Check: resource.ComposeTestCheckFunc(
 					append([]resource.TestCheckFunc{
 						testAccCheckRecordPtrExists(context.Background(), resourceName, &v),

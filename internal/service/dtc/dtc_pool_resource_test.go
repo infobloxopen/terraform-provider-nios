@@ -188,16 +188,16 @@ func TestAccDtcPoolResource_ConsolidatedMonitors(t *testing.T) {
 	lbPreferredMethod := "ROUND_ROBIN"
 	consolidatedMonitors := []map[string]interface{}{
 		{
-			"monitor":                   "dtc:monitor:http/ZG5zLmlkbnNfbW9uaXRvcl9odHRwJGh0dHA:http",
+			"monitor":                   "${nios_dtc_monitor_http.test_http_monitor1.ref}",
 			"availability":              "ANY",
 			"full_health_communication": false,
 			"members":                   []string{"infoblox.localdomain"},
 		},
 	}
-	monitors := []string{"dtc:monitor:http/ZG5zLmlkbnNfbW9uaXRvcl9odHRwJGh0dHA:http", "dtc:monitor:icmp/ZG5zLmlkbnNfbW9uaXRvcl9pY21wJGljbXA:icmp"}
+	monitors := []string{"${nios_dtc_monitor_http.test_http_monitor1.ref}", "${nios_dtc_monitor_icmp.test_icmp_monitor1.ref}"}
 	consolidatedMonitorsUpdate := []map[string]interface{}{
 		{
-			"monitor":                   "dtc:monitor:icmp/ZG5zLmlkbnNfbW9uaXRvcl9pY21wJGljbXA:icmp",
+			"monitor":                   "${nios_dtc_monitor_icmp.test_icmp_monitor1.ref}",
 			"availability":              "ALL",
 			"full_health_communication": false,
 			"members":                   []string{"infoblox.localdomain"},
@@ -213,7 +213,7 @@ func TestAccDtcPoolResource_ConsolidatedMonitors(t *testing.T) {
 				Config: testAccDtcPoolConsolidatedMonitors(name, lbPreferredMethod, monitors, consolidatedMonitors),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcPoolExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "consolidated_monitors.0.monitor", "dtc:monitor:http/ZG5zLmlkbnNfbW9uaXRvcl9odHRwJGh0dHA:http"),
+					resource.TestCheckResourceAttrPair(resourceName, "consolidated_monitors.0.monitor", "nios_dtc_monitor_http.test_http_monitor1", "ref"),
 					resource.TestCheckResourceAttr(resourceName, "consolidated_monitors.0.availability", "ANY"),
 					resource.TestCheckResourceAttr(resourceName, "consolidated_monitors.0.full_health_communication", "false"),
 					resource.TestCheckResourceAttr(resourceName, "consolidated_monitors.0.members.0", "infoblox.localdomain"),
@@ -224,7 +224,7 @@ func TestAccDtcPoolResource_ConsolidatedMonitors(t *testing.T) {
 				Config: testAccDtcPoolConsolidatedMonitors(name, lbPreferredMethod, monitors, consolidatedMonitorsUpdate),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcPoolExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "consolidated_monitors.0.monitor", "dtc:monitor:icmp/ZG5zLmlkbnNfbW9uaXRvcl9pY21wJGljbXA:icmp"),
+					resource.TestCheckResourceAttrPair(resourceName, "consolidated_monitors.0.monitor", "nios_dtc_monitor_icmp.test_icmp_monitor1", "ref"),
 					resource.TestCheckResourceAttr(resourceName, "consolidated_monitors.0.availability", "ALL"),
 					resource.TestCheckResourceAttr(resourceName, "consolidated_monitors.0.full_health_communication", "false"),
 					resource.TestCheckResourceAttr(resourceName, "consolidated_monitors.0.members.0", "infoblox.localdomain"),
@@ -310,16 +310,16 @@ func TestAccDtcPoolResource_LbAlternateMethod(t *testing.T) {
 	var v dtc.DtcPool
 	name := acctest.RandomNameWithPrefix("dtc-pool")
 	lbPreferredMethod := "TOPOLOGY"
-	lbPreferredToplogyMethod := "dtc:topology/ZG5zLmlkbnNfdG9wb2xvZ3kkdG9wb2xvZ3lfcnVsZXNldA:topology_ruleset"
+	lbPreferredToplogyMethod := "${nios_dtc_topology.test_rules.ref}"
 	lbAlternateMethod := "ALL_AVAILABLE"
 	lbAlternateMethodUpdate := "GLOBAL_AVAILABILITY"
 	servers := []map[string]interface{}{
 		{
-			"server": "dtc:server/ZG5zLmlkbnNfc2VydmVyJHRlc3Qtc2VydmVyLmNvbQ:test-server.com",
+			"server": "${nios_dtc_server.test_server.ref}",
 			"ratio":  100,
 		},
 		{
-			"server": "dtc:server/ZG5zLmlkbnNfc2VydmVyJHRlc3Qtc2VydmVyMi5jb20:test-server2.com",
+			"server": "${nios_dtc_server.test_server2.ref}",
 			"ratio":  50,
 		},
 	}
@@ -335,11 +335,10 @@ func TestAccDtcPoolResource_LbAlternateMethod(t *testing.T) {
 					testAccCheckDtcPoolExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "lb_alternate_method", lbAlternateMethod),
 					resource.TestCheckResourceAttr(resourceName, "lb_preferred_method", lbPreferredMethod),
-					resource.TestCheckResourceAttr(resourceName, "lb_preferred_topology", lbPreferredToplogyMethod),
-					resource.TestCheckResourceAttr(resourceName, "servers.#", "2"),
-					resource.TestCheckResourceAttr(resourceName, "servers.0.server", "dtc:server/ZG5zLmlkbnNfc2VydmVyJHRlc3Qtc2VydmVyLmNvbQ:test-server.com"),
+					resource.TestCheckResourceAttrPair(resourceName, "lb_preferred_topology", "nios_dtc_topology.test_rules", "ref"),
+					resource.TestCheckResourceAttrPair(resourceName, "servers.0.server", "nios_dtc_server.test_server", "ref"),
 					resource.TestCheckResourceAttr(resourceName, "servers.0.ratio", "100"),
-					resource.TestCheckResourceAttr(resourceName, "servers.1.server", "dtc:server/ZG5zLmlkbnNfc2VydmVyJHRlc3Qtc2VydmVyMi5jb20:test-server2.com"),
+					resource.TestCheckResourceAttrPair(resourceName, "servers.1.server", "nios_dtc_server.test_server2", "ref"),
 					resource.TestCheckResourceAttr(resourceName, "servers.1.ratio", "50"),
 				),
 			},
@@ -350,11 +349,11 @@ func TestAccDtcPoolResource_LbAlternateMethod(t *testing.T) {
 					testAccCheckDtcPoolExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "lb_alternate_method", lbAlternateMethodUpdate),
 					resource.TestCheckResourceAttr(resourceName, "lb_preferred_method", lbPreferredMethod),
-					resource.TestCheckResourceAttr(resourceName, "lb_preferred_topology", lbPreferredToplogyMethod),
+					resource.TestCheckResourceAttrPair(resourceName, "lb_preferred_topology", "nios_dtc_topology.test_rules", "ref"),
 					resource.TestCheckResourceAttr(resourceName, "servers.#", "2"),
-					resource.TestCheckResourceAttr(resourceName, "servers.0.server", "dtc:server/ZG5zLmlkbnNfc2VydmVyJHRlc3Qtc2VydmVyLmNvbQ:test-server.com"),
+					resource.TestCheckResourceAttrPair(resourceName, "servers.0.server", "nios_dtc_server.test_server", "ref"),
 					resource.TestCheckResourceAttr(resourceName, "servers.0.ratio", "100"),
-					resource.TestCheckResourceAttr(resourceName, "servers.1.server", "dtc:server/ZG5zLmlkbnNfc2VydmVyJHRlc3Qtc2VydmVyMi5jb20:test-server2.com"),
+					resource.TestCheckResourceAttrPair(resourceName, "servers.1.server", "nios_dtc_server.test_server2", "ref"),
 					resource.TestCheckResourceAttr(resourceName, "servers.1.ratio", "50"),
 				),
 			},
@@ -368,18 +367,18 @@ func TestAccDtcPoolResource_LbAlternateTopology(t *testing.T) {
 	var v dtc.DtcPool
 	name := acctest.RandomNameWithPrefix("dtc-pool")
 	lbPreferredMethod := "TOPOLOGY"
-	lbPreferredTopology := "dtc:topology/ZG5zLmlkbnNfdG9wb2xvZ3kkdG9wb2xvZ3lfcnVsZXNldA:topology_ruleset"
+	lbPreferredTopology := "${nios_dtc_topology.test_rules.ref}"
 	lbAlternateMethod := "TOPOLOGY"
-	lbAlternateTopology := "dtc:topology/ZG5zLmlkbnNfdG9wb2xvZ3kkdG9wb2xvZ3lfcnVsZXNldDI:topology_ruleset2"
-	lbPreferredTopologyUpdate := "dtc:topology/ZG5zLmlkbnNfdG9wb2xvZ3kkdG9wb2xvZ3lfcnVsZXNldDI:topology_ruleset2"
-	lbAlternateTopologyUpdate := "dtc:topology/ZG5zLmlkbnNfdG9wb2xvZ3kkdG9wb2xvZ3lfcnVsZXNldA:topology_ruleset"
+	lbAlternateTopology := "${nios_dtc_topology.test_rules2.ref}"
+	lbPreferredTopologyUpdate := "${nios_dtc_topology.test_rules2.ref}"
+	lbAlternateTopologyUpdate := "${nios_dtc_topology.test_rules.ref}"
 	servers := []map[string]interface{}{
 		{
-			"server": "dtc:server/ZG5zLmlkbnNfc2VydmVyJHRlc3Qtc2VydmVyLmNvbQ:test-server.com",
+			"server": "${nios_dtc_server.test_server.ref}",
 			"ratio":  100,
 		},
 		{
-			"server": "dtc:server/ZG5zLmlkbnNfc2VydmVyJHRlc3Qtc2VydmVyMi5jb20:test-server2.com",
+			"server": "${nios_dtc_server.test_server2.ref}",
 			"ratio":  50,
 		},
 	}
@@ -393,7 +392,7 @@ func TestAccDtcPoolResource_LbAlternateTopology(t *testing.T) {
 				Config: testAccDtcPoolLbAlternateTopology(name, lbPreferredMethod, lbPreferredTopology, lbAlternateMethod, lbAlternateTopology, servers),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcPoolExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "lb_alternate_topology", lbAlternateTopology),
+					resource.TestCheckResourceAttrPair(resourceName, "lb_alternate_topology", "nios_dtc_topology.test_rules2", "ref"),
 				),
 			},
 			// Update and Read
@@ -401,7 +400,7 @@ func TestAccDtcPoolResource_LbAlternateTopology(t *testing.T) {
 				Config: testAccDtcPoolLbAlternateTopology(name, lbPreferredMethod, lbPreferredTopologyUpdate, lbAlternateMethod, lbAlternateTopologyUpdate, servers),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcPoolExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "lb_alternate_topology", lbAlternateTopologyUpdate),
+					resource.TestCheckResourceAttrPair(resourceName, "lb_alternate_topology", "nios_dtc_topology.test_rules", "ref"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -414,32 +413,32 @@ func TestAccDtcPoolResource_LbDynamicRatioAlternate(t *testing.T) {
 	var v dtc.DtcPool
 	name := acctest.RandomNameWithPrefix("dtc-pool")
 	lbPreferredMethod := "TOPOLOGY"
-	lbPreferredTopology := "dtc:topology/ZG5zLmlkbnNfdG9wb2xvZ3kkdG9wb2xvZ3lfcnVsZXNldA:topology_ruleset"
+	lbPreferredTopology := "${nios_dtc_topology.test_rules.ref}"
 	monitors := []string{
-		"dtc:monitor:http/ZG5zLmlkbnNfbW9uaXRvcl9odHRwJGh0dHA:http", "dtc:monitor:snmp/ZG5zLmlkbnNfbW9uaXRvcl9zbm1wJHNubXA:snmp",
+		"${nios_dtc_monitor_http.test_http_monitor1.ref}", "${nios_dtc_monitor_snmp.test_snmp_monitor1.ref}",
 	}
 	servers := []map[string]interface{}{
 		{
-			"server": "dtc:server/ZG5zLmlkbnNfc2VydmVyJHRlc3Qtc2VydmVyLmNvbQ:test-server.com",
+			"server": "${nios_dtc_server.test_server.ref}",
 			"ratio":  100,
 		},
 		{
-			"server": "dtc:server/ZG5zLmlkbnNfc2VydmVyJHRlc3Qtc2VydmVyMi5jb20:test-server2.com",
+			"server": "${nios_dtc_server.test_server2.ref}",
 			"ratio":  50,
 		},
 	}
 	lbAlternateMethod := "DYNAMIC_RATIO"
 	lbDynamicRatioAlternate := map[string]interface{}{
 		"method":                "ROUND_TRIP_DELAY",
-		"monitor":               "dtc:monitor:http/ZG5zLmlkbnNfbW9uaXRvcl9odHRwJGh0dHA:http",
+		"monitor":               "${nios_dtc_monitor_http.test_http_monitor1.ref}",
 		"monitor_metric":        ".0",
 		"monitor_weighing":      "RATIO",
 		"invert_monitor_metric": false,
 	}
 	lbDynamicRatioAlternateUpdate := map[string]interface{}{
 		"method":                "MONITOR",
-		"monitor":               "dtc:monitor:snmp/ZG5zLmlkbnNfbW9uaXRvcl9zbm1wJHNubXA:snmp",
-		"monitor_metric":        ".2",
+		"monitor":               "${nios_dtc_monitor_snmp.test_snmp_monitor1.ref}",
+		"monitor_metric":        ".0",
 		"monitor_weighing":      "RATIO",
 		"invert_monitor_metric": false,
 	}
@@ -454,7 +453,7 @@ func TestAccDtcPoolResource_LbDynamicRatioAlternate(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcPoolExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "lb_dynamic_ratio_alternate.method", "ROUND_TRIP_DELAY"),
-					resource.TestCheckResourceAttr(resourceName, "lb_dynamic_ratio_alternate.monitor", "dtc:monitor:http/ZG5zLmlkbnNfbW9uaXRvcl9odHRwJGh0dHA:http"),
+					resource.TestCheckResourceAttrPair(resourceName, "lb_dynamic_ratio_alternate.monitor", "nios_dtc_monitor_http.test_http_monitor1", "ref"),
 					resource.TestCheckResourceAttr(resourceName, "lb_dynamic_ratio_alternate.monitor_metric", ".0"),
 					resource.TestCheckResourceAttr(resourceName, "lb_dynamic_ratio_alternate.monitor_weighing", "RATIO"),
 					resource.TestCheckResourceAttr(resourceName, "lb_dynamic_ratio_alternate.invert_monitor_metric", "false"),
@@ -466,7 +465,7 @@ func TestAccDtcPoolResource_LbDynamicRatioAlternate(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcPoolExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "lb_dynamic_ratio_alternate.method", "MONITOR"),
-					resource.TestCheckResourceAttr(resourceName, "lb_dynamic_ratio_alternate.monitor", "dtc:monitor:snmp/ZG5zLmlkbnNfbW9uaXRvcl9zbm1wJHNubXA:snmp"),
+					resource.TestCheckResourceAttrPair(resourceName, "lb_dynamic_ratio_alternate.monitor", "nios_dtc_monitor_snmp.test_snmp_monitor1", "ref"),
 					resource.TestCheckResourceAttr(resourceName, "lb_dynamic_ratio_alternate.monitor_metric", ".2"),
 					resource.TestCheckResourceAttr(resourceName, "lb_dynamic_ratio_alternate.monitor_weighing", "RATIO"),
 					resource.TestCheckResourceAttr(resourceName, "lb_dynamic_ratio_alternate.invert_monitor_metric", "false"),
@@ -483,18 +482,18 @@ func TestAccDtcPoolResource_LbDynamicRatioPreferred(t *testing.T) {
 	name := acctest.RandomNameWithPrefix("dtc-pool")
 	lbPreferredMethod := "DYNAMIC_RATIO"
 	monitors := []string{
-		"dtc:monitor:http/ZG5zLmlkbnNfbW9uaXRvcl9odHRwJGh0dHA:http", "dtc:monitor:snmp/ZG5zLmlkbnNfbW9uaXRvcl9zbm1wJHNubXA:snmp",
+		"${nios_dtc_monitor_http.test_http_monitor1.ref}", "${nios_dtc_monitor_snmp.test_snmp_monitor1.ref}",
 	}
 	lbDynamicRatioPreferred := map[string]interface{}{
 		"method":                "ROUND_TRIP_DELAY",
-		"monitor":               "dtc:monitor:http/ZG5zLmlkbnNfbW9uaXRvcl9odHRwJGh0dHA:http",
+		"monitor":               "${nios_dtc_monitor_http.test_http_monitor1.ref}",
 		"monitor_metric":        ".0",
 		"monitor_weighing":      "RATIO",
 		"invert_monitor_metric": false,
 	}
 	lbDynamicRatioPreferredUpdate := map[string]interface{}{
 		"method":                "ROUND_TRIP_DELAY",
-		"monitor":               "dtc:monitor:snmp/ZG5zLmlkbnNfbW9uaXRvcl9zbm1wJHNubXA:snmp",
+		"monitor":               "${nios_dtc_monitor_snmp.test_snmp_monitor1.ref}",
 		"monitor_metric":        ".2",
 		"monitor_weighing":      "RATIO",
 		"invert_monitor_metric": true,
@@ -510,7 +509,7 @@ func TestAccDtcPoolResource_LbDynamicRatioPreferred(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcPoolExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "lb_dynamic_ratio_preferred.method", "ROUND_TRIP_DELAY"),
-					resource.TestCheckResourceAttr(resourceName, "lb_dynamic_ratio_preferred.monitor", monitors[0]),
+					resource.TestCheckResourceAttrPair(resourceName, "lb_dynamic_ratio_preferred.monitor", "nios_dtc_monitor_http.test_http_monitor1", "ref"),
 					resource.TestCheckResourceAttr(resourceName, "lb_dynamic_ratio_preferred.monitor_metric", ".0"),
 					resource.TestCheckResourceAttr(resourceName, "lb_dynamic_ratio_preferred.monitor_weighing", "RATIO"),
 					resource.TestCheckResourceAttr(resourceName, "lb_dynamic_ratio_preferred.invert_monitor_metric", "false"),
@@ -522,7 +521,7 @@ func TestAccDtcPoolResource_LbDynamicRatioPreferred(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcPoolExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "lb_dynamic_ratio_preferred.method", "ROUND_TRIP_DELAY"),
-					resource.TestCheckResourceAttr(resourceName, "lb_dynamic_ratio_preferred.monitor", monitors[1]),
+					resource.TestCheckResourceAttrPair(resourceName, "lb_dynamic_ratio_preferred.monitor", "nios_dtc_monitor_snmp.test_snmp_monitor1", "ref"),
 					resource.TestCheckResourceAttr(resourceName, "lb_dynamic_ratio_preferred.monitor_metric", ".2"),
 					resource.TestCheckResourceAttr(resourceName, "lb_dynamic_ratio_preferred.monitor_weighing", "RATIO"),
 					resource.TestCheckResourceAttr(resourceName, "lb_dynamic_ratio_preferred.invert_monitor_metric", "true"),
@@ -633,20 +632,20 @@ func TestAccDtcPoolResource_LbPreferredTopology(t *testing.T) {
 	var v dtc.DtcPool
 	name := acctest.RandomNameWithPrefix("dtc-pool")
 	lbPreferredMethod := "TOPOLOGY"
-	lbPreferredToplogy := "dtc:topology/ZG5zLmlkbnNfdG9wb2xvZ3kkdG9wb2xvZ3lfcnVsZXNldA:topology_ruleset"
+	lbPreferredToplogy := "${nios_dtc_topology.test_rules.ref}"
 	servers := []map[string]interface{}{
 		{
-			"server": "dtc:server/ZG5zLmlkbnNfc2VydmVyJHRlc3Qtc2VydmVyLmNvbQ:test-server.com",
+			"server": "${nios_dtc_server.test_server.ref}",
 			"ratio":  100,
 		},
 	}
 	serversUpdated := []map[string]interface{}{
 		{
-			"server": "dtc:server/ZG5zLmlkbnNfc2VydmVyJHRlc3Qtc2VydmVyMi5jb20:test-server2.com",
+			"server": "${nios_dtc_server.test_server2.ref}",
 			"ratio":  50,
 		},
 	}
-	lbPreferredToplogyUpdate := "dtc:topology/ZG5zLmlkbnNfdG9wb2xvZ3kkdG9wb2xvZ3lfcnVsZXNldDI:topology_ruleset2"
+	lbPreferredToplogyUpdate := "${nios_dtc_topology.test_rules2.ref}"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -657,7 +656,7 @@ func TestAccDtcPoolResource_LbPreferredTopology(t *testing.T) {
 				Config: testAccDtcPoolLbPreferredTopology(name, lbPreferredMethod, lbPreferredToplogy, servers),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcPoolExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "lb_preferred_topology", lbPreferredToplogy),
+					resource.TestCheckResourceAttrPair(resourceName, "lb_preferred_topology", "nios_dtc_topology.test_rules", "ref"),
 				),
 			},
 			// Update and Read
@@ -665,7 +664,7 @@ func TestAccDtcPoolResource_LbPreferredTopology(t *testing.T) {
 				Config: testAccDtcPoolLbPreferredTopology(name, lbPreferredMethod, lbPreferredToplogyUpdate, serversUpdated),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcPoolExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "lb_preferred_topology", lbPreferredToplogyUpdate),
+					resource.TestCheckResourceAttrPair(resourceName, "lb_preferred_topology", "nios_dtc_topology.test_rules2", "ref"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -678,8 +677,8 @@ func TestAccDtcPoolResource_Monitors(t *testing.T) {
 	var v dtc.DtcPool
 	name := acctest.RandomNameWithPrefix("dtc-pool")
 	lbPreferredMethod := "ROUND_ROBIN"
-	monitors := []string{"dtc:monitor:http/ZG5zLmlkbnNfbW9uaXRvcl9odHRwJGh0dHA:http", "dtc:monitor:snmp/ZG5zLmlkbnNfbW9uaXRvcl9zbm1wJHNubXA:snmp"}
-	monitorsUpdated := []string{"dtc:monitor:snmp/ZG5zLmlkbnNfbW9uaXRvcl9zbm1wJHNubXA:snmp", "dtc:monitor:http/ZG5zLmlkbnNfbW9uaXRvcl9odHRwJGh0dHA:http", "dtc:monitor:icmp/ZG5zLmlkbnNfbW9uaXRvcl9pY21wJGljbXA:icmp"}
+	monitors := []string{"${nios_dtc_monitor_http.test_http_monitor1.ref}", "${nios_dtc_monitor_snmp.test_snmp_monitor1.ref}"}
+	monitorsUpdated := []string{"${nios_dtc_monitor_snmp.test_snmp_monitor1.ref}", "${nios_dtc_monitor_http.test_http_monitor1.ref}", "${nios_dtc_monitor_icmp.test_icmp_monitor1.ref}"}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -691,8 +690,8 @@ func TestAccDtcPoolResource_Monitors(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcPoolExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "monitors.#", "2"),
-					resource.TestCheckResourceAttr(resourceName, "monitors.0", monitors[0]),
-					resource.TestCheckResourceAttr(resourceName, "monitors.1", monitors[1]),
+					resource.TestCheckResourceAttrPair(resourceName, "monitors.0", "nios_dtc_monitor_http.test_http_monitor1", "ref"),
+					resource.TestCheckResourceAttrPair(resourceName, "monitors.1", "nios_dtc_monitor_snmp.test_snmp_monitor1", "ref"),
 				),
 			},
 			// Update and Read
@@ -700,9 +699,9 @@ func TestAccDtcPoolResource_Monitors(t *testing.T) {
 				Config: testAccDtcPoolMonitors(name, lbPreferredMethod, monitorsUpdated),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcPoolExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "monitors.0", monitorsUpdated[0]),
-					resource.TestCheckResourceAttr(resourceName, "monitors.1", monitorsUpdated[1]),
-					resource.TestCheckResourceAttr(resourceName, "monitors.2", monitorsUpdated[2]),
+					resource.TestCheckResourceAttrPair(resourceName, "monitors.0", "nios_dtc_monitor_snmp.test_snmp_monitor1", "ref"),
+					resource.TestCheckResourceAttrPair(resourceName, "monitors.1", "nios_dtc_monitor_http.test_http_monitor1", "ref"),
+					resource.TestCheckResourceAttrPair(resourceName, "monitors.2", "nios_dtc_monitor_icmp.test_icmp_monitor1", "ref"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -749,7 +748,6 @@ func TestAccDtcPoolResource_Quorum(t *testing.T) {
 	lbPreferredMethod := "ROUND_ROBIN"
 	quorum := 3
 	quorumUpdate := 5
-
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
@@ -782,18 +780,18 @@ func TestAccDtcPoolResource_Servers(t *testing.T) {
 	lbPreferredMethod := "ROUND_ROBIN"
 	servers := []map[string]interface{}{
 		{
-			"server": "dtc:server/ZG5zLmlkbnNfc2VydmVyJHRlc3Qtc2VydmVyLmNvbQ:test-server.com",
+			"server": "${nios_dtc_server.test_server.ref}",
 			"ratio":  100,
 		},
 	}
 	updatedServers := []map[string]interface{}{
 		{
-			"server": "dtc:server/ZG5zLmlkbnNfc2VydmVyJHRlc3Qtc2VydmVyLmNvbQ:test-server.com",
+			"server": "${nios_dtc_server.test_server.ref}",
 			"ratio":  100,
 		},
 		{
 
-			"server": "dtc:server/ZG5zLmlkbnNfc2VydmVyJHRlc3Qtc2VydmVyMi5jb20:test-server2.com",
+			"server": "${nios_dtc_server.test_server2.ref}",
 			"ratio":  50,
 		}}
 
@@ -807,7 +805,7 @@ func TestAccDtcPoolResource_Servers(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcPoolExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "servers.#", "1"),
-					resource.TestCheckResourceAttr(resourceName, "servers.0.server", "dtc:server/ZG5zLmlkbnNfc2VydmVyJHRlc3Qtc2VydmVyLmNvbQ:test-server.com"),
+					resource.TestCheckResourceAttrPair(resourceName, "servers.0.server", "nios_dtc_server.test_server", "ref"),
 					resource.TestCheckResourceAttr(resourceName, "servers.0.ratio", "100"),
 				),
 			},
@@ -817,9 +815,9 @@ func TestAccDtcPoolResource_Servers(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcPoolExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "servers.#", "2"),
-					resource.TestCheckResourceAttr(resourceName, "servers.0.server", "dtc:server/ZG5zLmlkbnNfc2VydmVyJHRlc3Qtc2VydmVyLmNvbQ:test-server.com"),
+					resource.TestCheckResourceAttrPair(resourceName, "servers.0.server", "nios_dtc_server.test_server", "ref"),
 					resource.TestCheckResourceAttr(resourceName, "servers.0.ratio", "100"),
-					resource.TestCheckResourceAttr(resourceName, "servers.1.server", "dtc:server/ZG5zLmlkbnNfc2VydmVyJHRlc3Qtc2VydmVyMi5jb20:test-server2.com"),
+					resource.TestCheckResourceAttrPair(resourceName, "servers.1.server", "nios_dtc_server.test_server2", "ref"),
 					resource.TestCheckResourceAttr(resourceName, "servers.1.ratio", "50"),
 				),
 			},
@@ -953,6 +951,43 @@ func testAccCheckDtcPoolDisappears(ctx context.Context, v *dtc.DtcPool) resource
 	}
 }
 
+func testAccBaseWithDtcMonitorHttp() string {
+	return `
+resource "nios_dtc_monitor_http" "test_http_monitor1" {
+	name = "test-http-monitor"
+}
+`
+}
+
+func testAccBaseWithDtcMonitorSnmp() string {
+	return `
+resource "nios_dtc_monitor_snmp" "test_snmp_monitor1" {
+	name = "test-snmp-monitor"
+}
+`
+}
+
+func testAccBaseWithDtcMonitorIcmp() string {
+	return `
+resource "nios_dtc_monitor_icmp" "test_icmp_monitor1" {
+	name = "test-icmp-monitor"
+}
+`
+}
+
+func testAccBaseWithTwoDtcServers(server1Name, server1Host, server2Name, server2Host string) string {
+	return fmt.Sprintf(`
+resource "nios_dtc_server" "test_server1" {
+	name = %q
+	host = %q
+}
+resource "nios_dtc_server" "test_server2" {
+	name = %q
+	host = %q
+}
+`, server1Name, server1Host, server2Name, server2Host)
+}
+
 func testAccDtcPoolBasicConfig(name, lbPreferredMethod string) string {
 	return fmt.Sprintf(`
 resource "nios_dtc_pool" "test" {
@@ -995,7 +1030,7 @@ resource "nios_dtc_pool" "test_comment" {
 func testAccDtcPoolConsolidatedMonitors(name, lbPreferredMethod string, monitors []string, consolidatedMonitors []map[string]interface{}) string {
 	monitorsHCL := formatMonitorsToHCL(monitors)
 	consolidatedMonitorsHCL := formatConsolidatedMonitorsToHCL(consolidatedMonitors)
-	return fmt.Sprintf(`
+	config := fmt.Sprintf(`
 resource "nios_dtc_pool" "test_consolidated_monitors" {
     consolidated_monitors = %s
 	disable = true
@@ -1004,6 +1039,7 @@ resource "nios_dtc_pool" "test_consolidated_monitors" {
 	monitors = %s
 }
 `, consolidatedMonitorsHCL, name, lbPreferredMethod, monitorsHCL)
+	return strings.Join([]string{testAccBaseWithDtcMonitorHttp(), testAccBaseWithDtcMonitorIcmp(), config}, "")
 }
 
 func testAccDtcPoolDisable(name, lbPreferredMethod, disable string) string {
@@ -1035,7 +1071,7 @@ resource "nios_dtc_pool" "test_extattrs" {
 
 func testAccDtcPoolLbAlternateMethod(name, lbPreferredMethod, lbPreferredTopology, lbAlternateMethod string, servers []map[string]interface{}) string {
 	serversHCL := formatServersToHCL(servers)
-	return fmt.Sprintf(`
+	config := fmt.Sprintf(`
 resource "nios_dtc_pool" "test_lb_alternate_method" {
    name = %q
     lb_preferred_method = %q
@@ -1044,11 +1080,25 @@ resource "nios_dtc_pool" "test_lb_alternate_method" {
     servers = %s
 }
 `, name, lbPreferredMethod, lbPreferredTopology, lbAlternateMethod, serversHCL)
+	return strings.Join([]string{testAccDtcTopologyRulesWithServer(acctest.RandomNameWithPrefix("dtc-topology"),
+		acctest.RandomNameWithPrefix("dtc-server"), acctest.RandomIP()),
+		testAccBaseWithTwoDtcServers(acctest.RandomNameWithPrefix("dtc-server"), acctest.RandomIP(),
+			acctest.RandomNameWithPrefix("dtc-server"), acctest.RandomIP()), config}, "")
 }
 
 func testAccDtcPoolLbAlternateTopology(name, lbPreferredMethod, lbPreferredTopology, lbAlternateMethod, lbAlternateTopology string, servers []map[string]interface{}) string {
 	serversHCL := formatServersToHCL(servers)
-	return fmt.Sprintf(`
+	config := fmt.Sprintf(`
+resource "nios_dtc_topology" "test_rules2" {
+    name = "test-topology-with-rules3"
+    rules = [
+        {
+            dest_type = "SERVER"
+            destination_link = nios_dtc_server.test_server2.ref
+        }
+    ]
+}
+
 resource "nios_dtc_pool" "test_lb_alternate_topology" {
    name = %q
     lb_preferred_method = %q
@@ -1058,13 +1108,18 @@ resource "nios_dtc_pool" "test_lb_alternate_topology" {
     servers = %s
 }
 `, name, lbPreferredMethod, lbPreferredTopology, lbAlternateMethod, lbAlternateTopology, serversHCL)
+	return strings.Join([]string{testAccDtcTopologyRulesWithServer(acctest.RandomNameWithPrefix("dtc-topology"),
+		acctest.RandomNameWithPrefix("dtc-server"), acctest.RandomIP()),
+		testAccBaseWithTwoDtcServers(acctest.RandomNameWithPrefix("dtc-server"), acctest.RandomIP(),
+			acctest.RandomNameWithPrefix("dtc-server"), acctest.RandomIP()),
+		config}, "")
 }
 
 func testAccDtcPoolLbDynamicRatioAlternate(name, lbPreferredMethod, lbPreferredTopology string, lbAlternateMethod string, lbDynamicRatioAlternate map[string]interface{}, servers []map[string]interface{}, monitors []string) string {
 	monitorsHCL := formatMonitorsToHCL(monitors)
 	serversHCL := formatServersToHCL(servers)
 	lbDynamicRatioAlternateStr := formatLbDynamicRatioToHCL(lbDynamicRatioAlternate)
-	return fmt.Sprintf(`
+	config := fmt.Sprintf(`
 resource "nios_dtc_pool" "test_lb_dynamic_ratio_alternate" {
 name = %q
 	lb_preferred_method = %q
@@ -1075,12 +1130,17 @@ name = %q
 	monitors = %s
 }
 `, name, lbPreferredMethod, lbPreferredTopology, lbAlternateMethod, lbDynamicRatioAlternateStr, serversHCL, monitorsHCL)
+	return strings.Join([]string{testAccDtcTopologyRulesWithServer(acctest.RandomNameWithPrefix("dtc-topology"),
+		acctest.RandomNameWithPrefix("dtc-server"), acctest.RandomIP()),
+		testAccBaseWithTwoDtcServers(acctest.RandomNameWithPrefix("dtc-server"), acctest.RandomIP(),
+			acctest.RandomNameWithPrefix("dtc-server"), acctest.RandomIP()),
+		testAccBaseWithDtcMonitorHttp(), testAccBaseWithDtcMonitorSnmp(), config}, "")
 }
 
 func testAccDtcPoolLbDynamicRatioPreferred(name, lbPreferredMethod string, lbDynamicRatioAlternate map[string]interface{}, monitors []string) string {
 	monitorsHCL := formatMonitorsToHCL(monitors)
 	lbDynamicRatioPreferredStr := formatLbDynamicRatioToHCL(lbDynamicRatioAlternate)
-	return fmt.Sprintf(`
+	config := fmt.Sprintf(`
 resource "nios_dtc_pool" "test_lb_dynamic_ratio_preferred" {
 	name = %q
 	lb_preferred_method = %q
@@ -1088,6 +1148,7 @@ resource "nios_dtc_pool" "test_lb_dynamic_ratio_preferred" {
 	monitors = %s
 }
 `, name, lbPreferredMethod, lbDynamicRatioPreferredStr, monitorsHCL)
+	return strings.Join([]string{testAccBaseWithDtcMonitorHttp(), testAccBaseWithDtcMonitorSnmp(), config}, "")
 }
 
 func testAccDtcPoolLbPreferredMethod(name, lbPreferredMethod string) string {
@@ -1101,7 +1162,17 @@ resource "nios_dtc_pool" "test_lb_preferred_method" {
 
 func testAccDtcPoolLbPreferredTopology(name, lbPreferredMethod, lbPreferredTopology string, servers []map[string]interface{}) string {
 	serversHCL := formatServersToHCL(servers)
-	return fmt.Sprintf(`
+	config := fmt.Sprintf(`
+resource "nios_dtc_topology" "test_rules2" {
+    name = "test-topology-with-rules4"
+    rules = [
+        {
+            dest_type = "SERVER"
+            destination_link = nios_dtc_server.test_server2.ref
+        }
+    ]
+}
+
 resource "nios_dtc_pool" "test_lb_preferred_topology" {
    name = %q
 	lb_preferred_method = %q
@@ -1109,17 +1180,24 @@ resource "nios_dtc_pool" "test_lb_preferred_topology" {
     servers = %s
 }
 `, name, lbPreferredMethod, lbPreferredTopology, serversHCL)
+	return strings.Join([]string{testAccDtcTopologyRulesWithServer(acctest.RandomNameWithPrefix("dtc-topology"),
+		acctest.RandomNameWithPrefix("dtc-server"), acctest.RandomIP()),
+		testAccBaseWithTwoDtcServers(acctest.RandomNameWithPrefix("dtc-server"), acctest.RandomIP(),
+			acctest.RandomNameWithPrefix("dtc-server"), acctest.RandomIP()),
+		config}, "")
 }
 
 func testAccDtcPoolMonitors(name, lbPreferredMethod string, monitors []string) string {
 	monitorsList := formatMonitorsToHCL(monitors)
-	return fmt.Sprintf(`
+	config := fmt.Sprintf(`
 resource "nios_dtc_pool" "test_monitors" {
    name = %q
     lb_preferred_method = %q
     monitors = %s
 }
 `, name, lbPreferredMethod, monitorsList)
+	return strings.Join([]string{testAccBaseWithDtcMonitorHttp(), testAccBaseWithDtcMonitorSnmp(),
+		testAccBaseWithDtcMonitorIcmp(), config}, "")
 }
 
 func testAccDtcPoolName(name string, lbPreferredMethod string) string {
@@ -1143,13 +1221,17 @@ resource "nios_dtc_pool" "test_quorum" {
 
 func testAccDtcPoolServers(name, lbPreferredMethod string, servers []map[string]interface{}) string {
 	serversHCL := formatServersToHCL(servers)
-	return fmt.Sprintf(`
+	config := fmt.Sprintf(`
 resource "nios_dtc_pool" "test_servers" {
 name = %q
     lb_preferred_method = %q
     servers = %s
 }
 `, name, lbPreferredMethod, serversHCL)
+	return strings.Join([]string{testAccBaseWithTwoDtcServers(
+		acctest.RandomNameWithPrefix("dtc-server"), acctest.RandomIP(),
+		acctest.RandomNameWithPrefix("dtc-server"), acctest.RandomIP()),
+		config}, "")
 }
 
 func testAccDtcPoolTtl(name, lbPreferredMethod string, ttl int) string {

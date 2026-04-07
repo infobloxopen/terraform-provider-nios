@@ -213,7 +213,7 @@ func TestAccZoneStubResource_ExternalNsGroup(t *testing.T) {
 	var v dns.ZoneStub
 	fqdn := acctest.RandomNameWithPrefix("zone-stub") + ".com"
 	stubServerName := acctest.RandomNameWithPrefix("stub_server")
-	externalNsGroup1 := "ensg3"
+	externalNsGroup1 := "ensg1"
 	externalNsGroup2 := "ensg2"
 
 	resource.ParallelTest(t, resource.TestCase{

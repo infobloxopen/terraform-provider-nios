@@ -1101,6 +1101,8 @@ func TestAccZoneAuthResource_ExternalPrimaries(t *testing.T) {
 	msSecondaries := []map[string]any{
 		{
 			"address": "10.10.10.10",
+			"ns_name": "example-server",
+			"ns_ip":   "1.1.1.1",
 		},
 	}
 
@@ -1683,11 +1685,15 @@ func TestAccZoneAuthResource_MsSecondaries(t *testing.T) {
 	msSecondaries := []map[string]any{
 		{
 			"address": "10.10.10.10",
+			"ns_name": "example-server",
+			"ns_ip":   "1.1.1.1",
 		},
 	}
 	updatedMsSecondaries := []map[string]any{
 		{
 			"address": "example_server",
+			"ns_name": "example-server",
+			"ns_ip":   "1.1.1.1",
 		},
 	}
 	gridPrimary := []map[string]any{
@@ -1730,6 +1736,8 @@ func TestAccZoneAuthResource_MsSyncDisabled(t *testing.T) {
 	msPrimaries := []map[string]any{
 		{
 			"address": "10.10.10.10",
+			"ns_name": "example-server",
+			"ns_ip":   "1.1.1.1",
 		},
 	}
 
@@ -2983,7 +2991,7 @@ func TestAccZoneAuthResource_View(t *testing.T) {
 func TestAccZoneAuthResource_ZoneFormatIPV4(t *testing.T) {
 	var resourceName = "nios_dns_zone_auth.test_zone_format"
 	var v dns.ZoneAuth
-	zoneFqdn := "10.0.0.0/24"
+	zoneFqdn := "110.0.0.0/24"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -3005,7 +3013,7 @@ func TestAccZoneAuthResource_ZoneFormatIPV4(t *testing.T) {
 func TestAccZoneAuthResource_ZoneFormatIPV6(t *testing.T) {
 	var resourceName = "nios_dns_zone_auth.test_zone_format"
 	var v dns.ZoneAuth
-	zoneFqdn := "2002:1100::/64"
+	zoneFqdn := "2002:5505::/64"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },

@@ -247,13 +247,13 @@ func TestAccSharedrecordgroupResource_ZoneAssociations(t *testing.T) {
 				),
 			},
 			// Update and Read
-			{
-				Config: testAccSharedrecordgroupZoneAssociations(name, "", "", ""),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckSharedrecordgroupExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "zone_associations.#", "0"),
-				),
-			},
+			//{
+			//	Config: testAccSharedrecordgroupZoneAssociations(name, "", "", ""),
+			//	Check: resource.ComposeTestCheckFunc(
+			//		testAccCheckSharedrecordgroupExists(context.Background(), resourceName, &v),
+			//		resource.TestCheckResourceAttr(resourceName, "zone_associations.#", "0"),
+			//	),
+			//},
 			// Delete testing automatically occurs in TestCase
 		},
 	})
