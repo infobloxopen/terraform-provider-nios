@@ -11,7 +11,7 @@
 
 | Name | Version |
 |------|---------|
-| <a name="provider_aws"></a> [aws](#provider\_aws) | 6.38.0 |
+| <a name="provider_aws"></a> [aws](#provider\_aws) | >= 6.38.0 |
 
 ## Resources
 
@@ -32,13 +32,14 @@
 | <a name="input_delete_on_termination"></a> [delete\_on\_termination](#input\_delete\_on\_termination) | Whether to delete the volume on instance termination | `bool` | `true` | no |
 | <a name="input_enable_ipv6"></a> [enable\_ipv6](#input\_enable\_ipv6) | Enable IPv6 configuration | `bool` | `true` | no |
 | <a name="input_ha_enable"></a> [ha\_enable](#input\_ha\_enable) | Enable HA configuration | `bool` | `false` | no |
-| <a name="input_iam_instance_profile"></a> [iam\_instance\_profile](#input\_iam\_instance\_profile) | IAM instance profile to attach to the instance (required if ha\_enable is true) | `string` | `null` | no |
+| <a name="input_iam_instance_profile"></a> [iam\_instance\_profile](#input\_iam\_instance\_profile) | IAM instance profile to attach to the instance | `string` | `null` | no |
 | <a name="input_instance_type"></a> [instance\_type](#input\_instance\_type) | EC2 instance type | `string` | `"r6i.large"` | no |
 | <a name="input_key_name"></a> [key\_name](#input\_key\_name) | Name of the SSH key pair | `string` | n/a | yes |
 | <a name="input_lan1_subnet_id"></a> [lan1\_subnet\_id](#input\_lan1\_subnet\_id) | ID of the LAN1 subnet (ETH1) | `string` | n/a | yes |
 | <a name="input_mgmt_subnet_id"></a> [mgmt\_subnet\_id](#input\_mgmt\_subnet\_id) | ID of the management subnet (ETH0) | `string` | n/a | yes |
 | <a name="input_name_prefix"></a> [name\_prefix](#input\_name\_prefix) | Prefix for resource names | `string` | n/a | yes |
 | <a name="input_nios_license"></a> [nios\_license](#input\_nios\_license) | NIOS temporary license string | `string` | `"nios IB-V825 enterprise dns dhcp cloud"` | no |
+| <a name="input_private_ips_count_eth2"></a> [private\_ips\_count\_eth2](#input\_private\_ips\_count\_eth2) | Number of private IPs to assign to ETH2 (HA interface). Set 1 for secondary IP (VIP) for HA, 0 for no secondary IP | `number` | `0` | no |
 | <a name="input_remote_console_enabled"></a> [remote\_console\_enabled](#input\_remote\_console\_enabled) | Enable remote console access | `bool` | `true` | no |
 | <a name="input_security_group_id"></a> [security\_group\_id](#input\_security\_group\_id) | ID of the existing AWS security group | `string` | n/a | yes |
 | <a name="input_tags"></a> [tags](#input\_tags) | Tags to apply to AWS resources | `map(string)` | `{}` | no |
@@ -51,9 +52,10 @@
 |------|-------------|
 | <a name="output_eth0_ip"></a> [eth0\_ip](#output\_eth0\_ip) | Mgmt IP address of the EC2 instance (ETH0) |
 | <a name="output_eth1_gateway"></a> [eth1\_gateway](#output\_eth1\_gateway) | Gateway IP for the LAN1 Subnet |
-| <a name="output_eth1_ip"></a> [eth1\_ip](#output\_eth1\_ip) | LAN1 IP address of the EC2 instance (ETH1) |
-| <a name="output_eth1_private_ipv6"></a> [eth1\_private\_ipv6](#output\_eth1\_private\_ipv6) | Private IPv6 address of ETH1 |
+| <a name="output_eth1_ipv4"></a> [eth1\_ipv4](#output\_eth1\_ipv4) | LAN1 IP address of the EC2 instance (ETH1) |
+| <a name="output_eth1_ipv6"></a> [eth1\_ipv6](#output\_eth1\_ipv6) | Private IPv6 address of ETH1 |
 | <a name="output_eth1_subnet_mask"></a> [eth1\_subnet\_mask](#output\_eth1\_subnet\_mask) | Subnet mask of the LAN1 Subnet |
+| <a name="output_eth2_eni"></a> [eth2\_eni](#output\_eth2\_eni) | ENI ID of the HA interface (ETH2) |
 | <a name="output_eth2_ip"></a> [eth2\_ip](#output\_eth2\_ip) | HA IP address of the EC2 instance (ETH2) |
 | <a name="output_eth2_secondary_ip_for_ha"></a> [eth2\_secondary\_ip\_for\_ha](#output\_eth2\_secondary\_ip\_for\_ha) | Secondary private IP address for HA configuration on ETH2 |
 | <a name="output_instance_id"></a> [instance\_id](#output\_instance\_id) | ID of the EC2 instance |
