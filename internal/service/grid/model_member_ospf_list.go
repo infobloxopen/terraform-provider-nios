@@ -206,7 +206,7 @@ func (m *MemberOspfListModel) Expand(ctx context.Context, diags *diag.Diagnostic
 		EnableBfd:              flex.ExpandBoolPointer(m.EnableBfd),
 		EnableBfdDnscheck:      flex.ExpandBoolPointer(m.EnableBfdDnscheck),
 	}
-	// TODO: AuthenticationKey is non-updatable, Please create an IsCreate Block for the same
+
 	return to
 }
 
