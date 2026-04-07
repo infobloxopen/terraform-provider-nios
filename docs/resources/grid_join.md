@@ -86,8 +86,8 @@ resource "nios_grid_join" "member_join" {
   depends_on      = [nios_grid_member.example_grid_member]
 }
 
-
-// Create a HA Member with both IPV4 and IPV6 config
+// For SA-HA config, import the existing grid master and update the resource to set ha_on_cloud to true and provide the cloud attributes.
+// This forms the HA with one Active and one Passive node.
 resource "nios_grid_member" "example_grid_member" {
   host_name         = "infoblox.localdomain"
   config_addr_type  = "IPV4"
@@ -121,7 +121,7 @@ resource "nios_grid_member" "example_grid_member" {
   ]
 }
 
-// Join the member to the grid master
+// Initiate the grid join
 resource "nios_grid_join" "member_join" {
   member_url      = "https://172.28.83.237"
   member_username = "username"

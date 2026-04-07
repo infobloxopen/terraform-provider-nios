@@ -186,7 +186,7 @@ resource "nios_grid_join" "member_join" {
 
 ### Example 2: HA Grid Configuration
 
-Deploy 2 AWS EC2 instances for SA-HA Config
+Deploy 2 AWS EC2 instances for SA-HA Config with the required IAM Permissions.
 
 ```hcl
 # Deploy AWS infrastructure for Node 1 (Active Node)
@@ -206,13 +206,13 @@ module "node2" {
 ```
 #### After both the grids are up and running (~20 min), configure HA 
 
-1. Import Node 1 under nios_grid_member.ha_pair 
+1. Import Node1 under nios_grid_member.ha_pair after configuring dns resolver
 
 ```resource "nios_grid_member" "ha_pair"{}```
 
 ```terraform import nios_grid_member.ha_pair <resource_ref>```
 
-2. Modify the node_info for nios_grid_member.ha_pair
+2. Modify the resource to set ha_on_cloud to true and provide the cloud attributes.
 
 3. Join Node2 (Passive Node) to Node1 (Active Node).
 
@@ -284,7 +284,6 @@ The module outputs can be used directly in NIOS provider resources:
 | `eth2_secondary_ip_for_ha` | HA `vip_setting.address` |
 
 ---
-
 
 ### Boot Time
 - NIOS takes **15-20 minutes** to fully boot after EC2 instance creation
