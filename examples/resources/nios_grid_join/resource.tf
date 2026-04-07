@@ -17,7 +17,7 @@ resource "nios_grid_join" "member_join" {
   member_password = "password"
   grid_name       = "Infoblox"
   master          = "172.28.82.32"
-  shared_secret   = "test"
+  shared_secret   = "secret"
   depends_on      = [nios_grid_member.example_grid_member]
 }
 
@@ -40,7 +40,7 @@ resource "nios_grid_join" "member_join" {
   member_password = "password"
   grid_name       = "Infoblox"
   master          = "2600:1f1c:e86:5e01:fb1d:dc76:3c28:ec48"
-  shared_secret   = "test"
+  shared_secret   = "secret"
   depends_on      = [nios_grid_member.example_grid_member]
 }
 
@@ -67,7 +67,7 @@ resource "nios_grid_join" "member_join" {
   member_password = "password"
   grid_name       = "Infoblox"
   master          = "172.28.82.171"
-  shared_secret   = "test"
+  shared_secret   = "secret"
   depends_on      = [nios_grid_member.example_grid_member]
 }
 
@@ -113,6 +113,6 @@ resource "nios_grid_join" "member_join" {
   member_password = "password"
   grid_name       = "Infoblox"
   master          = "172.28.83.245"
-  shared_secret   = "test"
+  shared_secret   = "secret"
   depends_on      = [nios_grid_member.example_grid_member]
 }
