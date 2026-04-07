@@ -156,7 +156,6 @@ module "node1" {
   // Same config as shown in example
   ha_enable = false
 }
-```
 
 module "node2" {
 // Same config as shown in example
