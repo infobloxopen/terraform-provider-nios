@@ -111,7 +111,7 @@ func TestAccParentalcontrolSubscribersiteResource_Abss(t *testing.T) {
 					testAccCheckParentalcontrolSubscribersiteExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "abss.#", "1"),
 					resource.TestCheckResourceAttr(resourceName, "abss.0.ip_address", "12.12.1.1"),
-					resource.TestCheckResourceAttr(resourceName, "abss.0.blocking_policy", "policy1"),
+					resource.TestCheckResourceAttr(resourceName, "abss.0.blocking_policy", blockingPolicy1),
 				),
 			},
 			// Update and Read
@@ -121,7 +121,7 @@ func TestAccParentalcontrolSubscribersiteResource_Abss(t *testing.T) {
 					testAccCheckParentalcontrolSubscribersiteExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "abss.#", "1"),
 					resource.TestCheckResourceAttr(resourceName, "abss.0.ip_address", "12.12.10.10"),
-					resource.TestCheckResourceAttr(resourceName, "abss.0.blocking_policy", "policy2"),
+					resource.TestCheckResourceAttr(resourceName, "abss.0.blocking_policy", blockingPolicy2),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -910,7 +910,6 @@ func testAccCheckParentalcontrolSubscribersiteDisappears(ctx context.Context, v 
 }
 
 func testAccParentalcontrolSubscribersiteBasicConfig(name string) string {
-	// TODO: create basic resource with required fields
 	return fmt.Sprintf(`
 resource "nios_parentalcontrol_subscribersite" "test" {
     name = %q

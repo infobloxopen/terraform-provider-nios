@@ -27,11 +27,11 @@ var ParentalcontrolSubscribersiteAbssAttrTypes = map[string]attr.Type{
 var ParentalcontrolSubscribersiteAbssResourceSchemaAttributes = map[string]schema.Attribute{
 	"ip_address": schema.StringAttribute{
 		Required:            true,
-		MarkdownDescription: "The IP address of addional blocking server.",
+		MarkdownDescription: "The IP address of additional blocking server.",
 	},
 	"blocking_policy": schema.StringAttribute{
 		Required:            true,
-		MarkdownDescription: "The blocking policy for the addional blocking server.",
+		MarkdownDescription: "The blocking policy for the additional blocking server.",
 	},
 }
 

@@ -97,9 +97,9 @@ resource "nios_parentalcontrol_subscribersite" "test" {
 }
 
 data "nios_parentalcontrol_subscribersite" "test" {
-  filters = {
-	 name = nios_parentalcontrol_subscribersite.test.name
-  }
+	filters = {
+		name = nios_parentalcontrol_subscribersite.test.name
+	}
 }
 `, name)
 }
@@ -107,16 +107,16 @@ data "nios_parentalcontrol_subscribersite" "test" {
 func testAccParentalcontrolSubscribersiteDataSourceConfigExtAttrFilters(name, extAttrsValue string) string {
 	return fmt.Sprintf(`
 resource "nios_parentalcontrol_subscribersite" "test" {
-  name = %q 
-  extattrs = {
-    Site = %q
-  } 
+	name = %q 
+	extattrs = {
+		Site = %q
+	} 
 }
 
 data "nios_parentalcontrol_subscribersite" "test" {
-  extattrfilters = {
-	Site = nios_parentalcontrol_subscribersite.test.extattrs.Site
-  }
+	extattrfilters = {
+		Site = nios_parentalcontrol_subscribersite.test.extattrs.Site
+	}
 }
 `, name, extAttrsValue)
 }

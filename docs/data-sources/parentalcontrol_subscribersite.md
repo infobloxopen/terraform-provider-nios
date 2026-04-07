@@ -3,12 +3,12 @@
 page_title: "nios_parentalcontrol_subscribersite Data Source - nios"
 subcategory: "PARENTAL CONTROL"
 description: |-
-  
+  Retrieves information about existing Parental Control Subscriber Sites.
 ---
 
 # nios_parentalcontrol_subscribersite (Data Source)
 
-
+Retrieves information about existing Parental Control Subscriber Sites.
 
 ## Example Usage
 
@@ -84,8 +84,8 @@ Read-Only:
 
 Required:
 
-- `blocking_policy` (String) The blocking policy for the addional blocking server.
-- `ip_address` (String) The IP address of addional blocking server.
+- `blocking_policy` (String) The blocking policy for the additional blocking server.
+- `ip_address` (String) The IP address of additional blocking server.
 
 
 <a id="nestedatt--result--api_members"></a>

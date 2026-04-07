@@ -3,12 +3,12 @@
 page_title: "nios_parentalcontrol_subscribersite Resource - nios"
 subcategory: "PARENTAL CONTROL"
 description: |-
-  
+  Manages a Parental Control Subscribe Site.
 ---
 
 # nios_parentalcontrol_subscribersite (Resource)
 
-
+Manages a Parental Control Subscribe Site.
 
 ## Example Usage
 
@@ -44,32 +44,32 @@ resource "nios_parentalcontrol_subscribersite" "subscriber_site_with_additional_
   maximum_subscribers          = 100000
   msps = [
     {
-      ip_address : "12.12.14.1"
+      ip_address = "12.12.14.1"
     }
   ]
   nas_port = 56
   nas_gateways = [
     {
-      "ip_address" = "12.1.1.1",
-      "name"       = "nas_gateway_1",
-      "send_ack" : false,
-      "shared_secret" : "secret123"
+      ip_address    = "12.1.1.1",
+      name          = "nas_gateway_1",
+      send_ack      = false,
+      shared_secret = "secret123"
     }
   ]
   members = [
     {
-      "name" = "infoblox.localdomain"
+      name = "infoblox.localdomain"
     }
   ]
   api_members = [
     {
-      "name" = "infoblox.localdomain"
+      name = "infoblox.localdomain"
     }
   ]
   proxy_rpz_passthru = false
   spms = [
     {
-      ip_address : "12.13.14.1"
+      ip_address = "12.13.14.1"
     }
   ]
   stop_anycast               = true
@@ -128,8 +128,8 @@ resource "nios_parentalcontrol_subscribersite" "subscriber_site_with_additional_
 
 Required:
 
-- `blocking_policy` (String) The blocking policy for the addional blocking server.
-- `ip_address` (String) The IP address of addional blocking server.
+- `blocking_policy` (String) The blocking policy for the additional blocking server.
+- `ip_address` (String) The IP address of additional blocking server.
 
 
 <a id="nestedatt--api_members"></a>

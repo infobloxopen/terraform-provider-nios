@@ -37,7 +37,7 @@ func (r *ParentalcontrolSubscribersiteResource) Metadata(ctx context.Context, re
 
 func (r *ParentalcontrolSubscribersiteResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "",
+		MarkdownDescription: "Manages a Parental Control Subscribe Site.",
 		Attributes:          ParentalcontrolSubscribersiteResourceSchemaAttributes,
 	}
 }
