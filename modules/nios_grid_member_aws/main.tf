@@ -23,7 +23,7 @@ resource "aws_instance" "grid" {
     tags = merge(
       var.tags,
       {
-        Name = var.name_prefix
+        Name = var.name
       }
     )
   }
@@ -31,7 +31,7 @@ resource "aws_instance" "grid" {
   tags = merge(
     var.tags,
     {
-      Name = var.name_prefix
+      Name = var.name
     }
   )
 
@@ -53,7 +53,7 @@ resource "aws_network_interface" "eth1" {
   tags = merge(
     var.tags,
     {
-      Name = var.name_prefix
+      Name = var.name
     }
   )
 }
@@ -75,7 +75,7 @@ resource "aws_network_interface" "eth2" {
   tags = merge(
     var.tags,
     {
-      Name = var.name_prefix
+      Name = var.name
     }
   )
 }

@@ -1,3 +1,9 @@
+# NIOS Grid Member AWS Module
+
+## Overview
+
+This module provisions the AWS infrastructure (EC2 instance, network interfaces, etc.) for NIOS Grid. The NIOS configuration (`nios_grid_member` and `nios_grid_join` resources) should be applied after the infrastructure is deployed and NIOS grid is fully booted (~15-25 minutes).
+
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
 
@@ -26,25 +32,25 @@
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_ami_id"></a> [ami\_id](#input\_ami\_id) | AMI ID for NIOS instance. If not provided, will search for latest NIOS AMI | `string` | `null` | no |
-| <a name="input_availability_zone"></a> [availability\_zone](#input\_availability\_zone) | AWS availability zone | `string` | n/a | yes |
-| <a name="input_default_admin_password"></a> [default\_admin\_password](#input\_default\_admin\_password) | Default admin password for NIOS | `string` | n/a | yes |
-| <a name="input_delete_on_termination"></a> [delete\_on\_termination](#input\_delete\_on\_termination) | Whether to delete the volume on instance termination | `bool` | `true` | no |
-| <a name="input_enable_ipv6"></a> [enable\_ipv6](#input\_enable\_ipv6) | Enable IPv6 configuration | `bool` | `true` | no |
-| <a name="input_ha_enable"></a> [ha\_enable](#input\_ha\_enable) | Enable HA configuration | `bool` | `false` | no |
-| <a name="input_iam_instance_profile"></a> [iam\_instance\_profile](#input\_iam\_instance\_profile) | IAM instance profile to attach to the instance | `string` | `null` | no |
-| <a name="input_instance_type"></a> [instance\_type](#input\_instance\_type) | EC2 instance type | `string` | `"r6i.large"` | no |
-| <a name="input_key_name"></a> [key\_name](#input\_key\_name) | Name of the SSH key pair | `string` | n/a | yes |
-| <a name="input_lan1_subnet_id"></a> [lan1\_subnet\_id](#input\_lan1\_subnet\_id) | ID of the LAN1 subnet (ETH1) | `string` | n/a | yes |
-| <a name="input_mgmt_subnet_id"></a> [mgmt\_subnet\_id](#input\_mgmt\_subnet\_id) | ID of the management subnet (ETH0) | `string` | n/a | yes |
-| <a name="input_name_prefix"></a> [name\_prefix](#input\_name\_prefix) | Prefix for resource names | `string` | n/a | yes |
-| <a name="input_nios_license"></a> [nios\_license](#input\_nios\_license) | NIOS temporary license string | `string` | `"nios IB-V825 enterprise dns dhcp cloud"` | no |
-| <a name="input_private_ips_count_eth2"></a> [private\_ips\_count\_eth2](#input\_private\_ips\_count\_eth2) | Number of private IPs to assign to ETH2 (HA interface). Set 1 for secondary IP (VIP) for HA, 0 for no secondary IP | `number` | `0` | no |
-| <a name="input_remote_console_enabled"></a> [remote\_console\_enabled](#input\_remote\_console\_enabled) | Enable remote console access | `bool` | `true` | no |
-| <a name="input_security_group_id"></a> [security\_group\_id](#input\_security\_group\_id) | ID of the existing AWS security group | `string` | n/a | yes |
-| <a name="input_tags"></a> [tags](#input\_tags) | Tags to apply to AWS resources | `map(string)` | `{}` | no |
-| <a name="input_volume_size"></a> [volume\_size](#input\_volume\_size) | Size of the root volume in GB | `number` | `500` | no |
-| <a name="input_volume_type"></a> [volume\_type](#input\_volume\_type) | Type of the root volume | `string` | `"gp3"` | no |
+| <a name="input_ami_id"></a> [ami\_id](#input\_ami\_id) | AMI ID for NIOS instance. | `string` | `null` | no |
+| <a name="input_availability_zone"></a> [availability\_zone](#input\_availability\_zone) | AWS availability zone. | `string` | `"us-west-1a"` | no |
+| <a name="input_default_admin_password"></a> [default\_admin\_password](#input\_default\_admin\_password) | Default admin password for NIOS. | `string` | n/a | yes |
+| <a name="input_delete_on_termination"></a> [delete\_on\_termination](#input\_delete\_on\_termination) | Whether to delete the volume on instance termination. | `bool` | `true` | no |
+| <a name="input_enable_ipv6"></a> [enable\_ipv6](#input\_enable\_ipv6) | Enable IPv6 configuration. | `bool` | `false` | no |
+| <a name="input_ha_enable"></a> [ha\_enable](#input\_ha\_enable) | Enable HA configuration. | `bool` | `false` | no |
+| <a name="input_iam_instance_profile"></a> [iam\_instance\_profile](#input\_iam\_instance\_profile) | IAM instance profile to attach to the instance. | `string` | `null` | no |
+| <a name="input_instance_type"></a> [instance\_type](#input\_instance\_type) | EC2 instance type. | `string` | `"r6i.large"` | no |
+| <a name="input_key_name"></a> [key\_name](#input\_key\_name) | Name of the SSH key pair. | `string` | `null` | no |
+| <a name="input_lan1_subnet_id"></a> [lan1\_subnet\_id](#input\_lan1\_subnet\_id) | ID of the LAN1 subnet (ETH1). | `string` | n/a | yes |
+| <a name="input_mgmt_subnet_id"></a> [mgmt\_subnet\_id](#input\_mgmt\_subnet\_id) | ID of the management subnet (ETH0). | `string` | n/a | yes |
+| <a name="input_name"></a> [name](#input\_name) | Prefix for instance name. | `string` | `"nios-aws-instance"` | no |
+| <a name="input_nios_license"></a> [nios\_license](#input\_nios\_license) | NIOS temporary license string. | `string` | `"nios IB-V825 enterprise dns dhcp cloud"` | no |
+| <a name="input_private_ips_count_eth2"></a> [private\_ips\_count\_eth2](#input\_private\_ips\_count\_eth2) | Number of IPs to assign to ETH2 (HA interface). Set 1 for secondary IP (VIP) for HA, 0 for no secondary IP. | `number` | `0` | no |
+| <a name="input_remote_console_enabled"></a> [remote\_console\_enabled](#input\_remote\_console\_enabled) | Enable remote console access. | `bool` | `true` | no |
+| <a name="input_security_group_id"></a> [security\_group\_id](#input\_security\_group\_id) | ID of the existing AWS security group. | `string` | n/a | yes |
+| <a name="input_tags"></a> [tags](#input\_tags) | Tags to apply to AWS resources. | `map(string)` | `{}` | no |
+| <a name="input_volume_size"></a> [volume\_size](#input\_volume\_size) | Size of the root volume in GB. | `number` | `500` | no |
+| <a name="input_volume_type"></a> [volume\_type](#input\_volume\_type) | Type of the root volume. | `string` | `"gp3"` | no |
 
 ## Outputs
 
@@ -63,14 +69,6 @@
 
 ---
 
-# NIOS Grid Member AWS Module
-
-Deploy NIOS Grid on AWS 
-
-## Overview
-
-This module provisions the AWS infrastructure (EC2 instance, network interfaces, etc.) for NIOS Grid. The NIOS configuration (`nios_grid_member` and `nios_grid_join` resources) should be applied **after** the infrastructure is deployed and NIOS has fully booted (~15-25 minutes).
-
 ## Architecture
 
 ### Standalone Mode (`ha_enable = false`)
@@ -86,44 +84,34 @@ This module provisions the AWS infrastructure (EC2 instance, network interfaces,
 
 ## Usage
 
-### Step 1: Deploy AWS Infrastructure
+### Step 1: Deploy AWS Infrastructure 
 
 ```hcl
 module "node1" {
-  source = "./nios_grid_member_aws"
+  source = "github.com/infobloxopen/terraform-provider-nios//modules/nios_grid_member_aws"
 
-  # AWS Infrastructure
   security_group_id = var.security_group_id
   mgmt_subnet_id    = var.mgmt_subnet_id
   lan1_subnet_id    = var.lan1_subnet_id
 
-  # AMI Configuration
   ami_id          = var.ami_id
 
-  # Instance Configuration
   instance_type     = var.instance_type
   key_name          = var.key_name
   availability_zone = var.availability_zone
 
-  # Storage Configuration
   volume_size           = var.volume_size
   volume_type           = var.volume_type
   delete_on_termination = var.delete_on_termination
 
-  # IPv6 Configuration
   enable_ipv6      = var.enable_ipv6
 
-  # Naming and Tags
-  name_prefix = var.name_prefix
+  name = var.name
   tags        = var.tags
 
-  # NIOS Configuration
   nios_license           = var.nios_license
   remote_console_enabled = var.remote_console_enabled
   default_admin_password = var.default_admin_password
-
-  ha_enable = var.ha_enable
-  iam_instance_profile = var.iam_instance_profile
 }
 ```
 
@@ -134,35 +122,31 @@ terraform apply
 
 ### Step 2: Wait for NIOS to Boot
 
-NIOS takes approximately **15-20 minutes** to fully boot and be ready for configuration.
+NIOS takes approximately **15-20 minutes** to fully boot.
 
-### Step 3: Configure NIOS Grid Member
+### Step 3: Join the Grid Member to the Master Grid / Configure HA
 
-Once NIOS is ready, configure the grid member and join to the grid.
+Once Grid is up and running, configure the grid member and join to the grid.
 
----
 
-## Complete Examples
+#### Examples
 
-### Example 1: Normal Member
+#### Example 1: Join a Member to a Master
 
-Deploy infrastructure and join to an existing master:
+#### Deploy AWS infrastructure for Master and Member
 
-```hcl
-# Deploy AWS infrastructure for member
-
-```hcl
+```
 module "node1" {
-  // Same config as shown in example
+  // ... (same config as Step 1)
   ha_enable = false
 }
 
 module "node2" {
-// Same config as shown in example
+  // ... (same config as Step 1)
   ha_enable = false
 }
 
-# After NIOS is ready (~20 min), configure grid member
+// After NIOS is ready (~20 min), configure grid member
 provider "nios" {
   nios_host_url = "https://${module.grid_master.eth1_ipv4}"
   nios_username = "username"
@@ -170,7 +154,7 @@ provider "nios" {
 }
 
 resource "nios_grid_member" "member" {
-  host_name        = "infoblox.member1"
+  host_name        = "infoblox.member"
   config_addr_type = "BOTH"
   platform         = "VNIOS"
 
@@ -188,44 +172,51 @@ resource "nios_grid_member" "member" {
   }
 }
 
-# Join member to existing grid master
+// Join member to existing grid master
 resource "nios_grid_join" "member_join" {
   member_url       = "https://${module.node2.eth1_ipv4}"
-  member_username = "admin"
-  member_password = "SecurePassword123"
+  member_username = "UserName"
+  member_password = "Password"
   grid_name       = "Infoblox"
   master          = module.node1.eth1_ipv4
-  shared_secret   = "your-shared-secret"
+  shared_secret   = "secret"
   depends_on = [nios_grid_member.member]
 }
 ```
 
 ### Example 2: HA Grid Configuration
 
-Deploy 2 instances as an HA pair:
+Deploy 2 AWS EC2 instances for SA-HA Config
 
 ```hcl
-# Deploy infrastructure for Node 1 (Active)
+# Deploy AWS infrastructure for Node 1 (Active Node)
 module "node1" {
-  // Same config as shown in example
+  // ... (same config as Step 1)
   ha_enable = true
+  private_ips_count_eth2 = 1
   iam_instance_profile = var.iam_instance_profile
 }
 
-# Deploy infrastructure for Node 2 (Passive)
-
+# Deploy AWS infrastructure for Node 2 (Passive Node)
 module "node2" {
-  // Same config as shown in example
+  // ... (same config as Step 1)
   ha_enable = true
   iam_instance_profile = var.iam_instance_profile
 }
+```
+#### After both the grids are up and running (~20 min), configure HA 
 
-# After both NIOS instances are ready (~20 min), configure HA grid 
+1. Import Node 1 under nios_grid_member.ha_pair 
 
-1. Import Node 1 under nios_grid_member.ha_pair
-2. Modify the node_infor for nios_grid_member.ha_pair
-3. Call Grid Join on Node 2
+```resource "nios_grid_member" "ha_pair"{}```
 
+```terraform import nios_grid_member.ha_pair <resource_ref>```
+
+2. Modify the node_info for nios_grid_member.ha_pair
+
+3. Join Node2 (Passive Node) to Node1 (Active Node).
+
+```
 provider "nios" {
   nios_host_url = "https://${module.node1.eth1_ipv4}"
   nios_username = "admin"
@@ -267,7 +258,6 @@ resource "nios_grid_member" "ha_pair" {
   ]
 }
 
-# Optional: Join HA pair to existing master grid
 resource "nios_grid_join" "ha_member_join" {
   member_url       = "https://${module.node2.eth1_ipv4}"
   member_username = "admin"
@@ -295,7 +285,6 @@ The module outputs can be used directly in NIOS provider resources:
 
 ---
 
-## Important Notes
 
 ### Boot Time
 - NIOS takes **15-20 minutes** to fully boot after EC2 instance creation
@@ -304,10 +293,4 @@ The module outputs can be used directly in NIOS provider resources:
 ### HA Requirements
 - Set `ha_enable = true` to create ETH2 interface
 - Provide `iam_instance_profile` with permissions for HA operations
-- Deploy 2 instances (node1 and node2) before configuring HA
-- VIP uses the secondary IP on ETH2 (`eth2_secondary_ip_for_ha` output)
 
-### Network Interfaces
-- **ETH0**: Management (auto-created by AWS, accessible via `eth0_ip`)
-- **ETH1**: Grid communication (use for standalone members)
-- **ETH2**: HA interface (only created when `ha_enable = true`)
