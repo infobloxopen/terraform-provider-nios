@@ -19,7 +19,7 @@ import (
 type GridJoinModel struct {
 	MemberUsername types.String `tfsdk:"member_username"`
 	MemberPassword types.String `tfsdk:"member_password"`
-	MemberIP       types.String `tfsdk:"member_ip"`
+	MemberURL      types.String `tfsdk:"member_url"`
 	GridName       types.String `tfsdk:"grid_name"`
 	Master         types.String `tfsdk:"master"`
 	SharedSecret   types.String `tfsdk:"shared_secret"`
@@ -28,7 +28,7 @@ type GridJoinModel struct {
 var GridJoinAttrTypes = map[string]attr.Type{
 	"member_username": types.StringType,
 	"member_password": types.StringType,
-	"member_ip":       types.StringType,
+	"member_url":       types.StringType,
 	"grid_name":       types.StringType,
 	"master":          types.StringType,
 	"shared_secret":   types.StringType,
@@ -49,12 +49,13 @@ var GridJoinResourceSchemaAttributes = map[string]schema.Attribute{
 		},
 		MarkdownDescription: "The password of the grid member.",
 	},
-	"member_ip": schema.StringAttribute{
+	"member_url": schema.StringAttribute{
 		Required: true,
 		PlanModifiers: []planmodifier.String{
 			planmodifiers.ImmutableString(),
 		},
-		MarkdownDescription: "The IP address of the grid member.",
+		MarkdownDescription: "The URL of the grid member.",
+
 	},
 	"grid_name": schema.StringAttribute{
 		Required: true,

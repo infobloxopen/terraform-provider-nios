@@ -12,7 +12,7 @@ resource "nios_grid_member" "example_grid_member" {
 
 // Join the member to the grid master
 resource "nios_grid_join" "member_join" {
-  member_ip       = "https://172.28.83.231"
+  member_url      = "https://172.28.83.231"
   member_username = "username"
   member_password = "password"
   grid_name       = "Infoblox"
@@ -35,7 +35,7 @@ resource "nios_grid_member" "example_grid_member" {
 
 // Join the member to the grid master
 resource "nios_grid_join" "member_join" {
-  member_ip       = "https://172.28.83.21"
+  member_url      = "https://172.28.83.21"
   member_username = "username"
   member_password = "password"
   grid_name       = "Infoblox"
@@ -62,7 +62,7 @@ resource "nios_grid_member" "example_grid_member" {
 }
 
 resource "nios_grid_join" "member_join" {
-  member_ip       = "https://172.28.83.21"
+  member_url      = "https://172.28.83.21"
   member_username = "username"
   member_password = "password"
   grid_name       = "Infoblox"
@@ -108,7 +108,7 @@ resource "nios_grid_member" "example_grid_member" {
 
 // Join the member to the grid master
 resource "nios_grid_join" "member_join" {
-  member_ip       = "https://172.28.83.237"
+  member_url      = "https://172.28.83.237"
   member_username = "username"
   member_password = "password"
   grid_name       = "Infoblox"

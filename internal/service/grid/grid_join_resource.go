@@ -71,7 +71,7 @@ func (r *GridJoinResource) Create(ctx context.Context, req resource.CreateReques
 	memberClient := niosclient.NewAPIClient(
 		option.WithNIOSUsername(data.MemberUsername.ValueString()),
 		option.WithNIOSPassword(data.MemberPassword.ValueString()),
-		option.WithNIOSHostUrl(data.MemberIP.ValueString()),
+		option.WithNIOSHostUrl(data.MemberURL.ValueString()),
 		option.WithDebug(true),
 	)
 
@@ -126,9 +126,9 @@ func (r *GridJoinResource) Create(ctx context.Context, req resource.CreateReques
 
 	// Normal 200 response - grid join initiated
 	tflog.Debug(ctx, "Grid join initiated successfully. Please verify the grid status manually through the NIOS GUI to confirm the member has joined. If the join operation fails, manual intervention may be required to troubleshoot connectivity issues, credentials, or grid configuration.", map[string]any{
-		"member_ip": data.MemberIP.ValueString(),
-		"master":    data.Master.ValueString(),
-		"grid_name": data.GridName.ValueString(),
+		"member_url": data.MemberURL.ValueString(),
+		"master":     data.Master.ValueString(),
+		"grid_name":  data.GridName.ValueString(),
 	})
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)

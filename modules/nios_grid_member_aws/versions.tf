@@ -1,0 +1,14 @@
+terraform {
+  required_version = ">= 1.0"
+
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = ">= 6.38.0"
+    }
+    nios = {
+      source  = "infobloxopen/nios"
+      version = ">= 1.1.0"
+    }
+  }
+}
