@@ -56,3 +56,52 @@ func (m immutableStringModifier) PlanModifyString(ctx context.Context, req planm
 func ImmutableString() planmodifier.String {
 	return immutableStringModifier{}
 }
+
+var _ planmodifier.String = immutableIfValueStringModifier{}
+
+// immutableIfValueStringModifier prevents changes to/from a specific value.
+type immutableIfValueStringModifier struct {
+	value string
+}
+
+func (m immutableIfValueStringModifier) Description(ctx context.Context) string {
+	return fmt.Sprintf("Ensures this attribute cannot be changed to or from %q after resource creation", m.value)
+}
+
+func (m immutableIfValueStringModifier) MarkdownDescription(ctx context.Context) string {
+	return m.Description(ctx)
+}
+
+func (m immutableIfValueStringModifier) PlanModifyString(ctx context.Context, req planmodifier.StringRequest, resp *planmodifier.StringResponse) {
+	if req.StateValue.IsNull() || req.StateValue.IsUnknown() {
+		return
+	}
+
+	if req.PlanValue.IsNull() || req.PlanValue.IsUnknown() {
+		return
+	}
+
+	stateVal := req.StateValue.ValueString()
+	planVal := req.PlanValue.ValueString()
+
+	if stateVal == m.value || planVal == m.value {
+		if stateVal != planVal {
+			resp.Diagnostics.AddAttributeError(
+				req.Path,
+				"Immutable Attribute Changed",
+				fmt.Sprintf("The attribute cannot be changed to or from %q. "+
+					"Existing value: %q, Planned value: %q. "+
+					"To change this value, the resource must be destroyed and recreated.",
+					m.value,
+					stateVal,
+					planVal,
+				),
+			)
+		}
+	}
+}
+
+// ImmutableIfValue returns a plan modifier that prevents changes to or from a specific value.
+func ImmutableIfValue(value string) planmodifier.String {
+	return immutableIfValueStringModifier{value: value}
+}

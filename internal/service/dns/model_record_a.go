@@ -120,7 +120,10 @@ var RecordAResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional: true,
 		Computed: true,
 		Validators: []validator.String{
-			stringvalidator.OneOf("STATIC", "DYNAMIC"),
+			stringvalidator.OneOf("STATIC", "DYNAMIC", "SYSTEM"),
+		},
+		PlanModifiers: []planmodifier.String{
+			planmodifiers.ImmutableIfValue("SYSTEM"),
 		},
 		Default:             stringdefault.StaticString("STATIC"),
 		MarkdownDescription: "The record creator.",
