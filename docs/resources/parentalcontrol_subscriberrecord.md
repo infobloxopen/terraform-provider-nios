@@ -93,3 +93,4 @@ resource "nios_parentalcontrol_subscriberrecord" "subscriber_record_with_additio
 ### Read-Only
 
 - `ref` (String) The reference to the object.
+- `uuid` (String) Universally Unique ID assigned for this object.

@@ -122,6 +122,7 @@ resource "nios_parentalcontrol_subscribersite" "subscriber_site_with_additional_
 - `api_port` (Number) The port number for gRPC API server.
 - `extattrs_all` (Map of String) Extensible attributes associated with the object, including default attributes.
 - `ref` (String) The reference to the object.
+- `uuid` (String) Universally Unique ID assigned for this object.
 
 <a id="nestedatt--abss"></a>
 ### Nested Schema for `abss`
