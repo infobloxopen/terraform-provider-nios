@@ -355,7 +355,7 @@ func (r *MemberResource) Update(ctx context.Context, req resource.UpdateRequest,
 
 	apiRes, _, err := r.client.GridAPI.
 		MemberAPI.
-		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Update(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
 		Member(*data.Expand(ctx, &resp.Diagnostics, false)).
 		ReturnFieldsPlus(readableAttributesForMember).
 		ReturnAsObject(1).

@@ -28,7 +28,7 @@ type GridJoinModel struct {
 var GridJoinAttrTypes = map[string]attr.Type{
 	"member_username": types.StringType,
 	"member_password": types.StringType,
-	"member_url":       types.StringType,
+	"member_url":      types.StringType,
 	"grid_name":       types.StringType,
 	"master":          types.StringType,
 	"shared_secret":   types.StringType,
@@ -55,7 +55,6 @@ var GridJoinResourceSchemaAttributes = map[string]schema.Attribute{
 			planmodifiers.ImmutableString(),
 		},
 		MarkdownDescription: "The URL of the grid member.",
-
 	},
 	"grid_name": schema.StringAttribute{
 		Required: true,
