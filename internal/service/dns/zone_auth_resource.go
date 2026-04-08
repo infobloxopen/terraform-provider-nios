@@ -82,7 +82,6 @@ func (r *ZoneAuthResource) ValidateConfig(ctx context.Context, req resource.Vali
 	}
 
     hasMsSyncDisabled := !data.MsSyncDisabled.IsNull() && !data.MsSyncDisabled.IsUnknown()
-
     if hasMsSyncDisabled {
         hasMsPrimaries := !data.MsPrimaries.IsNull() && !data.MsPrimaries.IsUnknown()
         if !hasMsPrimaries {
