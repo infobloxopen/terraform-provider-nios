@@ -142,6 +142,7 @@ Read-Only:
 - `ref` (String) The reference to the object.
 - `service_status` (Attributes List) The service status list of a grid member. (see [below for nested schema](#nestedatt--result--service_status))
 - `support_access_info` (String) The information string for support access.
+- `uuid` (String) Universally Unique ID assigned for this object.
 
 <a id="nestedatt--result--additional_ip_list"></a>
 ### Nested Schema for `result.additional_ip_list`
