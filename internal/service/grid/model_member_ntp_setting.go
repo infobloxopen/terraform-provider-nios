@@ -128,10 +128,11 @@ var MemberNtpSettingResourceSchemaAttributes = map[string]schema.Attribute{
 		Default:             int64default.StaticInt64(15),
 		MarkdownDescription: "Vnode level local NTP stratum.",
 	},
+	// Default Value set to `true` in spite of WAPI doc specification due to NIOS-109173
 	"use_default_stratum": schema.BoolAttribute{
 		Optional:            true,
 		Computed:            true,
-		Default:             booldefault.StaticBool(true), //https://infoblox.atlassian.net/browse/NIOS-109173
+		Default:             booldefault.StaticBool(true),
 		MarkdownDescription: "Vnode level default stratum.",
 	},
 	"use_ntp_servers": schema.BoolAttribute{

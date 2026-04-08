@@ -17,6 +17,8 @@ import (
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
+// License Require for Test Execution - GRID
+
 var readableAttributesForMember = "active_position,additional_ip_list,automated_traffic_capture_setting,bgp_as,comment,config_addr_type,csp_access_key,csp_member_setting,dns_resolver_setting,dscp,email_setting,enable_ha,enable_lom,enable_member_redirect,enable_ro_api_access,extattrs,external_syslog_backup_servers,external_syslog_server_enable,ha_cloud_platform,ha_on_cloud,host_name,ipv6_setting,ipv6_static_routes,is_dscp_capable,lan2_enabled,lan2_port_setting,lom_network_config,lom_users,master_candidate,member_service_communication,mgmt_port_setting,mmdb_ea_build_time,mmdb_geoip_build_time,nat_setting,node_info,ntp_setting,ospf_list,passive_ha_arp_enabled,platform,pre_provisioning,preserve_if_owns_delegation,remote_console_access_enable,router_id,service_status,service_type_configuration,snmp_setting,static_routes,support_access_enable,support_access_info,syslog_proxy_setting,syslog_servers,syslog_size,threshold_traps,time_zone,traffic_capture_auth_dns_setting,traffic_capture_chr_setting,traffic_capture_qps_setting,traffic_capture_rec_dns_setting,traffic_capture_rec_queries_setting,trap_notifications,upgrade_group,use_automated_traffic_capture,use_dns_resolver_setting,use_dscp,use_email_setting,use_enable_lom,use_enable_member_redirect,use_external_syslog_backup_servers,use_remote_console_access_enable,use_snmp_setting,use_support_access_enable,use_syslog_proxy_setting,use_threshold_traps,use_time_zone,use_traffic_capture_auth_dns,use_traffic_capture_chr,use_traffic_capture_qps,use_traffic_capture_rec_dns,use_traffic_capture_rec_queries,use_trap_notifications,use_v4_vrrp,vip_setting,vpn_mtu"
 
 func TestAccMemberResource_basic(t *testing.T) {
@@ -822,12 +824,12 @@ func TestAccMemberResource_EnableHa(t *testing.T) {
 				Config: testAccMemberEnableHa(
 					hostName, "IPV4", "VNIOS", "ALL_V4",
 					vipAddress, "172.28.82.1", "255.255.254.0",
-					true, 112,
+					true, 197,
 				),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "enable_ha", "true"),
-					resource.TestCheckResourceAttr(resourceName, "router_id", "112"),
+					resource.TestCheckResourceAttr(resourceName, "router_id", "197"),
 					resource.TestCheckResourceAttr(resourceName, "node_info.#", "2"),
 				),
 			},
@@ -2031,7 +2033,7 @@ func TestAccMemberResource_OspfList(t *testing.T) {
 		{
 			"area_id":                "121",
 			"area_type":              "STANDARD",
-			"authentication_type":    "NONE",
+			"authentication_type":    "SIMPLE",
 			"auto_calc_cost_enabled": true,
 			"cost":                   2,
 			"dead_interval":          40,
@@ -2100,7 +2102,7 @@ func TestAccMemberResource_PassiveHaArpEnabled(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "enable_ha", "true"),
-					resource.TestCheckResourceAttr(resourceName, "router_id", "112"),
+					resource.TestCheckResourceAttr(resourceName, "router_id", "198"),
 					resource.TestCheckResourceAttr(resourceName, "node_info.#", "2"),
 					resource.TestCheckResourceAttr(resourceName, "passive_ha_arp_enabled", "true"),
 				),
@@ -2303,22 +2305,22 @@ func TestAccMemberResource_RouterId(t *testing.T) {
 				Config: testAccMemberRouterId(
 					hostName, "IPV4", "VNIOS", "ALL_V4",
 					vipAddress, "172.28.82.1", "255.255.254.0",
-					111,
+					199,
 				),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "router_id", "111"),
+					resource.TestCheckResourceAttr(resourceName, "router_id", "199"),
 				),
 			},
 			{
 				Config: testAccMemberRouterId(
 					hostName, "IPV4", "VNIOS", "ALL_V4",
 					vipAddress, "172.28.82.1", "255.255.254.0",
-					112,
+					201,
 				),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "router_id", "112"),
+					resource.TestCheckResourceAttr(resourceName, "router_id", "201"),
 				),
 			},
 		},
@@ -4459,27 +4461,27 @@ func testAccMemberImportStateIdFunc(resourceName string) resource.ImportStateIdF
 func testAccMemberBasicConfig(hostName, configAddrType, platform, serviceTypeConfig, vipAddress, vipGateway, vipSubnetMask string) string {
 	return fmt.Sprintf(`
 resource "nios_grid_member" "test" {
-    host_name = %q
-    config_addr_type = %q
-    platform = %q
-    service_type_configuration = %q
+	host_name = %q
+	config_addr_type = %q
+	platform = %q
+	service_type_configuration = %q
     
-    ipv6_setting = {
-        auto_router_config_enabled = false
-        dscp = 0
-        enabled = false
-        primary = true
-        use_dscp = false
-    }
+	ipv6_setting = {
+		auto_router_config_enabled = false
+		dscp = 0
+		enabled = false
+		primary = true
+		use_dscp = false
+	}
     
-    vip_setting = {
-        address = %q
-        dscp = 0
-        gateway = %q
-        primary = true
-        subnet_mask = %q
-        use_dscp = false
-    }
+	vip_setting = {
+		address = %q
+		dscp = 0
+		gateway = %q
+		primary = true
+		subnet_mask = %q
+		use_dscp = false
+	}
 }
 `, hostName, configAddrType, platform, serviceTypeConfig, vipAddress, vipGateway, vipSubnetMask)
 }
@@ -4619,20 +4621,20 @@ resource "nios_grid_member" "test_comment" {
 	service_type_configuration = %q
 	
 	ipv6_setting = {
-	auto_router_config_enabled = false
-	dscp = 0
-	enabled = false
-	primary = true
-	use_dscp = false
+		auto_router_config_enabled = false
+		dscp = 0
+		enabled = false
+		primary = true
+		use_dscp = false
 	}
 
 	vip_setting = {
-	address = %q
-	dscp = 0
-	gateway = %q
-	primary = true
-	subnet_mask = %q
-	use_dscp = false
+		address = %q
+		dscp = 0
+		gateway = %q
+		primary = true
+		subnet_mask = %q
+		use_dscp = false
 	}
     comment = %q
 }
@@ -4874,57 +4876,57 @@ func testAccMemberEnableHa(
 ) string {
 	return fmt.Sprintf(`
 resource "nios_grid_member" "test_enable_ha" {
-  host_name = %q
-  config_addr_type = %q
-  platform = %q
-  service_type_configuration = %q
+	host_name = %q
+	config_addr_type = %q
+	platform = %q
+	service_type_configuration = %q
 
-  ipv6_setting = {
-    auto_router_config_enabled = false
-    enabled = false
-    primary = true
-    use_dscp = false
-    dscp = 0
-  }
+	ipv6_setting = {
+		auto_router_config_enabled = false
+		enabled = false
+		primary = true
+		use_dscp = false
+		dscp = 0
+	}
 
-  vip_setting = {
-    address = %q
-    gateway = %q
-    subnet_mask = %q
-    primary = true
-    use_dscp = false
-    dscp = 0
-  }
-  enable_ha = %t
-  router_id = %d
+	vip_setting = {
+		address = %q
+		gateway = %q
+		subnet_mask = %q
+		primary = true
+		use_dscp = false
+		dscp = 0
+	}
+	enable_ha = %t
+	router_id = %d
 
-  node_info = [
+	node_info = [
+	{
+	  lan_ha_port_setting = {
+		ha_cloud_attribute = "UNK"
+		ha_ip_address = "172.28.82.11"
+		ha_port_setting = {
+			auto_port_setting_enabled = true
+			speed = "10"
+		}
+		lan_port_setting = {
+			auto_port_setting_enabled = true
+		}
+		mgmt_lan = "172.28.82.32"
+	  }
+	},
     {
       lan_ha_port_setting = {
-        ha_cloud_attribute = "UNK"
-        ha_ip_address = "172.28.82.11"
-        ha_port_setting = {
-          auto_port_setting_enabled = true
-          speed = "10"
+      	ha_cloud_attribute = "UNK"
+      	ha_ip_address = "172.28.82.41"
+      	ha_port_setting = {
+        	auto_port_setting_enabled = true
+        	speed = "10"
         }
-        lan_port_setting = {
-          auto_port_setting_enabled = true
-        }
-        mgmt_lan = "172.28.82.32"
-      }
-    },
-    {
-      lan_ha_port_setting = {
-        ha_cloud_attribute = "UNK"
-        ha_ip_address = "172.28.82.41"
-        ha_port_setting = {
-          auto_port_setting_enabled = true
-          speed = "10"
-        }
-        lan_port_setting = {
-          auto_port_setting_enabled = true
-        }
-        mgmt_lan = "172.28.82.43"
+      	lan_port_setting = {
+        	auto_port_setting_enabled = true
+      	}
+      	mgmt_lan = "172.28.82.43"
       }
     }
   ]
@@ -5112,12 +5114,12 @@ resource "nios_grid_member" "test_ha_cloud_platform" {
     host_name = %q
     ha_cloud_platform = %q
 	vip_setting = {
-			address = %q
-			dscp = 0
-			gateway = %q
-			primary = true
-			subnet_mask = %q
-			use_dscp = false
+		address = %q
+		dscp = 0
+		gateway = %q
+		primary = true
+		subnet_mask = %q
+		use_dscp = false
 	}
 }
 `, hostName, haCloudPlatform, vipAddress, vipGateway, vipSubnetMask)
@@ -5412,9 +5414,9 @@ resource "nios_grid_member" "test_mgmt_port_setting" {
 	node_info = [
 	{
 		mgmt_network_setting = {
-		  address     = "1.1.1.2"
-		  gateway     = "1.1.1.1"
-		  subnet_mask = "255.255.255.0"
+			address     = "1.1.1.2"
+			gateway     = "1.1.1.1"
+			subnet_mask = "255.255.255.0"
 		}
 	}
 	]
@@ -5604,7 +5606,7 @@ resource "nios_grid_member" "test_passive_ha_arp_enabled" {
     }
 
     enable_ha = true
-    router_id = 112
+    router_id = 198
     passive_ha_arp_enabled = %t
 
     node_info = [
@@ -6562,11 +6564,11 @@ resource "nios_grid_member" "test_use_email_setting" {
 
     use_email_setting = %t
 	email_setting = {
-	enabled            = false
-	port_number        = 25
-	relay_enabled      = false
-	smtps              = false
-	use_authentication = false
+		enabled            = false
+		port_number        = 25
+		relay_enabled      = false
+		smtps              = false
+		use_authentication = false
     }
 }
 `, hostName, configAddrType, platform, serviceTypeConfig, vipAddress, vipGateway, vipSubnetMask, useEmailSetting)

@@ -47,7 +47,7 @@ var MemberTrafficCaptureAuthDnsSettingResourceSchemaAttributes = map[string]sche
 	},
 	"auth_dns_latency_reset": schema.Int64Attribute{
 		Optional:            true,
-		MarkdownDescription: "Authoritative DNS latency above which traffic capture will stopped.",
+		MarkdownDescription: "Authoritative DNS latency above which traffic capture will be stopped.",
 	},
 	"auth_dns_latency_listen_on_source": schema.StringAttribute{
 		Computed: true,

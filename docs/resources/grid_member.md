@@ -13,7 +13,7 @@ Manages a Member resource object.
 ## Example Usage
 
 ```terraform
-// Create an Member with Basic Fields
+// Create a Member with Basic Fields
 resource "nios_grid_member" "example_member_with_basic_fields" {
   host_name                  = "member-node.localdomain"
   config_addr_type           = "IPV4"
@@ -38,7 +38,7 @@ resource "nios_grid_member" "example_member_with_basic_fields" {
   }
 }
 
-// Create an Member with additional Fields
+// Create a Member with additional Fields
 resource "nios_grid_member" "example_member_with_additional_fields" {
   host_name                  = "member2-node.localdomain"
   config_addr_type           = "IPV4"
@@ -87,7 +87,9 @@ resource "nios_grid_member" "example_member_with_additional_fields" {
       }
     }
   ]
-  nat_setting = false
+  mgmt_port_setting = {
+    enabled = true
+  }
 }
 ```
 
@@ -496,7 +498,7 @@ Read-Only:
 
 Optional:
 
-- `auto_port_setting_enabled` (Boolean) Enable or disalbe the auto port setting.
+- `auto_port_setting_enabled` (Boolean) Enable or disable the auto port setting.
 - `duplex` (String) The port duplex; if speed is 1000, duplex must be FULL.
 - `speed` (String) The port speed; if speed is 1000, duplex is FULL.
 
@@ -518,7 +520,7 @@ Optional:
 
 Optional:
 
-- `auto_port_setting_enabled` (Boolean) Enable or disalbe the auto port setting.
+- `auto_port_setting_enabled` (Boolean) Enable or disable the auto port setting.
 - `duplex` (String) The port duplex; if speed is 1000, duplex must be FULL.
 - `speed` (String) The port speed; if speed is 1000, duplex is FULL.
 
@@ -528,7 +530,7 @@ Optional:
 
 Optional:
 
-- `auto_port_setting_enabled` (Boolean) Enable or disalbe the auto port setting.
+- `auto_port_setting_enabled` (Boolean) Enable or disable the auto port setting.
 - `duplex` (String) The port duplex; if speed is 1000, duplex must be FULL.
 - `speed` (String) The port speed; if speed is 1000, duplex is FULL.
 
@@ -555,7 +557,7 @@ Optional:
 
 Optional:
 
-- `auto_port_setting_enabled` (Boolean) Enable or disalbe the auto port setting.
+- `auto_port_setting_enabled` (Boolean) Enable or disable the auto port setting.
 - `duplex` (String) The port duplex; if speed is 1000, duplex must be FULL.
 - `speed` (String) The port speed; if speed is 1000, duplex is FULL.
 
@@ -853,7 +855,7 @@ Optional:
 
 - `auth_dns_latency_listen_on_ip` (String) The DNS listen-on IP address used if auth_dns_latency_on_source is IP.
 - `auth_dns_latency_listen_on_source` (String) The local IP DNS service is listen on (for authoritative DNS latency trigger).
-- `auth_dns_latency_reset` (Number) Authoritative DNS latency above which traffic capture will stopped.
+- `auth_dns_latency_reset` (Number) Authoritative DNS latency above which traffic capture will be stopped.
 - `auth_dns_latency_threshold` (Number) Authoritative DNS latency below which traffic capture will be triggered.
 - `auth_dns_latency_trigger_enable` (Boolean) Enabling trigger automated traffic capture based on authoritative DNS latency.
 
