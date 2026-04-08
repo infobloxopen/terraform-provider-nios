@@ -455,8 +455,6 @@ func ConvertSliceOfMapsToHCL(data []map[string]any) string {
 				formattedValue = fmt.Sprintf("%v", v)
 			case bool:
 				formattedValue = fmt.Sprintf("%t", v)
-			case []string:
-				formattedValue = ConvertStringSliceToHCL(v)
 			default:
 				formattedValue = fmt.Sprintf("%q", fmt.Sprintf("%v", v))
 			}

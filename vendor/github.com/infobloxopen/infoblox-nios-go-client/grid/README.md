@@ -126,6 +126,7 @@ Class | Method | HTTP request | Description
 *GridFiledistributionAPI* | [**List**](docs/GridFiledistributionAPI.md#list) | **Get** /grid:filedistribution | Retrieve grid:filedistribution objects
 *GridFiledistributionAPI* | [**Read**](docs/GridFiledistributionAPI.md#read) | **Get** /grid:filedistribution/{reference} | Get a specific grid:filedistribution object
 *GridFiledistributionAPI* | [**Update**](docs/GridFiledistributionAPI.md#update) | **Put** /grid:filedistribution/{reference} | Update a grid:filedistribution object
+*GridJoinAPI* | [**Create**](docs/GridJoinAPI.md#create) | **Post** /grid/join | Join an Infoblox appliance to an existing grid
 *GridLicensePoolAPI* | [**List**](docs/GridLicensePoolAPI.md#list) | **Get** /grid:license_pool | Retrieve grid:license_pool objects
 *GridLicensePoolAPI* | [**Read**](docs/GridLicensePoolAPI.md#read) | **Get** /grid:license_pool/{reference} | Get a specific grid:license_pool object
 *GridLicensePoolContainerAPI* | [**List**](docs/GridLicensePoolContainerAPI.md#list) | **Get** /grid:license_pool_container | Retrieve grid:license_pool_container objects
@@ -224,6 +225,7 @@ Class | Method | HTTP request | Description
  - [CreateExtensibleattributedefResponseAsObject](docs/CreateExtensibleattributedefResponseAsObject.md)
  - [CreateGmcgroupResponse](docs/CreateGmcgroupResponse.md)
  - [CreateGmcgroupResponseAsObject](docs/CreateGmcgroupResponseAsObject.md)
+ - [CreateGridJoinResponse](docs/CreateGridJoinResponse.md)
  - [CreateGridServicerestartGroupOrderResponse](docs/CreateGridServicerestartGroupOrderResponse.md)
  - [CreateGridServicerestartGroupOrderResponseAsObject](docs/CreateGridServicerestartGroupOrderResponseAsObject.md)
  - [CreateGridServicerestartGroupResponse](docs/CreateGridServicerestartGroupResponse.md)
@@ -385,6 +387,7 @@ Class | Method | HTTP request | Description
  - [GridFiledistribution](docs/GridFiledistribution.md)
  - [GridHttpProxyServerSetting](docs/GridHttpProxyServerSetting.md)
  - [GridInformationalBannerSetting](docs/GridInformationalBannerSetting.md)
+ - [GridJoin](docs/GridJoin.md)
  - [GridLicensePool](docs/GridLicensePool.md)
  - [GridLicensePoolContainer](docs/GridLicensePoolContainer.md)
  - [GridLicensePoolSubpools](docs/GridLicensePoolSubpools.md)
