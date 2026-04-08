@@ -20,7 +20,7 @@ func TestAccParentalcontrolSubscriberrecordDataSource_Filters(t *testing.T) {
 	subscriberId := "IMSI=12345"
 	ipsd := "N/A"
 	localId := "N/A"
-	prefix := "32"
+	prefix := int32(32)
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
@@ -71,21 +71,26 @@ func testAccCheckParentalcontrolSubscriberrecordResourceAttrPair(resourceName, d
 	}
 }
 
-func testAccParentalcontrolSubscriberrecordDataSourceConfigFilters(ipAddr, ipsd, localId, prefix, site, subscriberId string) string {
+func testAccParentalcontrolSubscriberrecordDataSourceConfigFilters(ipAddr, ipsd, localId string, prefix int32, site, subscriberId string) string {
 	return fmt.Sprintf(`
 resource "nios_parentalcontrol_subscriberrecord" "test" {
 	ip_addr = %q
 	ipsd = %q
 	localid = %q
-	prefix = %q
+	prefix = %d
 	site = %q
 	subscriber_id = %q
 }
 
 data "nios_parentalcontrol_subscriberrecord" "test" {
-  filters = {
-	 site = nios_parentalcontrol_subscriberrecord.test.site
-  }
+	filters = {
+		ip_addr = %q
+		site = %q
+		prefix = %d
+		localid = %q
+		ipsd = %q
+	}
+	depends_on = [nios_parentalcontrol_subscriberrecord.test]
 }
-`, ipAddr, ipsd, localId, prefix, site, subscriberId)
+`, ipAddr, ipsd, localId, prefix, site, subscriberId, ipAddr, site, prefix, localId, ipsd)
 }

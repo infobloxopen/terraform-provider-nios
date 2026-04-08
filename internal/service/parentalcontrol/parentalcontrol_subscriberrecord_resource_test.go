@@ -737,7 +737,7 @@ func TestAccParentalcontrolSubscriberrecordResource_Site(t *testing.T) {
 	subscriberId := "IMSI=12345"
 	ipsd := "N/A"
 	localId := "N/A"
-	prefix := "32"
+	prefix := int32(32)
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
@@ -1270,13 +1270,13 @@ resource "nios_parentalcontrol_subscriberrecord" "test_proxy_all" {
 `, ipAddr, ipsd, localId, prefix, site, subscriberId, proxyAll)
 }
 
-func testAccParentalcontrolSubscriberrecordSite(ipAddr, ipsd, localId, prefix, site, subscriberId string) string {
+func testAccParentalcontrolSubscriberrecordSite(ipAddr, ipsd, localId string, prefix int32, site, subscriberId string) string {
 	return fmt.Sprintf(`
 resource "nios_parentalcontrol_subscriberrecord" "test_site" {
     ip_addr = %q
 	ipsd = %q
 	localid = %q
-	prefix = %q
+	prefix = %d
 	site = %q
 	subscriber_id = %q
 }

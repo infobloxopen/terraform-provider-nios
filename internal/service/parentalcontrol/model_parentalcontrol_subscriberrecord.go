@@ -2,12 +2,14 @@ package parentalcontrol
 
 import (
 	"context"
-
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
@@ -139,14 +141,23 @@ var ParentalcontrolSubscriberrecordResourceSchemaAttributes = map[string]schema.
 	"ip_addr": schema.StringAttribute{
 		Required:            true,
 		MarkdownDescription: "ip_addr",
+		PlanModifiers: []planmodifier.String{
+			stringplanmodifier.RequiresReplaceIfConfigured(),
+		},
 	},
 	"ipsd": schema.StringAttribute{
 		Required:            true,
 		MarkdownDescription: "ipsd",
+		PlanModifiers: []planmodifier.String{
+			stringplanmodifier.RequiresReplaceIfConfigured(),
+		},
 	},
 	"localid": schema.StringAttribute{
 		Required:            true,
 		MarkdownDescription: "localid",
+		PlanModifiers: []planmodifier.String{
+			stringplanmodifier.RequiresReplaceIfConfigured(),
+		},
 	},
 	"nas_contextual": schema.StringAttribute{
 		Optional:            true,
@@ -166,6 +177,9 @@ var ParentalcontrolSubscriberrecordResourceSchemaAttributes = map[string]schema.
 	"prefix": schema.Int64Attribute{
 		Required:            true,
 		MarkdownDescription: "prefix",
+		PlanModifiers: []planmodifier.Int64{
+			int64planmodifier.RequiresReplaceIfConfigured(),
+		},
 	},
 	"proxy_all": schema.BoolAttribute{
 		Optional:            true,
@@ -175,6 +189,9 @@ var ParentalcontrolSubscriberrecordResourceSchemaAttributes = map[string]schema.
 	"site": schema.StringAttribute{
 		Required:            true,
 		MarkdownDescription: "site",
+		PlanModifiers: []planmodifier.String{
+			stringplanmodifier.RequiresReplaceIfConfigured(),
+		},
 	},
 	"subscriber_id": schema.StringAttribute{
 		Required:            true,

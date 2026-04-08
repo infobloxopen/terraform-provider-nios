@@ -1,6 +1,6 @@
 // Create a Parental Control Subscriber Record with Basic Fields
 resource "nios_parentalcontrol_subscriberrecord" "subscriber_record_with_basic_fields" {
-  ip_addr       = "10.36.0.154"
+  ip_addr       = "10.36.1.15"
   ipsd          = "N/A"
   localid       = "N/A"
   prefix        = 32
@@ -10,7 +10,7 @@ resource "nios_parentalcontrol_subscriberrecord" "subscriber_record_with_basic_f
 
 // Create a Parental Control Subscriber Record with Additional Fields
 resource "nios_parentalcontrol_subscriberrecord" "subscriber_record_with_additional_fields" {
-  ip_addr       = "10.36.0.155"
+  ip_addr       = "10.36.11.15"
   ipsd          = "N/A"
   localid       = "N/A"
   prefix        = 32
@@ -32,7 +32,7 @@ resource "nios_parentalcontrol_subscriberrecord" "subscriber_record_with_additio
   flags                    = "SB"
   nas_contextual           = "NAS-PORT=1813"
   op_code                  = "11111"
-  parental_control_policy  = "00000000000000000000000000020040"
+  parental_control_policy  = "101"
   proxy_all                = true
   subscriber_secure_policy = "0ff"
   unknown_category_policy  = false
