@@ -35,8 +35,14 @@ func TestAccParentalcontrolSubscriberrecordResource_basic(t *testing.T) {
 				Config: testAccParentalcontrolSubscriberrecordBasicConfig(ipAddr, ipsd, localId, prefix, site, subscriberId),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckParentalcontrolSubscriberrecordExists(context.Background(), resourceName, &v),
-					// TODO: check and validate these
+					resource.TestCheckResourceAttr(resourceName, "ip_addr", ipAddr),
+					resource.TestCheckResourceAttr(resourceName, "ipsd", ipsd),
+					resource.TestCheckResourceAttr(resourceName, "localid", localId),
+					resource.TestCheckResourceAttr(resourceName, "prefix", prefix),
+					resource.TestCheckResourceAttr(resourceName, "site", site),
+					resource.TestCheckResourceAttr(resourceName, "subscriber_id", subscriberId),
 					// Test fields with default value
+					// All the default values are undefined
 				),
 			},
 			// Delete testing automatically occurs in TestCase
