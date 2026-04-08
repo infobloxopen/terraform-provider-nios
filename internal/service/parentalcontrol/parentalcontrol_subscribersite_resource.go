@@ -1,9 +1,8 @@
-package dhcp
+package parentalcontrol
 
 import (
 	"context"
 	"fmt"
-	"net"
 	"net/http"
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -17,34 +16,33 @@ import (
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
-var readableAttributesForDhcpfailover = "association_type,comment,extattrs,failover_port,load_balance_split,max_client_lead_time,max_load_balance_delay,max_response_delay,max_unacked_updates,ms_association_mode,ms_enable_authentication,ms_enable_switchover_interval,ms_failover_mode,ms_failover_partner,ms_hotstandby_partner_role,ms_is_conflict,ms_previous_state,ms_server,ms_state,ms_switchover_interval,name,primary,primary_server_type,primary_state,recycle_leases,secondary,secondary_server_type,secondary_state,use_failover_port,use_ms_switchover_interval,use_recycle_leases"
+var readableAttributesForParentalcontrolSubscribersite = "abss,api_members,api_port,block_size,blocking_ipv4_vip1,blocking_ipv4_vip2,blocking_ipv6_vip1,blocking_ipv6_vip2,comment,dca_sub_bw_list,dca_sub_query_count,enable_global_allow_list_rpz,enable_rpz_filtering_bypass,extattrs,first_port,global_allow_list_rpz,maximum_subscribers,members,msps,name,nas_gateways,nas_port,proxy_rpz_passthru,spms,stop_anycast,strict_nat,subscriber_collection_type"
 
 // Ensure provider defined types fully satisfy framework interfaces.
-var _ resource.Resource = &DhcpfailoverResource{}
-var _ resource.ResourceWithImportState = &DhcpfailoverResource{}
-var _ resource.ResourceWithValidateConfig = &DhcpfailoverResource{}
+var _ resource.Resource = &ParentalcontrolSubscribersiteResource{}
+var _ resource.ResourceWithImportState = &ParentalcontrolSubscribersiteResource{}
 
-func NewDhcpfailoverResource() resource.Resource {
-	return &DhcpfailoverResource{}
+func NewParentalcontrolSubscribersiteResource() resource.Resource {
+	return &ParentalcontrolSubscribersiteResource{}
 }
 
-// DhcpfailoverResource defines the resource implementation.
-type DhcpfailoverResource struct {
+// ParentalcontrolSubscribersiteResource defines the resource implementation.
+type ParentalcontrolSubscribersiteResource struct {
 	client *niosclient.APIClient
 }
 
-func (r *DhcpfailoverResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_" + "dhcp_failover"
+func (r *ParentalcontrolSubscribersiteResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_" + "parentalcontrol_subscribersite"
 }
 
-func (r *DhcpfailoverResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
+func (r *ParentalcontrolSubscribersiteResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Manages a DHCP Failover.",
-		Attributes:          DhcpfailoverResourceSchemaAttributes,
+		MarkdownDescription: "Manages a Parental Control Subscribe Site.",
+		Attributes:          ParentalcontrolSubscribersiteResourceSchemaAttributes,
 	}
 }
 
-func (r *DhcpfailoverResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+func (r *ParentalcontrolSubscribersiteResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	// Prevent panic if the provider has not been configured.
 	if req.ProviderData == nil {
 		return
@@ -64,9 +62,9 @@ func (r *DhcpfailoverResource) Configure(ctx context.Context, req resource.Confi
 	r.client = client
 }
 
-func (r *DhcpfailoverResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+func (r *ParentalcontrolSubscribersiteResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var diags diag.Diagnostics
-	var data DhcpfailoverModel
+	var data ParentalcontrolSubscribersiteModel
 
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
@@ -78,25 +76,27 @@ func (r *DhcpfailoverResource) Create(ctx context.Context, req resource.CreateRe
 	// Add internal ID exists in the Extensible Attributes if not already present
 	data.ExtAttrs, diags = AddInternalIDToExtAttrs(ctx, data.ExtAttrs, diags)
 	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
 		return
 	}
 
-	apiRes, _, err := r.client.DHCPAPI.
-		DhcpfailoverAPI.
+	apiRes, _, err := r.client.ParentalControlAPI.
+		ParentalcontrolSubscribersiteAPI.
 		Create(ctx).
-		Dhcpfailover(*data.Expand(ctx, &resp.Diagnostics)).
-		ReturnFieldsPlus(readableAttributesForDhcpfailover).
+		ParentalcontrolSubscribersite(*data.Expand(ctx, &resp.Diagnostics, true)).
+		ReturnFieldsPlus(readableAttributesForParentalcontrolSubscribersite).
 		ReturnAsObject(1).
 		Execute()
 	if err != nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create Dhcpfailover, got error: %s", err))
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create ParentalcontrolSubscribersite, got error: %s", err))
 		return
 	}
 
-	res := apiRes.CreateDhcpfailoverResponseAsObject.GetResult()
+	res := apiRes.CreateParentalcontrolSubscribersiteResponseAsObject.GetResult()
 	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.ExtAttrs)
 	if diags.HasError() {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while create Dhcpfailover due inherited Extensible attributes, got error: %s", err))
+		resp.Diagnostics.Append(diags...)
+		resp.Diagnostics.AddError("Client Error", "Error while creating ParentalcontrolSubscribersite due to inherited Extensible attributes")
 		return
 	}
 
@@ -106,9 +106,9 @@ func (r *DhcpfailoverResource) Create(ctx context.Context, req resource.CreateRe
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
-func (r *DhcpfailoverResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+func (r *ParentalcontrolSubscribersiteResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var diags diag.Diagnostics
-	var data DhcpfailoverModel
+	var data ParentalcontrolSubscribersiteModel
 
 	// Read Terraform prior state data into the model
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
@@ -123,10 +123,10 @@ func (r *DhcpfailoverResource) Read(ctx context.Context, req resource.ReadReques
 		return
 	}
 
-	apiRes, httpRes, err := r.client.DHCPAPI.
-		DhcpfailoverAPI.
+	apiRes, httpRes, err := r.client.ParentalControlAPI.
+		ParentalcontrolSubscribersiteAPI.
 		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
-		ReturnFieldsPlus(readableAttributesForDhcpfailover).
+		ReturnFieldsPlus(readableAttributesForParentalcontrolSubscribersite).
 		ReturnAsObject(1).
 		ProxySearch(config.GetProxySearch()).
 		Execute()
@@ -136,11 +136,11 @@ func (r *DhcpfailoverResource) Read(ctx context.Context, req resource.ReadReques
 		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound && r.ReadByExtAttrs(ctx, &data, resp) {
 			return
 		}
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read Dhcpfailover, got error: %s", err))
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read ParentalcontrolSubscribersite, got error: %s", err))
 		return
 	}
 
-	res := apiRes.GetDhcpfailoverResponseObjectAsResult.GetResult()
+	res := apiRes.GetParentalcontrolSubscribersiteResponseObjectAsResult.GetResult()
 
 	apiTerraformId, ok := (*res.ExtAttrs)[terraformInternalIDEA]
 	if !ok {
@@ -152,7 +152,7 @@ func (r *DhcpfailoverResource) Read(ctx context.Context, req resource.ReadReques
 		if stateExtAttrs == nil {
 			resp.Diagnostics.AddError(
 				"Missing Internal ID",
-				"Unable to read Dhcpfailover because the internal ID (from extattrs_all) is missing or invalid.",
+				"Unable to read ParentalcontrolSubscribersite because the internal ID (from extattrs_all) is missing or invalid.",
 			)
 			return
 		}
@@ -167,7 +167,8 @@ func (r *DhcpfailoverResource) Read(ctx context.Context, req resource.ReadReques
 
 	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.ExtAttrs)
 	if diags.HasError() {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while reading Dhcpfailover due inherited Extensible attributes, got error: %s", diags))
+		resp.Diagnostics.Append(diags...)
+		resp.Diagnostics.AddError("Client Error", "Error while reading ParentalcontrolSubscribersite due to inherited Extensible attributes")
 		return
 	}
 
@@ -177,7 +178,7 @@ func (r *DhcpfailoverResource) Read(ctx context.Context, req resource.ReadReques
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
-func (r *DhcpfailoverResource) ReadByExtAttrs(ctx context.Context, data *DhcpfailoverModel, resp *resource.ReadResponse) bool {
+func (r *ParentalcontrolSubscribersiteResource) ReadByExtAttrs(ctx context.Context, data *ParentalcontrolSubscribersiteModel, resp *resource.ReadResponse) bool {
 	var diags diag.Diagnostics
 
 	if data.ExtAttrsAll.IsNull() {
@@ -193,25 +194,24 @@ func (r *DhcpfailoverResource) ReadByExtAttrs(ctx context.Context, data *Dhcpfai
 	if internalId == "" {
 		return false
 	}
-
 	idMap := map[string]interface{}{
 		terraformInternalIDEA: internalId,
 	}
 
-	apiRes, _, err := r.client.DHCPAPI.
-		DhcpfailoverAPI.
+	apiRes, _, err := r.client.ParentalControlAPI.
+		ParentalcontrolSubscribersiteAPI.
 		List(ctx).
 		Extattrfilter(idMap).
 		ReturnAsObject(1).
-		ReturnFieldsPlus(readableAttributesForDhcpfailover).
+		ReturnFieldsPlus(readableAttributesForParentalcontrolSubscribersite).
 		ProxySearch(config.GetProxySearch()).
 		Execute()
 	if err != nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read Dhcpfailover by extattrs, got error: %s", err))
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read ParentalcontrolSubscribersite by extattrs, got error: %s", err))
 		return true
 	}
 
-	results := apiRes.ListDhcpfailoverResponseObject.GetResult()
+	results := apiRes.ListParentalcontrolSubscribersiteResponseObject.GetResult()
 
 	// If the list is empty, the resource no longer exists so remove it from state
 	if len(results) == 0 {
@@ -233,9 +233,9 @@ func (r *DhcpfailoverResource) ReadByExtAttrs(ctx context.Context, data *Dhcpfai
 	return true
 }
 
-func (r *DhcpfailoverResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+func (r *ParentalcontrolSubscribersiteResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	var diags diag.Diagnostics
-	var data DhcpfailoverModel
+	var data ParentalcontrolSubscribersiteModel
 
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
@@ -258,13 +258,14 @@ func (r *DhcpfailoverResource) Update(ctx context.Context, req resource.UpdateRe
 	}
 
 	associateInternalId, diags := req.Private.GetKey(ctx, "associate_internal_id")
-	resp.Diagnostics.Append(diags...)
 	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
 		return
 	}
 	if associateInternalId != nil {
 		data.ExtAttrs, diags = AddInternalIDToExtAttrs(ctx, data.ExtAttrs, diags)
 		if diags.HasError() {
+			resp.Diagnostics.Append(diags...)
 			return
 		}
 	}
@@ -276,23 +277,24 @@ func (r *DhcpfailoverResource) Update(ctx context.Context, req resource.UpdateRe
 		return
 	}
 
-	apiRes, _, err := r.client.DHCPAPI.
-		DhcpfailoverAPI.
+	apiRes, _, err := r.client.ParentalControlAPI.
+		ParentalcontrolSubscribersiteAPI.
 		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
-		Dhcpfailover(*data.Expand(ctx, &resp.Diagnostics)).
-		ReturnFieldsPlus(readableAttributesForDhcpfailover).
+		ParentalcontrolSubscribersite(*data.Expand(ctx, &resp.Diagnostics, false)).
+		ReturnFieldsPlus(readableAttributesForParentalcontrolSubscribersite).
 		ReturnAsObject(1).
 		Execute()
 	if err != nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update Dhcpfailover, got error: %s", err))
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update ParentalcontrolSubscribersite, got error: %s", err))
 		return
 	}
 
-	res := apiRes.UpdateDhcpfailoverResponseAsObject.GetResult()
+	res := apiRes.UpdateParentalcontrolSubscribersiteResponseAsObject.GetResult()
 
 	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, planExtAttrs, *res.ExtAttrs)
 	if diags.HasError() {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while update Dhcpfailover due inherited Extensible attributes, got error: %s", diags))
+		resp.Diagnostics.Append(diags...)
+		resp.Diagnostics.AddError("Client Error", "Error while updating ParentalcontrolSubscribersite due to inherited Extensible attributes")
 		return
 	}
 
@@ -305,8 +307,8 @@ func (r *DhcpfailoverResource) Update(ctx context.Context, req resource.UpdateRe
 	}
 }
 
-func (r *DhcpfailoverResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	var data DhcpfailoverModel
+func (r *ParentalcontrolSubscribersiteResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+	var data ParentalcontrolSubscribersiteModel
 
 	// Read Terraform prior state data into the model
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
@@ -315,72 +317,20 @@ func (r *DhcpfailoverResource) Delete(ctx context.Context, req resource.DeleteRe
 		return
 	}
 
-	httpRes, err := r.client.DHCPAPI.
-		DhcpfailoverAPI.
+	httpRes, err := r.client.ParentalControlAPI.
+		ParentalcontrolSubscribersiteAPI.
 		Delete(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
 		Execute()
 	if err != nil {
 		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
 			return
 		}
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete Dhcpfailover, got error: %s", err))
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete ParentalcontrolSubscribersite, got error: %s", err))
 		return
 	}
 }
 
-func (r *DhcpfailoverResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+func (r *ParentalcontrolSubscribersiteResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("ref"), req.ID)...)
 	resp.Diagnostics.Append(resp.Private.SetKey(ctx, "associate_internal_id", []byte("true"))...)
-}
-
-func (r *DhcpfailoverResource) ValidateConfig(ctx context.Context, req resource.ValidateConfigRequest, resp *resource.ValidateConfigResponse) {
-	var data DhcpfailoverModel
-
-	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-	primaryServerType := ""
-	secondaryServerType := ""
-	// Get the values or default to empty string
-	if !data.PrimaryServerType.IsNull() && !data.PrimaryServerType.IsUnknown() {
-		primaryServerType = data.PrimaryServerType.ValueString()
-	}
-
-	if !data.SecondaryServerType.IsNull() && !data.SecondaryServerType.IsUnknown() {
-		secondaryServerType = data.SecondaryServerType.ValueString()
-	}
-
-	if secondaryServerType == "EXTERNAL" && primaryServerType == "EXTERNAL" {
-		resp.Diagnostics.AddError(
-			"Invalid Server Types",
-			"Both primary_server_type and secondary_server_type cannot be set to EXTERNAL.",
-		)
-	}
-
-	if secondaryServerType == "EXTERNAL" {
-		secondaryValue := data.Secondary.ValueString()
-		if secondaryValue != "" {
-			ip := net.ParseIP(secondaryValue)
-			if ip == nil || ip.To4() == nil {
-				resp.Diagnostics.AddError(
-					"Invalid Secondary Server",
-					"secondary must be a valid IPv4 address when secondary_server_type is set to EXTERNAL.",
-				)
-			}
-		}
-	}
-
-	if primaryServerType == "EXTERNAL" {
-		primaryValue := data.Primary.ValueString()
-		if primaryValue != "" {
-			ip := net.ParseIP(primaryValue)
-			if ip == nil || ip.To4() == nil {
-				resp.Diagnostics.AddError(
-					"Invalid Primary Server",
-					"primary must be a valid IPv4 address when primary_server_type is set to EXTERNAL.",
-				)
-			}
-		}
-	}
 }
