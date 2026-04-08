@@ -119,6 +119,12 @@ resource "nios_grid_member" "example_grid_member" {
       }
     }
   ]
+
+  // To configure grid level dns resolver settings, use the grid_level_dns_resolver_setting attribute 
+  grid_level_dns_resolver_setting = {
+    resolvers = [
+      "10.10.10.10"
+  ] }
 }
 
 // Initiate the grid join

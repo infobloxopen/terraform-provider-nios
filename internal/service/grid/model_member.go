@@ -42,6 +42,7 @@ type MemberModel struct {
 	CspMemberSetting                types.Object `tfsdk:"csp_member_setting"`
 	ConfigureCspMemberSetting       types.Bool   `tfsdk:"configure_csp_member_setting"`
 	DnsResolverSetting              types.Object `tfsdk:"dns_resolver_setting"`
+	GridLevelDnsResolverSetting     types.Object `tfsdk:"grid_level_dns_resolver_setting"`
 	Dscp                            types.Int64  `tfsdk:"dscp"`
 	EmailSetting                    types.Object `tfsdk:"email_setting"`
 	EnableHa                        types.Bool   `tfsdk:"enable_ha"`
@@ -131,6 +132,7 @@ var MemberAttrTypes = map[string]attr.Type{
 	"csp_member_setting":                  types.ObjectType{AttrTypes: MemberCspMemberSettingAttrTypes},
 	"configure_csp_member_setting":        types.BoolType,
 	"dns_resolver_setting":                types.ObjectType{AttrTypes: MemberDnsResolverSettingAttrTypes},
+	"grid_level_dns_resolver_setting":     types.ObjectType{AttrTypes: MemberDnsResolverSettingAttrTypes},
 	"dscp":                                types.Int64Type,
 	"email_setting":                       types.ObjectType{AttrTypes: MemberEmailSettingAttrTypes},
 	"enable_ha":                           types.BoolType,
@@ -286,6 +288,12 @@ var MemberResourceSchemaAttributes = map[string]schema.Attribute{
 			objectvalidator.AlsoRequires(path.MatchRoot("use_dns_resolver_setting")),
 		},
 		MarkdownDescription: "DNS resolver setting for member.",
+	},
+	"grid_level_dns_resolver_setting": schema.SingleNestedAttribute{
+		Attributes:          MemberDnsResolverSettingResourceSchemaAttributes,
+		Computed:            true,
+		Optional:            true,
+		MarkdownDescription: "Grid-level DNS resolver setting. When configured, this will update the grid DNS resolver settings and restart grid services.",
 	},
 	"configure_csp_member_setting": schema.BoolAttribute{
 		Optional:            true,

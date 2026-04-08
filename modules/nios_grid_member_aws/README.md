@@ -206,15 +206,13 @@ module "node2" {
 ```
 #### After both the grids are up and running (~20 min), configure HA 
 
-1. Import Node1 under nios_grid_member.ha_pair after configuring dns resolver
+1. Import Node1 under nios_grid_member.ha_pair
 
 ```resource "nios_grid_member" "ha_pair"{}```
 
 ```terraform import nios_grid_member.ha_pair <resource_ref>```
 
 2. Modify the resource to set ha_on_cloud to true and provide the cloud attributes.
-
-3. Join Node2 (Passive Node) to Node1 (Active Node).
 
 ```
 provider "nios" {
@@ -256,7 +254,15 @@ resource "nios_grid_member" "ha_pair" {
       }
     }
   ]
+
+  // To configure grid level dns resolver settings, use the grid_level_dns_resolver_setting attribute 
+  grid_level_dns_resolver_setting = {
+    resolvers = [
+      "10.10.10.10"
+  ] }
 }
+
+3. Join Node2 (Passive Node) to Node1 (Active Node).
 
 resource "nios_grid_join" "ha_member_join" {
   member_url       = "https://${module.node2.eth1_ipv4}"
@@ -268,7 +274,6 @@ resource "nios_grid_join" "ha_member_join" {
   depends_on = [nios_grid_member.ha_pair]
 }
 ```
-
 
 ## Outputs Usage
 
