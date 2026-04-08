@@ -190,13 +190,8 @@ func (r *ParentalcontrolSubscribersiteResource) ReadByExtAttrs(ctx context.Conte
 		return false
 	}
 
-	extAttr, ok := internalIdExtAttr[terraformInternalIDEA]
-	if !ok {
-		return false
-	}
-
-	internalId, ok := extAttr.Value.(string)
-	if !ok || internalId == "" {
+	internalId := internalIdExtAttr[terraformInternalIDEA].Value
+	if internalId == "" {
 		return false
 	}
 	idMap := map[string]interface{}{
