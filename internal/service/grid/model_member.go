@@ -293,7 +293,7 @@ var MemberResourceSchemaAttributes = map[string]schema.Attribute{
 		Attributes:          MemberDnsResolverSettingResourceSchemaAttributes,
 		Computed:            true,
 		Optional:            true,
-		MarkdownDescription: "Grid-level DNS resolver setting. When configured, this will update the grid DNS resolver settings and restart grid services.",
+		MarkdownDescription: "Grid-level DNS resolver setting. When configured, this will update the grid DNS resolver settings and restart grid services. To unset resolvers, set resolvers to null in this block.",
 	},
 	"configure_csp_member_setting": schema.BoolAttribute{
 		Optional:            true,
@@ -1113,6 +1113,12 @@ func (m *MemberModel) Flatten(ctx context.Context, from *grid.Member, diags *dia
 	m.UseV4Vrrp = types.BoolPointerValue(from.UseV4Vrrp)
 	m.VipSetting = FlattenMemberVipSetting(ctx, from.VipSetting, diags)
 	m.VpnMtu = flex.FlattenInt64Pointer(from.VpnMtu)
+	planGridLevelDnsResolverSetting := m.GridLevelDnsResolverSetting
+	if planGridLevelDnsResolverSetting.IsNull() || planGridLevelDnsResolverSetting.IsUnknown() {
+		m.GridLevelDnsResolverSetting = types.ObjectNull(MemberDnsResolverSettingAttrTypes)
+	} else {
+		m.GridLevelDnsResolverSetting = planGridLevelDnsResolverSetting
+	}
 }
 
 func ExpandHACloudPlatform(v types.String) *string {
