@@ -72,4 +72,7 @@ resource "nios_grid_member" "example_member_with_additional_fields" {
       }
     }
   ]
+  mgmt_port_setting = {
+    enabled = true
+  }
 }
