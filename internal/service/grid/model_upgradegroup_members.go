@@ -26,8 +26,9 @@ var UpgradegroupMembersAttrTypes = map[string]attr.Type{
 
 var UpgradegroupMembersResourceSchemaAttributes = map[string]schema.Attribute{
 	"member": schema.StringAttribute{
-		Required:            true,
-		MarkdownDescription: "The upgrade group member name.",
+		Optional:            true,
+		Computed:            true,
+		MarkdownDescription: "The upgrade group member name. This is Required when creating a new upgrade group member.",
 	},
 	"time_zone": schema.StringAttribute{
 		Computed:            true,
