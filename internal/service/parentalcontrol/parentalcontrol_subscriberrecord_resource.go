@@ -125,7 +125,7 @@ func (r *ParentalcontrolSubscriberrecordResource) Read(ctx context.Context, req 
 
 	apiRes, httpRes, err := r.client.ParentalControlAPI.
 		ParentalcontrolSubscriberrecordAPI.
-		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Read(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
 		ReturnFieldsPlus(readableAttributesForParentalcontrolSubscriberrecord).
 		ReturnAsObject(1).
 		ProxySearch(config.GetProxySearch()).
@@ -167,9 +167,15 @@ func (r *ParentalcontrolSubscriberrecordResource) Update(ctx context.Context, re
 		return
 	}
 
+	diags = req.State.GetAttribute(ctx, path.Root("uuid"), &data.Uuid)
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+		return
+	}
+
 	apiRes, _, err := r.client.ParentalControlAPI.
 		ParentalcontrolSubscriberrecordAPI.
-		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Update(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
 		ParentalcontrolSubscriberrecord(*data.Expand(ctx, &resp.Diagnostics)).
 		ReturnFieldsPlus(readableAttributesForParentalcontrolSubscriberrecord).
 		ReturnAsObject(1).
@@ -199,7 +205,7 @@ func (r *ParentalcontrolSubscriberrecordResource) Delete(ctx context.Context, re
 
 	httpRes, err := r.client.ParentalControlAPI.
 		ParentalcontrolSubscriberrecordAPI.
-		Delete(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+		Delete(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
 		Execute()
 	if err != nil {
 		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
@@ -211,5 +217,5 @@ func (r *ParentalcontrolSubscriberrecordResource) Delete(ctx context.Context, re
 }
 
 func (r *ParentalcontrolSubscriberrecordResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	resource.ImportStatePassthroughID(ctx, path.Root("ref"), req, resp)
+	resource.ImportStatePassthroughID(ctx, path.Root("uuid"), req, resp)
 }

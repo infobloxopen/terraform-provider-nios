@@ -81,16 +81,16 @@ func (r *ZoneAuthResource) ValidateConfig(ctx context.Context, req resource.Vali
 		}
 	}
 
-    hasMsSyncDisabled := !data.MsSyncDisabled.IsNull() && !data.MsSyncDisabled.IsUnknown()
-    if hasMsSyncDisabled {
-        hasMsPrimaries := !data.MsPrimaries.IsNull() && !data.MsPrimaries.IsUnknown()
-        if !hasMsPrimaries {
-            resp.Diagnostics.AddError(
-                "Invalid Configuration",
-                "'ms_primaries' must be provided when 'ms_sync_disabled' is set.",
-            )
-        }
-    }
+	hasMsSyncDisabled := !data.MsSyncDisabled.IsNull() && !data.MsSyncDisabled.IsUnknown()
+	if hasMsSyncDisabled {
+		hasMsPrimaries := !data.MsPrimaries.IsNull() && !data.MsPrimaries.IsUnknown()
+		if !hasMsPrimaries {
+			resp.Diagnostics.AddError(
+				"Invalid Configuration",
+				"'ms_primaries' must be provided when 'ms_sync_disabled' is set.",
+			)
+		}
+	}
 
 	// Validation for use_soa_email and soa_serial_number requiring grid_primary or ns_group
 	hasUseSoaEmail := !data.UseSoaEmail.IsNull() && !data.UseSoaEmail.IsUnknown()

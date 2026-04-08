@@ -2,6 +2,7 @@ package parentalcontrol
 
 import (
 	"context"
+
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -19,6 +20,7 @@ import (
 
 type ParentalcontrolSubscriberrecordModel struct {
 	Ref                    types.String `tfsdk:"ref"`
+	Uuid                   types.String `tfsdk:"uuid"`
 	AccountingSessionId    types.String `tfsdk:"accounting_session_id"`
 	AltIpAddr              types.String `tfsdk:"alt_ip_addr"`
 	Ans0                   types.String `tfsdk:"ans0"`
@@ -48,6 +50,7 @@ type ParentalcontrolSubscriberrecordModel struct {
 
 var ParentalcontrolSubscriberrecordAttrTypes = map[string]attr.Type{
 	"ref":                      types.StringType,
+	"uuid":                     types.StringType,
 	"accounting_session_id":    types.StringType,
 	"alt_ip_addr":              types.StringType,
 	"ans0":                     types.StringType,
@@ -79,6 +82,10 @@ var ParentalcontrolSubscriberrecordResourceSchemaAttributes = map[string]schema.
 	"ref": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The reference to the object.",
+	},
+	"uuid": schema.StringAttribute{
+		Computed:            true,
+		MarkdownDescription: "Universally Unique ID assigned for this object.",
 	},
 	"accounting_session_id": schema.StringAttribute{
 		Optional:            true,
@@ -297,6 +304,7 @@ func (m *ParentalcontrolSubscriberrecordModel) Flatten(ctx context.Context, from
 		*m = ParentalcontrolSubscriberrecordModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.AccountingSessionId = flex.FlattenStringPointer(from.AccountingSessionId)
 	m.AltIpAddr = flex.FlattenStringPointer(from.AltIpAddr)
 	m.Ans0 = flex.FlattenStringPointer(from.Ans0)

@@ -27,6 +27,7 @@ import (
 
 type ParentalcontrolSubscribersiteModel struct {
 	Ref                      types.String `tfsdk:"ref"`
+	Uuid                     types.String `tfsdk:"uuid"`
 	Abss                     types.List   `tfsdk:"abss"`
 	ApiMembers               types.List   `tfsdk:"api_members"`
 	ApiPort                  types.Int64  `tfsdk:"api_port"`
@@ -59,6 +60,7 @@ type ParentalcontrolSubscribersiteModel struct {
 
 var ParentalcontrolSubscribersiteAttrTypes = map[string]attr.Type{
 	"ref":                          types.StringType,
+	"uuid":                         types.StringType,
 	"abss":                         types.ListType{ElemType: types.ObjectType{AttrTypes: ParentalcontrolSubscribersiteAbssAttrTypes}},
 	"api_members":                  types.ListType{ElemType: types.ObjectType{AttrTypes: ParentalcontrolSubscribersiteApiMembersAttrTypes}},
 	"api_port":                     types.Int64Type,
@@ -93,6 +95,10 @@ var ParentalcontrolSubscribersiteResourceSchemaAttributes = map[string]schema.At
 	"ref": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The reference to the object.",
+	},
+	"uuid": schema.StringAttribute{
+		Computed:            true,
+		MarkdownDescription: "Universally Unique ID assigned for this object.",
 	},
 	"abss": schema.ListNestedAttribute{
 		NestedObject: schema.NestedAttributeObject{
@@ -363,6 +369,7 @@ func (m *ParentalcontrolSubscribersiteModel) Flatten(ctx context.Context, from *
 		*m = ParentalcontrolSubscribersiteModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
+	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.Abss = flex.FlattenFrameworkListNestedBlock(ctx, from.Abss, ParentalcontrolSubscribersiteAbssAttrTypes, diags, FlattenParentalcontrolSubscribersiteAbss)
 	m.ApiMembers = flex.FlattenFrameworkListNestedBlock(ctx, from.ApiMembers, ParentalcontrolSubscribersiteApiMembersAttrTypes, diags, FlattenParentalcontrolSubscribersiteApiMembers)
 	m.ApiPort = flex.FlattenInt64Pointer(from.ApiPort)

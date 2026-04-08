@@ -120,7 +120,7 @@ var RecordAResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional: true,
 		Computed: true,
 		Validators: []validator.String{
-			stringvalidator.OneOf("STATIC", "DYNAMIC","SYSTEM"),
+			stringvalidator.OneOf("STATIC", "DYNAMIC", "SYSTEM"),
 		},
 		PlanModifiers: []planmodifier.String{
 			planmodifiers.ImmutableIfValue("SYSTEM"),
