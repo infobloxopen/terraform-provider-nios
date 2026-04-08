@@ -1,4 +1,4 @@
-package dtc
+package security
 
 import (
 	"context"
@@ -13,60 +13,54 @@ import (
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
-	"github.com/infobloxopen/infoblox-nios-go-client/dtc"
+	"github.com/infobloxopen/infoblox-nios-go-client/security"
 	"github.com/infobloxopen/terraform-provider-nios/internal/config"
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces.
-var _ datasource.DataSource = &DtcTopologyDataSource{}
+var _ datasource.DataSource = &RadiusAuthserviceDataSource{}
 
-func NewDtcTopologyDataSource() datasource.DataSource {
-	return &DtcTopologyDataSource{}
+func NewRadiusAuthserviceDataSource() datasource.DataSource {
+	return &RadiusAuthserviceDataSource{}
 }
 
-// DtcTopologyDataSource defines the data source implementation.
-type DtcTopologyDataSource struct {
+// RadiusAuthserviceDataSource defines the data source implementation.
+type RadiusAuthserviceDataSource struct {
 	client *niosclient.APIClient
 }
 
-func (d *DtcTopologyDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_" + "dtc_topology"
+func (d *RadiusAuthserviceDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_" + "security_radius_authservice"
 }
 
-type DtcTopologyModelWithFilter struct {
-	Filters        types.Map   `tfsdk:"filters"`
-	ExtAttrFilters types.Map   `tfsdk:"extattrfilters"`
-	Result         types.List  `tfsdk:"result"`
-	MaxResults     types.Int32 `tfsdk:"max_results"`
-	Paging         types.Int32 `tfsdk:"paging"`
+type RadiusAuthserviceModelWithFilter struct {
+	Filters    types.Map   `tfsdk:"filters"`
+	Result     types.List  `tfsdk:"result"`
+	MaxResults types.Int32 `tfsdk:"max_results"`
+	Paging     types.Int32 `tfsdk:"paging"`
 }
 
-func (m *DtcTopologyModelWithFilter) FlattenResults(ctx context.Context, from []dtc.DtcTopology, diags *diag.Diagnostics) {
+func (m *RadiusAuthserviceModelWithFilter) FlattenResults(ctx context.Context, from []security.RadiusAuthservice, diags *diag.Diagnostics) {
 	if len(from) == 0 {
 		return
 	}
-	m.Result = flex.FlattenFrameworkListNestedBlock(ctx, from, DtcTopologyAttrTypes, diags, FlattenDtcTopology)
+	m.Result = flex.FlattenFrameworkListNestedBlock(ctx, from, RadiusAuthserviceAttrTypes, diags, FlattenRadiusAuthservice)
 }
 
-func (d *DtcTopologyDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
+func (d *RadiusAuthserviceDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Retrieves information about existing DTC Topologies.",
+		MarkdownDescription: "Retrieves information about existing Radius Authentication Services.",
 		Attributes: map[string]schema.Attribute{
 			"filters": schema.MapAttribute{
-				Description: "Filter are used to return a more specific list of results. Filters can be used to match resources by specific attributes, e.g. name. If you specify multiple filters, the results returned will have only resources that match all the specified filters.",
-				ElementType: types.StringType,
-				Optional:    true,
-			},
-			"extattrfilters": schema.MapAttribute{
-				Description: "External Attribute Filters are used to return a more specific list of results by filtering on external attributes. If you specify multiple filters, the results returned will have only resources that match all the specified filters.",
+				Description: "Filters are used to return a more specific list of results. Filters can be used to match resources by specific attributes, e.g. name. If you specify multiple filters, the results returned will have only resources that match all the specified filters.",
 				ElementType: types.StringType,
 				Optional:    true,
 			},
 			"result": schema.ListNestedAttribute{
 				NestedObject: schema.NestedAttributeObject{
-					Attributes: utils.DataSourceAttributeMap(DtcTopologyResourceSchemaAttributes, &resp.Diagnostics),
+					Attributes: utils.DataSourceAttributeMap(RadiusAuthserviceResourceSchemaAttributes, &resp.Diagnostics),
 				},
 				Computed: true,
 			},
@@ -85,7 +79,7 @@ func (d *DtcTopologyDataSource) Schema(ctx context.Context, req datasource.Schem
 	}
 }
 
-func (d *DtcTopologyDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
+func (d *RadiusAuthserviceDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
 	// Prevent panic if the provider has not been configured.
 	if req.ProviderData == nil {
 		return
@@ -105,8 +99,8 @@ func (d *DtcTopologyDataSource) Configure(ctx context.Context, req datasource.Co
 	d.client = client
 }
 
-func (d *DtcTopologyDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
-	var data DtcTopologyModelWithFilter
+func (d *RadiusAuthserviceDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
+	var data RadiusAuthserviceModelWithFilter
 	pageCount := 0
 
 	// Read Terraform prior state data into the model
@@ -117,7 +111,7 @@ func (d *DtcTopologyDataSource) Read(ctx context.Context, req datasource.ReadReq
 	}
 
 	allResults, err := utils.ReadWithPages(
-		func(pageID string, maxResults int32) ([]dtc.DtcTopology, string, error) {
+		func(pageID string, maxResults int32) ([]security.RadiusAuthservice, string, error) {
 
 			if !data.MaxResults.IsNull() {
 				maxResults = data.MaxResults.ValueInt32()
@@ -130,13 +124,12 @@ func (d *DtcTopologyDataSource) Read(ctx context.Context, req datasource.ReadReq
 			//Increment the page count
 			pageCount++
 
-			request := d.client.DTCAPI.
-				DtcTopologyAPI.
+			request := d.client.SecurityAPI.
+				RadiusAuthserviceAPI.
 				List(ctx).
 				Filters(flex.ExpandFrameworkMapString(ctx, data.Filters, &resp.Diagnostics)).
-				Extattrfilter(flex.ExpandFrameworkMapString(ctx, data.ExtAttrFilters, &resp.Diagnostics)).
 				ReturnAsObject(1).
-				ReturnFieldsPlus(readableAttributesForDtcTopology).
+				ReturnFieldsPlus(readableAttributesForRadiusAuthservice).
 				Paging(paging).
 				MaxResults(maxResults).
 				ProxySearch(config.GetProxySearch())
@@ -149,15 +142,15 @@ func (d *DtcTopologyDataSource) Read(ctx context.Context, req datasource.ReadReq
 			// Execute the request
 			apiRes, _, err := request.Execute()
 			if err != nil {
-				resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read DtcTopology by extattrs, got error: %s", err))
+				resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read RadiusAuthservice, got error: %s", err))
 				return nil, "", err
 			}
 
-			res := apiRes.ListDtcTopologyResponseObject.GetResult()
+			res := apiRes.ListRadiusAuthserviceResponseObject.GetResult()
 			tflog.Info(ctx, fmt.Sprintf("Page %d : Retrieved %d results", pageCount, len(res)))
 
 			// Check for next page ID in additional properties
-			additionalProperties := apiRes.ListDtcTopologyResponseObject.AdditionalProperties
+			additionalProperties := apiRes.ListRadiusAuthserviceResponseObject.AdditionalProperties
 			var nextPageID string
 			npId, ok := additionalProperties["next_page_id"]
 			if ok {
@@ -172,17 +165,10 @@ func (d *DtcTopologyDataSource) Read(ctx context.Context, req datasource.ReadReq
 	)
 
 	if err != nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read DtcTopology, got error: %s", err))
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read RadiusAuthservice, got error: %s", err))
 		return
 	}
 	tflog.Info(ctx, fmt.Sprintf("Query complete: Total Number of Pages %d : Total results retrieved %d", pageCount, len(allResults)))
-
-	for i := range allResults {
-		populateTopologyRules(ctx, d.client, &allResults[i], &resp.Diagnostics)
-		if resp.Diagnostics.HasError() {
-			return
-		}
-	}
 
 	// Process the results
 	data.FlattenResults(ctx, allResults, &resp.Diagnostics)
