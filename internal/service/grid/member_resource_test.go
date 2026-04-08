@@ -4461,27 +4461,27 @@ func testAccMemberImportStateIdFunc(resourceName string) resource.ImportStateIdF
 func testAccMemberBasicConfig(hostName, configAddrType, platform, serviceTypeConfig, vipAddress, vipGateway, vipSubnetMask string) string {
 	return fmt.Sprintf(`
 resource "nios_grid_member" "test" {
-    host_name = %q
-    config_addr_type = %q
-    platform = %q
-    service_type_configuration = %q
+	host_name = %q
+	config_addr_type = %q
+	platform = %q
+	service_type_configuration = %q
     
-    ipv6_setting = {
-        auto_router_config_enabled = false
-        dscp = 0
-        enabled = false
-        primary = true
-        use_dscp = false
-    }
+	ipv6_setting = {
+		auto_router_config_enabled = false
+		dscp = 0
+		enabled = false
+		primary = true
+		use_dscp = false
+	}
     
-    vip_setting = {
-        address = %q
-        dscp = 0
-        gateway = %q
-        primary = true
-        subnet_mask = %q
-        use_dscp = false
-    }
+	vip_setting = {
+		address = %q
+		dscp = 0
+		gateway = %q
+		primary = true
+		subnet_mask = %q
+		use_dscp = false
+	}
 }
 `, hostName, configAddrType, platform, serviceTypeConfig, vipAddress, vipGateway, vipSubnetMask)
 }
@@ -4621,20 +4621,20 @@ resource "nios_grid_member" "test_comment" {
 	service_type_configuration = %q
 	
 	ipv6_setting = {
-	auto_router_config_enabled = false
-	dscp = 0
-	enabled = false
-	primary = true
-	use_dscp = false
+		auto_router_config_enabled = false
+		dscp = 0
+		enabled = false
+		primary = true
+		use_dscp = false
 	}
 
 	vip_setting = {
-	address = %q
-	dscp = 0
-	gateway = %q
-	primary = true
-	subnet_mask = %q
-	use_dscp = false
+		address = %q
+		dscp = 0
+		gateway = %q
+		primary = true
+		subnet_mask = %q
+		use_dscp = false
 	}
     comment = %q
 }
@@ -4876,57 +4876,57 @@ func testAccMemberEnableHa(
 ) string {
 	return fmt.Sprintf(`
 resource "nios_grid_member" "test_enable_ha" {
-  host_name = %q
-  config_addr_type = %q
-  platform = %q
-  service_type_configuration = %q
+	host_name = %q
+	config_addr_type = %q
+	platform = %q
+	service_type_configuration = %q
 
-  ipv6_setting = {
-    auto_router_config_enabled = false
-    enabled = false
-    primary = true
-    use_dscp = false
-    dscp = 0
-  }
+	ipv6_setting = {
+		auto_router_config_enabled = false
+		enabled = false
+		primary = true
+		use_dscp = false
+		dscp = 0
+	}
 
-  vip_setting = {
-    address = %q
-    gateway = %q
-    subnet_mask = %q
-    primary = true
-    use_dscp = false
-    dscp = 0
-  }
-  enable_ha = %t
-  router_id = %d
+	vip_setting = {
+		address = %q
+		gateway = %q
+		subnet_mask = %q
+		primary = true
+		use_dscp = false
+		dscp = 0
+	}
+	enable_ha = %t
+	router_id = %d
 
-  node_info = [
+	node_info = [
+	{
+	  lan_ha_port_setting = {
+		ha_cloud_attribute = "UNK"
+		ha_ip_address = "172.28.82.11"
+		ha_port_setting = {
+			auto_port_setting_enabled = true
+			speed = "10"
+		}
+		lan_port_setting = {
+			auto_port_setting_enabled = true
+		}
+		mgmt_lan = "172.28.82.32"
+	  }
+	},
     {
       lan_ha_port_setting = {
-        ha_cloud_attribute = "UNK"
-        ha_ip_address = "172.28.82.11"
-        ha_port_setting = {
-          auto_port_setting_enabled = true
-          speed = "10"
+      	ha_cloud_attribute = "UNK"
+      	ha_ip_address = "172.28.82.41"
+      	ha_port_setting = {
+        	auto_port_setting_enabled = true
+        	speed = "10"
         }
-        lan_port_setting = {
-          auto_port_setting_enabled = true
-        }
-        mgmt_lan = "172.28.82.32"
-      }
-    },
-    {
-      lan_ha_port_setting = {
-        ha_cloud_attribute = "UNK"
-        ha_ip_address = "172.28.82.41"
-        ha_port_setting = {
-          auto_port_setting_enabled = true
-          speed = "10"
-        }
-        lan_port_setting = {
-          auto_port_setting_enabled = true
-        }
-        mgmt_lan = "172.28.82.43"
+      	lan_port_setting = {
+        	auto_port_setting_enabled = true
+      	}
+      	mgmt_lan = "172.28.82.43"
       }
     }
   ]
@@ -5114,12 +5114,12 @@ resource "nios_grid_member" "test_ha_cloud_platform" {
     host_name = %q
     ha_cloud_platform = %q
 	vip_setting = {
-			address = %q
-			dscp = 0
-			gateway = %q
-			primary = true
-			subnet_mask = %q
-			use_dscp = false
+		address = %q
+		dscp = 0
+		gateway = %q
+		primary = true
+		subnet_mask = %q
+		use_dscp = false
 	}
 }
 `, hostName, haCloudPlatform, vipAddress, vipGateway, vipSubnetMask)
@@ -5414,9 +5414,9 @@ resource "nios_grid_member" "test_mgmt_port_setting" {
 	node_info = [
 	{
 		mgmt_network_setting = {
-		  address     = "1.1.1.2"
-		  gateway     = "1.1.1.1"
-		  subnet_mask = "255.255.255.0"
+			address     = "1.1.1.2"
+			gateway     = "1.1.1.1"
+			subnet_mask = "255.255.255.0"
 		}
 	}
 	]
@@ -6564,11 +6564,11 @@ resource "nios_grid_member" "test_use_email_setting" {
 
     use_email_setting = %t
 	email_setting = {
-	enabled            = false
-	port_number        = 25
-	relay_enabled      = false
-	smtps              = false
-	use_authentication = false
+		enabled            = false
+		port_number        = 25
+		relay_enabled      = false
+		smtps              = false
+		use_authentication = false
     }
 }
 `, hostName, configAddrType, platform, serviceTypeConfig, vipAddress, vipGateway, vipSubnetMask, useEmailSetting)
