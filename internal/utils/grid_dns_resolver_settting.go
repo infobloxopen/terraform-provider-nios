@@ -42,6 +42,7 @@ func ConfigureGridDNSResolver(ctx context.Context, gridClient *grid.APIClient, d
 	tflog.Info(ctx, "Successfully initiated grid services restart")
 
 	tflog.Info(ctx, "Waiting 60 seconds for grid services to stabilize")
+	//lintignore:R018
 	time.Sleep(60 * time.Second)
 
 	return nil
