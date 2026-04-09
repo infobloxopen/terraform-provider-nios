@@ -297,7 +297,6 @@ var MemberResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"grid_level_dns_resolver_setting": schema.SingleNestedAttribute{
 		Attributes:          MemberDnsResolverSettingResourceSchemaAttributes,
-		Computed:            true,
 		Optional:            true,
 		MarkdownDescription: "Grid-level DNS resolver setting. When configured, this will update the grid DNS resolver settings and restart grid services. To unset resolvers, set resolvers to null in this block.",
 	},

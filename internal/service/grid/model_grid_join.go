@@ -43,7 +43,8 @@ var GridJoinResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The username of the grid member.",
 	},
 	"member_password": schema.StringAttribute{
-		Required: true,
+		Required:  true,
+		Sensitive: true,
 		PlanModifiers: []planmodifier.String{
 			planmodifiers.ImmutableString(),
 		},
@@ -71,7 +72,8 @@ var GridJoinResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The virtual IP address of the grid master.",
 	},
 	"shared_secret": schema.StringAttribute{
-		Required: true,
+		Required:  true,
+		Sensitive: true,
 		PlanModifiers: []planmodifier.String{
 			planmodifiers.ImmutableString(),
 		},

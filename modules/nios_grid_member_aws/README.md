@@ -148,7 +148,7 @@ module "node2" {
 
 // After NIOS is ready (~20 min), configure grid member
 provider "nios" {
-  nios_host_url = "https://${module.grid_master.eth1_ipv4}"
+  nios_host_url = "https://${module.node1.eth1_ipv4}"
   nios_username = "username"
   nios_password = "password"
 }
@@ -208,9 +208,13 @@ module "node2" {
 
 1. Import Node1 under nios_grid_member.ha_pair
 
-```resource "nios_grid_member" "ha_pair"{}```
+```hcl 
+resource "nios_grid_member" "ha_pair"{}
+```
 
-```terraform import nios_grid_member.ha_pair <resource_ref>```
+```hcl 
+terraform import nios_grid_member.ha_pair <resource_ref>
+```
 
 2. Modify the resource to set ha_on_cloud to true and provide the cloud attributes.
 
@@ -265,13 +269,13 @@ resource "nios_grid_member" "ha_pair" {
 3. Join Node2 (Passive Node) to Node1 (Active Node).
 
 resource "nios_grid_join" "ha_member_join" {
-  member_url       = "https://${module.node2.eth1_ipv4}"
+  member_url      = "https://${module.node2.eth1_ipv4}"
   member_username = "admin"
   member_password = "password"
   grid_name       = "Grid Name"
-  master          = "module.node1.eth2_secondary_ip_for_ha"
+  master          = module.node1.eth2_secondary_ip_for_ha
   shared_secret   = "your-shared-secret"
-  depends_on = [nios_grid_member.ha_pair]
+  depends_on      = [nios_grid_member.ha_pair]
 }
 ```
 
@@ -281,10 +285,10 @@ The module outputs can be used directly in NIOS provider resources:
 
 | Output | NIOS Resource Usage |
 |--------|---------------------|
-| `eth1_ip` | `vip_setting.address`, `member_ip` in grid_join |
+| `eth1_ipv4` | `vip_setting.address`, `member_ip` in grid_join |
 | `eth1_gateway` | `vip_setting.gateway` |
 | `eth1_subnet_mask` | `vip_setting.subnet_mask` |
-| `eth1_private_ipv6` | `ipv6_setting.virtual_ip` |
+| `eth1_ipv6` | `ipv6_setting.virtual_ip` |
 | `eth2_ip` | HA `node_info.lan_ha_port_setting.ha_ip_address` |
 | `eth2_secondary_ip_for_ha` | HA `vip_setting.address` |
 

@@ -1,5 +1,5 @@
 // Create an Offline Member with IPV4 config
-resource "nios_grid_member" "example_grid_member" {
+resource "nios_grid_member" "example_grid_member_1" {
   host_name        = "infoblox.member1"
   config_addr_type = "IPV4"
   platform         = "VNIOS"
@@ -11,18 +11,18 @@ resource "nios_grid_member" "example_grid_member" {
 }
 
 // Join the member to the grid master
-resource "nios_grid_join" "member_join" {
+resource "nios_grid_join" "member_join_1" {
   member_url      = "https://172.28.83.231"
   member_username = "username"
   member_password = "password"
   grid_name       = "Infoblox"
   master          = "172.28.82.32"
   shared_secret   = "secret"
-  depends_on      = [nios_grid_member.example_grid_member]
+  depends_on      = [nios_grid_member.example_grid_member_1]
 }
 
 // Create an Offline Member with IPV6 config
-resource "nios_grid_member" "example_grid_member" {
+resource "nios_grid_member" "example_grid_member_2" {
   host_name        = "infoblox.member2"
   config_addr_type = "IPV6"
   platform         = "VNIOS"
@@ -34,18 +34,18 @@ resource "nios_grid_member" "example_grid_member" {
 }
 
 // Join the member to the grid master
-resource "nios_grid_join" "member_join" {
+resource "nios_grid_join" "member_join_2" {
   member_url      = "https://172.28.83.21"
   member_username = "username"
   member_password = "password"
   grid_name       = "Infoblox"
   master          = "2600:1f1c:e86:5e01:fb1d:dc76:3c28:ec48"
   shared_secret   = "secret"
-  depends_on      = [nios_grid_member.example_grid_member]
+  depends_on      = [nios_grid_member.example_grid_member_2]
 }
 
 // Create an Offline Member with both IPV4 and IPV6 config
-resource "nios_grid_member" "example_grid_member" {
+resource "nios_grid_member" "example_grid_member_3" {
   host_name        = "infoblox.member3"
   config_addr_type = "BOTH"
   platform         = "VNIOS"
@@ -61,19 +61,19 @@ resource "nios_grid_member" "example_grid_member" {
   }
 }
 
-resource "nios_grid_join" "member_join" {
+resource "nios_grid_join" "member_join_3" {
   member_url      = "https://172.28.83.21"
   member_username = "username"
   member_password = "password"
   grid_name       = "Infoblox"
   master          = "172.28.82.171"
   shared_secret   = "secret"
-  depends_on      = [nios_grid_member.example_grid_member]
+  depends_on      = [nios_grid_member.example_grid_member_3]
 }
 
 // For SA-HA config, import the existing grid master and update the resource to set ha_on_cloud to true and provide the cloud attributes.
 // This forms the HA with one Active and one Passive node.
-resource "nios_grid_member" "example_grid_member" {
+resource "nios_grid_member" "example_grid_member_4" {
   host_name         = "infoblox.localdomain"
   config_addr_type  = "IPV4"
   platform          = "VNIOS"
@@ -113,12 +113,12 @@ resource "nios_grid_member" "example_grid_member" {
 }
 
 // Initiate the grid join
-resource "nios_grid_join" "member_join" {
+resource "nios_grid_join" "member_join_4" {
   member_url      = "https://172.28.83.237"
   member_username = "username"
   member_password = "password"
   grid_name       = "Infoblox"
   master          = "172.28.83.245"
   shared_secret   = "secret"
-  depends_on      = [nios_grid_member.example_grid_member]
+  depends_on      = [nios_grid_member.example_grid_member_4]
 }
