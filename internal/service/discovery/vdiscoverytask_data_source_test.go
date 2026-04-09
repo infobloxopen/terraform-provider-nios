@@ -24,7 +24,7 @@ func TestAccVdiscoverytaskDataSource_Filters(t *testing.T) {
 		CheckDestroy:             testAccCheckVdiscoverytaskDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccVdiscoverytaskDataSourceConfigFilters(name, true, true, true, "infoblox.172_28_83_29", "AWS", "AUTO_CREATE", "AUTO_CREATE", true, false, "us-east-1", "aws_access_key", "aws_secret_key"),
+				Config: testAccVdiscoverytaskDataSourceConfigFilters(name, true, true, true, "infoblox.localdomain", "AWS", "AUTO_CREATE", "AUTO_CREATE", true, false, "us-east-1", "aws_access_key", "aws_secret_key"),
 				Check: resource.ComposeTestCheckFunc(
 					append([]resource.TestCheckFunc{
 						testAccCheckVdiscoverytaskExists(context.Background(), resourceName, &v),

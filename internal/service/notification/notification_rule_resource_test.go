@@ -909,6 +909,12 @@ func testAccNotificationRuleBasicConfig(eventType string, expressionList []map[s
 	expressionListHCL := utils.ConvertSliceOfMapsToHCL(expressionList)
 	templateInstanceHCL := utils.ConvertMapToHCL(templateInstance)
 	return fmt.Sprintf(`
+resource "nios_notification_rest_endpoint" "test_endpoint" {
+    name = %q
+    outbound_member_type = "https://example.com"
+    uri = "GM"
+}
+
 resource "nios_notification_rule" "test" {
     event_type = %q
     expression_list = %s
@@ -917,7 +923,8 @@ resource "nios_notification_rule" "test" {
     notification_target = %q
     template_instance = %s
 }
-`, eventType, expressionListHCL, name, notificationAction, notificationTarget, templateInstanceHCL)
+`, acctest.RandomNameWithPrefix("notification-rest-endpoint"),
+		eventType, expressionListHCL, name, notificationAction, notificationTarget, templateInstanceHCL)
 }
 
 func testAccNotificationRuleComment(eventType string, expressionList []map[string]any, name, notificationAction, notificationTarget string, templateInstance map[string]any, comment string) string {

@@ -14,7 +14,9 @@ import (
 	"strings"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/dhcp"
+	"github.com/infobloxopen/infoblox-nios-go-client/dns"
 	"github.com/infobloxopen/infoblox-nios-go-client/ipam"
+	"github.com/infobloxopen/infoblox-nios-go-client/security"
 )
 
 // UploadInitResponse holds the fields returned by the NIOS uploadinit fileop endpoint.
@@ -239,8 +241,10 @@ func FetchAndStoreCertificateRef(host, wapiVer, username, password, envVarName s
 }
 
 type PreConfigClients struct {
-	IPAM *ipam.APIClient
-	DHCP *dhcp.APIClient
+	IPAM     *ipam.APIClient
+	DHCP     *dhcp.APIClient
+	DNS      *dns.APIClient
+	SECURITY *security.APIClient
 }
 
 // PreConfig creates the network views required for integration testing.
@@ -252,6 +256,12 @@ func PreConfig(clients PreConfigClients) error {
 	}
 	if clients.DHCP == nil {
 		return fmt.Errorf("preconfig: DHCP client is required")
+	}
+	if clients.DNS == nil {
+		return fmt.Errorf("preconfig: DNS client is required")
+	}
+	if clients.SECURITY == nil {
+		return fmt.Errorf("preconfig: SECURITY client is required")
 	}
 
 	networkViews := []string{"test_network_view", "custom_view", "test_network_view2"}
@@ -451,14 +461,240 @@ func PreConfig(clients PreConfigClients) error {
 		fmt.Printf("Fingerprint filter %q created successfully\n", fpFilterName)
 	}
 
+	// Create admin users
+	adminUsers := []string{"aws1", "aws2"}
+
+	for _, adminUserName := range adminUsers {
+		adminUser := security.Adminuser{
+			Name:        security.PtrString(adminUserName),
+			AuthType:    security.PtrString("SAML"),
+			AdminGroups: []string{"cloud-api-only"},
+		}
+
+		_, _, err := clients.SECURITY.AdminuserAPI.Create(context.Background()).
+			Adminuser(adminUser).
+			Execute()
+
+		if err != nil {
+			if strings.Contains(err.Error(), "already exists") {
+				fmt.Printf("Admin user %q already exists, skipping creation\n", adminUserName)
+				continue
+			}
+			return fmt.Errorf("failed to create admin user %q: %w", adminUserName, err)
+		}
+
+		fmt.Printf("Admin user %q created successfully\n", adminUserName)
+	}
+
+	// Create DNS views
+	dnsViews := []string{"custom_dns_view"}
+
+	for _, dnsViewName := range dnsViews {
+		dnsViewBody := dns.View{
+			Name: dns.PtrString(dnsViewName),
+		}
+
+		_, _, err := clients.DNS.ViewAPI.Create(context.Background()).
+			View(dnsViewBody).
+			Execute()
+
+		if err != nil {
+			if strings.Contains(err.Error(), "already exists") {
+				fmt.Printf("DNS view %q already exists, skipping creation\n", dnsViewName)
+				continue
+			}
+			return fmt.Errorf("failed to create DNS view %q: %w", dnsViewName, err)
+		}
+
+		fmt.Printf("DNS view %q created successfully\n", dnsViewName)
+	}
+
+	// Create DDNS principal cluster groups
+	ddnsPrincipalClusterGroups := []string{"dynamic_update_grp_1", "dynamic_update_grp_2"}
+
+	for _, groupName := range ddnsPrincipalClusterGroups {
+		ddnsPrincipalClusterGroupBody := dns.DdnsPrincipalclusterGroup{
+			Name: dns.PtrString(groupName),
+		}
+
+		_, _, err := clients.DNS.DdnsPrincipalclusterGroupAPI.Create(context.Background()).
+			DdnsPrincipalclusterGroup(ddnsPrincipalClusterGroupBody).
+			Execute()
+
+		if err != nil {
+			if strings.Contains(err.Error(), "already exists") {
+				fmt.Printf("DDNS principal cluster group %q already exists, skipping creation\n", groupName)
+				continue
+			}
+			return fmt.Errorf("failed to create DDNS principal cluster group %q: %w", groupName, err)
+		}
+
+		fmt.Printf("DDNS principal cluster group %q created successfully\n", groupName)
+	}
+
+	// Create DNS64 groups
+	dns64Groups := []struct {
+		name   string
+		prefix string
+	}{
+		{name: "dns64_group", prefix: "64:FF9B::/96"},
+	}
+
+	for _, g := range dns64Groups {
+		dns64GroupBody := dns.Dns64group{
+			Name:   dns.PtrString(g.name),
+			Prefix: dns.PtrString(g.prefix),
+		}
+
+		_, _, err := clients.DNS.Dns64groupAPI.Create(context.Background()).
+			Dns64group(dns64GroupBody).
+			Execute()
+
+		if err != nil {
+			if strings.Contains(err.Error(), "already exists") {
+				fmt.Printf("DNS64 group %q already exists, skipping creation\n", g.name)
+				continue
+			}
+			return fmt.Errorf("failed to create DNS64 group %q: %w", g.name, err)
+		}
+
+		fmt.Printf("DNS64 group %q created successfully\n", g.name)
+	}
+
+	// Create stub NS groups
+	stubNSGroups := []string{"stub_ns_group1", "stub_ns_group2"}
+
+	for _, groupName := range stubNSGroups {
+		stubMemberBody := dns.NsgroupStubmember{
+			Name: dns.PtrString(groupName),
+			StubMembers: []dns.NsgroupStubmemberStubMembers{
+				{
+					Name: dns.PtrString("infoblox.member"),
+				},
+			},
+		}
+
+		_, _, err := clients.DNS.NsgroupStubmemberAPI.Create(context.Background()).
+			NsgroupStubmember(stubMemberBody).
+			Execute()
+
+		if err != nil {
+			if strings.Contains(err.Error(), "already exists") {
+				fmt.Printf("Stub NS group %q already exists, skipping creation\n", groupName)
+				continue
+			}
+			return fmt.Errorf("failed to create stub NS group %q: %w", groupName, err)
+		}
+
+		fmt.Printf("Stub NS group %q created successfully\n", groupName)
+	}
+
+	// Create forward stub servers
+	forwardStubServers := []string{"ensg1", "ensg2"}
+
+	for _, serverName := range forwardStubServers {
+		forwardStubServerBody := dns.NsgroupForwardstubserver{
+			Name: dns.PtrString(serverName),
+		}
+
+		_, _, err := clients.DNS.NsgroupForwardstubserverAPI.Create(context.Background()).
+			NsgroupForwardstubserver(forwardStubServerBody).
+			Execute()
+
+		if err != nil {
+			if strings.Contains(err.Error(), "already exists") {
+				fmt.Printf("Forward stub server %q already exists, skipping creation\n", serverName)
+				continue
+			}
+			return fmt.Errorf("failed to create forward stub server %q: %w", serverName, err)
+		}
+
+		fmt.Printf("Forward stub server %q created successfully\n", serverName)
+	}
+
+	// Create IPv4 reverse mapping zone auth
+	zoneAuthBody := dns.ZoneAuth{
+		Fqdn:       dns.PtrString("192.168.10.0/24"),
+		View:       dns.PtrString("default"),
+		ZoneFormat: dns.PtrString("IPV4"),
+	}
+
+	_, _, err := clients.DNS.ZoneAuthAPI.Create(context.Background()).
+		ZoneAuth(zoneAuthBody).
+		Execute()
+
+	if err != nil {
+		if strings.Contains(err.Error(), "already exists") {
+			fmt.Printf("Zone auth %q already exists, skipping creation\n", "192.168.10.0/24")
+		} else {
+			return fmt.Errorf("failed to create zone auth %q: %w", "192.168.10.0/24", err)
+		}
+	} else {
+		fmt.Printf("Zone auth %q created successfully\n", "192.168.10.0/24")
+	}
+
+	// Create IPv6 reverse mapping zone auth
+	ipv6ZoneAuthBody := dns.ZoneAuth{
+		Fqdn:       dns.PtrString("2001::/64"),
+		View:       dns.PtrString("default"),
+		ZoneFormat: dns.PtrString("IPV6"),
+	}
+
+	_, _, err = clients.DNS.ZoneAuthAPI.Create(context.Background()).
+		ZoneAuth(ipv6ZoneAuthBody).
+		Execute()
+
+	if err != nil {
+		if strings.Contains(err.Error(), "already exists") {
+			fmt.Printf("Zone auth %q already exists, skipping creation\n", "2001::/64")
+		} else {
+			return fmt.Errorf("failed to create zone auth %q: %w", "2001::/64", err)
+		}
+	} else {
+		fmt.Printf("Zone auth %q created successfully\n", "2001::/64")
+	}
+
+	// Create DHCP failovers
+	failovers := []struct {
+		name      string
+		secondary string
+	}{
+		{name: "example_failover_association", secondary: "2.2.2.2"},
+		{name: "example_failover_association1", secondary: "2.2.2.3"},
+	}
+
+	for _, f := range failovers {
+		failoverBody := dhcp.Dhcpfailover{
+			Name:                dhcp.PtrString(f.name),
+			PrimaryServerType:   dhcp.PtrString("GRID"),
+			Primary:             dhcp.PtrString("infoblox.member"),
+			SecondaryServerType: dhcp.PtrString("EXTERNAL"),
+			Secondary:           dhcp.PtrString(f.secondary),
+		}
+
+		_, _, err := clients.DHCP.DhcpfailoverAPI.Create(context.Background()).
+			Dhcpfailover(failoverBody).
+			Execute()
+
+		if err != nil {
+			if strings.Contains(err.Error(), "already exists") {
+				fmt.Printf("DHCP failover %q already exists, skipping creation\n", f.name)
+				continue
+			}
+			return fmt.Errorf("failed to create DHCP failover %q: %w", f.name, err)
+		}
+
+		fmt.Printf("DHCP failover %q created successfully\n", f.name)
+	}
+
 	return nil
 }
 
 func main() {
-	host := "https://172.28.83.140"
-	wapiVer := "v2.13.6"
-	username := "admin"
-	password := "Infoblox@123"
+	host := ""
+	wapiVer := ""
+	username := ""
+	password := ""
 
 	certUpload, err := UploadInit(host, wapiVer, username, password)
 	if err != nil {
