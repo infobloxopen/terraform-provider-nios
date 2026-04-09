@@ -1,6 +1,7 @@
 package grid
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"io"
@@ -93,20 +94,16 @@ func (r *GridJoinResource) Create(ctx context.Context, req resource.CreateReques
 		if httpResp.Body != nil {
 			bodyBytes, readErr := io.ReadAll(httpResp.Body)
 			if readErr == nil {
-				bodyStr := string(bodyBytes)
-				bodyLower := strings.ToLower(bodyStr)
-
 				isHTMLResponse := strings.Contains(httpResp.Header.Get("Content-Type"), "text/html")
-				isHTML := strings.Contains(bodyLower, "<html")
-				hasMetaRefresh := strings.Contains(bodyLower, "http-equiv=\"refresh\"")
-
+				isHTML := bytes.Contains(bodyBytes, []byte("<HTML"))
+				hasMetaRefresh := bytes.Contains(bodyBytes, []byte("HTTP-EQUIV=\"REFRESH\""))
 				// If response is HTML redirect, member is already joined
 				if isHTMLResponse && isHTML && hasMetaRefresh {
 					// Extract URL from HTML redirect
-					masterURL := extractRedirectURL(bodyStr)
+					masterURL := extractRedirectURL(string(bodyBytes))
 					errorMsg := "Member is already part of another grid."
 					if masterURL != "" {
-						errorMsg = fmt.Sprintf("The member is already part of grid master: %s", masterURL)
+						errorMsg += fmt.Sprintf(" Master URL: %s", masterURL)
 					}
 					resp.Diagnostics.AddError("Grid Join Failed", errorMsg)
 					return
@@ -151,7 +148,7 @@ func (r *GridJoinResource) Delete(ctx context.Context, req resource.DeleteReques
 }
 
 func extractRedirectURL(body string) string {
-	idx := strings.Index(strings.ToLower(body), "url=")
+	idx := strings.Index(body, "URL=")
 	if idx == -1 {
 		return ""
 	}
