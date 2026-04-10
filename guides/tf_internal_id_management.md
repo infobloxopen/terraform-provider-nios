@@ -35,7 +35,7 @@ Use one of the following methods to create the Terraform Internal ID extensible 
 
 2. **Use the following cURL command to create the extensible attribute as a read-only attribute in NIOS:**
 ```bash
-   curl -k -u admin:infoblox -H "Content-Type: application/json" -X POST https://<Grid_IP>/wapi/v2.13.6/extensibleattributedef -d '{"name": "Terraform Internal ID", "flags": "CR", "type": "STRING", "comment": "Internal ID for Terraform Resource"}'
+   curl -k -u admin:infoblox -H "Content-Type: application/json" -X POST https://<Grid_IP>/wapi/v2.14/extensibleattributedef -d '{"name": "Terraform Internal ID", "flags": "CR", "type": "STRING", "comment": "Internal ID for Terraform Resource"}'
 ```
    * If the user you want to manage is a cloud member, then include the flag `C` for cloud API.
    * If you are using multiple flags in the command, ensure that the flags are written in correct order. For more information about flags, refer to the Extensible Attribute Definition object in the [Infoblox WAPI documentation](https://docs.infoblox.com/space/NIOS/35400616/NIOS).

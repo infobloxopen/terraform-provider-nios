@@ -45,6 +45,7 @@
 
 - `nios_grid_member` : Manage grid members and retrieve existing member configurations. ([#425](https://github.com/infobloxopen/terraform-provider-nios/pull/425))
 - `nios_grid_upgradeschedule` : Manage grid upgrade schedules and retrieve existing upgrade schedule configurations. ([#391](https://github.com/infobloxopen/terraform-provider-nios/pull/391))
+- `nios_grid_join` : Join a member to an Infoblox Grid. ([#434](https://github.com/infobloxopen/terraform-provider-nios/pull/434))
 
 #### IPAM
 
@@ -84,12 +85,16 @@
 - `nios_misc_tftp_filedir` : Manage TFTP file directories and retrieve existing TFTP file directory configurations. ([#411](https://github.com/infobloxopen/terraform-provider-nios/pull/411))
 - `nios_misc_dxl_endpoint` : Manage DXL endpoints and retrieve existing DXL endpoint data. ([#389](https://github.com/infobloxopen/terraform-provider-nios/pull/389))
 
+### Modules
+
+- **NIOS Grid Member AWS Module** : Terraform module for deploying NIOS Grid EC2 instances on AWS. ([#434](https://github.com/infobloxopen/terraform-provider-nios/pull/434))
+
 ### Enhancements
 
 - Added support for NIOS 9.1.0 with WAPI version v2.14 and UUID-based API calls.
-- Added comprehensive IPv4, IPv6, CIDR, and domain name validation support across multiple resource types.[#345](https://github.com/infobloxopen/terraform-provider-nios/pull/345)
-- Enhanced validation for schedule configurations across various object groups. [#333](https://github.com/infobloxopen/terraform-provider-nios/pull/333)
-- Improved handling of unknown values in ValidateConfig to support variable resolution.[#375](https://github.com/infobloxopen/terraform-provider-nios/pull/375)
+- Added comprehensive IPv4, IPv6, CIDR, and domain name validation support across multiple resource types.([#345](https://github.com/infobloxopen/terraform-provider-nios/pull/345))
+- Enhanced validation for schedule configurations across various object groups. ([#333](https://github.com/infobloxopen/terraform-provider-nios/pull/333))
+- Improved handling of unknown values in ValidateConfig to support variable resolution. ([#375](https://github.com/infobloxopen/terraform-provider-nios/pull/375))
 
 ### Fixes
 

@@ -21,8 +21,8 @@ The Terraform Provider for Infoblox NIOS allows you to manage your Infoblox NIOS
 ## Requirements
 
 - [Go](https://golang.org/doc/install) >= 1.18 (to build the provider plugin) (recommended version is 1.24.4 or later)
-- [Terraform](https://www.terraform.io/downloads.html) >= 1.8.0
-- [Infoblox NIOS](https://www.infoblox.com/products/nios/) (version 9.0.6 or higher)
+- [Terraform](https://www.terraform.io/downloads.html) >= 1.12.1
+- [Infoblox NIOS](https://www.infoblox.com/products/nios/) (version 9.1.0 or higher)
 
 ## Getting Started
 
@@ -87,7 +87,7 @@ Detailed documentation for these resources can be found in [Host Record Document
 
 ## Importing Existing Resources
 
-Resources can be imported using their reference ID:
+Resources can be imported using UUID:
 
 For detailed information, refer to the [Importing Existing Resources](guides/importing_resources.md) page.
 

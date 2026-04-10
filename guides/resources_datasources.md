@@ -164,6 +164,7 @@ The tables below list all available resources and data sources
 | `nios_grid_distributionschedule`   | Manages Grid Distribution Schedules                      | Retrieves information about existing Grid Distribution Schedules                      |
 | `nios_grid_member` | Manages grid members | Retrieves information about existing member configurations |
 | `nios_grid_upgradeschedule` | Manages grid upgrade schedules | Retrieves information about existing upgrade schedule configurations |
+| `nios_grid_join` | Joins a member to an Infoblox Grid |  |
 
 ### DISCOVERY
 
