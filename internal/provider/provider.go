@@ -247,6 +247,7 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 		grid.NewDistributionscheduleResource,
 		grid.NewMemberResource,
 		grid.NewUpgradescheduleResource,
+		grid.NewGridJoinResource,
 
 		discovery.NewDiscoveryCredentialgroupResource,
 		discovery.NewVdiscoverytaskResource,
