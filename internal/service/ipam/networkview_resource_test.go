@@ -74,10 +74,11 @@ func TestAccNetworkviewResource_disappears(t *testing.T) {
 // TestAccNetworkviewResource_CloudInfo sets Delegated Member with Cloud Info
 // To Update the Delegated Member, use 'null' to unset the existing member first and then set a new member
 func TestAccNetworkviewResource_CloudInfo(t *testing.T) {
+	t.Skip("Requires Cloud API Configurations to Run this test")
 	var resourceName = "nios_ipam_network_view.test_cloud_info"
 	var v ipam.Networkview
 	name := acctest.RandomNameWithPrefix("test-network-view")
-	memberName := "infoblox.localdomain"
+	memberName := "infoblox.member"
 	memberIpv4 := "172.172.172.172"
 	memberIpv6 := "2001::123"
 
@@ -91,7 +92,7 @@ func TestAccNetworkviewResource_CloudInfo(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkviewExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "name", name),
-					resource.TestCheckResourceAttr(resourceName, "cloud_info.authority_type", "GM"),
+					resource.TestCheckResourceAttr(resourceName, "cloud_info.authority_type", "Member"),
 					resource.TestCheckResourceAttr(resourceName, "cloud_info.delegated_scope", "ROOT"),
 					resource.TestCheckResourceAttr(resourceName, "cloud_info.owned_by_adaptor", "false"),
 					resource.TestCheckResourceAttr(resourceName, "cloud_info.delegated_member.name", memberName),
@@ -175,6 +176,8 @@ func TestAccNetworkviewResource_DdnsZonePrimaries(t *testing.T) {
 	var resourceName = "nios_ipam_network_view.test_ddns_zone_primaries"
 	var v ipam.Networkview
 	name := acctest.RandomNameWithPrefix("test-network-view")
+	zoneFQDN1 := acctest.RandomNameWithPrefix("zone") + ".com"
+	zoneFQDN2 := acctest.RandomNameWithPrefix("zone") + ".com"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -182,22 +185,22 @@ func TestAccNetworkviewResource_DdnsZonePrimaries(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccNetworkviewDdnsZonePrimaries(name, "infoblox.member", "GRID", "zone_auth/ZG5zLnpvbmUkLl9kZWZhdWx0LmNvbS5maXJzdA:first.com/default"),
+				Config: testAccNetworkviewDdnsZonePrimaries(name, "infoblox.member", "GRID", "${nios_dns_zone_auth.parent_zone1.ref}", zoneFQDN1, zoneFQDN2),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkviewExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ddns_zone_primaries.0.dns_grid_primary", "infoblox.cloudmem"),
+					resource.TestCheckResourceAttr(resourceName, "ddns_zone_primaries.0.dns_grid_primary", "infoblox.member"),
 					resource.TestCheckResourceAttr(resourceName, "ddns_zone_primaries.0.zone_match", "GRID"),
-					resource.TestCheckResourceAttr(resourceName, "ddns_zone_primaries.0.dns_grid_zone.ref", "zone_auth/ZG5zLnpvbmUkLl9kZWZhdWx0LmNvbS5maXJzdA:first.com/default"),
+					resource.TestCheckResourceAttrPair(resourceName, "ddns_zone_primaries.0.dns_grid_zone.ref", "nios_dns_zone_auth.parent_zone1", "ref"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccNetworkviewDdnsZonePrimaries(name, "infoblox.member", "GRID", "zone_auth/ZG5zLnpvbmUkLl9kZWZhdWx0LmNvbS5zZWNvbmQ:second.com/default"),
+				Config: testAccNetworkviewDdnsZonePrimaries(name, "infoblox.member", "GRID", "${nios_dns_zone_auth.parent_zone2.ref}", zoneFQDN1, zoneFQDN2),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkviewExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ddns_zone_primaries.1.dns_grid_primary", "infoblox.cloudmem"),
-					resource.TestCheckResourceAttr(resourceName, "ddns_zone_primaries.1.zone_match", "GRID"),
-					resource.TestCheckResourceAttr(resourceName, "ddns_zone_primaries.1.dns_grid_zone.ref", "zone_auth/ZG5zLnpvbmUkLl9kZWZhdWx0LmNvbS5zZWNvbmQ:second.com/default"),
+					resource.TestCheckResourceAttr(resourceName, "ddns_zone_primaries.0.dns_grid_primary", "infoblox.member"),
+					resource.TestCheckResourceAttr(resourceName, "ddns_zone_primaries.0.zone_match", "GRID"),
+					resource.TestCheckResourceAttrPair(resourceName, "ddns_zone_primaries.0.dns_grid_zone.ref", "nios_dns_zone_auth.parent_zone2", "ref"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -296,15 +299,15 @@ func TestAccNetworkviewResource_InternalForwardZones(t *testing.T) {
 				Config: testAccNetworkviewInternalForwardZones(name, InternalForwardZonesCreate),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkviewExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "internal_forward_zones.0", InternalForwardZonesCreate[0]),
+					resource.TestCheckResourceAttrPair(resourceName, "internal_forward_zones.0", "nios_dns_zone_auth.test_zone1", "ref"),
 				),
 			},
 			{
 				Config: testAccNetworkviewInternalForwardZones(name, InternalForwardZonesUpdate),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkviewExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "internal_forward_zones.0", InternalForwardZonesUpdate[0]),
-					resource.TestCheckResourceAttr(resourceName, "internal_forward_zones.1", InternalForwardZonesUpdate[1]),
+					resource.TestCheckResourceAttrPair(resourceName, "internal_forward_zones.0", "nios_dns_zone_auth.test_zone1", "ref"),
+					resource.TestCheckResourceAttrPair(resourceName, "internal_forward_zones.1", "nios_dns_zone_auth.test_zone2", "ref"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -552,8 +555,28 @@ resource "nios_ipam_network_view" "test_ddns_dns_view" {
 `, name, ddnsDnsView)
 }
 
-func testAccNetworkviewDdnsZonePrimaries(name, dnsGridZonePrimary, zoneMatch, dnsGridZoneRef string) string {
+func testAccNetworkviewDdnsZonePrimaries(name, dnsGridZonePrimary, zoneMatch, dnsGridZoneRef, zoneFQDN1, zoneFQDN2 string) string {
 	return fmt.Sprintf(`
+resource "nios_dns_zone_auth" "parent_zone1" {
+	fqdn = %q
+	grid_primary = [
+		{
+		  name = "infoblox.member",
+		}
+  	]
+	view = "default"
+}
+
+resource "nios_dns_zone_auth" "parent_zone2" {
+	fqdn = %q
+	grid_primary = [
+		{
+		  name = "infoblox.member",
+		}
+  	]
+	view = "default"
+}
+
 resource "nios_ipam_network_view" "test_ddns_zone_primaries" {
 	name = %q
     ddns_zone_primaries = [{
@@ -564,7 +587,7 @@ resource "nios_ipam_network_view" "test_ddns_zone_primaries" {
             }
         }]
 }
-`, name, dnsGridZonePrimary, zoneMatch, dnsGridZoneRef)
+`, zoneFQDN1, zoneFQDN2, name, dnsGridZonePrimary, zoneMatch, dnsGridZoneRef)
 }
 
 func testAccNetworkviewExtAttrs(name string, extAttrs map[string]string) string {
@@ -606,22 +629,23 @@ resource "nios_ipam_network_view" "test_internal_forward_zones" {
 }
 
 func testAccNetworkviewInternalForwardZones(name string, internalForwardZones []string) string {
+	internalForwardZonesStr := utils.ConvertStringSliceToHCL(internalForwardZones)
 	return fmt.Sprintf(`
 resource "nios_dns_zone_auth" "test_zone1" {
     fqdn = "example_fqdn_internal_forward_zone_1"
-    view = "default"
+    view = "default.%[1]s"
 }
 
 resource "nios_dns_zone_auth" "test_zone2" {
     fqdn = "example_fqdn_internal_forward_zone_2"
-    view = "default"
+    view = "default.%[1]s"
 }
 
 resource "nios_ipam_network_view" "test_internal_forward_zones" {
-	name = %q
-    internal_forward_zones = %s
+	name = %[1]q
+    internal_forward_zones = %[2]s
 }
-`, name, internalForwardZones)
+`, name, internalForwardZonesStr)
 }
 
 func testAccNetworkviewMgmPrivate(name string, mgmPrivate bool) string {

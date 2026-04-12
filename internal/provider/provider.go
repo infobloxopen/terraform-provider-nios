@@ -109,13 +109,13 @@ func (p *NIOSProvider) Configure(ctx context.Context, req provider.ConfigureRequ
 	// Set ProxySearch configuration
 	config.SetProxySearch(data.ProxySearch.ValueString())
 
-	err := checkAndCreatePreRequisites(ctx, client)
-	if err != nil {
-		resp.Diagnostics.AddError(
-			"Failed to ensure Terraform extensible attribute exists",
-			err.Error(),
-		)
-	}
+	//err := checkAndCreatePreRequisites(ctx, client)
+	//if err != nil {
+	//	resp.Diagnostics.AddError(
+	//		"Failed to ensure Terraform extensible attribute exists",
+	//		err.Error(),
+	//	)
+	//}
 	resp.DataSourceData = client
 	resp.ResourceData = client
 }

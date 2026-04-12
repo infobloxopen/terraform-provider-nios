@@ -393,7 +393,7 @@ resource "nios_ipam_network" "example_network" {
 	members = [
 		{
 			struct = "msdhcpserver"
-			ipv4addr = "10.34.98.68"
+			ipv4addr = "10.10.10.10"
 		}
 	]
 }
@@ -402,7 +402,7 @@ resource "nios_dhcp_range" "test" {
 	start_addr = %q
 	end_addr   = %q
 	server_association_type = "MS_SERVER"
-	ms_server = {ipv4addr="10.34.98.68"}
+	ms_server = {ipv4addr="10.10.10.10"}
 	network_view = "ms_server"
 	depends_on = [nios_ipam_network.example_network]
 }
@@ -474,9 +474,13 @@ resource "nios_microsoft_mssuperscope" "test_name" {
 
 func testAccMssuperscopeNetworkView(name string, startAddrRange1, endAddrRange1, startAddrRange2, endAddrRange2, rangeResource, msServer string) string {
 	config := fmt.Sprintf(`
+resource "nios_ipam_network_view" "test_view" {
+	name = "ms-server2"
+}
+
 resource "nios_ipam_network" "example_network2" {
 	network      = "117.0.0.0/24"
-	network_view = "ms_server2"
+	network_view = nios_ipam_network_view.test_view.ref
 	members = [
 		{
 			struct = "msdhcpserver"

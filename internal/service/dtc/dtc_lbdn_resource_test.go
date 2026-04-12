@@ -270,7 +270,7 @@ func TestAccDtcLbdnResource_LbMethod(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccDtcLbdnLbMethod(name, "TOPOLOGY", utils.Ptr("dtc:topology/ZG5zLmlkbnNfdG9wb2xvZ3kkdG9wbzE:topo1")),
+				Config: testAccDtcLbdnLbMethod(name, "TOPOLOGY", utils.Ptr("${nios_dtc_topology.test_rules_pool.ref}")),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcLbdnExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "lb_method", "TOPOLOGY"),
@@ -459,18 +459,18 @@ func TestAccDtcLbdnResource_Topology(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccDtcLbdnTopology(name, "TOPOLOGY", "dtc:topology/ZG5zLmlkbnNfdG9wb2xvZ3kkdG9wbzE:topo1"),
+				Config: testAccDtcLbdnTopology(name, "TOPOLOGY", "${nios_dtc_topology.test_rules_pool.ref}"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcLbdnExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "topology", "dtc:topology/ZG5zLmlkbnNfdG9wb2xvZ3kkdG9wbzE:topo1"),
+					resource.TestCheckResourceAttrPair(resourceName, "topology", "nios_dtc_topology.test_rules_pool", "ref"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccDtcLbdnTopology(name, "TOPOLOGY", "dtc:topology/ZG5zLmlkbnNfdG9wb2xvZ3kkdG9wbzI:topo2"),
+				Config: testAccDtcLbdnTopology(name, "TOPOLOGY", "${nios_dtc_topology.test_rules_pool.ref}"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcLbdnExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "topology", "dtc:topology/ZG5zLmlkbnNfdG9wb2xvZ3kkdG9wbzI:topo2"),
+					resource.TestCheckResourceAttrPair(resourceName, "topology", "nios_dtc_topology.test_rules_pool", "ref"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -752,7 +752,7 @@ func testAccDtcLbdnLbMethod(name, lbMethod string, topology *string) string {
 		extraConfig = fmt.Sprintf(`topology = %q`, *topology)
 	}
 
-	return fmt.Sprintf(`
+	config := fmt.Sprintf(`
 resource "nios_dtc_lbdn" "test_lb_method" {
 	name      = %q
 	lb_method = %q
@@ -760,6 +760,8 @@ resource "nios_dtc_lbdn" "test_lb_method" {
 	types = ["A", "AAAA"]
 }
 `, name, lbMethod, extraConfig)
+	return strings.Join([]string{testAccDtcTopologyRulesWithPool(acctest.RandomNameWithPrefix("topology"),
+		acctest.RandomNameWithPrefix("dtc-pool"), "ROUND_ROBIN"), config}, "\n")
 }
 
 func testAccDtcLbdnName(name, lbMethod string) string {
@@ -862,7 +864,7 @@ resource "nios_dtc_lbdn" "test_priority" {
 }
 
 func testAccDtcLbdnTopology(name, lbMethod, topology string) string {
-	return fmt.Sprintf(`
+	config := fmt.Sprintf(`
 resource "nios_dtc_lbdn" "test_topology" {
 	name = %q
 	lb_method = %q
@@ -870,6 +872,8 @@ resource "nios_dtc_lbdn" "test_topology" {
 	types = ["A", "AAAA"]
 }
 `, name, lbMethod, topology)
+	return strings.Join([]string{testAccDtcTopologyRulesWithPool(acctest.RandomNameWithPrefix("topology"),
+		acctest.RandomNameWithPrefix("dtc-pool"), "ROUND_ROBIN"), config}, "\n")
 }
 
 func testAccDtcLbdnTtl(name, lbMethod string, ttl uint32, useTtl bool) string {

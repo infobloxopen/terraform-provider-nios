@@ -17,7 +17,7 @@ import (
 )
 
 // TODO : OBJECTS TO BE PRESENT IN GRID FOR TESTS
-// Grid Members: infoblox.localdomain, infoblox.member
+// Grid Members: infoblox.member, infoblox.member2
 // Distribution Dependent Groups: example_distribution_dependent_group1, example_distribution_dependent_group2
 // Upgrade Dependent Groups: example_upgrade_dependent_group1, example_upgrade_dependent_group2
 
@@ -27,7 +27,7 @@ func TestAccUpgradegroupResource_basic(t *testing.T) {
 	var resourceName = "nios_grid_upgradegroup.test"
 	var v grid.Upgradegroup
 
-	name := acctest.RandomNameWithPrefix("example-upgradegroup-")
+	name := acctest.RandomNameWithPrefix("example-upgradegroup")
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
@@ -54,7 +54,7 @@ func TestAccUpgradegroupResource_disappears(t *testing.T) {
 	resourceName := "nios_grid_upgradegroup.test"
 	var v grid.Upgradegroup
 
-	name := acctest.RandomNameWithPrefix("example-upgradegroup-")
+	name := acctest.RandomNameWithPrefix("example-upgradegroup")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -77,7 +77,7 @@ func TestAccUpgradegroupResource_Comment(t *testing.T) {
 	var resourceName = "nios_grid_upgradegroup.test_comment"
 	var v grid.Upgradegroup
 
-	name := acctest.RandomNameWithPrefix("example-upgradegroup-")
+	name := acctest.RandomNameWithPrefix("example-upgradegroup")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -108,7 +108,7 @@ func TestAccUpgradegroupResource_DistributionDependentGroup(t *testing.T) {
 	var resourceName = "nios_grid_upgradegroup.test_distribution_dependent_group"
 	var v grid.Upgradegroup
 
-	name := acctest.RandomNameWithPrefix("example-upgradegroup-")
+	name := acctest.RandomNameWithPrefix("example-upgradegroup")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -139,7 +139,7 @@ func TestAccUpgradegroupResource_DistributionPolicy(t *testing.T) {
 	var resourceName = "nios_grid_upgradegroup.test_distribution_policy"
 	var v grid.Upgradegroup
 
-	name := acctest.RandomNameWithPrefix("example-upgradegroup-")
+	name := acctest.RandomNameWithPrefix("example-upgradegroup")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -170,13 +170,13 @@ func TestAccUpgradegroupResource_DistributionTime(t *testing.T) {
 	var resourceName = "nios_grid_upgradegroup.test_distribution_time"
 	var v grid.Upgradegroup
 
-	name := acctest.RandomNameWithPrefix("example-upgradegroup-")
+	name := acctest.RandomNameWithPrefix("example-upgradegroup")
 
 	now := time.Now()
 	distributionTime := now.Add(24 * time.Hour).Format(utils.NaiveDatetimeLayout)
 	updatedDistributionTime := now.Add(48 * time.Hour).Format(utils.NaiveDatetimeLayout)
 	grid_member := []map[string]any{
-		{"member": "infoblox.localdomain"},
+		{"member": "infoblox.member"},
 	}
 
 	resource.Test(t, resource.TestCase{
@@ -208,12 +208,12 @@ func TestAccUpgradegroupResource_Members(t *testing.T) {
 	var resourceName = "nios_grid_upgradegroup.test_members"
 	var v grid.Upgradegroup
 
-	name := acctest.RandomNameWithPrefix("example-upgradegroup-")
+	name := acctest.RandomNameWithPrefix("example-upgradegroup")
 	member1 := []map[string]any{
-		{"member": "infoblox.localdomain"},
+		{"member": "infoblox.member"},
 	}
 	member2 := []map[string]any{
-		{"member": "infoblox.member"},
+		{"member": "infoblox.member2"},
 	}
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -225,7 +225,7 @@ func TestAccUpgradegroupResource_Members(t *testing.T) {
 				Config: testAccUpgradegroupMembers(name, member1),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckUpgradegroupExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "members.0.member", "infoblox.localdomain"),
+					resource.TestCheckResourceAttr(resourceName, "members.0.member", "infoblox.member"),
 				),
 			},
 			// // Update and Read
@@ -233,7 +233,7 @@ func TestAccUpgradegroupResource_Members(t *testing.T) {
 				Config: testAccUpgradegroupMembers(name, member2),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckUpgradegroupExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "members.0.member", "infoblox.member"),
+					resource.TestCheckResourceAttr(resourceName, "members.0.member", "infoblox.member2"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -277,7 +277,7 @@ func TestAccUpgradegroupResource_UpgradeDependentGroup(t *testing.T) {
 	var resourceName = "nios_grid_upgradegroup.test_upgrade_dependent_group"
 	var v grid.Upgradegroup
 
-	name := acctest.RandomNameWithPrefix("example-upgradegroup-")
+	name := acctest.RandomNameWithPrefix("example-upgradegroup")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -308,7 +308,7 @@ func TestAccUpgradegroupResource_UpgradePolicy(t *testing.T) {
 	var resourceName = "nios_grid_upgradegroup.test_upgrade_policy"
 	var v grid.Upgradegroup
 
-	name := acctest.RandomNameWithPrefix("example-upgradegroup-")
+	name := acctest.RandomNameWithPrefix("example-upgradegroup")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -339,13 +339,13 @@ func TestAccUpgradegroupResource_UpgradeTime(t *testing.T) {
 	var resourceName = "nios_grid_upgradegroup.test_upgrade_time"
 	var v grid.Upgradegroup
 
-	name := acctest.RandomNameWithPrefix("example-upgradegroup-")
+	name := acctest.RandomNameWithPrefix("example-upgradegroup")
 
 	now := time.Now()
 	upgradeTime := now.Add(30 * time.Hour).Format(utils.NaiveDatetimeLayout)
 	updatedUpgradeTime := now.Add(54 * time.Hour).Format(utils.NaiveDatetimeLayout)
 	grid_member := []map[string]any{
-		{"member": "infoblox.localdomain"},
+		{"member": "infoblox.member"},
 	}
 
 	resource.Test(t, resource.TestCase{

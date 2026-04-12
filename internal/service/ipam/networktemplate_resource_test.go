@@ -1107,7 +1107,7 @@ func TestAccNetworktemplateResource_LogicFilterRules(t *testing.T) {
 	}
 	logicFilterRulesValUpdated := []map[string]any{
 		{
-			"filter": "option_filter",
+			"filter": "example-option-filter-1",
 			"type":   "Option",
 		},
 	}
@@ -1130,7 +1130,7 @@ func TestAccNetworktemplateResource_LogicFilterRules(t *testing.T) {
 				Config: testAccNetworktemplateLogicFilterRules(name, 24, logicFilterRulesValUpdated),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "logic_filter_rules.0.filter", "option_filter"),
+					resource.TestCheckResourceAttr(resourceName, "logic_filter_rules.0.filter", "example-option-filter-1"),
 					resource.TestCheckResourceAttr(resourceName, "logic_filter_rules.0.type", "Option"),
 				),
 			},
@@ -1223,8 +1223,8 @@ func TestAccNetworktemplateResource_Members(t *testing.T) {
 				Config: testAccNetworktemplateMembers(name, 24, membersVal),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "members.struct", "dhcpmember"),
-					resource.TestCheckResourceAttr(resourceName, "members.name", "infoblox.localdomain"),
+					resource.TestCheckResourceAttr(resourceName, "members.0.struct", "dhcpmember"),
+					resource.TestCheckResourceAttr(resourceName, "members.0.name", "infoblox.localdomain"),
 				),
 			},
 			// Update and Read
@@ -1232,8 +1232,8 @@ func TestAccNetworktemplateResource_Members(t *testing.T) {
 				Config: testAccNetworktemplateMembers(name, 24, membersValUpdated),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "members.struct", "dhcpmember"),
-					resource.TestCheckResourceAttr(resourceName, "members.name", "infoblox.member")),
+					resource.TestCheckResourceAttr(resourceName, "members.0.struct", "dhcpmember"),
+					resource.TestCheckResourceAttr(resourceName, "members.0.name", "infoblox.member")),
 			},
 			// Delete testing automatically occurs in TestCase
 		},

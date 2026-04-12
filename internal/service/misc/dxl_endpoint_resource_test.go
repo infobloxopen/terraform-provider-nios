@@ -422,7 +422,7 @@ func TestAccDxlEndpointResource_TemplateInstance(t *testing.T) {
 		"template": "Version5_DXL_Session_Template",
 	}
 	templateInstanceValUpdated := map[string]any{
-		"template": "Version5_DXL_Session_Template_2",
+		"template": "Version5_DXL_Session_Template2",
 	}
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -442,7 +442,7 @@ func TestAccDxlEndpointResource_TemplateInstance(t *testing.T) {
 				Config: testAccDxlEndpointTemplateInstance(clientCertificateFile, broker, name, "GM", templateInstanceValUpdated),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDxlEndpointExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "template_instance.template", "Version5_DXL_Session_Template_2"),
+					resource.TestCheckResourceAttr(resourceName, "template_instance.template", "Version5_DXL_Session_Template2"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase

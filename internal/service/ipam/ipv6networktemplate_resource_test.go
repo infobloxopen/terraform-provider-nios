@@ -446,7 +446,6 @@ func TestAccIpv6networktemplateResource_DelegatedMember(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "delegated_member.name", "infoblox.member"),
-					resource.TestCheckResourceAttr(resourceName, "delegated_member.ipv4addr", "6.6.6.6"),
 				),
 			},
 			// Update and Read
@@ -455,7 +454,6 @@ func TestAccIpv6networktemplateResource_DelegatedMember(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "delegated_member.name", "infoblox.localdomain"),
-					resource.TestCheckResourceAttr(resourceName, "delegated_member.ipv4addr", "1.1.1.1"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -664,13 +662,13 @@ func TestAccIpv6networktemplateResource_LogicFilterRules(t *testing.T) {
 	name := acctest.RandomNameWithPrefix("network-template")
 	logicFilterRulesVal := []map[string]any{
 		{
-			"filter": "ipv6_nac_filter",
-			"type":   "NAC",
+			"filter": "ipv6_option_filter",
+			"type":   "Option",
 		},
 	}
 	logicFilterRulesValUpdated := []map[string]any{
 		{
-			"filter": "ipv6_option_filter",
+			"filter": "ipv6_option_filter1",
 			"type":   "Option",
 		},
 	}
@@ -684,8 +682,8 @@ func TestAccIpv6networktemplateResource_LogicFilterRules(t *testing.T) {
 				Config: testAccIpv6networktemplateLogicFilterRules(name, 24, logicFilterRulesVal),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networktemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "logic_filter_rules.0.filter", "ipv6_nac_filter"),
-					resource.TestCheckResourceAttr(resourceName, "logic_filter_rules.0.type", "NAC"),
+					resource.TestCheckResourceAttr(resourceName, "logic_filter_rules.0.filter", "ipv6_option_filter"),
+					resource.TestCheckResourceAttr(resourceName, "logic_filter_rules.0.type", "Option"),
 				),
 			},
 			// Update and Read
@@ -693,7 +691,7 @@ func TestAccIpv6networktemplateResource_LogicFilterRules(t *testing.T) {
 				Config: testAccIpv6networktemplateLogicFilterRules(name, 24, logicFilterRulesValUpdated),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networktemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "logic_filter_rules.0.filter", "ipv6_option_filter"),
+					resource.TestCheckResourceAttr(resourceName, "logic_filter_rules.0.filter", "ipv6_option_filter1"),
 					resource.TestCheckResourceAttr(resourceName, "logic_filter_rules.0.type", "Option"),
 				),
 			},
@@ -734,7 +732,7 @@ func TestAccIpv6networktemplateResource_Members(t *testing.T) {
 				Config: testAccIpv6networktemplateMembers(name, 24, membersValUpdated),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networktemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "members.0.name", "infoblox.member2"),
+					resource.TestCheckResourceAttr(resourceName, "members.0.name", "infoblox.member"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase

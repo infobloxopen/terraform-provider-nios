@@ -780,13 +780,13 @@ func TestAccDtcPoolResource_Servers(t *testing.T) {
 	lbPreferredMethod := "ROUND_ROBIN"
 	servers := []map[string]interface{}{
 		{
-			"server": "${nios_dtc_server.test_server.ref}",
+			"server": "${nios_dtc_server.test_server1.ref}",
 			"ratio":  100,
 		},
 	}
 	updatedServers := []map[string]interface{}{
 		{
-			"server": "${nios_dtc_server.test_server.ref}",
+			"server": "${nios_dtc_server.test_server1.ref}",
 			"ratio":  100,
 		},
 		{
@@ -805,7 +805,7 @@ func TestAccDtcPoolResource_Servers(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcPoolExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "servers.#", "1"),
-					resource.TestCheckResourceAttrPair(resourceName, "servers.0.server", "nios_dtc_server.test_server", "ref"),
+					resource.TestCheckResourceAttrPair(resourceName, "servers.0.server", "nios_dtc_server.test_server1", "ref"),
 					resource.TestCheckResourceAttr(resourceName, "servers.0.ratio", "100"),
 				),
 			},
@@ -815,7 +815,7 @@ func TestAccDtcPoolResource_Servers(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcPoolExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "servers.#", "2"),
-					resource.TestCheckResourceAttrPair(resourceName, "servers.0.server", "nios_dtc_server.test_server", "ref"),
+					resource.TestCheckResourceAttrPair(resourceName, "servers.0.server", "nios_dtc_server.test_server1", "ref"),
 					resource.TestCheckResourceAttr(resourceName, "servers.0.ratio", "100"),
 					resource.TestCheckResourceAttrPair(resourceName, "servers.1.server", "nios_dtc_server.test_server2", "ref"),
 					resource.TestCheckResourceAttr(resourceName, "servers.1.ratio", "50"),
@@ -952,27 +952,34 @@ func testAccCheckDtcPoolDisappears(ctx context.Context, v *dtc.DtcPool) resource
 }
 
 func testAccBaseWithDtcMonitorHttp() string {
-	return `
+	return fmt.Sprintf(`
 resource "nios_dtc_monitor_http" "test_http_monitor1" {
-	name = "test-http-monitor"
+	name = %q
 }
-`
+`, acctest.RandomNameWithPrefix("dtc-monitor_http"))
 }
 
 func testAccBaseWithDtcMonitorSnmp() string {
-	return `
+	return fmt.Sprintf(`
 resource "nios_dtc_monitor_snmp" "test_snmp_monitor1" {
-	name = "test-snmp-monitor"
+	name = %q
+	oids = [
+		{
+		  oid       = ".0"
+		  condition = "EXACT"
+		  first     = "10"
+    	}
+	]
 }
-`
+`, acctest.RandomNameWithPrefix("dtc-monitor_http"))
 }
 
 func testAccBaseWithDtcMonitorIcmp() string {
-	return `
+	return fmt.Sprintf(`
 resource "nios_dtc_monitor_icmp" "test_icmp_monitor1" {
-	name = "test-icmp-monitor"
+	name = %q
 }
-`
+`, acctest.RandomNameWithPrefix("dtc-monitor_http"))
 }
 
 func testAccBaseWithTwoDtcServers(server1Name, server1Host, server2Name, server2Host string) string {
@@ -1090,7 +1097,7 @@ func testAccDtcPoolLbAlternateTopology(name, lbPreferredMethod, lbPreferredTopol
 	serversHCL := formatServersToHCL(servers)
 	config := fmt.Sprintf(`
 resource "nios_dtc_topology" "test_rules2" {
-    name = "test-topology-with-rules3"
+    name = %q
     rules = [
         {
             dest_type = "SERVER"
@@ -1107,7 +1114,8 @@ resource "nios_dtc_pool" "test_lb_alternate_topology" {
     lb_alternate_topology = %q
     servers = %s
 }
-`, name, lbPreferredMethod, lbPreferredTopology, lbAlternateMethod, lbAlternateTopology, serversHCL)
+`, acctest.RandomNameWithPrefix("dtc-topology"),
+		name, lbPreferredMethod, lbPreferredTopology, lbAlternateMethod, lbAlternateTopology, serversHCL)
 	return strings.Join([]string{testAccDtcTopologyRulesWithServer(acctest.RandomNameWithPrefix("dtc-topology"),
 		acctest.RandomNameWithPrefix("dtc-server"), acctest.RandomIP()),
 		testAccBaseWithTwoDtcServers(acctest.RandomNameWithPrefix("dtc-server"), acctest.RandomIP(),
