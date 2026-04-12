@@ -231,6 +231,7 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 		misc.NewBfdtemplateResource,
 		misc.NewDxlEndpointResource,
 		misc.NewTftpfiledirResource,
+		misc.NewSyslogEndpointResource,
 
 		smartfolder.NewSmartfolderPersonalResource,
 		smartfolder.NewSmartfolderGlobalResource,
@@ -242,6 +243,7 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 		grid.NewUpgradegroupResource,
 		grid.NewGridServicerestartGroupResource,
 		grid.NewDistributionscheduleResource,
+		grid.NewMemberResource,
 		grid.NewUpgradescheduleResource,
 
 		discovery.NewDiscoveryCredentialgroupResource,
@@ -269,6 +271,8 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 
 		parentalcontrol.NewParentalcontrolAvpResource,
 		parentalcontrol.NewParentalcontrolBlockingpolicyResource,
+		parentalcontrol.NewParentalcontrolSubscribersiteResource,
+		parentalcontrol.NewParentalcontrolSubscriberrecordResource,
 
 		microsoft.NewMsserverResource,
 		microsoft.NewMsserverAdsitesSiteResource,
@@ -387,6 +391,7 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 		misc.NewBfdtemplateDataSource,
 		misc.NewDxlEndpointDataSource,
 		misc.NewTftpfiledirDataSource,
+		misc.NewSyslogEndpointDataSource,
 
 		smartfolder.NewSmartfolderPersonalDataSource,
 		smartfolder.NewSmartfolderGlobalDataSource,
@@ -398,6 +403,7 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 		grid.NewUpgradegroupDataSource,
 		grid.NewGridServicerestartGroupDataSource,
 		grid.NewDistributionscheduleDataSource,
+		grid.NewMemberDataSource,
 		grid.NewUpgradescheduleDataSource,
 
 		discovery.NewDiscoveryCredentialgroupDataSource,
@@ -425,6 +431,8 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 
 		parentalcontrol.NewParentalcontrolAvpDataSource,
 		parentalcontrol.NewParentalcontrolBlockingpolicyDataSource,
+		parentalcontrol.NewParentalcontrolSubscribersiteDataSource,
+		parentalcontrol.NewParentalcontrolSubscriberrecordDataSource,
 
 		microsoft.NewMsserverDataSource,
 		microsoft.NewMsserverAdsitesSiteDataSource,

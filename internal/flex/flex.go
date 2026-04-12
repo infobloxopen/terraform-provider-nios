@@ -383,13 +383,19 @@ func ExpandFrameworkListNestedBlock[T any, U any](ctx context.Context, tfList in
 	}
 
 	var data []T
-
 	diags.Append(tfList.ElementsAs(ctx, &data, false)...)
 
-	return ApplyToAll(data, func(t T) U {
-		return *f(ctx, t, diags)
-	})
+	expanded := make([]U, 0, len(data))
+	for _, t := range data {
+		v := f(ctx, t, diags)
+		if v == nil {
+			// Skip unknown/null nested objects safely.
+			continue
+		}
+		expanded = append(expanded, *v)
+	}
 
+	return expanded
 }
 
 func ExpandFrameworkListNestedBlockEmptyAsNil[T any, U any](ctx context.Context, tfList interface {
