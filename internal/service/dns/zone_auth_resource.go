@@ -81,33 +81,31 @@ func (r *ZoneAuthResource) ValidateConfig(ctx context.Context, req resource.Vali
 		}
 	}
 
-    hasMsSyncDisabled := !data.MsSyncDisabled.IsNull() && !data.MsSyncDisabled.IsUnknown()
-    if hasMsSyncDisabled {
-        hasMsPrimaries := !data.MsPrimaries.IsNull() && !data.MsPrimaries.IsUnknown()
-        if !hasMsPrimaries {
-            resp.Diagnostics.AddError(
-                "Invalid Configuration",
-                "'ms_primaries' must be provided when 'ms_sync_disabled' is set.",
-            )
-        }
-    }
+	if !data.MsSyncDisabled.IsNull() && !data.MsSyncDisabled.IsUnknown() && data.MsSyncDisabled.ValueBool() {
+		if data.MsPrimaries.IsNull() && data.MsPrimaries.IsUnknown() {
+			resp.Diagnostics.AddError(
+				"Invalid Configuration",
+				"'ms_primaries' must be provided when 'ms_sync_disabled' is set.",
+			)
+		}
+	}
 
 	// Validation for use_soa_email and soa_serial_number requiring grid_primary or ns_group
-    hasUseSoaEmail := !data.UseSoaEmail.IsNull() && !data.UseSoaEmail.IsUnknown()
-    hasSoaSerialNumber := !data.SoaSerialNumber.IsNull() && !data.SoaSerialNumber.IsUnknown()
+	hasUseSoaEmail := !data.UseSoaEmail.IsNull() && !data.UseSoaEmail.IsUnknown()
+	hasSoaSerialNumber := !data.SoaSerialNumber.IsNull() && !data.SoaSerialNumber.IsUnknown()
 	hasMemberSoaMnames := !data.MemberSoaMnames.IsNull() && !data.MemberSoaMnames.IsUnknown()
 
-    if hasUseSoaEmail || hasSoaSerialNumber || hasMemberSoaMnames {
-        hasGridPrimary := !data.GridPrimary.IsNull() && !data.GridPrimary.IsUnknown()
-        hasNsGroup := !data.NsGroup.IsNull() && !data.NsGroup.IsUnknown()
+	if hasUseSoaEmail || hasSoaSerialNumber || hasMemberSoaMnames {
+		hasGridPrimary := !data.GridPrimary.IsNull() && !data.GridPrimary.IsUnknown()
+		hasNsGroup := !data.NsGroup.IsNull() && !data.NsGroup.IsUnknown()
 
-        if !hasGridPrimary && !hasNsGroup {
-            resp.Diagnostics.AddError(
-                "Invalid Configuration",
-                "When use_soa_email, soa_serial_number, or member_soa_mnames is specified, either grid_primary or ns_group must be provided.",
-            )
-        }
-    }
+		if !hasGridPrimary && !hasNsGroup {
+			resp.Diagnostics.AddError(
+				"Invalid Configuration",
+				"When use_soa_email, soa_serial_number, or member_soa_mnames is specified, either grid_primary or ns_group must be provided.",
+			)
+		}
+	}
 
 	// Validation for mutually exclusive primary servers
 	specifiedPrimaries := []string{}
