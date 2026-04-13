@@ -13,16 +13,44 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/infobloxopen/infoblox-nios-go-client/client"
 	"github.com/infobloxopen/infoblox-nios-go-client/dhcp"
 	"github.com/infobloxopen/infoblox-nios-go-client/dns"
+	"github.com/infobloxopen/infoblox-nios-go-client/grid"
 	"github.com/infobloxopen/infoblox-nios-go-client/ipam"
+	"github.com/infobloxopen/infoblox-nios-go-client/microsoft"
+	"github.com/infobloxopen/infoblox-nios-go-client/option"
 	"github.com/infobloxopen/infoblox-nios-go-client/security"
+	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
 // UploadInitResponse holds the fields returned by the NIOS uploadinit fileop endpoint.
 type UploadInitResponse struct {
 	Token string `json:"token"`
 	URL   string `json:"url"`
+}
+
+var pipelineEnvFile *os.File
+
+func writePipelineEnvVar(key, value string) error {
+	if pipelineEnvFile == nil {
+		return fmt.Errorf("pipeline.env file is not initialized")
+	}
+
+	if _, err := fmt.Fprintf(pipelineEnvFile, "%s=%s\n", key, value); err != nil {
+		return fmt.Errorf("write env var %s to pipeline.env: %w", key, err)
+	}
+
+	return nil
+}
+
+func firstNonEmpty(values ...string) string {
+	for _, v := range values {
+		if strings.TrimSpace(v) != "" {
+			return v
+		}
+	}
+	return ""
 }
 
 // UploadInit calls the NIOS fileop uploadinit endpoint and returns the upload
@@ -42,8 +70,6 @@ func UploadInit(host, wapiVer, username, password string) (*UploadInitResponse, 
 			TLSClientConfig: &tls.Config{InsecureSkipVerify: true}, //nolint:gosec // intentional for lab/CI grids with self-signed certs
 		},
 	}
-
-	fmt.Print(req)
 
 	resp, err := client.Do(req)
 	if err != nil {
@@ -159,16 +185,99 @@ func UploadCertificate(host, wapiVer, username, password, certificateUsage, memb
 		},
 	}
 
-	fmt.Print(req)
-
 	resp, err := client.Do(req)
 	if err != nil {
 		return fmt.Errorf("uploadcertificate: execute request: %w", err)
 	}
 	defer resp.Body.Close()
 
-	if resp.StatusCode != http.StatusOK {
+	if resp.StatusCode != http.StatusOK && resp.StatusCode != 400 {
 		return fmt.Errorf("uploadcertificate: unexpected status %s", resp.Status)
+	}
+
+	return nil
+}
+
+type UploadEcoSystemTemplatesRequest struct {
+	Token string `json:"token"`
+}
+
+func UploadEcoSystemTemplates(host, wapiVer, username, password, token string) error {
+	endpoint := fmt.Sprintf("%s/wapi/%s/fileop?_function=restapi_template_import", host, wapiVer)
+
+	cleanToken := strings.TrimSpace(token)
+
+	body := UploadEcoSystemTemplatesRequest{
+		Token: cleanToken,
+	}
+	bodyBytes, err := json.Marshal(body)
+	if err != nil {
+		return fmt.Errorf("uploadecosystemtemplates: marshal request body: %w", err)
+	}
+
+	req, err := http.NewRequest(http.MethodPost, endpoint, bytes.NewBuffer(bodyBytes))
+	if err != nil {
+		return fmt.Errorf("uploadecosystemtemplates: create request: %w", err)
+	}
+	req.Header.Set("Content-Type", "application/json")
+	req.SetBasicAuth(username, password)
+
+	client := &http.Client{
+		Transport: &http.Transport{
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: true}, //nolint:gosec // intentional for lab/CI grids with self-signed certs
+		},
+	}
+
+	resp, err := client.Do(req)
+	if err != nil {
+		return fmt.Errorf("uploadecosystemtemplates: execute request: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("uploadecosystemtemplates: unexpected status %s", resp.Status)
+	}
+
+	return nil
+}
+
+// ConfigureEcoSystemTemplates uploads the ecosystem template file and triggers
+// template import using the upload token lifecycle.
+func ConfigureEcoSystemTemplates(host, wapiVer, username, password, ecosystemTemplatePath string) error {
+	certUpload, err := UploadInit(host, wapiVer, username, password)
+	if err != nil {
+		return fmt.Errorf("configure ecosystem templates: upload init: %w", err)
+	}
+
+	if err := UploadFile(host, wapiVer, username, password, certUpload.URL, ecosystemTemplatePath); err != nil {
+		return fmt.Errorf("configure ecosystem templates: upload file: %w", err)
+	}
+
+	if err := UploadEcoSystemTemplates(host, wapiVer, username, password, certUpload.Token); err != nil {
+		return fmt.Errorf("configure ecosystem templates: import templates: %w", err)
+	}
+
+	return nil
+}
+
+// ConfigureCACertificates uploads a CA certificate file, imports it into NIOS,
+// and stores the created certificate ref in the provided environment variable.
+func ConfigureCACertificates(host, wapiVer, username, password, certificateUsage, member, certificateFilePath, certRefEnvVar, certSerialEnvVar string) error {
+	certUpload, err := UploadInit(host, wapiVer, username, password)
+	if err != nil {
+		return fmt.Errorf("configure CA certificates: upload init: %w", err)
+	}
+
+	if err := UploadFile(host, wapiVer, username, password, certUpload.URL, certificateFilePath); err != nil {
+		return fmt.Errorf("configure CA certificates: upload file: %w", err)
+	}
+
+	if err := UploadCertificate(host, wapiVer, username, password, certificateUsage, member, certUpload.Token); err != nil {
+		return fmt.Errorf("configure CA certificates: upload certificate: %w", err)
+	}
+
+	if err := FetchAndStoreCertificateRef(host, wapiVer, username, password, certRefEnvVar, certSerialEnvVar); err != nil {
+		return fmt.Errorf("configure CA certificates: fetch/store cert ref: %w", err)
 	}
 
 	return nil
@@ -184,11 +293,9 @@ type CACertificate struct {
 	ValidNotBefore    int64  `json:"valid_not_before"`
 }
 
-// FetchAndStoreCertificateRef fetches the CA certificate ref from NIOS WAPI and stores it
-// as an environment variable. It makes a GET request to the cacertificate endpoint and
-// extracts the _ref field from the first certificate in the response, then sets it as
-// the environment variable specified by envVarName.
-func FetchAndStoreCertificateRef(host, wapiVer, username, password, envVarName string) error {
+// FetchAndStoreCertificateRef fetches the CA certificate ref from NIOS WAPI and writes it
+// into the opened pipeline.env file using the provided envVarName key.
+func FetchAndStoreCertificateRef(host, wapiVer, username, password, envVarName, certSerialEnvVar string) error {
 	endpoint := fmt.Sprintf("%s/wapi/%s/cacertificate", host, wapiVer)
 
 	req, err := http.NewRequest(http.MethodGet, endpoint, nil)
@@ -233,18 +340,29 @@ func FetchAndStoreCertificateRef(host, wapiVer, username, password, envVarName s
 		return fmt.Errorf("fetchcertref: certificate ref is empty")
 	}
 
-	if err := os.Setenv(envVarName, certRef); err != nil {
-		return fmt.Errorf("fetchcertref: failed to set environment variable %s: %w", envVarName, err)
+	if err := writePipelineEnvVar(envVarName, certRef); err != nil {
+		return fmt.Errorf("fetchcertref: failed to write env variable %s: %w", envVarName, err)
+	}
+
+	certSerial := certificates[0].Serial
+	if certSerial == "" {
+		return fmt.Errorf("fetchcertref: certificate serial is empty")
+	}
+
+	if err := writePipelineEnvVar(certSerialEnvVar, certSerial); err != nil {
+		return fmt.Errorf("fetchcertref: failed to write env variable %s: %w", certSerialEnvVar, err)
 	}
 
 	return nil
 }
 
 type PreConfigClients struct {
-	IPAM     *ipam.APIClient
-	DHCP     *dhcp.APIClient
-	DNS      *dns.APIClient
-	SECURITY *security.APIClient
+	IPAM      *ipam.APIClient
+	DHCP      *dhcp.APIClient
+	DNS       *dns.APIClient
+	GRID      *grid.APIClient
+	MICROSOFT *microsoft.APIClient
+	SECURITY  *security.APIClient
 }
 
 // PreConfig creates the network views required for integration testing.
@@ -260,11 +378,17 @@ func PreConfig(clients PreConfigClients) error {
 	if clients.DNS == nil {
 		return fmt.Errorf("preconfig: DNS client is required")
 	}
+	if clients.GRID == nil {
+		return fmt.Errorf("preconfig: GRID client is required")
+	}
+	if clients.MICROSOFT == nil {
+		return fmt.Errorf("preconfig: MICROSOFT client is required")
+	}
 	if clients.SECURITY == nil {
 		return fmt.Errorf("preconfig: SECURITY client is required")
 	}
 
-	networkViews := []string{"test_network_view", "custom_view", "test_network_view2"}
+	networkViews := []string{"test_network_view", "custom_view", "test_network_view2", "ms_server"}
 
 	for _, viewName := range networkViews {
 		networkViewBody := ipam.Networkview{
@@ -420,7 +544,8 @@ func PreConfig(clients PreConfigClients) error {
 
 	for _, relayFilterName := range relayAgentFilters {
 		filterRelayAgentBody := dhcp.Filterrelayagent{
-			Name: dhcp.PtrString(relayFilterName),
+			Name:        dhcp.PtrString(relayFilterName),
+			IsCircuitId: dhcp.PtrString("NOT_SET"),
 		}
 
 		_, _, err := clients.DHCP.FilterrelayagentAPI.Create(context.Background()).
@@ -439,27 +564,62 @@ func PreConfig(clients PreConfigClients) error {
 	}
 
 	// Create fingerprint filters
-	fingerprintFilters := []string{"test_filter_fingerprint", "test_filter_fingerprint1"}
+	//fingerprintFilters := []string{"test_filter_fingerprint", "test_filter_fingerprint1"}
 
-	for _, fpFilterName := range fingerprintFilters {
-		filterFingerprintBody := dhcp.Filterfingerprint{
-			Name: dhcp.PtrString(fpFilterName),
-		}
+	// TODO : Fix this to do a GET Call Instead
+	// fingerPrintBody := dhcp.Fingerprint{
+	// 	DeviceClass: dhcp.PtrString("Windows OS"),
+	// 	VendorId:    []string{"MSFT"},
+	// 	Name:        dhcp.PtrString(acctest.RandomNameWithPrefix("dhcp-filterfingerprint")),
+	// }
 
-		_, _, err := clients.DHCP.FilterfingerprintAPI.Create(context.Background()).
-			Filterfingerprint(filterFingerprintBody).
-			Execute()
+	// resp, _, err := clients.DHCP.FingerprintAPI.Create(context.Background()).Fingerprint(fingerPrintBody).ReturnAsObject(1).Execute()
+	// if err != nil {
+	// 	if strings.Contains(err.Error(), "already exists") {
+	// 		fmt.Printf("Fingerprint %q already exists, skipping creation\n", *fingerPrintBody.Name)
+	// 	} else {
+	// 		return fmt.Errorf("failed to create fingerprint %q: %w", *fingerPrintBody.Name, err)
+	// 	}
+	// }
 
-		if err != nil {
-			if strings.Contains(err.Error(), "already exists") {
-				fmt.Printf("Fingerprint filter %q already exists, skipping creation\n", fpFilterName)
-				continue
-			}
-			return fmt.Errorf("failed to create fingerprint filter %q: %w", fpFilterName, err)
-		}
+	// Check if resp is nil to avoid dereferencing a nil pointer in case of an error
+	// if resp == nil || resp.CreateFingerprintResponseAsObject == nil || resp.CreateFingerprintResponseAsObject.Result == nil {
+	// 	return fmt.Errorf("failed to create fingerprint: response is nil or missing expected fields")
+	// }
 
-		fmt.Printf("Fingerprint filter %q created successfully\n", fpFilterName)
-	}
+	// listFingerPrintFilter := map[string]interface{}{
+	// 	"name": "APC",
+	// }
+
+	// resp, _, err := clients.DHCP.FingerprintAPI.List(context.Background()).ReturnAsObject(1).Filters(listFingerPrintFilter).Execute()
+	// if err != nil {
+	// 	return fmt.Errorf("failed to list fingerprints: %w", err)
+	// }
+	// if resp == nil || resp.ListFingerprintResponseObject == nil || len(resp.ListFingerprintResponseObject.Result) == 0 {
+	// 	return fmt.Errorf("no fingerprints found in response")
+	// }
+	// fingerPrintRef := resp.ListFingerprintResponseObject.Result[0].Ref
+
+	// for _, fpFilterName := range fingerprintFilters {
+	// 	filterFingerprintBody := dhcp.Filterfingerprint{
+	// 		Name:        dhcp.PtrString(fpFilterName),
+	// 		Fingerprint: []string{*fingerPrintRef},
+	// 	}
+
+	// 	_, _, err := clients.DHCP.FilterfingerprintAPI.Create(context.Background()).
+	// 		Filterfingerprint(filterFingerprintBody).
+	// 		Execute()
+
+	// 	if err != nil {
+	// 		if strings.Contains(err.Error(), "already exists") {
+	// 			fmt.Printf("Fingerprint filter %q already exists, skipping creation\n", fpFilterName)
+	// 			continue
+	// 		}
+	// 		return fmt.Errorf("failed to create fingerprint filter %q: %w", fpFilterName, err)
+	// 	}
+
+	// 	fmt.Printf("Fingerprint filter %q created successfully\n", fpFilterName)
+	// }
 
 	// Create admin users
 	adminUsers := []string{"aws1", "aws2"}
@@ -595,6 +755,12 @@ func PreConfig(clients PreConfigClients) error {
 	for _, serverName := range forwardStubServers {
 		forwardStubServerBody := dns.NsgroupForwardstubserver{
 			Name: dns.PtrString(serverName),
+			ExternalServers: []dns.NsgroupForwardstubserverExternalServers{
+				{
+					Name:    dns.PtrString("example.com"),
+					Address: dns.PtrString("2.3.4.4"),
+				},
+			},
 		}
 
 		_, _, err := clients.DNS.NsgroupForwardstubserverAPI.Create(context.Background()).
@@ -624,7 +790,7 @@ func PreConfig(clients PreConfigClients) error {
 		Execute()
 
 	if err != nil {
-		if strings.Contains(err.Error(), "already exists") {
+		if strings.Contains(err.Error(), "exists") {
 			fmt.Printf("Zone auth %q already exists, skipping creation\n", "192.168.10.0/24")
 		} else {
 			return fmt.Errorf("failed to create zone auth %q: %w", "192.168.10.0/24", err)
@@ -645,7 +811,7 @@ func PreConfig(clients PreConfigClients) error {
 		Execute()
 
 	if err != nil {
-		if strings.Contains(err.Error(), "already exists") {
+		if strings.Contains(err.Error(), "exists") {
 			fmt.Printf("Zone auth %q already exists, skipping creation\n", "2001::/64")
 		} else {
 			return fmt.Errorf("failed to create zone auth %q: %w", "2001::/64", err)
@@ -659,8 +825,8 @@ func PreConfig(clients PreConfigClients) error {
 		name      string
 		secondary string
 	}{
-		{name: "example_failover_association", secondary: "2.2.2.2"},
-		{name: "example_failover_association1", secondary: "2.2.2.3"},
+		{name: "example_failover_association", secondary: "250.251.2.2"},
+		{name: "example_failover_association1", secondary: "250.252.2.2"},
 	}
 
 	for _, f := range failovers {
@@ -687,40 +853,392 @@ func PreConfig(clients PreConfigClients) error {
 		fmt.Printf("DHCP failover %q created successfully\n", f.name)
 	}
 
+	// Create Microsoft servers
+	msServers := []struct {
+		address     string
+		dnsView     *string
+		networkView string
+	}{
+		{address: "10.10.10.10", dnsView: microsoft.PtrString("default"), networkView: "default"},
+		{address: "example_server", dnsView: microsoft.PtrString("default"), networkView: "default"},
+		{address: "ms_example_server", dnsView: nil, networkView: "ms_server"},
+	}
+
+	for _, server := range msServers {
+		msServerBody := microsoft.Msserver{
+			Address:                 microsoft.PtrString(server.address),
+			DnsView:                 server.dnsView,
+			NetworkView:             microsoft.PtrString(server.networkView),
+			ReadOnly:                microsoft.PtrBool(false),
+			SynchronizationMinDelay: microsoft.PtrInt64(2),
+			LoginName:               microsoft.PtrString("admin"),
+		}
+
+		_, _, err := clients.MICROSOFT.MsserverAPI.Create(context.Background()).
+			Msserver(msServerBody).
+			Execute()
+
+		if err != nil {
+			if strings.Contains(err.Error(), "is using") || strings.Contains(err.Error(), "is already using") {
+				fmt.Printf("Microsoft server %q already exists, skipping creation\n", server.address)
+				continue
+			}
+			return fmt.Errorf("failed to create Microsoft server %q: %w", server.address, err)
+		}
+
+		fmt.Printf("Microsoft server %q created successfully\n", server.address)
+	}
+
+	// Create grid members
+	// TODO : Valid License Problem
+	// The master does not have a valid Grid license installed for the member 172.28.83.140.
+	//members := []struct {
+	//	hostName   string
+	//	vipAddress string
+	//}{
+	//	{hostName: "infoblox.member2", vipAddress: "172.28.82.251"},
+	//	{hostName: "infoblox.member3", vipAddress: "172.28.82.252"},
+	//}
+	//
+	//for _, member := range members {
+	//	memberBody := grid.Member{
+	//		HostName:                 grid.PtrString(member.hostName),
+	//		ConfigAddrType:           grid.PtrString("IPV4"),
+	//		Platform:                 grid.PtrString("VNIOS"),
+	//		ServiceTypeConfiguration: grid.PtrString("ALL_V4"),
+	//		VipSetting: &grid.MemberVipSetting{
+	//			Address:    grid.PtrString(member.vipAddress),
+	//			Gateway:    grid.PtrString("172.28.82.1"),
+	//			SubnetMask: grid.PtrString("255.255.254.0"),
+	//			Primary:    grid.PtrBool(true),
+	//			Dscp:       grid.PtrInt64(0),
+	//			UseDscp:    grid.PtrBool(false),
+	//		},
+	//	}
+	//
+	//	_, _, err := clients.GRID.MemberAPI.Create(context.Background()).
+	//		Member(memberBody).
+	//		Execute()
+	//
+	//	if err != nil {
+	//		if strings.Contains(err.Error(), "already exists") {
+	//			fmt.Printf("Member %q already exists, skipping creation\n", member.hostName)
+	//			continue
+	//		}
+	//		return fmt.Errorf("failed to create member %q: %w", member.hostName, err)
+	//	}
+	//
+	//	fmt.Printf("Member %q created successfully\n", member.hostName)
+	//}
+
+	// Create upgrade dependent groups
+	upgradeGroups := []string{"example_upgrade_dependent_group1", "example_upgrade_dependent_group2"}
+
+	for _, groupName := range upgradeGroups {
+		upgradeGroupBody := grid.Upgradegroup{
+			Name: grid.PtrString(groupName),
+		}
+
+		_, _, err := clients.GRID.UpgradegroupAPI.Create(context.Background()).
+			Upgradegroup(upgradeGroupBody).
+			Execute()
+
+		if err != nil {
+			if strings.Contains(err.Error(), "already exists") {
+				fmt.Printf("Upgrade dependent group %q already exists, skipping creation\n", groupName)
+				continue
+			}
+			return fmt.Errorf("failed to create upgrade dependent group %q: %w", groupName, err)
+		}
+
+		fmt.Printf("Upgrade dependent group %q created successfully\n", groupName)
+	}
+
+	// Create Active Directory auth services
+	adAuthServices := []struct {
+		name      string
+		refEnvVar string
+	}{
+		{name: "active_dir", refEnvVar: "NIOS_AD_AUTH_SERVICE_ACTIVE_DIR_REF"},
+		{name: "active_dir_test", refEnvVar: "NIOS_AD_AUTH_SERVICE_ACTIVE_DIR_TEST_REF"},
+	}
+
+	adAuthServiceRefs := make(map[string]string)
+
+	for _, ad := range adAuthServices {
+		adAuthServiceBody := security.AdAuthService{
+			Name:     security.PtrString(ad.name),
+			AdDomain: security.PtrString("example.com"),
+			DomainControllers: []security.AdAuthServiceDomainControllers{
+				{
+					FqdnOrIp: security.PtrString("1.1.1.1"),
+					Disabled: security.PtrBool(false),
+					AuthPort: security.PtrInt64(389),
+				},
+			},
+			Timeout: security.PtrInt64(5),
+		}
+
+		resp, _, err := clients.SECURITY.AdAuthServiceAPI.Create(context.Background()).
+			AdAuthService(adAuthServiceBody).
+			Execute()
+
+		if err != nil {
+			if strings.Contains(err.Error(), "already exists") {
+				fmt.Printf("Active Directory auth service %q already exists, skipping creation\n", ad.name)
+				continue
+			}
+			return fmt.Errorf("failed to create Active Directory auth service %q: %w", ad.name, err)
+		}
+
+		// Extract ref from response (plain string in default mode, nested object in _return_as_object mode)
+		var adRef string
+		if resp.String != nil {
+			adRef = *resp.String
+		} else if resp.CreateAdAuthServiceResponseAsObject != nil && resp.CreateAdAuthServiceResponseAsObject.Result != nil {
+			adRef = resp.CreateAdAuthServiceResponseAsObject.Result.GetRef()
+		}
+
+		adAuthServiceRefs[ad.name] = adRef
+
+		if err := writePipelineEnvVar(ad.refEnvVar, adRef); err != nil {
+			return fmt.Errorf("failed to write env var %s: %w", ad.refEnvVar, err)
+		}
+
+		fmt.Printf("Active Directory auth service %q created successfully (ref: %s, env: %s)\n", ad.name, adRef, ad.refEnvVar)
+	}
+
+	// Update auth policy to append the first AD auth service ref
+	// Only proceed if at least one new ref was captured
+	firstADRef := adAuthServiceRefs["active_dir"]
+	if firstADRef != "" {
+		// GET current auth policy
+		listResp, _, err := clients.SECURITY.AuthpolicyAPI.List(context.Background()).ReturnAsObject(1).Execute()
+		if err != nil {
+			return fmt.Errorf("failed to list auth policy: %w", err)
+		}
+
+		// Resolve the auth policy slice and ref from either response shape
+		var authPolicies []security.Authpolicy
+		if listResp.ListAuthpolicyResponseObject != nil {
+			authPolicies = listResp.ListAuthpolicyResponseObject.Result
+		} else if listResp.ArrayOfAuthpolicy != nil {
+			authPolicies = *listResp.ArrayOfAuthpolicy
+		}
+
+		if len(authPolicies) == 0 {
+			return fmt.Errorf("auth policy list returned no results")
+		}
+
+		authPolicyRef := authPolicies[0].Ref
+
+		if authPolicyRef == nil || *authPolicyRef == "" {
+			return fmt.Errorf("auth policy ref is empty")
+		}
+
+		extractedAuthPolicyRef := utils.ExtractResourceRef(*authPolicyRef)
+
+		// Append first AD auth service ref to existing auth services
+		authServices := authPolicies[0].GetAuthServices()
+		authServices = append(authServices, firstADRef)
+
+		authPolicyBody := security.Authpolicy{
+			AuthServices: authServices,
+		}
+
+		_, _, err = clients.SECURITY.AuthpolicyAPI.Update(context.Background(), extractedAuthPolicyRef).
+			Authpolicy(authPolicyBody).
+			Execute()
+		if err != nil {
+			return fmt.Errorf("failed to update auth policy %q: %w", *authPolicyRef, err)
+		}
+
+		fmt.Printf("Auth policy %q updated with AD auth service ref %q\n", *authPolicyRef, firstADRef)
+	}
+
+	// Update MemberFileDistribution to append a new TFTP ACL entry
+	memberFiledistResp, _, err := clients.GRID.MemberFiledistributionAPI.List(context.Background()).ReturnAsObject(1).Execute()
+	if err != nil {
+		return fmt.Errorf("failed to list member file distribution: %w", err)
+	}
+
+	// Resolve the member file distribution slice from either response shape
+	var memberFiledistributions []grid.MemberFiledistribution
+	if memberFiledistResp.ListMemberFiledistributionResponseObject != nil {
+		memberFiledistributions = memberFiledistResp.ListMemberFiledistributionResponseObject.Result
+	} else if memberFiledistResp.ArrayOfMemberFiledistribution != nil {
+		memberFiledistributions = *memberFiledistResp.ArrayOfMemberFiledistribution
+	}
+
+	if len(memberFiledistributions) > 0 {
+		memberRef := memberFiledistributions[0].Ref
+		if memberRef != nil && *memberRef != "" {
+			// Get existing TFTP ACLs
+			memberTftpACL := memberFiledistributions[0].GetTftpAcls()
+
+			// Create new TFTP ACL entry
+			newTftpACL := grid.MemberFiledistributionTftpAcls{
+				Address:    grid.PtrString("Any"),
+				Permission: grid.PtrString("ALLOW"),
+			}
+			memberTftpACL = append(memberTftpACL, newTftpACL)
+
+			memberFileDistributionBody := grid.MemberFiledistribution{
+				TftpAcls: memberTftpACL,
+			}
+
+			extractedMemberRef := utils.ExtractResourceRef(*memberRef)
+
+			_, _, err := clients.GRID.MemberFiledistributionAPI.Update(context.Background(), extractedMemberRef).
+				MemberFiledistribution(memberFileDistributionBody).
+				Execute()
+			if err != nil {
+				return fmt.Errorf("failed to update member file distribution %q: %w", *memberRef, err)
+			}
+
+			fmt.Printf("Member file distribution %q updated with new TFTP ACL (Address: Any, Permission: ALLOW)\n", *memberRef)
+		}
+	}
+
+	// Update RPZ logging in DNS grid properties
+	gridDNSResp, _, err := clients.GRID.GridDnsAPI.List(context.Background()).
+		ReturnAsObject(1).
+		ReturnFields("logging_categories").
+		Execute()
+	if err != nil {
+		return fmt.Errorf("failed to list grid DNS properties: %w", err)
+	}
+
+	if gridDNSResp.ListGridDnsResponseObject == nil || len(gridDNSResp.ListGridDnsResponseObject.Result) == 0 {
+		return fmt.Errorf("grid DNS properties list returned no results")
+	}
+
+	gridDNSRef := gridDNSResp.ListGridDnsResponseObject.Result[0].Ref
+	if gridDNSRef == nil || *gridDNSRef == "" {
+		return fmt.Errorf("grid DNS properties ref is empty")
+	}
+
+	dnsGridPropertiesRef := utils.ExtractResourceRef(*gridDNSRef)
+	rpzLoggingLevel := gridDNSResp.ListGridDnsResponseObject.Result[0].LoggingCategories.LogRpz
+
+	if rpzLoggingLevel == nil || !*rpzLoggingLevel {
+		fmt.Printf("RPZ logging level is %v, updating to true\n", rpzLoggingLevel)
+		dnsGridUpdateBody := grid.GridDns{
+			LoggingCategories: &grid.GridDnsLoggingCategories{
+				LogRpz: grid.PtrBool(true),
+			},
+		}
+
+		_, _, err = clients.GRID.GridDnsAPI.Update(context.Background(), dnsGridPropertiesRef).
+			GridDns(dnsGridUpdateBody).
+			Execute()
+		if err != nil {
+			return fmt.Errorf("failed to update RPZ logging in DNS grid properties %q: %w", dnsGridPropertiesRef, err)
+		}
+
+		fmt.Printf("RPZ logging enabled for DNS grid properties %q\n", dnsGridPropertiesRef)
+	}
+
 	return nil
 }
 
 func main() {
-	host := ""
-	wapiVer := ""
-	username := ""
-	password := ""
+	host := strings.TrimSpace(firstNonEmpty(os.Getenv("NIOS_HOST_URL")))
+	wapiVer := strings.TrimSpace(firstNonEmpty(os.Getenv("NIOS_WAPI_VERSION"), "v2.13.6"))
+	username := strings.TrimSpace(firstNonEmpty(os.Getenv("NIOS_USERNAME")))
+	password := strings.TrimSpace(firstNonEmpty(os.Getenv("NIOS_PASSWORD")))
 
-	certUpload, err := UploadInit(host, wapiVer, username, password)
-	if err != nil {
-		fmt.Printf("Error initializing upload: %v\n", err)
+	if host == "" || wapiVer == "" || username == "" || password == "" {
+		fmt.Println("Missing required NIOS configuration. Ensure host, WAPI version, username, and password are set.")
+		fmt.Println("Supported env vars: NIOS_HOST_URL (or NIOS_HOST), NIOS_WAPI_VERSION, NIOS_USERNAME, NIOS_PASSWORD")
 		return
 	}
-	fmt.Printf("Upload initialized: %+v\n", certUpload)
 
-	err = UploadFile(host, wapiVer, username, password, certUpload.URL, "./nios_security_certificate_authservice/cert.pem")
-	if err != nil {
-		fmt.Printf("Error uploading file: %v\n", err)
+	if !strings.HasPrefix(host, "http://") && !strings.HasPrefix(host, "https://") {
+		fmt.Printf("Invalid NIOS host %q: must include http:// or https://\n", host)
 		return
 	}
-	fmt.Println("File uploaded successfully")
 
-	err = UploadCertificate(host, wapiVer, username, password, "EAP_CA", "infoblox.localdomain", certUpload.Token)
+	// Construct absolute path to ecosystem template file
+	cwd, err := os.Getwd()
 	if err != nil {
-		fmt.Printf("Error uploading certificate: %v\n", err)
+		fmt.Printf("Error getting current working directory: %v\n", err)
 		return
 	}
-	fmt.Println("Certificate uploaded successfully")
 
-	err = FetchAndStoreCertificateRef(host, wapiVer, username, password, "NIOS_CA_CERT1_REF")
+	pipelineEnvPath := filepath.Join(cwd, "pipeline.env")
+	f, err := os.Create(pipelineEnvPath)
 	if err != nil {
-		fmt.Printf("Error fetching and storing certificate ref: %v\n", err)
+		fmt.Printf("Error creating pipeline.env: %v\n", err)
 		return
 	}
-	fmt.Println("Certificate ref fetched and stored successfully")
+	pipelineEnvFile = f
+	defer func() {
+		_ = pipelineEnvFile.Close()
+		pipelineEnvFile = nil
+	}()
+
+	fmt.Print("meow")
+
+	caCertUploadFilePath := filepath.Join(cwd, "internal/testdata/nios_security_certificate_authservice", "cert.pem")
+
+	err = ConfigureCACertificates(host, wapiVer, username, password, "EAP_CA", "infoblox.localdomain", caCertUploadFilePath, "NIOS_CA_CERT1_REF", "NIOS_CA_CERT1_SERIAL")
+	if err != nil {
+		fmt.Printf("Error configuring CA certificates: %v\n", err)
+		return
+	}
+	fmt.Println("CA certificate 1 configured successfully")
+
+	caCertUploadFilePath2 := filepath.Join(cwd, "internal/testdata/nios_notification_rest_endpoint", "dummy-bundle.pem")
+
+	err = ConfigureCACertificates(host, wapiVer, username, password, "EAP_CA", "infoblox.localdomain", caCertUploadFilePath2, "NIOS_CA_CERT2_REF", "NIOS_CA_CERT2_SERIAL")
+	if err != nil {
+		fmt.Printf("Error configuring CA certificates: %v\n", err)
+		return
+	}
+	fmt.Println("CA certificate 2 configured successfully")
+
+	ecosystemTemplatePath := filepath.Join(cwd, "internal/testdata/nios_ecosystem_templates", "Version5_DXL_Session_Template.json")
+
+	err = ConfigureEcoSystemTemplates(host, wapiVer, username, password, ecosystemTemplatePath)
+	if err != nil {
+		fmt.Printf("Error uploading ecosystem templates: %v\n", err)
+		return
+	}
+	fmt.Println("Ecosystem template 1 uploaded successfully")
+
+	ecosystemTemplatePath2 := filepath.Join(cwd, "internal/testdata/nios_ecosystem_templates", "Version5_Syslog_Session_Template.json")
+
+	err = ConfigureEcoSystemTemplates(host, wapiVer, username, password, ecosystemTemplatePath2)
+	if err != nil {
+		fmt.Printf("Error uploading ecosystem templates: %v\n", err)
+		return
+	}
+	fmt.Println("Ecosystem template 2 uploaded successfully")
+
+	apiClient := client.NewAPIClient(
+		option.WithNIOSHostUrl(host),
+		option.WithNIOSUsername(username),
+		option.WithNIOSPassword(password),
+		option.WithDebug(true),
+	)
+
+	clients := PreConfigClients{
+		IPAM:      apiClient.IPAMAPI,
+		DHCP:      apiClient.DHCPAPI,
+		DNS:       apiClient.DNSAPI,
+		GRID:      apiClient.GridAPI,
+		MICROSOFT: apiClient.MicrosoftAPI,
+		SECURITY:  apiClient.SecurityAPI,
+	}
+
+	err = PreConfig(clients)
+	if err != nil {
+		fmt.Printf("Error during pre-configuration: %v\n", err)
+		return
+	}
+	fmt.Println("Pre-configuration completed successfully")
+
+	fmt.Printf("Environment setup complete. Variables written to %s\n", pipelineEnvPath)
+
 }
