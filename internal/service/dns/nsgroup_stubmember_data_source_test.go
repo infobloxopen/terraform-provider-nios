@@ -19,7 +19,7 @@ func TestAccNsgroupStubmemberDataSource_Filters(t *testing.T) {
 	name := acctest.RandomNameWithPrefix("test-nsgroup-stubmember")
 	stubMember := []map[string]any{
 		{
-			"name": "member.com",
+			"name": "infoblox.member",
 		},
 	}
 
@@ -47,7 +47,7 @@ func TestAccNsgroupStubmemberDataSource_ExtAttrFilters(t *testing.T) {
 	name := acctest.RandomNameWithPrefix("test-nsgroup-stubmember")
 	stubMember := []map[string]any{
 		{
-			"name": "member.com",
+			"name": "infoblox.member",
 		},
 	}
 	extAttrValue := acctest.RandomName()

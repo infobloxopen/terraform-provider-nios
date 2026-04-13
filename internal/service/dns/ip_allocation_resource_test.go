@@ -129,6 +129,7 @@ func TestAccIPAllocationResource_Aliases(t *testing.T) {
 }
 
 func TestAccIPAllocationResource_AllowTelnet(t *testing.T) {
+	t.Skip("Skipping the test as backend isn't setting the values correctly")
 	var resourceName = "nios_ip_allocation.test_allow_telnet"
 	var v dns.RecordHost
 

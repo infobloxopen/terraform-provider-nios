@@ -17,7 +17,7 @@ import (
 )
 
 //TODO : Objects to be created in the grid for testing
-// - Record Name Policy - example-policy , example-policy-update
+// - Record Name Policy - Allow Any , Allow Underscore
 
 var readableAttributesForZoneRp = "address,comment,disable,display_domain,dns_soa_email,extattrs,external_primaries,external_secondaries,fireeye_rule_mapping,fqdn,grid_primary,grid_secondaries,locked,locked_by,log_rpz,mask_prefix,member_soa_mnames,member_soa_serials,network_view,ns_group,parent,prefix,primary_type,record_name_policy,rpz_drop_ip_rule_enabled,rpz_drop_ip_rule_min_prefix_length_ipv4,rpz_drop_ip_rule_min_prefix_length_ipv6,rpz_last_updated_time,rpz_policy,rpz_priority,rpz_priority_end,rpz_severity,rpz_type,soa_default_ttl,soa_email,soa_expire,soa_negative_ttl,soa_refresh,soa_retry,soa_serial_number,substitute_name,use_external_primary,use_grid_zone_timer,use_log_rpz,use_record_name_policy,use_rpz_drop_ip_rule,use_soa_email,view"
 
@@ -198,7 +198,7 @@ func TestAccZoneRpResource_ExternalPrimaries(t *testing.T) {
 	}
 	gridSecondary := []map[string]any{
 		{
-			"name": "member.com",
+			"name": "infoblox.member",
 		},
 	}
 
@@ -249,7 +249,7 @@ func TestAccZoneRpResource_ExternalSecondaries(t *testing.T) {
 	}
 	gridPrimary := []map[string]any{
 		{
-			"name": "member.com",
+			"name": "infoblox.member",
 		},
 	}
 	updatedExternalSecondaries := []map[string]any{
@@ -378,7 +378,7 @@ func TestAccZoneRpResource_GridPrimary(t *testing.T) {
 	zoneFqdn := acctest.RandomNameWithPrefix("zone-rp") + ".com"
 	gridPrimary := []map[string]any{
 		{
-			"name":    "member.com",
+			"name":    "infoblox.member",
 			"stealth": false,
 		},
 	}
@@ -388,7 +388,7 @@ func TestAccZoneRpResource_GridPrimary(t *testing.T) {
 			"stealth": true,
 		},
 		{
-			"name":    "member.com",
+			"name":    "infoblox.member",
 			"stealth": false,
 		},
 	}
@@ -403,7 +403,7 @@ func TestAccZoneRpResource_GridPrimary(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneRpExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "grid_primary.#", "1"),
-					resource.TestCheckResourceAttr(resourceName, "grid_primary.0.name", "member.com")),
+					resource.TestCheckResourceAttr(resourceName, "grid_primary.0.name", "infoblox.member")),
 			},
 			// Update and Read
 			{
@@ -413,7 +413,7 @@ func TestAccZoneRpResource_GridPrimary(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "grid_primary.#", "2"),
 					resource.TestCheckResourceAttr(resourceName, "grid_primary.0.name", "infoblox.localdomain"),
 					resource.TestCheckResourceAttr(resourceName, "grid_primary.0.stealth", "true"),
-					resource.TestCheckResourceAttr(resourceName, "grid_primary.1.name", "member.com"),
+					resource.TestCheckResourceAttr(resourceName, "grid_primary.1.name", "infoblox.member"),
 					resource.TestCheckResourceAttr(resourceName, "grid_primary.1.stealth", "false"),
 				),
 			},
@@ -433,7 +433,7 @@ func TestAccZoneRpResource_GridSecondaries(t *testing.T) {
 	}
 	gridSecondary := []map[string]any{
 		{
-			"name":                       "member.com",
+			"name":                       "infoblox.member",
 			"stealth":                    false,
 			"grid_replicate":             true,
 			"lead":                       false,
@@ -442,7 +442,7 @@ func TestAccZoneRpResource_GridSecondaries(t *testing.T) {
 	}
 	updatedgridPrimary := []map[string]any{
 		{
-			"name": "member.com",
+			"name": "infoblox.member",
 		},
 	}
 	updatedGridSecondary := []map[string]any{
@@ -461,7 +461,7 @@ func TestAccZoneRpResource_GridSecondaries(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneRpExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "grid_secondaries.#", "1"),
-					resource.TestCheckResourceAttr(resourceName, "grid_secondaries.0.name", "member.com"),
+					resource.TestCheckResourceAttr(resourceName, "grid_secondaries.0.name", "infoblox.member"),
 					resource.TestCheckResourceAttr(resourceName, "grid_secondaries.0.stealth", "false"),
 					resource.TestCheckResourceAttr(resourceName, "grid_secondaries.0.grid_replicate", "true"),
 					resource.TestCheckResourceAttr(resourceName, "grid_secondaries.0.lead", "false"),
@@ -595,7 +595,7 @@ func TestAccZoneRpResource_NsGroup(t *testing.T) {
 	zoneFqdn := acctest.RandomNameWithPrefix("zone-rp") + ".com"
 	gridPrimary := []map[string]any{
 		{
-			"name": "member.com",
+			"name": "infoblox.member",
 		},
 	}
 
@@ -665,18 +665,18 @@ func TestAccZoneRpResource_RecordNamePolicy(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccZoneRpRecordNamePolicy(zoneFqdn, "default", "example-policy", true),
+				Config: testAccZoneRpRecordNamePolicy(zoneFqdn, "default", "Allow Any", true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneRpExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "record_name_policy", "example-policy"),
+					resource.TestCheckResourceAttr(resourceName, "record_name_policy", "Allow Any"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccZoneRpRecordNamePolicy(zoneFqdn, "default", "example-policy-update", true),
+				Config: testAccZoneRpRecordNamePolicy(zoneFqdn, "default", "Allow Underscore", true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneRpExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "record_name_policy", "example-policy-update"),
+					resource.TestCheckResourceAttr(resourceName, "record_name_policy", "Allow Underscore"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -977,7 +977,7 @@ func TestAccZoneRpResource_SoaEmail(t *testing.T) {
 	zoneFqdn := acctest.RandomNameWithPrefix("zone-rp") + ".com"
 	gridPrimary := []map[string]any{
 		{
-			"name": "member.com",
+			"name": "infoblox.member",
 		},
 	}
 
@@ -1328,7 +1328,7 @@ func TestAccZoneRpResource_UseRecordNamePolicy(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccZoneRpUseRecordNamePolicy(zoneFqdn, "default", "example-policy", true),
+				Config: testAccZoneRpUseRecordNamePolicy(zoneFqdn, "default", "Allow Any", true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneRpExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_record_name_policy", "true"),
@@ -1336,7 +1336,7 @@ func TestAccZoneRpResource_UseRecordNamePolicy(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccZoneRpUseRecordNamePolicy(zoneFqdn, "default", "example-policy", false),
+				Config: testAccZoneRpUseRecordNamePolicy(zoneFqdn, "default", "Allow Any", false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneRpExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_record_name_policy", "false"),

@@ -28,26 +28,19 @@ import (
 var readableAttributesForNotificationRule = "all_members,comment,disable,enable_event_deduplication,enable_event_deduplication_log,event_deduplication_fields,event_deduplication_lookback_period,event_priority,event_type,expression_list,name,notification_action,notification_target,publish_settings,scheduled_event,selected_members,template_instance,use_publish_settings"
 
 var (
-	notificationTarget = "notification:rest:endpoint/b25lLmVuZHBvaW50JDI:rest_api"
-	eventType          = "DHCP_LEASES"
+	notificationTarget = "notification:rest:endpoint/b25lLmVuZHBvaW50JDUx:example-notification-rest-endpoint-1"
+	eventType          = "DNS_RPZ"
 	expressionList     = []map[string]any{
 		{
 			"op":       "AND",
 			"op1_type": "LIST",
 		},
 		{
-			"op":       "EQ",
-			"op1":      "DHCP_LEASE_STATE",
-			"op1_type": "FIELD",
-			"op2":      "DHCP_LEASE_STATE_ACTIVE",
-			"op2_type": "STRING",
-		},
-		{
 			"op": "ENDLIST",
 		},
 	}
 	templateInstance = map[string]any{
-		"template": "DHCP_Lease",
+		"template": "Version5_DNS_Zone_and_Records",
 	}
 	notificationAction = "RESTAPI_TEMPLATE_INSTANCE"
 )
@@ -909,6 +902,12 @@ func testAccNotificationRuleBasicConfig(eventType string, expressionList []map[s
 	expressionListHCL := utils.ConvertSliceOfMapsToHCL(expressionList)
 	templateInstanceHCL := utils.ConvertMapToHCL(templateInstance)
 	return fmt.Sprintf(`
+resource "nios_notification_rest_endpoint" "test_endpoint" {
+    name = %q
+    outbound_member_type = "GM"
+    uri = "https://www.example.com"
+}
+
 resource "nios_notification_rule" "test" {
     event_type = %q
     expression_list = %s
@@ -917,7 +916,8 @@ resource "nios_notification_rule" "test" {
     notification_target = %q
     template_instance = %s
 }
-`, eventType, expressionListHCL, name, notificationAction, notificationTarget, templateInstanceHCL)
+`, acctest.RandomNameWithPrefix("notification-rest-endpoint"),
+		eventType, expressionListHCL, name, notificationAction, notificationTarget, templateInstanceHCL)
 }
 
 func testAccNotificationRuleComment(eventType string, expressionList []map[string]any, name, notificationAction, notificationTarget string, templateInstance map[string]any, comment string) string {

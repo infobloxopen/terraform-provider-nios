@@ -163,7 +163,7 @@ func TestAccNsgroupForwardingmemberResource_ForwardingServers(t *testing.T) {
 	}
 	forwardingServersUpdate := []map[string]any{
 		{
-			"name":                    "member.com",
+			"name":                    "infoblox.member",
 			"use_override_forwarders": true,
 			"forward_to": []map[string]any{
 				{
@@ -191,7 +191,7 @@ func TestAccNsgroupForwardingmemberResource_ForwardingServers(t *testing.T) {
 				Config: testAccNsgroupForwardingmemberForwardingServers(name, forwardingServersUpdate),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNsgroupForwardingmemberExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "forwarding_servers.0.name", "member.com"),
+					resource.TestCheckResourceAttr(resourceName, "forwarding_servers.0.name", "infoblox.member"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase

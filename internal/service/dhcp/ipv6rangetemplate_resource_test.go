@@ -150,12 +150,10 @@ func TestAccIpv6rangetemplateResource_DelegatedMember(t *testing.T) {
 	offset := 50
 	delegatedMember1 := map[string]any{
 
-		"name":     "infoblox.172_28_82_213",
-		"ipv4addr": "172.28.82.213",
+		"name": "infoblox.localdomain",
 	}
 	delegatedMember2 := map[string]any{
-		"name":     "infoblox.172_28_82_185",
-		"ipv4addr": "172.28.82.185",
+		"name": "infoblox.member",
 	}
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -166,8 +164,7 @@ func TestAccIpv6rangetemplateResource_DelegatedMember(t *testing.T) {
 				Config: testAccIpv6rangetemplateDelegatedMember(name, numberOfAdresses, offset, delegatedMember1),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6rangetemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "delegated_member.name", "infoblox.172_28_82_213"),
-					resource.TestCheckResourceAttr(resourceName, "delegated_member.ipv4addr", "172.28.82.213"),
+					resource.TestCheckResourceAttr(resourceName, "delegated_member.name", "infoblox.localdomain"),
 				),
 			},
 			// Update and Read
@@ -175,8 +172,7 @@ func TestAccIpv6rangetemplateResource_DelegatedMember(t *testing.T) {
 				Config: testAccIpv6rangetemplateDelegatedMember(name, numberOfAdresses, offset, delegatedMember2),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6rangetemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "delegated_member.name", "infoblox.172_28_82_185"),
-					resource.TestCheckResourceAttr(resourceName, "delegated_member.ipv4addr", "172.28.82.185"),
+					resource.TestCheckResourceAttr(resourceName, "delegated_member.name", "infoblox.member"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -287,12 +283,10 @@ func TestAccIpv6rangetemplateResource_Member(t *testing.T) {
 	numberOfAdresses := 100
 	offset := 50
 	member1 := map[string]any{
-		"name":     "infoblox.172_28_82_213",
-		"ipv4addr": "172.28.82.213",
+		"name": "infoblox.localdomain",
 	}
 	member2 := map[string]any{
-		"name":     "infoblox.172_28_82_185",
-		"ipv4addr": "172.28.82.185",
+		"name": "infoblox.member",
 	}
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -303,8 +297,7 @@ func TestAccIpv6rangetemplateResource_Member(t *testing.T) {
 				Config: testAccIpv6rangetemplateMember(name, numberOfAdresses, offset, member1),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6rangetemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "member.name", "infoblox.172_28_82_213"),
-					resource.TestCheckResourceAttr(resourceName, "member.ipv4addr", "172.28.82.213"),
+					resource.TestCheckResourceAttr(resourceName, "member.name", "infoblox.localdomain"),
 				),
 			},
 			// Update and Read
@@ -312,8 +305,7 @@ func TestAccIpv6rangetemplateResource_Member(t *testing.T) {
 				Config: testAccIpv6rangetemplateMember(name, numberOfAdresses, offset, member2),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6rangetemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "member.name", "infoblox.172_28_82_185"),
-					resource.TestCheckResourceAttr(resourceName, "member.ipv4addr", "172.28.82.185"),
+					resource.TestCheckResourceAttr(resourceName, "member.name", "infoblox.member"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -498,8 +490,7 @@ func TestAccIpv6rangetemplateResource_ServerAssociationType(t *testing.T) {
 	numberOfAdresses := 100
 	offset := 50
 	member := map[string]any{
-		"name":     "infoblox.172_28_82_213",
-		"ipv4addr": "172.28.82.213",
+		"name": "infoblox.localdomain",
 	}
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -729,6 +720,7 @@ resource "nios_dhcp_ipv6_range_template" "test_member" {
 	offset = %d
     cloud_api_compatible = true
     member = %s
+	server_association_type = "MEMBER"
 }
 `, name, numberOfAddresses, offset, membersStr)
 }

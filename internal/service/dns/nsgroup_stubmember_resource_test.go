@@ -23,7 +23,7 @@ func TestAccNsgroupStubmemberResource_basic(t *testing.T) {
 	name := acctest.RandomNameWithPrefix("test-nsgroup-stubmember")
 	stubMember := []map[string]any{
 		{
-			"name": "member.com",
+			"name": "infoblox.member",
 		},
 	}
 	resource.ParallelTest(t, resource.TestCase{
@@ -37,7 +37,7 @@ func TestAccNsgroupStubmemberResource_basic(t *testing.T) {
 					testAccCheckNsgroupStubmemberExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "name", name),
 					resource.TestCheckResourceAttr(resourceName, "stub_members.#", "1"),
-					resource.TestCheckResourceAttr(resourceName, "stub_members.0.name", "member.com"),
+					resource.TestCheckResourceAttr(resourceName, "stub_members.0.name", "infoblox.member"),
 					// Test fields with default value
 					resource.TestCheckResourceAttr(resourceName, "comment", ""),
 				),
@@ -53,7 +53,7 @@ func TestAccNsgroupStubmemberResource_disappears(t *testing.T) {
 	name := acctest.RandomNameWithPrefix("test-nsgroup-stubmember")
 	stubMember := []map[string]any{
 		{
-			"name": "member.com",
+			"name": "infoblox.member",
 		},
 	}
 
@@ -80,7 +80,7 @@ func TestAccNsgroupStubmemberResource_Comment(t *testing.T) {
 	name := acctest.RandomNameWithPrefix("test-nsgroup-stubmember")
 	stubMember := []map[string]any{
 		{
-			"name": "member.com",
+			"name": "infoblox.member",
 		},
 	}
 
@@ -115,7 +115,7 @@ func TestAccNsgroupStubmemberResource_ExtAttrs(t *testing.T) {
 	name := acctest.RandomNameWithPrefix("test-nsgroup-stubmember")
 	stubMember := []map[string]any{
 		{
-			"name": "member.com",
+			"name": "infoblox.member",
 		},
 	}
 	extAttrValue1 := acctest.RandomName()
@@ -156,7 +156,7 @@ func TestAccNsgroupStubmemberResource_Name(t *testing.T) {
 	nameUpdate := acctest.RandomNameWithPrefix("test-nsgroup-stubmember")
 	stubMember := []map[string]any{
 		{
-			"name": "member.com",
+			"name": "infoblox.member",
 		},
 	}
 
@@ -191,7 +191,7 @@ func TestAccNsgroupStubmemberResource_StubMembers(t *testing.T) {
 	name := acctest.RandomNameWithPrefix("test-nsgroup-stubmember")
 	stubMember := []map[string]any{
 		{
-			"name": "member.com",
+			"name": "infoblox.member",
 		},
 	}
 	stubMemberUpdate := []map[string]any{
@@ -208,7 +208,7 @@ func TestAccNsgroupStubmemberResource_StubMembers(t *testing.T) {
 				Config: testAccNsgroupStubmemberStubMembers(name, stubMember),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNsgroupStubmemberExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "stub_members.0.name", "member.com"),
+					resource.TestCheckResourceAttr(resourceName, "stub_members.0.name", "infoblox.member"),
 				),
 			},
 			// Update and Read

@@ -428,7 +428,8 @@ func TestAccRecordMxResource_View(t *testing.T) {
 	var resourceName = "nios_dns_record_mx.test_view"
 	var v dns.RecordMx
 	name := acctest.RandomNameWithPrefix("record-mx") + ".example.com"
-	mail_exchanger := acctest.RandomNameWithPrefix("mail-exchanger") + ".example.com"
+	mailExchanger := acctest.RandomNameWithPrefix("mail-exchanger") + ".example.com"
+	viewName := acctest.RandomNameWithPrefix("view")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -436,7 +437,7 @@ func TestAccRecordMxResource_View(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRecordMxView(name, mail_exchanger, 10, "default"),
+				Config: testAccRecordMxView(name, mailExchanger, 10, "default"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordMxExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "view", "default"),
@@ -444,10 +445,10 @@ func TestAccRecordMxResource_View(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRecordMxView(name, mail_exchanger, 10, "default.custom_view"),
+				Config: testAccRecordMxViewUpdate(name, mailExchanger, 10, viewName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordMxExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "view", "default.custom_view"),
+					resource.TestCheckResourceAttr(resourceName, "view", viewName),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -668,4 +669,24 @@ resource "nios_dns_record_mx" "test_view" {
     view            = %q
 }
 `, name, mail_exchanger, preference, view)
+}
+
+func testAccRecordMxViewUpdate(name, mail_exchanger string, preference int64, view string) string {
+	return fmt.Sprintf(`
+resource "nios_dns_view" "test_dns_view" {
+	name = %q
+}
+
+resource "nios_dns_zone_auth" "test_dns_zone" {
+	fqdn = "example.com"
+	view = nios_dns_view.test_dns_view.name
+}
+
+resource "nios_dns_record_mx" "test_view" {
+    name            = %q
+    mail_exchanger  = %q
+    preference      = %d
+    view            = nios_dns_zone_auth.test_dns_zone.view
+}
+`, view, name, mail_exchanger, preference)
 }

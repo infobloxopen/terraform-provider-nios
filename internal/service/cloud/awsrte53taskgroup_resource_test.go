@@ -19,12 +19,14 @@ import (
 
 var readableAttributesForAwsrte53taskgroup = "account_id,comment,consolidate_zones,consolidated_view,disabled,grid_member,name,network_view,network_view_mapping_policy,role_arn,sync_child_accounts,sync_status,task_list"
 
-// TODO : OBJECTS TO BE PRESENT IN GRID FOR TESTS
-// Two Grid members are needed for testing ( "infoblox.localdomain" "member.com"),
-// add  "member.com" within "infoblox.localdomain"
-// Tasklist unordered issue exist, similar to dhcp options
-// AWS secret and key has to added, or can be skipped if privacy concern
-// upload child is a limitation with multiple accounts sync policy
+// TODO
+// Additional Support Required - AwsAccountIdsFileToken (Support for File Operation)
+
+// OBJECTS TO BE PRESENT IN GRID FOR TESTS :
+// Two Grid members are needed for testing ( "infoblox.localdomain" "infoblox.member")
+
+// Upload child is a limitation with multiple accounts sync policy
+
 func TestAccAwsrte53taskgroupResource_basic(t *testing.T) {
 	var resourceName = "nios_cloud_aws_route53_task_group.test"
 	var v cloud.Awsrte53taskgroup
@@ -232,10 +234,10 @@ func TestAccAwsrte53taskgroupResource_GridMember(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccAwsrte53taskgroupGridMember("member.com", taskGroupName),
+				Config: testAccAwsrte53taskgroupGridMember("infoblox.member", taskGroupName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAwsrte53taskgroupExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "grid_member", "member.com"),
+					resource.TestCheckResourceAttr(resourceName, "grid_member", "infoblox.member"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase

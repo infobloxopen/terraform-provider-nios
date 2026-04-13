@@ -17,7 +17,7 @@ func TestAccDhcpfailoverDataSource_Filters(t *testing.T) {
 	var v dhcp.Dhcpfailover
 	failoverName := acctest.RandomNameWithPrefix("failover")
 	primary := "infoblox.localdomain"
-	secondary := "infoblox.member1"
+	secondary := "infoblox.member"
 	primaryServerType := "GRID"
 	secondaryServerType := "GRID"
 
@@ -44,7 +44,7 @@ func TestAccDhcpfailoverDataSource_ExtAttrFilters(t *testing.T) {
 	var v dhcp.Dhcpfailover
 	extAttrValue := acctest.RandomNameWithPrefix("Site")
 	primary := "infoblox.localdomain"
-	secondary := "infoblox.member1"
+	secondary := "infoblox.member"
 	primaryServerType := "GRID"
 	secondaryServerType := "GRID"
 	dhcpfailoverName := acctest.RandomNameWithPrefix("failover")

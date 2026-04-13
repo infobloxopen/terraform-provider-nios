@@ -255,7 +255,7 @@ func TestAccGridServicerestartGroupResource_RecurringSchedule(t *testing.T) {
 			"repeat":            "ONCE",
 			"day_of_month":      30,
 			"month":             1,
-			"year":              2026,
+			"year":              2050,
 			"hour_of_day":       20,
 		},
 	}
@@ -297,7 +297,7 @@ func TestAccGridServicerestartGroupResource_RecurringSchedule(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "recurring_schedule.schedule.repeat", "ONCE"),
 					resource.TestCheckResourceAttr(resourceName, "recurring_schedule.schedule.day_of_month", "30"),
 					resource.TestCheckResourceAttr(resourceName, "recurring_schedule.schedule.month", "1"),
-					resource.TestCheckResourceAttr(resourceName, "recurring_schedule.schedule.year", "2026"),
+					resource.TestCheckResourceAttr(resourceName, "recurring_schedule.schedule.year", "2050"),
 					resource.TestCheckResourceAttr(resourceName, "recurring_schedule.schedule.hour_of_day", "20"),
 				),
 			},

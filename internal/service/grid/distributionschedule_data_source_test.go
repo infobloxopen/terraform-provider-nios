@@ -42,6 +42,13 @@ func TestAccDistributionscheduleDataSource_Read(t *testing.T) {
 					}, testAccCheckDistributionscheduleResourceAttrPair(resourceName, dataSourceName)...)...,
 				),
 			},
+			// Deactivate schedule for Integration Testing
+			{
+				Config: testAccDistributionscheduleDeactivate(),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("nios_grid_distributionschedule.deactivate_schedule", "active", "false"),
+				),
+			},
 		},
 	})
 }

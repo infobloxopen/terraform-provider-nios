@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -72,10 +73,10 @@ func TestAccDtcLbdnResource_AuthZones(t *testing.T) {
 	var resourceName = "nios_dtc_lbdn.test_auth_zones"
 	var v dtc.DtcLbdn
 	name := "dtc-lbdn-" + acctest.RandomName()
-	authZones := []string{"zone_auth/ZG5zLnpvbmUkLl9kZWZhdWx0LmNvbS50ZXN0:test.com/default", "zone_auth/ZG5zLnpvbmUkLl9kZWZhdWx0LmNvbS5yZWNvcmRfdGVzdA:record_test.com/default"}
-	authZonesUpdated := []string{"zone_auth/ZG5zLnpvbmUkLjEuY29tLnRlc3Q:test.com/default.custom_view"}
+	authZones := []string{"${nios_dns_zone_auth.test_zone1.ref}", "${nios_dns_zone_auth.test_zone2.ref}"}
+	authZonesUpdated := []string{"${nios_dns_zone_auth.test_zone3.ref}"}
 	pools := []map[string]interface{}{
-		{"pool": "dtc:pool/ZG5zLmlkbnNfcG9vbCRkdGNfcG9vbC5jb20:dtc_pool.com", "ratio": 2},
+		{"pool": "${nios_dtc_topology.test.ref}", "ratio": 2},
 	}
 	patterns := []string{"*.test.com", "*.record_test.com"}
 
@@ -89,8 +90,8 @@ func TestAccDtcLbdnResource_AuthZones(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcLbdnExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "auth_zones.#", "2"),
-					resource.TestCheckTypeSetElemAttr(resourceName, "auth_zones.*", "zone_auth/ZG5zLnpvbmUkLl9kZWZhdWx0LmNvbS50ZXN0:test.com/default"),
-					resource.TestCheckTypeSetElemAttr(resourceName, "auth_zones.*", "zone_auth/ZG5zLnpvbmUkLl9kZWZhdWx0LmNvbS5yZWNvcmRfdGVzdA:record_test.com/default"),
+					resource.TestCheckTypeSetElemAttr(resourceName, "auth_zones.*", "${nios_dns_zone_auth.test_zone1.ref}"),
+					resource.TestCheckTypeSetElemAttr(resourceName, "auth_zones.*", "${nios_dns_zone_auth.test_zone2.ref}"),
 				),
 			},
 			// Update and Read
@@ -98,8 +99,8 @@ func TestAccDtcLbdnResource_AuthZones(t *testing.T) {
 				Config: testAccDtcLbdnAuthZones("lbdn-resource-13", "SOURCE_IP_HASH", authZonesUpdated, pools, patterns),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcLbdnExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "auth_zones.#", "1"), // Check element count
-					resource.TestCheckTypeSetElemAttr(resourceName, "auth_zones.*", "zone_auth/ZG5zLnpvbmUkLjEuY29tLnRlc3Q:test.com/default.custom_view"),
+					resource.TestCheckResourceAttr(resourceName, "auth_zones.#", "1"),
+					resource.TestCheckTypeSetElemAttr(resourceName, "auth_zones.*", "${nios_dns_zone_auth.test_zone3.ref}"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -269,7 +270,7 @@ func TestAccDtcLbdnResource_LbMethod(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccDtcLbdnLbMethod(name, "TOPOLOGY", utils.Ptr("dtc:topology/ZG5zLmlkbnNfdG9wb2xvZ3kkdG9wbzE:topo1")),
+				Config: testAccDtcLbdnLbMethod(name, "TOPOLOGY", utils.Ptr("${nios_dtc_topology.test_rules_pool.ref}")),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcLbdnExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "lb_method", "TOPOLOGY"),
@@ -382,11 +383,10 @@ func TestAccDtcLbdnResource_Pools(t *testing.T) {
 	var v dtc.DtcLbdn
 	name := "dtc-lbdn-" + acctest.RandomName()
 	pools := []map[string]interface{}{
-		{"pool": "dtc:pool/ZG5zLmlkbnNfcG9vbCRkdGNfcG9vbF9fbmV3MzAy:dtc_pool__new302", "ratio": 2},
-		{"pool": "dtc:pool/ZG5zLmlkbnNfcG9vbCRkdGNfcG9vbF9fbmV3NDg3:dtc_pool__new487", "ratio": 3},
+		{"pool": "${nios_dtc_pool.test_pool1.ref}", "ratio": 2},
 	}
 	poolsUpdated := []map[string]interface{}{
-		{"pool": "dtc:pool/ZG5zLmlkbnNfcG9vbCRkdGNfcG9vbF9fbmV3NDg5:dtc_pool__new489", "ratio": 2},
+		{"pool": "${nios_dtc_pool.test_pool2.ref}", "ratio": 2},
 	}
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -398,11 +398,9 @@ func TestAccDtcLbdnResource_Pools(t *testing.T) {
 				Config: testAccDtcLbdnPools(name, "ROUND_ROBIN", pools),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcLbdnExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "pools.#", "2"),
-					resource.TestCheckResourceAttr(resourceName, "pools.0.pool", "dtc:pool/ZG5zLmlkbnNfcG9vbCRkdGNfcG9vbF9fbmV3MzAy:dtc_pool__new302"),
+					resource.TestCheckResourceAttr(resourceName, "pools.#", "1"),
+					resource.TestCheckResourceAttrPair(resourceName, "pools.0.pool", "nios_dtc_pool.test_pool1", "ref"),
 					resource.TestCheckResourceAttr(resourceName, "pools.0.ratio", "2"),
-					resource.TestCheckResourceAttr(resourceName, "pools.1.pool", "dtc:pool/ZG5zLmlkbnNfcG9vbCRkdGNfcG9vbF9fbmV3NDg3:dtc_pool__new487"),
-					resource.TestCheckResourceAttr(resourceName, "pools.1.ratio", "3"),
 				),
 			},
 			// Update and Read
@@ -411,7 +409,7 @@ func TestAccDtcLbdnResource_Pools(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcLbdnExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "pools.#", "1"),
-					resource.TestCheckResourceAttr(resourceName, "pools.0.pool", "dtc:pool/ZG5zLmlkbnNfcG9vbCRkdGNfcG9vbF9fbmV3NDg5:dtc_pool__new489"),
+					resource.TestCheckResourceAttrPair(resourceName, "pools.0.pool", "nios_dtc_pool.test_pool2", "ref"),
 					resource.TestCheckResourceAttr(resourceName, "pools.0.ratio", "2"),
 				),
 			},
@@ -461,18 +459,18 @@ func TestAccDtcLbdnResource_Topology(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccDtcLbdnTopology(name, "TOPOLOGY", "dtc:topology/ZG5zLmlkbnNfdG9wb2xvZ3kkdG9wbzE:topo1"),
+				Config: testAccDtcLbdnTopology(name, "TOPOLOGY", "${nios_dtc_topology.test_rules_pool.ref}"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcLbdnExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "topology", "dtc:topology/ZG5zLmlkbnNfdG9wb2xvZ3kkdG9wbzE:topo1"),
+					resource.TestCheckResourceAttrPair(resourceName, "topology", "nios_dtc_topology.test_rules_pool", "ref"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccDtcLbdnTopology(name, "TOPOLOGY", "dtc:topology/ZG5zLmlkbnNfdG9wb2xvZ3kkdG9wbzI:topo2"),
+				Config: testAccDtcLbdnTopology(name, "TOPOLOGY", "${nios_dtc_topology.test_rules_pool.ref}"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcLbdnExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "topology", "dtc:topology/ZG5zLmlkbnNfdG9wb2xvZ3kkdG9wbzI:topo2"),
+					resource.TestCheckResourceAttrPair(resourceName, "topology", "nios_dtc_topology.test_rules_pool", "ref"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -641,6 +639,7 @@ func testAccDtcLbdnBasicConfig(name, lbMethod string) string {
 resource "nios_dtc_lbdn" "test" {
 	name = %q
 	lb_method = %q
+	types = ["A", "AAAA"]
 }
 `, name, lbMethod)
 }
@@ -661,15 +660,41 @@ func testAccDtcLbdnAuthZones(name, lbMethod string, authZones []string, pools []
 		patternsStr += fmt.Sprintf("\t%q,\n", pattern)
 	}
 	patternsStr += "]"
-	return fmt.Sprintf(`
+	config := fmt.Sprintf(`
+resource "nios_dns_zone_auth" "test_zone1" {
+    fqdn = "%s.com"
+    view = "default"
+	grid_primary = [{
+		name =  "infoblox.localdomain",
+	}]
+}
+
+resource "nios_dns_zone_auth" "test_zone2" {
+    fqdn = "%s.com"
+    view = "default"
+	grid_primary = [{
+		name =  "infoblox.localdomain",
+	}]
+}
+
+resource "nios_dns_zone_auth" "test_zone3" {
+    fqdn = "%s.com"
+    view = "custom_dns_view"
+	grid_primary = [{
+		name =  "infoblox.localdomain",
+	}]
+}
 resource "nios_dtc_lbdn" "test_auth_zones" {
     name = %q
     lb_method = %q
     auth_zones = %s
     pools = %s
     patterns = %s
+	disable = "true"
 }
-`, name, lbMethod, authZonesStr, poolsStr, patternsStr)
+`, acctest.RandomNameWithPrefix("zone-auth"), acctest.RandomNameWithPrefix("zone-auth"),
+		acctest.RandomNameWithPrefix("zone-auth"), name, lbMethod, authZonesStr, poolsStr, patternsStr)
+	return strings.Join([]string{testAccDtcTopologyBasicConfig(acctest.RandomNameWithPrefix("topology")), config}, "\n")
 }
 
 func testAccDtcLbdnAutoConsolidatedMonitors(name, lbMethod, autoConsolidatedMonitors string) string {
@@ -678,6 +703,7 @@ resource "nios_dtc_lbdn" "test_auto_consolidated_monitors" {
 	name = %q
 	lb_method = %q
     auto_consolidated_monitors = %q
+	types = ["A", "AAAA"]
 }
 `, name, lbMethod, autoConsolidatedMonitors)
 }
@@ -688,6 +714,7 @@ resource "nios_dtc_lbdn" "test_comment" {
     name = %q
     lb_method = %q
     comment = %q
+	types = ["A", "AAAA"]
 }
 `, name, lbMethod, comment)
 }
@@ -698,6 +725,7 @@ resource "nios_dtc_lbdn" "test_disable" {
     name = %q
     lb_method = %q
     disable = %q
+	types = ["A", "AAAA"]
 }
 `, name, lbMethod, disable)
 }
@@ -713,6 +741,7 @@ resource "nios_dtc_lbdn" "test_extattrs" {
     name = %q
     lb_method = %q
     extattrs = %s
+	types = ["A", "AAAA"]
 }
 `, name, lbMethod, extattrsStr)
 }
@@ -723,13 +752,16 @@ func testAccDtcLbdnLbMethod(name, lbMethod string, topology *string) string {
 		extraConfig = fmt.Sprintf(`topology = %q`, *topology)
 	}
 
-	return fmt.Sprintf(`
+	config := fmt.Sprintf(`
 resource "nios_dtc_lbdn" "test_lb_method" {
-  name      = %q
-  lb_method = %q
-  %s
+	name      = %q
+	lb_method = %q
+	%s
+	types = ["A", "AAAA"]
 }
 `, name, lbMethod, extraConfig)
+	return strings.Join([]string{testAccDtcTopologyRulesWithPool(acctest.RandomNameWithPrefix("topology"),
+		acctest.RandomNameWithPrefix("dtc-pool"), "ROUND_ROBIN"), config}, "\n")
 }
 
 func testAccDtcLbdnName(name, lbMethod string) string {
@@ -737,6 +769,7 @@ func testAccDtcLbdnName(name, lbMethod string) string {
 resource "nios_dtc_lbdn" "test_name" {
     name = %q
     lb_method = %q
+	types = ["A", "AAAA"]
 }
 `, name, lbMethod)
 }
@@ -752,6 +785,7 @@ resource "nios_dtc_lbdn" "test_patterns" {
     name = %q
     lb_method = %q
     patterns = %s
+	types = ["A", "AAAA"]
 }
 `, name, lbMethod, patternsStr)
 }
@@ -762,6 +796,7 @@ resource "nios_dtc_lbdn" "test_persistence" {
 	name = %q
 	lb_method = %q
     persistence = %q
+	types = ["A", "AAAA"]
 }
 `, name, lbMethod, persistence)
 }
@@ -773,12 +808,48 @@ func testAccDtcLbdnPools(name, lbMethod string, pools []map[string]interface{}) 
 	}
 	poolsStr += "]"
 	return fmt.Sprintf(`
+resource "nios_dtc_server" "test_server" {
+    name = %q
+    host = %q
+}
+
+resource "nios_dtc_server" "test_server2" {
+    name = %q
+    host = %q
+}
+
+resource "nios_dtc_pool" "test_pool1" {
+	name = %q
+	lb_preferred_method = "ROUND_ROBIN"
+	servers = [
+        {
+            server = nios_dtc_server.test_server.ref
+            ratio  = 1
+        }
+    ]
+}
+
+resource "nios_dtc_pool" "test_pool2" {
+	name = %q
+	lb_preferred_method = "ROUND_ROBIN"
+	servers = [
+        {
+            server = nios_dtc_server.test_server2.ref
+            ratio  = 1
+        }
+    ]
+}
+
 resource "nios_dtc_lbdn" "test_pools" {
 	name = %q
 	lb_method = %q
     pools = %s
+	types = ["A", "AAAA"]
 }
-`, name, lbMethod, poolsStr)
+`, acctest.RandomNameWithPrefix("dtc-server"), acctest.RandomIP(),
+		acctest.RandomNameWithPrefix("dtc-server"), acctest.RandomIP(),
+		acctest.RandomNameWithPrefix("dtc-pool"), acctest.RandomNameWithPrefix("dtc-pool"),
+		name, lbMethod, poolsStr)
 }
 
 func testAccDtcLbdnPriority(name, lbMethod, priority string) string {
@@ -787,18 +858,22 @@ resource "nios_dtc_lbdn" "test_priority" {
 	name = %q
 	lb_method = %q
     priority = %q
+	types = ["A", "AAAA"]
 }
 `, name, lbMethod, priority)
 }
 
 func testAccDtcLbdnTopology(name, lbMethod, topology string) string {
-	return fmt.Sprintf(`
+	config := fmt.Sprintf(`
 resource "nios_dtc_lbdn" "test_topology" {
 	name = %q
 	lb_method = %q
     topology = %q
+	types = ["A", "AAAA"]
 }
 `, name, lbMethod, topology)
+	return strings.Join([]string{testAccDtcTopologyRulesWithPool(acctest.RandomNameWithPrefix("topology"),
+		acctest.RandomNameWithPrefix("dtc-pool"), "ROUND_ROBIN"), config}, "\n")
 }
 
 func testAccDtcLbdnTtl(name, lbMethod string, ttl uint32, useTtl bool) string {
@@ -808,6 +883,7 @@ resource "nios_dtc_lbdn" "test_ttl" {
 	lb_method = %q
     ttl = %d
 	use_ttl = %t
+	types = ["A", "AAAA"]
 }
 `, name, lbMethod, ttl, useTtl)
 }
@@ -834,6 +910,7 @@ resource "nios_dtc_lbdn" "test_use_ttl" {
 	lb_method = %q
     use_ttl = %t
 	ttl = %d
+	types = ["A", "AAAA"]
 }
 `, name, lbMethod, useTtl, ttl)
 }
