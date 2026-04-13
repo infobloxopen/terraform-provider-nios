@@ -19,7 +19,7 @@ terraform {
   required_providers {
     nios = {
       source  = "infobloxopen/nios"
-      version = "1.1.0"
+      version = "2.0.0"
     }
   }
 }
