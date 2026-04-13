@@ -82,8 +82,7 @@ func (r *ZoneAuthResource) ValidateConfig(ctx context.Context, req resource.Vali
 	}
 
 	if !data.MsSyncDisabled.IsNull() && !data.MsSyncDisabled.IsUnknown() && data.MsSyncDisabled.ValueBool() {
-		hasMsPrimaries := !data.MsPrimaries.IsNull() && !data.MsPrimaries.IsUnknown()
-		if !hasMsPrimaries {
+		if data.MsPrimaries.IsNull() && data.MsPrimaries.IsUnknown() {
 			resp.Diagnostics.AddError(
 				"Invalid Configuration",
 				"'ms_primaries' must be provided when 'ms_sync_disabled' is set.",
