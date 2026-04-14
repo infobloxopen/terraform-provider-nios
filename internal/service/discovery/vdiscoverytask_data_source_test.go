@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/discovery"
 	"github.com/infobloxopen/terraform-provider-nios/internal/acctest"
@@ -15,6 +16,7 @@ func TestAccVdiscoverytaskDataSource_Filters(t *testing.T) {
 	dataSourceName := "data.nios_discovery_vdiscovery_task.test"
 	resourceName := "nios_discovery_vdiscovery_task.test"
 	var v discovery.Vdiscoverytask
+	memberName := utils.GetNIOSGridMasterHostName()
 
 	name := acctest.RandomNameWithPrefix("example-vDiscovery-task-")
 
@@ -24,7 +26,7 @@ func TestAccVdiscoverytaskDataSource_Filters(t *testing.T) {
 		CheckDestroy:             testAccCheckVdiscoverytaskDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccVdiscoverytaskDataSourceConfigFilters(name, true, true, true, "infoblox.localdomain", "AWS", "AUTO_CREATE", "AUTO_CREATE", true, false, "us-east-1", "aws_access_key", "aws_secret_key"),
+				Config: testAccVdiscoverytaskDataSourceConfigFilters(name, true, true, true, memberName, "AWS", "AUTO_CREATE", "AUTO_CREATE", true, false, "us-east-1", "aws_access_key", "aws_secret_key"),
 				Check: resource.ComposeTestCheckFunc(
 					append([]resource.TestCheckFunc{
 						testAccCheckVdiscoverytaskExists(context.Background(), resourceName, &v),

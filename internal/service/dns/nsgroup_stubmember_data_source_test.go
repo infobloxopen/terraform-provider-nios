@@ -17,9 +17,10 @@ func TestAccNsgroupStubmemberDataSource_Filters(t *testing.T) {
 	resourceName := "nios_dns_nsgroup_stubmember.test"
 	var v dns.NsgroupStubmember
 	name := acctest.RandomNameWithPrefix("test-nsgroup-stubmember")
+	memberUpdatedName := utils.GetNIOSGridMemberHostName()
 	stubMember := []map[string]any{
 		{
-			"name": "infoblox.member",
+			"name": memberUpdatedName,
 		},
 	}
 
@@ -45,9 +46,10 @@ func TestAccNsgroupStubmemberDataSource_ExtAttrFilters(t *testing.T) {
 	resourceName := "nios_dns_nsgroup_stubmember.test"
 	var v dns.NsgroupStubmember
 	name := acctest.RandomNameWithPrefix("test-nsgroup-stubmember")
+	memberUpdatedName := utils.GetNIOSGridMemberHostName()
 	stubMember := []map[string]any{
 		{
-			"name": "infoblox.member",
+			"name": memberUpdatedName,
 		},
 	}
 	extAttrValue := acctest.RandomName()

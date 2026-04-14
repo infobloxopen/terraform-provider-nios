@@ -655,6 +655,7 @@ resource "nios_dtc_lbdn" "test" {
 }
 
 func testAccDtcLbdnAuthZones(name, lbMethod string, authZones, authZoneNames []string, pools, servers []map[string]interface{}, patterns []string) string {
+	memberName := utils.GetNIOSGridMasterHostName()
 	authZonesStr := "[\n"
 	for _, zone := range authZones {
 		authZonesStr += fmt.Sprintf("\t%q,\n", zone)
@@ -675,7 +676,7 @@ resource "nios_dns_zone_auth" "test_zone1" {
     fqdn = "%s.test.com"
     view = "default"
 	grid_primary = [{
-		name =  "infoblox.localdomain",
+		name =  %q,
 	}]
 }
 
@@ -683,7 +684,7 @@ resource "nios_dns_zone_auth" "test_zone2" {
     fqdn = "%s.record_test.com"
     view = "default"
 	grid_primary = [{
-		name =  "infoblox.localdomain",
+		name =  %q,
 	}]
 }
 
@@ -691,7 +692,7 @@ resource "nios_dns_zone_auth" "test_zone3" {
     fqdn = "%s.test.com"
     view = "custom_dns_view"
 	grid_primary = [{
-		name =  "infoblox.localdomain",
+		name =  %q,
 	}]
 }
 resource "nios_dtc_lbdn" "test_auth_zones" {
@@ -703,7 +704,7 @@ resource "nios_dtc_lbdn" "test_auth_zones" {
 	disable = "true"
 	types = ["A", "AAAA"]
 }
-`, authZoneNames[0], authZoneNames[1],
+`, memberName, memberName, memberName, authZoneNames[0], authZoneNames[1],
 		authZoneNames[2], name, lbMethod, authZonesStr, poolsStr, patternsStr)
 	return strings.Join([]string{testAccDtcPoolServers(acctest.RandomNameWithPrefix("server"),
 		"ROUND_ROBIN", servers), config}, "\n")

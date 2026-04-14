@@ -326,11 +326,13 @@ func TestAccRangetemplateResource_DelegatedMember(t *testing.T) {
 	name := acctest.RandomNameWithPrefix("range-template")
 	numberOfAdresses := 100
 	offset := 50
+	delegatedMemberName := utils.GetNIOSGridMasterHostName()
+	delegatedMemberUpdatedName := utils.GetNIOSGridMemberHostName()
 	delegatedMember := map[string]string{
-		"name": "infoblox.localdomain",
+		"name": delegatedMemberName,
 	}
 	delegatedMemberUpdated := map[string]string{
-		"name": "infoblox.member",
+		"name": delegatedMemberUpdatedName,
 	}
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -342,7 +344,7 @@ func TestAccRangetemplateResource_DelegatedMember(t *testing.T) {
 				Config: testAccRangetemplateDelegatedMember(delegatedMember, name, numberOfAdresses, offset),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangetemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "delegated_member.name", "infoblox.localdomain"),
+					resource.TestCheckResourceAttr(resourceName, "delegated_member.name", delegatedMemberName),
 				),
 			},
 			// Update and Read
@@ -350,7 +352,7 @@ func TestAccRangetemplateResource_DelegatedMember(t *testing.T) {
 				Config: testAccRangetemplateDelegatedMember(delegatedMemberUpdated, name, numberOfAdresses, offset),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangetemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "delegated_member.name", "infoblox.member"),
+					resource.TestCheckResourceAttr(resourceName, "delegated_member.name", delegatedMemberUpdatedName),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -1146,12 +1148,13 @@ func TestAccRangetemplateResource_Member(t *testing.T) {
 	name := acctest.RandomNameWithPrefix("range-template")
 	numberOfAdresses := 100
 	offset := 50
-
+	memberName := utils.GetNIOSGridMasterHostName()
+	memberUpdatedName := utils.GetNIOSGridMemberHostName()
 	member := map[string]string{
-		"name": "infoblox.localdomain",
+		"name": memberName,
 	}
 	memberUpdated := map[string]string{
-		"name": "infoblox.member",
+		"name": memberUpdatedName,
 	}
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -1163,7 +1166,7 @@ func TestAccRangetemplateResource_Member(t *testing.T) {
 				Config: testAccRangetemplateMember(member, name, numberOfAdresses, offset),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangetemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "member.name", "infoblox.localdomain"),
+					resource.TestCheckResourceAttr(resourceName, "member.name", memberName),
 				),
 			},
 			// Update and Read
@@ -1171,7 +1174,7 @@ func TestAccRangetemplateResource_Member(t *testing.T) {
 				Config: testAccRangetemplateMember(memberUpdated, name, numberOfAdresses, offset),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangetemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "member.name", "infoblox.member"),
+					resource.TestCheckResourceAttr(resourceName, "member.name", memberUpdatedName),
 				),
 			},
 			// Delete testing automatically occurs in TestCase

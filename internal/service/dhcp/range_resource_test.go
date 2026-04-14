@@ -584,7 +584,8 @@ func TestAccRangeResource_DiscoveryMember(t *testing.T) {
 	var v dhcp.Range
 	startAddr := "10.0.0.39"
 	endAddr := "10.0.0.40"
-	discoveryMember := "infoblox.member"
+	memberUpdatedName := utils.GetNIOSGridMemberHostName()
+	discoveryMember := memberUpdatedName
 	discoveryMemberUpdate := "infoblox.member2"
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -1480,11 +1481,13 @@ func TestAccRangeResource_Member(t *testing.T) {
 	var v dhcp.Range
 	startAddr := "102.0.0.93"
 	endAddr := "102.0.0.94"
+	memberName := utils.GetNIOSGridMasterHostName()
+	memberUpdatedName := utils.GetNIOSGridMemberHostName()
 	member := map[string]any{
-		"name": "infoblox.localdomain",
+		"name": memberName,
 	}
 	member2 := map[string]any{
-		"name": "infoblox.member",
+		"name": memberUpdatedName,
 	}
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -1496,7 +1499,7 @@ func TestAccRangeResource_Member(t *testing.T) {
 				Config: testAccRangeMember(startAddr, endAddr, member, member2),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangeExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "member.name", "infoblox.localdomain"),
+					resource.TestCheckResourceAttr(resourceName, "member.name", memberName),
 				),
 			},
 			// Update and Read
@@ -1504,7 +1507,7 @@ func TestAccRangeResource_Member(t *testing.T) {
 				Config: testAccRangeMember(startAddr, endAddr, member2, member),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangeExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "member.name", "infoblox.member"),
+					resource.TestCheckResourceAttr(resourceName, "member.name", memberUpdatedName),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -2084,7 +2087,7 @@ func TestAccRangeResource_ServerAssociationType(t *testing.T) {
 	serverAssociationType := "FAILOVER"
 	failoverAssociation := "example_failover_association1"
 	serverAssociationTypeUpdate := "MEMBER"
-	member := "infoblox.member"
+	member := utils.GetNIOSGridMemberHostName()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -2106,7 +2109,7 @@ func TestAccRangeResource_ServerAssociationType(t *testing.T) {
 					testAccCheckRangeExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "server_association_type", "MEMBER"),
 					resource.TestCheckResourceAttr(resourceName, "member.ipv4addr", "172.28.83.209"),
-					resource.TestCheckResourceAttr(resourceName, "member.name", "infoblox.localdomain"),
+					resource.TestCheckResourceAttr(resourceName, "member.name", member),
 				),
 			},
 			// Delete testing automatically occurs in TestCase

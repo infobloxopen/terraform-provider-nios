@@ -429,11 +429,13 @@ func TestAccIpv6networktemplateResource_DelegatedMember(t *testing.T) {
 	var resourceName = "nios_ipam_ipv6networktemplate.test_delegated_member"
 	var v ipam.Ipv6networktemplate
 	name := acctest.RandomNameWithPrefix("network-template")
+	memberName := utils.GetNIOSGridMasterHostName()
+	memberUpdatedName := utils.GetNIOSGridMemberHostName()
 	delegatedMemberVal := map[string]any{
-		"name": "infoblox.member",
+		"name": memberUpdatedName,
 	}
 	delegatedMemberValUpdated := map[string]any{
-		"name": "infoblox.localdomain",
+		"name": memberName,
 	}
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -445,7 +447,7 @@ func TestAccIpv6networktemplateResource_DelegatedMember(t *testing.T) {
 				Config: testAccIpv6networktemplateDelegatedMember(name, 24, delegatedMemberVal),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networktemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "delegated_member.name", "infoblox.member"),
+					resource.TestCheckResourceAttr(resourceName, "delegated_member.name", memberName),
 				),
 			},
 			// Update and Read
@@ -453,7 +455,7 @@ func TestAccIpv6networktemplateResource_DelegatedMember(t *testing.T) {
 				Config: testAccIpv6networktemplateDelegatedMember(name, 24, delegatedMemberValUpdated),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networktemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "delegated_member.name", "infoblox.localdomain"),
+					resource.TestCheckResourceAttr(resourceName, "delegated_member.name", memberName),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -704,14 +706,16 @@ func TestAccIpv6networktemplateResource_Members(t *testing.T) {
 	var resourceName = "nios_ipam_ipv6networktemplate.test_members"
 	var v ipam.Ipv6networktemplate
 	name := acctest.RandomNameWithPrefix("network-template")
+	memberName := utils.GetNIOSGridMasterHostName()
+	memberUpdatedName := utils.GetNIOSGridMemberHostName()
 	membersVal := []map[string]any{
 		{
-			"name": "infoblox.localdomain",
+			"name": memberName,
 		},
 	}
 	membersValUpdated := []map[string]any{
 		{
-			"name": "infoblox.member",
+			"name": memberUpdatedName,
 		},
 	}
 
@@ -724,7 +728,7 @@ func TestAccIpv6networktemplateResource_Members(t *testing.T) {
 				Config: testAccIpv6networktemplateMembers(name, 24, membersVal),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networktemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "members.0.name", "infoblox.localdomain"),
+					resource.TestCheckResourceAttr(resourceName, "members.0.name", memberName),
 				),
 			},
 			// Update and Read
@@ -732,7 +736,7 @@ func TestAccIpv6networktemplateResource_Members(t *testing.T) {
 				Config: testAccIpv6networktemplateMembers(name, 24, membersValUpdated),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networktemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "members.0.name", "infoblox.member"),
+					resource.TestCheckResourceAttr(resourceName, "members.0.name", memberUpdatedName),
 				),
 			},
 			// Delete testing automatically occurs in TestCase

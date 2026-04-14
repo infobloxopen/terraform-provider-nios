@@ -365,7 +365,8 @@ func TestAccDxlEndpointResource_OutboundMemberType(t *testing.T) {
 	var resourceName = "nios_misc_dxl_endpoint.test_outbound_member_type"
 	var v misc.DxlEndpoint
 	name := acctest.RandomNameWithPrefix("dxl-endpoint")
-	outboundMembers := []string{"infoblox.member"}
+	memberUpdatedName := utils.GetNIOSGridMemberHostName()
+	outboundMembers := []string{memberUpdatedName}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -394,7 +395,8 @@ func TestAccDxlEndpointResource_OutboundMembers(t *testing.T) {
 	var resourceName = "nios_misc_dxl_endpoint.test_outbound_members"
 	var v misc.DxlEndpoint
 	name := acctest.RandomNameWithPrefix("dxl-endpoint")
-	outboundMembersVal := []string{"infoblox.member"}
+	memberUpdatedName := utils.GetNIOSGridMemberHostName()
+	outboundMembersVal := []string{memberUpdatedName}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -406,7 +408,7 @@ func TestAccDxlEndpointResource_OutboundMembers(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDxlEndpointExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "outbound_members.#", "1"),
-					resource.TestCheckResourceAttr(resourceName, "outbound_members.0", "infoblox.member"),
+					resource.TestCheckResourceAttr(resourceName, "outbound_members.0", memberUpdatedName),
 				),
 			},
 			// Delete testing automatically occurs in TestCase

@@ -451,7 +451,7 @@ func TestAccMsserverResource_GridMember(t *testing.T) {
 
 	address := "10.10.0.13"
 	loginName := acctest.RandomName()
-	member1 := "infoblox.localdomain"
+	member1 := utils.GetNIOSGridMasterHostName()
 	member2 := "member.com"
 
 	resource.ParallelTest(t, resource.TestCase{

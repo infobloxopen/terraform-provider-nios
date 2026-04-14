@@ -203,7 +203,8 @@ func TestAccSyslogEndpointResource_OutboundMemberType(t *testing.T) {
 	connectionType := "udp"
 	format := "formatted"
 	updatedOutboundMember := "MEMBER"
-	outboundMember := "infoblox.member"
+	memberUpdatedName := utils.GetNIOSGridMemberHostName()
+	outboundMember := memberUpdatedName
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -239,8 +240,9 @@ func TestAccSyslogEndpointResource_OutboundMembers(t *testing.T) {
 	connectionType := "udp"
 	format := "formatted"
 	outboundMemberTypeUpdated := "MEMBER"
-	outboundMember := "infoblox.member"
-	outboundMemberUpdated := "infoblox.grid_master_candidate1"
+	memberUpdatedName := utils.GetNIOSGridMemberHostName()
+	outboundMember := memberUpdatedName
+	outboundMemberUpdated := "infoblox.member2"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },

@@ -180,6 +180,7 @@ func TestAccZoneRpResource_ExternalPrimaries(t *testing.T) {
 	var v dns.ZoneRp
 	zoneFqdn := acctest.RandomNameWithPrefix("zone-rp") + ".com"
 	tsigKeyName := acctest.RandomName()
+	memberUpdatedName := utils.GetNIOSGridMemberHostName()
 	externalPrimaries := []map[string]any{
 		{
 			"address":           "10.0.0.0",
@@ -198,7 +199,7 @@ func TestAccZoneRpResource_ExternalPrimaries(t *testing.T) {
 	}
 	gridSecondary := []map[string]any{
 		{
-			"name": "infoblox.member",
+			"name": memberUpdatedName,
 		},
 	}
 
@@ -237,6 +238,7 @@ func TestAccZoneRpResource_ExternalSecondaries(t *testing.T) {
 	var resourceName = "nios_dns_zone_rp.test_external_secondaries"
 	var v dns.ZoneRp
 	zoneFqdn := acctest.RandomNameWithPrefix("zone-rp") + ".com"
+	memberUpdatedName := utils.GetNIOSGridMemberHostName()
 	externalSecondaries := []map[string]any{
 		{
 			"address":           "10.0.0.0",
@@ -249,7 +251,7 @@ func TestAccZoneRpResource_ExternalSecondaries(t *testing.T) {
 	}
 	gridPrimary := []map[string]any{
 		{
-			"name": "infoblox.member",
+			"name": memberUpdatedName,
 		},
 	}
 	updatedExternalSecondaries := []map[string]any{
@@ -376,19 +378,21 @@ func TestAccZoneRpResource_GridPrimary(t *testing.T) {
 	var resourceName = "nios_dns_zone_rp.test_grid_primary"
 	var v dns.ZoneRp
 	zoneFqdn := acctest.RandomNameWithPrefix("zone-rp") + ".com"
+	memberName := utils.GetNIOSGridMasterHostName()
+	memberUpdatedName := utils.GetNIOSGridMemberHostName()
 	gridPrimary := []map[string]any{
 		{
-			"name":    "infoblox.member",
+			"name":    memberUpdatedName,
 			"stealth": false,
 		},
 	}
 	gridPrimaryUpdated := []map[string]any{
 		{
-			"name":    "infoblox.localdomain",
+			"name":    memberName,
 			"stealth": true,
 		},
 		{
-			"name":    "infoblox.member",
+			"name":    memberUpdatedName,
 			"stealth": false,
 		},
 	}
@@ -403,7 +407,7 @@ func TestAccZoneRpResource_GridPrimary(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneRpExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "grid_primary.#", "1"),
-					resource.TestCheckResourceAttr(resourceName, "grid_primary.0.name", "infoblox.member")),
+					resource.TestCheckResourceAttr(resourceName, "grid_primary.0.name", memberUpdatedName)),
 			},
 			// Update and Read
 			{
@@ -411,9 +415,9 @@ func TestAccZoneRpResource_GridPrimary(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneRpExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "grid_primary.#", "2"),
-					resource.TestCheckResourceAttr(resourceName, "grid_primary.0.name", "infoblox.localdomain"),
+					resource.TestCheckResourceAttr(resourceName, "grid_primary.0.name", memberName),
 					resource.TestCheckResourceAttr(resourceName, "grid_primary.0.stealth", "true"),
-					resource.TestCheckResourceAttr(resourceName, "grid_primary.1.name", "infoblox.member"),
+					resource.TestCheckResourceAttr(resourceName, "grid_primary.1.name", memberUpdatedName),
 					resource.TestCheckResourceAttr(resourceName, "grid_primary.1.stealth", "false"),
 				),
 			},
@@ -426,14 +430,16 @@ func TestAccZoneRpResource_GridSecondaries(t *testing.T) {
 	var resourceName = "nios_dns_zone_rp.test_grid_secondaries"
 	var v dns.ZoneRp
 	zoneFqdn := acctest.RandomNameWithPrefix("zone-rp") + ".com"
+	memberName := utils.GetNIOSGridMasterHostName()
+	memberUpdatedName := utils.GetNIOSGridMemberHostName()
 	gridPrimary := []map[string]any{
 		{
-			"name": "infoblox.localdomain",
+			"name": memberName,
 		},
 	}
 	gridSecondary := []map[string]any{
 		{
-			"name":                       "infoblox.member",
+			"name":                       memberUpdatedName,
 			"stealth":                    false,
 			"grid_replicate":             true,
 			"lead":                       false,
@@ -442,12 +448,12 @@ func TestAccZoneRpResource_GridSecondaries(t *testing.T) {
 	}
 	updatedgridPrimary := []map[string]any{
 		{
-			"name": "infoblox.member",
+			"name": memberUpdatedName,
 		},
 	}
 	updatedGridSecondary := []map[string]any{
 		{
-			"name": "infoblox.localdomain",
+			"name": memberName,
 		},
 	}
 
@@ -461,7 +467,7 @@ func TestAccZoneRpResource_GridSecondaries(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneRpExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "grid_secondaries.#", "1"),
-					resource.TestCheckResourceAttr(resourceName, "grid_secondaries.0.name", "infoblox.member"),
+					resource.TestCheckResourceAttr(resourceName, "grid_secondaries.0.name", memberUpdatedName),
 					resource.TestCheckResourceAttr(resourceName, "grid_secondaries.0.stealth", "false"),
 					resource.TestCheckResourceAttr(resourceName, "grid_secondaries.0.grid_replicate", "true"),
 					resource.TestCheckResourceAttr(resourceName, "grid_secondaries.0.lead", "false"),
@@ -474,7 +480,7 @@ func TestAccZoneRpResource_GridSecondaries(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneRpExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "grid_secondaries.#", "1"),
-					resource.TestCheckResourceAttr(resourceName, "grid_secondaries.0.name", "infoblox.localdomain")),
+					resource.TestCheckResourceAttr(resourceName, "grid_secondaries.0.name", memberName)),
 			},
 			// Delete testing automatically occurs in TestCase
 		},
@@ -546,14 +552,15 @@ func TestAccZoneRpResource_MemberSoaMnames(t *testing.T) {
 	var resourceName = "nios_dns_zone_rp.test_member_soa_mnames"
 	var v dns.ZoneRp
 	zoneFqdn := acctest.RandomNameWithPrefix("zone-rp") + ".com"
+	memberName := utils.GetNIOSGridMasterHostName()
 	gridPrimary := []map[string]any{
 		{
-			"name": "infoblox.localdomain",
+			"name": memberName,
 		},
 	}
 	memberSoaMnames := []map[string]any{
 		{
-			"grid_primary": "infoblox.localdomain",
+			"grid_primary": memberName,
 			"mname":        "example.com",
 		},
 	}
@@ -572,7 +579,7 @@ func TestAccZoneRpResource_MemberSoaMnames(t *testing.T) {
 				Config: testAccZoneRpMemberSoaMnames(zoneFqdn, "default", gridPrimary, memberSoaMnames),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneRpExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "member_soa_mnames.0.grid_primary", "infoblox.localdomain"),
+					resource.TestCheckResourceAttr(resourceName, "member_soa_mnames.0.grid_primary", memberName),
 					resource.TestCheckResourceAttr(resourceName, "member_soa_mnames.0.mname", "example.com"),
 				),
 			},
@@ -593,9 +600,10 @@ func TestAccZoneRpResource_NsGroup(t *testing.T) {
 	var resourceName = "nios_dns_zone_rp.test_ns_group"
 	var v dns.ZoneRp
 	zoneFqdn := acctest.RandomNameWithPrefix("zone-rp") + ".com"
+	memberUpdatedName := utils.GetNIOSGridMemberHostName()
 	gridPrimary := []map[string]any{
 		{
-			"name": "infoblox.member",
+			"name": memberUpdatedName,
 		},
 	}
 
@@ -940,9 +948,10 @@ func TestAccZoneRpResource_SoaDefaultTtl(t *testing.T) {
 	var resourceName = "nios_dns_zone_rp.test_soa_default_ttl"
 	var v dns.ZoneRp
 	zoneFqdn := acctest.RandomNameWithPrefix("zone-rp") + ".com"
+	memberName := utils.GetNIOSGridMasterHostName()
 	gridPrimary := []map[string]any{
 		{
-			"name": "infoblox.localdomain",
+			"name": memberName,
 		},
 	}
 
@@ -975,9 +984,10 @@ func TestAccZoneRpResource_SoaEmail(t *testing.T) {
 	var resourceName = "nios_dns_zone_rp.test_soa_email"
 	var v dns.ZoneRp
 	zoneFqdn := acctest.RandomNameWithPrefix("zone-rp") + ".com"
+	memberUpdatedName := utils.GetNIOSGridMemberHostName()
 	gridPrimary := []map[string]any{
 		{
-			"name": "infoblox.member",
+			"name": memberUpdatedName,
 		},
 	}
 
@@ -1010,9 +1020,10 @@ func TestAccZoneRpResource_SoaExpire(t *testing.T) {
 	var resourceName = "nios_dns_zone_rp.test_soa_expire"
 	var v dns.ZoneRp
 	zoneFqdn := acctest.RandomNameWithPrefix("zone-rp") + ".com"
+	memberName := utils.GetNIOSGridMasterHostName()
 	gridPrimary := []map[string]any{
 		{
-			"name": "infoblox.localdomain",
+			"name": memberName,
 		},
 	}
 
@@ -1045,9 +1056,10 @@ func TestAccZoneRpResource_SoaNegativeTtl(t *testing.T) {
 	var resourceName = "nios_dns_zone_rp.test_soa_negative_ttl"
 	var v dns.ZoneRp
 	zoneFqdn := acctest.RandomNameWithPrefix("zone-rp") + ".com"
+	memberName := utils.GetNIOSGridMasterHostName()
 	gridPrimary := []map[string]any{
 		{
-			"name": "infoblox.localdomain",
+			"name": memberName,
 		},
 	}
 
@@ -1080,9 +1092,10 @@ func TestAccZoneRpResource_SoaRefresh(t *testing.T) {
 	var resourceName = "nios_dns_zone_rp.test_soa_refresh"
 	var v dns.ZoneRp
 	zoneFqdn := acctest.RandomNameWithPrefix("zone-rp") + ".com"
+	memberName := utils.GetNIOSGridMasterHostName()
 	gridPrimary := []map[string]any{
 		{
-			"name": "infoblox.localdomain",
+			"name": memberName,
 		},
 	}
 
@@ -1115,9 +1128,10 @@ func TestAccZoneRpResource_SoaRetry(t *testing.T) {
 	var resourceName = "nios_dns_zone_rp.test_soa_retry"
 	var v dns.ZoneRp
 	zoneFqdn := acctest.RandomNameWithPrefix("zone-rp") + ".com"
+	memberName := utils.GetNIOSGridMasterHostName()
 	gridPrimary := []map[string]any{
 		{
-			"name": "infoblox.localdomain",
+			"name": memberName,
 		},
 	}
 
@@ -1150,9 +1164,10 @@ func TestAccZoneRpResource_SoaSerialNumber(t *testing.T) {
 	var resourceName = "nios_dns_zone_rp.test_soa_serial_number"
 	var v dns.ZoneRp
 	zoneFqdn := acctest.RandomNameWithPrefix("zone-rp") + ".com"
+	memberName := utils.GetNIOSGridMasterHostName()
 	gridPrimary := []map[string]any{
 		{
-			"name": "infoblox.localdomain",
+			"name": memberName,
 		},
 	}
 
@@ -1215,6 +1230,7 @@ func TestAccZoneRpResource_UseExternalPrimary(t *testing.T) {
 	var resourceName = "nios_dns_zone_rp.test_use_external_primary"
 	var v dns.ZoneRp
 	zoneFqdn := acctest.RandomNameWithPrefix("zone-rp") + ".com"
+	memberName := utils.GetNIOSGridMasterHostName()
 	externalPrimaries := []map[string]any{
 		{
 			"address": "10.0.0.0",
@@ -1223,7 +1239,7 @@ func TestAccZoneRpResource_UseExternalPrimary(t *testing.T) {
 	}
 	gridSecondaries := []map[string]any{
 		{
-			"name": "infoblox.localdomain",
+			"name": memberName,
 		},
 	}
 
@@ -1256,9 +1272,10 @@ func TestAccZoneRpResource_UseGridZoneTimer(t *testing.T) {
 	var resourceName = "nios_dns_zone_rp.test_use_grid_zone_timer"
 	var v dns.ZoneRp
 	zoneFqdn := acctest.RandomNameWithPrefix("zone-rp") + ".com"
+	memberName := utils.GetNIOSGridMasterHostName()
 	gridPrimary := []map[string]any{
 		{
-			"name": "infoblox.localdomain",
+			"name": memberName,
 		},
 	}
 
@@ -1381,9 +1398,10 @@ func TestAccZoneRpResource_UseSoaEmail(t *testing.T) {
 	var resourceName = "nios_dns_zone_rp.test_use_soa_email"
 	var v dns.ZoneRp
 	zoneFqdn := acctest.RandomNameWithPrefix("zone-rp") + ".com"
+	memberName := utils.GetNIOSGridMasterHostName()
 	gridPrimary := []map[string]any{
 		{
-			"name": "infoblox.localdomain",
+			"name": memberName,
 		},
 	}
 

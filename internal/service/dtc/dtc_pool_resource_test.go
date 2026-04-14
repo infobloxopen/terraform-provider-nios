@@ -186,12 +186,13 @@ func TestAccDtcPoolResource_ConsolidatedMonitors(t *testing.T) {
 	var v dtc.DtcPool
 	name := acctest.RandomNameWithPrefix("dtc-pool")
 	lbPreferredMethod := "ROUND_ROBIN"
+	memberName := utils.GetNIOSGridMasterHostName()
 	consolidatedMonitors := []map[string]interface{}{
 		{
 			"monitor":                   "${nios_dtc_monitor_http.test_http_monitor1.ref}",
 			"availability":              "ANY",
 			"full_health_communication": false,
-			"members":                   []string{"infoblox.localdomain"},
+			"members":                   []string{memberName},
 		},
 	}
 	monitors := []string{"${nios_dtc_monitor_http.test_http_monitor1.ref}", "${nios_dtc_monitor_icmp.test_icmp_monitor1.ref}"}
@@ -200,7 +201,7 @@ func TestAccDtcPoolResource_ConsolidatedMonitors(t *testing.T) {
 			"monitor":                   "${nios_dtc_monitor_icmp.test_icmp_monitor1.ref}",
 			"availability":              "ALL",
 			"full_health_communication": false,
-			"members":                   []string{"infoblox.localdomain"},
+			"members":                   []string{memberName},
 		},
 	}
 
@@ -216,7 +217,7 @@ func TestAccDtcPoolResource_ConsolidatedMonitors(t *testing.T) {
 					resource.TestCheckResourceAttrPair(resourceName, "consolidated_monitors.0.monitor", "nios_dtc_monitor_http.test_http_monitor1", "ref"),
 					resource.TestCheckResourceAttr(resourceName, "consolidated_monitors.0.availability", "ANY"),
 					resource.TestCheckResourceAttr(resourceName, "consolidated_monitors.0.full_health_communication", "false"),
-					resource.TestCheckResourceAttr(resourceName, "consolidated_monitors.0.members.0", "infoblox.localdomain"),
+					resource.TestCheckResourceAttr(resourceName, "consolidated_monitors.0.members.0", memberName),
 				),
 			},
 			// Update and Read
@@ -227,7 +228,7 @@ func TestAccDtcPoolResource_ConsolidatedMonitors(t *testing.T) {
 					resource.TestCheckResourceAttrPair(resourceName, "consolidated_monitors.0.monitor", "nios_dtc_monitor_icmp.test_icmp_monitor1", "ref"),
 					resource.TestCheckResourceAttr(resourceName, "consolidated_monitors.0.availability", "ALL"),
 					resource.TestCheckResourceAttr(resourceName, "consolidated_monitors.0.full_health_communication", "false"),
-					resource.TestCheckResourceAttr(resourceName, "consolidated_monitors.0.members.0", "infoblox.localdomain"),
+					resource.TestCheckResourceAttr(resourceName, "consolidated_monitors.0.members.0", memberName),
 				),
 			},
 			// Delete testing automatically occurs in TestCase

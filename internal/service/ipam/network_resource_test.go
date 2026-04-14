@@ -1429,11 +1429,12 @@ func TestAccNetworkResource_Members(t *testing.T) {
 	var v ipam.Network
 
 	network := acctest.RandomCIDRNetwork()
+	memberName := utils.GetNIOSGridMasterHostName()
 	member1 := []map[string]any{
 
 		{
 			"struct": "dhcpmember",
-			"name":   "infoblox.localdomain",
+			"name":   memberName,
 		},
 	}
 	member2 := []map[string]any{
@@ -1454,7 +1455,7 @@ func TestAccNetworkResource_Members(t *testing.T) {
 					testAccCheckNetworkExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "network", network),
 					resource.TestCheckResourceAttr(resourceName, "members.0.struct", "dhcpmember"),
-					resource.TestCheckResourceAttr(resourceName, "members.0.name", "infoblox.localdomain"),
+					resource.TestCheckResourceAttr(resourceName, "members.0.name", memberName),
 				),
 			},
 			// Update and Read

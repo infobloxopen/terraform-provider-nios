@@ -171,12 +171,13 @@ func TestAccUpgradegroupResource_DistributionTime(t *testing.T) {
 	var v grid.Upgradegroup
 
 	name := acctest.RandomNameWithPrefix("example-upgradegroup")
+	memberUpdatedName := utils.GetNIOSGridMemberHostName()
 
 	now := time.Now()
 	distributionTime := now.Add(24 * time.Hour).Format(utils.NaiveDatetimeLayout)
 	updatedDistributionTime := now.Add(48 * time.Hour).Format(utils.NaiveDatetimeLayout)
 	grid_member := []map[string]any{
-		{"member": "infoblox.member"},
+		{"member": memberUpdatedName},
 	}
 
 	resource.Test(t, resource.TestCase{
@@ -209,8 +210,9 @@ func TestAccUpgradegroupResource_Members(t *testing.T) {
 	var v grid.Upgradegroup
 
 	name := acctest.RandomNameWithPrefix("example-upgradegroup")
+	memberUpdatedName := utils.GetNIOSGridMemberHostName()
 	member1 := []map[string]any{
-		{"member": "infoblox.member"},
+		{"member": memberUpdatedName},
 	}
 	member2 := []map[string]any{
 		{"member": "infoblox.member2"},
@@ -225,7 +227,7 @@ func TestAccUpgradegroupResource_Members(t *testing.T) {
 				Config: testAccUpgradegroupMembers(name, member1),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckUpgradegroupExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "members.0.member", "infoblox.member"),
+					resource.TestCheckResourceAttr(resourceName, "members.0.member", memberUpdatedName),
 				),
 			},
 			// // Update and Read
@@ -344,8 +346,9 @@ func TestAccUpgradegroupResource_UpgradeTime(t *testing.T) {
 	now := time.Now()
 	upgradeTime := now.Add(30 * time.Hour).Format(utils.NaiveDatetimeLayout)
 	updatedUpgradeTime := now.Add(54 * time.Hour).Format(utils.NaiveDatetimeLayout)
+	memberUpdatedName := utils.GetNIOSGridMemberHostName()
 	grid_member := []map[string]any{
-		{"member": "infoblox.member"},
+		{"member": memberUpdatedName},
 	}
 
 	resource.Test(t, resource.TestCase{

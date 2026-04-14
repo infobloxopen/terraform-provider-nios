@@ -554,11 +554,13 @@ func TestAccNetworktemplateResource_DelegatedMember(t *testing.T) {
 	var resourceName = "nios_ipam_networktemplate.test_delegated_member"
 	var v ipam.Networktemplate
 	name := acctest.RandomNameWithPrefix("network-template")
+	memberName := utils.GetNIOSGridMasterHostName()
+	memberUpdatedName := utils.GetNIOSGridMemberHostName()
 	delegatedMemberVal := map[string]any{
-		"name": "infoblox.member",
+		"name": memberUpdatedName,
 	}
 	delegatedMemberValUpdated := map[string]any{
-		"name": "infoblox.localdomain",
+		"name": memberName,
 	}
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -570,7 +572,7 @@ func TestAccNetworktemplateResource_DelegatedMember(t *testing.T) {
 				Config: testAccNetworktemplateDelegatedMember(name, 24, delegatedMemberVal),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "delegated_member.name", "infoblox.member"),
+					resource.TestCheckResourceAttr(resourceName, "delegated_member.name", memberUpdatedName),
 				),
 			},
 			// Update and Read
@@ -578,7 +580,7 @@ func TestAccNetworktemplateResource_DelegatedMember(t *testing.T) {
 				Config: testAccNetworktemplateDelegatedMember(name, 24, delegatedMemberValUpdated),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "delegated_member.name", "infoblox.localdomain"),
+					resource.TestCheckResourceAttr(resourceName, "delegated_member.name", memberName),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -1201,16 +1203,18 @@ func TestAccNetworktemplateResource_Members(t *testing.T) {
 	var resourceName = "nios_ipam_networktemplate.test_members"
 	var v ipam.Networktemplate
 	name := acctest.RandomNameWithPrefix("network-template")
+	memberName := utils.GetNIOSGridMasterHostName()
+	memberUpdatedName := utils.GetNIOSGridMemberHostName()
 	membersVal := []map[string]any{
 		{
 			"struct": "dhcpmember",
-			"name":   "infoblox.localdomain",
+			"name":   memberName,
 		},
 	}
 	membersValUpdated := []map[string]any{
 		{
 			"struct": "dhcpmember",
-			"name":   "infoblox.member",
+			"name":   memberUpdatedName,
 		},
 	}
 
@@ -1224,7 +1228,7 @@ func TestAccNetworktemplateResource_Members(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "members.0.struct", "dhcpmember"),
-					resource.TestCheckResourceAttr(resourceName, "members.0.name", "infoblox.localdomain"),
+					resource.TestCheckResourceAttr(resourceName, "members.0.name", memberName),
 				),
 			},
 			// Update and Read
@@ -1233,7 +1237,7 @@ func TestAccNetworktemplateResource_Members(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworktemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "members.0.struct", "dhcpmember"),
-					resource.TestCheckResourceAttr(resourceName, "members.0.name", "infoblox.member")),
+					resource.TestCheckResourceAttr(resourceName, "members.0.name", memberUpdatedName)),
 			},
 			// Delete testing automatically occurs in TestCase
 		},

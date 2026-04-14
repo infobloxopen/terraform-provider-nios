@@ -23,9 +23,10 @@ func TestAccNsgroupForwardingmemberResource_basic(t *testing.T) {
 	var resourceName = "nios_dns_nsgroup_forwardingmember.test"
 	var v dns.NsgroupForwardingmember
 	name := acctest.RandomNameWithPrefix("ns-group-forwardingMember")
+	memberName := utils.GetNIOSGridMasterHostName()
 	forwardingServers := []map[string]any{
 		{
-			"name": "infoblox.localdomain",
+			"name": memberName,
 		},
 	}
 
@@ -39,7 +40,7 @@ func TestAccNsgroupForwardingmemberResource_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNsgroupForwardingmemberExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "name", name),
-					resource.TestCheckResourceAttr(resourceName, "forwarding_servers.0.name", "infoblox.localdomain"),
+					resource.TestCheckResourceAttr(resourceName, "forwarding_servers.0.name", memberName),
 					// Test fields with default value
 					resource.TestCheckResourceAttr(resourceName, "comment", ""),
 				),
@@ -53,9 +54,10 @@ func TestAccNsgroupForwardingmemberResource_disappears(t *testing.T) {
 	resourceName := "nios_dns_nsgroup_forwardingmember.test"
 	var v dns.NsgroupForwardingmember
 	name := acctest.RandomNameWithPrefix("ns-group-forwardingMember")
+	memberName := utils.GetNIOSGridMasterHostName()
 	forwardingServers := []map[string]any{
 		{
-			"name": "infoblox.localdomain",
+			"name": memberName,
 		},
 	}
 
@@ -80,9 +82,10 @@ func TestAccNsgroupForwardingmemberResource_Comment(t *testing.T) {
 	var resourceName = "nios_dns_nsgroup_forwardingmember.test_comment"
 	var v dns.NsgroupForwardingmember
 	name := acctest.RandomNameWithPrefix("ns-group-forwardingMember")
+	memberName := utils.GetNIOSGridMasterHostName()
 	forwardingServers := []map[string]any{
 		{
-			"name": "infoblox.localdomain",
+			"name": memberName,
 		},
 	}
 
@@ -115,9 +118,10 @@ func TestAccNsgroupForwardingmemberResource_ExtAttrs(t *testing.T) {
 	var resourceName = "nios_dns_nsgroup_forwardingmember.test_extattrs"
 	var v dns.NsgroupForwardingmember
 	name := acctest.RandomNameWithPrefix("ns-group-forwardingMember")
+	memberName := utils.GetNIOSGridMasterHostName()
 	forwardingServers := []map[string]any{
 		{
-			"name": "infoblox.localdomain",
+			"name": memberName,
 		},
 	}
 	extAttrValue1 := acctest.RandomName()
@@ -156,14 +160,16 @@ func TestAccNsgroupForwardingmemberResource_ForwardingServers(t *testing.T) {
 	var resourceName = "nios_dns_nsgroup_forwardingmember.test_forwarding_servers"
 	var v dns.NsgroupForwardingmember
 	name := acctest.RandomNameWithPrefix("ns-group-forwardingMember")
+	memberName := utils.GetNIOSGridMasterHostName()
+	memberUpdatedName := utils.GetNIOSGridMemberHostName()
 	forwardingServers := []map[string]any{
 		{
-			"name": "infoblox.localdomain",
+			"name": memberName,
 		},
 	}
 	forwardingServersUpdate := []map[string]any{
 		{
-			"name":                    "infoblox.member",
+			"name":                    memberUpdatedName,
 			"use_override_forwarders": true,
 			"forward_to": []map[string]any{
 				{
@@ -183,7 +189,7 @@ func TestAccNsgroupForwardingmemberResource_ForwardingServers(t *testing.T) {
 				Config: testAccNsgroupForwardingmemberForwardingServers(name, forwardingServers),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNsgroupForwardingmemberExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "forwarding_servers.0.name", "infoblox.localdomain"),
+					resource.TestCheckResourceAttr(resourceName, "forwarding_servers.0.name", memberName),
 				),
 			},
 			// Update and Read
@@ -191,7 +197,7 @@ func TestAccNsgroupForwardingmemberResource_ForwardingServers(t *testing.T) {
 				Config: testAccNsgroupForwardingmemberForwardingServers(name, forwardingServersUpdate),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNsgroupForwardingmemberExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "forwarding_servers.0.name", "infoblox.member"),
+					resource.TestCheckResourceAttr(resourceName, "forwarding_servers.0.name", memberUpdatedName),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -204,9 +210,10 @@ func TestAccNsgroupForwardingmemberResource_Name(t *testing.T) {
 	var v dns.NsgroupForwardingmember
 	name := acctest.RandomNameWithPrefix("ns-group-forwardingMember")
 	nameUpdate := acctest.RandomNameWithPrefix("ns-group-forwardingMember")
+	memberName := utils.GetNIOSGridMasterHostName()
 	forwardingServers := []map[string]any{
 		{
-			"name": "infoblox.localdomain",
+			"name": memberName,
 		},
 	}
 	resource.ParallelTest(t, resource.TestCase{

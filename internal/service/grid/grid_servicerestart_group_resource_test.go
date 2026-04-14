@@ -140,6 +140,8 @@ func TestAccGridServicerestartGroupResource_Members(t *testing.T) {
 	var resourceName = "nios_grid_servicerestart_group.test_members"
 	var v grid.GridServicerestartGroup
 	name := acctest.RandomNameWithPrefix("grid-service")
+	memberName := utils.GetNIOSGridMasterHostName()
+	memberUpdatedName := utils.GetNIOSGridMemberHostName()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -147,18 +149,18 @@ func TestAccGridServicerestartGroupResource_Members(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccGridServicerestartGroupMembers(name, "DHCP", "infoblox.member"),
+				Config: testAccGridServicerestartGroupMembers(name, "DHCP", memberUpdatedName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckGridServicerestartGroupExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "members.0", "infoblox.member"),
+					resource.TestCheckResourceAttr(resourceName, "members.0", memberUpdatedName),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccGridServicerestartGroupMembers(name, "DNS", "infoblox.localdomain"),
+				Config: testAccGridServicerestartGroupMembers(name, "DNS", memberName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckGridServicerestartGroupExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "members.0", "infoblox.localdomain"),
+					resource.TestCheckResourceAttr(resourceName, "members.0", memberName),
 				),
 			},
 			// Delete testing automatically occurs in TestCase

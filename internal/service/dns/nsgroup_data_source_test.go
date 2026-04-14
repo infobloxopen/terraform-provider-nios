@@ -17,9 +17,10 @@ func TestAccNsgroupDataSource_Filters(t *testing.T) {
 	resourceName := "nios_dns_nsgroup.test"
 	var v dns.Nsgroup
 	name := acctest.RandomNameWithPrefix("ns-group")
+	memberName := utils.GetNIOSGridMasterHostName()
 	gridPrimary := []map[string]any{
 		{
-			"name": "infoblox.localdomain",
+			"name": memberName,
 		},
 	}
 
@@ -45,9 +46,10 @@ func TestAccNsgroupDataSource_ExtAttrFilters(t *testing.T) {
 	resourceName := "nios_dns_nsgroup.test"
 	var v dns.Nsgroup
 	name := acctest.RandomNameWithPrefix("ns-group")
+	memberName := utils.GetNIOSGridMasterHostName()
 	gridPrimary := []map[string]any{
 		{
-			"name": "infoblox.localdomain",
+			"name": memberName,
 		},
 	}
 	extAttrValue := acctest.RandomName()

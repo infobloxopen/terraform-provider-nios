@@ -712,6 +712,8 @@ func TestAccIpv6rangeResource_Member(t *testing.T) {
 	var resourceName = "nios_dhcp_ipv6range.test_member"
 	var v dhcp.Ipv6range
 	view := "default"
+	member1 := utils.GetNIOSGridMasterHostName()
+	memberUpdatedName := utils.GetNIOSGridMemberHostName()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -719,18 +721,18 @@ func TestAccIpv6rangeResource_Member(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccIpv6rangeMember(view, "140::1", "140::10", "infoblox.localdomain", "infoblox.member", "MEMBER"),
+				Config: testAccIpv6rangeMember(view, "140::1", "140::10", member1, memberUpdatedName, "MEMBER"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6rangeExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "member.name", "infoblox.localdomain"),
+					resource.TestCheckResourceAttr(resourceName, "member.name", member1),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccIpv6rangeMember(view, "140::1", "140::10", "infoblox.member", "infoblox.localdomain", "MEMBER"),
+				Config: testAccIpv6rangeMember(view, "140::1", "140::10", memberUpdatedName, member1, "MEMBER"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6rangeExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "member.name", "infoblox.member"),
+					resource.TestCheckResourceAttr(resourceName, "member.name", memberUpdatedName),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -1001,6 +1003,7 @@ func TestAccIpv6rangeResource_ServerAssociationType(t *testing.T) {
 	var resourceName = "nios_dhcp_ipv6range.test_server_association_type"
 	var v dhcp.Ipv6range
 	view := "default"
+	memberUpdatedName := utils.GetNIOSGridMemberHostName()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1008,7 +1011,7 @@ func TestAccIpv6rangeResource_ServerAssociationType(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccIpv6rangeServerAssociationType(view, "141::1", "141::10", "MEMBER", "infoblox.member"),
+				Config: testAccIpv6rangeServerAssociationType(view, "141::1", "141::10", "MEMBER", memberUpdatedName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6rangeExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "server_association_type", "MEMBER"),
@@ -1016,7 +1019,7 @@ func TestAccIpv6rangeResource_ServerAssociationType(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccIpv6rangeServerAssociationType(view, "141::1", "141::10", "NONE", "infoblox.member"),
+				Config: testAccIpv6rangeServerAssociationType(view, "141::1", "141::10", "NONE", memberUpdatedName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6rangeExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "server_association_type", "NONE"),
