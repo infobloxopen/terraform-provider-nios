@@ -62,8 +62,7 @@ pipeline {
             //     '''
             // }
             steps {
-                git branch: 'fix_tests',
-                    url: 'https://github.com/unasra/terraform-provider-nios.git',
+                git url: 'https://github.com/unasra/terraform-provider-nios.git', branch: 'fix_tests'
             }
             // steps {
             //     checkout([
