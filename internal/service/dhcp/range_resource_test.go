@@ -2082,9 +2082,9 @@ func TestAccRangeResource_ServerAssociationType(t *testing.T) {
 	startAddr := "10.0.0.121"
 	endAddr := "10.0.0.122"
 	serverAssociationType := "FAILOVER"
-	failoverAssociation := "example_failover_association"
+	failoverAssociation := "example_failover_association1"
 	serverAssociationTypeUpdate := "MEMBER"
-	member := "infoblox.localdomain"
+	member := "infoblox.member"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },

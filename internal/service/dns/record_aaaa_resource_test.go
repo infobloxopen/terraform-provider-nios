@@ -317,8 +317,7 @@ func TestAccRecordAaaaResource_Ipv6addr(t *testing.T) {
 }
 
 // TestAccRecordAaaaResource_FuncCall tests the "func_call" attribute functionality
-// which allocates IPv6 addresses using next_available_ip. Since func_call attribute can't be
-// updated, the comment is updated to demonstrate an update to the resource
+// which allocates IPv6 addresses using next_available_ip.
 func TestAccRecordAaaaResource_FuncCall(t *testing.T) {
 	var resourceName = "nios_dns_record_aaaa.test_func_call"
 	var v dns.RecordAaaa

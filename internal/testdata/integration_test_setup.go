@@ -8,7 +8,9 @@ import (
 	"fmt"
 	"io"
 	"mime/multipart"
+	"net"
 	"net/http"
+	"net/url"
 	"os"
 	"path/filepath"
 	"strings"
@@ -19,6 +21,7 @@ import (
 	"github.com/infobloxopen/infoblox-nios-go-client/grid"
 	"github.com/infobloxopen/infoblox-nios-go-client/ipam"
 	"github.com/infobloxopen/infoblox-nios-go-client/microsoft"
+	"github.com/infobloxopen/infoblox-nios-go-client/notification"
 	"github.com/infobloxopen/infoblox-nios-go-client/option"
 	"github.com/infobloxopen/infoblox-nios-go-client/security"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
@@ -51,6 +54,96 @@ func firstNonEmpty(values ...string) string {
 		}
 	}
 	return ""
+}
+
+func normalizeAddressFromEnv(value string) string {
+	v := strings.TrimSpace(value)
+	if v == "" {
+		return ""
+	}
+
+	if u, err := url.Parse(v); err == nil && u.Hostname() != "" {
+		return strings.TrimSpace(u.Hostname())
+	}
+
+	if host, _, err := net.SplitHostPort(v); err == nil {
+		return strings.Trim(host, "[]")
+	}
+
+	return v
+}
+
+type GridHostnames struct {
+	MasterHostname string
+	MemberHostname string
+}
+
+// ResolveAndStoreGridHostnames resolves grid hostnames from VIP addresses and
+// persists them into pipeline.env for downstream integration tests.
+func ResolveAndStoreGridHostnames(gridClient *grid.APIClient) (GridHostnames, error) {
+	if gridClient == nil {
+		return GridHostnames{}, fmt.Errorf("resolve hostnames: GRID client is required")
+	}
+
+	masterAddr := normalizeAddressFromEnv(os.Getenv("NIOS_HOST_URL"))
+	memberAddr := normalizeAddressFromEnv(os.Getenv("NIOS_MEMBER_URL"))
+
+	memberListResp, _, err := gridClient.MemberAPI.List(context.Background()).
+		ReturnAsObject(1).
+		ReturnFieldsPlus("vip_setting,host_name").
+		Execute()
+	if err != nil {
+		return GridHostnames{}, fmt.Errorf("resolve hostnames: failed to list members: %w", err)
+	}
+
+	if memberListResp.ListMemberResponseObject == nil {
+		return GridHostnames{}, fmt.Errorf("resolve hostnames: member list response object is nil")
+	}
+
+	memberResp := memberListResp.ListMemberResponseObject.Result
+
+	resolved := GridHostnames{}
+
+	for _, m := range memberResp {
+		if m.VipSetting == nil || m.VipSetting.Address == nil || m.HostName == nil {
+			continue
+		}
+
+		vipAddr := strings.TrimSpace(*m.VipSetting.Address)
+		hostName := strings.TrimSpace(*m.HostName)
+
+		if masterAddr != "" && vipAddr == masterAddr && resolved.MasterHostname == "" {
+			resolved.MasterHostname = hostName
+		}
+
+		if memberAddr != "" && vipAddr == memberAddr && resolved.MemberHostname == "" {
+			resolved.MemberHostname = hostName
+		}
+	}
+
+	if resolved.MasterHostname != "" {
+		if err := writePipelineEnvVar("NIOS_GRID_MASTER_HOSTNAME", resolved.MasterHostname); err != nil {
+			return GridHostnames{}, fmt.Errorf("resolve hostnames: failed to write NIOS_GRID_MASTER_HOSTNAME: %w", err)
+		}
+		fmt.Printf("Mapped master VIP %q to hostname %q\n", masterAddr, resolved.MasterHostname)
+	}
+
+	if resolved.MemberHostname != "" {
+		if err := writePipelineEnvVar("NIOS_GRID_MEMBER_HOSTNAME", resolved.MemberHostname); err != nil {
+			return GridHostnames{}, fmt.Errorf("resolve hostnames: failed to write NIOS_GRID_MEMBER_HOSTNAME: %w", err)
+		}
+		fmt.Printf("Mapped member VIP %q to hostname %q\n", memberAddr, resolved.MemberHostname)
+	}
+
+	if masterAddr != "" && resolved.MasterHostname == "" {
+		fmt.Printf("No member found with VIP address matching NIOS_HOST_URL (%q)\n", masterAddr)
+	}
+
+	if memberAddr != "" && resolved.MemberHostname == "" {
+		fmt.Printf("No member found with VIP address matching NIOS_MEMBER_URL (%q)\n", memberAddr)
+	}
+
+	return resolved, nil
 }
 
 // UploadInit calls the NIOS fileop uploadinit endpoint and returns the upload
@@ -152,11 +245,6 @@ func UploadFile(host, wapiVer, username, password, url, filePath string) error {
 }
 
 // UploadCertificate uses the token from UploadInit to upload a certificate to NIOS.
-// It mirrors:
-//
-//	curl -k -u admin:infoblox -X POST -H "Content-Type: application/json" \
-//	  https://<host>/wapi/<ver>/fileop?_function=uploadcertificate \
-//	  -d '{"certificate_usage":"EAP_CA","member":"infoblox.localdomain","token":"<token>"}'
 func UploadCertificate(host, wapiVer, username, password, certificateUsage, member, token string) error {
 	endpoint := fmt.Sprintf("%s/wapi/%s/fileop?_function=uploadcertificate", host, wapiVer)
 
@@ -191,7 +279,12 @@ func UploadCertificate(host, wapiVer, username, password, certificateUsage, memb
 	}
 	defer resp.Body.Close()
 
-	if resp.StatusCode != http.StatusOK && resp.StatusCode != 400 {
+	if resp.StatusCode == 400 {
+		fmt.Printf("uploadcertificate: bad request. This may indicate that that either `disable_strict_ca_cert_check` is not set on NIOS or Certificate is already uploaded. Skipping certificate upload.\n")
+		return nil
+	}
+
+	if resp.StatusCode != http.StatusOK {
 		return fmt.Errorf("uploadcertificate: unexpected status %s", resp.Status)
 	}
 
@@ -357,18 +450,19 @@ func FetchAndStoreCertificateRef(host, wapiVer, username, password, envVarName, 
 }
 
 type PreConfigClients struct {
-	IPAM      *ipam.APIClient
-	DHCP      *dhcp.APIClient
-	DNS       *dns.APIClient
-	GRID      *grid.APIClient
-	MICROSOFT *microsoft.APIClient
-	SECURITY  *security.APIClient
+	IPAM         *ipam.APIClient
+	DHCP         *dhcp.APIClient
+	DNS          *dns.APIClient
+	GRID         *grid.APIClient
+	MICROSOFT    *microsoft.APIClient
+	NOTIFICATION *notification.APIClient
+	SECURITY     *security.APIClient
 }
 
 // PreConfig creates the network views required for integration testing.
 // If a network view already exists (error contains "already exists"), it skips creation and continues.
 // For any other error, it returns the error immediately.
-func PreConfig(clients PreConfigClients) error {
+func PreConfig(clients PreConfigClients, hostnames GridHostnames) error {
 	if clients.IPAM == nil {
 		return fmt.Errorf("preconfig: IPAM client is required")
 	}
@@ -383,6 +477,9 @@ func PreConfig(clients PreConfigClients) error {
 	}
 	if clients.MICROSOFT == nil {
 		return fmt.Errorf("preconfig: MICROSOFT client is required")
+	}
+	if clients.NOTIFICATION == nil {
+		return fmt.Errorf("preconfig: NOTIFICATION client is required")
 	}
 	if clients.SECURITY == nil {
 		return fmt.Errorf("preconfig: SECURITY client is required")
@@ -411,6 +508,23 @@ func PreConfig(clients PreConfigClients) error {
 
 		fmt.Printf("Network view %q created successfully\n", viewName)
 	}
+
+	if hostnames.MasterHostname == "" || hostnames.MemberHostname == "" {
+		resolvedHostnames, err := ResolveAndStoreGridHostnames(clients.GRID)
+		if err != nil {
+			return err
+		}
+
+		if hostnames.MasterHostname == "" {
+			hostnames.MasterHostname = resolvedHostnames.MasterHostname
+		}
+
+		if hostnames.MemberHostname == "" {
+			hostnames.MemberHostname = resolvedHostnames.MemberHostname
+		}
+	}
+
+	memberHostname := strings.TrimSpace(hostnames.MemberHostname)
 
 	// Create networks
 	type networkEntry struct {
@@ -729,7 +843,7 @@ func PreConfig(clients PreConfigClients) error {
 			Name: dns.PtrString(groupName),
 			StubMembers: []dns.NsgroupStubmemberStubMembers{
 				{
-					Name: dns.PtrString("infoblox.member"),
+					Name: dns.PtrString(memberHostname),
 				},
 			},
 		}
@@ -833,7 +947,7 @@ func PreConfig(clients PreConfigClients) error {
 		failoverBody := dhcp.Dhcpfailover{
 			Name:                dhcp.PtrString(f.name),
 			PrimaryServerType:   dhcp.PtrString("GRID"),
-			Primary:             dhcp.PtrString("infoblox.member"),
+			Primary:             dhcp.PtrString(memberHostname),
 			SecondaryServerType: dhcp.PtrString("EXTERNAL"),
 			Secondary:           dhcp.PtrString(f.secondary),
 		}
@@ -890,46 +1004,45 @@ func PreConfig(clients PreConfigClients) error {
 	}
 
 	// Create grid members
-	// TODO : Valid License Problem
-	// The master does not have a valid Grid license installed for the member 172.28.83.140.
-	//members := []struct {
-	//	hostName   string
-	//	vipAddress string
-	//}{
-	//	{hostName: "infoblox.member2", vipAddress: "172.28.82.251"},
-	//	{hostName: "infoblox.member3", vipAddress: "172.28.82.252"},
-	//}
-	//
-	//for _, member := range members {
-	//	memberBody := grid.Member{
-	//		HostName:                 grid.PtrString(member.hostName),
-	//		ConfigAddrType:           grid.PtrString("IPV4"),
-	//		Platform:                 grid.PtrString("VNIOS"),
-	//		ServiceTypeConfiguration: grid.PtrString("ALL_V4"),
-	//		VipSetting: &grid.MemberVipSetting{
-	//			Address:    grid.PtrString(member.vipAddress),
-	//			Gateway:    grid.PtrString("172.28.82.1"),
-	//			SubnetMask: grid.PtrString("255.255.254.0"),
-	//			Primary:    grid.PtrBool(true),
-	//			Dscp:       grid.PtrInt64(0),
-	//			UseDscp:    grid.PtrBool(false),
-	//		},
-	//	}
-	//
-	//	_, _, err := clients.GRID.MemberAPI.Create(context.Background()).
-	//		Member(memberBody).
-	//		Execute()
-	//
-	//	if err != nil {
-	//		if strings.Contains(err.Error(), "already exists") {
-	//			fmt.Printf("Member %q already exists, skipping creation\n", member.hostName)
-	//			continue
-	//		}
-	//		return fmt.Errorf("failed to create member %q: %w", member.hostName, err)
-	//	}
-	//
-	//	fmt.Printf("Member %q created successfully\n", member.hostName)
-	//}
+	members := []struct {
+		hostName   string
+		vipAddress string
+	}{
+		// TODO: Randomize the vipAddress values to avoid conflicts with existing members
+		{hostName: "infoblox.member2", vipAddress: "172.28.82.251"},
+		{hostName: "infoblox.member3", vipAddress: "172.28.82.252"},
+	}
+
+	for _, member := range members {
+		memberBody := grid.Member{
+			HostName:                 grid.PtrString(member.hostName),
+			ConfigAddrType:           grid.PtrString("IPV4"),
+			Platform:                 grid.PtrString("VNIOS"),
+			ServiceTypeConfiguration: grid.PtrString("ALL_V4"),
+			VipSetting: &grid.MemberVipSetting{
+				Address:    grid.PtrString(member.vipAddress),
+				Gateway:    grid.PtrString("172.28.82.1"),
+				SubnetMask: grid.PtrString("255.255.254.0"),
+				Primary:    grid.PtrBool(true),
+				Dscp:       grid.PtrInt64(0),
+				UseDscp:    grid.PtrBool(false),
+			},
+		}
+
+		_, _, err := clients.GRID.MemberAPI.Create(context.Background()).
+			Member(memberBody).
+			Execute()
+
+		if err != nil {
+			if strings.Contains(err.Error(), "is already using") {
+				fmt.Printf("Member %q already exists, skipping creation\n", member.hostName)
+				continue
+			}
+			return fmt.Errorf("failed to create member %q: %w", member.hostName, err)
+		}
+
+		fmt.Printf("Member %q created successfully\n", member.hostName)
+	}
 
 	// Create upgrade dependent groups
 	upgradeGroups := []string{"example_upgrade_dependent_group1", "example_upgrade_dependent_group2"}
@@ -1139,6 +1252,37 @@ func PreConfig(clients PreConfigClients) error {
 		fmt.Printf("RPZ logging enabled for DNS grid properties %q\n", dnsGridPropertiesRef)
 	}
 
+	// Create notification REST endpoint and persist its ref
+	notificationRestEndpointBody := notification.NotificationRestEndpoint{
+		Name:               notification.PtrString("notification_rest_endpoint999"),
+		OutboundMemberType: notification.PtrString("GM"),
+		Uri:                notification.PtrString("https://example.com"),
+	}
+
+	notificationResp, _, err := clients.NOTIFICATION.NotificationRestEndpointAPI.Create(context.Background()).
+		ReturnAsObject(1).
+		ReturnFieldsPlus("name").
+		NotificationRestEndpoint(notificationRestEndpointBody).
+		Execute()
+	if err != nil {
+		if strings.Contains(err.Error(), "already exists") {
+			fmt.Printf("Notification REST endpoint %q already exists, skipping creation\n", *notificationRestEndpointBody.Name)
+		} else {
+			return fmt.Errorf("failed to create notification REST endpoint %q: %w", *notificationRestEndpointBody.Name, err)
+		}
+	} else {
+		if notificationResp.CreateNotificationRestEndpointResponseAsObject == nil || notificationResp.CreateNotificationRestEndpointResponseAsObject.Result == nil || notificationResp.CreateNotificationRestEndpointResponseAsObject.Result.Ref == nil {
+			return fmt.Errorf("notification REST endpoint create response missing ref")
+		}
+
+		notifRestEndpointRef := *notificationResp.CreateNotificationRestEndpointResponseAsObject.Result.Ref
+		if err := writePipelineEnvVar("NIOS_NOTIFICATION_REST_ENDPOINT_REF", notifRestEndpointRef); err != nil {
+			return fmt.Errorf("failed to write NIOS_NOTIFICATION_REST_ENDPOINT_REF: %w", err)
+		}
+
+		fmt.Printf("Notification REST endpoint %q created successfully (ref: %s)\n", *notificationRestEndpointBody.Name, notifRestEndpointRef)
+	}
+
 	return nil
 }
 
@@ -1154,8 +1298,8 @@ func main() {
 		return
 	}
 
-	if !strings.HasPrefix(host, "http://") && !strings.HasPrefix(host, "https://") {
-		fmt.Printf("Invalid NIOS host %q: must include http:// or https://\n", host)
+	if !strings.HasPrefix(host, "https://") {
+		fmt.Printf("Invalid NIOS host %q: must include https://\n", host)
 		return
 	}
 
@@ -1178,11 +1322,24 @@ func main() {
 		pipelineEnvFile = nil
 	}()
 
-	fmt.Print("meow")
+	apiClient := client.NewAPIClient(
+		option.WithNIOSHostUrl(host),
+		option.WithNIOSUsername(username),
+		option.WithNIOSPassword(password),
+		option.WithDebug(true),
+	)
+
+	hostnames, err := ResolveAndStoreGridHostnames(apiClient.GridAPI)
+	if err != nil {
+		fmt.Printf("Error resolving grid hostnames: %v\n", err)
+		return
+	}
+
+	certMember := strings.TrimSpace(hostnames.MasterHostname)
 
 	caCertUploadFilePath := filepath.Join(cwd, "internal/testdata/nios_security_certificate_authservice", "cert.pem")
 
-	err = ConfigureCACertificates(host, wapiVer, username, password, "EAP_CA", "infoblox.localdomain", caCertUploadFilePath, "NIOS_CA_CERT1_REF", "NIOS_CA_CERT1_SERIAL")
+	err = ConfigureCACertificates(host, wapiVer, username, password, "EAP_CA", certMember, caCertUploadFilePath, "NIOS_CA_CERT1_REF", "NIOS_CA_CERT1_SERIAL")
 	if err != nil {
 		fmt.Printf("Error configuring CA certificates: %v\n", err)
 		return
@@ -1191,7 +1348,7 @@ func main() {
 
 	caCertUploadFilePath2 := filepath.Join(cwd, "internal/testdata/nios_notification_rest_endpoint", "dummy-bundle.pem")
 
-	err = ConfigureCACertificates(host, wapiVer, username, password, "EAP_CA", "infoblox.localdomain", caCertUploadFilePath2, "NIOS_CA_CERT2_REF", "NIOS_CA_CERT2_SERIAL")
+	err = ConfigureCACertificates(host, wapiVer, username, password, "EAP_CA", certMember, caCertUploadFilePath2, "NIOS_CA_CERT2_REF", "NIOS_CA_CERT2_SERIAL")
 	if err != nil {
 		fmt.Printf("Error configuring CA certificates: %v\n", err)
 		return
@@ -1216,23 +1373,17 @@ func main() {
 	}
 	fmt.Println("Ecosystem template 2 uploaded successfully")
 
-	apiClient := client.NewAPIClient(
-		option.WithNIOSHostUrl(host),
-		option.WithNIOSUsername(username),
-		option.WithNIOSPassword(password),
-		option.WithDebug(true),
-	)
-
 	clients := PreConfigClients{
-		IPAM:      apiClient.IPAMAPI,
-		DHCP:      apiClient.DHCPAPI,
-		DNS:       apiClient.DNSAPI,
-		GRID:      apiClient.GridAPI,
-		MICROSOFT: apiClient.MicrosoftAPI,
-		SECURITY:  apiClient.SecurityAPI,
+		IPAM:         apiClient.IPAMAPI,
+		DHCP:         apiClient.DHCPAPI,
+		DNS:          apiClient.DNSAPI,
+		GRID:         apiClient.GridAPI,
+		MICROSOFT:    apiClient.MicrosoftAPI,
+		NOTIFICATION: apiClient.NotificationAPI,
+		SECURITY:     apiClient.SecurityAPI,
 	}
 
-	err = PreConfig(clients)
+	err = PreConfig(clients, hostnames)
 	if err != nil {
 		fmt.Printf("Error during pre-configuration: %v\n", err)
 		return

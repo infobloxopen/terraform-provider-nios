@@ -427,7 +427,7 @@ func TestAccDtcPoolResource_LbDynamicRatioAlternate(t *testing.T) {
 			"ratio":  50,
 		},
 	}
-	lbAlternateMethod := "DYNAMIC_RATIO"
+	lbAlternateMethod := "NONE"
 	lbDynamicRatioAlternate := map[string]interface{}{
 		"method":                "ROUND_TRIP_DELAY",
 		"monitor":               "${nios_dtc_monitor_http.test_http_monitor1.ref}",
@@ -438,7 +438,7 @@ func TestAccDtcPoolResource_LbDynamicRatioAlternate(t *testing.T) {
 	lbDynamicRatioAlternateUpdate := map[string]interface{}{
 		"method":                "MONITOR",
 		"monitor":               "${nios_dtc_monitor_snmp.test_snmp_monitor1.ref}",
-		"monitor_metric":        ".0",
+		"monitor_metric":        ".2",
 		"monitor_weighing":      "RATIO",
 		"invert_monitor_metric": false,
 	}
@@ -746,15 +746,17 @@ func TestAccDtcPoolResource_Quorum(t *testing.T) {
 	var v dtc.DtcPool
 	name := acctest.RandomNameWithPrefix("dtc-pool")
 	lbPreferredMethod := "ROUND_ROBIN"
-	quorum := 3
-	quorumUpdate := 5
+	quorum := 1
+	quorumUpdate := 2
+	monitors := []string{"${nios_dtc_monitor_http.test_http_monitor1.ref}", "${nios_dtc_monitor_snmp.test_snmp_monitor1.ref}"}
+
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccDtcPoolQuorum(name, lbPreferredMethod, quorum),
+				Config: testAccDtcPoolQuorum(name, lbPreferredMethod, quorum, monitors),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcPoolExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "quorum", fmt.Sprintf("%d", quorum)),
@@ -762,7 +764,7 @@ func TestAccDtcPoolResource_Quorum(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccDtcPoolQuorum(name, lbPreferredMethod, quorumUpdate),
+				Config: testAccDtcPoolQuorum(name, lbPreferredMethod, quorumUpdate, monitors),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcPoolExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "quorum", fmt.Sprintf("%d", quorumUpdate)),
@@ -1217,14 +1219,18 @@ resource "nios_dtc_pool" "test_name" {
 `, name, lbPreferredMethod)
 }
 
-func testAccDtcPoolQuorum(name, lbPreferredMethod string, quorum int) string {
-	return fmt.Sprintf(`
+func testAccDtcPoolQuorum(name, lbPreferredMethod string, quorum int, monitors []string) string {
+	monitorsHCL := formatMonitorsToHCL(monitors)
+	config := fmt.Sprintf(`
 resource "nios_dtc_pool" "test_quorum" {
     name = %q
 	lb_preferred_method = %q
     quorum = %d
+	availability = "QUORUM"
+	monitors = %s
 }
-`, name, lbPreferredMethod, quorum)
+`, name, lbPreferredMethod, quorum, monitorsHCL)
+	return strings.Join([]string{testAccBaseWithDtcMonitorHttp(), testAccBaseWithDtcMonitorSnmp(), config}, "")
 }
 
 func testAccDtcPoolServers(name, lbPreferredMethod string, servers []map[string]interface{}) string {

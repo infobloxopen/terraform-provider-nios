@@ -97,7 +97,7 @@ func TestAccSharednetworkResource_disappears(t *testing.T) {
 		CheckDestroy:             testAccCheckSharednetworkDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccSharednetworkBasicConfig(name, networks),
+				Config: testAccSharednetworkDisappears(name, networks),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSharednetworkExists(context.Background(), resourceName, &v),
 					testAccCheckSharednetworkDisappears(context.Background(), &v),
@@ -1644,6 +1644,17 @@ resource "nios_dhcp_shared_network" "test" {
 }`, name, networksStr)
 	return strings.Join([]string{testAccBaseWithNetworks(
 		"201.1.0.0/24", "201.2.0.0/24"), config}, "\n")
+}
+
+func testAccSharednetworkDisappears(name string, networks []string) string {
+	networksStr := formatNetworksToHCL(networks)
+	config := fmt.Sprintf(`
+resource "nios_dhcp_shared_network" "test" {
+    name     = %q
+    networks = %s
+}`, name, networksStr)
+	return strings.Join([]string{testAccBaseWithNetworks(
+		"201.1.1.0/24", "201.2.1.0/24"), config}, "\n")
 }
 
 func formatNetworksToHCL(networks []string) string {

@@ -75,10 +75,20 @@ func TestAccDtcLbdnResource_AuthZones(t *testing.T) {
 	name := "dtc-lbdn-" + acctest.RandomName()
 	authZones := []string{"${nios_dns_zone_auth.test_zone1.ref}", "${nios_dns_zone_auth.test_zone2.ref}"}
 	authZonesUpdated := []string{"${nios_dns_zone_auth.test_zone3.ref}"}
+	authZone1 := acctest.RandomNameWithPrefix("zone_auth")
+	authZone2 := acctest.RandomNameWithPrefix("zone_auth")
+	authZone3 := acctest.RandomNameWithPrefix("zone_auth")
+	authZoneNames := []string{authZone1, authZone2, authZone3}
 	pools := []map[string]interface{}{
-		{"pool": "${nios_dtc_topology.test.ref}", "ratio": 2},
+		{"pool": "${nios_dtc_pool.test_servers.ref}", "ratio": 2},
 	}
 	patterns := []string{"*.test.com", "*.record_test.com"}
+	servers := []map[string]interface{}{
+		{
+			"server": "${nios_dtc_server.test_server1.ref}",
+			"ratio":  100,
+		},
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -86,21 +96,21 @@ func TestAccDtcLbdnResource_AuthZones(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccDtcLbdnAuthZones(name, "SOURCE_IP_HASH", authZones, pools, patterns),
+				Config: testAccDtcLbdnAuthZones(name, "SOURCE_IP_HASH", authZones, authZoneNames, pools, servers, patterns),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcLbdnExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "auth_zones.#", "2"),
-					resource.TestCheckTypeSetElemAttr(resourceName, "auth_zones.*", "${nios_dns_zone_auth.test_zone1.ref}"),
-					resource.TestCheckTypeSetElemAttr(resourceName, "auth_zones.*", "${nios_dns_zone_auth.test_zone2.ref}"),
+					resource.TestCheckResourceAttrPair(resourceName, "auth_zones.0", "nios_dns_zone_auth.test_zone1", "ref"),
+					resource.TestCheckResourceAttrPair(resourceName, "auth_zones.1", "nios_dns_zone_auth.test_zone2", "ref"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccDtcLbdnAuthZones("lbdn-resource-13", "SOURCE_IP_HASH", authZonesUpdated, pools, patterns),
+				Config: testAccDtcLbdnAuthZones("lbdn-resource-13", "SOURCE_IP_HASH", authZonesUpdated, authZoneNames, pools, servers, patterns),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDtcLbdnExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "auth_zones.#", "1"),
-					resource.TestCheckTypeSetElemAttr(resourceName, "auth_zones.*", "${nios_dns_zone_auth.test_zone3.ref}"),
+					resource.TestCheckResourceAttrPair(resourceName, "auth_zones.0", "nios_dns_zone_auth.test_zone3", "ref"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -644,7 +654,7 @@ resource "nios_dtc_lbdn" "test" {
 `, name, lbMethod)
 }
 
-func testAccDtcLbdnAuthZones(name, lbMethod string, authZones []string, pools []map[string]interface{}, patterns []string) string {
+func testAccDtcLbdnAuthZones(name, lbMethod string, authZones, authZoneNames []string, pools, servers []map[string]interface{}, patterns []string) string {
 	authZonesStr := "[\n"
 	for _, zone := range authZones {
 		authZonesStr += fmt.Sprintf("\t%q,\n", zone)
@@ -662,7 +672,7 @@ func testAccDtcLbdnAuthZones(name, lbMethod string, authZones []string, pools []
 	patternsStr += "]"
 	config := fmt.Sprintf(`
 resource "nios_dns_zone_auth" "test_zone1" {
-    fqdn = "%s.com"
+    fqdn = "%s.test.com"
     view = "default"
 	grid_primary = [{
 		name =  "infoblox.localdomain",
@@ -670,7 +680,7 @@ resource "nios_dns_zone_auth" "test_zone1" {
 }
 
 resource "nios_dns_zone_auth" "test_zone2" {
-    fqdn = "%s.com"
+    fqdn = "%s.record_test.com"
     view = "default"
 	grid_primary = [{
 		name =  "infoblox.localdomain",
@@ -678,7 +688,7 @@ resource "nios_dns_zone_auth" "test_zone2" {
 }
 
 resource "nios_dns_zone_auth" "test_zone3" {
-    fqdn = "%s.com"
+    fqdn = "%s.test.com"
     view = "custom_dns_view"
 	grid_primary = [{
 		name =  "infoblox.localdomain",
@@ -691,10 +701,12 @@ resource "nios_dtc_lbdn" "test_auth_zones" {
     pools = %s
     patterns = %s
 	disable = "true"
+	types = ["A", "AAAA"]
 }
-`, acctest.RandomNameWithPrefix("zone-auth"), acctest.RandomNameWithPrefix("zone-auth"),
-		acctest.RandomNameWithPrefix("zone-auth"), name, lbMethod, authZonesStr, poolsStr, patternsStr)
-	return strings.Join([]string{testAccDtcTopologyBasicConfig(acctest.RandomNameWithPrefix("topology")), config}, "\n")
+`, authZoneNames[0], authZoneNames[1],
+		authZoneNames[2], name, lbMethod, authZonesStr, poolsStr, patternsStr)
+	return strings.Join([]string{testAccDtcPoolServers(acctest.RandomNameWithPrefix("server"),
+		"ROUND_ROBIN", servers), config}, "\n")
 }
 
 func testAccDtcLbdnAutoConsolidatedMonitors(name, lbMethod, autoConsolidatedMonitors string) string {

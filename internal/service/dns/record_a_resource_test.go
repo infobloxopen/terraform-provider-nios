@@ -286,8 +286,7 @@ func TestAccRecordAResource_ForbidReclamation(t *testing.T) {
 }
 
 // TestAccRecordAResource_FuncCall tests the "func_call" attribute functionality
-// which allocates IPv4 addresses using next_available_ip. Since func_call attribute can't be
-// updated, the comment is updated to demonstrate an update to the resource
+// which allocates IPv4 addresses using next_available_ip.
 func TestAccRecordAResource_FuncCall(t *testing.T) {
 	var resourceName = "nios_dns_record_a.test_func_call"
 	var v dns.RecordA
@@ -306,7 +305,7 @@ func TestAccRecordAResource_FuncCall(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRecordAFuncCall(name, "default", "comment", "next_available_ip", "", "ips", "network", "85.85.0.0/16", "Function Call with Update"),
+				Config: testAccRecordAFuncCall(name, "default", "ipv4addr", "next_available_ip", "", "ips", "network", "85.85.0.0/16", "Function Call with Update"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordAExists(context.Background(), resourceName, &v),
 				),

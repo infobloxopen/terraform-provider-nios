@@ -912,8 +912,7 @@ func TestAccFixedaddressResource_Ipv4addr(t *testing.T) {
 }
 
 // TestAccFixedaddressResource_FuncCall tests the "func_call" attribute functionality
-// which allocates IPv4 addresses using next_available_ip. Since func_call attribute can't be
-// updated, the comment is updated to demonstrate an update to the resource
+// which allocates IPv4 addresses using next_available_ip.
 func TestAccFixedaddressResource_FuncCall(t *testing.T) {
 	var resourceName = "nios_dhcp_fixed_address.test_func_call"
 	var v dhcp.Fixedaddress
@@ -932,7 +931,7 @@ func TestAccFixedaddressResource_FuncCall(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccFixedaddressFuncCall("CIRCUIT_ID", agentCircuitID, "comment", "next_available_ip", "ips", "network", "15.0.0.0/24", "Function Call with Update"),
+				Config: testAccFixedaddressFuncCall("CIRCUIT_ID", agentCircuitID, "ipv4addr", "next_available_ip", "ips", "network", "16.0.0.0/24", "Function Call with Update"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
 				),
@@ -1454,7 +1453,7 @@ func TestAccFixedaddressResource_Template(t *testing.T) {
 	var resourceName = "nios_dhcp_fixed_address.test_template"
 	var v dhcp.Fixedaddress
 	ip := "15.0.0.43"
-	agentCircuitID := acctest.RandomNumber(1000)
+	macAddress := "00:1d:2e:3f:4a:5c"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1462,20 +1461,13 @@ func TestAccFixedaddressResource_Template(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccFixedaddressTemplate(ip, "CIRCUIT_ID", agentCircuitID, "${nios_dhcp_fixedaddresstemplate.test.name}"),
+				Config: testAccFixedaddressTemplate(ip, "MAC_ADDRESS", macAddress, "${nios_dhcp_fixedaddresstemplate.test.name}"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttrPair(resourceName, "template", "nios_dhcp_fixedaddresstemplate.test", "name"),
 				),
 			},
-			// Update and Read
-			{
-				Config: testAccFixedaddressTemplate(ip, "CIRCUIT_ID", agentCircuitID, "${nios_dhcp_fixedaddresstemplate.test2.name}"),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttrPair(resourceName, "template", "nios_dhcp_fixedaddresstemplate.test2", "name"),
-				),
-			},
+			// Fixed Address Template cannot be updated
 			// Delete testing automatically occurs in TestCase
 		},
 	})
@@ -2568,23 +2560,19 @@ resource "nios_dhcp_fixed_address" "test_snmp_credential" {
 `, ip, matchClient, agentCircuitID, snmpCredentialCommStr, snmpCredentialComment, snmpCredentialGroup, useSnmpCredentials)
 }
 
-func testAccFixedaddressTemplate(ip, matchClient string, agentCircuitID int, template string) string {
+func testAccFixedaddressTemplate(ip, matchClient string, macAddress, template string) string {
 	return fmt.Sprintf(`
 resource "nios_dhcp_fixedaddresstemplate" "test" {
-    name = %q
-}
-
-resource "nios_dhcp_fixedaddresstemplate" "test2" {
     name = %q
 }
 
 resource "nios_dhcp_fixed_address" "test_template" {
 	ipv4addr = %q
 	match_client = %q
-	agent_circuit_id = %d
+	mac = %q
 	template = %q
 }
-`, fmt.Sprintf("FATemplate%d", agentCircuitID), fmt.Sprintf("FATemplate%d", agentCircuitID+10), ip, matchClient, agentCircuitID, template)
+`, fmt.Sprintf("FATemplate%s", matchClient), ip, matchClient, macAddress, template)
 }
 
 func testAccFixedaddressUseBootfile(ip, matchClient string, agentCircuitID int, useBootFile, bootFile string) string {

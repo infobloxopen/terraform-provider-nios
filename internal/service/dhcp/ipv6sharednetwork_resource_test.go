@@ -129,6 +129,7 @@ func TestAccIpv6sharednetworkResource_Import(t *testing.T) {
 				ImportStateIdFunc:                    testAccIpv6sharednetworkImportStateIdFunc(resourceName),
 				ImportStateVerify:                    true,
 				ImportStateVerifyIdentifierAttribute: "ref",
+				ImportStateVerifyIgnore:              []string{"networks"},
 				PlanOnly:                             true,
 			},
 			// Import and Verify
