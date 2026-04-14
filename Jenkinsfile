@@ -144,7 +144,7 @@ node('Cloud-test1-172.28.81.12-label') {
                     envVars.each { line ->
                         def parts = line.split('=', 2)
                         if (parts.length == 2) {
-                            env[parts[0]] = parts[1]
+                            env.setProperty(parts[0], parts[1])
                         }
                     }
                 }
