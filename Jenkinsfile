@@ -30,7 +30,7 @@ def runTestStage(String name, String dir, String timeout) {
 // ── Main pipeline ─────────────────────────────────────────────────────────────
 node('Cloud-test1-172.28.81.12-label') {
     timestamps {
-        timeout(time: 180, unit: 'MINUTES') {
+        timeout(time: 240, unit: 'MINUTES') {
 
             // ── Environment variables ─────────────────────────────────────────
             env.NIOS_HOST_URL     = params.GM_URL
@@ -122,7 +122,7 @@ node('Cloud-test1-172.28.81.12-label') {
 
                 // ── Integration config ────────────────────────────────────────
                 stage('Integration config') {
-                    sh '''
+                    sh '''#!/bin/bash
                         set -euo pipefail
 
                         rm -f pipeline.env integration_test_setup.log
@@ -154,7 +154,7 @@ node('Cloud-test1-172.28.81.12-label') {
                 // A failure in one directory does NOT abort the others.
                 sh 'mkdir -p $WORKSPACE/test-results'
                 runTestStage('acl',             'internal/service/acl',             '5m')
-                // runTestStage('cloud',           'internal/service/cloud',           '5m')
+                runTestStage('cloud',           'internal/service/cloud',           '5m')
                 // runTestStage('dhcp',            'internal/service/dhcp',            '80m')
                 // runTestStage('discovery',       'internal/service/discovery',       '30m')
                 // runTestStage('dns',             'internal/service/dns',             '80m')
@@ -164,7 +164,7 @@ node('Cloud-test1-172.28.81.12-label') {
                 // runTestStage('microsoft',       'internal/service/microsoft',       '30m')
                 // runTestStage('misc',            'internal/service/misc',            '30m')
                 // runTestStage('notification',    'internal/service/notification',    '30m')
-                // runTestStage('parentalcontrol', 'internal/service/parentalcontrol', '30m')
+                runTestStage('parentalcontrol', 'internal/service/parentalcontrol', '30m')
                 // runTestStage('rir',             'internal/service/rir',             '5m')
                 // runTestStage('rpz',             'internal/service/rpz',             '45m')
                 // runTestStage('security',        'internal/service/security',        '30m')
