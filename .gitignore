@@ -44,6 +44,5 @@ internal/service/*/.openapi-generator-ignore
 **/.DS_Store
 .vscode/
 
-Jenkinsfile
 pipeline.env
 .env
