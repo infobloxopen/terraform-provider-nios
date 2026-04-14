@@ -635,6 +635,38 @@ func (r *Ipv6networkResource) ValidateConfig(ctx context.Context, req resource.V
 			)
 		}
 	}
+
+	// mgm_private and use_mgm_private must both be true if either one is true
+	if !data.MgmPrivate.IsNull() && !data.MgmPrivate.IsUnknown() &&
+		!data.UseMgmPrivate.IsNull() && !data.UseMgmPrivate.IsUnknown() {
+		if data.MgmPrivate.ValueBool() && !data.UseMgmPrivate.ValueBool() {
+			resp.Diagnostics.AddAttributeError(
+				path.Root("use_mgm_private"),
+				"Invalid MGM Private Configuration",
+				"When 'mgm_private' is set to true, 'use_mgm_private' must also be set to true.",
+			)
+		} else if data.UseMgmPrivate.ValueBool() && !data.MgmPrivate.ValueBool() {
+			resp.Diagnostics.AddAttributeError(
+				path.Root("mgm_private"),
+				"Invalid MGM Private Configuration",
+				"When 'use_mgm_private' is set to true, 'mgm_private' must also be set to true.",
+			)
+		}
+	} else if !data.MgmPrivate.IsNull() && !data.MgmPrivate.IsUnknown() && data.MgmPrivate.ValueBool() &&
+		(data.UseMgmPrivate.IsNull() || data.UseMgmPrivate.IsUnknown()) {
+		resp.Diagnostics.AddAttributeError(
+			path.Root("use_mgm_private"),
+			"Invalid MGM Private Configuration",
+			"When 'mgm_private' is set to true, 'use_mgm_private' must also be set to true.",
+		)
+	} else if !data.UseMgmPrivate.IsNull() && !data.UseMgmPrivate.IsUnknown() && data.UseMgmPrivate.ValueBool() &&
+		(data.MgmPrivate.IsNull() || data.MgmPrivate.IsUnknown()) {
+		resp.Diagnostics.AddAttributeError(
+			path.Root("mgm_private"),
+			"Invalid MGM Private Configuration",
+			"When 'use_mgm_private' is set to true, 'mgm_private' must also be set to true.",
+		)
+	}
 }
 
 func (r *Ipv6networkResource) isIpv6NetworkConvertedToContainer(ctx context.Context, data *Ipv6networkModel) bool {
