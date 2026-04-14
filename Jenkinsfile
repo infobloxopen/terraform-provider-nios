@@ -1,5 +1,5 @@
 pipeline {
-    agent Cloud-test1-172.28.81.12-label
+    agent { label 'Cloud-test1-172.28.81.12-label' }
 
     // ── Parameters ────────────────────────────────────────────────────────────
     // Shown as form fields when "Build with Parameters" is triggered.
