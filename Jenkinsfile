@@ -1,5 +1,5 @@
 pipeline {
-    agent any
+    agent Cloud-test1-172.28.81.12-label
 
     // ── Parameters ────────────────────────────────────────────────────────────
     // Shown as form fields when "Build with Parameters" is triggered.
@@ -7,18 +7,13 @@ pipeline {
         // TODO : Remove hardcoded defaults
         string(
             name: 'GM_URL',
-            defaultValue: 'https://172.28.82.73',
+            defaultValue: 'https://host-a.infoblox.com',
             description: 'URL For the GRID Master'
         )
         string(
             name: 'MEMBER_URL',
-            defaultValue: 'https://172.28.82.16',
+            defaultValue: 'https://host-b.infoblox.com',
             description: 'URL for the GRID Member'
-        )
-        string(
-            name: 'GO_VERSION',
-            defaultValue: '1.25.1',
-            description: 'Go version to install e.g. 1.22.5'
         )
         string(
             name: 'TF_VERSION',
@@ -35,9 +30,9 @@ pipeline {
         NIOS_MEMBER_URL = "${params.MEMBER_URL}"
         NIOS_WAPI_VERSION = "v2.13.6"
         TF_ACC     = "1"
-        GO_VERSION  = "${params.GO_VERSION}"
+        GO_VERSION  = "1.25.1"
         TF_VERSION  = "${params.TF_VERSION}"
-        PATH        = "/usr/local/go/bin:${HOME}/go/bin:${env.PATH}"
+        PATH        = "${WORKSPACE}/tools/go/bin:/usr/local/go/bin:${HOME}/go/bin:${env.PATH}"
 
         // withCredentials() below injects NIOS_USERNAME, NIOS_PASSWORD, etc.
         // Declaring them here as empty strings lets the IDE / linter know they exist.
@@ -50,8 +45,8 @@ pipeline {
     options {
         // Show timestamps next to every log line — very useful for long test runs.
         timestamps()
-        // Fail the whole build if it takes longer than 120 minutes.
-        timeout(time: 120, unit: 'MINUTES')
+        // Fail the whole build if it takes longer than 180 minutes.
+        timeout(time: 180, unit: 'MINUTES')
     }
 
     stages {
@@ -66,20 +61,20 @@ pipeline {
             //             --exclude='.git'
             //     '''
             // }
-//             steps {
-//                 git branch: 'fix_tests',
-//                     url: 'https://github.com/unasra/terraform-provider-nios.git',
-//             }
             steps {
-                checkout([
-                    $class: 'GitSCM',
-                    branches: [[name: '*/fix_tests']],
-                    userRemoteConfigs: [[
-                        url: 'file:///Users/unasra/go/src/github.com/infobloxopen/terraform-provider-nios'
-                    ]],
-                    extensions: [[$class: 'CleanBeforeCheckout']]
-                ])
+                git branch: 'fix_tests',
+                    url: 'https://github.com/unasra/terraform-provider-nios.git',
             }
+            // steps {
+            //     checkout([
+            //         $class: 'GitSCM',
+            //         branches: [[name: '*/fix_tests']],
+            //         userRemoteConfigs: [[
+            //             url: 'file:///Users/unasra/go/src/github.com/infobloxopen/terraform-provider-nios'
+            //         ]],
+            //         extensions: [[$class: 'CleanBeforeCheckout']]
+            //     ])
+            // }
         }
 
         // Setup the ToolChain
@@ -93,11 +88,16 @@ pipeline {
                         echo "Go $GO_VERSION already installed, skipping."
                     else
                         echo "Installing Go $GO_VERSION (found: ${INSTALLED_GO:-none})..."
-                        # wget -q "https://go.dev/dl/go${GO_VERSION}.linux-amd64.tar.gz" \
-                        #     -O /tmp/go.tar.gz
-                        # rm -rf /usr/local/go
-                        # tar -C /usr/local -xzf /tmp/go.tar.gz
-                        # rm /tmp/go.tar.gz
+                        wget -q "https://go.dev/dl/go${GO_VERSION}.linux-amd64.tar.gz" \
+                            -O /tmp/go.tar.gz
+
+                        # Install into workspace/tools to avoid requiring root on Jenkins agents.
+                        mkdir -p ${WORKSPACE}/tools
+                        rm -rf ${WORKSPACE}/tools/go
+                        tar -C ${WORKSPACE}/tools -xzf /tmp/go.tar.gz
+                        rm /tmp/go.tar.gz
+
+                        export PATH="${WORKSPACE}/tools/go/bin:${PATH}"
                         echo "Go installed: $(go version)"
                     fi
 
@@ -139,12 +139,12 @@ pipeline {
             steps {
                 withCredentials([
                     usernamePassword(
-                        credentialsId: 'host-a-creds',
+                        credentialsId: 'tf_automation',
                         usernameVariable: 'HOST_A_USER',
                         passwordVariable: 'HOST_A_PASS'
                     ),
                     usernamePassword(
-                        credentialsId: 'host-b-creds',
+                        credentialsId: 'tf_automation',
                         usernameVariable: 'HOST_B_USER',
                         passwordVariable: 'HOST_B_PASS'
                     )
@@ -253,20 +253,22 @@ pipeline {
                     }
                 }
 
-                // stage('Tests: dhcp') {
-                //     steps {
-                //         sh '''
-                //             cd internal/service/dhcp
-                //             go test -v -count=1 -timeout 30m ./... \
-                //                 2>&1 | tee ../../test-results/dhcp.txt
-                //         '''
-                //     }
-                //     post {
-                //         always {
-                //             sh 'go-junit-report < ../../test-results/dhcp.txt > ../../test-results/dhcp-junit.xml || true'
-                //         }
-                //     }
-                // }
+                stage('Tests: dhcp') {
+                    steps {
+                        catchError(buildResult: 'FAILURE', stageResult: 'FAILURE') {
+                            sh '''
+                                cd internal/service/dhcp
+                                go test -v -count=1 -timeout 80m ./... \
+                                    2>&1 | tee $WORKSPACE/test-results/dhcp.txt
+                            '''
+                        }
+                    }
+                    post {
+                        always {
+                            sh 'go-junit-report < $WORKSPACE/test-results/dhcp.txt > $WORKSPACE/test-results/dhcp-junit.xml || true'
+                        }
+                    }
+                }
 
                stage('Tests: discovery') {
                     steps {
@@ -285,65 +287,141 @@ pipeline {
                     }
                 }
 
-                // stage('Tests: dns') {
-                //     steps {
-                //         sh '''
-                //             cd internal/service/dns
-                //             go test -v -count=1 -timeout 30m ./... \
-                //                 2>&1 | tee ../../test-results/dns.txt
-                //         '''
-                //     }
-                //     post {
-                //         always {
-                //             sh 'go-junit-report < ../../test-results/dns.txt > ../../test-results/dns-junit.xml || true'
-                //         }
-                //     }
-                // }
+                stage('Tests: dns') {
+                    steps {
+                        catchError(buildResult: 'FAILURE', stageResult: 'FAILURE') {
+                            sh '''
+                                cd internal/service/dns
+                                go test -v -count=1 -timeout 80m ./... \
+                                    2>&1 | tee $WORKSPACE/test-results/dns.txt
+                            '''
+                        }
+                    }
+                    post {
+                        always {
+                            sh 'go-junit-report < $WORKSPACE/test-results/dns.txt > $WORKSPACE/test-results/dns-junit.xml || true'
+                        }
+                    }
+                }
 
-//                 stage('Tests: dtc') {
-//                     steps {
-//                         sh '''
-//                             cd internal/service/dtc
-//                             go test -v -count=1 -timeout 30m ./... \
-//                                 2>&1 | tee ../../test-results/dtc.txt
-//                         '''
-//                     }
-//                     post {
-//                         always {
-//                             sh 'go-junit-report < ../../test-results/dtc.txt > ../../test-results/dtc-junit.xml || true'
-//                         }
-//                     }
-//                 }
+                stage('Tests: dtc') {
+                    steps {
+                        catchError(buildResult: 'FAILURE', stageResult: 'FAILURE') {
+                            sh '''
+                                cd internal/service/dtc
+                                go test -v -count=1 -timeout 30m ./... \
+                                    2>&1 | tee $WORKSPACE/test-results/dtc.txt
+                            '''
+                        }
+                    }
+                    post {
+                        always {
+                            sh 'go-junit-report < $WORKSPACE/test-results/dtc.txt > $WORKSPACE/test-results/dtc-junit.xml || true'
+                        }
+                    }
+                }
 
-                // stage('Tests: grid') {
-                //     steps {
-                //         sh '''
-                //             cd internal/service/grid
-                //             go test -v -count=1 -timeout 30m ./... \
-                //                 2>&1 | tee ../../test-results/grid.txt
-                //         '''
-                //     }
-                //     post {
-                //         always {
-                //             sh 'go-junit-report < ../../test-results/grid.txt > ../../test-results/grid-junit.xml || true'
-                //         }
-                //     }
-                // }
+                stage('Tests: grid') {
+                    steps {
+                        catchError(buildResult: 'FAILURE', stageResult: 'FAILURE') {
+                            sh '''
+                                cd internal/service/grid
+                                go test -v -count=1 -timeout 30m ./... \
+                                    2>&1 | tee $WORKSPACE/test-results/grid.txt
+                            '''
+                        }
+                    }
+                    post {
+                        always {
+                            sh 'go-junit-report < $WORKSPACE/test-results/grid.txt > $WORKSPACE/test-results/grid-junit.xml || true'
+                        }
+                    }
+                }
 
-                // stage('Tests: ipam') {
-                //     steps {
-                //         sh '''
-                //             cd internal/service/ipam
-                //             go test -v -count=1 -timeout 30m ./... \
-                //                 2>&1 | tee ../../test-results/ipam.txt
-                //         '''
-                //     }
-                //     post {
-                //         always {
-                //             sh 'go-junit-report < ../../test-results/ipam.txt > ../../test-results/ipam-junit.xml || true'
-                //         }
-                //     }
-                // }
+                stage('Tests: ipam') {
+                    steps {
+                        catchError(buildResult: 'FAILURE', stageResult: 'FAILURE') {
+                            sh '''
+                                cd internal/service/ipam
+                                go test -v -count=1 -timeout 45m ./... \
+                                    2>&1 | tee $WORKSPACE/test-results/ipam.txt
+                            '''
+                        }
+                    }
+                    post {
+                        always {
+                            sh 'go-junit-report < $WORKSPACE/test-results/ipam.txt > $WORKSPACE/test-results/ipam-junit.xml || true'
+                        }
+                    }
+                }
+
+                stage('Tests: microsoft') {
+                    steps {
+                        catchError(buildResult: 'FAILURE', stageResult: 'FAILURE') {
+                            sh '''
+                                cd internal/service/microsoft
+                                go test -v -count=1 -timeout 30m ./... \
+                                    2>&1 | tee $WORKSPACE/test-results/microsoft.txt
+                            '''
+                        }
+                    }
+                    post {
+                        always {
+                            sh 'go-junit-report < $WORKSPACE/test-results/microsoft.txt > $WORKSPACE/test-results/microsoft-junit.xml || true'
+                        }
+                    }
+                }
+
+                stage('Tests: misc') {
+                    steps {
+                        catchError(buildResult: 'FAILURE', stageResult: 'FAILURE') {
+                            sh '''
+                                cd internal/service/misc
+                                go test -v -count=1 -timeout 30m ./... \
+                                    2>&1 | tee $WORKSPACE/test-results/misc.txt
+                            '''
+                        }
+                    }
+                    post {
+                        always {
+                            sh 'go-junit-report < $WORKSPACE/test-results/misc.txt > $WORKSPACE/test-results/misc-junit.xml || true'
+                        }
+                    }
+                }
+
+                stage('Tests: notification') {
+                    steps {
+                        catchError(buildResult: 'FAILURE', stageResult: 'FAILURE') {
+                            sh '''
+                                cd internal/service/notification
+                                go test -v -count=1 -timeout 30m ./... \
+                                    2>&1 | tee $WORKSPACE/test-results/notification.txt
+                            '''
+                        }
+                    }
+                    post {
+                        always {
+                            sh 'go-junit-report < $WORKSPACE/test-results/notification.txt > $WORKSPACE/test-results/notification-junit.xml || true'
+                        }
+                    }
+                }
+
+                stage('Tests: parentalcontrol') {
+                    steps {
+                        catchError(buildResult: 'FAILURE', stageResult: 'FAILURE') {
+                            sh '''
+                                cd internal/service/parentalcontrol
+                                go test -v -count=1 -timeout 30m ./... \
+                                    2>&1 | tee $WORKSPACE/test-results/parentalcontrol.txt
+                            '''
+                        }
+                    }
+                    post {
+                        always {
+                            sh 'go-junit-report < $WORKSPACE/test-results/parentalcontrol.txt > $WORKSPACE/test-results/parentalcontrol-junit.xml || true'
+                        }
+                    }
+                }
 
                 stage('Tests: rir') {
                     steps {
@@ -358,6 +436,57 @@ pipeline {
                     post {
                         always {
                             sh 'go-junit-report < $WORKSPACE/test-results/rir.txt > $WORKSPACE/test-results/rir-junit.xml || true'
+                        }
+                    }
+                }
+
+                stage('Tests: rpz') {
+                    steps {
+                        catchError(buildResult: 'FAILURE', stageResult: 'FAILURE') {
+                            sh '''
+                                cd internal/service/rpz
+                                go test -v -count=1 -timeout 45m ./... \
+                                    2>&1 | tee $WORKSPACE/test-results/rpz.txt
+                            '''
+                        }
+                    }
+                    post {
+                        always {
+                            sh 'go-junit-report < $WORKSPACE/test-results/rpz.txt > $WORKSPACE/test-results/rpz-junit.xml || true'
+                        }
+                    }
+                }
+
+                stage('Tests: security') {
+                    steps {
+                        catchError(buildResult: 'FAILURE', stageResult: 'FAILURE') {
+                            sh '''
+                                cd internal/service/security
+                                go test -v -count=1 -timeout 30m ./... \
+                                    2>&1 | tee $WORKSPACE/test-results/security.txt
+                            '''
+                        }
+                    }
+                    post {
+                        always {
+                            sh 'go-junit-report < $WORKSPACE/test-results/security.txt > $WORKSPACE/test-results/security-junit.xml || true'
+                        }
+                    }
+                }
+
+                stage('Tests: smartfolder') {
+                    steps {
+                        catchError(buildResult: 'FAILURE', stageResult: 'FAILURE') {
+                            sh '''
+                                cd internal/service/smartfolder
+                                go test -v -count=1 -timeout 30m ./... \
+                                    2>&1 | tee $WORKSPACE/test-results/smartfolder.txt
+                            '''
+                        }
+                    }
+                    post {
+                        always {
+                            sh 'go-junit-report < $WORKSPACE/test-results/smartfolder.txt > $WORKSPACE/test-results/smartfolder-junit.xml || true'
                         }
                     }
                 }
