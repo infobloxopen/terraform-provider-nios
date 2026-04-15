@@ -220,6 +220,9 @@ func TestAccZoneAuthResource_AllowGssTsigForUnderscoreZone(t *testing.T) {
 }
 
 func TestAccZoneAuthResource_AllowGssTsigZoneUpdates(t *testing.T) {
+	if utils.GetGSSTSIGCertRef() == "" {
+		t.Skip("GSS TSIG certificate not configured on grid")
+	}
 	var resourceName = "nios_dns_zone_auth.test_allow_gss_tsig_zone_updates"
 	var v dns.ZoneAuth
 	zoneFqdn := acctest.RandomNameWithPrefix("zone") + ".com"

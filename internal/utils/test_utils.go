@@ -49,3 +49,7 @@ func GetNIOSNotificationRestEndpointRef() string {
 func GetNIOSPxgridEndpointRef() string {
 	return os.Getenv("NIOS_PXGRID_ENDPOINT_REF")
 }
+
+func GetGSSTSIGCertRef() string {
+	return os.Getenv("NIOS_GSS_TSIG_CERT_REF")
+}

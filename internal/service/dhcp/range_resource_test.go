@@ -1192,8 +1192,8 @@ func TestAccRangeResource_IgnoreDhcpOptionListRequest(t *testing.T) {
 func TestAccRangeResource_IgnoreId(t *testing.T) {
 	var resourceName = "nios_dhcp_range.test_ignore_id"
 	var v dhcp.Range
-	startAddr := "10.0.0.77"
-	endAddr := "10.0.0.78"
+	startAddr := "10.0.0.177"
+	endAddr := "10.0.0.178"
 	ignoreId := "CLIENT"
 	ignoreIdUpdate := "MACADDR"
 
@@ -1225,10 +1225,10 @@ func TestAccRangeResource_IgnoreId(t *testing.T) {
 func TestAccRangeResource_IgnoreMacAddresses(t *testing.T) {
 	var resourceName = "nios_dhcp_range.test_ignore_mac_addresses"
 	var v dhcp.Range
-	startAddr := "10.0.0.79"
-	endAddr := "10.0.0.80"
-	ignoreMacAddresses := []string{"00:1a:2b:3c:4d:5e"}
-	ignoreMacAddressesUpdate := []string{"00:1a:2b:33:4d:52"}
+	startAddr := "10.0.0.179"
+	endAddr := "10.0.0.180"
+	ignoreMacAddresses := []string{"00:4a:2b:3c:1d:5e"}
+	ignoreMacAddressesUpdate := []string{"00:3a:2b:43:5d:52"}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1239,7 +1239,7 @@ func TestAccRangeResource_IgnoreMacAddresses(t *testing.T) {
 				Config: testAccRangeIgnoreMacAddresses(startAddr, endAddr, ignoreMacAddresses),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangeExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ignore_mac_addresses.0", "00:1a:2b:3c:4d:5e"),
+					resource.TestCheckResourceAttr(resourceName, "ignore_mac_addresses.0", "00:4a:2b:3c:1d:5e"),
 				),
 			},
 			// Update and Read
@@ -1247,7 +1247,7 @@ func TestAccRangeResource_IgnoreMacAddresses(t *testing.T) {
 				Config: testAccRangeIgnoreMacAddresses(startAddr, endAddr, ignoreMacAddressesUpdate),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangeExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ignore_mac_addresses.0", "00:1a:2b:33:4d:52"),
+					resource.TestCheckResourceAttr(resourceName, "ignore_mac_addresses.0", "00:3a:2b:43:5d:52"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase

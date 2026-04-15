@@ -365,7 +365,7 @@ func TestAccDxlEndpointResource_OutboundMemberType(t *testing.T) {
 	var resourceName = "nios_misc_dxl_endpoint.test_outbound_member_type"
 	var v misc.DxlEndpoint
 	name := acctest.RandomNameWithPrefix("dxl-endpoint")
-	memberUpdatedName := utils.GetNIOSGridMemberHostName()
+	memberUpdatedName := "infoblox.member2"
 	outboundMembers := []string{memberUpdatedName}
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -395,7 +395,7 @@ func TestAccDxlEndpointResource_OutboundMembers(t *testing.T) {
 	var resourceName = "nios_misc_dxl_endpoint.test_outbound_members"
 	var v misc.DxlEndpoint
 	name := acctest.RandomNameWithPrefix("dxl-endpoint")
-	memberUpdatedName := utils.GetNIOSGridMemberHostName()
+	memberUpdatedName := "infoblox.member2"
 	outboundMembersVal := []string{memberUpdatedName}
 
 	resource.ParallelTest(t, resource.TestCase{

@@ -590,7 +590,7 @@ resource "nios_ipam_network_view" "test_ddns_zone_primaries" {
             }
         }]
 }
-`, memberUpdatedName, memberUpdatedName, zoneFQDN1, zoneFQDN2, name, dnsGridZonePrimary, zoneMatch, dnsGridZoneRef)
+`, zoneFQDN1, memberUpdatedName, zoneFQDN2, memberUpdatedName, name, dnsGridZonePrimary, zoneMatch, dnsGridZoneRef)
 }
 
 func testAccNetworkviewExtAttrs(name string, extAttrs map[string]string) string {

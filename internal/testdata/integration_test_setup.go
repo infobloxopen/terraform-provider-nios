@@ -21,9 +21,12 @@ import (
 	"github.com/infobloxopen/infoblox-nios-go-client/grid"
 	"github.com/infobloxopen/infoblox-nios-go-client/ipam"
 	"github.com/infobloxopen/infoblox-nios-go-client/microsoft"
+	"github.com/infobloxopen/infoblox-nios-go-client/misc"
 	"github.com/infobloxopen/infoblox-nios-go-client/notification"
 	"github.com/infobloxopen/infoblox-nios-go-client/option"
+	"github.com/infobloxopen/infoblox-nios-go-client/parentalcontrol"
 	"github.com/infobloxopen/infoblox-nios-go-client/security"
+	"github.com/infobloxopen/terraform-provider-nios/internal/acctest"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
@@ -376,6 +379,91 @@ func ConfigureCACertificates(host, wapiVer, username, password, certificateUsage
 	return nil
 }
 
+func ConfigurePxgridEndpoint(host, wapiVer, username, password, certUploadFilePath string, miscClient *misc.APIClient) error {
+	if miscClient == nil {
+		return fmt.Errorf("configure pxgrid endpoint: MISC client is required")
+	}
+
+	uploadInitResp, err := UploadInit(host, wapiVer, username, password)
+	if err != nil {
+		return fmt.Errorf("configure pxgrid endpoint: upload init: %w", err)
+	}
+
+	if err := UploadFile(host, wapiVer, username, password, uploadInitResp.URL, certUploadFilePath); err != nil {
+		return fmt.Errorf("configure pxgrid endpoint: upload file: %w", err)
+	}
+
+	endpointName := "Example_pxgrid_ISE_endpoint"
+	resolvedOutboundMember := firstNonEmpty("infoblox.member2")
+
+	pxGridEndpointBody := misc.PxgridEndpoint{
+		Address:                misc.PtrString("1.1.1.1"),
+		Name:                   misc.PtrString(endpointName),
+		NetworkView:            misc.PtrString("test_network_view"),
+		ClientCertificateToken: misc.PtrString(uploadInitResp.Token),
+		OutboundMemberType:     misc.PtrString("MEMBER"),
+		OutboundMembers:        []string{resolvedOutboundMember},
+		SubscribeSettings: &misc.PxgridEndpointSubscribeSettings{
+			EnabledAttributes: []string{"DOMAINNAME"},
+		},
+		PublishSettings: &misc.PxgridEndpointPublishSettings{
+			EnabledAttributes: []string{"IPADDRESS"},
+		},
+	}
+
+	apiResp, _, err := miscClient.PxgridEndpointAPI.Create(context.Background()).
+		PxgridEndpoint(pxGridEndpointBody).
+		ReturnAsObject(1).
+		ReturnFieldsPlus("name").
+		Execute()
+	if err != nil {
+		if strings.Contains(err.Error(), "already exists") {
+			filters := map[string]interface{}{"name": endpointName}
+			existingResp, _, listErr := miscClient.PxgridEndpointAPI.List(context.Background()).
+				ReturnAsObject(1).
+				Filters(filters).
+				ReturnFieldsPlus("name").
+				Execute()
+			if listErr != nil {
+				return fmt.Errorf("configure pxgrid endpoint: failed to list existing pxgrid endpoint: %w", listErr)
+			}
+			if existingResp.ListPxgridEndpointResponseObject == nil || len(existingResp.ListPxgridEndpointResponseObject.Result) == 0 {
+				return fmt.Errorf("configure pxgrid endpoint: pxgrid endpoint %q already exists but no matching object was returned", endpointName)
+			}
+
+			existingRef := existingResp.ListPxgridEndpointResponseObject.Result[0].GetRef()
+			if existingRef == "" {
+				return fmt.Errorf("configure pxgrid endpoint: pxgrid endpoint %q already exists but ref could not be resolved", endpointName)
+			}
+
+			if err := writePipelineEnvVar("NIOS_PXGRID_ENDPOINT_REF", existingRef); err != nil {
+				return fmt.Errorf("configure pxgrid endpoint: failed to write existing pxgrid endpoint ref: %w", err)
+			}
+
+			fmt.Printf("pxGrid endpoint %q already exists, using ref %s\n", endpointName, existingRef)
+			return nil
+		}
+
+		return fmt.Errorf("configure pxgrid endpoint: failed to create pxgrid endpoint: %w", err)
+	}
+
+	if apiResp.CreatePxgridEndpointResponseAsObject == nil || apiResp.CreatePxgridEndpointResponseAsObject.Result == nil {
+		return fmt.Errorf("configure pxgrid endpoint: create response did not include a result")
+	}
+
+	createdRef := apiResp.CreatePxgridEndpointResponseAsObject.Result.GetRef()
+	if createdRef == "" {
+		return fmt.Errorf("configure pxgrid endpoint: created pxgrid endpoint ref is empty")
+	}
+
+	if err := writePipelineEnvVar("NIOS_PXGRID_ENDPOINT_REF", createdRef); err != nil {
+		return fmt.Errorf("configure pxgrid endpoint: failed to write created pxgrid endpoint ref: %w", err)
+	}
+
+	fmt.Printf("pxGrid endpoint %q created successfully with ref %s\n", endpointName, createdRef)
+	return nil
+}
+
 // CACertificate represents a single CA certificate object from the NIOS WAPI.
 type CACertificate struct {
 	Ref               string `json:"_ref"`
@@ -456,6 +544,7 @@ type PreConfigClients struct {
 	GRID         *grid.APIClient
 	MICROSOFT    *microsoft.APIClient
 	NOTIFICATION *notification.APIClient
+	PARENTAL     *parentalcontrol.APIClient
 	SECURITY     *security.APIClient
 }
 
@@ -480,6 +569,9 @@ func PreConfig(clients PreConfigClients, hostnames GridHostnames) error {
 	}
 	if clients.NOTIFICATION == nil {
 		return fmt.Errorf("preconfig: NOTIFICATION client is required")
+	}
+	if clients.PARENTAL == nil {
+		return fmt.Errorf("preconfig: PARENTAL client is required")
 	}
 	if clients.SECURITY == nil {
 		return fmt.Errorf("preconfig: SECURITY client is required")
@@ -524,6 +616,78 @@ func PreConfig(clients PreConfigClients, hostnames GridHostnames) error {
 		fmt.Printf("Roaming hosts enabled for grid DHCP properties %q\n", *gridDHCPProperties.Ref)
 	} else {
 		fmt.Printf("Roaming hosts already enabled for grid DHCP properties %q, skipping update\n", *gridDHCPProperties.Ref)
+	}
+
+	// Update Grid settings: enable RIR SWIP and MS network users.
+	gridListResp, _, err := clients.GRID.GridAPI.List(context.Background()).
+		ReturnAsObject(1).
+		ReturnFieldsPlus("enable_rir_swip,ms_setting").
+		Execute()
+	if err != nil {
+		return fmt.Errorf("failed to list grid objects: %w", err)
+	}
+	if gridListResp.ListGridResponseObject == nil || len(gridListResp.ListGridResponseObject.Result) == 0 {
+		return fmt.Errorf("grid list returned no results")
+	}
+	gridRef := gridListResp.ListGridResponseObject.Result[0].Ref
+	if gridRef == nil || *gridRef == "" {
+		return fmt.Errorf("grid ref is empty")
+	}
+	gridBody := grid.Grid{
+		MsSetting: &grid.GridMsSetting{
+			EnableNetworkUsers: grid.PtrBool(true),
+		},
+		EnableRirSwip: grid.PtrBool(true),
+	}
+	_, _, err = clients.GRID.GridAPI.Update(context.Background(), utils.ExtractResourceRef(*gridRef)).
+		Grid(gridBody).
+		Execute()
+	if err != nil {
+		return fmt.Errorf("failed to update grid settings for %q: %w", *gridRef, err)
+	}
+	fmt.Printf("Grid settings updated (enable_rir_swip=true, enable_network_users=true) for %q\n", *gridRef)
+
+	// Ensure parental control is enabled.
+	parentalResp, _, err := clients.PARENTAL.ParentalcontrolSubscriberAPI.List(context.Background()).
+		ReturnAsObject(1).
+		ReturnFieldsPlus("enable_parental_control").
+		Execute()
+	if err != nil {
+		return fmt.Errorf("failed to list parentalcontrol subscribers: %w", err)
+	}
+	if parentalResp.ListParentalcontrolSubscriberResponseObject == nil || len(parentalResp.ListParentalcontrolSubscriberResponseObject.Result) == 0 {
+		return fmt.Errorf("parentalcontrol subscriber list returned no results")
+	}
+
+	parentalSubscriber := parentalResp.ListParentalcontrolSubscriberResponseObject.Result[0]
+	if parentalSubscriber.Ref == nil || *parentalSubscriber.Ref == "" {
+		return fmt.Errorf("parentalcontrol subscriber ref is empty")
+	}
+
+	parentalControlStatus := false
+	if parentalSubscriber.EnableParentalControl != nil {
+		parentalControlStatus = *parentalSubscriber.EnableParentalControl
+	}
+
+	if !parentalControlStatus {
+		parentalControlRef := utils.ExtractResourceRef(*parentalSubscriber.Ref)
+		parentalControlSubscriberBody := parentalcontrol.ParentalcontrolSubscriber{
+			EnableParentalControl: parentalcontrol.PtrBool(true),
+			CatAcctname:           parentalcontrol.PtrString("test_account"),
+			PcZoneName:            parentalcontrol.PtrString("PcZone"),
+		}
+
+		_, _, err = clients.PARENTAL.ParentalcontrolSubscriberAPI.Update(context.Background(), parentalControlRef).
+			ParentalcontrolSubscriber(parentalControlSubscriberBody).
+			ReturnAsObject(1).
+			Execute()
+		if err != nil {
+			return fmt.Errorf("failed to enable parental control on %q: %w", *parentalSubscriber.Ref, err)
+		}
+
+		fmt.Printf("Parental control enabled for subscriber %q\n", *parentalSubscriber.Ref)
+	} else {
+		fmt.Printf("Parental control already enabled for subscriber %q, skipping update\n", *parentalSubscriber.Ref)
 	}
 
 	networkViews := []string{"test_network_view", "custom_view", "test_network_view2", "ms_server", "ms_server2"}
@@ -1041,30 +1205,54 @@ func PreConfig(clients PreConfigClients, hostnames GridHostnames) error {
 	}
 
 	// Create grid members
+
+	networkSettingAddress6 := fmt.Sprintf("2001:db8:%x:%x::%x", acctest.RandomNumber(65535), acctest.RandomNumber(65535), acctest.RandomNumber(65535))
+	ipv6SettingVal2 := grid.MemberIpv6Setting{
+		AutoRouterConfigEnabled: grid.PtrBool(false),
+		Dscp:                    grid.PtrInt64(0),
+		Enabled:                 grid.PtrBool(true),
+		UseDscp:                 grid.PtrBool(false),
+		VirtualIp:               grid.PtrString(networkSettingAddress6),
+		Gateway:                 grid.PtrString("2001::1"),
+		Primary:                 grid.PtrBool(true),
+		CidrPrefix:              grid.PtrInt64(8),
+	}
+
+	ipv6SettingVal3 := grid.MemberIpv6Setting{
+		AutoRouterConfigEnabled: grid.PtrBool(false),
+		Dscp:                    grid.PtrInt64(0),
+		Enabled:                 grid.PtrBool(false),
+		UseDscp:                 grid.PtrBool(false),
+		Primary:                 grid.PtrBool(true),
+	}
+
 	members := []struct {
-		hostName   string
-		vipAddress string
+		hostName        string
+		vipAddress      string
+		configAddrType  string
+		ipv6SettingVal  grid.MemberIpv6Setting
+		masterCandidate bool
 	}{
-		// TODO: Randomize the vipAddress values to avoid conflicts with existing members
-		{hostName: "infoblox.member2", vipAddress: "172.28.82.251"},
-		{hostName: "infoblox.member3", vipAddress: "172.28.82.252"},
+		{hostName: "infoblox.member2", vipAddress: "172.28.32.251", configAddrType: "BOTH", ipv6SettingVal: ipv6SettingVal2, masterCandidate: true},
+		{hostName: "infoblox.member3", vipAddress: "172.28.32.252", configAddrType: "IPV4", ipv6SettingVal: ipv6SettingVal3, masterCandidate: false},
 	}
 
 	for _, member := range members {
 		memberBody := grid.Member{
 			HostName:                 grid.PtrString(member.hostName),
-			ConfigAddrType:           grid.PtrString("IPV4"),
+			ConfigAddrType:           grid.PtrString(member.configAddrType),
 			Platform:                 grid.PtrString("VNIOS"),
 			ServiceTypeConfiguration: grid.PtrString("ALL_V4"),
-			MasterCandidate:          grid.PtrBool(true),
+			MasterCandidate:          grid.PtrBool(member.masterCandidate),
 			VipSetting: &grid.MemberVipSetting{
 				Address:    grid.PtrString(member.vipAddress),
-				Gateway:    grid.PtrString("172.28.82.1"),
+				Gateway:    grid.PtrString("172.28.32.1"),
 				SubnetMask: grid.PtrString("255.255.254.0"),
 				Primary:    grid.PtrBool(true),
 				Dscp:       grid.PtrInt64(0),
 				UseDscp:    grid.PtrBool(false),
 			},
+			Ipv6Setting: &member.ipv6SettingVal,
 		}
 
 		_, _, err := clients.GRID.MemberAPI.Create(context.Background()).
@@ -1195,56 +1383,57 @@ func PreConfig(clients PreConfigClients, hostnames GridHostnames) error {
 		fmt.Printf("Active Directory auth service %q created successfully (ref: %s, env: %s)\n", ad.name, adRef, ad.refEnvVar)
 	}
 
+	// TODO : Remote Lookup Services need to be removed to run Member UTs
 	// Update auth policy to append the first AD auth service ref
 	// Only proceed if at least one new ref was captured
-	firstADRef := adAuthServiceRefs["active_dir"]
-	if firstADRef != "" {
-		// GET current auth policy
-		listResp, _, err := clients.SECURITY.AuthpolicyAPI.List(context.Background()).
-			ReturnAsObject(1).
-			ReturnFieldsPlus("auth_services").
-			Execute()
-		if err != nil {
-			return fmt.Errorf("failed to list auth policy: %w", err)
-		}
-
-		// Resolve the auth policy slice and ref from either response shape
-		var authPolicies []security.Authpolicy
-		if listResp.ListAuthpolicyResponseObject != nil {
-			authPolicies = listResp.ListAuthpolicyResponseObject.Result
-		} else if listResp.ArrayOfAuthpolicy != nil {
-			authPolicies = *listResp.ArrayOfAuthpolicy
-		}
-
-		if len(authPolicies) == 0 {
-			return fmt.Errorf("auth policy list returned no results")
-		}
-
-		authPolicyRef := authPolicies[0].Ref
-
-		if authPolicyRef == nil || *authPolicyRef == "" {
-			return fmt.Errorf("auth policy ref is empty")
-		}
-
-		extractedAuthPolicyRef := utils.ExtractResourceRef(*authPolicyRef)
-
-		// Append first AD auth service ref to existing auth services
-		authServices := authPolicies[0].GetAuthServices()
-		authServices = append(authServices, firstADRef)
-
-		authPolicyBody := security.Authpolicy{
-			AuthServices: authServices,
-		}
-
-		_, _, err = clients.SECURITY.AuthpolicyAPI.Update(context.Background(), extractedAuthPolicyRef).
-			Authpolicy(authPolicyBody).
-			Execute()
-		if err != nil {
-			return fmt.Errorf("failed to update auth policy %q: %w", *authPolicyRef, err)
-		}
-
-		fmt.Printf("Auth policy %q updated with AD auth service ref %q\n", *authPolicyRef, firstADRef)
-	}
+	//firstADRef := adAuthServiceRefs["active_dir"]
+	//if firstADRef != "" {
+	//	// GET current auth policy
+	//	listResp, _, err := clients.SECURITY.AuthpolicyAPI.List(context.Background()).
+	//		ReturnAsObject(1).
+	//		ReturnFieldsPlus("auth_services").
+	//		Execute()
+	//	if err != nil {
+	//		return fmt.Errorf("failed to list auth policy: %w", err)
+	//	}
+	//
+	//	// Resolve the auth policy slice and ref from either response shape
+	//	var authPolicies []security.Authpolicy
+	//	if listResp.ListAuthpolicyResponseObject != nil {
+	//		authPolicies = listResp.ListAuthpolicyResponseObject.Result
+	//	} else if listResp.ArrayOfAuthpolicy != nil {
+	//		authPolicies = *listResp.ArrayOfAuthpolicy
+	//	}
+	//
+	//	if len(authPolicies) == 0 {
+	//		return fmt.Errorf("auth policy list returned no results")
+	//	}
+	//
+	//	authPolicyRef := authPolicies[0].Ref
+	//
+	//	if authPolicyRef == nil || *authPolicyRef == "" {
+	//		return fmt.Errorf("auth policy ref is empty")
+	//	}
+	//
+	//	extractedAuthPolicyRef := utils.ExtractResourceRef(*authPolicyRef)
+	//
+	//	// Append first AD auth service ref to existing auth services
+	//	authServices := authPolicies[0].GetAuthServices()
+	//	authServices = append(authServices, firstADRef)
+	//
+	//	authPolicyBody := security.Authpolicy{
+	//		AuthServices: authServices,
+	//	}
+	//
+	//	_, _, err = clients.SECURITY.AuthpolicyAPI.Update(context.Background(), extractedAuthPolicyRef).
+	//		Authpolicy(authPolicyBody).
+	//		Execute()
+	//	if err != nil {
+	//		return fmt.Errorf("failed to update auth policy %q: %w", *authPolicyRef, err)
+	//	}
+	//
+	//	fmt.Printf("Auth policy %q updated with AD auth service ref %q\n", *authPolicyRef, firstADRef)
+	//}
 
 	// Update MemberFileDistribution to append a new TFTP ACL entry
 	memberFiledistResp, _, err := clients.GRID.MemberFiledistributionAPI.List(context.Background()).ReturnAsObject(1).Execute()
@@ -1492,6 +1681,7 @@ func main() {
 		GRID:         apiClient.GridAPI,
 		MICROSOFT:    apiClient.MicrosoftAPI,
 		NOTIFICATION: apiClient.NotificationAPI,
+		PARENTAL:     apiClient.ParentalControlAPI,
 		SECURITY:     apiClient.SecurityAPI,
 	}
 
@@ -1501,6 +1691,15 @@ func main() {
 		return
 	}
 	fmt.Println("Pre-configuration completed successfully")
+
+	pxgridCertUploadFilePath := filepath.Join(cwd, "internal/testdata/nios_notification_rest_endpoint", "dummy-bundle.pem")
+	err = ConfigurePxgridEndpoint(host, wapiVer, username, password, pxgridCertUploadFilePath, apiClient.MiscAPI)
+	if err != nil {
+		fmt.Printf("Error configuring pxGrid endpoint: %v\n", err)
+		return
+	}
+
+	fmt.Println("PXGRID endpoint configured successfully")
 
 	fmt.Printf("Environment setup complete. Variables written to %s\n", pipelineEnvPath)
 

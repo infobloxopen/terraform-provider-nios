@@ -239,6 +239,8 @@ func TestAccCertificateAuthserviceResource_EnablePasswordRequest(t *testing.T) {
 }
 
 func TestAccCertificateAuthserviceResource_EnableRemoteLookup(t *testing.T) {
+	// Remote Lookup Service cannot be configured as it prevents changing Member Type
+	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_security_certificate_authservice.test_enable_remote_lookup"
 	var v security.CertificateAuthservice
 	name := acctest.RandomNameWithPrefix("certificate_authservice")

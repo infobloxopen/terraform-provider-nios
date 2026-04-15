@@ -107,6 +107,9 @@ func TestAccDtcMonitorSipResource_ClientCert(t *testing.T) {
 	name := acctest.RandomNameWithPrefix("dtc-monitor-sip")
 	certificate1 := utils.GetNIOSDtcCertRef()
 	certificate2 := utils.GetNIOSDtcCert2Ref()
+	if certificate1 == "" || certificate2 == "" {
+		t.Skip("Both certificates for testing client_cert must be set in environment variables NIOS_DTC_CERT_REF and NIOS_DTC_CERT2_REF")
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },

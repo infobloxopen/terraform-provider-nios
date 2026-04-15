@@ -447,7 +447,7 @@ func TestAccIpv6networktemplateResource_DelegatedMember(t *testing.T) {
 				Config: testAccIpv6networktemplateDelegatedMember(name, 24, delegatedMemberVal),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networktemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "delegated_member.name", memberName),
+					resource.TestCheckResourceAttr(resourceName, "delegated_member.name", memberUpdatedName),
 				),
 			},
 			// Update and Read

@@ -116,18 +116,18 @@ func TestAccUpgradegroupResource_DistributionDependentGroup(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccUpgradegroupDistributionDependentGroup(name, "example_distribution_dependent_group1"),
+				Config: testAccUpgradegroupDistributionDependentGroup(name, "example_upgrade_dependent_group1"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckUpgradegroupExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "distribution_dependent_group", "example_distribution_dependent_group1"),
+					resource.TestCheckResourceAttr(resourceName, "distribution_dependent_group", "example_upgrade_dependent_group1"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccUpgradegroupDistributionDependentGroup(name, "example_distribution_dependent_group2"),
+				Config: testAccUpgradegroupDistributionDependentGroup(name, "example_upgrade_dependent_group2"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckUpgradegroupExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "distribution_dependent_group", "example_distribution_dependent_group2"),
+					resource.TestCheckResourceAttr(resourceName, "distribution_dependent_group", "example_upgrade_dependent_group2"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
