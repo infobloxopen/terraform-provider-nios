@@ -631,25 +631,25 @@ func (r *Ipv6networkResource) ValidateConfig(ctx context.Context, req resource.V
 	}
 
 	// mgm_private and use_mgm_private must both be true if either one is true
-    mgmPrivateSet := !data.MgmPrivate.IsNull() && !data.MgmPrivate.IsUnknown()
-    useMgmPrivateSet := !data.UseMgmPrivate.IsNull() && !data.UseMgmPrivate.IsUnknown()
+	mgmPrivateSet := !data.MgmPrivate.IsNull() && !data.MgmPrivate.IsUnknown()
+	useMgmPrivateSet := !data.UseMgmPrivate.IsNull() && !data.UseMgmPrivate.IsUnknown()
 
-    mgmPrivateTrue := mgmPrivateSet && data.MgmPrivate.ValueBool()
-    useMgmPrivateTrue := useMgmPrivateSet && data.UseMgmPrivate.ValueBool()
+	mgmPrivateTrue := mgmPrivateSet && data.MgmPrivate.ValueBool()
+	useMgmPrivateTrue := useMgmPrivateSet && data.UseMgmPrivate.ValueBool()
 
-    if mgmPrivateTrue && !useMgmPrivateTrue {
-        resp.Diagnostics.AddAttributeError(
-            path.Root("use_mgm_private"),
-            "Invalid MGM Private Configuration",
-            "When 'mgm_private' is set to true, 'use_mgm_private' must also be set to true.",
-        )
-    } else if useMgmPrivateTrue && !mgmPrivateTrue {
-        resp.Diagnostics.AddAttributeError(
-            path.Root("mgm_private"),
-            "Invalid MGM Private Configuration",
-            "When 'use_mgm_private' is set to true, 'mgm_private' must also be set to true.",
-        )
-    }
+	if mgmPrivateTrue && !useMgmPrivateTrue {
+		resp.Diagnostics.AddAttributeError(
+			path.Root("use_mgm_private"),
+			"Invalid MGM Private Configuration",
+			"When 'mgm_private' is set to true, 'use_mgm_private' must also be set to true.",
+		)
+	} else if useMgmPrivateTrue && !mgmPrivateTrue {
+		resp.Diagnostics.AddAttributeError(
+			path.Root("mgm_private"),
+			"Invalid MGM Private Configuration",
+			"When 'use_mgm_private' is set to true, 'mgm_private' must also be set to true.",
+		)
+	}
 }
 
 func (r *Ipv6networkResource) isIpv6NetworkConvertedToContainer(ctx context.Context, data *Ipv6networkModel) bool {
