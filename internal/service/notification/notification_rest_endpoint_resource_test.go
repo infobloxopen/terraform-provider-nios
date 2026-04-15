@@ -242,7 +242,8 @@ func TestAccNotificationRestEndpointResource_OutboundMemberType(t *testing.T) {
 	var resourceName = "nios_notification_rest_endpoint.test_outbound_member_type"
 	var v notification.NotificationRestEndpoint
 	name := acctest.RandomNameWithPrefix("notification-rest-endpoint")
-	outboundMembers := []string{"infoblox.grid_master_candidate1"}
+	memberUpdatedName := utils.GetNIOSGridMemberHostName()
+	outboundMembers := []string{memberUpdatedName}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -273,8 +274,9 @@ func TestAccNotificationRestEndpointResource_OutboundMembers(t *testing.T) {
 	var resourceName = "nios_notification_rest_endpoint.test_outbound_members"
 	var v notification.NotificationRestEndpoint
 	name := acctest.RandomNameWithPrefix("notification-rest-endpoint")
-	outboundMembers := []string{"infoblox.grid_master_candidate1"}
-	updatedOutboundMembers := []string{"infoblox.grid_master_candidate2"}
+	memberUpdatedName := utils.GetNIOSGridMemberHostName()
+	outboundMembers := []string{memberUpdatedName}
+	updatedOutboundMembers := []string{"infoblox.member2"}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -286,7 +288,7 @@ func TestAccNotificationRestEndpointResource_OutboundMembers(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNotificationRestEndpointExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "outbound_members.#", "1"),
-					resource.TestCheckResourceAttr(resourceName, "outbound_members.0", "infoblox.grid_master_candidate1"),
+					resource.TestCheckResourceAttr(resourceName, "outbound_members.0", memberUpdatedName),
 				),
 			},
 			// Update and Read
@@ -295,7 +297,7 @@ func TestAccNotificationRestEndpointResource_OutboundMembers(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNotificationRestEndpointExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "outbound_members.#", "1"),
-					resource.TestCheckResourceAttr(resourceName, "outbound_members.0", "infoblox.grid_master_candidate2"),
+					resource.TestCheckResourceAttr(resourceName, "outbound_members.0", "infoblox.member2"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase

@@ -40,10 +40,6 @@ func TestAccUpgradescheduleResource_basic(t *testing.T) {
 	})
 }
 
-func TestAccUpgradescheduleResource_disappears(t *testing.T) {
-	t.Skip("Upgradeschedule cannot be deleted from NIOS, skipping disappears test")
-}
-
 func TestAccUpgradescheduleResource_Active(t *testing.T) {
 	var resourceName = "nios_grid_upgradeschedule.test_active"
 	var v grid.Upgradeschedule

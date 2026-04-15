@@ -647,8 +647,7 @@ func TestAccIpv6fixedaddressResource_Ipv6addr(t *testing.T) {
 }
 
 // TestAccIpv6fixedaddressResource_FuncCall tests the "func_call" attribute functionality
-// which allocates IPv6 addresses using next_available_ip. Since func_call attribute can't be
-// updated, the comment is updated to demonstrate an update to the resource
+// which allocates IPv6 addresses using next_available_ip.
 func TestAccIpv6fixedaddressResource_FuncCall(t *testing.T) {
 	var resourceName = "nios_dhcp_ipv6fixedaddress.test_func_call"
 	var v dhcp.Ipv6fixedaddress
@@ -1801,6 +1800,7 @@ resource "nios_dhcp_ipv6fixedaddress" "test_func_call" {
 			"network_view" = nios_ipam_network_view.parent_network_view.name
 		}
 	}
+	network_view = nios_ipam_network_view.parent_network_view.name
 }
 `, duid, comment, attributeName, objFunc, resultField, object)
 	return strings.Join([]string{testAccBaseNetworkWithView(networkView, ipv6Network), config}, "")

@@ -133,8 +133,9 @@ func TestAccParentalcontrolSubscribersiteResource_ApiMembers(t *testing.T) {
 	var resourceName = "nios_parentalcontrol_subscribersite.test_api_members"
 	var v parentalcontrol.ParentalcontrolSubscribersite
 	name := acctest.RandomNameWithPrefix("subscriber-site")
+	memberName := utils.GetNIOSGridMasterHostName()
 	apiMembers1 := []map[string]any{
-		{"name": "infoblox.localdomain"},
+		{"name": memberName},
 	}
 	apiMembers2 := []map[string]any{
 		{"name": "infoblox.member1"},
@@ -149,7 +150,7 @@ func TestAccParentalcontrolSubscribersiteResource_ApiMembers(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckParentalcontrolSubscribersiteExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "api_members.#", "1"),
-					resource.TestCheckResourceAttr(resourceName, "api_members.0.name", "infoblox.localdomain"),
+					resource.TestCheckResourceAttr(resourceName, "api_members.0.name", memberName),
 				),
 			},
 			// Update and Read
@@ -582,8 +583,9 @@ func TestAccParentalcontrolSubscribersiteResource_Members(t *testing.T) {
 	var resourceName = "nios_parentalcontrol_subscribersite.test_members"
 	var v parentalcontrol.ParentalcontrolSubscribersite
 	name := acctest.RandomNameWithPrefix("subscriber-site")
+	memberName := utils.GetNIOSGridMasterHostName()
 	members1 := []map[string]any{
-		{"name": "infoblox.localdomain"},
+		{"name": memberName},
 	}
 	members2 := []map[string]any{
 		{"name": "infoblox.member1"},
@@ -598,7 +600,7 @@ func TestAccParentalcontrolSubscribersiteResource_Members(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckParentalcontrolSubscribersiteExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "members.#", "1"),
-					resource.TestCheckResourceAttr(resourceName, "members.0.name", "infoblox.localdomain"),
+					resource.TestCheckResourceAttr(resourceName, "members.0.name", memberName),
 				),
 			},
 			// Update and Read

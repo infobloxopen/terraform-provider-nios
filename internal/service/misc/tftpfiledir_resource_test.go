@@ -19,7 +19,7 @@ import (
 // Support for 'FILE' type needs to be added with function call and tests need to be updated accordingly.
 
 // Setup Required :
-// In the Infoblox UI , navigate to Data Management > File Distribution > Grid Members > i
+// In the Infoblox UI , navigate to Data Management > File Distribution > Members
 // For the member `infoblox.localdomain`, enable `Allow these clients perform file transfers` for `Any` client.
 
 var readableAttributesForTftpfiledir = "directory,is_synced_to_gm,last_modify,name,type,vtftp_dir_members"
@@ -121,10 +121,10 @@ func TestAccTftpfiledirResource_Directory(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccTftpfiledirDirectory(name, "DIRECTORY", "/ftpusers"),
+				Config: testAccTftpfiledirDirectory(name, "DIRECTORY", "/"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckTftpfiledirExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "directory", "/ftpusers"),
+					resource.TestCheckResourceAttr(resourceName, "directory", "/"),
 				),
 			},
 			// Skip Update testing as this field cannot be updated
@@ -190,14 +190,15 @@ func TestAccTftpfiledirResource_VtftpDirMembers(t *testing.T) {
 	var resourceName = "nios_misc_tftpfiledir.test_vtftp_dir_members"
 	var v misc.Tftpfiledir
 	name := acctest.RandomNameWithPrefix("tftpfiledir")
+	memberName := utils.GetNIOSGridMasterHostName()
 	vtftpDirMembersVal := []map[string]any{
 		{
-			"member":  "infoblox.localdomain",
+			"member":  memberName,
 			"ip_type": "ADDRESS",
 			"address": "10.0.0.103",
 		},
 		{
-			"member":        "infoblox.localdomain",
+			"member":        memberName,
 			"ip_type":       "RANGE",
 			"start_address": "10.0.0.170",
 			"end_address":   "10.0.0.180",
@@ -205,7 +206,7 @@ func TestAccTftpfiledirResource_VtftpDirMembers(t *testing.T) {
 	}
 	vtftpDirMembersValUpdated := []map[string]any{
 		{
-			"member":  "infoblox.localdomain",
+			"member":  memberName,
 			"ip_type": "NETWORK",
 			"network": "10.0.0.0",
 			"cidr":    24,
@@ -221,10 +222,10 @@ func TestAccTftpfiledirResource_VtftpDirMembers(t *testing.T) {
 				Config: testAccTftpfiledirVtftpDirMembers(name, "DIRECTORY", vtftpDirMembersVal),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckTftpfiledirExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "vtftp_dir_members.0.member", "infoblox.localdomain"),
+					resource.TestCheckResourceAttr(resourceName, "vtftp_dir_members.0.member", memberName),
 					resource.TestCheckResourceAttr(resourceName, "vtftp_dir_members.0.ip_type", "ADDRESS"),
 					resource.TestCheckResourceAttr(resourceName, "vtftp_dir_members.0.address", "10.0.0.103"),
-					resource.TestCheckResourceAttr(resourceName, "vtftp_dir_members.1.member", "infoblox.localdomain"),
+					resource.TestCheckResourceAttr(resourceName, "vtftp_dir_members.1.member", memberName),
 					resource.TestCheckResourceAttr(resourceName, "vtftp_dir_members.1.ip_type", "RANGE"),
 					resource.TestCheckResourceAttr(resourceName, "vtftp_dir_members.1.start_address", "10.0.0.170"),
 					resource.TestCheckResourceAttr(resourceName, "vtftp_dir_members.1.end_address", "10.0.0.180"),

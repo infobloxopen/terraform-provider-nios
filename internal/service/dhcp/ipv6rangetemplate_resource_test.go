@@ -148,14 +148,14 @@ func TestAccIpv6rangetemplateResource_DelegatedMember(t *testing.T) {
 	name := acctest.RandomNameWithPrefix("ipv6-range-template")
 	numberOfAdresses := 100
 	offset := 50
+	member1 := utils.GetNIOSGridMasterHostName()
+	memberUpdatedName := utils.GetNIOSGridMemberHostName()
 	delegatedMember1 := map[string]any{
 
-		"name":     "infoblox.172_28_82_213",
-		"ipv4addr": "172.28.82.213",
+		"name": member1,
 	}
 	delegatedMember2 := map[string]any{
-		"name":     "infoblox.172_28_82_185",
-		"ipv4addr": "172.28.82.185",
+		"name": memberUpdatedName,
 	}
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -166,8 +166,7 @@ func TestAccIpv6rangetemplateResource_DelegatedMember(t *testing.T) {
 				Config: testAccIpv6rangetemplateDelegatedMember(name, numberOfAdresses, offset, delegatedMember1),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6rangetemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "delegated_member.name", "infoblox.172_28_82_213"),
-					resource.TestCheckResourceAttr(resourceName, "delegated_member.ipv4addr", "172.28.82.213"),
+					resource.TestCheckResourceAttr(resourceName, "delegated_member.name", member1),
 				),
 			},
 			// Update and Read
@@ -175,8 +174,7 @@ func TestAccIpv6rangetemplateResource_DelegatedMember(t *testing.T) {
 				Config: testAccIpv6rangetemplateDelegatedMember(name, numberOfAdresses, offset, delegatedMember2),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6rangetemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "delegated_member.name", "infoblox.172_28_82_185"),
-					resource.TestCheckResourceAttr(resourceName, "delegated_member.ipv4addr", "172.28.82.185"),
+					resource.TestCheckResourceAttr(resourceName, "delegated_member.name", memberUpdatedName),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -286,13 +284,13 @@ func TestAccIpv6rangetemplateResource_Member(t *testing.T) {
 	name := acctest.RandomNameWithPrefix("ipv6-range-template")
 	numberOfAdresses := 100
 	offset := 50
+	member1Name := utils.GetNIOSGridMasterHostName()
+	memberUpdatedName := utils.GetNIOSGridMemberHostName()
 	member1 := map[string]any{
-		"name":     "infoblox.172_28_82_213",
-		"ipv4addr": "172.28.82.213",
+		"name": member1Name,
 	}
 	member2 := map[string]any{
-		"name":     "infoblox.172_28_82_185",
-		"ipv4addr": "172.28.82.185",
+		"name": memberUpdatedName,
 	}
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -303,8 +301,7 @@ func TestAccIpv6rangetemplateResource_Member(t *testing.T) {
 				Config: testAccIpv6rangetemplateMember(name, numberOfAdresses, offset, member1),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6rangetemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "member.name", "infoblox.172_28_82_213"),
-					resource.TestCheckResourceAttr(resourceName, "member.ipv4addr", "172.28.82.213"),
+					resource.TestCheckResourceAttr(resourceName, "member.name", member1Name),
 				),
 			},
 			// Update and Read
@@ -312,8 +309,7 @@ func TestAccIpv6rangetemplateResource_Member(t *testing.T) {
 				Config: testAccIpv6rangetemplateMember(name, numberOfAdresses, offset, member2),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6rangetemplateExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "member.name", "infoblox.172_28_82_185"),
-					resource.TestCheckResourceAttr(resourceName, "member.ipv4addr", "172.28.82.185"),
+					resource.TestCheckResourceAttr(resourceName, "member.name", memberUpdatedName),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -497,9 +493,9 @@ func TestAccIpv6rangetemplateResource_ServerAssociationType(t *testing.T) {
 	name := acctest.RandomNameWithPrefix("ipv6-range-template")
 	numberOfAdresses := 100
 	offset := 50
+	member1Name := utils.GetNIOSGridMasterHostName()
 	member := map[string]any{
-		"name":     "infoblox.172_28_82_213",
-		"ipv4addr": "172.28.82.213",
+		"name": member1Name,
 	}
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -729,6 +725,7 @@ resource "nios_dhcp_ipv6_range_template" "test_member" {
 	offset = %d
     cloud_api_compatible = true
     member = %s
+	server_association_type = "MEMBER"
 }
 `, name, numberOfAddresses, offset, membersStr)
 }

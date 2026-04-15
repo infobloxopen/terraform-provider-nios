@@ -213,7 +213,7 @@ func TestAccZoneStubResource_ExternalNsGroup(t *testing.T) {
 	var v dns.ZoneStub
 	fqdn := acctest.RandomNameWithPrefix("zone-stub") + ".com"
 	stubServerName := acctest.RandomNameWithPrefix("stub_server")
-	externalNsGroup1 := "ensg3"
+	externalNsGroup1 := "ensg1"
 	externalNsGroup2 := "ensg2"
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -437,6 +437,8 @@ func TestAccZoneStubResource_StubMembers(t *testing.T) {
 	var v dns.ZoneStub
 	fqdn := acctest.RandomNameWithPrefix("zone-stub") + ".com"
 	stubServerName := acctest.RandomNameWithPrefix("stub_server")
+	memberName := utils.GetNIOSGridMasterHostName()
+	memberUpdatedName := utils.GetNIOSGridMemberHostName()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -444,18 +446,18 @@ func TestAccZoneStubResource_StubMembers(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccZoneStubStubMembers(fqdn, "1.1.1.1", stubServerName, "infoblox.member"),
+				Config: testAccZoneStubStubMembers(fqdn, "1.1.1.1", stubServerName, memberUpdatedName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneStubExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "stub_members.0.name", "infoblox.member"),
+					resource.TestCheckResourceAttr(resourceName, "stub_members.0.name", memberUpdatedName),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccZoneStubStubMembers(fqdn, "1.1.1.1", stubServerName, "infoblox.172_28_82_250"),
+				Config: testAccZoneStubStubMembers(fqdn, "1.1.1.1", stubServerName, memberName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneStubExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "stub_members.0.name", "infoblox.172_28_82_250"),
+					resource.TestCheckResourceAttr(resourceName, "stub_members.0.name", memberName),
 				),
 			},
 			// Delete testing automatically occurs in TestCase

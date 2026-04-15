@@ -21,9 +21,10 @@ func TestAccNsgroupStubmemberResource_basic(t *testing.T) {
 	var resourceName = "nios_dns_nsgroup_stubmember.test"
 	var v dns.NsgroupStubmember
 	name := acctest.RandomNameWithPrefix("test-nsgroup-stubmember")
+	memberUpdatedName := utils.GetNIOSGridMemberHostName()
 	stubMember := []map[string]any{
 		{
-			"name": "member.com",
+			"name": memberUpdatedName,
 		},
 	}
 	resource.ParallelTest(t, resource.TestCase{
@@ -37,7 +38,7 @@ func TestAccNsgroupStubmemberResource_basic(t *testing.T) {
 					testAccCheckNsgroupStubmemberExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "name", name),
 					resource.TestCheckResourceAttr(resourceName, "stub_members.#", "1"),
-					resource.TestCheckResourceAttr(resourceName, "stub_members.0.name", "member.com"),
+					resource.TestCheckResourceAttr(resourceName, "stub_members.0.name", memberUpdatedName),
 					// Test fields with default value
 					resource.TestCheckResourceAttr(resourceName, "comment", ""),
 				),
@@ -51,9 +52,10 @@ func TestAccNsgroupStubmemberResource_disappears(t *testing.T) {
 	resourceName := "nios_dns_nsgroup_stubmember.test"
 	var v dns.NsgroupStubmember
 	name := acctest.RandomNameWithPrefix("test-nsgroup-stubmember")
+	memberUpdatedName := utils.GetNIOSGridMemberHostName()
 	stubMember := []map[string]any{
 		{
-			"name": "member.com",
+			"name": memberUpdatedName,
 		},
 	}
 
@@ -78,9 +80,10 @@ func TestAccNsgroupStubmemberResource_Comment(t *testing.T) {
 	var resourceName = "nios_dns_nsgroup_stubmember.test_comment"
 	var v dns.NsgroupStubmember
 	name := acctest.RandomNameWithPrefix("test-nsgroup-stubmember")
+	memberUpdatedName := utils.GetNIOSGridMemberHostName()
 	stubMember := []map[string]any{
 		{
-			"name": "member.com",
+			"name": memberUpdatedName,
 		},
 	}
 
@@ -113,9 +116,10 @@ func TestAccNsgroupStubmemberResource_ExtAttrs(t *testing.T) {
 	var resourceName = "nios_dns_nsgroup_stubmember.test_extattrs"
 	var v dns.NsgroupStubmember
 	name := acctest.RandomNameWithPrefix("test-nsgroup-stubmember")
+	memberUpdatedName := utils.GetNIOSGridMemberHostName()
 	stubMember := []map[string]any{
 		{
-			"name": "member.com",
+			"name": memberUpdatedName,
 		},
 	}
 	extAttrValue1 := acctest.RandomName()
@@ -154,9 +158,10 @@ func TestAccNsgroupStubmemberResource_Name(t *testing.T) {
 	var v dns.NsgroupStubmember
 	name := acctest.RandomNameWithPrefix("test-nsgroup-stubmember")
 	nameUpdate := acctest.RandomNameWithPrefix("test-nsgroup-stubmember")
+	memberUpdatedName := utils.GetNIOSGridMemberHostName()
 	stubMember := []map[string]any{
 		{
-			"name": "member.com",
+			"name": memberUpdatedName,
 		},
 	}
 
@@ -189,14 +194,16 @@ func TestAccNsgroupStubmemberResource_StubMembers(t *testing.T) {
 	var resourceName = "nios_dns_nsgroup_stubmember.test_stub_members"
 	var v dns.NsgroupStubmember
 	name := acctest.RandomNameWithPrefix("test-nsgroup-stubmember")
+	memberUpdatedName := utils.GetNIOSGridMemberHostName()
+	memberName := utils.GetNIOSGridMasterHostName()
 	stubMember := []map[string]any{
 		{
-			"name": "member.com",
+			"name": memberUpdatedName,
 		},
 	}
 	stubMemberUpdate := []map[string]any{
 		{
-			"name": "infoblox.localdomain",
+			"name": memberName,
 		},
 	}
 	resource.ParallelTest(t, resource.TestCase{
@@ -208,7 +215,7 @@ func TestAccNsgroupStubmemberResource_StubMembers(t *testing.T) {
 				Config: testAccNsgroupStubmemberStubMembers(name, stubMember),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNsgroupStubmemberExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "stub_members.0.name", "member.com"),
+					resource.TestCheckResourceAttr(resourceName, "stub_members.0.name", memberUpdatedName),
 				),
 			},
 			// Update and Read
@@ -216,7 +223,7 @@ func TestAccNsgroupStubmemberResource_StubMembers(t *testing.T) {
 				Config: testAccNsgroupStubmemberStubMembers(name, stubMemberUpdate),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNsgroupStubmemberExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "stub_members.0.name", "infoblox.localdomain"),
+					resource.TestCheckResourceAttr(resourceName, "stub_members.0.name", memberName),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
