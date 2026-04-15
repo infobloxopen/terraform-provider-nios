@@ -477,7 +477,7 @@ func TestAccZoneDelegatedResource_ZoneFormatIPV4(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccZoneDelegatedZoneFormat("10.1.0.132/32", delegatedToName, "10.0.0.1", "IPV4"),
+				Config: testAccZoneDelegatedZoneFormat("192.168.10.21/32", delegatedToName, "10.0.0.1", "IPV4"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneDelegatedExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "zone_format", "IPV4"),
@@ -491,7 +491,7 @@ func TestAccZoneDelegatedResource_ZoneFormatIPV4(t *testing.T) {
 func TestAccZoneDelegatedResource_ZoneFormatIPV6(t *testing.T) {
 	var resourceName = "nios_dns_zone_delegated.test_zone_format"
 	var v dns.ZoneDelegated
-	delegatedToName := acctest.RandomNameWithPrefix("zone-delegated") + ".com"
+	delegatedToName := acctest.RandomNameWithPrefix("zone-delegated") + ".example.com"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -499,7 +499,7 @@ func TestAccZoneDelegatedResource_ZoneFormatIPV6(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccZoneDelegatedZoneFormat("8.0.0.0.3.a.5.8.8.b.d.0.1.0.0.2.ip6.arpa", delegatedToName, "10.0.0.1", "IPV6"),
+				Config: testAccZoneDelegatedZoneFormat("2001::1/64", delegatedToName, "10.0.0.1", "IPV6"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneDelegatedExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "zone_format", "IPV6"),

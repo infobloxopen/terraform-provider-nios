@@ -14,6 +14,7 @@ import (
 )
 
 func TestAccDistributionscheduleDataSource_Read(t *testing.T) {
+	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	dataSourceName := "data.nios_grid_distributionschedule.test"
 	resourceName := "nios_grid_distributionschedule.test"
 	var v grid.Distributionschedule

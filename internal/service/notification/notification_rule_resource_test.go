@@ -54,6 +54,9 @@ var (
 )
 
 func TestAccNotificationRuleResource_basic(t *testing.T) {
+	if notificationTarget == "" {
+		t.Skip("NIOS_NOTIFICATION_REST_ENDPOINT_REF environment variable must be set for this test to run")
+	}
 	var resourceName = "nios_notification_rule.test"
 	var v notification.NotificationRule
 	name := acctest.RandomNameWithPrefix("example-notification-rule")
@@ -96,6 +99,9 @@ func TestAccNotificationRuleResource_basic(t *testing.T) {
 }
 
 func TestAccNotificationRuleResource_disappears(t *testing.T) {
+	if notificationTarget == "" {
+		t.Skip("NIOS_NOTIFICATION_REST_ENDPOINT_REF environment variable must be set for this test to run")
+	}
 	resourceName := "nios_notification_rule.test"
 	var v notification.NotificationRule
 	name := acctest.RandomNameWithPrefix("example-notification-rule")
@@ -118,6 +124,9 @@ func TestAccNotificationRuleResource_disappears(t *testing.T) {
 }
 
 func TestAccNotificationRuleResource_Comment(t *testing.T) {
+	if notificationTarget == "" {
+		t.Skip("NIOS_NOTIFICATION_REST_ENDPOINT_REF environment variable must be set for this test to run")
+	}
 	var resourceName = "nios_notification_rule.test_comment"
 	var v notification.NotificationRule
 	name := acctest.RandomNameWithPrefix("example-notification-rule")
@@ -148,6 +157,9 @@ func TestAccNotificationRuleResource_Comment(t *testing.T) {
 }
 
 func TestAccNotificationRuleResource_Disable(t *testing.T) {
+	if notificationTarget == "" {
+		t.Skip("NIOS_NOTIFICATION_REST_ENDPOINT_REF environment variable must be set for this test to run")
+	}
 	var resourceName = "nios_notification_rule.test_disable"
 	var v notification.NotificationRule
 	name := acctest.RandomNameWithPrefix("example-notification-rule")
@@ -179,6 +191,9 @@ func TestAccNotificationRuleResource_Disable(t *testing.T) {
 
 // Deduplication events are supported only for DNS_RPZ, SECURITY_ADP, DB_CHANGE_DNS_DISCOVERY_DATA, DXL_EVENT_SUBSCRIBER event types
 func TestAccNotificationRuleResource_EnableEventDeduplication(t *testing.T) {
+	if notificationTarget == "" {
+		t.Skip("NIOS_NOTIFICATION_REST_ENDPOINT_REF environment variable must be set for this test to run")
+	}
 	var resourceName = "nios_notification_rule.test_enable_event_deduplication"
 	var v notification.NotificationRule
 	name := acctest.RandomNameWithPrefix("example-notification-rule")
@@ -234,6 +249,9 @@ func TestAccNotificationRuleResource_EnableEventDeduplication(t *testing.T) {
 }
 
 func TestAccNotificationRuleResource_EnableEventDeduplicationLog(t *testing.T) {
+	if notificationTarget == "" {
+		t.Skip("NIOS_NOTIFICATION_REST_ENDPOINT_REF environment variable must be set for this test to run")
+	}
 	var resourceName = "nios_notification_rule.test_enable_event_deduplication_log"
 	var v notification.NotificationRule
 	name := acctest.RandomNameWithPrefix("example-notification-rule")
@@ -289,6 +307,9 @@ func TestAccNotificationRuleResource_EnableEventDeduplicationLog(t *testing.T) {
 }
 
 func TestAccNotificationRuleResource_EventDeduplicationFields(t *testing.T) {
+	if notificationTarget == "" {
+		t.Skip("NIOS_NOTIFICATION_REST_ENDPOINT_REF environment variable must be set for this test to run")
+	}
 	var resourceName = "nios_notification_rule.test_event_deduplication_fields"
 	var v notification.NotificationRule
 	name := acctest.RandomNameWithPrefix("example-notification-rule")
@@ -350,6 +371,9 @@ func TestAccNotificationRuleResource_EventDeduplicationFields(t *testing.T) {
 }
 
 func TestAccNotificationRuleResource_EventDeduplicationLookbackPeriod(t *testing.T) {
+	if notificationTarget == "" {
+		t.Skip("NIOS_NOTIFICATION_REST_ENDPOINT_REF environment variable must be set for this test to run")
+	}
 	var resourceName = "nios_notification_rule.test_event_deduplication_lookback_period"
 	var v notification.NotificationRule
 	name := acctest.RandomNameWithPrefix("example-notification-rule")
@@ -406,6 +430,9 @@ func TestAccNotificationRuleResource_EventDeduplicationLookbackPeriod(t *testing
 
 // The event priority can be configured only for outbound notification rules that contain the scheduled event type
 func TestAccNotificationRuleResource_EventPriority(t *testing.T) {
+	if notificationTarget == "" {
+		t.Skip("NIOS_NOTIFICATION_REST_ENDPOINT_REF environment variable must be set for this test to run")
+	}
 	t.Skip("Additional config is required for test")
 	var resourceName = "nios_notification_rule.test_event_priority"
 	var v notification.NotificationRule
@@ -437,6 +464,9 @@ func TestAccNotificationRuleResource_EventPriority(t *testing.T) {
 }
 
 func TestAccNotificationRuleResource_EventType(t *testing.T) {
+	if notificationTarget == "" {
+		t.Skip("NIOS_NOTIFICATION_REST_ENDPOINT_REF environment variable must be set for this test to run")
+	}
 	var resourceName = "nios_notification_rule.test_event_type"
 	var v notification.NotificationRule
 	name := acctest.RandomNameWithPrefix("example-notification-rule")
@@ -488,6 +518,9 @@ func TestAccNotificationRuleResource_EventType(t *testing.T) {
 }
 
 func TestAccNotificationRuleResource_ExpressionList(t *testing.T) {
+	if notificationTarget == "" {
+		t.Skip("NIOS_NOTIFICATION_REST_ENDPOINT_REF environment variable must be set for this test to run")
+	}
 	var resourceName = "nios_notification_rule.test_expression_list"
 	var v notification.NotificationRule
 	name := acctest.RandomNameWithPrefix("example-notification-rule")
@@ -563,6 +596,9 @@ func TestAccNotificationRuleResource_ExpressionList(t *testing.T) {
 }
 
 func TestAccNotificationRuleResource_Name(t *testing.T) {
+	if notificationTarget == "" {
+		t.Skip("NIOS_NOTIFICATION_REST_ENDPOINT_REF environment variable must be set for this test to run")
+	}
 	var resourceName = "nios_notification_rule.test_name"
 	var v notification.NotificationRule
 	name := acctest.RandomNameWithPrefix("example-notification-rule")
@@ -585,6 +621,9 @@ func TestAccNotificationRuleResource_Name(t *testing.T) {
 }
 
 func TestAccNotificationRuleResource_NotificationAction(t *testing.T) {
+	if notificationTarget == "" {
+		t.Skip("NIOS_NOTIFICATION_REST_ENDPOINT_REF environment variable must be set for this test to run")
+	}
 	t.Skip("Additional config is required for test")
 	var resourceName = "nios_notification_rule.test_notification_action"
 	var v notification.NotificationRule
@@ -616,6 +655,9 @@ func TestAccNotificationRuleResource_NotificationAction(t *testing.T) {
 }
 
 func TestAccNotificationRuleResource_NotificationTarget(t *testing.T) {
+	if notificationTarget == "" {
+		t.Skip("NIOS_NOTIFICATION_REST_ENDPOINT_REF environment variable must be set for this test to run")
+	}
 	var resourceName = "nios_notification_rule.test_notification_target"
 	var v notification.NotificationRule
 	name := acctest.RandomNameWithPrefix("example-notification-rule")
@@ -667,6 +709,9 @@ func TestAccNotificationRuleResource_NotificationTarget(t *testing.T) {
 }
 
 func TestAccNotificationRuleResource_PublishSettings(t *testing.T) {
+	if notificationTarget == "" {
+		t.Skip("NIOS_NOTIFICATION_REST_ENDPOINT_REF environment variable must be set for this test to run")
+	}
 	var resourceName = "nios_notification_rule.test_publish_settings"
 	var v notification.NotificationRule
 	name := acctest.RandomNameWithPrefix("example-notification-rule")
@@ -712,6 +757,9 @@ func TestAccNotificationRuleResource_PublishSettings(t *testing.T) {
 }
 
 func TestAccNotificationRuleResource_ScheduledEvent(t *testing.T) {
+	if notificationTarget == "" {
+		t.Skip("NIOS_NOTIFICATION_REST_ENDPOINT_REF environment variable must be set for this test to run")
+	}
 	t.Skip("Additional config is required for test")
 	var resourceName = "nios_notification_rule.test_scheduled_event"
 	var v notification.NotificationRule
@@ -761,6 +809,9 @@ func TestAccNotificationRuleResource_ScheduledEvent(t *testing.T) {
 }
 
 func TestAccNotificationRuleResource_TemplateInstance(t *testing.T) {
+	if notificationTarget == "" {
+		t.Skip("NIOS_NOTIFICATION_REST_ENDPOINT_REF environment variable must be set for this test to run")
+	}
 	var resourceName = "nios_notification_rule.test_template_instance"
 	var v notification.NotificationRule
 	name := acctest.RandomNameWithPrefix("example-notification-rule")
@@ -812,6 +863,9 @@ func TestAccNotificationRuleResource_TemplateInstance(t *testing.T) {
 }
 
 func TestAccNotificationRuleResource_UsePublishSettings(t *testing.T) {
+	if notificationTarget == "" {
+		t.Skip("NIOS_NOTIFICATION_REST_ENDPOINT_REF environment variable must be set for this test to run")
+	}
 	var resourceName = "nios_notification_rule.test_use_publish_settings"
 	var v notification.NotificationRule
 	name := acctest.RandomNameWithPrefix("example-notification-rule")

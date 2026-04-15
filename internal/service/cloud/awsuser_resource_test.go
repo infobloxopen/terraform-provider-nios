@@ -396,11 +396,6 @@ resource "nios_cloud_aws_user" "test_name" {
 
 func testAccAwsuserNiosUserName(accountId, accessKeyId, name, niosUserName, secretAccessKey string) string {
 	return fmt.Sprintf(`
-resource "nios_security_admin_user" "admin-user-test2" {
-  name = "aws2"
-  password = "ExamplePassword@123"
-  admin_groups = ["admin-group"]
-}
 resource "nios_cloud_aws_user" "test_nios_user_name" {
     account_id = %q
     access_key_id = %q

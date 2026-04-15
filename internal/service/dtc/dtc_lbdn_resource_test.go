@@ -673,39 +673,39 @@ func testAccDtcLbdnAuthZones(name, lbMethod string, authZones, authZoneNames []s
 	patternsStr += "]"
 	config := fmt.Sprintf(`
 resource "nios_dns_zone_auth" "test_zone1" {
-    fqdn = "%s.test.com"
+    fqdn = "%[1]s.test.com"
     view = "default"
 	grid_primary = [{
-		name =  %q,
+		name =  %[2]q,
 	}]
 }
 
 resource "nios_dns_zone_auth" "test_zone2" {
-    fqdn = "%s.record_test.com"
+    fqdn = "%[3]s.record_test.com"
     view = "default"
 	grid_primary = [{
-		name =  %q,
+		name =  %[2]q,
 	}]
 }
 
 resource "nios_dns_zone_auth" "test_zone3" {
-    fqdn = "%s.test.com"
+    fqdn = "%[4]s.test.com"
     view = "custom_dns_view"
 	grid_primary = [{
-		name =  %q,
+		name =  %[2]q,
 	}]
 }
 resource "nios_dtc_lbdn" "test_auth_zones" {
-    name = %q
-    lb_method = %q
-    auth_zones = %s
-    pools = %s
-    patterns = %s
+    name = %[5]q
+    lb_method = %[6]q
+    auth_zones = %[7]s
+    pools = %[8]s
+    patterns = %[9]s
 	disable = "true"
 	types = ["A", "AAAA"]
 }
-`, memberName, memberName, memberName, authZoneNames[0], authZoneNames[1],
-		authZoneNames[2], name, lbMethod, authZonesStr, poolsStr, patternsStr)
+`, authZoneNames[0], memberName, authZoneNames[1], authZoneNames[2],
+		name, lbMethod, authZonesStr, poolsStr, patternsStr)
 	return strings.Join([]string{testAccDtcPoolServers(acctest.RandomNameWithPrefix("server"),
 		"ROUND_ROBIN", servers), config}, "\n")
 }

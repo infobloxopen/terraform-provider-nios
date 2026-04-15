@@ -343,6 +343,9 @@ func (r *SharedrecordgroupResource) ValidateConfig(ctx context.Context, req reso
 
 	// Fqdn in Zone Associations must is required
 	for i, zoneAssociation := range zoneAssociations {
+		if zoneAssociation.Fqdn.IsUnknown() {
+			continue
+		}
 		if zoneAssociation.Fqdn.IsNull() || zoneAssociation.Fqdn.ValueString() == "" {
 			resp.Diagnostics.AddError(
 				"Invalid Configuration for Sharedrecordgroup",

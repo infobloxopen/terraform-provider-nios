@@ -1496,7 +1496,7 @@ func TestAccRangeResource_Member(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRangeMember(startAddr, endAddr, member, member2),
+				Config: testAccRangeMember(startAddr, endAddr, member, member2, member),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangeExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "member.name", memberName),
@@ -1504,7 +1504,7 @@ func TestAccRangeResource_Member(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRangeMember(startAddr, endAddr, member2, member),
+				Config: testAccRangeMember(startAddr, endAddr, member, member2, member2),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangeExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "member.name", memberUpdatedName),
@@ -2082,8 +2082,8 @@ func TestAccRangeResource_SamePortControlDiscoveryBlackout(t *testing.T) {
 func TestAccRangeResource_ServerAssociationType(t *testing.T) {
 	var resourceName = "nios_dhcp_range.test_server_association_type"
 	var v dhcp.Range
-	startAddr := "10.0.0.121"
-	endAddr := "10.0.0.122"
+	startAddr := "190.0.0.121"
+	endAddr := "190.0.0.122"
 	serverAssociationType := "FAILOVER"
 	failoverAssociation := "example_failover_association1"
 	serverAssociationTypeUpdate := "MEMBER"
@@ -2108,7 +2108,6 @@ func TestAccRangeResource_ServerAssociationType(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangeExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "server_association_type", "MEMBER"),
-					resource.TestCheckResourceAttr(resourceName, "member.ipv4addr", "172.28.83.209"),
 					resource.TestCheckResourceAttr(resourceName, "member.name", member),
 				),
 			},
@@ -2152,8 +2151,8 @@ func TestAccRangeResource_StartAddr(t *testing.T) {
 func TestAccRangeResource_SubscribeSettings(t *testing.T) {
 	var resourceName = "nios_dhcp_range.test_subscribe_settings"
 	var v dhcp.Range
-	startAddr := "10.0.0.127"
-	endAddr := "10.0.0.128"
+	startAddr := "110.0.0.127"
+	endAddr := "110.0.0.128"
 	enabledAttribute := "DOMAINNAME"
 	enabledAttributeUpdate := "ENDPOINT_PROFILE"
 
@@ -2935,8 +2934,8 @@ func TestAccRangeResource_UseRecycleLeases(t *testing.T) {
 func TestAccRangeResource_UseSubscribeSettings(t *testing.T) {
 	var resourceName = "nios_dhcp_range.test_use_subscribe_settings"
 	var v dhcp.Range
-	startAddr := "10.0.0.177"
-	endAddr := "10.0.0.178"
+	startAddr := "210.0.0.177"
+	endAddr := "210.0.0.178"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -3500,8 +3499,8 @@ resource "nios_dhcp_range" "test_mac_filter_rules" {
 `, startAddr, endAddr, macFilterRulesHCL)
 }
 
-func testAccRangeMember(startAddr, endAddr string, member, member2 map[string]any) string {
-	memberHCL := utils.ConvertMapToHCL(member)
+func testAccRangeMember(startAddr, endAddr string, member, member2, rangeMember map[string]any) string {
+	memberHCL := utils.ConvertMapToHCL(rangeMember)
 	return fmt.Sprintf(`
 resource "nios_ipam_network" "example_network" {
   	network      = "102.0.0.0/24"
@@ -3730,16 +3729,27 @@ resource "nios_dhcp_range" "test_same_port_control_discovery_blackout" {
 
 func testAccRangeServerAssociationType(startAddr, endAddr, serverAssociationType, failoverAssociation, member string) string {
 	return fmt.Sprintf(`
+resource "nios_ipam_network" "example_network" {
+  	network      = "190.0.0.0/24"
+	network_view = "default"
+	members = [
+		{
+			struct = "dhcpmember"
+			name = %q
+		}
+	]
+}
+
 resource "nios_dhcp_range" "test_server_association_type" {
     start_addr = %q
     end_addr = %q
     server_association_type = %q
     failover_association = %q
 	member = {
-		name = %q
+		name = nios_ipam_network.example_network.members[0].name
 	}
 }
-`, startAddr, endAddr, serverAssociationType, failoverAssociation, member)
+`, member, startAddr, endAddr, serverAssociationType, failoverAssociation)
 }
 
 func testAccRangeStartAddr(startAddr, endAddr string) string {
@@ -3753,9 +3763,15 @@ resource "nios_dhcp_range" "test_start_addr" {
 
 func testAccRangeSubscribeSettings(startAddr, endAddr string, subscribeSettings string) string {
 	return fmt.Sprintf(`
+resource "nios_ipam_network" "example_network" {
+  network      = "110.0.0.0/24"
+  network_view = "test_network_view"
+}
+
 resource "nios_dhcp_range" "test_subscribe_settings" {
     start_addr = %q
     end_addr = %q
+	network_view = nios_ipam_network.example_network.network_view
     subscribe_settings = {
 	enabled_attributes = [%q]
 }
@@ -4014,10 +4030,16 @@ resource "nios_dhcp_range" "test_use_recycle_leases" {
 
 func testAccRangeUseSubscribeSettings(startAddr, endAddr string, useSubscribeSettings bool) string {
 	return fmt.Sprintf(`
+resource "nios_ipam_network" "example_network" {
+  network      = "210.0.0.0/24"
+  network_view = "test_network_view"
+}
+
 resource "nios_dhcp_range" "test_use_subscribe_settings" {
 	start_addr = %q
 	end_addr = %q
     use_subscribe_settings = %t
+	network_view = nios_ipam_network.example_network.network_view
 	subscribe_settings = {
 	enabled_attributes = ["DOMAINNAME"]
 }

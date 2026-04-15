@@ -243,7 +243,7 @@ func TestAccCertificateAuthserviceResource_EnableRemoteLookup(t *testing.T) {
 	var v security.CertificateAuthservice
 	name := acctest.RandomNameWithPrefix("certificate_authservice")
 	caCertificate := []string{utils.GetNIOSCACert1Ref()}
-	remoteLookupService := "ad_auth_service/b25lLmFkX2F1dGhfc2VydmljZSRhY3RpdmVfZGly:active_dir"
+	remoteLookupService := utils.GetNIOSADAuthServiceRef()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -463,8 +463,8 @@ func TestAccCertificateAuthserviceResource_RemoteLookupService(t *testing.T) {
 	var v security.CertificateAuthservice
 	name := acctest.RandomNameWithPrefix("certificate_authservice")
 	caCertificate := []string{utils.GetNIOSCACert1Ref()}
-	remoteLookupService := "ad_auth_service/b25lLmFkX2F1dGhfc2VydmljZSRhY3RpdmVfZGly:active_dir"
-	remoteLookupServiceUpdate := "ad_auth_service/b25lLmFkX2F1dGhfc2VydmljZSRhY3RpdmVfZGlyX3Rlc3Q:active_dir_test"
+	remoteLookupService := utils.GetNIOSADAuthServiceRef()
+	remoteLookupServiceUpdate := utils.GetNIOSADAuthServiceRef2()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },

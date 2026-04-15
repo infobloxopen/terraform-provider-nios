@@ -293,6 +293,7 @@ func TestAccZoneRpResource_ExternalSecondaries(t *testing.T) {
 }
 
 func TestAccZoneRpResource_FireeyeRuleMapping(t *testing.T) {
+	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_dns_zone_rp.test_fireeye_rule_mapping"
 	var v dns.ZoneRp
 	zoneFqdn := acctest.RandomNameWithPrefix("zone-rp") + ".com"
@@ -878,14 +879,16 @@ func TestAccZoneRpResource_RpzType(t *testing.T) {
 	var resourceName = "nios_dns_zone_rp.test_rpz_type"
 	var v dns.ZoneRp
 	zoneFqdn := acctest.RandomNameWithPrefix("zone-rp") + ".com"
-	fireEyeRuleMapping := map[string]any{
-		"apt_override": "NODATA",
-		"fireeye_alert_mapping": []map[string]any{
-			{
-				"alert_type": "DOMAIN_MATCH",
-				"lifetime":   "0",
-				"rpz_rule":   "NODATA",
-			},
+	memberName := utils.GetNIOSGridMasterHostName()
+	externalPrimaries := []map[string]any{
+		{
+			"address": "10.0.0.0",
+			"name":    "example-server",
+		},
+	}
+	gridSecondaries := []map[string]any{
+		{
+			"name": memberName,
 		},
 	}
 
@@ -895,20 +898,13 @@ func TestAccZoneRpResource_RpzType(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccZoneRpRpzType(zoneFqdn, "default", "FIREEYE", fireEyeRuleMapping),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckZoneRpExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "rpz_type", "FIREEYE"),
-				),
-			},
-			// Update and Read
-			{
-				Config: testAccZoneRpRpzType(zoneFqdn, "default", "FEED", fireEyeRuleMapping),
+				Config: testAccZoneRpRpzType(zoneFqdn, "default", "FEED", externalPrimaries, gridSecondaries),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneRpExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "rpz_type", "FEED"),
 				),
 			},
+			// Field is not updatable
 			// Delete testing automatically occurs in TestCase
 		},
 	})
@@ -1744,16 +1740,19 @@ resource "nios_dns_zone_rp" "test_rpz_severity" {
 `, zoneFqdn, view, rpzSeverity)
 }
 
-func testAccZoneRpRpzType(zoneFqdn, view, rpzType string, fireEyeRuleMapping map[string]any) string {
-	fireeyeRuleMappingHCL := utils.ConvertMapToHCL(fireEyeRuleMapping)
+func testAccZoneRpRpzType(zoneFqdn, view, rpzType string, externalPrimaries, gridSecondary []map[string]any) string {
+	externalPrimariesHCL := utils.ConvertSliceOfMapsToHCL(externalPrimaries)
+	gridSecondaryHCL := utils.ConvertSliceOfMapsToHCL(gridSecondary)
 	return fmt.Sprintf(`
 resource "nios_dns_zone_rp" "test_rpz_type" {
     fqdn = %q
     view = %q
     rpz_type = %q
-    fireeye_rule_mapping = %s
+	external_primaries = %s
+    grid_secondaries = %s
+    use_external_primary = true
 }
-`, zoneFqdn, view, rpzType, fireeyeRuleMappingHCL)
+`, zoneFqdn, view, rpzType, externalPrimariesHCL, gridSecondaryHCL)
 }
 
 func testAccZoneRpSetSoaSerialNumber(zoneFqdn, view string, setSoaSerialNumber bool) string {

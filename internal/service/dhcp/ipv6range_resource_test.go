@@ -1076,7 +1076,7 @@ func TestAccIpv6rangeResource_SubscribeSettings(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccIpv6rangeSubscribeSettings("default", "19::1", "19::10", subscribeSettings, "true"),
+				Config: testAccIpv6rangeSubscribeSettings("test_network_view", "219::1", "219::10", subscribeSettings, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6rangeExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "subscribe_settings.enabled_attributes.0", "DOMAINNAME"),
@@ -1085,7 +1085,7 @@ func TestAccIpv6rangeResource_SubscribeSettings(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccIpv6rangeSubscribeSettings("default", "19::1", "19::10", subscribeSettingsUpdated, "true"),
+				Config: testAccIpv6rangeSubscribeSettings("test_network_view", "219::1", "219::10", subscribeSettingsUpdated, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6rangeExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "subscribe_settings.enabled_attributes.0", "SECURITY_GROUP"),
@@ -1265,7 +1265,7 @@ func TestAccIpv6rangeResource_UseSubscribeSettings(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccIpv6rangeUseSubscribeSettings("default", "19::1", "19::10", "true", subscribeSettings),
+				Config: testAccIpv6rangeUseSubscribeSettings("test_network_view", "119::1", "119::10", "true", subscribeSettings),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6rangeExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_subscribe_settings", "true"),
@@ -1273,7 +1273,7 @@ func TestAccIpv6rangeResource_UseSubscribeSettings(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccIpv6rangeUseSubscribeSettings("default", "19::1", "19::10", "false", nil),
+				Config: testAccIpv6rangeUseSubscribeSettings("test_network_view", "119::1", "119::10", "false", nil),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6rangeExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_subscribe_settings", "false"),
@@ -1763,7 +1763,12 @@ resource "nios_dhcp_ipv6range" "test_start_addr" {
 
 func testAccIpv6rangeSubscribeSettings(view, startAddr, endAddr string, subscribeSettings map[string]any, useSubscribeSettings string) string {
 	subscribeSettingsStr := utils.ConvertMapToHCL(subscribeSettings)
-	config := fmt.Sprintf(`
+	return fmt.Sprintf(`
+resource "nios_ipam_ipv6network" "test" {
+    network = "219::/64"
+	network_view = %q
+}
+
 resource "nios_dhcp_ipv6range" "test_subscribe_settings" {
     network = nios_ipam_ipv6network.test.network
     start_addr = %q
@@ -1772,8 +1777,7 @@ resource "nios_dhcp_ipv6range" "test_subscribe_settings" {
     subscribe_settings = %s
 	use_subscribe_settings = %q
 }
-`, startAddr, endAddr, subscribeSettingsStr, useSubscribeSettings)
-	return strings.Join([]string{testAccBaseWithIpv6Network(view), config}, "")
+`, view, startAddr, endAddr, subscribeSettingsStr, useSubscribeSettings)
 }
 
 func testAccIpv6rangeUseBlackoutSetting(view, startAddr, endAddr string, useBlackoutSetting string) string {
@@ -1846,7 +1850,12 @@ resource "nios_dhcp_ipv6range" "test_use_recycle_leases" {
 
 func testAccIpv6rangeUseSubscribeSettings(view, startAddr, endAddr string, useSubscribeSettings string, subscribeSettings map[string]any) string {
 	subscribeSettingsStr := utils.ConvertMapToHCL(subscribeSettings)
-	config := fmt.Sprintf(`
+	return fmt.Sprintf(`
+resource "nios_ipam_ipv6network" "test" {
+    network = "119::/64"
+	network_view = %q
+}
+
 resource "nios_dhcp_ipv6range" "test_use_subscribe_settings" {
     network = nios_ipam_ipv6network.test.network
     start_addr = %q
@@ -1855,8 +1864,7 @@ resource "nios_dhcp_ipv6range" "test_use_subscribe_settings" {
 	subscribe_settings = %s
     use_subscribe_settings = %q
 }
-`, startAddr, endAddr, subscribeSettingsStr, useSubscribeSettings)
-	return strings.Join([]string{testAccBaseWithIpv6Network(view), config}, "")
+`, view, startAddr, endAddr, subscribeSettingsStr, useSubscribeSettings)
 }
 
 func testAccBaseWithIpv6NetworkandView(view string) string {
@@ -1920,7 +1928,7 @@ resource "nios_ipam_ipv6network" "test" {
 func testAccBaseWithIpv6Network(view string) string {
 	return fmt.Sprintf(`
 resource "nios_ipam_ipv6network" "test" {
-    network = "19::/64"
+    network = "219::/64"
 	network_view = %q
 }
 `, view)

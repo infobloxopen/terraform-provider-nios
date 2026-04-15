@@ -26,6 +26,14 @@ func GetNIOSDtcCert2Ref() string {
 	return os.Getenv("NIOS_DTC_CERT2_REF")
 }
 
+func GetNIOSADAuthServiceRef() string {
+	return os.Getenv("NIOS_AD_AUTH_SERVICE_ACTIVE_DIR_REF")
+}
+
+func GetNIOSADAuthServiceRef2() string {
+	return os.Getenv("NIOS_AD_AUTH_SERVICE_ACTIVE_DIR_TEST_REF")
+}
+
 func GetNIOSGridMasterHostName() string {
 	return os.Getenv("NIOS_GRID_MASTER_HOSTNAME")
 }

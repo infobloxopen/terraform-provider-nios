@@ -485,7 +485,48 @@ func PreConfig(clients PreConfigClients, hostnames GridHostnames) error {
 		return fmt.Errorf("preconfig: SECURITY client is required")
 	}
 
-	networkViews := []string{"test_network_view", "custom_view", "test_network_view2", "ms_server"}
+	// Ensure roaming hosts support is enabled at grid DHCP properties level.
+	gridDHCPResp, _, err := clients.GRID.GridDhcppropertiesAPI.List(context.Background()).
+		ReturnAsObject(1).
+		ReturnFieldsPlus("enable_roaming_hosts").
+		Execute()
+	if err != nil {
+		return fmt.Errorf("failed to list grid DHCP properties: %w", err)
+	}
+
+	if gridDHCPResp.ListGridDhcppropertiesResponseObject == nil || len(gridDHCPResp.ListGridDhcppropertiesResponseObject.Result) == 0 {
+		return fmt.Errorf("grid DHCP properties list returned no results")
+	}
+
+	gridDHCPProperties := gridDHCPResp.ListGridDhcppropertiesResponseObject.Result[0]
+	if gridDHCPProperties.Ref == nil || *gridDHCPProperties.Ref == "" {
+		return fmt.Errorf("grid DHCP properties ref is empty")
+	}
+
+	enableRoamingHosts := false
+	if gridDHCPProperties.EnableRoamingHosts != nil {
+		enableRoamingHosts = *gridDHCPProperties.EnableRoamingHosts
+	}
+
+	if !enableRoamingHosts {
+		gridDHCPPropertiesBody := grid.GridDhcpproperties{
+			EnableRoamingHosts: grid.PtrBool(true),
+		}
+
+		gridDhcpPropertiesRef := utils.ExtractResourceRef(*gridDHCPProperties.Ref)
+		_, _, err = clients.GRID.GridDhcppropertiesAPI.Update(context.Background(), gridDhcpPropertiesRef).
+			GridDhcpproperties(gridDHCPPropertiesBody).
+			Execute()
+		if err != nil {
+			return fmt.Errorf("failed to enable roaming hosts on grid DHCP properties %q: %w", *gridDHCPProperties.Ref, err)
+		}
+
+		fmt.Printf("Roaming hosts enabled for grid DHCP properties %q\n", *gridDHCPProperties.Ref)
+	} else {
+		fmt.Printf("Roaming hosts already enabled for grid DHCP properties %q, skipping update\n", *gridDHCPProperties.Ref)
+	}
+
+	networkViews := []string{"test_network_view", "custom_view", "test_network_view2", "ms_server", "ms_server2"}
 
 	for _, viewName := range networkViews {
 		networkViewBody := ipam.Networkview{
@@ -678,62 +719,37 @@ func PreConfig(clients PreConfigClients, hostnames GridHostnames) error {
 	}
 
 	// Create fingerprint filters
-	//fingerprintFilters := []string{"test_filter_fingerprint", "test_filter_fingerprint1"}
+	fingerprintFilters := []string{"test_filter_fingerprint", "test_filter_fingerprint1"}
 
-	// TODO : Fix this to do a GET Call Instead
-	// fingerPrintBody := dhcp.Fingerprint{
-	// 	DeviceClass: dhcp.PtrString("Windows OS"),
-	// 	VendorId:    []string{"MSFT"},
-	// 	Name:        dhcp.PtrString(acctest.RandomNameWithPrefix("dhcp-filterfingerprint")),
-	// }
+	resp2, _, err := clients.DHCP.FingerprintAPI.List(context.Background()).ReturnAsObject(1).Execute()
+	if err != nil {
+		return fmt.Errorf("failed to list fingerprints: %w", err)
+	}
+	if resp2 == nil || resp2.ListFingerprintResponseObject == nil || len(resp2.ListFingerprintResponseObject.Result) == 0 {
+		return fmt.Errorf("no fingerprints found in response")
+	}
+	fingerPrintName := resp2.ListFingerprintResponseObject.Result[0].Name
 
-	// resp, _, err := clients.DHCP.FingerprintAPI.Create(context.Background()).Fingerprint(fingerPrintBody).ReturnAsObject(1).Execute()
-	// if err != nil {
-	// 	if strings.Contains(err.Error(), "already exists") {
-	// 		fmt.Printf("Fingerprint %q already exists, skipping creation\n", *fingerPrintBody.Name)
-	// 	} else {
-	// 		return fmt.Errorf("failed to create fingerprint %q: %w", *fingerPrintBody.Name, err)
-	// 	}
-	// }
+	for _, fpFilterName := range fingerprintFilters {
+		filterFingerprintBody := dhcp.Filterfingerprint{
+			Name:        dhcp.PtrString(fpFilterName),
+			Fingerprint: []string{*fingerPrintName},
+		}
 
-	// Check if resp is nil to avoid dereferencing a nil pointer in case of an error
-	// if resp == nil || resp.CreateFingerprintResponseAsObject == nil || resp.CreateFingerprintResponseAsObject.Result == nil {
-	// 	return fmt.Errorf("failed to create fingerprint: response is nil or missing expected fields")
-	// }
+		_, _, err := clients.DHCP.FilterfingerprintAPI.Create(context.Background()).
+			Filterfingerprint(filterFingerprintBody).
+			Execute()
 
-	// listFingerPrintFilter := map[string]interface{}{
-	// 	"name": "APC",
-	// }
+		if err != nil {
+			if strings.Contains(err.Error(), "already exists") {
+				fmt.Printf("Fingerprint filter %q already exists, skipping creation\n", fpFilterName)
+				continue
+			}
+			return fmt.Errorf("failed to create fingerprint filter %q: %w", fpFilterName, err)
+		}
 
-	// resp, _, err := clients.DHCP.FingerprintAPI.List(context.Background()).ReturnAsObject(1).Filters(listFingerPrintFilter).Execute()
-	// if err != nil {
-	// 	return fmt.Errorf("failed to list fingerprints: %w", err)
-	// }
-	// if resp == nil || resp.ListFingerprintResponseObject == nil || len(resp.ListFingerprintResponseObject.Result) == 0 {
-	// 	return fmt.Errorf("no fingerprints found in response")
-	// }
-	// fingerPrintRef := resp.ListFingerprintResponseObject.Result[0].Ref
-
-	// for _, fpFilterName := range fingerprintFilters {
-	// 	filterFingerprintBody := dhcp.Filterfingerprint{
-	// 		Name:        dhcp.PtrString(fpFilterName),
-	// 		Fingerprint: []string{*fingerPrintRef},
-	// 	}
-
-	// 	_, _, err := clients.DHCP.FilterfingerprintAPI.Create(context.Background()).
-	// 		Filterfingerprint(filterFingerprintBody).
-	// 		Execute()
-
-	// 	if err != nil {
-	// 		if strings.Contains(err.Error(), "already exists") {
-	// 			fmt.Printf("Fingerprint filter %q already exists, skipping creation\n", fpFilterName)
-	// 			continue
-	// 		}
-	// 		return fmt.Errorf("failed to create fingerprint filter %q: %w", fpFilterName, err)
-	// 	}
-
-	// 	fmt.Printf("Fingerprint filter %q created successfully\n", fpFilterName)
-	// }
+		fmt.Printf("Fingerprint filter %q created successfully\n", fpFilterName)
+	}
 
 	// Create admin users
 	adminUsers := []string{"aws1", "aws2"}
@@ -892,15 +908,35 @@ func PreConfig(clients PreConfigClients, hostnames GridHostnames) error {
 		fmt.Printf("Forward stub server %q created successfully\n", serverName)
 	}
 
-	// Create IPv4 reverse mapping zone auth
+	// Create zone auth
 	zoneAuthBody := dns.ZoneAuth{
+		Fqdn: dns.PtrString("example.com"),
+		View: dns.PtrString("default"),
+	}
+
+	_, _, err = clients.DNS.ZoneAuthAPI.Create(context.Background()).
+		ZoneAuth(zoneAuthBody).
+		Execute()
+
+	if err != nil {
+		if strings.Contains(err.Error(), "exists") {
+			fmt.Printf("Zone auth %q already exists, skipping creation\n", "example.com")
+		} else {
+			return fmt.Errorf("failed to create zone auth %q: %w", "example.com", err)
+		}
+	} else {
+		fmt.Printf("Zone auth %q created successfully\n", "example.com")
+	}
+
+	// Create IPv4 reverse mapping zone auth
+	zoneAuthIPv4Body := dns.ZoneAuth{
 		Fqdn:       dns.PtrString("192.168.10.0/24"),
 		View:       dns.PtrString("default"),
 		ZoneFormat: dns.PtrString("IPV4"),
 	}
 
-	_, _, err := clients.DNS.ZoneAuthAPI.Create(context.Background()).
-		ZoneAuth(zoneAuthBody).
+	_, _, err = clients.DNS.ZoneAuthAPI.Create(context.Background()).
+		ZoneAuth(zoneAuthIPv4Body).
 		Execute()
 
 	if err != nil {
@@ -976,6 +1012,7 @@ func PreConfig(clients PreConfigClients, hostnames GridHostnames) error {
 		{address: "10.10.10.10", dnsView: microsoft.PtrString("default"), networkView: "default"},
 		{address: "example_server", dnsView: microsoft.PtrString("default"), networkView: "default"},
 		{address: "ms_example_server", dnsView: nil, networkView: "ms_server"},
+		{address: "ms_example_server2", dnsView: nil, networkView: "ms_server2"},
 	}
 
 	for _, server := range msServers {
@@ -1019,6 +1056,7 @@ func PreConfig(clients PreConfigClients, hostnames GridHostnames) error {
 			ConfigAddrType:           grid.PtrString("IPV4"),
 			Platform:                 grid.PtrString("VNIOS"),
 			ServiceTypeConfiguration: grid.PtrString("ALL_V4"),
+			MasterCandidate:          grid.PtrBool(true),
 			VipSetting: &grid.MemberVipSetting{
 				Address:    grid.PtrString(member.vipAddress),
 				Gateway:    grid.PtrString("172.28.82.1"),
@@ -1098,6 +1136,41 @@ func PreConfig(clients PreConfigClients, hostnames GridHostnames) error {
 
 		if err != nil {
 			if strings.Contains(err.Error(), "already exists") {
+				filtersAdAuth := map[string]interface{}{
+					"name": ad.name,
+				}
+
+				existingResp, _, listErr := clients.SECURITY.AdAuthServiceAPI.List(context.Background()).
+					ReturnAsObject(1).
+					Filters(filtersAdAuth).
+					ReturnFieldsPlus("name").
+					Execute()
+				if listErr != nil {
+					return fmt.Errorf("failed to list AD auth services to capture existing ref: %w", listErr)
+				}
+
+				if existingResp.ListAdAuthServiceResponseObject == nil || len(existingResp.ListAdAuthServiceResponseObject.Result) == 0 {
+					return fmt.Errorf("AD auth service %q already exists but no matching object was returned", ad.name)
+				}
+
+				var existingAdRef string
+				for _, existingAd := range existingResp.ListAdAuthServiceResponseObject.Result {
+					if existingAd.Name != nil && *existingAd.Name == ad.name {
+						existingAdRef = existingAd.GetRef()
+						break
+					}
+				}
+
+				if existingAdRef == "" {
+					return fmt.Errorf("AD auth service %q already exists but ref could not be resolved", ad.name)
+				}
+
+				adAuthServiceRefs[ad.name] = existingAdRef
+				if err := writePipelineEnvVar(ad.refEnvVar, existingAdRef); err != nil {
+					return fmt.Errorf("failed to write env var %s for existing AD auth service: %w", ad.refEnvVar, err)
+				}
+
+				fmt.Printf("Captured ref for existing Active Directory auth service %q: %s (env: %s)\n", ad.name, existingAdRef, ad.refEnvVar)
 				fmt.Printf("Active Directory auth service %q already exists, skipping creation\n", ad.name)
 				continue
 			}
@@ -1111,8 +1184,9 @@ func PreConfig(clients PreConfigClients, hostnames GridHostnames) error {
 		} else if resp.CreateAdAuthServiceResponseAsObject != nil && resp.CreateAdAuthServiceResponseAsObject.Result != nil {
 			adRef = resp.CreateAdAuthServiceResponseAsObject.Result.GetRef()
 		}
-
-		adAuthServiceRefs[ad.name] = adRef
+		if adRef != "" {
+			adAuthServiceRefs[ad.name] = adRef
+		}
 
 		if err := writePipelineEnvVar(ad.refEnvVar, adRef); err != nil {
 			return fmt.Errorf("failed to write env var %s: %w", ad.refEnvVar, err)
@@ -1126,7 +1200,10 @@ func PreConfig(clients PreConfigClients, hostnames GridHostnames) error {
 	firstADRef := adAuthServiceRefs["active_dir"]
 	if firstADRef != "" {
 		// GET current auth policy
-		listResp, _, err := clients.SECURITY.AuthpolicyAPI.List(context.Background()).ReturnAsObject(1).Execute()
+		listResp, _, err := clients.SECURITY.AuthpolicyAPI.List(context.Background()).
+			ReturnAsObject(1).
+			ReturnFieldsPlus("auth_services").
+			Execute()
 		if err != nil {
 			return fmt.Errorf("failed to list auth policy: %w", err)
 		}
@@ -1240,6 +1317,7 @@ func PreConfig(clients PreConfigClients, hostnames GridHostnames) error {
 			LoggingCategories: &grid.GridDnsLoggingCategories{
 				LogRpz: grid.PtrBool(true),
 			},
+			AllowRecursiveQuery: grid.PtrBool(true),
 		}
 
 		_, _, err = clients.GRID.GridDnsAPI.Update(context.Background(), dnsGridPropertiesRef).
@@ -1266,6 +1344,31 @@ func PreConfig(clients PreConfigClients, hostnames GridHostnames) error {
 		Execute()
 	if err != nil {
 		if strings.Contains(err.Error(), "already exists") {
+			filtersNotifRest := map[string]interface{}{
+				"name": *notificationRestEndpointBody.Name,
+			}
+			// if the notification REST endpoint already exists, we can attempt to capture its ref for later use
+			existingResp, _, listErr := clients.NOTIFICATION.NotificationRestEndpointAPI.List(context.Background()).
+				ReturnAsObject(1).
+				Filters(filtersNotifRest).
+				ReturnFieldsPlus("name").
+				Execute()
+			if listErr != nil {
+				return fmt.Errorf("failed to list notification REST endpoints to capture existing ref: %w", listErr)
+			}
+
+			if existingResp.ListNotificationRestEndpointResponseObject != nil && len(existingResp.ListNotificationRestEndpointResponseObject.Result) > 0 {
+				for _, existingEndpoint := range existingResp.ListNotificationRestEndpointResponseObject.Result {
+					if existingEndpoint.Name != nil && *existingEndpoint.Name == *notificationRestEndpointBody.Name {
+						existingRef := existingEndpoint.GetRef()
+						if err := writePipelineEnvVar("NIOS_NOTIFICATION_REST_ENDPOINT_REF", existingRef); err != nil {
+							return fmt.Errorf("failed to write NIOS_NOTIFICATION_REST_ENDPOINT_REF for existing endpoint: %w", err)
+						}
+						fmt.Printf("Captured ref for existing notification REST endpoint %q: %s\n", *notificationRestEndpointBody.Name, existingRef)
+						break
+					}
+				}
+			}
 			fmt.Printf("Notification REST endpoint %q already exists, skipping creation\n", *notificationRestEndpointBody.Name)
 		} else {
 			return fmt.Errorf("failed to create notification REST endpoint %q: %w", *notificationRestEndpointBody.Name, err)
@@ -1372,6 +1475,15 @@ func main() {
 		return
 	}
 	fmt.Println("Ecosystem template 2 uploaded successfully")
+
+	ecosystemTemplatePath3 := filepath.Join(cwd, "internal/testdata/nios_ecosystem_templates", "event_dhcp_lease_template.json")
+
+	err = ConfigureEcoSystemTemplates(host, wapiVer, username, password, ecosystemTemplatePath3)
+	if err != nil {
+		fmt.Printf("Error uploading ecosystem templates: %v\n", err)
+		return
+	}
+	fmt.Println("Ecosystem template 3 uploaded successfully")
 
 	clients := PreConfigClients{
 		IPAM:         apiClient.IPAMAPI,

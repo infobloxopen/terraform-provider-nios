@@ -121,10 +121,10 @@ func TestAccTftpfiledirResource_Directory(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccTftpfiledirDirectory(name, "DIRECTORY", "/ftpusers"),
+				Config: testAccTftpfiledirDirectory(name, "DIRECTORY", "/"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckTftpfiledirExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "directory", "/ftpusers"),
+					resource.TestCheckResourceAttr(resourceName, "directory", "/"),
 				),
 			},
 			// Skip Update testing as this field cannot be updated

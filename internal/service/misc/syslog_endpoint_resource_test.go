@@ -240,7 +240,7 @@ func TestAccSyslogEndpointResource_OutboundMembers(t *testing.T) {
 	connectionType := "udp"
 	format := "formatted"
 	outboundMemberTypeUpdated := "MEMBER"
-	memberUpdatedName := utils.GetNIOSGridMemberHostName()
+	memberUpdatedName := "infoblox.member3"
 	outboundMember := memberUpdatedName
 	outboundMemberUpdated := "infoblox.member2"
 

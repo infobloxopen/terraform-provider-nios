@@ -332,7 +332,7 @@ func TestAccRecordPtrResource_FuncCallIpv4Addr(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRecordPtrFuncCallIpv4Addr("192.168.10.0/24", ptrDName, "default", "Created with func_call"),
+				Config: testAccRecordPtrFuncCallIpv4Addr("15.0.0.0/24", ptrDName, "default", "Created with func_call"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordPtrExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "ptrdname", ptrDName),
@@ -342,7 +342,7 @@ func TestAccRecordPtrResource_FuncCallIpv4Addr(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRecordPtrFuncCallIpv4Addr("192.168.10.0/24", "ptr2.example.com", "default", "Updated with func_call"),
+				Config: testAccRecordPtrFuncCallIpv4Addr("16.0.0.0/24", "ptr2.example.com", "default", "Updated with func_call"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordPtrExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "ptrdname", "ptr2.example.com"),
