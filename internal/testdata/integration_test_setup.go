@@ -679,7 +679,6 @@ func PreConfig(clients PreConfigClients, hostnames GridHostnames) error {
 
 		_, _, err = clients.PARENTAL.ParentalcontrolSubscriberAPI.Update(context.Background(), parentalControlRef).
 			ParentalcontrolSubscriber(parentalControlSubscriberBody).
-			ReturnAsObject(1).
 			Execute()
 		if err != nil {
 			return fmt.Errorf("failed to enable parental control on %q: %w", *parentalSubscriber.Ref, err)
