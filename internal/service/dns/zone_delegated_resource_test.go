@@ -499,7 +499,7 @@ func TestAccZoneDelegatedResource_ZoneFormatIPV6(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccZoneDelegatedZoneFormat("2001::1/64", delegatedToName, "10.0.0.1", "IPV6"),
+				Config: testAccZoneDelegatedZoneFormat("2002::/64", delegatedToName, "10.0.0.1", "IPV6"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneDelegatedExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "zone_format", "IPV6"),

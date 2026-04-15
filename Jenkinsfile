@@ -1,5 +1,4 @@
 // ── Parameters ────────────────────────────────────────────────────────────────
-// Shown as form fields when "Build with Parameters" is triggered.
 properties([
     parameters([
         string(name: 'GM_URL',     defaultValue: 'https://host-a.infoblox.com', description: 'URL For the GRID Master'),
@@ -8,7 +7,6 @@ properties([
     ])
 ])
 
-// ── Helper: run a single test directory, collect results, never abort the build ─
 def runTestStage(String name, String dir, String timeout) {
     stage("Tests: ${name}") {
         try {
@@ -150,25 +148,23 @@ node('Cloud-test1-172.28.81.12-label') {
                 }
 
                 // ── Test stages ───────────────────────────────────────────────
-                // Sequential — one at a time to avoid connection timeouts.
-                // A failure in one directory does NOT abort the others.
                 sh 'mkdir -p $WORKSPACE/test-results'
                 runTestStage('acl',             'internal/service/acl',             '5m')
                 runTestStage('cloud',           'internal/service/cloud',           '5m')
-                // runTestStage('dhcp',            'internal/service/dhcp',            '80m')
-                // runTestStage('discovery',       'internal/service/discovery',       '30m')
-                // runTestStage('dns',             'internal/service/dns',             '80m')
-                // runTestStage('dtc',             'internal/service/dtc',             '30m')
-                // runTestStage('grid',            'internal/service/grid',            '30m')
-                // runTestStage('ipam',            'internal/service/ipam',            '45m')
-                // runTestStage('microsoft',       'internal/service/microsoft',       '30m')
-                // runTestStage('misc',            'internal/service/misc',            '30m')
-                // runTestStage('notification',    'internal/service/notification',    '30m')
+                runTestStage('dhcp',            'internal/service/dhcp',            '80m')
+                runTestStage('discovery',       'internal/service/discovery',       '10m')
+                runTestStage('dns',             'internal/service/dns',             '80m')
+                runTestStage('dtc',             'internal/service/dtc',             '30m')
+                runTestStage('grid',            'internal/service/grid',            '30m')
+                runTestStage('ipam',            'internal/service/ipam',            '80m')
+                runTestStage('microsoft',       'internal/service/microsoft',       '30m')
+                runTestStage('misc',            'internal/service/misc',            '30m')
+                runTestStage('notification',    'internal/service/notification',    '30m')
                 runTestStage('parentalcontrol', 'internal/service/parentalcontrol', '30m')
-                // runTestStage('rir',             'internal/service/rir',             '5m')
-                // runTestStage('rpz',             'internal/service/rpz',             '45m')
-                // runTestStage('security',        'internal/service/security',        '30m')
-                // runTestStage('smartfolder',     'internal/service/smartfolder',     '30m')
+                runTestStage('rir',             'internal/service/rir',             '5m')
+                runTestStage('rpz',             'internal/service/rpz',             '45m')
+                runTestStage('security',        'internal/service/security',        '30m')
+                runTestStage('smartfolder',     'internal/service/smartfolder',     '5m')
 
             } catch (err) {
                 currentBuild.result = 'FAILURE'
