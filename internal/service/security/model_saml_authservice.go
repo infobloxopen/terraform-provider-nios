@@ -21,7 +21,6 @@ import (
 type SamlAuthserviceModel struct {
 	Ref            types.String `tfsdk:"ref"`
 	Uuid           types.String `tfsdk:"uuid"`
-	UUID           types.String `tfsdk:"uuid"`
 	Comment        types.String `tfsdk:"comment"`
 	Idp            types.Object `tfsdk:"idp"`
 	Name           types.String `tfsdk:"name"`

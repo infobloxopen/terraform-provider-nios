@@ -24,7 +24,6 @@ import (
 type ParentalcontrolAvpModel struct {
 	Ref          types.String `tfsdk:"ref"`
 	Uuid         types.String `tfsdk:"uuid"`
-	UUID         types.String `tfsdk:"uuid"`
 	Comment      types.String `tfsdk:"comment"`
 	DomainTypes  types.List   `tfsdk:"domain_types"`
 	IsRestricted types.Bool   `tfsdk:"is_restricted"`

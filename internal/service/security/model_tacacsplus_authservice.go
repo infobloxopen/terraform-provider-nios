@@ -25,7 +25,6 @@ import (
 type TacacsplusAuthserviceModel struct {
 	Ref         types.String `tfsdk:"ref"`
 	Uuid        types.String `tfsdk:"uuid"`
-	UUID        types.String `tfsdk:"uuid"`
 	AcctRetries types.Int64  `tfsdk:"acct_retries"`
 	AcctTimeout types.Int64  `tfsdk:"acct_timeout"`
 	AuthRetries types.Int64  `tfsdk:"auth_retries"`

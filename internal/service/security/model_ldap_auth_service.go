@@ -23,7 +23,6 @@ import (
 type LdapAuthServiceModel struct {
 	Ref                         types.String `tfsdk:"ref"`
 	Uuid                        types.String `tfsdk:"uuid"`
-	UUID                        types.String `tfsdk:"uuid"`
 	Comment                     types.String `tfsdk:"comment"`
 	Disable                     types.Bool   `tfsdk:"disable"`
 	EaMapping                   types.List   `tfsdk:"ea_mapping"`
