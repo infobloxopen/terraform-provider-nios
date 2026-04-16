@@ -1,0 +1,212 @@
+# NIOS Grid Member GCP Module
+
+## Overview
+
+This module provisions the GCP infrastructure (Compute Instance, network interfaces, etc.) for a single NIOS Grid member. Use one module call per instance — Grid Master, IB member, CP member, Reporting, or Discovery — they all share the same resource structure. The NIOS configuration (`nios_grid_member` and `nios_grid_join` resources) should be applied after the infrastructure is deployed and NIOS grid is fully booted (~15-25 minutes).
+
+### NIOS Model → Machine Type Mapping
+
+The module automatically maps NIOS models to GCP machine types:
+
+| NIOS Model | GCP Machine Type |
+|------------|-----------------|
+| IB-V825 / TE-V810 / CP-V800 | n2-standard-2 |
+| IB-V1425 / TE-V1410 / CP-V1400 | n2-standard-4 |
+| IB-V2225 / TE-V2210 / CP-V2200 | n2-standard-8 |
+| IB-V4025 / TE-V4010 / CP-V4000 | n2-standard-16 |
+
+<!-- BEGIN_TF_DOCS -->
+## Requirements
+
+| Name | Version |
+|------|---------|
+| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.21.1 |
+| <a name="requirement_google"></a> [google](#requirement\_google) | >= 5.0.0 |
+
+## Providers
+
+| Name | Version |
+|------|---------|
+| <a name="provider_google"></a> [google](#provider\_google) | >= 5.0.0 |
+
+## Resources
+
+| Name | Type |
+|------|------|
+| [google_compute_instance.grid](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_instance) | resource |
+| [google_compute_subnetwork.lan1](https://registry.terraform.io/providers/hashicorp/google/latest/docs/data-sources/compute_subnetwork) | data source |
+| [google_compute_subnetwork.mgmt](https://registry.terraform.io/providers/hashicorp/google/latest/docs/data-sources/compute_subnetwork) | data source |
+
+## Inputs
+
+| Name | Description | Type | Default | Required |
+|------|-------------|------|---------|:--------:|
+| <a name="input_boot_disk_size"></a> [boot\_disk\_size](#input\_boot\_disk\_size) | Boot disk size in GB. | `number` | `250` | no |
+| <a name="input_boot_disk_type"></a> [boot\_disk\_type](#input\_boot\_disk\_type) | Boot disk type (e.g. pd-standard, pd-ssd, pd-balanced). | `string` | `"pd-standard"` | no |
+| <a name="input_default_admin_password"></a> [default\_admin\_password](#input\_default\_admin\_password) | Default admin password for NIOS. | `string` | n/a | yes |
+| <a name="input_image_name"></a> [image\_name](#input\_image\_name) | Name of the custom NIOS GCP image in the same project. | `string` | n/a | yes |
+| <a name="input_labels"></a> [labels](#input\_labels) | Labels to apply to GCP resources. | `map(string)` | `{}` | no |
+| <a name="input_lan1_subnet_name"></a> [lan1\_subnet\_name](#input\_lan1\_subnet\_name) | Name of the LAN1 subnetwork (nic1) for grid communication. | `string` | n/a | yes |
+| <a name="input_machine_type"></a> [machine\_type](#input\_machine\_type) | GCP machine type. Used as fallback if nios\_model is not found in the machine\_type\_map. | `string` | `"n2-standard-4"` | no |
+| <a name="input_mgmt_subnet_name"></a> [mgmt\_subnet\_name](#input\_mgmt\_subnet\_name) | Name of the management subnetwork (nic0). | `string` | n/a | yes |
+| <a name="input_name"></a> [name](#input\_name) | Name for the Compute Instance. | `string` | `"nios-gcp-instance"` | no |
+| <a name="input_nios_license"></a> [nios\_license](#input\_nios\_license) | NIOS temporary license string (e.g. 'nios IB-V1425 enterprise dns dhcp cloud'). | `string` | `"nios IB-V1425 enterprise dns dhcp cloud"` | no |
+| <a name="input_nios_model"></a> [nios\_model](#input\_nios\_model) | NIOS virtual appliance model (e.g. IB-V825, IB-V1425, IB-V2225, IB-V4025, TE-V810, CP-V800). Used for machine type lookup and license. | `string` | `"IB-V1425"` | no |
+| <a name="input_project_id"></a> [project\_id](#input\_project\_id) | GCP project ID where all resources will be deployed. | `string` | n/a | yes |
+| <a name="input_region"></a> [region](#input\_region) | GCP region for the deployment. | `string` | `"us-west1"` | no |
+| <a name="input_remote_console_enabled"></a> [remote\_console\_enabled](#input\_remote\_console\_enabled) | Enable remote console access. | `bool` | `true` | no |
+| <a name="input_service_account_email"></a> [service\_account\_email](#input\_service\_account\_email) | Service account email to attach to the instance. Set to null to skip. | `string` | `null` | no |
+| <a name="input_service_account_scopes"></a> [service\_account\_scopes](#input\_service\_account\_scopes) | OAuth scopes for the service account. | `list(string)` | <pre>[<br/>  "https://www.googleapis.com/auth/cloud-platform"<br/>]</pre> | no |
+| <a name="input_zone"></a> [zone](#input\_zone) | GCP zone for the Compute Instance. | `string` | `"us-west1-b"` | no |
+
+## Outputs
+
+| Name | Description |
+|------|-------------|
+| <a name="output_instance_id"></a> [instance\_id](#output\_instance\_id) | ID of the NIOS Grid Member instance. |
+| <a name="output_lan1_gateway"></a> [lan1\_gateway](#output\_lan1\_gateway) | Gateway IP for the LAN1 subnetwork (first usable IP). |
+| <a name="output_lan1_ip"></a> [lan1\_ip](#output\_lan1\_ip) | Internal IP of the LAN1 interface (nic1). |
+| <a name="output_lan1_subnet_mask"></a> [lan1\_subnet\_mask](#output\_lan1\_subnet\_mask) | Subnet mask of the LAN1 subnetwork. |
+| <a name="output_mgmt_ip"></a> [mgmt\_ip](#output\_mgmt\_ip) | Internal IP of the MGMT interface (nic0). |
+<!-- END_TF_DOCS -->
+
+---
+
+## Architecture
+
+### Standalone Mode
+- 1 Compute Instance with NIOS custom image
+- nic0: MGMT interface
+- nic1: LAN1 Grid communication interface
+
+## Prerequisites
+
+Before using this module, ensure the following GCP resources exist:
+- **Project** with Compute Engine API enabled
+- **VPC Subnetworks** — at least 2 (mgmt + lan1)
+- **Custom NIOS Image** — uploaded to the project
+- **Service Account** (optional) — with appropriate permissions
+
+## Usage
+
+### Step 1: Deploy GCP Infrastructure
+
+Deploy two instances — one as Grid Master, one as Member:
+
+```hcl
+provider "google" {
+  project = var.project_id
+  region  = var.region
+  zone    = var.zone
+}
+
+# Grid Master
+module "gm" {
+  source = "github.com/infobloxopen/terraform-provider-nios//modules/nios_grid_member_gcp"
+
+  project_id = var.project_id
+  region     = var.region
+  zone       = var.zone
+
+  image_name      = var.image_name
+  name            = "nios-gm"
+  nios_model      = var.nios_model
+  mgmt_subnet_name = var.mgmt_subnet_name
+  lan1_subnet_name  = var.lan1_subnet_name
+
+  nios_license           = var.nios_license
+  default_admin_password = var.default_admin_password
+
+  service_account_email = var.service_account_email
+
+  labels = {
+    role    = "gm"
+    product = "nios"
+  }
+}
+
+# Member
+module "member" {
+  source = "github.com/infobloxopen/terraform-provider-nios//modules/nios_grid_member_gcp"
+
+  project_id = var.project_id
+  region     = var.region
+  zone       = var.zone
+
+  image_name      = var.image_name
+  name            = "nios-member"
+  nios_model      = var.nios_model
+  mgmt_subnet_name = var.mgmt_subnet_name
+  lan1_subnet_name  = var.lan1_subnet_name
+
+  nios_license           = var.nios_license
+  default_admin_password = var.default_admin_password
+
+  service_account_email = var.service_account_email
+
+  labels = {
+    role    = "member"
+    product = "nios"
+  }
+}
+```
+
+**Deploy the infrastructure:**
+```bash
+terraform apply
+```
+
+### Step 2: Wait for NIOS to Boot
+
+NIOS takes approximately **15-20 minutes** to fully boot.
+
+### Step 3: Join the Member to the Grid
+
+Once both instances are up and running, configure the grid member and join to the grid.
+
+```hcl
+provider "nios" {
+  nios_host_url = "https://${module.gm.lan1_ip}"
+  nios_username = "admin"
+  nios_password = "password"
+}
+
+resource "nios_grid_member" "member" {
+  host_name        = "infoblox.member"
+  config_addr_type = "IPV4"
+  platform         = "VNIOS"
+
+  vip_setting = {
+    address     = module.member.lan1_ip
+    gateway     = module.member.lan1_gateway
+    subnet_mask = module.member.lan1_subnet_mask
+  }
+}
+
+resource "nios_grid_join" "member_join" {
+  member_url      = "https://${module.member.lan1_ip}"
+  member_username = "admin"
+  member_password = var.default_admin_password
+  grid_name       = "Infoblox"
+  master          = module.gm.lan1_ip
+  shared_secret   = "<secret>"
+  depends_on      = [nios_grid_member.member]
+}
+```
+
+## Outputs Usage
+
+The module outputs can be used directly in NIOS provider resources:
+
+| Output | NIOS Resource Usage |
+|--------|---------------------|
+| `lan1_ip` | `vip_setting.address`, `member_url` in grid_join |
+| `lan1_gateway` | `vip_setting.gateway` |
+| `lan1_subnet_mask` | `vip_setting.subnet_mask` |
+| `mgmt_ip` | Management access |
+
+---
+
+### Boot Time
+- NIOS takes **15-20 minutes** to fully boot after instance creation
+- Always verify NIOS API is responding before applying `nios_grid_member` resources
