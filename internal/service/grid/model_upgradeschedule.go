@@ -21,7 +21,6 @@ import (
 type UpgradescheduleModel struct {
 	Ref           types.String `tfsdk:"ref"`
 	Uuid          types.String `tfsdk:"uuid"`
-	UUID          types.String `tfsdk:"uuid"`
 	Active        types.Bool   `tfsdk:"active"`
 	StartTime     types.String `tfsdk:"start_time"`
 	TimeZone      types.String `tfsdk:"time_zone"`

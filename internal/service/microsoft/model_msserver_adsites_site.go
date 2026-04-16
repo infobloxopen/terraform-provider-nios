@@ -17,7 +17,6 @@ import (
 type MsserverAdsitesSiteModel struct {
 	Ref      types.String `tfsdk:"ref"`
 	Uuid     types.String `tfsdk:"uuid"`
-	UUID     types.String `tfsdk:"uuid"`
 	Domain   types.String `tfsdk:"domain"`
 	Name     types.String `tfsdk:"name"`
 	Networks types.List   `tfsdk:"networks"`
