@@ -384,7 +384,7 @@ var MemberResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed: true,
 		Optional: true,
 		Validators: []validator.String{
-			stringvalidator.OneOf("AWS", "AZURE", "GCP", "OCI"),
+			stringvalidator.OneOf("AWS", "AZURE", "GCP"),
 		},
 		MarkdownDescription: "Cloud platform for HA.",
 	},
