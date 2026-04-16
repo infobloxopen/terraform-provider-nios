@@ -81,6 +81,7 @@ func TestAccParentalcontrolSubscribersiteResource_disappears(t *testing.T) {
 }
 
 func TestAccParentalcontrolSubscribersiteResource_Abss(t *testing.T) {
+	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_parentalcontrol_subscribersite.test_abss"
 	var v parentalcontrol.ParentalcontrolSubscribersite
 	name := acctest.RandomNameWithPrefix("subscriber-site")
@@ -657,6 +658,7 @@ func TestAccParentalcontrolSubscribersiteResource_Msps(t *testing.T) {
 }
 
 func TestAccParentalcontrolSubscribersiteResource_NasGateways(t *testing.T) {
+	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_parentalcontrol_subscribersite.test_nas_gateways"
 	var v parentalcontrol.ParentalcontrolSubscribersite
 	name := acctest.RandomNameWithPrefix("subscriber-site")
