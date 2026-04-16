@@ -1579,7 +1579,7 @@ func PreConfig(clients PreConfigClients, hostnames GridHostnames) error {
 
 func main() {
 	host := strings.TrimSpace(firstNonEmpty(os.Getenv("NIOS_HOST_URL")))
-	wapiVer := strings.TrimSpace(firstNonEmpty(os.Getenv("NIOS_WAPI_VERSION"), "v2.13.6"))
+	wapiVer := strings.TrimSpace(firstNonEmpty(os.Getenv("NIOS_WAPI_VERSION"), "v2.14.0"))
 	username := strings.TrimSpace(firstNonEmpty(os.Getenv("NIOS_USERNAME")))
 	password := strings.TrimSpace(firstNonEmpty(os.Getenv("NIOS_PASSWORD")))
 
@@ -1648,30 +1648,147 @@ func main() {
 
 	ecosystemTemplatePath := filepath.Join(cwd, "internal/testdata/nios_ecosystem_templates", "Version5_DXL_Session_Template.json")
 
-	err = ConfigureEcoSystemTemplates(host, wapiVer, username, password, ecosystemTemplatePath)
-	if err != nil {
-		fmt.Printf("Error uploading ecosystem templates: %v\n", err)
+	if _, statErr := os.Stat(ecosystemTemplatePath); statErr == nil {
+		err = ConfigureEcoSystemTemplates(host, wapiVer, username, password, ecosystemTemplatePath)
+		if err != nil {
+			fmt.Printf("Error uploading ecosystem templates: %v\n", err)
+			return
+		}
+		fmt.Println("Ecosystem template 1 uploaded successfully")
+	} else if os.IsNotExist(statErr) {
+		fmt.Printf("Ecosystem template 1 not found at %s, skipping upload\n", ecosystemTemplatePath)
+	} else {
+		fmt.Printf("Error checking ecosystem template 1 path %s: %v\n", ecosystemTemplatePath, statErr)
 		return
 	}
-	fmt.Println("Ecosystem template 1 uploaded successfully")
 
 	ecosystemTemplatePath2 := filepath.Join(cwd, "internal/testdata/nios_ecosystem_templates", "Version5_Syslog_Session_Template.json")
 
-	err = ConfigureEcoSystemTemplates(host, wapiVer, username, password, ecosystemTemplatePath2)
-	if err != nil {
-		fmt.Printf("Error uploading ecosystem templates: %v\n", err)
+	if _, statErr := os.Stat(ecosystemTemplatePath2); statErr == nil {
+		err = ConfigureEcoSystemTemplates(host, wapiVer, username, password, ecosystemTemplatePath2)
+		if err != nil {
+			fmt.Printf("Error uploading ecosystem templates: %v\n", err)
+			return
+		}
+		fmt.Println("Ecosystem template 2 uploaded successfully")
+	} else if os.IsNotExist(statErr) {
+		fmt.Printf("Ecosystem template 2 not found at %s, skipping upload\n", ecosystemTemplatePath2)
+	} else {
+		fmt.Printf("Error checking ecosystem template 2 path %s: %v\n", ecosystemTemplatePath2, statErr)
 		return
 	}
-	fmt.Println("Ecosystem template 2 uploaded successfully")
 
-	ecosystemTemplatePath3 := filepath.Join(cwd, "internal/testdata/nios_ecosystem_templates", "event_dhcp_lease_template.json")
+	ecosystemTemplatePath3 := filepath.Join(cwd, "internal/testdata/nios_ecosystem_templates", "Version5_Syslog_Action_Template.json")
 
-	err = ConfigureEcoSystemTemplates(host, wapiVer, username, password, ecosystemTemplatePath3)
-	if err != nil {
-		fmt.Printf("Error uploading ecosystem templates: %v\n", err)
+	if _, statErr := os.Stat(ecosystemTemplatePath3); statErr == nil {
+		err = ConfigureEcoSystemTemplates(host, wapiVer, username, password, ecosystemTemplatePath3)
+		if err != nil {
+			fmt.Printf("Error uploading ecosystem templates: %v\n", err)
+			return
+		}
+		fmt.Println("Ecosystem template 3 uploaded successfully")
+	} else if os.IsNotExist(statErr) {
+		fmt.Printf("Ecosystem template 3 not found at %s, skipping upload\n", ecosystemTemplatePath3)
+	} else {
+		fmt.Printf("Error checking ecosystem template 3 path %s: %v\n", ecosystemTemplatePath3, statErr)
 		return
 	}
-	fmt.Println("Ecosystem template 3 uploaded successfully")
+
+	ecosystemTemplatePath4 := filepath.Join(cwd, "internal/testdata/nios_ecosystem_templates", "Version5_DXL_action_template.json")
+
+	if _, statErr := os.Stat(ecosystemTemplatePath4); statErr == nil {
+		err = ConfigureEcoSystemTemplates(host, wapiVer, username, password, ecosystemTemplatePath4)
+		if err != nil {
+			fmt.Printf("Error uploading ecosystem templates: %v\n", err)
+			return
+		}
+		fmt.Println("Ecosystem template 4 uploaded successfully")
+	} else if os.IsNotExist(statErr) {
+		fmt.Printf("Ecosystem template 4 not found at %s, skipping upload\n", ecosystemTemplatePath4)
+	} else {
+		fmt.Printf("Error checking ecosystem template 4 path %s: %v\n", ecosystemTemplatePath4, statErr)
+		return
+	}
+
+	ecosystemTemplatePath5 := filepath.Join(cwd, "internal/testdata/nios_ecosystem_templates", "Version5_DNS_Zone_and_Records.json")
+
+	if _, statErr := os.Stat(ecosystemTemplatePath5); statErr == nil {
+		err = ConfigureEcoSystemTemplates(host, wapiVer, username, password, ecosystemTemplatePath5)
+		if err != nil {
+			fmt.Printf("Error uploading ecosystem templates: %v\n", err)
+			return
+		}
+		fmt.Println("Ecosystem template 5 uploaded successfully")
+	} else if os.IsNotExist(statErr) {
+		fmt.Printf("Ecosystem template 5 not found at %s, skipping upload\n", ecosystemTemplatePath5)
+	} else {
+		fmt.Printf("Error checking ecosystem template 5 path %s: %v\n", ecosystemTemplatePath5, statErr)
+		return
+	}
+
+	ecosystemTemplatePath6 := filepath.Join(cwd, "internal/testdata/nios_ecosystem_templates", "Version5_REST_API_Session_Template.json")
+
+	if _, statErr := os.Stat(ecosystemTemplatePath6); statErr == nil {
+		err = ConfigureEcoSystemTemplates(host, wapiVer, username, password, ecosystemTemplatePath6)
+		if err != nil {
+			fmt.Printf("Error uploading ecosystem templates: %v\n", err)
+			return
+		}
+		fmt.Println("Ecosystem template 6 uploaded successfully")
+	} else if os.IsNotExist(statErr) {
+		fmt.Printf("Ecosystem template 6 not found at %s, skipping upload\n", ecosystemTemplatePath6)
+	} else {
+		fmt.Printf("Error checking ecosystem template 6 path %s: %v\n", ecosystemTemplatePath6, statErr)
+		return
+	}
+
+	ecosystemTemplatePath7 := filepath.Join(cwd, "internal/testdata/nios_ecosystem_templates", "event_dhcp_lease_template.json")
+
+	if _, statErr := os.Stat(ecosystemTemplatePath7); statErr == nil {
+		err = ConfigureEcoSystemTemplates(host, wapiVer, username, password, ecosystemTemplatePath7)
+		if err != nil {
+			fmt.Printf("Error uploading ecosystem templates: %v\n", err)
+			return
+		}
+		fmt.Println("Ecosystem template 7 uploaded successfully")
+	} else if os.IsNotExist(statErr) {
+		fmt.Printf("Ecosystem template 7 not found at %s, skipping upload\n", ecosystemTemplatePath7)
+	} else {
+		fmt.Printf("Error checking ecosystem template 7 path %s: %v\n", ecosystemTemplatePath7, statErr)
+		return
+	}
+
+	ecosystemTemplatePath8 := filepath.Join(cwd, "internal/testdata/nios_ecosystem_templates", "Version5_DNS_Zone_and_Records.json")
+
+	if _, statErr := os.Stat(ecosystemTemplatePath8); statErr == nil {
+		err = ConfigureEcoSystemTemplates(host, wapiVer, username, password, ecosystemTemplatePath8)
+		if err != nil {
+			fmt.Printf("Error uploading ecosystem templates: %v\n", err)
+			return
+		}
+		fmt.Println("Ecosystem template 8 uploaded successfully")
+	} else if os.IsNotExist(statErr) {
+		fmt.Printf("Ecosystem template 8 not found at %s, skipping upload\n", ecosystemTemplatePath8)
+	} else {
+		fmt.Printf("Error checking ecosystem template 8 path %s: %v\n", ecosystemTemplatePath8, statErr)
+		return
+	}
+
+	ecosystemTemplatePath9 := filepath.Join(cwd, "internal/testdata/nios_ecosystem_templates", "IPAM_PxgridEvent.json")
+
+	if _, statErr := os.Stat(ecosystemTemplatePath9); statErr == nil {
+		err = ConfigureEcoSystemTemplates(host, wapiVer, username, password, ecosystemTemplatePath9)
+		if err != nil {
+			fmt.Printf("Error uploading ecosystem templates: %v\n", err)
+			return
+		}
+		fmt.Println("Ecosystem template 9 uploaded successfully")
+	} else if os.IsNotExist(statErr) {
+		fmt.Printf("Ecosystem template 9 not found at %s, skipping upload\n", ecosystemTemplatePath9)
+	} else {
+		fmt.Printf("Error checking ecosystem template 9 path %s: %v\n", ecosystemTemplatePath9, statErr)
+		return
+	}
 
 	clients := PreConfigClients{
 		IPAM:         apiClient.IPAMAPI,

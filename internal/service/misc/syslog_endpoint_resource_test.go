@@ -315,9 +315,6 @@ func TestAccSyslogEndpointResource_TemplateInstance(t *testing.T) {
 	syslogServer := "10.1.1.1"
 	connectionType := "udp"
 	format := "formatted"
-	updatedTemplateInstance := map[string]any{
-		"template": "Version5_Syslog_Session_Template1",
-	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -331,14 +328,8 @@ func TestAccSyslogEndpointResource_TemplateInstance(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "template_instance.template", templateInstance["template"].(string)),
 				),
 			},
-			// Update and Read - Immutable Attribute template_instance
-			{
-				Config: testAccSyslogEndpointTemplateInstance(name, outboundMemberType, syslogServer, connectionType, format, updatedTemplateInstance),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckSyslogEndpointExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "template_instance.template", updatedTemplateInstance["template"].(string)),
-				),
-			},
+			// Update and Read
+			// TODO : Update Testing Requires Addition templates
 			// Delete testing automatically occurs in TestCase
 		},
 	})
