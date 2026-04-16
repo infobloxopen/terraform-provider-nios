@@ -3,7 +3,6 @@ package dns
 import (
 	"context"
 
-	"github.com/hashicorp/terraform-plugin-framework-validators/boolvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
@@ -151,12 +150,6 @@ var NsgroupResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "Determines if the \"multiple DNS primaries\" feature is enabled for the group.",
 		PlanModifiers: []planmodifier.Bool{
 			planmodifiers.ImmutableBool(),
-		},
-		Validators: []validator.Bool{
-			boolvalidator.ExactlyOneOf(
-				path.MatchRoot("grid_primary"),
-				path.MatchRoot("external_primaries"),
-			),
 		},
 	},
 	"name": schema.StringAttribute{
