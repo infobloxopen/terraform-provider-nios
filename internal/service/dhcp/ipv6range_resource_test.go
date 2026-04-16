@@ -1924,12 +1924,3 @@ resource "nios_ipam_ipv6network" "test" {
 }
 `, view, member)
 }
-
-func testAccBaseWithIpv6Network(view string) string {
-	return fmt.Sprintf(`
-resource "nios_ipam_ipv6network" "test" {
-    network = "219::/64"
-	network_view = %q
-}
-`, view)
-}

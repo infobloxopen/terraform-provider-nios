@@ -775,7 +775,7 @@ resource "nios_cloud_aws_route53_task_group" "test_role_arn" {
 func testAccAwsrte53taskgroupSyncChildAccounts(taskGroupName, gridMember, syncChildAccounts string) string {
 	roleARNStr := ""
 	if syncChildAccounts == "true" {
-		roleARNStr = fmt.Sprintf("role_arn = \"arn:aws:iam::123456789012:role/Role-name\"")
+		roleARNStr = "role_arn = \"arn:aws:iam::123456789012:role/Role-name\""
 	}
 	return fmt.Sprintf(`
 resource "nios_cloud_aws_route53_task_group" "test_sync_child_accounts" {
