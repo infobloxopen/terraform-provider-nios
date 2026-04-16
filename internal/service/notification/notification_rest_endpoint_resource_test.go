@@ -284,7 +284,7 @@ func TestAccNotificationRestEndpointResource_OutboundMembers(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccNotificationRestEndpointOutboundMembers(name, "MEMBER", uri, outboundMembers),
+				Config: testAccNotificationRestEndpointOutboundMembers(name, "GM", uri, outboundMembers),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNotificationRestEndpointExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "outbound_members.#", "1"),
@@ -384,11 +384,11 @@ func TestAccNotificationRestEndpointResource_TemplateInstance(t *testing.T) {
 				"syntax": "BOOL",
 			},
 		},
-		"template": "REST API Template",
+		"template": "Version5_REST_API_Session_Template",
 	}
 
 	updatedTemplateInstance := map[string]any{
-		"template": "REST_API_Session_Template_3",
+		"template": "Version5_DNS_Zone_and_Records",
 	}
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -407,7 +407,7 @@ func TestAccNotificationRestEndpointResource_TemplateInstance(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "template_instance.parameters.1.syntax", "STR"),
 					resource.TestCheckResourceAttr(resourceName, "template_instance.parameters.2.name", "SPECIAL3"),
 					resource.TestCheckResourceAttr(resourceName, "template_instance.parameters.2.syntax", "BOOL"),
-					resource.TestCheckResourceAttr(resourceName, "template_instance.template", "REST API Template"),
+					resource.TestCheckResourceAttr(resourceName, "template_instance.template", "Version5_REST_API_Session_Template"),
 				),
 			},
 			// Update and Read
@@ -415,7 +415,7 @@ func TestAccNotificationRestEndpointResource_TemplateInstance(t *testing.T) {
 				Config: testAccNotificationRestEndpointTemplateInstance(name, outboundMemberType, uri, updatedTemplateInstance),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNotificationRestEndpointExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "template_instance.template", "REST_API_Session_Template_3"),
+					resource.TestCheckResourceAttr(resourceName, "template_instance.template", "Version5_DNS_Zone_and_Records"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -533,10 +533,10 @@ func TestAccNotificationRestEndpointResource_VendorIdentifier(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccNotificationRestEndpointVendorIdentifier(name, outboundMemberType, uri, "CarbonBlack"),
+				Config: testAccNotificationRestEndpointVendorIdentifier(name, outboundMemberType, uri, "pxgrid"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNotificationRestEndpointExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "vendor_identifier", "CarbonBlack"),
+					resource.TestCheckResourceAttr(resourceName, "vendor_identifier", "pxgrid"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -725,15 +725,19 @@ resource "nios_notification_rest_endpoint" "test_outbound_member_type" {
 }
 
 func testAccNotificationRestEndpointOutboundMembers(name string, outboundMemberType string, uri string, outboundMembers []string) string {
-	outboundMembersHCL := utils.ConvertStringSliceToHCL(outboundMembers)
+	outBoundMembersHCL := ""
+	if outboundMemberType != "GM" {
+		outBoundMembersStr := utils.ConvertStringSliceToHCL(outboundMembers)
+		outBoundMembersHCL = fmt.Sprintf("outbound_members = %s", outBoundMembersStr)
+	}
 	return fmt.Sprintf(`
 resource "nios_notification_rest_endpoint" "test_outbound_members" {
     name = %q
     outbound_member_type = %q
     uri = %q
-    outbound_members = %s
+    %s
 }
-`, name, outboundMemberType, uri, outboundMembersHCL)
+`, name, outboundMemberType, uri, outBoundMembersHCL)
 }
 
 func testAccNotificationRestEndpointServerCertValidation(name string, outboundMemberType string, uri string, serverCertValidation string) string {

@@ -214,7 +214,7 @@ func TestAccNotificationRuleResource_EnableEventDeduplication(t *testing.T) {
 			"op": "ENDLIST",
 		},
 	}
-	notificationTarget := "${nios_misc_syslog_endpoint.test.ref}"
+	notificationTarget := utils.GetSyslogEndpointRef()
 	templateInstance := map[string]any{
 		"template": "Version5_Syslog_Action_Template",
 	}
@@ -272,9 +272,9 @@ func TestAccNotificationRuleResource_EnableEventDeduplicationLog(t *testing.T) {
 			"op": "ENDLIST",
 		},
 	}
-	notificationTarget := "syslog:endpoint/b25lLmVuZHBvaW50JDEzNg:syslogendpoint1"
+	notificationTarget := utils.GetSyslogEndpointRef()
 	templateInstance := map[string]any{
-		"template": "Version5_Syslog_Action_Template",
+		"template": "Version5_REST_API_Session_Template",
 	}
 	eventDeduplicationFields := []string{
 		"SOURCE_IP",
@@ -330,7 +330,7 @@ func TestAccNotificationRuleResource_EventDeduplicationFields(t *testing.T) {
 			"op": "ENDLIST",
 		},
 	}
-	notificationTarget := "syslog:endpoint/b25lLmVuZHBvaW50JDEzNg:syslogendpoint1"
+	notificationTarget := utils.GetSyslogEndpointRef()
 	templateInstance := map[string]any{
 		"template": "Version5_Syslog_Action_Template",
 	}
@@ -394,7 +394,7 @@ func TestAccNotificationRuleResource_EventDeduplicationLookbackPeriod(t *testing
 			"op": "ENDLIST",
 		},
 	}
-	notificationTarget := "syslog:endpoint/b25lLmVuZHBvaW50JDEzNg:syslogendpoint1"
+	notificationTarget := utils.GetSyslogEndpointRef()
 	templateInstance := map[string]any{
 		"template": "Version5_Syslog_Action_Template",
 	}
@@ -487,7 +487,7 @@ func TestAccNotificationRuleResource_EventType(t *testing.T) {
 			"op": "ENDLIST",
 		},
 	}
-	updatedNotificationTarget := "syslog:endpoint/b25lLmVuZHBvaW50JDEzNg:syslogendpoint1"
+	updatedNotificationTarget := utils.GetSyslogEndpointRef()
 	updatedTemplateInstance := map[string]any{
 		"template": "Version5_Syslog_Action_Template",
 	}
@@ -541,7 +541,7 @@ func TestAccNotificationRuleResource_ExpressionList(t *testing.T) {
 			"op": "ENDLIST",
 		},
 	}
-	updatedNotificationTarget := "syslog:endpoint/b25lLmVuZHBvaW50JDEzNg:syslogendpoint1"
+	updatedNotificationTarget := utils.GetSyslogEndpointRef()
 	updatedTemplateInstance := map[string]any{
 		"template": "Version5_Syslog_Action_Template",
 	}
@@ -678,9 +678,9 @@ func TestAccNotificationRuleResource_NotificationTarget(t *testing.T) {
 			"op": "ENDLIST",
 		},
 	}
-	updatedNotificationTarget := "syslog:endpoint/b25lLmVuZHBvaW50JDEzNg:syslogendpoint1"
+	updatedNotificationTarget := utils.GetSyslogEndpointRef()
 	updatedTemplateInstance := map[string]any{
-		"template": "Version5_Syslog_Action_Template",
+		"template": "Version5_REST_API_Session_Template",
 	}
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -832,9 +832,9 @@ func TestAccNotificationRuleResource_TemplateInstance(t *testing.T) {
 			"op": "ENDLIST",
 		},
 	}
-	updatedNotificationTarget := "syslog:endpoint/b25lLmVuZHBvaW50JDEzNg:syslogendpoint1"
+	updatedNotificationTarget := "${nios_misc_syslog_endpoint.syslogendpoint.ref}"
 	updatedTemplateInstance := map[string]any{
-		"template": "Version5_Syslog_Action_Template",
+		"template": "Version5_DNS_Zone_and_Records",
 	}
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -854,7 +854,7 @@ func TestAccNotificationRuleResource_TemplateInstance(t *testing.T) {
 				Config: testAccNotificationRuleTemplateInstance(updatedEventType, updatedExpressionList, name, notificationAction, updatedNotificationTarget, updatedTemplateInstance),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNotificationRuleExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "template_instance.template", "Version5_Syslog_Action_Template"),
+					resource.TestCheckResourceAttr(resourceName, "template_instance.template", "Version5_DNS_Zone_and_Records"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase

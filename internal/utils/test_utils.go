@@ -53,3 +53,7 @@ func GetNIOSPxgridEndpointRef() string {
 func GetGSSTSIGCertRef() string {
 	return os.Getenv("NIOS_GSS_TSIG_CERT_REF")
 }
+
+func GetSyslogEndpointRef() string {
+	return os.Getenv("NIOS_SYSLOG_ENDPOINT_REF")
+}

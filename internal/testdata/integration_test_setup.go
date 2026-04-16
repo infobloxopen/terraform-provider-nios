@@ -542,6 +542,7 @@ type PreConfigClients struct {
 	DHCP         *dhcp.APIClient
 	DNS          *dns.APIClient
 	GRID         *grid.APIClient
+	MISC         *misc.APIClient
 	MICROSOFT    *microsoft.APIClient
 	NOTIFICATION *notification.APIClient
 	PARENTAL     *parentalcontrol.APIClient
@@ -563,6 +564,9 @@ func PreConfig(clients PreConfigClients, hostnames GridHostnames) error {
 	}
 	if clients.GRID == nil {
 		return fmt.Errorf("preconfig: GRID client is required")
+	}
+	if clients.MISC == nil {
+		return fmt.Errorf("preconfig: MISC client is required")
 	}
 	if clients.MICROSOFT == nil {
 		return fmt.Errorf("preconfig: MICROSOFT client is required")
@@ -1574,12 +1578,76 @@ func PreConfig(clients PreConfigClients, hostnames GridHostnames) error {
 		fmt.Printf("Notification REST endpoint %q created successfully (ref: %s)\n", *notificationRestEndpointBody.Name, notifRestEndpointRef)
 	}
 
+	// Create syslog endpoint and persist its ref.
+	syslogEndpointBody := misc.SyslogEndpoint{
+		Name:               misc.PtrString("syslogendpoint123"),
+		OutboundMemberType: misc.PtrString("GM"),
+		SyslogServers: []misc.SyslogEndpointSyslogServers{
+			{
+				Address:        misc.PtrString("127.0.0.1"),
+				Port:           misc.PtrInt64(514),
+				ConnectionType: misc.PtrString("udp"),
+				Format:         misc.PtrString("formatted"),
+			},
+		},
+	}
+
+	syslogResp, _, err := clients.MISC.SyslogEndpointAPI.Create(context.Background()).
+		SyslogEndpoint(syslogEndpointBody).
+		ReturnAsObject(1).
+		ReturnFieldsPlus("name").
+		Execute()
+	if err != nil {
+		if strings.Contains(err.Error(), "already exists") {
+			filtersSyslog := map[string]interface{}{
+				"name": *syslogEndpointBody.Name,
+			}
+
+			existingResp, _, listErr := clients.MISC.SyslogEndpointAPI.List(context.Background()).
+				ReturnAsObject(1).
+				Filters(filtersSyslog).
+				ReturnFieldsPlus("name").
+				Execute()
+			if listErr != nil {
+				return fmt.Errorf("failed to list syslog endpoints to capture existing ref: %w", listErr)
+			}
+
+			if existingResp.ListSyslogEndpointResponseObject != nil && len(existingResp.ListSyslogEndpointResponseObject.Result) > 0 {
+				for _, existingEndpoint := range existingResp.ListSyslogEndpointResponseObject.Result {
+					if existingEndpoint.Name != nil && *existingEndpoint.Name == *syslogEndpointBody.Name {
+						existingRef := existingEndpoint.GetRef()
+						if err := writePipelineEnvVar("NIOS_SYSLOG_ENDPOINT_REF", existingRef); err != nil {
+							return fmt.Errorf("failed to write NIOS_SYSLOG_ENDPOINT_REF for existing endpoint: %w", err)
+						}
+						fmt.Printf("Captured ref for existing syslog endpoint %q: %s\n", *syslogEndpointBody.Name, existingRef)
+						break
+					}
+				}
+			}
+
+			fmt.Printf("Syslog endpoint %q already exists, skipping creation\n", *syslogEndpointBody.Name)
+		} else {
+			return fmt.Errorf("failed to create syslog endpoint %q: %w", *syslogEndpointBody.Name, err)
+		}
+	} else {
+		if syslogResp.CreateSyslogEndpointResponseAsObject == nil || syslogResp.CreateSyslogEndpointResponseAsObject.Result == nil || syslogResp.CreateSyslogEndpointResponseAsObject.Result.Ref == nil {
+			return fmt.Errorf("syslog endpoint create response missing ref")
+		}
+
+		syslogEndpointRef := *syslogResp.CreateSyslogEndpointResponseAsObject.Result.Ref
+		if err := writePipelineEnvVar("NIOS_SYSLOG_ENDPOINT_REF", syslogEndpointRef); err != nil {
+			return fmt.Errorf("failed to write NIOS_SYSLOG_ENDPOINT_REF: %w", err)
+		}
+
+		fmt.Printf("Syslog endpoint %q created successfully (ref: %s)\n", *syslogEndpointBody.Name, syslogEndpointRef)
+	}
+
 	return nil
 }
 
 func main() {
 	host := strings.TrimSpace(firstNonEmpty(os.Getenv("NIOS_HOST_URL")))
-	wapiVer := strings.TrimSpace(firstNonEmpty(os.Getenv("NIOS_WAPI_VERSION"), "v2.14.0"))
+	wapiVer := strings.TrimSpace(firstNonEmpty(os.Getenv("NIOS_WAPI_VERSION"), "v2.13.6"))
 	username := strings.TrimSpace(firstNonEmpty(os.Getenv("NIOS_USERNAME")))
 	password := strings.TrimSpace(firstNonEmpty(os.Getenv("NIOS_PASSWORD")))
 
@@ -1795,6 +1863,7 @@ func main() {
 		DHCP:         apiClient.DHCPAPI,
 		DNS:          apiClient.DNSAPI,
 		GRID:         apiClient.GridAPI,
+		MISC:         apiClient.MiscAPI,
 		MICROSOFT:    apiClient.MicrosoftAPI,
 		NOTIFICATION: apiClient.NotificationAPI,
 		PARENTAL:     apiClient.ParentalControlAPI,
