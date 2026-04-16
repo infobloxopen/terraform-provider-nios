@@ -24,6 +24,22 @@ The Terraform Provider for Infoblox NIOS allows you to manage your Infoblox NIOS
 - [Terraform](https://www.terraform.io/downloads.html) >= 1.12.1
 - [Infoblox NIOS](https://www.infoblox.com/products/nios/) (version 9.1.0 or higher)
 
+## Version Compatibility Matrix
+
+The table below shows the compatibility between different versions of the Terraform Provider NIOS and the required versions of NIOS, WAPI, Terraform, and Go.
+
+| Provider Version | NIOS Version | WAPI Version | Terraform Version | Go Version 
+|-----------------|--------------|--------------|-------------------|------------
+| 2.0.0 | 9.1.0 | v2.14 | >= 1.12.1 | >= 1.18 (recommended 1.25.1) | 
+| 1.1.0 | 9.0.6 | v2.13.6 | >= 1.8.0 | >= 1.18 | 
+| 1.0.0 | 9.0.6 | v2.13.6 | >= 1.8.0 | >= 1.18 | 
+| 0.0.1 | 9.0.6 | v2.13.6 | >= 1.8.0 | >= 1.18 |
+
+**Important Notes:**
+- **Version 2.0.0+** introduces UUID based resource identification  NIOS 9.1.0. Resources must be imported using UUID instead of ref.
+- **Version 1.1.0 and earlier** use reference (_ref) based resource identification. Resources must be imported using ref
+- For migration guidance from earlier versions, refer the [Migration Guide](MIGRATION.md).
+
 ## Getting Started
 
 ### Prerequisites
