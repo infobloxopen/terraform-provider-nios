@@ -252,7 +252,7 @@ func TestAccAwsrte53taskgroupResource_MultipleAccountsSyncPolicy(t *testing.T) {
 	var v cloud.Awsrte53taskgroup
 	taskGroupName := acctest.RandomNameWithPrefix("test-taskgroup")
 	gridMember := utils.GetNIOSGridMasterHostName()
-	roleArn := "arn:aws:iam:::role/Role-name"
+	roleArn := "arn:aws:iam::123456789012:role/MyExampleRole"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -358,18 +358,18 @@ func TestAccAwsrte53taskgroupResource_RoleArn(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccAwsrte53taskgroupRoleArn(taskGroupName, gridMember, "arn:aws:iam:::role/Role-name"),
+				Config: testAccAwsrte53taskgroupRoleArn(taskGroupName, gridMember, "arn:aws:iam::167890122345:role/MyExampleRole"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAwsrte53taskgroupExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "role_arn", "arn:aws:iam:::role/Role-name"),
+					resource.TestCheckResourceAttr(resourceName, "role_arn", "arn:aws:iam::167890122345:role/MyExampleRole"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccAwsrte53taskgroupRoleArn(taskGroupName, gridMember, "arn:aws:iam::1:role/Role-name"),
+				Config: testAccAwsrte53taskgroupRoleArn(taskGroupName, gridMember, "arn:aws:iam::167890122345:role/RoleName2"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAwsrte53taskgroupExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "role_arn", "arn:aws:iam::1:role/Role-name"),
+					resource.TestCheckResourceAttr(resourceName, "role_arn", "arn:aws:iam::167890122345:role/RoleName2"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -720,6 +720,7 @@ resource "nios_cloud_aws_route53_task_group" "test_multiple_accounts_sync_policy
     multiple_accounts_sync_policy = %q
     role_arn                    = %q
 	network_view_mapping_policy = "AUTO_CREATE"
+	sync_child_accounts = true
 }
 `, taskGroupName, gridMember, multipleAccountsSyncPolicy, roleArn)
 }
@@ -766,20 +767,25 @@ resource "nios_cloud_aws_route53_task_group" "test_role_arn" {
     grid_member                 = %q	   
 	role_arn = %q
 	network_view_mapping_policy = "AUTO_CREATE"
+	sync_child_accounts = true
 }
 `, taskGroupName, gridMember, roleArn)
 }
 
 func testAccAwsrte53taskgroupSyncChildAccounts(taskGroupName, gridMember, syncChildAccounts string) string {
+	roleARNStr := ""
+	if syncChildAccounts == "true" {
+		roleARNStr = fmt.Sprintf("role_arn = \"arn:aws:iam::123456789012:role/Role-name\"")
+	}
 	return fmt.Sprintf(`
 resource "nios_cloud_aws_route53_task_group" "test_sync_child_accounts" {
     name                        = %q
     grid_member                 = %q	    
 	sync_child_accounts = %q
 	network_view_mapping_policy = "AUTO_CREATE"
-	role_arn = "arn:aws:iam::123456789012:role/Role-name"
+	%s
 }
-`, taskGroupName, gridMember, syncChildAccounts)
+`, taskGroupName, gridMember, syncChildAccounts, roleARNStr)
 }
 
 func testAccAwsrte53taskgroupTaskList(taskGroupName, gridMember string, taskList []map[string]any) string {
@@ -799,6 +805,7 @@ resource "nios_cloud_aws_route53_task_group" "test_task_list" {
 	network_view_mapping_policy = "DIRECT"
 	network_view= "default"
 	role_arn = "arn:aws:iam::123456789012:role/Role-name"
+	sync_child_accounts = true
 	depends_on = [nios_cloud_aws_user.test]
 }
 `, taskGroupName, gridMember, taskListHCL)

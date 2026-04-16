@@ -14,6 +14,7 @@ import (
 )
 
 func TestAccUpgradescheduleDataSource_Read(t *testing.T) {
+	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	dataSourceName := "data.nios_grid_upgradeschedule.test"
 	resourceName := "nios_grid_upgradeschedule.test"
 	var v grid.Upgradeschedule

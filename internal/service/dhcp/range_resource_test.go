@@ -2954,7 +2954,7 @@ func TestAccRangeResource_UseSubscribeSettings(t *testing.T) {
 				Config: testAccRangeUseSubscribeSettings(startAddr, endAddr, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangeExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_subscribe_settings", "true"),
+					resource.TestCheckResourceAttr(resourceName, "use_subscribe_settings", "false"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
