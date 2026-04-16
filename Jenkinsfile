@@ -43,7 +43,7 @@ node('Cloud-test1-172.28.81.12-label') {
 
                 // ── Checkout ──────────────────────────────────────────────────
                 stage('Checkout') {
-                    git url: 'https://github.com/unasra/terraform-provider-nios.git', branch: 'fix_tests'
+                    git url: 'https://github.com/unasra/terraform-provider-nios.git', branch: 'fix_tests_910'
                 }
 
                 // ── Install toolchain ─────────────────────────────────────────
