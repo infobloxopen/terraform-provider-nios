@@ -330,3 +330,57 @@ func (r *NsgroupResource) ImportState(ctx context.Context, req resource.ImportSt
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("ref"), req.ID)...)
 	resp.Diagnostics.Append(resp.Private.SetKey(ctx, "associate_internal_id", []byte("true"))...)
 }
+
+func (r *NsgroupResource) ValidateConfig(ctx context.Context, req resource.ValidateConfigRequest, resp *resource.ValidateConfigResponse) {
+    var data NsgroupModel
+    resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
+    if resp.Diagnostics.HasError() {
+        return
+    }
+
+    externalPrimariesSet := !data.ExternalPrimaries.IsNull() && !data.ExternalPrimaries.IsUnknown()
+    gridSecondariesSet := !data.GridSecondaries.IsNull() && !data.GridSecondaries.IsUnknown()
+
+    // If external_primaries is set, grid_secondaries must have at least one entry
+    if externalPrimariesSet && len(data.ExternalPrimaries.Elements()) > 0 {
+        if !gridSecondariesSet || len(data.GridSecondaries.Elements()) == 0 {
+            resp.Diagnostics.AddAttributeError(
+                path.Root("grid_secondaries"),
+                "Missing Grid Secondary Server",
+                "An NS group must contain at least one grid secondary server if an external primary server is specified.",
+            )
+        }
+    }
+
+    // Multimaster validations only apply when is_multimaster is true
+    if data.IsMultimaster.IsNull() || data.IsMultimaster.IsUnknown() || !data.IsMultimaster.ValueBool() {
+        return
+    }
+
+    gridPrimarySet := !data.GridPrimary.IsNull() && !data.GridPrimary.IsUnknown()
+
+    // At least one of grid_primary or external_primaries must be present
+    if !gridPrimarySet && !externalPrimariesSet {
+        resp.Diagnostics.AddError(
+            "Invalid Multimaster Configuration",
+            "When 'is_multimaster' is set to true, either 'grid_primary' or 'external_primaries' must be provided.",
+        )
+        return
+    }
+
+    if gridPrimarySet && len(data.GridPrimary.Elements()) <= 1 {
+        resp.Diagnostics.AddAttributeError(
+            path.Root("grid_primary"),
+            "Invalid Multimaster Configuration",
+            "When 'is_multimaster' is set to true, 'grid_primary' must contain more than one entry.",
+        )
+    }
+
+    if externalPrimariesSet && len(data.ExternalPrimaries.Elements()) <= 1 {
+        resp.Diagnostics.AddAttributeError(
+            path.Root("external_primaries"),
+            "Invalid Multimaster Configuration",
+            "When 'is_multimaster' is set to true, 'external_primaries' must contain more than one entry.",
+        )
+    }
+}
