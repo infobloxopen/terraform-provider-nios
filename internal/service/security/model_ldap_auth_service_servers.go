@@ -57,7 +57,7 @@ var LdapAuthServiceServersResourceSchemaAttributes = map[string]schema.Attribute
 		Optional: true,
 		Computed: true,
 		Validators: []validator.String{
-			stringvalidator.OneOf("ANONYMOUS", "SIMPLE"),
+			stringvalidator.OneOf("ANONYMOUS", "AUTHENTICATED"),
 		},
 		Default:             stringdefault.StaticString("ANONYMOUS"),
 		MarkdownDescription: "The authentication type for the LDAP server.",
