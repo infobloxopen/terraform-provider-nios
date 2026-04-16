@@ -84,6 +84,15 @@ Before using this module, ensure the following Azure resources exist:
 ### Step 1: Deploy Azure Infrastructure
 
 ```hcl
+provider "azurerm" {
+  features {}
+
+  subscription_id = var.subscription_id
+  client_id       = var.client_id
+  client_secret   = var.client_secret
+  tenant_id       = var.tenant_id
+}
+
 module "node1" {
   source = "github.com/infobloxopen/terraform-provider-nios//modules/nios_grid_member_azure"
 

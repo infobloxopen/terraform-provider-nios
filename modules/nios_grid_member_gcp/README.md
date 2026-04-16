@@ -20,7 +20,7 @@ The module automatically maps NIOS models to GCP machine types:
 
 | Name | Version |
 |------|---------|
-| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.21.1 |
+| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.12.1 |
 | <a name="requirement_google"></a> [google](#requirement\_google) | >= 5.0.0 |
 
 ## Providers
@@ -45,7 +45,7 @@ The module automatically maps NIOS models to GCP machine types:
 | <a name="input_boot_disk_type"></a> [boot\_disk\_type](#input\_boot\_disk\_type) | Boot disk type (e.g. pd-standard, pd-ssd, pd-balanced). | `string` | `"pd-standard"` | no |
 | <a name="input_default_admin_password"></a> [default\_admin\_password](#input\_default\_admin\_password) | Default admin password for NIOS. | `string` | n/a | yes |
 | <a name="input_image_name"></a> [image\_name](#input\_image\_name) | Name of the custom NIOS GCP image in the same project. | `string` | n/a | yes |
-| <a name="input_labels"></a> [labels](#input\_labels) | Labels to apply to GCP resources. | `map(string)` | `{}` | no |
+| <a name="input_labels"></a> [labels](#input\_labels) | Labels to apply to GCP resources. | `map(string)` | <pre>{<br/>  "dontstop": "no",<br/>  "dontterminate": "yes",<br/>  "product": "nios"<br/>}</pre> | no |
 | <a name="input_lan1_subnet_name"></a> [lan1\_subnet\_name](#input\_lan1\_subnet\_name) | Name of the LAN1 subnetwork (nic1) for grid communication. | `string` | n/a | yes |
 | <a name="input_machine_type"></a> [machine\_type](#input\_machine\_type) | GCP machine type. Used as fallback if nios\_model is not found in the machine\_type\_map. | `string` | `"n2-standard-4"` | no |
 | <a name="input_mgmt_subnet_name"></a> [mgmt\_subnet\_name](#input\_mgmt\_subnet\_name) | Name of the management subnetwork (nic0). | `string` | n/a | yes |
@@ -91,8 +91,6 @@ Before using this module, ensure the following GCP resources exist:
 
 ### Step 1: Deploy GCP Infrastructure
 
-Deploy two instances — one as Grid Master, one as Member:
-
 ```hcl
 provider "google" {
   project = var.project_id
@@ -100,54 +98,29 @@ provider "google" {
   zone    = var.zone
 }
 
-# Grid Master
-module "gm" {
+module "node1" {
   source = "github.com/infobloxopen/terraform-provider-nios//modules/nios_grid_member_gcp"
 
   project_id = var.project_id
   region     = var.region
   zone       = var.zone
 
-  image_name      = var.image_name
-  name            = "nios-gm"
-  nios_model      = var.nios_model
-  mgmt_subnet_name = var.mgmt_subnet_name
+  image_name        = var.image_name
+  name              = var.name
+  nios_model        = var.nios_model
+  mgmt_subnet_name  = var.mgmt_subnet_name
   lan1_subnet_name  = var.lan1_subnet_name
+
+  boot_disk_type = var.boot_disk_type
+  boot_disk_size = var.boot_disk_size
 
   nios_license           = var.nios_license
   default_admin_password = var.default_admin_password
 
-  service_account_email = var.service_account_email
+  service_account_email  = var.service_account_email
+  service_account_scopes = var.service_account_scopes
 
-  labels = {
-    role    = "gm"
-    product = "nios"
-  }
-}
-
-# Member
-module "member" {
-  source = "github.com/infobloxopen/terraform-provider-nios//modules/nios_grid_member_gcp"
-
-  project_id = var.project_id
-  region     = var.region
-  zone       = var.zone
-
-  image_name      = var.image_name
-  name            = "nios-member"
-  nios_model      = var.nios_model
-  mgmt_subnet_name = var.mgmt_subnet_name
-  lan1_subnet_name  = var.lan1_subnet_name
-
-  nios_license           = var.nios_license
-  default_admin_password = var.default_admin_password
-
-  service_account_email = var.service_account_email
-
-  labels = {
-    role    = "member"
-    product = "nios"
-  }
+  labels = var.labels
 }
 ```
 
@@ -158,16 +131,34 @@ terraform apply
 
 ### Step 2: Wait for NIOS to Boot
 
-NIOS takes approximately **15-20 minutes** to fully boot.
+NIOS takes approximately **15 to 20 minutes** to fully boot.
 
-### Step 3: Join the Member to the Grid
+### Step 3: Join the Grid Member to the Master Grid
 
-Once both instances are up and running, configure the grid member and join to the grid.
+Once Grid is up and running, configure the grid member and join to the grid.
+
+#### Example: Join a Member to a Master
+
+##### Deploy GCP infrastructure for Master and Member
+
+```hcl
+module "node1" {
+  source = "github.com/infobloxopen/terraform-provider-nios//modules/nios_grid_member_gcp"
+  // ... (master config)
+}
+
+module "node2" {
+  source = "github.com/infobloxopen/terraform-provider-nios//modules/nios_grid_member_gcp"
+  // ... (member config)
+}
+```
+
+##### After NIOS is ready (~20 min), configure grid member
 
 ```hcl
 provider "nios" {
-  nios_host_url = "https://${module.gm.lan1_ip}"
-  nios_username = "admin"
+  nios_host_url = "https://${module.node1.lan1_ip}"
+  nios_username = "username"
   nios_password = "password"
 }
 
@@ -177,18 +168,19 @@ resource "nios_grid_member" "member" {
   platform         = "VNIOS"
 
   vip_setting = {
-    address     = module.member.lan1_ip
-    gateway     = module.member.lan1_gateway
-    subnet_mask = module.member.lan1_subnet_mask
+    address     = module.node2.lan1_ip
+    gateway     = module.node2.lan1_gateway
+    subnet_mask = module.node2.lan1_subnet_mask
   }
 }
 
+// Join member to existing grid master
 resource "nios_grid_join" "member_join" {
-  member_url      = "https://${module.member.lan1_ip}"
-  member_username = "admin"
-  member_password = var.default_admin_password
+  member_url      = "https://${module.node2.lan1_ip}"
+  member_username = "Username"
+  member_password = "Password"
   grid_name       = "Infoblox"
-  master          = module.gm.lan1_ip
+  master          = module.node1.lan1_ip
   shared_secret   = "<secret>"
   depends_on      = [nios_grid_member.member]
 }

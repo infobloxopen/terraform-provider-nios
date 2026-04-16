@@ -93,5 +93,9 @@ variable "service_account_scopes" {
 variable "labels" {
   description = "Labels to apply to GCP resources."
   type        = map(string)
-  default     = {}
+  default = {
+    "product"       = "nios",
+    "dontstop"      = "no",
+    "dontterminate" = "yes"
+  }
 }

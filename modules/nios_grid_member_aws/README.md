@@ -86,6 +86,12 @@ This module provisions the AWS infrastructure (EC2 instance, network interfaces,
 ### Step 1: Deploy AWS Infrastructure 
 
 ```hcl
+provider "aws" {
+  region     = "aws_region"
+  access_key = "aws_access_key"
+  secret_key = "aws_secret_key"
+}
+
 module "node1" {
   source = "github.com/infobloxopen/terraform-provider-nios//modules/nios_grid_member_aws"
 
