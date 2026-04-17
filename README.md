@@ -35,9 +35,27 @@ The table below shows the compatibility between different versions of the Terraf
 
 **Important Notes:**
 - **Version 2.0.0+** introduces UUID based resource identification  NIOS 9.1.0. Resources must be imported using UUID instead of ref.
-- **Version 1.1.0 and earlier** use reference (_ref) based resource identification. Resources must be imported using ref
-- For migration from legacy terraform provider , refer the [Migration Guide](MIGRATION.md).
-- If upgrading from provider v1.x to v2.0.0, execute `terraform refresh` to automatically update your state file with UUID.
+- **Version 1.1.0 and earlier** uses reference based resource identification. Resources must be imported using ref
+- **Recommended**: When upgrading from provider v1.x to v2.0.0, execute `terraform refresh` to automatically update your state file with UUID.
+- For migration from the legacy terraform provider , refer to the [Migration Guide](MIGRATION.md).
+
+### Known Issues
+
+The following resources may experience issues with create, read, update, and delete and import operations due to known WAPI limitations in NIOS 9.1.0:
+
+**DTC Records**
+
+- `nios_dtc_record_a`
+- `nios_dtc_record_aaaa`
+- `nios_dtc_record_cname`
+- `nios_dtc_record_naptr`
+- `nios_dtc_record_srv`
+
+**IPAM Objects**
+
+- `nios_ipam_ipv6networktemplate`
+
+These issues are caused by underlying WAPI behavior in NIOS 9.1.0 and will be addressed in future releases.
 
 ## Getting Started
 
