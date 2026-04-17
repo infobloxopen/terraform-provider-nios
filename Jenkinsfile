@@ -149,22 +149,22 @@ node('Cloud-test1-172.28.81.12-label') {
 
                 // ── Test stages ───────────────────────────────────────────────
                 sh 'mkdir -p $WORKSPACE/test-results'
-//                 runTestStage('acl',             'internal/service/acl',             '5m')
-//                 runTestStage('cloud',           'internal/service/cloud',           '5m')
+                runTestStage('acl',             'internal/service/acl',             '5m')
+                runTestStage('cloud',           'internal/service/cloud',           '5m')
                 runTestStage('dhcp',            'internal/service/dhcp',            '80m')
-//                 runTestStage('discovery',       'internal/service/discovery',       '10m')
+                runTestStage('discovery',       'internal/service/discovery',       '10m')
                 runTestStage('dns',             'internal/service/dns',             '80m')
                 runTestStage('dtc',             'internal/service/dtc',             '30m')
                 runTestStage('grid',            'internal/service/grid',            '30m')
                 runTestStage('ipam',            'internal/service/ipam',            '80m')
-//                 runTestStage('microsoft',       'internal/service/microsoft',       '30m')
-//                 runTestStage('misc',            'internal/service/misc',            '30m')
+                runTestStage('microsoft',       'internal/service/microsoft',       '30m')
+                runTestStage('misc',            'internal/service/misc',            '30m')
                 runTestStage('notification',    'internal/service/notification',    '30m')
                 runTestStage('parentalcontrol', 'internal/service/parentalcontrol', '30m')
-//                 runTestStage('rir',             'internal/service/rir',             '5m')
-//                 runTestStage('rpz',             'internal/service/rpz',             '45m')
+                runTestStage('rir',             'internal/service/rir',             '5m')
+                runTestStage('rpz',             'internal/service/rpz',             '45m')
                 runTestStage('security',        'internal/service/security',        '30m')
-//                 runTestStage('smartfolder',     'internal/service/smartfolder',     '5m')
+                runTestStage('smartfolder',     'internal/service/smartfolder',     '5m')
 
             } catch (err) {
                 currentBuild.result = 'FAILURE'

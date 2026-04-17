@@ -1439,8 +1439,8 @@ func TestAccNetworkResource_Members(t *testing.T) {
 	}
 	member2 := []map[string]any{
 		{
-			"struct":   "msdhcpserver",
-			"ipv4addr": "10.10.10.10",
+			"struct":  "msdhcpserver",
+			"address": "10.10.10.10",
 		},
 	}
 
