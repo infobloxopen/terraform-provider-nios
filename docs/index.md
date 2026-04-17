@@ -12,15 +12,6 @@ The NIOS provider is used to interact with the resources supported by Infoblox N
 
 >For more guides and detailed documentation, see the [NIOS Terraform Provider Guides](https://github.com/infobloxopen/terraform-provider-nios/tree/main/guides).
 
-## Version Compatibility Matrix
-
-The table below shows the compatibility between different versions of the Terraform Provider NIOS and the required versions of NIOS, WAPI, Terraform, and Go.
-
-| Provider Version | Go Version | Terraform Version | NIOS Version | WAPI Version |
-|-----------------|------------|-------------------|--------------|--------------|
-| 2.0.0 | >= 1.18 (recommended 1.25.1) | >= 1.12.1 | 9.1.0 or higher | v2.14 |
-| 1.1.0 , 1.0.0 , 0.0.1 | >= 1.18 | >= 1.8.0 | 9.0.6 or higher | v2.13.6 |
-
 ## Example Usage
 
 ```terraform

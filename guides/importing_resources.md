@@ -1,9 +1,11 @@
 ## Importing Existing Resources
 
-Resources can be imported using their reference ID:
+> **Note**: In provider version 2.0.0, imports use UUID-based identification format for NIOS 9.1.0 and WAPI v2.14.
+
+Resources can be imported using their UUID:
 
 ```bash
-terraform import nios_dns_record_a.example record:a/ZG5zLmJpbmRfYSQuX2RlZmF1bHQuY29tLmV4YW1wbGUsc2FtcGxlLDE5Mi4xNjguMS4xMA:example.mydomain.com/default
+terraform import nios_dns_record_a.example "8644ac3ff0b141fccb97851cre4184f9"
 ```
 
 You can use Terraform's import blocks (available in Terraform 1.5.0 and later) to declaratively import resources:
@@ -11,7 +13,7 @@ You can use Terraform's import blocks (available in Terraform 1.5.0 and later) t
 ```hcl
 import {
   to = nios_dns_record_a.example
-  id = "record:a/ZG5zLmJpbmRfYSQuX2RlZmF1bHQuY29tLmV4YW1wbGUsc2FtcGxlLDE5Mi4xNjguMS4xMA:example.mydomain.com/default"
+  id = "8644ac3ff0b141fccb97851cre4184f9"
 }
 
 resource "nios_dns_record_a" "example" {
