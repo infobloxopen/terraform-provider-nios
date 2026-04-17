@@ -22,7 +22,6 @@ import (
 type RirOrganizationModel struct {
 	Ref         types.String `tfsdk:"ref"`
 	Uuid        types.String `tfsdk:"uuid"`
-	UUID        types.String `tfsdk:"uuid"`
 	ExtAttrs    types.Map    `tfsdk:"extattrs"`
 	Id          types.String `tfsdk:"id"`
 	Maintainer  types.String `tfsdk:"maintainer"`

@@ -28,7 +28,6 @@ import (
 type DxlEndpointModel struct {
 	Ref                        types.String `tfsdk:"ref"`
 	Uuid                       types.String `tfsdk:"uuid"`
-	UUID                       types.String `tfsdk:"uuid"`
 	Brokers                    types.List   `tfsdk:"brokers"`
 	BrokersImportToken         types.String `tfsdk:"brokers_import_token"`
 	BrokersImportFile          types.String `tfsdk:"brokers_import_file"`
