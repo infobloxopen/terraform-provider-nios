@@ -2,6 +2,12 @@
 
 ## Version 2.0.0
 
+### Key Changes
+
+**UUID Based Resource Identification**
+
+Version 2.0.0 introduces UUID-based resource identification for NIOS 9.1.0 and WAPI v2.14
+
 ### Newly Supported Resources and Datasources
 
 #### DHCP
@@ -118,14 +124,19 @@
 
 ### Enhancements
 
-- Added support for NIOS 9.1.0 with WAPI version v2.14 and UUID-based API calls.
-- Updated BFD Template by removing unsupported authentication fields (`authentication_key`, `authentication_key_id`, and `authentication_type`) to maintain parity with WAPI v2.14 ([#418](https://github.com/infobloxopen/terraform-provider-nios/pull/418))
-- Enhanced CNAME Record with `rr_precondition_instructions` field enabling conditional record creation. When A or AAAA records with the same name exist, this field allows automatic deletion of conflicting records based on specified conditions before creating the CNAME record. ([#418](https://github.com/infobloxopen/terraform-provider-nios/pull/418))
-- Enhanced Alias Record with CAA enum support under `target_type`. ([#418](https://github.com/infobloxopen/terraform-provider-nios/pull/418))
-- Updated DTC Topology with structured `destination` field replacing `destination_link`. ([#418](https://github.com/infobloxopen/terraform-provider-nios/pull/418))
-- Updated Admin Group field naming: renamed `set_analytics_database_dump` to `set_query_logging_warnings` in nested command fields. ([#418](https://github.com/infobloxopen/terraform-provider-nios/pull/418))
-- Added comprehensive IPv4, IPv6, CIDR, and domain name validation support across multiple resource types.([#345](https://github.com/infobloxopen/terraform-provider-nios/pull/345))
-- Improved handling of unknown values in ValidateConfig to support variable resolution. ([#375](https://github.com/infobloxopen/terraform-provider-nios/pull/375))
+**WAPI v2.14 Schema Updates** 
+- **DNS**
+  - Enhanced CNAME Record with `rr_precondition_instructions` field enabling conditional record creation. When A or AAAA records with the same name exist, this field allows automatic deletion of conflicting records based on specified conditions before creating the CNAME record
+  - Enhanced Alias Record with CAA enum support under `target_type`
+
+- **DTC**
+  - Updated DTC Topology with structured `destination` field replacing `destination_link`
+
+- **Security**
+  - Updated Admin Group field naming: renamed `set_analytics_database_dump` to `set_query_logging_warnings` in nested command fields
+
+- **Miscellaneous**
+  - Updated BFD Template by removing unsupported authentication fields (`authentication_key`, `authentication_key_id`, and `authentication_type`) to maintain parity with WAPI v2.14
 
 ### Fixes
 
