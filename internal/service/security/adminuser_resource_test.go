@@ -86,7 +86,7 @@ func TestAccAdminuserResource_AdminGroups(t *testing.T) {
 	name := acctest.RandomNameWithPrefix("admin-user")
 	password := "Example-Admin123!"
 	adminGroups := "admin-group"
-	adminGroups1 := "opa-group"
+	adminGroups1 := "cloud-api-only"
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
@@ -104,7 +104,7 @@ func TestAccAdminuserResource_AdminGroups(t *testing.T) {
 				Config: testAccAdminuserAdminGroups(name, password, adminGroups1),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAdminuserExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "admin_groups.0", "opa-group"),
+					resource.TestCheckResourceAttr(resourceName, "admin_groups.0", "cloud-api-only"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase

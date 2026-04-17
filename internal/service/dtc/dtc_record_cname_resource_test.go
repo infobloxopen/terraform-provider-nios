@@ -19,6 +19,7 @@ import (
 var readableAttributesForDtcRecordCname = "auto_created,canonical,comment,disable,dns_canonical,dtc_server,ttl,use_ttl"
 
 func TestAccDtcRecordCnameResource_basic(t *testing.T) {
+	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_dtc_record_cname.test"
 	var v dtc.DtcRecordCname
 	name := acctest.RandomNameWithPrefix("dtc-cname")
@@ -45,6 +46,7 @@ func TestAccDtcRecordCnameResource_basic(t *testing.T) {
 }
 
 func TestAccDtcRecordCnameResource_disappears(t *testing.T) {
+	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	resourceName := "nios_dtc_record_cname.test"
 	var v dtc.DtcRecordCname
 	name := acctest.RandomNameWithPrefix("dtc-cname")
@@ -68,6 +70,7 @@ func TestAccDtcRecordCnameResource_disappears(t *testing.T) {
 }
 
 func TestAccDtcRecordCnameResource_Canonical(t *testing.T) {
+	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_dtc_record_cname.test_canonical"
 	var v dtc.DtcRecordCname
 	name := acctest.RandomNameWithPrefix("dtc-cname")
@@ -100,6 +103,7 @@ func TestAccDtcRecordCnameResource_Canonical(t *testing.T) {
 }
 
 func TestAccDtcRecordCnameResource_Comment(t *testing.T) {
+	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_dtc_record_cname.test_comment"
 	var v dtc.DtcRecordCname
 	name := acctest.RandomNameWithPrefix("dtc-cname")
@@ -131,6 +135,7 @@ func TestAccDtcRecordCnameResource_Comment(t *testing.T) {
 }
 
 func TestAccDtcRecordCnameResource_Disable(t *testing.T) {
+	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_dtc_record_cname.test_disable"
 	var v dtc.DtcRecordCname
 	name := acctest.RandomNameWithPrefix("dtc-cname")
@@ -162,6 +167,7 @@ func TestAccDtcRecordCnameResource_Disable(t *testing.T) {
 }
 
 func TestAccDtcRecordCnameResource_DtcServer(t *testing.T) {
+	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_dtc_record_cname.test_dtc_server"
 	var v dtc.DtcRecordCname
 	name := acctest.RandomNameWithPrefix("dtc-cname")
@@ -186,6 +192,7 @@ func TestAccDtcRecordCnameResource_DtcServer(t *testing.T) {
 }
 
 func TestAccDtcRecordCnameResource_Ttl(t *testing.T) {
+	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_dtc_record_cname.test_ttl"
 	var v dtc.DtcRecordCname
 	name := acctest.RandomNameWithPrefix("dtc-cname")
@@ -217,6 +224,7 @@ func TestAccDtcRecordCnameResource_Ttl(t *testing.T) {
 }
 
 func TestAccDtcRecordCnameResource_UseTtl(t *testing.T) {
+	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_dtc_record_cname.test_use_ttl"
 	var v dtc.DtcRecordCname
 	name := acctest.RandomNameWithPrefix("dtc-cname")

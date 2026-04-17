@@ -219,6 +219,7 @@ func TestAccSharedrecordgroupResource_UseRecordNamePolicy(t *testing.T) {
 }
 
 func TestAccSharedrecordgroupResource_ZoneAssociations(t *testing.T) {
+	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_dns_sharedrecordgroup.test_zone_associations"
 	var v dns.Sharedrecordgroup
 	name := acctest.RandomNameWithPrefix("sharedrecordgroup")

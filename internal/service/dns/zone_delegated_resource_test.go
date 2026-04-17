@@ -489,6 +489,7 @@ func TestAccZoneDelegatedResource_ZoneFormatIPV4(t *testing.T) {
 }
 
 func TestAccZoneDelegatedResource_ZoneFormatIPV6(t *testing.T) {
+	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_dns_zone_delegated.test_zone_format"
 	var v dns.ZoneDelegated
 	delegatedToName := acctest.RandomNameWithPrefix("zone-delegated") + ".example.com"

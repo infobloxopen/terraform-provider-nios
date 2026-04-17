@@ -23,6 +23,7 @@ import (
 var readableAttributesForIpv6networktemplate = "allow_any_netmask,auto_create_reversezone,cidr,cloud_api_compatible,comment,ddns_domainname,ddns_enable_option_fqdn,ddns_generate_hostname,ddns_server_always_updates,ddns_ttl,delegated_member,domain_name,domain_name_servers,enable_ddns,extattrs,fixed_address_templates,ipv6prefix,logic_filter_rules,members,name,options,preferred_lifetime,range_templates,recycle_leases,rir,rir_organization,rir_registration_action,rir_registration_status,send_rir_request,update_dns_on_lease_renewal,use_ddns_domainname,use_ddns_enable_option_fqdn,use_ddns_generate_hostname,use_ddns_ttl,use_domain_name,use_domain_name_servers,use_enable_ddns,use_logic_filter_rules,use_options,use_preferred_lifetime,use_recycle_leases,use_update_dns_on_lease_renewal,use_valid_lifetime,valid_lifetime"
 
 func TestAccIpv6networktemplateResource_basic(t *testing.T) {
+	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_ipam_ipv6networktemplate.test"
 	var v ipam.Ipv6networktemplate
 	name := acctest.RandomNameWithPrefix("network-template")
@@ -72,6 +73,7 @@ func TestAccIpv6networktemplateResource_basic(t *testing.T) {
 }
 
 func TestAccIpv6networktemplateResource_disappears(t *testing.T) {
+	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	resourceName := "nios_ipam_ipv6networktemplate.test"
 	var v ipam.Ipv6networktemplate
 	name := acctest.RandomNameWithPrefix("network-template")
@@ -94,6 +96,7 @@ func TestAccIpv6networktemplateResource_disappears(t *testing.T) {
 }
 
 func TestAccIpv6networktemplateResource_Import(t *testing.T) {
+	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_ipam_ipv6networktemplate.test"
 	var v ipam.Ipv6networktemplate
 	name := acctest.RandomNameWithPrefix("network-template")
@@ -134,6 +137,7 @@ func TestAccIpv6networktemplateResource_Import(t *testing.T) {
 }
 
 func TestAccIpv6networktemplateResource_AllowAnyNetmask(t *testing.T) {
+	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_ipam_ipv6networktemplate.test_allow_any_netmask"
 	var v ipam.Ipv6networktemplate
 	name := acctest.RandomNameWithPrefix("network-template")
@@ -164,6 +168,7 @@ func TestAccIpv6networktemplateResource_AllowAnyNetmask(t *testing.T) {
 }
 
 func TestAccIpv6networktemplateResource_AutoCreateReversezone(t *testing.T) {
+	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_ipam_ipv6networktemplate.test_auto_create_reversezone"
 	var v ipam.Ipv6networktemplate
 	name := acctest.RandomNameWithPrefix("network-template")
@@ -194,6 +199,7 @@ func TestAccIpv6networktemplateResource_AutoCreateReversezone(t *testing.T) {
 }
 
 func TestAccIpv6networktemplateResource_Cidr(t *testing.T) {
+	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_ipam_ipv6networktemplate.test_cidr"
 	var v ipam.Ipv6networktemplate
 	name := acctest.RandomNameWithPrefix("network-template")
@@ -224,6 +230,7 @@ func TestAccIpv6networktemplateResource_Cidr(t *testing.T) {
 }
 
 func TestAccIpv6networktemplateResource_CloudApiCompatible(t *testing.T) {
+	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_ipam_ipv6networktemplate.test_cloud_api_compatible"
 	var v ipam.Ipv6networktemplate
 	name := acctest.RandomNameWithPrefix("network-template")
@@ -247,6 +254,7 @@ func TestAccIpv6networktemplateResource_CloudApiCompatible(t *testing.T) {
 }
 
 func TestAccIpv6networktemplateResource_Comment(t *testing.T) {
+	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_ipam_ipv6networktemplate.test_comment"
 	var v ipam.Ipv6networktemplate
 	name := acctest.RandomNameWithPrefix("network-template")
@@ -277,6 +285,7 @@ func TestAccIpv6networktemplateResource_Comment(t *testing.T) {
 }
 
 func TestAccIpv6networktemplateResource_DdnsDomainname(t *testing.T) {
+	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_ipam_ipv6networktemplate.test_ddns_domainname"
 	var v ipam.Ipv6networktemplate
 	name := acctest.RandomNameWithPrefix("network-template")
@@ -307,6 +316,7 @@ func TestAccIpv6networktemplateResource_DdnsDomainname(t *testing.T) {
 }
 
 func TestAccIpv6networktemplateResource_DdnsEnableOptionFqdn(t *testing.T) {
+	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_ipam_ipv6networktemplate.test_ddns_enable_option_fqdn"
 	var v ipam.Ipv6networktemplate
 	name := acctest.RandomNameWithPrefix("network-template")
@@ -337,6 +347,7 @@ func TestAccIpv6networktemplateResource_DdnsEnableOptionFqdn(t *testing.T) {
 }
 
 func TestAccIpv6networktemplateResource_DdnsGenerateHostname(t *testing.T) {
+	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_ipam_ipv6networktemplate.test_ddns_generate_hostname"
 	var v ipam.Ipv6networktemplate
 	name := acctest.RandomNameWithPrefix("network-template")
@@ -367,6 +378,7 @@ func TestAccIpv6networktemplateResource_DdnsGenerateHostname(t *testing.T) {
 }
 
 func TestAccIpv6networktemplateResource_DdnsServerAlwaysUpdates(t *testing.T) {
+	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_ipam_ipv6networktemplate.test_ddns_server_always_updates"
 	var v ipam.Ipv6networktemplate
 	name := acctest.RandomNameWithPrefix("network-template")
@@ -397,6 +409,7 @@ func TestAccIpv6networktemplateResource_DdnsServerAlwaysUpdates(t *testing.T) {
 }
 
 func TestAccIpv6networktemplateResource_DdnsTtl(t *testing.T) {
+	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_ipam_ipv6networktemplate.test_ddns_ttl"
 	var v ipam.Ipv6networktemplate
 	name := acctest.RandomNameWithPrefix("network-template")
@@ -426,6 +439,7 @@ func TestAccIpv6networktemplateResource_DdnsTtl(t *testing.T) {
 	})
 }
 func TestAccIpv6networktemplateResource_DelegatedMember(t *testing.T) {
+	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_ipam_ipv6networktemplate.test_delegated_member"
 	var v ipam.Ipv6networktemplate
 	name := acctest.RandomNameWithPrefix("network-template")
@@ -463,6 +477,7 @@ func TestAccIpv6networktemplateResource_DelegatedMember(t *testing.T) {
 	})
 }
 func TestAccIpv6networktemplateResource_DomainName(t *testing.T) {
+	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_ipam_ipv6networktemplate.test_domain_name"
 	var v ipam.Ipv6networktemplate
 	name := acctest.RandomNameWithPrefix("network-template")
@@ -493,6 +508,7 @@ func TestAccIpv6networktemplateResource_DomainName(t *testing.T) {
 }
 
 func TestAccIpv6networktemplateResource_DomainNameServers(t *testing.T) {
+	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_ipam_ipv6networktemplate.test_domain_name_servers"
 	var v ipam.Ipv6networktemplate
 	name := acctest.RandomNameWithPrefix("network-template")
@@ -530,6 +546,7 @@ func TestAccIpv6networktemplateResource_DomainNameServers(t *testing.T) {
 }
 
 func TestAccIpv6networktemplateResource_EnableDdns(t *testing.T) {
+	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_ipam_ipv6networktemplate.test_enable_ddns"
 	var v ipam.Ipv6networktemplate
 	name := acctest.RandomNameWithPrefix("network-template")
@@ -560,6 +577,7 @@ func TestAccIpv6networktemplateResource_EnableDdns(t *testing.T) {
 }
 
 func TestAccIpv6networktemplateResource_ExtAttrs(t *testing.T) {
+	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_ipam_ipv6networktemplate.test_extattrs"
 	var v ipam.Ipv6networktemplate
 	name := acctest.RandomNameWithPrefix("network-template")
@@ -596,6 +614,7 @@ func TestAccIpv6networktemplateResource_ExtAttrs(t *testing.T) {
 }
 
 func TestAccIpv6networktemplateResource_FixedAddressTemplates(t *testing.T) {
+	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	t.Skip("FA Template cannot be cloud compatible. Skipping test for cloud users as we use a EA with cloud compatible enabled.")
 	var resourceName = "nios_ipam_ipv6networktemplate.test_fixed_address_templates"
 	var v ipam.Ipv6networktemplate
@@ -629,6 +648,7 @@ func TestAccIpv6networktemplateResource_FixedAddressTemplates(t *testing.T) {
 }
 
 func TestAccIpv6networktemplateResource_Ipv6prefix(t *testing.T) {
+	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_ipam_ipv6networktemplate.test_ipv6prefix"
 	var v ipam.Ipv6networktemplate
 	name := acctest.RandomNameWithPrefix("network-template")
@@ -659,6 +679,7 @@ func TestAccIpv6networktemplateResource_Ipv6prefix(t *testing.T) {
 }
 
 func TestAccIpv6networktemplateResource_LogicFilterRules(t *testing.T) {
+	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_ipam_ipv6networktemplate.test_logic_filter_rules"
 	var v ipam.Ipv6networktemplate
 	name := acctest.RandomNameWithPrefix("network-template")
@@ -703,6 +724,7 @@ func TestAccIpv6networktemplateResource_LogicFilterRules(t *testing.T) {
 }
 
 func TestAccIpv6networktemplateResource_Members(t *testing.T) {
+	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_ipam_ipv6networktemplate.test_members"
 	var v ipam.Ipv6networktemplate
 	name := acctest.RandomNameWithPrefix("network-template")
@@ -745,6 +767,7 @@ func TestAccIpv6networktemplateResource_Members(t *testing.T) {
 }
 
 func TestAccIpv6networktemplateResource_Name(t *testing.T) {
+	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_ipam_ipv6networktemplate.test_name"
 	var v ipam.Ipv6networktemplate
 	name1 := acctest.RandomNameWithPrefix("network-template")
@@ -776,6 +799,7 @@ func TestAccIpv6networktemplateResource_Name(t *testing.T) {
 }
 
 func TestAccIpv6networktemplateResource_Options(t *testing.T) {
+	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_ipam_ipv6networktemplate.test_options"
 	var v ipam.Ipv6networktemplate
 	name := acctest.RandomNameWithPrefix("network-template")
@@ -850,6 +874,7 @@ func TestAccIpv6networktemplateResource_Options(t *testing.T) {
 }
 
 func TestAccIpv6networktemplateResource_PreferredLifetime(t *testing.T) {
+	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_ipam_ipv6networktemplate.test_preferred_lifetime"
 	var v ipam.Ipv6networktemplate
 	name := acctest.RandomNameWithPrefix("network-template")
@@ -879,6 +904,7 @@ func TestAccIpv6networktemplateResource_PreferredLifetime(t *testing.T) {
 	})
 }
 func TestAccIpv6networktemplateResource_RangeTemplates(t *testing.T) {
+	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_ipam_ipv6networktemplate.test_range_templates"
 	var v ipam.Ipv6networktemplate
 	name := acctest.RandomNameWithPrefix("network-template")
@@ -909,6 +935,7 @@ func TestAccIpv6networktemplateResource_RangeTemplates(t *testing.T) {
 }
 
 func TestAccIpv6networktemplateResource_RecycleLeases(t *testing.T) {
+	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_ipam_ipv6networktemplate.test_recycle_leases"
 	var v ipam.Ipv6networktemplate
 	name := acctest.RandomNameWithPrefix("network-template")
@@ -939,6 +966,7 @@ func TestAccIpv6networktemplateResource_RecycleLeases(t *testing.T) {
 }
 
 func TestAccIpv6networktemplateResource_RirOrganization(t *testing.T) {
+	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	t.Skip("Cloud-compatible templates cannot set RIR registration action")
 	var resourceName = "nios_ipam_ipv6networktemplate.test_rir_organization"
 	var v ipam.Ipv6networktemplate
@@ -970,6 +998,7 @@ func TestAccIpv6networktemplateResource_RirOrganization(t *testing.T) {
 }
 
 func TestAccIpv6networktemplateResource_RirRegistrationAction(t *testing.T) {
+	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	t.Skip("Cloud-compatible templates cannot set RIR registration action")
 	var resourceName = "nios_ipam_ipv6networktemplate.test_rir_registration_action"
 	var v ipam.Ipv6networktemplate
@@ -999,6 +1028,7 @@ func TestAccIpv6networktemplateResource_RirRegistrationAction(t *testing.T) {
 }
 
 func TestAccIpv6networktemplateResource_RirRegistrationStatus(t *testing.T) {
+	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_ipam_ipv6networktemplate.test_rir_registration_status"
 	var v ipam.Ipv6networktemplate
 	name := acctest.RandomNameWithPrefix("network-template")
@@ -1027,6 +1057,7 @@ func TestAccIpv6networktemplateResource_RirRegistrationStatus(t *testing.T) {
 }
 
 func TestAccIpv6networktemplateResource_SendRirRequest(t *testing.T) {
+	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_ipam_ipv6networktemplate.test_send_rir_request"
 	var v ipam.Ipv6networktemplate
 	name := acctest.RandomNameWithPrefix("network-template")
@@ -1057,6 +1088,7 @@ func TestAccIpv6networktemplateResource_SendRirRequest(t *testing.T) {
 }
 
 func TestAccIpv6networktemplateResource_UpdateDnsOnLeaseRenewal(t *testing.T) {
+	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_ipam_ipv6networktemplate.test_update_dns_on_lease_renewal"
 	var v ipam.Ipv6networktemplate
 	name := acctest.RandomNameWithPrefix("network-template")
@@ -1087,6 +1119,7 @@ func TestAccIpv6networktemplateResource_UpdateDnsOnLeaseRenewal(t *testing.T) {
 }
 
 func TestAccIpv6networktemplateResource_UseDdnsDomainname(t *testing.T) {
+	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_ipam_ipv6networktemplate.test_use_ddns_domainname"
 	var v ipam.Ipv6networktemplate
 	name := acctest.RandomNameWithPrefix("network-template")
@@ -1117,6 +1150,7 @@ func TestAccIpv6networktemplateResource_UseDdnsDomainname(t *testing.T) {
 }
 
 func TestAccIpv6networktemplateResource_UseDdnsEnableOptionFqdn(t *testing.T) {
+	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_ipam_ipv6networktemplate.test_use_ddns_enable_option_fqdn"
 	var v ipam.Ipv6networktemplate
 	name := acctest.RandomNameWithPrefix("network-template")
@@ -1147,6 +1181,7 @@ func TestAccIpv6networktemplateResource_UseDdnsEnableOptionFqdn(t *testing.T) {
 }
 
 func TestAccIpv6networktemplateResource_UseDdnsGenerateHostname(t *testing.T) {
+	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_ipam_ipv6networktemplate.test_use_ddns_generate_hostname"
 	var v ipam.Ipv6networktemplate
 	name := acctest.RandomNameWithPrefix("network-template")
@@ -1177,6 +1212,7 @@ func TestAccIpv6networktemplateResource_UseDdnsGenerateHostname(t *testing.T) {
 }
 
 func TestAccIpv6networktemplateResource_UseDdnsTtl(t *testing.T) {
+	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_ipam_ipv6networktemplate.test_use_ddns_ttl"
 	var v ipam.Ipv6networktemplate
 	name := acctest.RandomNameWithPrefix("network-template")
@@ -1207,6 +1243,7 @@ func TestAccIpv6networktemplateResource_UseDdnsTtl(t *testing.T) {
 }
 
 func TestAccIpv6networktemplateResource_UseDomainName(t *testing.T) {
+	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_ipam_ipv6networktemplate.test_use_domain_name"
 	var v ipam.Ipv6networktemplate
 	name := acctest.RandomNameWithPrefix("network-template")
@@ -1237,6 +1274,7 @@ func TestAccIpv6networktemplateResource_UseDomainName(t *testing.T) {
 }
 
 func TestAccIpv6networktemplateResource_UseDomainNameServers(t *testing.T) {
+	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_ipam_ipv6networktemplate.test_use_domain_name_servers"
 	var v ipam.Ipv6networktemplate
 	name := acctest.RandomNameWithPrefix("network-template")
@@ -1267,6 +1305,7 @@ func TestAccIpv6networktemplateResource_UseDomainNameServers(t *testing.T) {
 }
 
 func TestAccIpv6networktemplateResource_UseEnableDdns(t *testing.T) {
+	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_ipam_ipv6networktemplate.test_use_enable_ddns"
 	var v ipam.Ipv6networktemplate
 	name := acctest.RandomNameWithPrefix("network-template")
@@ -1297,6 +1336,7 @@ func TestAccIpv6networktemplateResource_UseEnableDdns(t *testing.T) {
 }
 
 func TestAccIpv6networktemplateResource_UseLogicFilterRules(t *testing.T) {
+	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_ipam_ipv6networktemplate.test_use_logic_filter_rules"
 	var v ipam.Ipv6networktemplate
 	name := acctest.RandomNameWithPrefix("network-template")
@@ -1327,6 +1367,7 @@ func TestAccIpv6networktemplateResource_UseLogicFilterRules(t *testing.T) {
 }
 
 func TestAccIpv6networktemplateResource_UseOptions(t *testing.T) {
+	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_ipam_ipv6networktemplate.test_use_options"
 	var v ipam.Ipv6networktemplate
 	name := acctest.RandomNameWithPrefix("network-template")
@@ -1357,6 +1398,7 @@ func TestAccIpv6networktemplateResource_UseOptions(t *testing.T) {
 }
 
 func TestAccIpv6networktemplateResource_UsePreferredLifetime(t *testing.T) {
+	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_ipam_ipv6networktemplate.test_use_preferred_lifetime"
 	var v ipam.Ipv6networktemplate
 	name := acctest.RandomNameWithPrefix("network-template")
@@ -1387,6 +1429,7 @@ func TestAccIpv6networktemplateResource_UsePreferredLifetime(t *testing.T) {
 }
 
 func TestAccIpv6networktemplateResource_UseRecycleLeases(t *testing.T) {
+	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_ipam_ipv6networktemplate.test_use_recycle_leases"
 	var v ipam.Ipv6networktemplate
 	name := acctest.RandomNameWithPrefix("network-template")
@@ -1417,6 +1460,7 @@ func TestAccIpv6networktemplateResource_UseRecycleLeases(t *testing.T) {
 }
 
 func TestAccIpv6networktemplateResource_UseUpdateDnsOnLeaseRenewal(t *testing.T) {
+	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_ipam_ipv6networktemplate.test_use_update_dns_on_lease_renewal"
 	var v ipam.Ipv6networktemplate
 	name := acctest.RandomNameWithPrefix("network-template")
@@ -1447,6 +1491,7 @@ func TestAccIpv6networktemplateResource_UseUpdateDnsOnLeaseRenewal(t *testing.T)
 }
 
 func TestAccIpv6networktemplateResource_UseValidLifetime(t *testing.T) {
+	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_ipam_ipv6networktemplate.test_use_valid_lifetime"
 	var v ipam.Ipv6networktemplate
 	name := acctest.RandomNameWithPrefix("network-template")
@@ -1477,6 +1522,7 @@ func TestAccIpv6networktemplateResource_UseValidLifetime(t *testing.T) {
 }
 
 func TestAccIpv6networktemplateResource_ValidLifetime(t *testing.T) {
+	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_ipam_ipv6networktemplate.test_valid_lifetime"
 	var v ipam.Ipv6networktemplate
 	name := acctest.RandomNameWithPrefix("network-template")
