@@ -306,4 +306,3 @@ The module outputs can be used directly in NIOS provider resources:
 ### HA Requirements
 - Set `ha_enable = true` to create ETH2 interface
 - Provide `iam_instance_profile` with permissions for HA operations
-
