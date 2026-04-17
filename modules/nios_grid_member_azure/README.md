@@ -63,21 +63,6 @@ This module provisions the Azure infrastructure (Virtual Machine, NICs, Managed 
 
 ---
 
-## Architecture
-
-### Standalone Mode
-- 1 Azure VM with NIOS VHD image (imported as Managed Disk)
-- NIC1: Primary interface on Subnet 1
-- NIC2: Secondary interface on Subnet 2
-
-## Prerequisites
-
-Before using this module, ensure the following Azure resources exist:
-- **Resource Group** — the target resource group for all resources
-- **Virtual Network** — with at least two subnets
-- **Storage Account** — containing the NIOS VHD image blob
-- **Service Principal** — with appropriate permissions (subscription\_id, client\_id, client\_secret, tenant\_id)
-
 ## Usage
 
 ### Step 1: Deploy Azure Infrastructure

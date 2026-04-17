@@ -4,7 +4,7 @@
 
 This module provisions the GCP infrastructure (Compute Instance, network interfaces, etc.) for a single NIOS Grid member. Use one module call per instance — Grid Master, IB member, CP member, Reporting, or Discovery — they all share the same resource structure. The NIOS configuration (`nios_grid_member` and `nios_grid_join` resources) should be applied after the infrastructure is deployed and NIOS grid is fully booted (~15-25 minutes).
 
-### NIOS Model → Machine Type Mapping
+### NIOS Model -> Machine Type Mapping
 
 The module automatically maps NIOS models to GCP machine types:
 
@@ -70,21 +70,6 @@ The module automatically maps NIOS models to GCP machine types:
 <!-- END_TF_DOCS -->
 
 ---
-
-## Architecture
-
-### Standalone Mode
-- 1 Compute Instance with NIOS custom image
-- nic0: MGMT interface
-- nic1: LAN1 Grid communication interface
-
-## Prerequisites
-
-Before using this module, ensure the following GCP resources exist:
-- **Project** with Compute Engine API enabled
-- **VPC Subnetworks** — at least 2 (mgmt + lan1)
-- **Custom NIOS Image** — uploaded to the project
-- **Service Account** (optional) — with appropriate permissions
 
 ## Usage
 

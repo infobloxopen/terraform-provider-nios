@@ -13,7 +13,7 @@ data "google_compute_subnetwork" "lan1" {
 }
 
 locals {
-  // Machine-type lookup: NIOS model → GCP machine type
+  // Machine-type lookup: NIOS model -> GCP machine type
   machine_type_map = {
     "IB-V825"  = "n2-standard-2"
     "IB-V1425" = "n2-standard-4"
