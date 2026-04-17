@@ -4,23 +4,30 @@ The tables below list all available resources and data sources
 
 | Name | Resource Description                         | Data Source Description                                        |
 |----------|----------------------------------------------|----------------------------------------------------------------|
+| `nios_dhcp_failover` | Manages DHCP Failover Resources | Retrieves information about existing Failovers |
+| `nios_dhcp_filterfingerprint` | Manages DHCP Filter Fingerprint Resources | Retrieves information about existing Filter Fingerprints |
+| `nios_dhcp_filtermac` | Manages DHCP Filter MAC Resources | Retrieves information about existing MAC Filters |
+| `nios_dhcp_filternac` | Manages DHCP Filter NAC Resources | Retrieves information about existing NAC Filters |
+| `nios_dhcp_filteroption` | Manages DHCP Filter Option Resources | Retrieves information about existing Filter Options |
+| `nios_dhcp_filterrelayagent` | Manages DHCP Filter Relay Agent Resources | Retrieves information about existing Filter Relay Agents |
+| `nios_dhcp_fingerprint` | Manages DHCP Fingerprint Resources | Retrieves information about existing Fingerprints |
 | `nios_dhcp_fixed_address` | Manages DHCP Fixed Address (IPv4) Resources  | Retrieves information about existing DHCP Fixed Addresses      |
+| `nios_dhcp_fixedaddresstemplate` | Manages DHCP Fixed Address Template Resources | Retrieves information about existing Fixed Address Templates |
+| `nios_dhcp_ipv6dhcpoptiondefinition` | Manages DHCP IPv6 Option Definition Resources | Retrieves information about existing IPv6 Option Definitions      |
+| `nios_dhcp_ipv6dhcpoptionspace` | Manages DHCP IPv6 Option Space Resources | Retrieves information about existing IPv6 Option Spaces      |
+| `nios_dhcp_ipv6filteroption` | Manages DHCP IPv6 Filter Option Resources | Retrieves information about existing IPv6 Filter Options |
+| `nios_dhcp_ipv6fixedaddress` | Manages DHCP IPv6 Fixed Address Resources | Retrieves information about existing IPv6 Fixed Addresses |
+| `nios_dhcp_ipv6fixedaddresstemplate` | Manages DHCP IPv6 Fixed Address Template Resources | Retrieves information about existing IPv6 Fixed Address Templates      |
+| `nios_dhcp_ipv6range` | Manages DHCP IPv6 Range Resources | Retrieves information about existing IPv6 Ranges |
+| `nios_dhcp_ipv6sharednetwork` | Manages DHCP IPv6 Shared Network Resources | Retrieves information about existing IPv6 Shared Networks |
+| `nios_dhcp_ipv6_range_template` | Manages DHCP IPv6 Range Template Resources   | Retrieves information about existing DHCP IPv6 Range Templates |
+| `nios_dhcp_macfilteraddress` | Manages DHCP MAC Filter Address Resources | Retrieves information about existing MAC Filter Addresses |
+| `nios_dhcp_optiondefinition` | Manages DHCP Option Definition Resources | Retrieves information about existing Option Definitions |
+| `nios_dhcp_optionspace` | Manages DHCP Option Space Resources | Retrieves information about existing Option Spaces |
 | `nios_dhcp_range` | Manages DHCP Range (IPv4) Resources          | Retrieves information about existing DHCP Ranges               |
 | `nios_dhcp_range_template` | Manages DHCP Range Template (IPv4) Resources | Retrieves information about existing DHCP Range Templates      |
+| `nios_dhcp_roaminghost` | Manages DHCP Roaming Host Resources | Retrieves information about existing Roaming Hosts |
 | `nios_dhcp_shared_network` | Manages DHCP Shared Network (IPv4) Resources | Retrieves information about existing DHCP Shared Networks      |
-| `nios_dhcp_ipv6_range_template` | Manages DHCP IPV6 Range Template Resources   | Retrieves information about existing DHCP IPV6 Range Templates |                           |                                              |                                                           |
-| `nios_dhcp_ipv6dhcpoptiondefinition` | Manages DHCP IPv6 Option Definition | Retrieves information about existing IPv6 Option Definitions      |
-| `nios_dhcp_ipv6dhcpoptionspace` | Manages DHCP IPv6 Option Space | Retrieves information about existing IPv6 Option Spaces      |
-| `nios_dhcp_ipv6fixedaddresstemplate` | Manages DHCP IPv6 Fixed Address Template | Retrieves information about existing IPv6 Fixed Address Templates      |
-| `nios_dhcp_filteroption` | Manages DHCP Filter Options | Retrieves information about existing Filter Option Configurations |
-| `nios_dhcp_filterrelayagent` | Manages DHCP Filter Relay Agent | Retrieves information about existing Relay Agents |
-| `nios_dhcp_ipv6filteroption` | Manages DHCP IPv6 Filter Options | Retrieves information about existing IPv6 Filter Options |
-| `nios_dhcp_ipv6fixedaddress` | Manages DHCP IPv6 Fixed Addresses | Retrieves information about existing IPv6 Fixed Addresses |
-| `nios_dhcp_fingerprint` | Manages DHCP Fingerprints | Retrieves information about existing Fingerprints |
-| `nios_dhcp_filterfingerprint` | Manages DHCP Filter Fingerprints | Retrieves information about existing Filter Fingerprints |
-| `nios_dhcp_roaminghost` | Manages DHCP Roaming Hosts | Retrieves information about existing Roaming Hosts |
-| `nios_dhcp_filternac` | Manages DHCP Filter NAC | Retrieves information about existing NAC Filters |
-| `nios_dhcp_macfilteraddress` | Manages DHCP MAC Filter Addresses | Retrieves information about existing MAC Filter Addresses |
 
 ### DNS
 
@@ -54,10 +61,15 @@ The tables below list all available resources and data sources
 | `nios_ip_allocation`                 | Manages an IP Allocation                  |                                                                      |
 | `nios-ip_association`                | Manages an IP Association                 |                                                                      |
 | `nios_host_record`                   |                                           | Retrieves information about existing Host Records                    |
-| `nios_dns_sharedrecordgroup`         | Manages Shared Record Group               | Retrieves information about existing Shared Record Groups            |
-| `nios_dns_sharedrecord_txt`          | Manages Shared Record TXT                 | Retrieves information about existing DNS Shared TXT Records          |
 | `nios_dns_record_https`              | Manages DNS HTTPS Records                 | Retrieves information about existing HTTPS Records               |
 | `nios_dns_record_svcb`               | Manages DNS SVCB Records                  | Retrieves information about existing SVCB Records                |
+| `nios_dns_sharedrecord_a`            | Manages DNS Shared A Records              | Retrieves information about existing Shared A Records            |
+| `nios_dns_sharedrecord_aaaa`         | Manages DNS Shared AAAA Records           | Retrieves information about existing Shared AAAA Records         |
+| `nios_dns_sharedrecord_cname`        | Manages DNS Shared CNAME Records          | Retrieves information about existing Shared CNAME Records        |
+| `nios_dns_sharedrecord_mx`           | Manages DNS Shared MX Records             | Retrieves information about existing Shared MX Records           |
+| `nios_dns_sharedrecord_srv`          | Manages DNS Shared SRV Records            | Retrieves information about existing Shared SRV Records          |
+| `nios_dns_sharedrecord_txt`          | Manages DNS Shared TXT Records            | Retrieves information about existing DNS Shared TXT Records          |
+| `nios_dns_sharedrecordgroup`         | Manages Shared Record Groups              | Retrieves information about existing Shared Record Groups            |
 
 
 ### DTC
@@ -65,27 +77,48 @@ The tables below list all available resources and data sources
 | Name | Resource Description         | Data Source Description                          |
 |----------|------------------------------|--------------------------------------------------|
 | `nios_dtc_lbdn` | Manages DTC LBDN Resources   | Retrieves information about existing DTC LBDNs   |
+| `nios_dtc_monitor_http` | Manages DTC HTTP Monitor Resources | Retrieves information about existing HTTP Monitors |
+| `nios_dtc_monitor_icmp` | Manages DTC ICMP Monitor Resources | Retrieves information about existing ICMP Monitors |
+| `nios_dtc_monitor_pdp` | Manages DTC PDP Monitor Resources | Retrieves information about existing PDP Monitors |
+| `nios_dtc_monitor_sip` | Manages DTC SIP Monitor Resources | Retrieves information about existing SIP Monitors |
+| `nios_dtc_monitor_snmp` | Manages DTC SNMP Monitor Resources | Retrieves information about existing SNMP Monitors |
+| `nios_dtc_monitor_tcp` | Manages DTC TCP Monitor Resources | Retrieves information about existing TCP Monitors |
 | `nios_dtc_pool` | Manages DTC Pool Resources   | Retrieves information about existing DTC Pools   |
-| `nios_dtc_server` | Manages DTC Server Resources | Retrieves information about existing DTC Servers |
 | `nios_dtc_record_a` | Manages DTC A Records | Retrieves information about existing DTC A Records |
 | `nios_dtc_record_aaaa` | Manages DTC AAAA Records | Retrieves information about existing DTC AAAA Records |
 | `nios_dtc_record_cname` | Manages DTC CNAME Records | Retrieves information about existing DTC CNAME Records |
 | `nios_dtc_record_naptr` | Manages DTC NAPTR Records | Retrieves information about existing DTC NAPTR Records |
 | `nios_dtc_record_srv` | Manages DTC SRV Records | Retrieves information about existing DTC SRV Records |
+| `nios_dtc_server` | Manages DTC Server Resources | Retrieves information about existing DTC Servers |
+| `nios_dtc_topology` | Manages DTC Topology Resources | Retrieves information about existing Topologies |
 | `nios_dtc_topology_rule` |  | Retrieves information about existing DTC Topology Rules |
 
 ### RPZ
 
 | Name | Resource Description         | Data Source Description                          |
 |----------|------------------------------|--------------------------------------------------|
-| `nios_dns_record_rpz_a_ipaddress` | Manages RPZ A IP Address Records | Retrieves information about existing RPZ A IP Address Records |
+| `nios_dns_record_rpz_a` | Manages RPZ A Records | Retrieves information about existing RPZ A Records |
+| `nios_dns_record_rpz_a_ipaddress` | Manages RPZ A IP Address Records | Retrieves information about existing RPZ A IP Addresses |
 | `nios_dns_record_rpz_aaaa` | Manages RPZ AAAA Records | Retrieves information about existing RPZ AAAA Records |
-| `nios_dns_record_rpz_aaaa_ipaddress` | Manages RPZ AAAA IP Address Records | Retrieves information about existing RPZ AAAA IP Address Records |
+| `nios_dns_record_rpz_aaaa_ipaddress` | Manages RPZ AAAA IP Address Records | Retrieves information about existing RPZ AAAA IP Addresses |
 | `nios_dns_record_rpz_cname` | Manages RPZ CNAME Records | Retrieves information about existing RPZ CNAME Records |
-| `nios_dns_record_rpz_cname_clientipaddress` | Manages RPZ CNAME Client IP Address Records | Retrieves information about existing RPZ CNAME Client IP Address Records |
-| `nios_dns_record_rpz_cname_clientipaddressdn` | Manages RPZ CNAME Client IP Address DN Records | Retrieves information about existing RPZ CNAME Client IP Address DN Records |
-| `nios_dns_record_rpz_cname_ipaddressdn` | Manages RPZ CNAME IP Address DN Records | Retrieves information about existing RPZ CNAME IP Address DN Records |
+| `nios_dns_record_rpz_cname_clientipaddress` | Manages RPZ CNAME Client IP Address Records | Retrieves information about existing RPZ CNAME Client IP Addresses |
+| `nios_dns_record_rpz_cname_clientipaddressdn` | Manages RPZ CNAME Client IP Address DN Records | Retrieves information about existing RPZ CNAME Client IP Address DNs |
+| `nios_dns_record_rpz_cname_ipaddress` | Manages RPZ CNAME IP Address Records | Retrieves information about existing RPZ CNAME IP Addresses |
+| `nios_dns_record_rpz_cname_ipaddressdn` | Manages RPZ CNAME IP Address DN Records | Retrieves information about existing RPZ CNAME IP Address DNs |
+| `nios_dns_record_rpz_mx` | Manages RPZ MX Records | Retrieves information about existing RPZ MX Records |
+| `nios_dns_record_rpz_naptr` | Manages RPZ NAPTR Records | Retrieves information about existing RPZ NAPTR Records |
+| `nios_dns_record_rpz_ptr` | Manages RPZ PTR Records | Retrieves information about existing RPZ PTR Records |
+| `nios_dns_record_rpz_srv` | Manages RPZ SRV Records | Retrieves information about existing RPZ SRV Records |
 | `nios_dns_record_rpz_txt` | Manages RPZ TXT Records | Retrieves information about existing RPZ TXT Records |
+
+### GRID
+
+| Name | Resource Description         | Data Source Description                          |
+|----------|------------------------------|--------------------------------------------------|
+| `nios_grid_join` | Joins a Member to an Infoblox Grid |  |
+| `nios_grid_member` | Manages Grid Member Resources | Retrieves information about existing Members |
+| `nios_grid_upgradeschedule` | Manages Grid Upgrade Schedule Resources | Retrieves information about existing Upgrade Schedules |
 
 ### IPAM
 
@@ -97,8 +130,12 @@ The tables below list all available resources and data sources
 | `nios_ipam_ipv6network`           | Manages IPAM IPv6 Networks           | Retrieves information about existing IPAM IPv6 Networks           |
 | `nios_ipam_ipv6network_container` | Manages IPAM IPv6 Network Containers | Retrieves information about existing IPAM IPv6 Network Containers |
 | `nios_ipam_bulk_hostname_template` | Manages IPAM Bulk Hostname Templates | Retrieves information about existing IPAM Bulk Hostname Templates |
-| `nios_ipam_ipv6networktemplate` | Manages IPAM IPv6 Network Templates | Retrieves information about existing IPv6 Network Templates |
-| `nios_ipam_superhost` | Manages IPAM Super Hosts | Retrieves information about existing Super Hosts |
+| `nios_ipam_ipv6networktemplate` | Manages IPAM IPv6 Network Template Resources | Retrieves information about existing IPv6 Network Templates |
+| `nios_ipam_networktemplate` | Manages IPAM Network Template Resources | Retrieves information about existing Network Templates |
+| `nios_ipam_superhost` | Manages IPAM Super Host Resources | Retrieves information about existing Super Hosts |
+| `nios_ipam_vlan` | Manages IPAM VLAN Resources | Retrieves information about existing VLANs |
+| `nios_ipam_vlanrange` | Manages IPAM VLAN Range Resources | Retrieves information about existing VLAN Ranges |
+| `nios_ipam_vlanview` | Manages IPAM VLAN View Resources | Retrieves information about existing VLAN Views |
 
 ### CLOUD
 
@@ -111,9 +148,24 @@ The tables below list all available resources and data sources
 
 | Name                                | Resource Description                 | Data Source Description                                           |
 |-------------------------------------|--------------------------------------|-------------------------------------------------------------------|
-| `nios_microsoft_superscope` | Manages Microsoft Super Scopes | Retrieves information about existing Super Scopes  |
-| `nios_microsoft_adsites` | Manages Microsoft AD Sites | Retrieves information about existing AD Sites |
-| `nios_microsoft_server` | Manages Microsoft Servers | Retrieves information about existing Microsoft Servers |
+| `nios_microsoft_msserver` | Manages Microsoft Server Resources | Retrieves information about existing Microsoft Servers |
+| `nios_microsoft_msserver_adsites_site` | Manages Microsoft AD Site Resources | Retrieves information about existing AD Sites |
+| `nios_microsoft_mssuperscope` | Manages Microsoft Super Scope Resources | Retrieves information about existing Super Scopes |
+
+### PARENTAL CONTROL
+
+| Name                                | Resource Description                 | Data Source Description                                           |
+|-------------------------------------|--------------------------------------|-------------------------------------------------------------------|
+| `nios_parentalcontrol_avp` | Manages Parental Control AVP Resources | Retrieves information about existing AVPs |
+| `nios_parentalcontrol_blockingpolicy` | Manages Blocking Policy Resources | Retrieves information about existing Blocking Policies |
+| `nios_parentalcontrol_subscriberrecord` | Manages Subscriber Record Resources | Retrieves information about existing Subscriber Records |
+| `nios_parentalcontrol_subscribersite` | Manages Subscriber Site Resources | Retrieves information about existing Subscriber Sites |
+
+### RIR
+
+| Name                                | Resource Description                 | Data Source Description                                           |
+|-------------------------------------|--------------------------------------|-------------------------------------------------------------------|
+| `nios_rir_organization` | Manages RIR Organization Resources | Retrieves information about existing RIR Organizations |
 
 ### SECURITY
 
@@ -131,14 +183,15 @@ The tables below list all available resources and data sources
 | `nios_security_ldap_authservice` | Manages LDAP Authentication Services | Retrieves information about existing LDAP Authentication Services |
 | `nios_security_saml_authservice` | Manages SAML Authentication Services | Retrieves information about existing SAML Authentication Services |
 
-### Misc
+### MISCELLANEOUS
 
 | Name                    | Resource Description  | Data Source Description                            |
 |-------------------------|-----------------------|----------------------------------------------------|
-| `nios_misc_ruleset`     | Manages Rule Sets     | Retrieves information about existing Rule Sets     |
-| `nios_misc_bfdtemplate` | Manages BFD Templates | Retrieves information about existing BFD Templates |
-| `nios_misc_tftp_filedir` | Manages TFTP File Directories | Retrieves information about existing TFTP File Directories |
-| `nios_misc_dxl_endpoint` | Manages DXL Endpoints | Retrieves information about existing DXL Endpoints |
+| `nios_misc_bfdtemplate` | Manages BFD Template Resources | Retrieves information about existing BFD Templates |
+| `nios_misc_dxl_endpoint` | Manages DXL Endpoint Resources | Retrieves information about existing DXL Endpoints |
+| `nios_misc_ruleset`     | Manages Rule Set Resources | Retrieves information about existing Rule Sets     |
+| `nios_misc_syslog_endpoint` | Manages Syslog Notification Endpoint Resources | Retrieves information about existing Syslog Endpoints |
+| `nios_misc_tftpfiledir` | Manages TFTP File Directory Resources | Retrieves information about existing TFTP File Directories |
 
 ### SMARTFOLDER
 
