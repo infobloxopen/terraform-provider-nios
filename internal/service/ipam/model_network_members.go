@@ -19,14 +19,14 @@ import (
 
 type NetworkMembersModel struct {
 	Struct   types.String `tfsdk:"struct"`
-	Address  types.String `tfsdk:"ipv4addr"`
+	Ipv4addr types.String `tfsdk:"ipv4addr"`
 	Ipv6addr types.String `tfsdk:"ipv6addr"`
 	Name     types.String `tfsdk:"name"`
 }
 
 var NetworkMembersAttrTypes = map[string]attr.Type{
 	"struct":   types.StringType,
-	"address":  types.StringType,
+	"ipv4addr": types.StringType,
 	"ipv6addr": types.StringType,
 	"name":     types.StringType,
 }
@@ -39,7 +39,7 @@ var NetworkMembersResourceSchemaAttributes = map[string]schema.Attribute{
 		},
 		MarkdownDescription: "The struct type of the object. The value must be one of 'dhcpmember' or 'msdhcpserver'.",
 	},
-	"address": schema.StringAttribute{
+	"ipv4addr": schema.StringAttribute{
 		Optional: true,
 		Validators: []validator.String{
 			customvalidator.IsValidIPv4OrFQDN(),
@@ -77,7 +77,7 @@ func (m *NetworkMembersModel) Expand(ctx context.Context, diags *diag.Diagnostic
 	}
 	to := &ipam.NetworkMembers{
 		Struct:   flex.ExpandStringPointer(m.Struct),
-		Ipv4addr: flex.ExpandStringPointer(m.Address),
+		Ipv4addr: flex.ExpandStringPointer(m.Ipv4addr),
 		Ipv6addr: flex.ExpandStringPointer(m.Ipv6addr),
 		Name:     flex.ExpandStringPointer(m.Name),
 	}
@@ -103,7 +103,7 @@ func (m *NetworkMembersModel) Flatten(ctx context.Context, from *ipam.NetworkMem
 		*m = NetworkMembersModel{}
 	}
 	m.Struct = flex.FlattenStringPointer(from.Struct)
-	m.Address = flex.FlattenStringPointer(from.Ipv4addr)
+	m.Ipv4addr = flex.FlattenStringPointer(from.Ipv4addr)
 	m.Ipv6addr = flex.FlattenStringPointer(from.Ipv6addr)
 	m.Name = flex.FlattenStringPointer(from.Name)
 }
