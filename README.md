@@ -106,7 +106,7 @@ The object groups available in this provider are categorized as follows:
   - [MICROSOFT](guides/resources_datasources.md#microsoft)
   - [PARENTAL CONTROL](guides/resources_datasources.md#parental-control)
   - [RIR](guides/resources_datasources.md#rir)
-  - [MISC](guides/resources_datasources.md#misc)
+  - [MISC](guides/resources_datasources.md#miscellaneous)
   - [SMARTFOLDER](guides/resources_datasources.md#smartfolder)
   - [ACL](guides/resources_datasources.md#acl)
   - [DISCOVERY](guides/resources_datasources.md#discovery)
