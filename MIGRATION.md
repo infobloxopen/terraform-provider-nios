@@ -151,7 +151,7 @@ terraform state rm infoblox_a_record.example
 Import the new resource using UUID:
 
 ```bash
-terraform import nios_dns_record_a.example "8644ac3ff0b141fccb97851cre4184f9"
+terraform import nios_dns_record_a.example "bf94eb18feee486aa608bb27ca2dcf0a"
 ```
 
 **Recommended Approach**: If you are using Terraform v1.5.0 or later, use the import block with configuration generation:
@@ -159,7 +159,7 @@ terraform import nios_dns_record_a.example "8644ac3ff0b141fccb97851cre4184f9"
 ```hcl
 import {
   to = nios_dns_record_a.example
-  id = "8644ac3ff0b141fccb97851cre4184f9"
+  id = "bf94eb18feee486aa608bb27ca2dcf0a"
 }
 ```
 

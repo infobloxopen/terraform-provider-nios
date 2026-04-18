@@ -13,8 +13,8 @@ The tables below list all available resources and data sources
 | `nios_dhcp_fingerprint` | Manages DHCP Fingerprint Resources | Retrieves information about existing Fingerprints |
 | `nios_dhcp_fixed_address` | Manages DHCP Fixed Address (IPv4) Resources  | Retrieves information about existing DHCP Fixed Addresses      |
 | `nios_dhcp_fixedaddresstemplate` | Manages DHCP Fixed Address Template Resources | Retrieves information about existing Fixed Address Templates |
-| `nios_dhcp_ipv6dhcpoptiondefinition` | Manages DHCP IPv6 Option Definition Resources | Retrieves information about existing IPv6 Option Definitions      |
-| `nios_dhcp_ipv6dhcpoptionspace` | Manages DHCP IPv6 Option Space Resources | Retrieves information about existing IPv6 Option Spaces      |
+| `nios_dhcp_ipv6optiondefinition` | Manages DHCP IPv6 Option Definition Resources | Retrieves information about existing IPv6 Option Definitions      |
+| `nios_dhcp_ipv6optionspace` | Manages DHCP IPv6 Option Space Resources | Retrieves information about existing IPv6 Option Spaces      |
 | `nios_dhcp_ipv6filteroption` | Manages DHCP IPv6 Filter Option Resources | Retrieves information about existing IPv6 Filter Options |
 | `nios_dhcp_ipv6fixedaddress` | Manages DHCP IPv6 Fixed Address Resources | Retrieves information about existing IPv6 Fixed Addresses |
 | `nios_dhcp_ipv6fixedaddresstemplate` | Manages DHCP IPv6 Fixed Address Template Resources | Retrieves information about existing IPv6 Fixed Address Templates      |
@@ -58,9 +58,9 @@ The tables below list all available resources and data sources
 | `nios_dns_nsgroup_forwardingmember`  | Manages DNS NS Group Forwarding Members   | Retrieves information about existing DNS NS Group Forwarding Member  |
 | `nios_dns_nsgroup_forwardstubserver` | Manages DNS NS Group Forward Stub Servers | Retrieves information about existing DNS NS Group Forward Stub Servers |
 | `nios_dns_nsgroup_stubmember`        | Manages DNS NS Group Stub Members         | Retrieves information about existing DNS NS Group Stub Members       |
-| `nios_ip_allocation`                 | Manages an IP Allocation                  |                                                                      |
-| `nios-ip_association`                | Manages an IP Association                 |                                                                      |
-| `nios_host_record`                   |                                           | Retrieves information about existing Host Records                    |
+| `nios_ip_allocation`                 | Manages an IP Allocation                  |                                                                  |
+| `nios_ip_association`                | Manages an IP Association                 |                                                                      |
+| `nios_record_host`                   |                                           | Retrieves information about existing Host Records                    |
 | `nios_dns_record_https`              | Manages DNS HTTPS Records                 | Retrieves information about existing HTTPS Records               |
 | `nios_dns_record_svcb`               | Manages DNS SVCB Records                  | Retrieves information about existing SVCB Records                |
 | `nios_dns_sharedrecord_a`            | Manages DNS Shared A Records              | Retrieves information about existing Shared A Records            |
@@ -97,28 +97,33 @@ The tables below list all available resources and data sources
 
 | Name | Resource Description         | Data Source Description                          |
 |----------|------------------------------|--------------------------------------------------|
-| `nios_dns_record_rpz_a` | Manages RPZ A Records | Retrieves information about existing RPZ A Records |
-| `nios_dns_record_rpz_a_ipaddress` | Manages RPZ A IP Address Records | Retrieves information about existing RPZ A IP Addresses |
-| `nios_dns_record_rpz_aaaa` | Manages RPZ AAAA Records | Retrieves information about existing RPZ AAAA Records |
-| `nios_dns_record_rpz_aaaa_ipaddress` | Manages RPZ AAAA IP Address Records | Retrieves information about existing RPZ AAAA IP Addresses |
-| `nios_dns_record_rpz_cname` | Manages RPZ CNAME Records | Retrieves information about existing RPZ CNAME Records |
-| `nios_dns_record_rpz_cname_clientipaddress` | Manages RPZ CNAME Client IP Address Records | Retrieves information about existing RPZ CNAME Client IP Addresses |
-| `nios_dns_record_rpz_cname_clientipaddressdn` | Manages RPZ CNAME Client IP Address DN Records | Retrieves information about existing RPZ CNAME Client IP Address DNs |
-| `nios_dns_record_rpz_cname_ipaddress` | Manages RPZ CNAME IP Address Records | Retrieves information about existing RPZ CNAME IP Addresses |
-| `nios_dns_record_rpz_cname_ipaddressdn` | Manages RPZ CNAME IP Address DN Records | Retrieves information about existing RPZ CNAME IP Address DNs |
-| `nios_dns_record_rpz_mx` | Manages RPZ MX Records | Retrieves information about existing RPZ MX Records |
-| `nios_dns_record_rpz_naptr` | Manages RPZ NAPTR Records | Retrieves information about existing RPZ NAPTR Records |
-| `nios_dns_record_rpz_ptr` | Manages RPZ PTR Records | Retrieves information about existing RPZ PTR Records |
-| `nios_dns_record_rpz_srv` | Manages RPZ SRV Records | Retrieves information about existing RPZ SRV Records |
-| `nios_dns_record_rpz_txt` | Manages RPZ TXT Records | Retrieves information about existing RPZ TXT Records |
+| `nios_rpz_record_a` | Manages RPZ A Records | Retrieves information about existing RPZ A Records |
+| `nios_rpz_record_a_ipaddress` | Manages RPZ A IP Address Records | Retrieves information about existing RPZ A IP Addresses |
+| `nios_rpz_record_aaaa` | Manages RPZ AAAA Records | Retrieves information about existing RPZ AAAA Records |
+| `nios_rpz_record_aaaa_ipaddress` | Manages RPZ AAAA IP Address Records | Retrieves information about existing RPZ AAAA IP Addresses |
+| `nios_rpz_record_cname` | Manages RPZ CNAME Records | Retrieves information about existing RPZ CNAME Records |
+| `nios_rpz_record_cname_clientipaddress` | Manages RPZ CNAME Client IP Address Records | Retrieves information about existing RPZ CNAME Client IP Addresses |
+| `nios_rpz_record_cname_clientipaddressdn` | Manages RPZ CNAME Client IP Address DN Records | Retrieves information about existing RPZ CNAME Client IP Address DNs |
+| `nios_rpz_record_cname_ipaddress` | Manages RPZ CNAME IP Address Records | Retrieves information about existing RPZ CNAME IP Addresses |
+| `nios_rpz_record_cname_ipaddressdn` | Manages RPZ CNAME IP Address DN Records | Retrieves information about existing RPZ CNAME IP Address DNs |
+| `nios_rpz_record_mx` | Manages RPZ MX Records | Retrieves information about existing RPZ MX Records |
+| `nios_rpz_record_naptr` | Manages RPZ NAPTR Records | Retrieves information about existing RPZ NAPTR Records |
+| `nios_rpz_record_ptr` | Manages RPZ PTR Records | Retrieves information about existing RPZ PTR Records |
+| `nios_rpz_record_srv` | Manages RPZ SRV Records | Retrieves information about existing RPZ SRV Records |
+| `nios_rpz_record_txt` | Manages RPZ TXT Records | Retrieves information about existing RPZ TXT Records |
 
 ### GRID
 
-| Name | Resource Description         | Data Source Description                          |
-|----------|------------------------------|--------------------------------------------------|
-| `nios_grid_join` | Joins a Member to an Infoblox Grid |  |
-| `nios_grid_member` | Manages Grid Member Resources | Retrieves information about existing Members |
-| `nios_grid_upgradeschedule` | Manages Grid Upgrade Schedule Resources | Retrieves information about existing Upgrade Schedules |
+| Name                               | Resource Description                                     | Data Source Description                                                               |
+|------------------------------------|----------------------------------------------------------|---------------------------------------------------------------------------------------|
+| `nios_grid_natgroup`               | Manages Grid NAT Groups                                  | Retrieves information about existing Grid NAT Groups                                  |
+| `nios_grid_extensibleattributedef` | Manages Grid Extensible Attribute Definitions | Retrieves information about existing Grid Extensible Attribute Definitions |
+| `nios_grid_upgradegroup`           | Manages Grid Upgrade Groups                              | Retrieves information about existing Grid Upgrade Groups                              |
+| `nios_grid_servicerestart_group`   | Manages Grid Service Restart Groups                      | Retrieves information about existing Grid Service Restart Groups                      |
+| `nios_grid_distributionschedule`   | Manages Grid Distribution Schedule                     | Retrieves information about current Distribution Schedule                       |
+| `nios_grid_member` | Manages Grid Members | Retrieves information about existing Grid Members |
+| `nios_grid_upgradeschedule` | Manages Grid Upgrade Schedule | Retrieves information about current Upgrade Schedule |
+| `nios_grid_join` | Joins a member to an Infoblox Grid |  |
 
 ### IPAM
 
@@ -177,10 +182,10 @@ The tables below list all available resources and data sources
 | `nios_security_permission`         | Manages Security Permissions | Retrieves information about existing Security Permissions                |
 | `nios_security_ftpuser`            | Manages Security FTP User    | Retrieves information about existing Security FTP Users                  |
 | `nios_security_snmp_user`          | Manages Security SNMP Users  | Retrieves information about existing Security SNMP Users                  |
-| `security_certificate_authservice` | Manages Security Certificate Authentication Services | Retrieves information about existing Certificate Authentication Services |
+| `nios_security_certificate_authservice` | Manages Security Certificate Authentication Services | Retrieves information about existing Certificate Authentication Services |
 | `nios_security_radius_authservice` | Manages RADIUS Authentication Services | Retrieves information about existing RADIUS Authentication Services |
 | `nios_security_tacacsplus_authservice` | Manages TACACS+ Authentication Services | Retrieves information about existing TACACS+ Authentication Services |
-| `nios_security_ldap_authservice` | Manages LDAP Authentication Services | Retrieves information about existing LDAP Authentication Services |
+| `nios_security_ldap_auth_service` | Manages LDAP Authentication Services | Retrieves information about existing LDAP Authentication Services |
 | `nios_security_saml_authservice` | Manages SAML Authentication Services | Retrieves information about existing SAML Authentication Services |
 
 ### MISCELLANEOUS
@@ -206,19 +211,6 @@ The tables below list all available resources and data sources
 |---------------------|----------|------------|
 | `nios_acl_namedacl` | Manages Named Access Control Lists | Retrieves information about existing Named Access Control Lists |
 
-### GRID
-
-| Name                               | Resource Description                                     | Data Source Description                                                               |
-|------------------------------------|----------------------------------------------------------|---------------------------------------------------------------------------------------|
-| `nios_grid_natgroup`               | Manages Grid NAT Groups                                  | Retrieves information about existing Grid NAT Groups                                  |
-| `nios_grid_extensibleattributedef` | Manages Grid Extensible Attribute Definitions | Retrieves information about existing Grid Extensible Attribute Definitions |
-| `nios_grid_upgradegroup`           | Manages Grid Upgrade Groups                              | Retrieves information about existing Grid Upgrade Groups                              |
-| `nios_grid_servicerestart_group`   | Manages Grid Service Restart Groups                      | Retrieves information about existing Grid Service Restart Groups                      |
-| `nios_grid_distributionschedule`   | Manages Grid Distribution Schedule                     | Retrieves information about current Distribution Schedule                       |
-| `nios_grid_member` | Manages Grid Members | Retrieves information about existing Grid Members |
-| `nios_grid_upgradeschedule` | Manages Grid Upgrade Schedule | Retrieves information about current Upgrade Schedule |
-| `nios_grid_join` | Joins a member to an Infoblox Grid |  |
-
 ### DISCOVERY
 
 | Name | Resource Description                | Data Source Description                                           |
@@ -232,19 +224,3 @@ The tables below list all available resources and data sources
 |-----------------------------------|-------------------------------------|------------------------------------------------------------------|
 | `nios_notification_rule`          | Manages Notification Rules          | Retrieves information about existing Notification Rules          |
 | `nios_notification_rest_endpoint` | Manages Notification Rest Endpoints | Retrieves information about existing Notification Rest Endpoints |
-| `nios_notification_syslog_endpoint` | Manages Syslog Endpoints | Retrieves information about existing Syslog Endpoints |
-
-### PARENTAL CONTROL
-
-| Name                              | Resource Description                | Data Source Description                                          |
-|-----------------------------------|-------------------------------------|------------------------------------------------------------------|
-| `nios_parentalcontrol_subscriberrecord` | Manages Subscriber Records | Retrieves information about existing Subscriber Records |
-| `nios_parentalcontrol_subscribersite` | Manages Subscriber Sites | Retrieves information about existing Subscriber Sites |
-| `nios_parentalcontrol_blockingpolicy` | Manages Parental Control Blocking Policies | Retrieves information about existing Parental Control Blocking Policies |
-| `nios_parentalcontrol_avp` | Manages Parental Control AVPs | Retrieves information about existing Parental Control AVPs |
-
-### RIR
-
-| Name                              | Resource Description                | Data Source Description                                          |
-|-----------------------------------|-------------------------------------|------------------------------------------------------------------|
-| `nios_rir_organization` | Manages RIR Organizations | Retrieves information about existing RIR Organizations |

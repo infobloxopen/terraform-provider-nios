@@ -34,10 +34,10 @@ The table below shows the compatibility between different versions of the Terraf
 | 1.1.0 , 1.0.0 , 0.0.1 | >= 1.18 | >= 1.8.0 | 9.0.6 or higher | v2.13.6 |
 
 **Important Notes:**
-- **Version 2.0.0+** introduces UUID based resource identification  NIOS 9.1.0. Resources must be imported using UUID instead of ref.
-- **Version 1.1.0 and earlier** uses reference based resource identification. Resources must be imported using ref
+- **Version 2.0.0+** introduces UUID based resource identification for NIOS 9.1.0. Resources must be imported using UUID instead of ref.
+- **Version 1.1.0 and earlier** uses reference based resource identification. Resources must be imported using ref.
 - **Recommended**: When upgrading from provider v1.x to v2.0.0, execute `terraform refresh` to automatically update your state file with UUID.
-- For migration from the legacy terraform provider , refer to the [Migration Guide](MIGRATION.md).
+- For migration from the legacy terraform provider, refer to the [Migration Guide](MIGRATION.md).
 
 ### Known Issues
 
@@ -98,13 +98,17 @@ The object groups available in this provider are categorized as follows:
   - [DHCP](guides/resources_datasources.md#dhcp)
   - [DNS](guides/resources_datasources.md#dns)
   - [DTC](guides/resources_datasources.md#dtc)
+  - [RPZ](guides/resources_datasources.md#rpz)
   - [IPAM](guides/resources_datasources.md#ipam)
   - [CLOUD](guides/resources_datasources.md#cloud)
+  - [GRID](guides/resources_datasources.md#grid)
   - [SECURITY](guides/resources_datasources.md#security)
+  - [MICROSOFT](guides/resources_datasources.md#microsoft)
+  - [PARENTAL CONTROL](guides/resources_datasources.md#parental-control)
+  - [RIR](guides/resources_datasources.md#rir)
   - [MISC](guides/resources_datasources.md#misc)
   - [SMARTFOLDER](guides/resources_datasources.md#smartfolder)
   - [ACL](guides/resources_datasources.md#acl)
-  - [GRID](guides/resources_datasources.md#grid)
   - [DISCOVERY](guides/resources_datasources.md#discovery)
   - [NOTIFICATION](guides/resources_datasources.md#notification)
 
