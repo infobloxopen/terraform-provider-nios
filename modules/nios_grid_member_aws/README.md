@@ -193,7 +193,7 @@ resource "nios_grid_join" "member_join" {
 Deploy 2 AWS EC2 instances for SA-HA Config with the required IAM Permissions.
 
 ```hcl
-# Deploy AWS infrastructure for Node 1 (Active Node)
+// Deploy AWS infrastructure for Node 1 (Active Node)
 module "node1" {
   // ... (same config as Step 1)
   ha_enable = true
@@ -201,7 +201,7 @@ module "node1" {
   iam_instance_profile = var.iam_instance_profile
 }
 
-# Deploy AWS infrastructure for Node 2 (Passive Node)
+// Deploy AWS infrastructure for Node 2 (Passive Node)
 module "node2" {
   // ... (same config as Step 1)
   ha_enable = true
@@ -246,7 +246,7 @@ resource "nios_grid_member" "ha_pair" {
 
   node_info = [
     {
-      # Node 1 configuration
+      // Node 1 configuration
       lan_ha_port_setting = {
         ha_ip_address      = module.node1.eth2_ip
         mgmt_lan           = module.node1.eth1_ipv4
@@ -254,7 +254,7 @@ resource "nios_grid_member" "ha_pair" {
       }
     },
     {
-      # Node 2 configuration
+      // Node 2 configuration
       lan_ha_port_setting = {
         ha_ip_address      = module.node2.eth2_ip
         mgmt_lan           = module.node2.eth1_ipv4
@@ -269,9 +269,11 @@ resource "nios_grid_member" "ha_pair" {
       "10.10.10.10"
   ] }
 }
+```
 
 3. Join Node2 (Passive Node) to Node1 (Active Node).
 
+```
 resource "nios_grid_join" "ha_member_join" {
   member_url      = "https://${module.node2.eth1_ipv4}"
   member_username = "admin"
@@ -282,21 +284,6 @@ resource "nios_grid_join" "ha_member_join" {
   depends_on      = [nios_grid_member.ha_pair]
 }
 ```
-
-## Outputs Usage
-
-The module outputs can be used directly in NIOS provider resources:
-
-| Output | NIOS Resource Usage |
-|--------|---------------------|
-| `eth1_ipv4` | `vip_setting.address`, `member_ip` in grid_join |
-| `eth1_gateway` | `vip_setting.gateway` |
-| `eth1_subnet_mask` | `vip_setting.subnet_mask` |
-| `eth1_ipv6` | `ipv6_setting.virtual_ip` |
-| `eth2_ip` | HA `node_info.lan_ha_port_setting.ha_ip_address` |
-| `eth2_secondary_ip_for_ha` | HA `vip_setting.address` |
-
----
 
 ### Boot Time
 - NIOS takes **15-20 minutes** to fully boot after EC2 instance creation

@@ -82,7 +82,7 @@ provider "google" {
   project = var.project
   region  = var.region
   zone    = var.zone
-  credentials = file("path/to/service-account-key.json"")
+  credentials = file("path/to/service-account-key.json")
 }
 
 module "node1" {
@@ -172,19 +172,6 @@ resource "nios_grid_join" "member_join" {
   depends_on      = [nios_grid_member.member]
 }
 ```
-
-## Outputs Usage
-
-The module outputs can be used directly in NIOS provider resources:
-
-| Output | NIOS Resource Usage |
-|--------|---------------------|
-| `lan1_ip` | `vip_setting.address`, `member_url` in grid_join |
-| `lan1_gateway` | `vip_setting.gateway` |
-| `lan1_subnet_mask` | `vip_setting.subnet_mask` |
-| `mgmt_ip` | Management access |
-
----
 
 ### Boot Time
 - NIOS takes **15-20 minutes** to fully boot after instance creation

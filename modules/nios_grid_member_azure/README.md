@@ -172,19 +172,6 @@ resource "nios_grid_join" "member_join" {
 }
 ```
 
-## Outputs Usage
-
-The module outputs can be used directly in NIOS provider resources:
-
-| Output | NIOS Resource Usage |
-|--------|---------------------|
-| `nic2_ip` | `vip_setting.address`, `member_url` in grid_join |
-| `subnet2_gateway` | `vip_setting.gateway` |
-| `subnet2_mask` | `vip_setting.subnet_mask` |
-| `nic1_ip` | Management access |
-
----
-
 ### Boot Time
 - NIOS takes **15-20 minutes** to fully boot after VM creation
 - Always verify NIOS API is responding before applying `nios_grid_member` resources
