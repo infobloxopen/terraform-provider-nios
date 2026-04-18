@@ -2,14 +2,14 @@
 data "google_compute_subnetwork" "mgmt" {
   name    = var.mgmt_subnet_name
   region  = var.region
-  project = var.project_id
+  project = var.project
 }
 
 // Retrieve information about existing LAN1 subnetwork
 data "google_compute_subnetwork" "lan1" {
   name    = var.lan1_subnet_name
   region  = var.region
-  project = var.project_id
+  project = var.project
 }
 
 locals {
@@ -30,11 +30,11 @@ locals {
   }
 
   // Image self-link
-  image = "projects/${var.project_id}/global/images/${var.image_name}"
+  image = "projects/${var.project}/global/images/${var.image_name}"
 
   // Subnetwork self-links
-  subnetwork_mgmt = "projects/${var.project_id}/regions/${var.region}/subnetworks/${var.mgmt_subnet_name}"
-  subnetwork_lan1 = "projects/${var.project_id}/regions/${var.region}/subnetworks/${var.lan1_subnet_name}"
+  subnetwork_mgmt = "projects/${var.project}/regions/${var.region}/subnetworks/${var.mgmt_subnet_name}"
+  subnetwork_lan1 = "projects/${var.project}/regions/${var.region}/subnetworks/${var.lan1_subnet_name}"
 }
 
 // Manage a Google Compute Instance for NIOS Grid Member

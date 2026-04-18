@@ -28,11 +28,11 @@ resource "azurerm_managed_disk" "disk" {
   name                 = var.disk_name
   location             = var.location
   resource_group_name  = data.azurerm_resource_group.rg.name
-  storage_account_type = "Standard_LRS"
-  create_option        = "Import"
+  storage_account_type = var.storage_account_type
+  create_option        = var.create_option_managed_disk
   storage_account_id   = var.storage_account_id
   source_uri           = var.disk_url
-  os_type              = "Linux"
+  os_type              = var.os_type
   disk_size_gb         = var.disk_size
 }
 
@@ -43,9 +43,9 @@ resource "azurerm_network_interface" "nic1" {
   resource_group_name = data.azurerm_resource_group.rg.name
 
   ip_configuration {
-    name                          = "internal1"
+    name                          = var.ip_configuration_name_nic1
     subnet_id                     = data.azurerm_subnet.subnet1.id
-    private_ip_address_allocation = "Dynamic"
+    private_ip_address_allocation = var.private_ip_address_allocation
     primary                       = true
   }
 }
@@ -57,9 +57,9 @@ resource "azurerm_network_interface" "nic2" {
   resource_group_name = data.azurerm_resource_group.rg.name
 
   ip_configuration {
-    name                          = "internal2"
+    name                          = var.ip_configuration_name_nic2
     subnet_id                     = data.azurerm_subnet.subnet2.id
-    private_ip_address_allocation = "Dynamic"
+    private_ip_address_allocation = var.private_ip_address_allocation
     primary                       = true
   }
 }
@@ -78,13 +78,13 @@ resource "azurerm_virtual_machine" "vm" {
 
   primary_network_interface_id = azurerm_network_interface.nic1.id
 
-  delete_os_disk_on_termination = false
+  delete_os_disk_on_termination = var.delete_os_disk_on_termination
 
   storage_os_disk {
     name            = var.disk_name
     managed_disk_id = azurerm_managed_disk.disk.id
-    create_option   = "Attach"
-    caching         = "ReadWrite"
-    os_type         = "Linux"
+    create_option   = var.create_option_storage_os_disk_for_vm
+    caching         = var.caching
+    os_type         = var.os_type_on_storage_os_disk
   }
 }

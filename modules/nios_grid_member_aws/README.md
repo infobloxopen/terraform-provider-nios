@@ -46,7 +46,7 @@ This module provisions the AWS infrastructure (EC2 instance, network interfaces,
 | <a name="input_private_ips_count_eth2"></a> [private\_ips\_count\_eth2](#input\_private\_ips\_count\_eth2) | Number of IPs to assign to ETH2 (HA interface). Set 1 for secondary IP (VIP) for HA, 0 for no secondary IP. | `number` | `0` | no |
 | <a name="input_remote_console_enabled"></a> [remote\_console\_enabled](#input\_remote\_console\_enabled) | Enable remote console access. | `bool` | `true` | no |
 | <a name="input_security_group_id"></a> [security\_group\_id](#input\_security\_group\_id) | ID of the existing AWS security group. | `string` | n/a | yes |
-| <a name="input_tags"></a> [tags](#input\_tags) | Tags to apply to AWS resources. | `map(string)` | `{}` | no |
+| <a name="input_tags"></a> [tags](#input\_tags) | Tags to apply to AWS resources. | `map(string)` | <pre>{<br/>  "Name": "nios-aws-instance",<br/>  "dontStop": "true",<br/>  "dontTerminate": "true"<br/>}</pre> | no |
 | <a name="input_volume_size"></a> [volume\_size](#input\_volume\_size) | Size of the root volume in GB. | `number` | `500` | no |
 | <a name="input_volume_type"></a> [volume\_type](#input\_volume\_type) | Type of the root volume. | `string` | `"gp3"` | no |
 

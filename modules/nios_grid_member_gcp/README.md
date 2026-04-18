@@ -40,23 +40,23 @@ The module automatically maps NIOS models to GCP machine types:
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_boot_disk_size"></a> [boot\_disk\_size](#input\_boot\_disk\_size) | Boot disk size in GB. | `number` | `250` | no |
-| <a name="input_boot_disk_type"></a> [boot\_disk\_type](#input\_boot\_disk\_type) | Boot disk type (e.g. pd-standard, pd-ssd, pd-balanced). | `string` | `"pd-standard"` | no |
-| <a name="input_default_admin_password"></a> [default\_admin\_password](#input\_default\_admin\_password) | Default admin password for NIOS. | `string` | n/a | yes |
-| <a name="input_image_name"></a> [image\_name](#input\_image\_name) | Name of the custom NIOS GCP image in the same project. | `string` | n/a | yes |
-| <a name="input_labels"></a> [labels](#input\_labels) | Labels to apply to GCP resources. | `map(string)` | <pre>{<br/>  "dontstop": "no",<br/>  "dontterminate": "yes",<br/>  "product": "nios"<br/>}</pre> | no |
-| <a name="input_lan1_subnet_name"></a> [lan1\_subnet\_name](#input\_lan1\_subnet\_name) | Name of the LAN1 subnetwork (nic1) for grid communication. | `string` | n/a | yes |
-| <a name="input_machine_type"></a> [machine\_type](#input\_machine\_type) | GCP machine type. Used as fallback if nios\_model is not found in the machine\_type\_map. | `string` | `"n2-standard-4"` | no |
-| <a name="input_mgmt_subnet_name"></a> [mgmt\_subnet\_name](#input\_mgmt\_subnet\_name) | Name of the management subnetwork (nic0). | `string` | n/a | yes |
-| <a name="input_name"></a> [name](#input\_name) | Name for the Compute Instance. | `string` | `"nios-gcp-instance"` | no |
-| <a name="input_nios_license"></a> [nios\_license](#input\_nios\_license) | NIOS temporary license string (e.g. 'nios IB-V1425 enterprise dns dhcp cloud'). | `string` | `"nios IB-V1425 enterprise dns dhcp cloud"` | no |
-| <a name="input_nios_model"></a> [nios\_model](#input\_nios\_model) | NIOS virtual appliance model (e.g. IB-V825, IB-V1425, IB-V2225, IB-V4025, TE-V810, CP-V800). Used for machine type lookup and license. | `string` | `"IB-V1425"` | no |
-| <a name="input_project_id"></a> [project\_id](#input\_project\_id) | GCP project ID where all resources will be deployed. | `string` | n/a | yes |
-| <a name="input_region"></a> [region](#input\_region) | GCP region for the deployment. | `string` | `"us-west1"` | no |
-| <a name="input_remote_console_enabled"></a> [remote\_console\_enabled](#input\_remote\_console\_enabled) | Enable remote console access. | `bool` | `true` | no |
-| <a name="input_service_account_email"></a> [service\_account\_email](#input\_service\_account\_email) | Service account email to attach to the instance. Set to null to skip. | `string` | `null` | no |
-| <a name="input_service_account_scopes"></a> [service\_account\_scopes](#input\_service\_account\_scopes) | OAuth scopes for the service account. | `list(string)` | <pre>[<br/>  "https://www.googleapis.com/auth/cloud-platform"<br/>]</pre> | no |
-| <a name="input_zone"></a> [zone](#input\_zone) | GCP zone for the Compute Instance. | `string` | `"us-west1-b"` | no |
+| <a name="input_boot_disk_size"></a> [boot\_disk\_size](#input\_boot\_disk\_size) | The size of the boot disk in GB. | `number` | `250` | no |
+| <a name="input_boot_disk_type"></a> [boot\_disk\_type](#input\_boot\_disk\_type) | The type of the boot disk. | `string` | `"pd-standard"` | no |
+| <a name="input_default_admin_password"></a> [default\_admin\_password](#input\_default\_admin\_password) | The default admin password for the NIOS instance. | `string` | n/a | yes |
+| <a name="input_image_name"></a> [image\_name](#input\_image\_name) | The image from which to initialize this disk. | `string` | n/a | yes |
+| <a name="input_labels"></a> [labels](#input\_labels) | A map of key/value labels to assign to the instance. | `map(string)` | <pre>{<br/>  "dontstop": "no",<br/>  "dontterminate": "yes",<br/>  "product": "nios"<br/>}</pre> | no |
+| <a name="input_lan1_subnet_name"></a> [lan1\_subnet\_name](#input\_lan1\_subnet\_name) | The name of the subnetwork to attach to the secondary network interface (nic1). | `string` | n/a | yes |
+| <a name="input_machine_type"></a> [machine\_type](#input\_machine\_type) | The machine type to use for the instance. Used if nios\_model is not mapped. | `string` | `"n2-standard-4"` | no |
+| <a name="input_mgmt_subnet_name"></a> [mgmt\_subnet\_name](#input\_mgmt\_subnet\_name) | The name of the subnetwork to attach to the primary network interface (nic0). | `string` | n/a | yes |
+| <a name="input_name"></a> [name](#input\_name) | The name of the compute instance. | `string` | `"nios-gcp-instance"` | no |
+| <a name="input_nios_license"></a> [nios\_license](#input\_nios\_license) | The NIOS license string applied during instance initialization. | `string` | `"nios IB-V1425 enterprise dns dhcp cloud"` | no |
+| <a name="input_nios_model"></a> [nios\_model](#input\_nios\_model) | The NIOS appliance model used to determine the machine type. | `string` | `"IB-V1425"` | no |
+| <a name="input_project"></a> [project](#input\_project) | The default project to manage resources in. | `string` | n/a | yes |
+| <a name="input_region"></a> [region](#input\_region) | The region in which to manage resources. | `string` | `"us-west1"` | no |
+| <a name="input_remote_console_enabled"></a> [remote\_console\_enabled](#input\_remote\_console\_enabled) | Whether to enable remote console access. | `bool` | `true` | no |
+| <a name="input_service_account_email"></a> [service\_account\_email](#input\_service\_account\_email) | The service account e-mail address. | `string` | `null` | no |
+| <a name="input_service_account_scopes"></a> [service\_account\_scopes](#input\_service\_account\_scopes) | A list of service scopes to assign to the service account. | `list(string)` | <pre>[<br/>  "https://www.googleapis.com/auth/cloud-platform"<br/>]</pre> | no |
+| <a name="input_zone"></a> [zone](#input\_zone) | The zone in which the compute instance will be created. | `string` | `"us-west1-b"` | no |
 
 ## Outputs
 
@@ -66,7 +66,9 @@ The module automatically maps NIOS models to GCP machine types:
 | <a name="output_lan1_gateway"></a> [lan1\_gateway](#output\_lan1\_gateway) | Gateway IP for the LAN1 subnetwork (first usable IP). |
 | <a name="output_lan1_ip"></a> [lan1\_ip](#output\_lan1\_ip) | Internal IP of the LAN1 interface (nic1). |
 | <a name="output_lan1_subnet_mask"></a> [lan1\_subnet\_mask](#output\_lan1\_subnet\_mask) | Subnet mask of the LAN1 subnetwork. |
+| <a name="output_mgmt_gateway"></a> [mgmt\_gateway](#output\_mgmt\_gateway) | Gateway IP for the MGMT subnetwork (first usable IP). |
 | <a name="output_mgmt_ip"></a> [mgmt\_ip](#output\_mgmt\_ip) | Internal IP of the MGMT interface (nic0). |
+| <a name="output_mgmt_subnet_mask"></a> [mgmt\_subnet\_mask](#output\_mgmt\_subnet\_mask) | Subnet Mask of the Mgmt Subnetwork |
 <!-- END_TF_DOCS -->
 
 ---
@@ -77,7 +79,7 @@ The module automatically maps NIOS models to GCP machine types:
 
 ```hcl
 provider "google" {
-  project = var.project_id
+  project = var.project
   region  = var.region
   zone    = var.zone
   credentials = file("path/to/service-account-key.json"")
@@ -86,7 +88,7 @@ provider "google" {
 module "node1" {
   source = "github.com/infobloxopen/terraform-provider-nios//modules/nios_grid_member_gcp"
 
-  project_id = var.project_id
+  project = var.project
   region     = var.region
   zone       = var.zone
 

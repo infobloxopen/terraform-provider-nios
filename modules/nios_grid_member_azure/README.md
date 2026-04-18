@@ -34,19 +34,29 @@ This module provisions the Azure infrastructure (Virtual Machine, NICs, Managed 
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_disk_name"></a> [disk\_name](#input\_disk\_name) | Name for the managed OS disk. | `string` | n/a | yes |
-| <a name="input_disk_size"></a> [disk\_size](#input\_disk\_size) | Size of the OS disk in GB. | `number` | n/a | yes |
-| <a name="input_disk_url"></a> [disk\_url](#input\_disk\_url) | Source VHD URL for importing the NIOS managed disk image. | `string` | n/a | yes |
-| <a name="input_location"></a> [location](#input\_location) | Azure region for the deployment. | `string` | n/a | yes |
-| <a name="input_nic1_name"></a> [nic1\_name](#input\_nic1\_name) | Name for NIC 1 (primary interface on subnet 1). | `string` | n/a | yes |
-| <a name="input_nic2_name"></a> [nic2\_name](#input\_nic2\_name) | Name for NIC 2 (secondary interface on subnet 2). | `string` | n/a | yes |
-| <a name="input_resource_group"></a> [resource\_group](#input\_resource\_group) | Name of the existing Azure resource group. | `string` | n/a | yes |
+| <a name="input_caching"></a> [caching](#input\_caching) | Specifies the caching requirements for the OS Disk. | `string` | `"ReadWrite"` | no |
+| <a name="input_create_option_managed_disk"></a> [create\_option\_managed\_disk](#input\_create\_option\_managed\_disk) | The method to use when creating the managed disk. | `string` | `"Import"` | no |
+| <a name="input_create_option_storage_os_disk_for_vm"></a> [create\_option\_storage\_os\_disk\_for\_vm](#input\_create\_option\_storage\_os\_disk\_for\_vm) | Specifies how the OS Disk should be created. | `string` | `"Attach"` | no |
+| <a name="input_delete_os_disk_on_termination"></a> [delete\_os\_disk\_on\_termination](#input\_delete\_os\_disk\_on\_termination) | Should the OS Disk (either the Managed Disk / VHD Blob) be deleted when the Virtual Machine is destroyed. | `string` | `"false"` | no |
+| <a name="input_disk_name"></a> [disk\_name](#input\_disk\_name) | The name of the Managed Disk. | `string` | n/a | yes |
+| <a name="input_disk_size"></a> [disk\_size](#input\_disk\_size) | The size of the managed disk in gigabytes. | `number` | n/a | yes |
+| <a name="input_disk_url"></a> [disk\_url](#input\_disk\_url) | URI to a valid VHD file to be used for the managed disk. | `string` | n/a | yes |
+| <a name="input_ip_configuration_name_nic1"></a> [ip\_configuration\_name\_nic1](#input\_ip\_configuration\_name\_nic1) | A name used for the IP Configuration of NIC 1. | `string` | `"internal1"` | no |
+| <a name="input_ip_configuration_name_nic2"></a> [ip\_configuration\_name\_nic2](#input\_ip\_configuration\_name\_nic2) | A name used for the IP Configuration of NIC 2. | `string` | `"internal2"` | no |
+| <a name="input_location"></a> [location](#input\_location) | The Azure location where the resource exists. | `string` | n/a | yes |
+| <a name="input_nic1_name"></a> [nic1\_name](#input\_nic1\_name) | The name of the Network Interface 1 on subnet 1. | `string` | n/a | yes |
+| <a name="input_nic2_name"></a> [nic2\_name](#input\_nic2\_name) | The name of the Network Interface 2 on subnet 2. | `string` | n/a | yes |
+| <a name="input_os_type"></a> [os\_type](#input\_os\_type) | The operating system type of the managed disk. | `string` | `"Linux"` | no |
+| <a name="input_os_type_on_storage_os_disk"></a> [os\_type\_on\_storage\_os\_disk](#input\_os\_type\_on\_storage\_os\_disk) | Specifies the Operating System on the OS Disk. | `string` | `"Linux"` | no |
+| <a name="input_private_ip_address_allocation"></a> [private\_ip\_address\_allocation](#input\_private\_ip\_address\_allocation) | The allocation method used for the Private IP Address. | `string` | `"Dynamic"` | no |
+| <a name="input_resource_group"></a> [resource\_group](#input\_resource\_group) | The name of the Resource Group where the Managed Disk should exist. | `string` | n/a | yes |
 | <a name="input_storage_account_id"></a> [storage\_account\_id](#input\_storage\_account\_id) | Resource ID of the storage account containing the VHD. | `string` | n/a | yes |
+| <a name="input_storage_account_type"></a> [storage\_account\_type](#input\_storage\_account\_type) | The type of storage to use for the managed disk. | `string` | `"Standard_LRS"` | no |
 | <a name="input_subnet1_name"></a> [subnet1\_name](#input\_subnet1\_name) | Name of subnet 1 (used by NIC 1). | `string` | n/a | yes |
 | <a name="input_subnet2_name"></a> [subnet2\_name](#input\_subnet2\_name) | Name of subnet 2 (used by NIC 2). | `string` | n/a | yes |
 | <a name="input_vm_name"></a> [vm\_name](#input\_vm\_name) | Name for the Azure Virtual Machine. | `string` | n/a | yes |
 | <a name="input_vm_size"></a> [vm\_size](#input\_vm\_size) | Azure VM size (e.g. Standard\_E4s\_v5). | `string` | n/a | yes |
-| <a name="input_vnet_name"></a> [vnet\_name](#input\_vnet\_name) | Name of the existing Azure Virtual Network. | `string` | n/a | yes |
+| <a name="input_vnet_name"></a> [vnet\_name](#input\_vnet\_name) | The name of the Virtual Network. | `string` | n/a | yes |
 
 ## Outputs
 

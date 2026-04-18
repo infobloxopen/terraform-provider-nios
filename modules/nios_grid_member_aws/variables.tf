@@ -28,13 +28,13 @@ variable "instance_type" {
 variable "key_name" {
   description = "Name of the SSH key pair."
   type        = string
-  default = null
+  default     = null
 }
 
 variable "availability_zone" {
   description = "AWS availability zone."
   type        = string
-  default = "us-west-1a"
+  default     = "us-west-1a"
 }
 
 variable "volume_size" {
@@ -64,13 +64,17 @@ variable "enable_ipv6" {
 variable "name" {
   description = "Prefix for instance name."
   type        = string
-  default = "nios-aws-instance"
+  default     = "nios-aws-instance"
 }
 
 variable "tags" {
   description = "Tags to apply to AWS resources."
   type        = map(string)
-  default     = {}
+  default = {
+    Name          = "nios-aws-instance"
+    dontStop      = "true"
+    dontTerminate = "true"
+  }
 }
 
 variable "nios_license" {
