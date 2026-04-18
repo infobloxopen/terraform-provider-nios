@@ -9,6 +9,7 @@ This module provisions the AWS infrastructure (EC2 instance, network interfaces,
 
 | Name | Version |
 |------|---------|
+| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.12.1 |
 | <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 6.38.0 |
 
 ## Providers

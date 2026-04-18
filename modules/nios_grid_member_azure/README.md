@@ -9,6 +9,7 @@ This module provisions the Azure infrastructure (Virtual Machine, NICs, Managed 
 
 | Name | Version |
 |------|---------|
+| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.12.1 |
 | <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) | >= 4.0.0 |
 
 ## Providers
@@ -37,7 +38,7 @@ This module provisions the Azure infrastructure (Virtual Machine, NICs, Managed 
 | <a name="input_caching"></a> [caching](#input\_caching) | Specifies the caching requirements for the OS Disk. | `string` | `"ReadWrite"` | no |
 | <a name="input_create_option_managed_disk"></a> [create\_option\_managed\_disk](#input\_create\_option\_managed\_disk) | The method to use when creating the managed disk. | `string` | `"Import"` | no |
 | <a name="input_create_option_storage_os_disk_for_vm"></a> [create\_option\_storage\_os\_disk\_for\_vm](#input\_create\_option\_storage\_os\_disk\_for\_vm) | Specifies how the OS Disk should be created. | `string` | `"Attach"` | no |
-| <a name="input_delete_os_disk_on_termination"></a> [delete\_os\_disk\_on\_termination](#input\_delete\_os\_disk\_on\_termination) | Should the OS Disk (either the Managed Disk / VHD Blob) be deleted when the Virtual Machine is destroyed. | `string` | `"false"` | no |
+| <a name="input_delete_os_disk_on_termination"></a> [delete\_os\_disk\_on\_termination](#input\_delete\_os\_disk\_on\_termination) | Should the OS Disk (either the Managed Disk / VHD Blob) be deleted when the Virtual Machine is destroyed. | `bool` | `false` | no |
 | <a name="input_disk_name"></a> [disk\_name](#input\_disk\_name) | The name of the Managed Disk. | `string` | n/a | yes |
 | <a name="input_disk_size"></a> [disk\_size](#input\_disk\_size) | The size of the managed disk in gigabytes. | `number` | n/a | yes |
 | <a name="input_disk_url"></a> [disk\_url](#input\_disk\_url) | URI to a valid VHD file to be used for the managed disk. | `string` | n/a | yes |

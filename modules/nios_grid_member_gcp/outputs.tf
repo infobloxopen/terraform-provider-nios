@@ -16,7 +16,6 @@ output "mgmt_subnet_mask" {
 output "mgmt_gateway" {
   description = "Gateway IP for the MGMT subnetwork (first usable IP)."
   value       = cidrhost(data.google_compute_subnetwork.mgmt.ip_cidr_range, 1)
-  
 }
 
 output "lan1_ip" {

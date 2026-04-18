@@ -83,20 +83,20 @@ variable "vm_size" {
 
 variable "private_ip_address_allocation" {
   description = "The allocation method used for the Private IP Address."
-  type = string
-  default = "Dynamic"
+  type        = string
+  default     = "Dynamic"
 }
 
 variable "ip_configuration_name_nic1" {
   description = "A name used for the IP Configuration of NIC 1."
-  type = string
-  default = "internal1"
+  type        = string
+  default     = "internal1"
 }
 
 variable "ip_configuration_name_nic2" {
   description = "A name used for the IP Configuration of NIC 2."
-  type = string
-  default = "internal2"
+  type        = string
+  default     = "internal2"
 }
 
 variable "create_option_storage_os_disk_for_vm" {
@@ -107,18 +107,18 @@ variable "create_option_storage_os_disk_for_vm" {
 
 variable "caching" {
   description = "Specifies the caching requirements for the OS Disk."
-  type = string
-  default = "ReadWrite"
+  type        = string
+  default     = "ReadWrite"
 }
 
 variable "os_type_on_storage_os_disk" {
   description = "Specifies the Operating System on the OS Disk."
-  type = string
-  default = "Linux"
+  type        = string
+  default     = "Linux"
 }
 
 variable "delete_os_disk_on_termination" {
   description = "Should the OS Disk (either the Managed Disk / VHD Blob) be deleted when the Virtual Machine is destroyed."
-  type = string
-  default = "false"
+  type        = bool
+  default     = false
 }
