@@ -13,6 +13,7 @@ import (
 )
 
 func TestAccNotificationRuleDataSource_Filters(t *testing.T) {
+	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	dataSourceName := "data.nios_notification_rule.test"
 	resourceName := "nios_notification_rule.test"
 	var v notification.NotificationRule

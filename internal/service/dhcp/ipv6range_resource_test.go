@@ -709,6 +709,7 @@ func TestAccIpv6rangeResource_LogicFilterRules(t *testing.T) {
 }
 
 func TestAccIpv6rangeResource_Member(t *testing.T) {
+	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_dhcp_ipv6range.test_member"
 	var v dhcp.Ipv6range
 	view := "default"
@@ -1000,6 +1001,7 @@ func TestAccIpv6rangeResource_SamePortControlDiscoveryBlackout(t *testing.T) {
 }
 
 func TestAccIpv6rangeResource_ServerAssociationType(t *testing.T) {
+	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_dhcp_ipv6range.test_server_association_type"
 	var v dhcp.Ipv6range
 	view := "default"

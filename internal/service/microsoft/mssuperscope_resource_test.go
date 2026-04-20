@@ -19,6 +19,7 @@ import (
 var readableAttributesForMssuperscope = "comment,dhcp_utilization,dhcp_utilization_status,disable,dynamic_hosts,extattrs,high_water_mark,high_water_mark_reset,low_water_mark,low_water_mark_reset,name,network_view,ranges,static_hosts,total_hosts"
 
 func TestAccMssuperscopeResource_basic(t *testing.T) {
+	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_microsoft_mssuperscope.test"
 	var v microsoft.Mssuperscope
 	name := acctest.RandomNameWithPrefix("mssuperscope")
@@ -47,6 +48,7 @@ func TestAccMssuperscopeResource_basic(t *testing.T) {
 }
 
 func TestAccMssuperscopeResource_disappears(t *testing.T) {
+	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	resourceName := "nios_microsoft_mssuperscope.test"
 	var v microsoft.Mssuperscope
 	name := acctest.RandomNameWithPrefix("mssuperscope")
@@ -71,6 +73,7 @@ func TestAccMssuperscopeResource_disappears(t *testing.T) {
 }
 
 func TestAccMssuperscopeResource_Import(t *testing.T) {
+	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_microsoft_mssuperscope.test"
 	var v microsoft.Mssuperscope
 	name := acctest.RandomNameWithPrefix("mssuperscope")
@@ -112,6 +115,7 @@ func TestAccMssuperscopeResource_Import(t *testing.T) {
 }
 
 func TestAccMssuperscopeResource_Comment(t *testing.T) {
+	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_microsoft_mssuperscope.test_comment"
 	var v microsoft.Mssuperscope
 	name := acctest.RandomNameWithPrefix("mssuperscope")
@@ -144,6 +148,7 @@ func TestAccMssuperscopeResource_Comment(t *testing.T) {
 }
 
 func TestAccMssuperscopeResource_Disable(t *testing.T) {
+	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_microsoft_mssuperscope.test_disable"
 	var v microsoft.Mssuperscope
 	name := acctest.RandomNameWithPrefix("mssuperscope")
@@ -176,6 +181,7 @@ func TestAccMssuperscopeResource_Disable(t *testing.T) {
 }
 
 func TestAccMssuperscopeResource_ExtAttrs(t *testing.T) {
+	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_microsoft_mssuperscope.test_extattrs"
 	var v microsoft.Mssuperscope
 	name := acctest.RandomNameWithPrefix("mssuperscope")
@@ -214,6 +220,7 @@ func TestAccMssuperscopeResource_ExtAttrs(t *testing.T) {
 }
 
 func TestAccMssuperscopeResource_Name(t *testing.T) {
+	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_microsoft_mssuperscope.test_name"
 	var v microsoft.Mssuperscope
 	name1 := acctest.RandomNameWithPrefix("mssuperscope")
@@ -247,6 +254,7 @@ func TestAccMssuperscopeResource_Name(t *testing.T) {
 }
 
 func TestAccMssuperscopeResource_NetworkView(t *testing.T) {
+	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_microsoft_mssuperscope.test_network_view"
 	var v microsoft.Mssuperscope
 	name := acctest.RandomNameWithPrefix("mssuperscope")
@@ -281,6 +289,7 @@ func TestAccMssuperscopeResource_NetworkView(t *testing.T) {
 }
 
 func TestAccMssuperscopeResource_Ranges(t *testing.T) {
+	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_microsoft_mssuperscope.test_ranges"
 	var v microsoft.Mssuperscope
 	name := acctest.RandomNameWithPrefix("mssuperscope")

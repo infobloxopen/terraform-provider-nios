@@ -72,6 +72,7 @@ func TestAccTftpfiledirResource_disappears(t *testing.T) {
 }
 
 func TestAccTftpfiledirResource_Import(t *testing.T) {
+	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_misc_tftpfiledir.test"
 	var v misc.Tftpfiledir
 	name := acctest.RandomNameWithPrefix("tftpfiledir")

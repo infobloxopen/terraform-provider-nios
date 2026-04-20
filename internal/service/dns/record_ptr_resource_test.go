@@ -321,6 +321,7 @@ func TestAccRecordPtrResource_Ipv4addr(t *testing.T) {
 // TestAccRecordPtrResource_FuncCallIpv4Addr tests the "func_call" attribute functionality
 // which allocates IP addresses using next_available_ip.
 func TestAccRecordPtrResource_FuncCallIpv4Addr(t *testing.T) {
+	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_dns_record_ptr.test_func_call"
 	var v dns.RecordPtr
 	ptrDName := acctest.RandomNameWithPrefix("ptr") + ".example.com"

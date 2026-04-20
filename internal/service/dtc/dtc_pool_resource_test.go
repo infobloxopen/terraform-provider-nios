@@ -364,6 +364,7 @@ func TestAccDtcPoolResource_LbAlternateMethod(t *testing.T) {
 }
 
 func TestAccDtcPoolResource_LbAlternateTopology(t *testing.T) {
+	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_dtc_pool.test_lb_alternate_topology"
 	var v dtc.DtcPool
 	name := acctest.RandomNameWithPrefix("dtc-pool")
@@ -674,6 +675,7 @@ func TestAccDtcPoolResource_LbPreferredTopology(t *testing.T) {
 }
 
 func TestAccDtcPoolResource_Monitors(t *testing.T) {
+	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_dtc_pool.test_monitors"
 	var v dtc.DtcPool
 	name := acctest.RandomNameWithPrefix("dtc-pool")

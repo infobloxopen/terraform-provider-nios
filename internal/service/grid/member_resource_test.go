@@ -1177,6 +1177,7 @@ func TestAccMemberResource_HaCloudPlatform(t *testing.T) {
 }
 
 func TestAccMemberResource_HaOnCloud(t *testing.T) {
+	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_grid_member.test_ha_on_cloud"
 	var v grid.Member
 

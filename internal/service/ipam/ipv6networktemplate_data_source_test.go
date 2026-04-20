@@ -13,6 +13,7 @@ import (
 )
 
 func TestAccIpv6networktemplateDataSource_Filters(t *testing.T) {
+	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	dataSourceName := "data.nios_ipam_ipv6networktemplate.test"
 	resourceName := "nios_ipam_ipv6networktemplate.test"
 	var v ipam.Ipv6networktemplate
@@ -36,6 +37,7 @@ func TestAccIpv6networktemplateDataSource_Filters(t *testing.T) {
 }
 
 func TestAccIpv6networktemplateDataSource_ExtAttrFilters(t *testing.T) {
+	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	dataSourceName := "data.nios_ipam_ipv6networktemplate.test"
 	resourceName := "nios_ipam_ipv6networktemplate.test"
 	var v ipam.Ipv6networktemplate

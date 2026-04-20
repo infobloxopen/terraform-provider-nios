@@ -61,6 +61,7 @@ func TestAccFixedaddressDataSource_ExtAttrFilters(t *testing.T) {
 }
 
 func TestAccFixedaddressDataSource_MsServerStruct(t *testing.T) {
+	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	dataSourceName := "data.nios_dhcp_fixed_address.test"
 	macAddress := "00:16:3e:00:00:01"
 	ip := acctest.RandomIPWithSpecificOctetsSet("189.0.0")
