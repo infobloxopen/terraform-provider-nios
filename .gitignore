@@ -47,4 +47,3 @@ internal/service/*/.openapi-generator-ignore
 pipeline.env
 .env
 
-Jenkinsfile
