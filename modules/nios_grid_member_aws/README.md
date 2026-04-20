@@ -2,7 +2,7 @@
 
 ## Overview
 
-This module provisions the AWS infrastructure (EC2 instance, network interfaces, etc.) for NIOS Grid. The NIOS configuration (`nios_grid_member` and `nios_grid_join` resources) should be applied after the infrastructure is deployed and NIOS grid is fully booted (~15-25 minutes).
+This module provisions the AWS infrastructure (EC2 instance, network interfaces, etc.) for NIOS Grid. The NIOS configuration (`nios_grid_member` and `nios_grid_join` resources) should be applied after the infrastructure is deployed and NIOS grid is fully booted (~30 minutes).
 
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
@@ -127,7 +127,7 @@ terraform apply
 
 ### Step 2: Wait for NIOS to Boot
 
-NIOS takes approximately **15-20 minutes** to fully boot.
+NIOS takes approximately **30 minutes** to fully boot, make sure the grid is up and running before triggering the grid join.
 
 ### Step 3: Join the Grid Member to the Master Grid / Configure HA
 
@@ -151,7 +151,7 @@ module "node2" {
   ha_enable = false
 }
 
-// After NIOS is ready (~20 min), configure grid member
+// After NIOS is ready (~30 min), configure grid member
 provider "nios" {
   nios_host_url = "https://${module.node1.eth1_ipv4}"
   nios_username = "username"
@@ -209,7 +209,7 @@ module "node2" {
   iam_instance_profile = var.iam_instance_profile
 }
 ```
-#### After both the grids are up and running (~20 min), configure HA 
+#### After both the grids are up and running (~30 min), configure HA 
 
 1. Import Node1 under nios_grid_member.ha_pair
 
@@ -287,7 +287,7 @@ resource "nios_grid_join" "ha_member_join" {
 ```
 
 ### Boot Time
-- NIOS takes **15-20 minutes** to fully boot after EC2 instance creation
+- NIOS takes around **30 minutes** to fully boot after EC2 instance creation, make sure the grid is up and running before triggering the grid join.
 - Always verify NIOS API is responding before applying `nios_grid_member` resources
 
 ### HA Requirements

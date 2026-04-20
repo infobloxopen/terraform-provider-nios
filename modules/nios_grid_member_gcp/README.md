@@ -2,7 +2,7 @@
 
 ## Overview
 
-This module provisions the GCP infrastructure (Compute Instance, network interfaces, etc.) for a single NIOS Grid member. Use one module call per instance — Grid Master, IB member, CP member, Reporting, or Discovery — they all share the same resource structure. The NIOS configuration (`nios_grid_member` and `nios_grid_join` resources) should be applied after the infrastructure is deployed and NIOS grid is fully booted (~15-25 minutes).
+This module provisions the GCP infrastructure (Compute Instance, network interfaces, etc.) for a single NIOS Grid member. Use one module call per instance — Grid Master, IB member, CP member, Reporting, or Discovery — they all share the same resource structure. The NIOS configuration (`nios_grid_member` and `nios_grid_join` resources) should be applied after the infrastructure is deployed and NIOS grid is fully booted (~30 minutes).
 
 ### NIOS Model -> Machine Type Mapping
 
@@ -119,7 +119,7 @@ terraform apply
 
 ### Step 2: Wait for NIOS to Boot
 
-NIOS takes approximately **15 to 20 minutes** to fully boot.
+NIOS takes approximately around **30 minutes** to fully boot.
 
 ### Step 3: Join the Grid Member to the Master Grid
 
@@ -141,7 +141,7 @@ module "node2" {
 }
 ```
 
-##### After NIOS is ready (~20 min), configure grid member
+##### After NIOS is ready (~30 min), configure grid member
 
 ```hcl
 provider "nios" {
@@ -175,5 +175,5 @@ resource "nios_grid_join" "member_join" {
 ```
 
 ### Boot Time
-- NIOS takes **15-20 minutes** to fully boot after instance creation
+- NIOS takes **30 minutes** to fully boot after instance creation, make sure the grid is up and running before triggering the grid join.
 - Always verify NIOS API is responding before applying `nios_grid_member` resources
