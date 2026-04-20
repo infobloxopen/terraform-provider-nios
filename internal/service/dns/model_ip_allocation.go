@@ -229,7 +229,6 @@ var IPAllocationResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional:            true,
 		Computed:            true,
 		MarkdownDescription: "Determines if the discovery for the record is disabled or not. False means that the discovery is enabled.",
-		Default:             booldefault.StaticBool(false),
 	},
 	"dns_aliases": schema.ListAttribute{
 		ElementType:         types.StringType,

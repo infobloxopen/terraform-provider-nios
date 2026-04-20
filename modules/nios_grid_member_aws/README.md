@@ -9,7 +9,7 @@ This module provisions the AWS infrastructure (EC2 instance, network interfaces,
 
 | Name | Version |
 |------|---------|
-| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.8.0 |
+| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.12.1 |
 | <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 6.38.0 |
 
 ## Providers
@@ -47,7 +47,7 @@ This module provisions the AWS infrastructure (EC2 instance, network interfaces,
 | <a name="input_private_ips_count_eth2"></a> [private\_ips\_count\_eth2](#input\_private\_ips\_count\_eth2) | Number of IPs to assign to ETH2 (HA interface). Set 1 for secondary IP (VIP) for HA, 0 for no secondary IP. | `number` | `0` | no |
 | <a name="input_remote_console_enabled"></a> [remote\_console\_enabled](#input\_remote\_console\_enabled) | Enable remote console access. | `bool` | `true` | no |
 | <a name="input_security_group_id"></a> [security\_group\_id](#input\_security\_group\_id) | ID of the existing AWS security group. | `string` | n/a | yes |
-| <a name="input_tags"></a> [tags](#input\_tags) | Tags to apply to AWS resources. | `map(string)` | `{}` | no |
+| <a name="input_tags"></a> [tags](#input\_tags) | Tags to apply to AWS resources. | `map(string)` | <pre>{<br/>  "Name": "nios-aws-instance",<br/>  "dontStop": "true",<br/>  "dontTerminate": "true"<br/>}</pre> | no |
 | <a name="input_volume_size"></a> [volume\_size](#input\_volume\_size) | Size of the root volume in GB. | `number` | `500` | no |
 | <a name="input_volume_type"></a> [volume\_type](#input\_volume\_type) | Type of the root volume. | `string` | `"gp3"` | no |
 
@@ -86,6 +86,12 @@ This module provisions the AWS infrastructure (EC2 instance, network interfaces,
 ### Step 1: Deploy AWS Infrastructure 
 
 ```hcl
+provider "aws" {
+  region     = "aws_region"
+  access_key = "aws_access_key"
+  secret_key = "aws_secret_key"
+}
+
 module "node1" {
   source = "github.com/infobloxopen/terraform-provider-nios//modules/nios_grid_member_aws"
 
@@ -188,7 +194,7 @@ resource "nios_grid_join" "member_join" {
 Deploy 2 AWS EC2 instances for SA-HA Config with the required IAM Permissions.
 
 ```hcl
-# Deploy AWS infrastructure for Node 1 (Active Node)
+// Deploy AWS infrastructure for Node 1 (Active Node)
 module "node1" {
   // ... (same config as Step 1)
   ha_enable = true
@@ -196,7 +202,7 @@ module "node1" {
   iam_instance_profile = var.iam_instance_profile
 }
 
-# Deploy AWS infrastructure for Node 2 (Passive Node)
+// Deploy AWS infrastructure for Node 2 (Passive Node)
 module "node2" {
   // ... (same config as Step 1)
   ha_enable = true
@@ -241,7 +247,7 @@ resource "nios_grid_member" "ha_pair" {
 
   node_info = [
     {
-      # Node 1 configuration
+      // Node 1 configuration
       lan_ha_port_setting = {
         ha_ip_address      = module.node1.eth2_ip
         mgmt_lan           = module.node1.eth1_ipv4
@@ -249,7 +255,7 @@ resource "nios_grid_member" "ha_pair" {
       }
     },
     {
-      # Node 2 configuration
+      // Node 2 configuration
       lan_ha_port_setting = {
         ha_ip_address      = module.node2.eth2_ip
         mgmt_lan           = module.node2.eth1_ipv4
@@ -264,9 +270,11 @@ resource "nios_grid_member" "ha_pair" {
       "10.10.10.10"
   ] }
 }
+```
 
 3. Join Node2 (Passive Node) to Node1 (Active Node).
 
+```
 resource "nios_grid_join" "ha_member_join" {
   member_url      = "https://${module.node2.eth1_ipv4}"
   member_username = "admin"
@@ -278,21 +286,6 @@ resource "nios_grid_join" "ha_member_join" {
 }
 ```
 
-## Outputs Usage
-
-The module outputs can be used directly in NIOS provider resources:
-
-| Output | NIOS Resource Usage |
-|--------|---------------------|
-| `eth1_ipv4` | `vip_setting.address`, `member_ip` in grid_join |
-| `eth1_gateway` | `vip_setting.gateway` |
-| `eth1_subnet_mask` | `vip_setting.subnet_mask` |
-| `eth1_ipv6` | `ipv6_setting.virtual_ip` |
-| `eth2_ip` | HA `node_info.lan_ha_port_setting.ha_ip_address` |
-| `eth2_secondary_ip_for_ha` | HA `vip_setting.address` |
-
----
-
 ### Boot Time
 - NIOS takes **15-20 minutes** to fully boot after EC2 instance creation
 - Always verify NIOS API is responding before applying `nios_grid_member` resources
@@ -300,4 +293,3 @@ The module outputs can be used directly in NIOS provider resources:
 ### HA Requirements
 - Set `ha_enable = true` to create ETH2 interface
 - Provide `iam_instance_profile` with permissions for HA operations
-
