@@ -3621,13 +3621,13 @@ resource "nios_dhcp_range" "test_network" {
 func testAccRangeNetworkView(startAddr, endAddr, networkView string) string {
 	return fmt.Sprintf(`
 resource "nios_ipam_network_view" "create_network_view" {
-  name = %q
+	name = %q
 }
 
 resource "nios_ipam_network" "example_network" {
-  network      = "10.0.0.0/24"
-  network_view = nios_ipam_network_view.create_network_view.name
-  comment      = "Created by Terraform for Range Network View Test"
+	network      = "10.0.0.0/24"
+	network_view = nios_ipam_network_view.create_network_view.name
+	comment      = "Created by Terraform for Range Network View Test"
 }
 
 resource "nios_dhcp_range" "test_network_view" {
@@ -3765,8 +3765,8 @@ resource "nios_dhcp_range" "test_start_addr" {
 func testAccRangeSubscribeSettings(startAddr, endAddr string, subscribeSettings string) string {
 	return fmt.Sprintf(`
 resource "nios_ipam_network" "example_network" {
-  network      = "110.0.0.0/24"
-  network_view = "test_network_view"
+	network      = "110.0.0.0/24"
+	network_view = "test_network_view"
 }
 
 resource "nios_dhcp_range" "test_subscribe_settings" {
@@ -4032,8 +4032,8 @@ resource "nios_dhcp_range" "test_use_recycle_leases" {
 func testAccRangeUseSubscribeSettings(startAddr, endAddr string, useSubscribeSettings bool) string {
 	return fmt.Sprintf(`
 resource "nios_ipam_network" "example_network" {
-  network      = "210.0.0.0/24"
-  network_view = "test_network_view"
+	network      = "210.0.0.0/24"
+	network_view = "test_network_view"
 }
 
 resource "nios_dhcp_range" "test_use_subscribe_settings" {

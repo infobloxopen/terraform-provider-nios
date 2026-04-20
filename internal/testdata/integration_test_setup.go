@@ -1386,58 +1386,6 @@ func PreConfig(clients PreConfigClients, hostnames GridHostnames) error {
 		fmt.Printf("Active Directory auth service %q created successfully (ref: %s, env: %s)\n", ad.name, adRef, ad.refEnvVar)
 	}
 
-	// TODO : Remote Lookup Services need to be removed to run Member UTs
-	// Update auth policy to append the first AD auth service ref
-	// Only proceed if at least one new ref was captured
-	//firstADRef := adAuthServiceRefs["active_dir"]
-	//if firstADRef != "" {
-	//	// GET current auth policy
-	//	listResp, _, err := clients.SECURITY.AuthpolicyAPI.List(context.Background()).
-	//		ReturnAsObject(1).
-	//		ReturnFieldsPlus("auth_services").
-	//		Execute()
-	//	if err != nil {
-	//		return fmt.Errorf("failed to list auth policy: %w", err)
-	//	}
-	//
-	//	// Resolve the auth policy slice and ref from either response shape
-	//	var authPolicies []security.Authpolicy
-	//	if listResp.ListAuthpolicyResponseObject != nil {
-	//		authPolicies = listResp.ListAuthpolicyResponseObject.Result
-	//	} else if listResp.ArrayOfAuthpolicy != nil {
-	//		authPolicies = *listResp.ArrayOfAuthpolicy
-	//	}
-	//
-	//	if len(authPolicies) == 0 {
-	//		return fmt.Errorf("auth policy list returned no results")
-	//	}
-	//
-	//	authPolicyRef := authPolicies[0].Ref
-	//
-	//	if authPolicyRef == nil || *authPolicyRef == "" {
-	//		return fmt.Errorf("auth policy ref is empty")
-	//	}
-	//
-	//	extractedAuthPolicyRef := utils.ExtractResourceRef(*authPolicyRef)
-	//
-	//	// Append first AD auth service ref to existing auth services
-	//	authServices := authPolicies[0].GetAuthServices()
-	//	authServices = append(authServices, firstADRef)
-	//
-	//	authPolicyBody := security.Authpolicy{
-	//		AuthServices: authServices,
-	//	}
-	//
-	//	_, _, err = clients.SECURITY.AuthpolicyAPI.Update(context.Background(), extractedAuthPolicyRef).
-	//		Authpolicy(authPolicyBody).
-	//		Execute()
-	//	if err != nil {
-	//		return fmt.Errorf("failed to update auth policy %q: %w", *authPolicyRef, err)
-	//	}
-	//
-	//	fmt.Printf("Auth policy %q updated with AD auth service ref %q\n", *authPolicyRef, firstADRef)
-	//}
-
 	// Update MemberFileDistribution to append a new TFTP ACL entry
 	memberFiledistResp, _, err := clients.GRID.MemberFiledistributionAPI.List(context.Background()).ReturnAsObject(1).Execute()
 	if err != nil {
@@ -1549,14 +1497,16 @@ func PreConfig(clients PreConfigClients, hostnames GridHostnames) error {
 				return fmt.Errorf("failed to list notification REST endpoints to capture existing ref: %w", listErr)
 			}
 
-			if existingResp.ListNotificationRestEndpointResponseObject != nil && len(existingResp.ListNotificationRestEndpointResponseObject.Result) > 0 {
+			if existingResp.ListNotificationRestEndpointResponseObject != nil &&
+				len(existingResp.ListNotificationRestEndpointResponseObject.Result) > 0 {
 				for _, existingEndpoint := range existingResp.ListNotificationRestEndpointResponseObject.Result {
 					if existingEndpoint.Name != nil && *existingEndpoint.Name == *notificationRestEndpointBody.Name {
 						existingRef := existingEndpoint.GetRef()
 						if err := writePipelineEnvVar("NIOS_NOTIFICATION_REST_ENDPOINT_REF", existingRef); err != nil {
 							return fmt.Errorf("failed to write NIOS_NOTIFICATION_REST_ENDPOINT_REF for existing endpoint: %w", err)
 						}
-						fmt.Printf("Captured ref for existing notification REST endpoint %q: %s\n", *notificationRestEndpointBody.Name, existingRef)
+						fmt.Printf("Captured ref for existing notification REST endpoint %q: %s\n",
+							*notificationRestEndpointBody.Name, existingRef)
 						break
 					}
 				}
@@ -1566,7 +1516,9 @@ func PreConfig(clients PreConfigClients, hostnames GridHostnames) error {
 			return fmt.Errorf("failed to create notification REST endpoint %q: %w", *notificationRestEndpointBody.Name, err)
 		}
 	} else {
-		if notificationResp.CreateNotificationRestEndpointResponseAsObject == nil || notificationResp.CreateNotificationRestEndpointResponseAsObject.Result == nil || notificationResp.CreateNotificationRestEndpointResponseAsObject.Result.Ref == nil {
+		if notificationResp.CreateNotificationRestEndpointResponseAsObject == nil ||
+			notificationResp.CreateNotificationRestEndpointResponseAsObject.Result == nil ||
+			notificationResp.CreateNotificationRestEndpointResponseAsObject.Result.Ref == nil {
 			return fmt.Errorf("notification REST endpoint create response missing ref")
 		}
 
@@ -1575,7 +1527,8 @@ func PreConfig(clients PreConfigClients, hostnames GridHostnames) error {
 			return fmt.Errorf("failed to write NIOS_NOTIFICATION_REST_ENDPOINT_REF: %w", err)
 		}
 
-		fmt.Printf("Notification REST endpoint %q created successfully (ref: %s)\n", *notificationRestEndpointBody.Name, notifRestEndpointRef)
+		fmt.Printf("Notification REST endpoint %q created successfully (ref: %s)\n",
+			*notificationRestEndpointBody.Name, notifRestEndpointRef)
 	}
 
 	// Create syslog endpoint and persist its ref.
@@ -1630,7 +1583,8 @@ func PreConfig(clients PreConfigClients, hostnames GridHostnames) error {
 			return fmt.Errorf("failed to create syslog endpoint %q: %w", *syslogEndpointBody.Name, err)
 		}
 	} else {
-		if syslogResp.CreateSyslogEndpointResponseAsObject == nil || syslogResp.CreateSyslogEndpointResponseAsObject.Result == nil || syslogResp.CreateSyslogEndpointResponseAsObject.Result.Ref == nil {
+		if syslogResp.CreateSyslogEndpointResponseAsObject == nil || syslogResp.CreateSyslogEndpointResponseAsObject.Result == nil ||
+			syslogResp.CreateSyslogEndpointResponseAsObject.Result.Ref == nil {
 			return fmt.Errorf("syslog endpoint create response missing ref")
 		}
 

@@ -449,7 +449,6 @@ func TestAccDxlEndpointResource_TemplateInstance(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "template_instance.template", "Version5_DXL_Session_Template"),
 				),
 			},
-			// TODO : Update Testing Requires More Templates
 			// Delete testing automatically occurs in TestCase
 		},
 	})
