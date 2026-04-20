@@ -1,29 +1,3 @@
-// OCI Provider Authentication
-variable "tenancy_ocid" {
-  description = "OCID of your OCI tenancy."
-  type        = string
-}
-
-variable "user_ocid" {
-  description = "OCID of the OCI IAM user used for API authentication."
-  type        = string
-}
-
-variable "fingerprint" {
-  description = "Fingerprint of the API signing key."
-  type        = string
-}
-
-variable "private_key_path" {
-  description = "Absolute local path to the OCI API private key (PEM file)."
-  type        = string
-}
-
-variable "region" {
-  description = "OCI region identifier (e.g. us-ashburn-1)."
-  type        = string
-}
-
 // Compartment
 variable "compartment_id" {
   description = "OCID of the compartment in which all resources will be created."
@@ -62,7 +36,7 @@ variable "image_name" {
 
 // Compute Instances
 variable "instance_name" {
-  description = "Base display name. Instances will be named <name>-gm and <name>-member."
+  description = "Display name for the OCI instance."
   type        = string
   default     = "nios"
 }
@@ -148,13 +122,13 @@ variable "lan1_assign_public_ip" {
 
 // Cloud-Init
 variable "cloud_init_script_path" {
-  description = "Path to a cloud-init YAML file. Leave empty to skip."
+  description = "Path to a cloud-init YAML file. Used when cloud_init_content is empty. If both this and cloud_init_content are empty, the module uses its built-in default cloud-init template."
   type        = string
   default     = ""
 }
 
 variable "cloud_init_content" {
-  description = "Inline cloud-init YAML. Takes precedence over cloud_init_script_path."
+  description = "Inline cloud-init YAML. Takes precedence over cloud_init_script_path. If both are empty, the module uses its built-in default cloud-init template."
   type        = string
   default     = ""
 }

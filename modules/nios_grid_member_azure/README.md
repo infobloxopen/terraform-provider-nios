@@ -2,7 +2,7 @@
 
 ## Overview
 
-This module provisions the Azure infrastructure (Virtual Machine, NICs, Managed Disk, etc.) for NIOS Grid. The NIOS configuration (`nios_grid_member` and `nios_grid_join` resources) should be applied after the infrastructure is deployed and NIOS grid is fully booted (~15-25 minutes).
+This module provisions the Azure infrastructure (Virtual Machine, NICs, Managed Disk, etc.) for NIOS Grid. The NIOS configuration (`nios_grid_member` and `nios_grid_join` resources) should be applied after the infrastructure is deployed and NIOS grid is fully booted (~30 minutes).
 
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
@@ -118,7 +118,7 @@ terraform apply
 
 ### Step 2: Wait for NIOS to Boot
 
-NIOS takes approximately **15 to 20 minutes** to fully boot.
+NIOS takes approximately **30 minutes** to fully boot, make sure the grid is up and running before making joining the instances.
 
 ### Step 3: Join the Grid Member to the Master Grid
 
@@ -140,7 +140,7 @@ module "node2" {
 }
 ```
 
-##### After NIOS is ready (~20 min), configure grid member
+##### After NIOS is ready (~30 min), configure grid member
 
 ```hcl
 provider "nios" {
@@ -174,5 +174,5 @@ resource "nios_grid_join" "member_join" {
 ```
 
 ### Boot Time
-- NIOS takes **15-20 minutes** to fully boot after VM creation
+- NIOS takes **30 minutes** to fully boot after VM creation, make sure the grid is up and running before making joining the instances.
 - Always verify NIOS API is responding before applying `nios_grid_member` resources

@@ -8,14 +8,14 @@ a vNIOS instance with MGMT (primary) and LAN1 (secondary) VNICs. An optional rep
 can also be attached.
 
 The NIOS configuration (`nios_grid_member` and `nios_grid_join` resources) should be applied **after**
-the infrastructure is deployed and NIOS is fully booted (~15–25 minutes).
+the infrastructure is deployed and NIOS is fully booted (~30 minutes).
 
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
 
 | Name | Version |
 |------|---------|
-| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.8.0 |
+| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.12.1 |
 | <a name="requirement_oci"></a> [oci](#requirement\_oci) | >= 5.0.0 |
 
 ## Providers
@@ -45,16 +45,15 @@ the infrastructure is deployed and NIOS is fully booted (~15–25 minutes).
 |------|-------------|------|---------|:--------:|
 | <a name="input_availability_domain"></a> [availability\_domain](#input\_availability\_domain) | Full availability domain name (e.g. Uocm:US-ASHBURN-AD-1). | `string` | n/a | yes |
 | <a name="input_bucket_name"></a> [bucket\_name](#input\_bucket\_name) | Name of the Object Storage bucket for the NIOS QCOW2 image. | `string` | n/a | yes |
-| <a name="input_cloud_init_content"></a> [cloud\_init\_content](#input\_cloud\_init\_content) | Inline cloud-init YAML. Takes precedence over cloud\_init\_script\_path. | `string` | `""` | no |
-| <a name="input_cloud_init_script_path"></a> [cloud\_init\_script\_path](#input\_cloud\_init\_script\_path) | Path to a cloud-init YAML file. Leave empty to skip. | `string` | `""` | no |
+| <a name="input_cloud_init_content"></a> [cloud\_init\_content](#input\_cloud\_init\_content) | Inline cloud-init YAML. Takes precedence over cloud\_init\_script\_path. If both are empty, the module uses its built-in default cloud-init template. | `string` | `""` | no |
+| <a name="input_cloud_init_script_path"></a> [cloud\_init\_script\_path](#input\_cloud\_init\_script\_path) | Path to a cloud-init YAML file. Used when cloud\_init\_content is empty. If both this and cloud\_init\_content are empty, the module uses its built-in default cloud-init template. | `string` | `""` | no |
 | <a name="input_compartment_id"></a> [compartment\_id](#input\_compartment\_id) | OCID of the compartment in which all resources will be created. | `string` | n/a | yes |
 | <a name="input_create_bucket"></a> [create\_bucket](#input\_create\_bucket) | Set to true to create a new bucket; false to reuse an existing one. | `bool` | `true` | no |
 | <a name="input_default_admin_password"></a> [default\_admin\_password](#input\_default\_admin\_password) | Default admin password for NIOS. | `string` | n/a | yes |
 | <a name="input_enable_reporting_volume"></a> [enable\_reporting\_volume](#input\_enable\_reporting\_volume) | Create and attach a reporting block volume to the Grid Member. | `bool` | `false` | no |
-| <a name="input_fingerprint"></a> [fingerprint](#input\_fingerprint) | Fingerprint of the API signing key. | `string` | n/a | yes |
 | <a name="input_image_name"></a> [image\_name](#input\_image\_name) | Display name for the custom OCI image imported from the QCOW2. | `string` | `"nios-custom-image"` | no |
 | <a name="input_instance_memory_in_gbs"></a> [instance\_memory\_in\_gbs](#input\_instance\_memory\_in\_gbs) | Memory in GB — used only for IB-V5005. | `number` | `32` | no |
-| <a name="input_instance_name"></a> [instance\_name](#input\_instance\_name) | Base display name. Instances will be named <name>-gm and <name>-member. | `string` | `"nios"` | no |
+| <a name="input_instance_name"></a> [instance\_name](#input\_instance\_name) | Display name for the OCI instance. | `string` | `"nios"` | no |
 | <a name="input_instance_ocpus"></a> [instance\_ocpus](#input\_instance\_ocpus) | OCPUs — used only for IB-V5005. | `number` | `4` | no |
 | <a name="input_lan1_assign_public_ip"></a> [lan1\_assign\_public\_ip](#input\_lan1\_assign\_public\_ip) | Assign a public IP to the LAN1 VNIC. | `bool` | `false` | no |
 | <a name="input_lan1_subnet_id"></a> [lan1\_subnet\_id](#input\_lan1\_subnet\_id) | OCID of the subnet for the LAN1 interface. | `string` | n/a | yes |
@@ -68,13 +67,9 @@ the infrastructure is deployed and NIOS is fully booted (~15–25 minutes).
 | <a name="input_nios_object_name"></a> [nios\_object\_name](#input\_nios\_object\_name) | Object name to store the QCOW2 as in the bucket. | `string` | n/a | yes |
 | <a name="input_nios_qcow2_local_path"></a> [nios\_qcow2\_local\_path](#input\_nios\_qcow2\_local\_path) | Absolute local path to the NIOS QCOW2 image file. | `string` | n/a | yes |
 | <a name="input_nios_version_gte_902"></a> [nios\_version\_gte\_902](#input\_nios\_version\_gte\_902) | true → VM.Standard3.Flex (NIOS >= 9.0.2). false → legacy\_shape. | `bool` | `true` | no |
-| <a name="input_private_key_path"></a> [private\_key\_path](#input\_private\_key\_path) | Absolute local path to the OCI API private key (PEM file). | `string` | n/a | yes |
-| <a name="input_region"></a> [region](#input\_region) | OCI region identifier (e.g. us-ashburn-1). | `string` | n/a | yes |
 | <a name="input_remote_console_enabled"></a> [remote\_console\_enabled](#input\_remote\_console\_enabled) | Enable remote console access. | `bool` | `true` | no |
 | <a name="input_reporting_volume_name"></a> [reporting\_volume\_name](#input\_reporting\_volume\_name) | Display name for the reporting block volume. | `string` | `"nios-reporting-volume"` | no |
 | <a name="input_reporting_volume_size_gb"></a> [reporting\_volume\_size\_gb](#input\_reporting\_volume\_size\_gb) | Size in GB for the reporting volume. Minimum 250 GB recommended. | `number` | `250` | no |
-| <a name="input_tenancy_ocid"></a> [tenancy\_ocid](#input\_tenancy\_ocid) | OCID of your OCI tenancy. | `string` | n/a | yes |
-| <a name="input_user_ocid"></a> [user\_ocid](#input\_user\_ocid) | OCID of the OCI IAM user used for API authentication. | `string` | n/a | yes |
 
 ## Outputs
 
@@ -164,7 +159,7 @@ terraform apply
 
 ### Step 2: Wait for NIOS to Boot
 
-NIOS takes approximately **15–25 minutes** to fully boot after the instance starts.
+NIOS takes approximately **30 minutes** to fully boot after the instance starts.
 
 ### Step 3: Join the Grid Member to the Master Grid
 
@@ -174,7 +169,7 @@ Once Grid is up and running, configure the grid member and join to the grid.
 
 #### Example 1: Join a Member to a Master
 
-#### Deploy AWS infrastructure for Master and Member
+#### Deploy OCI infrastructure for Master and Member
 
 ```hcl
 module "node1" {
@@ -187,7 +182,7 @@ module "node2" {
   ha_enable = false
 }
 
-// After NIOS is ready (~20 min), configure grid member
+// After NIOS is ready (~30 mins), configure grid member
 provider "nios" {
   nios_host_url = "https://${module.nios_grid_member.mgmt_private_ip}"
   nios_username = "admin"
@@ -219,49 +214,19 @@ resource "nios_grid_join" "member_join" {
 
 ## Outputs Usage
 
-| Output | NIOS Resource Usage |
-|---|---|
-| `mgmt_private_ip` | Provider `nios_host_url`, SSH access |
-| `mgmt_public_ip` | Public access (when `mgmt_assign_public_ip = true`) |
+| Output           | NIOS Resource Usage                             |
+|------------------|-------------------------------------------------|
 | `lan1_private_ip` | `vip_setting.address`, `master` in `nios_grid_join` |
-| `lan1_vnic_id` | OCI-level VNIC operations |
-| `nios_image_id` | Reference for additional instances using the same image |
-| `reporting_volume_id` | OCI-level volume management |
+| `lan1_vnic_id`   | `OCI-level VNIC operations`                     |
+| `instance_id`    | `Reference for additional OCI operations`       |
+| `lan1_subnet_mask` | `vip_setting.subnet_mask` in `nios_grid_member` |
+| `lan1_gateway`   | `vip_setting.gateway` in `nios_grid_member`     |
 
-## Large Image Upload (> 5 GB)
-
-For large QCOW2 files, use the OCI CLI for better performance:
-
-```bash
-oci os object bulk-upload \
-  --namespace <namespace> \
-  --bucket-name <bucket> \
-  --src-dir /path/to/dir \
-  --include "*.qcow2"
-```
-
-Then remove the upload resource from Terraform state to prevent re-upload:
-
-```bash
-terraform state rm oci_objectstorage_object.nios_qcow2
-```
-
----
 
 ### Boot Time
-- NIOS takes **15–25 minutes** to fully boot after instance creation
+- NIOS takes around **30 minutes** to fully boot after instance creation, make sure the grid is up and running before making joining the instances.
 - Always verify the NIOS API is responding before applying `nios_grid_member` resources
-
-### Image Import
-- Custom image import can take **30–60 minutes**
-- The `create` timeout is set to `60m` to accommodate this
-- Launch mode is set to `PARAVIRTUALIZED` as required by Infoblox
 
 ### Cloud-Init
 - Inline content (`cloud_init_content`) takes precedence over file path (`cloud_init_script_path`)
 - Changes to cloud-init after initial deployment are ignored (`lifecycle.ignore_changes = [metadata]`)
-
-### Reporting Volume
-- Minimum **250 GB** recommended by Infoblox
-- Encrypted with Oracle-managed keys (default OCI behavior)
-- Attached as Paravirtualized, Read/Write
