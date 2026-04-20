@@ -2,7 +2,7 @@
 
 ## Overview
 
-This module provisions the OCI infrastructure for a NIOS Grid Member on Oracle Cloud Infrastructure.
+This module provisions vNIOS on Oracle Cloud Infrastructure.
 It uploads a NIOS QCOW2 image to Object Storage, imports it as a custom compute image, and launches
 a vNIOS instance with MGMT (primary) and LAN1 (secondary) VNICs. An optional reporting block volume
 can also be attached.

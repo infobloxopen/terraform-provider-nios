@@ -2,7 +2,7 @@
 
 ## Overview
 
-This module provisions the AWS infrastructure (EC2 instance, network interfaces, etc.) for NIOS Grid. The NIOS configuration (`nios_grid_member` and `nios_grid_join` resources) should be applied after the infrastructure is deployed and NIOS grid is fully booted (~30 minutes).
+This module provisions vNIOS on AWS. The NIOS configuration (`nios_grid_member` and `nios_grid_join` resources) should be applied after the infrastructure is deployed and NIOS grid is fully booted (~30 minutes).
 
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
