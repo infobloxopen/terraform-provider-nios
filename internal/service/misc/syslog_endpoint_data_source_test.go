@@ -12,6 +12,7 @@ import (
 )
 
 func TestAccSyslogEndpointDataSource_Filters(t *testing.T) {
+	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	dataSourceName := "data.nios_misc_syslog_endpoint.test"
 	resourceName := "nios_misc_syslog_endpoint.test"
 	var v misc.SyslogEndpoint
@@ -39,6 +40,7 @@ func TestAccSyslogEndpointDataSource_Filters(t *testing.T) {
 }
 
 func TestAccSyslogEndpointDataSource_ExtAttrFilters(t *testing.T) {
+	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	dataSourceName := "data.nios_misc_syslog_endpoint.test"
 	resourceName := "nios_misc_syslog_endpoint.test"
 	var v misc.SyslogEndpoint

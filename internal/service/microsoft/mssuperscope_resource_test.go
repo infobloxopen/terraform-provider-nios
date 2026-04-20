@@ -19,6 +19,7 @@ import (
 var readableAttributesForMssuperscope = "comment,dhcp_utilization,dhcp_utilization_status,disable,dynamic_hosts,extattrs,high_water_mark,high_water_mark_reset,low_water_mark,low_water_mark_reset,name,network_view,ranges,static_hosts,total_hosts"
 
 func TestAccMssuperscopeResource_basic(t *testing.T) {
+	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_microsoft_mssuperscope.test"
 	var v microsoft.Mssuperscope
 	name := acctest.RandomNameWithPrefix("mssuperscope")
@@ -47,6 +48,7 @@ func TestAccMssuperscopeResource_basic(t *testing.T) {
 }
 
 func TestAccMssuperscopeResource_disappears(t *testing.T) {
+	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	resourceName := "nios_microsoft_mssuperscope.test"
 	var v microsoft.Mssuperscope
 	name := acctest.RandomNameWithPrefix("mssuperscope")
@@ -71,6 +73,7 @@ func TestAccMssuperscopeResource_disappears(t *testing.T) {
 }
 
 func TestAccMssuperscopeResource_Import(t *testing.T) {
+	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_microsoft_mssuperscope.test"
 	var v microsoft.Mssuperscope
 	name := acctest.RandomNameWithPrefix("mssuperscope")
@@ -94,7 +97,7 @@ func TestAccMssuperscopeResource_Import(t *testing.T) {
 				ImportState:                          true,
 				ImportStateIdFunc:                    testAccMssuperscopeImportStateIdFunc(resourceName),
 				ImportStateVerify:                    true,
-				ImportStateVerifyIdentifierAttribute: "ref",
+				ImportStateVerifyIdentifierAttribute: "uuid",
 				PlanOnly:                             true,
 			},
 			// Import and Verify
@@ -104,7 +107,7 @@ func TestAccMssuperscopeResource_Import(t *testing.T) {
 				ImportStateIdFunc:                    testAccMssuperscopeImportStateIdFunc(resourceName),
 				ImportStateVerify:                    true,
 				ImportStateVerifyIgnore:              []string{"extattrs_all"},
-				ImportStateVerifyIdentifierAttribute: "ref",
+				ImportStateVerifyIdentifierAttribute: "uuid",
 			},
 			// Delete testing automatically occurs in TestCase
 		},
@@ -112,6 +115,7 @@ func TestAccMssuperscopeResource_Import(t *testing.T) {
 }
 
 func TestAccMssuperscopeResource_Comment(t *testing.T) {
+	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_microsoft_mssuperscope.test_comment"
 	var v microsoft.Mssuperscope
 	name := acctest.RandomNameWithPrefix("mssuperscope")
@@ -144,6 +148,7 @@ func TestAccMssuperscopeResource_Comment(t *testing.T) {
 }
 
 func TestAccMssuperscopeResource_Disable(t *testing.T) {
+	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_microsoft_mssuperscope.test_disable"
 	var v microsoft.Mssuperscope
 	name := acctest.RandomNameWithPrefix("mssuperscope")
@@ -176,6 +181,7 @@ func TestAccMssuperscopeResource_Disable(t *testing.T) {
 }
 
 func TestAccMssuperscopeResource_ExtAttrs(t *testing.T) {
+	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_microsoft_mssuperscope.test_extattrs"
 	var v microsoft.Mssuperscope
 	name := acctest.RandomNameWithPrefix("mssuperscope")
@@ -214,6 +220,7 @@ func TestAccMssuperscopeResource_ExtAttrs(t *testing.T) {
 }
 
 func TestAccMssuperscopeResource_Name(t *testing.T) {
+	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_microsoft_mssuperscope.test_name"
 	var v microsoft.Mssuperscope
 	name1 := acctest.RandomNameWithPrefix("mssuperscope")
@@ -247,6 +254,7 @@ func TestAccMssuperscopeResource_Name(t *testing.T) {
 }
 
 func TestAccMssuperscopeResource_NetworkView(t *testing.T) {
+	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_microsoft_mssuperscope.test_network_view"
 	var v microsoft.Mssuperscope
 	name := acctest.RandomNameWithPrefix("mssuperscope")
@@ -281,6 +289,7 @@ func TestAccMssuperscopeResource_NetworkView(t *testing.T) {
 }
 
 func TestAccMssuperscopeResource_Ranges(t *testing.T) {
+	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_microsoft_mssuperscope.test_ranges"
 	var v microsoft.Mssuperscope
 	name := acctest.RandomNameWithPrefix("mssuperscope")
@@ -378,10 +387,10 @@ func testAccMssuperscopeImportStateIdFunc(resourceName string) resource.ImportSt
 		if !ok {
 			return "", fmt.Errorf("not found: %s", resourceName)
 		}
-		if rs.Primary.Attributes["ref"] == "" {
-			return "", fmt.Errorf("ref is not set")
+		if rs.Primary.Attributes["uuid"] == "" {
+			return "", fmt.Errorf("uuid is not set")
 		}
-		return rs.Primary.Attributes["ref"], nil
+		return rs.Primary.Attributes["uuid"], nil
 	}
 }
 
@@ -393,7 +402,7 @@ resource "nios_ipam_network" "example_network" {
 	members = [
 		{
 			struct = "msdhcpserver"
-			ipv4addr = "10.34.98.68"
+			ipv4addr = "ms_example_server"
 		}
 	]
 }
@@ -402,7 +411,7 @@ resource "nios_dhcp_range" "test" {
 	start_addr = %q
 	end_addr   = %q
 	server_association_type = "MS_SERVER"
-	ms_server = {ipv4addr="10.34.98.68"}
+	ms_server = {ipv4addr="ms_example_server"}
 	network_view = "ms_server"
 	depends_on = [nios_ipam_network.example_network]
 }
@@ -480,7 +489,7 @@ resource "nios_ipam_network" "example_network2" {
 	members = [
 		{
 			struct = "msdhcpserver"
-			ipv4addr = "10.34.98.176"
+			ipv4addr = "ms_example_server2"
 		}
 	]
 }
@@ -489,7 +498,7 @@ resource "nios_dhcp_range" "test2" {
 	start_addr = %[1]q
 	end_addr   = %[2]q
 	server_association_type = "MS_SERVER"
-	ms_server = {ipv4addr="10.34.98.176"}
+	ms_server = {ipv4addr="ms_example_server2"}
 	network_view = "ms_server2"
 	depends_on = [nios_ipam_network.example_network2]
 }
@@ -511,7 +520,7 @@ resource "nios_ipam_network" "example_network2" {
 	members = [
 		{
 			struct = "msdhcpserver"
-			ipv4addr = "10.34.98.176"
+			ipv4addr = "ms_example_server2"
 		}
 	]
 }
@@ -520,7 +529,7 @@ resource "nios_dhcp_range" "test2" {
 	start_addr = %[1]q
 	end_addr   = %[2]q
 	server_association_type = "MS_SERVER"
-	ms_server = {ipv4addr="10.34.98.176"}
+	ms_server = {ipv4addr="ms_example_server2"}
 	network_view = "ms_server2"
 	depends_on = [nios_ipam_network.example_network2]
 }

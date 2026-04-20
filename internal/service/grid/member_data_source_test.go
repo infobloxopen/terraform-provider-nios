@@ -167,9 +167,9 @@ resource "nios_grid_member" "test" {
   }
 
   vip_setting = {
-    address = "172.28.83.100"
+    address = "172.28.38.100"
     dscp = 0
-    gateway = "172.28.82.1"
+    gateway = "172.28.38.1"
     primary = true
     subnet_mask = "255.255.254.0"
     use_dscp = false
@@ -201,9 +201,9 @@ resource "nios_grid_member" "test" {
   }
 
   vip_setting = {
-    address = "172.28.83.101"
+    address = "172.28.38.101"
     dscp = 0
-    gateway = "172.28.82.1"
+    gateway = "172.28.38.1"
     primary = true
     subnet_mask = "255.255.254.0"
     use_dscp = false

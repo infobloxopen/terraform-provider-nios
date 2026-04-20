@@ -71,9 +71,9 @@ resource "nios_dtc_topology" "test" {
 }
 
 data "nios_dtc_topology_rule" "test" {
-  filters = {
-	topology = nios_dtc_topology.test.ref
-  }
+	filters = {
+		topology = nios_dtc_topology.test.ref
+	}
 }
 `, serverName, serverIP, topologyName, sourceValue)
 }

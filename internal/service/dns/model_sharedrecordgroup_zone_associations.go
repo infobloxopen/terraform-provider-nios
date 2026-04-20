@@ -28,7 +28,8 @@ var SharedrecordgroupZoneAssociationsAttrTypes = map[string]attr.Type{
 
 var SharedrecordgroupZoneAssociationsResourceSchemaAttributes = map[string]schema.Attribute{
 	"fqdn": schema.StringAttribute{
-		Required: true,
+		Optional: true,
+		Computed: true,
 		Validators: []validator.String{
 			customvalidator.IsValidDomainName(),
 			customvalidator.IsNotArpa(),

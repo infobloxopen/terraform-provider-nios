@@ -106,7 +106,7 @@ func TestAccRirOrganizationResource_Import(t *testing.T) {
 				ImportState:                          true,
 				ImportStateIdFunc:                    testAccRirOrganizationImportStateIdFunc(resourceName),
 				ImportStateVerify:                    true,
-				ImportStateVerifyIdentifierAttribute: "ref",
+				ImportStateVerifyIdentifierAttribute: "uuid",
 				ImportStateVerifyIgnore:              []string{"password"},
 				PlanOnly:                             true,
 			},
@@ -117,7 +117,7 @@ func TestAccRirOrganizationResource_Import(t *testing.T) {
 				ImportStateIdFunc:                    testAccRirOrganizationImportStateIdFunc(resourceName),
 				ImportStateVerify:                    true,
 				ImportStateVerifyIgnore:              []string{"password"},
-				ImportStateVerifyIdentifierAttribute: "ref",
+				ImportStateVerifyIdentifierAttribute: "uuid",
 			},
 			// Delete testing automatically occurs in TestCase
 		},
@@ -439,10 +439,10 @@ func testAccRirOrganizationImportStateIdFunc(resourceName string) resource.Impor
 		if !ok {
 			return "", fmt.Errorf("not found: %s", resourceName)
 		}
-		if rs.Primary.Attributes["ref"] == "" {
-			return "", fmt.Errorf("ref is not set")
+		if rs.Primary.Attributes["uuid"] == "" {
+			return "", fmt.Errorf("uuid is not set")
 		}
-		return rs.Primary.Attributes["ref"], nil
+		return rs.Primary.Attributes["uuid"], nil
 	}
 }
 
