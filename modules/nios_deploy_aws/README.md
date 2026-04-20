@@ -1,4 +1,4 @@
-# NIOS Grid Member AWS Module
+# Deploy vNIOS on AWS
 
 ## Overview
 
@@ -16,7 +16,7 @@ This module provisions the AWS infrastructure (EC2 instance, network interfaces,
 
 | Name | Version |
 |------|---------|
-| <a name="provider_aws"></a> [aws](#provider\_aws) | >= 6.38.0 |
+| <a name="provider_aws"></a> [aws](#provider\_aws) | 6.41.0 |
 
 ## Resources
 
@@ -93,7 +93,7 @@ provider "aws" {
 }
 
 module "node1" {
-  source = "github.com/infobloxopen/terraform-provider-nios//modules/nios_grid_member_aws"
+  source = "github.com/infobloxopen/terraform-provider-nios//modules/nios_deploy_aws"
 
   security_group_id = var.security_group_id
   mgmt_subnet_id    = var.mgmt_subnet_id
@@ -226,8 +226,8 @@ terraform import nios_grid_member.ha_pair <uuid>
 ```
 provider "nios" {
   nios_host_url = "https://${module.node1.eth1_ipv4}"
-  nios_username = "admin"
-  nios_password = "Infoblox@123"
+  nios_username = "username"
+  nios_password = "password"
 }
 
 resource "nios_grid_member" "ha_pair" {

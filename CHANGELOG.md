@@ -120,10 +120,10 @@ Version 2.0.0 introduces UUID-based resource identification for NIOS 9.1.0 and W
 
 ### Modules
 
-- **NIOS Grid Member AWS Module** : Terraform module for deploying NIOS Grid EC2 instances on AWS. ([#434](https://github.com/infobloxopen/terraform-provider-nios/pull/434))
-- **NIOS Grid Member Azure Module** : Terraform module for deploying NIOS Grid Virtual Machines on Azure. ([#457](https://github.com/infobloxopen/terraform-provider-nios/pull/457))
-- **NIOS Grid Member GCP Module** : Terraform module for deploying NIOS Grid Compute instances on GCP. ([#457](https://github.com/infobloxopen/terraform-provider-nios/pull/457))
-- **NIOS Grid Member OCI Module** : Terraform module for deploying NIOS Grid Compute instances on OCI. ([#459](https://github.com/infobloxopen/terraform-provider-nios/pull/459))
+- **NIOS Grid Member AWS Module** : Terraform module for deploying vNIOS on AWS. ([#434](https://github.com/infobloxopen/terraform-provider-nios/pull/434))
+- **NIOS Grid Member Azure Module** : Terraform module for deploying vNIOS on Azure. ([#457](https://github.com/infobloxopen/terraform-provider-nios/pull/457))
+- **NIOS Grid Member GCP Module** : Terraform module for deploying vNIOS on GCP. ([#457](https://github.com/infobloxopen/terraform-provider-nios/pull/457))
+- **NIOS Grid Member OCI Module** : Terraform module for deploying vNIOS on OCI. ([#459](https://github.com/infobloxopen/terraform-provider-nios/pull/459))
 
 
 ### Enhancements

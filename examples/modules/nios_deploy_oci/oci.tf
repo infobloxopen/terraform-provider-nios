@@ -23,7 +23,7 @@ module "node1" {
   image_name               = var.image_name
   instance_name            = var.instance_name
   nios_model               = var.nios_model
-  nios_version_gte_902     = var.nios_version_gte_902
+  nios_version_gte_9xx     = var.nios_version_gte_9xx
   legacy_shape             = var.legacy_shape
   instance_ocpus           = var.instance_ocpus
   instance_memory_in_gbs   = var.instance_memory_in_gbs

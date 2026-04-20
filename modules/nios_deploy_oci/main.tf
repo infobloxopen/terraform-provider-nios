@@ -90,10 +90,10 @@ resource "oci_core_instance" "nios_instance" {
   }
 
   // Shape
-  shape = var.nios_version_gte_902 ? "VM.Standard3.Flex" : var.legacy_shape
+  shape = var.nios_version_gte_9xx ? "VM.Standard3.Flex" : var.legacy_shape
 
   dynamic "shape_config" {
-    for_each = var.nios_version_gte_902 ? [1] : []
+    for_each = var.nios_version_gte_9xx ? [1] : []
     content {
       ocpus         = local.effective_ocpus
       memory_in_gbs = local.effective_memory

@@ -47,8 +47,8 @@ variable "availability_domain" {
 }
 
 // Instance Shape
-variable "nios_version_gte_902" {
-  description = "true → VM.Standard3.Flex (NIOS >= 9.0.2). false → legacy_shape."
+variable "nios_version_gte_9xx" {
+  description = "true → VM.Standard3.Flex (NIOS >= 9.x.x). false → legacy_shape."
   type        = bool
   default     = true
 }
@@ -79,7 +79,7 @@ variable "instance_memory_in_gbs" {
 }
 
 variable "legacy_shape" {
-  description = "Fixed shape for NIOS < 9.0.2 (e.g. VM.Standard2.2)."
+  description = "Fixed shape for NIOS < 9.x.x (e.g. VM.Standard2.2)."
   type        = string
   default     = "VM.Standard2.2"
 }

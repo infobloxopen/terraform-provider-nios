@@ -1,4 +1,4 @@
-# NIOS Grid Member OCI Module
+# Deploy vNIOS on OCI
 
 ## Overview
 
@@ -58,7 +58,7 @@ the infrastructure is deployed and NIOS is fully booted (~30 minutes).
 | <a name="input_lan1_assign_public_ip"></a> [lan1\_assign\_public\_ip](#input\_lan1\_assign\_public\_ip) | Assign a public IP to the LAN1 VNIC. | `bool` | `false` | no |
 | <a name="input_lan1_subnet_id"></a> [lan1\_subnet\_id](#input\_lan1\_subnet\_id) | OCID of the subnet for the LAN1 interface. | `string` | n/a | yes |
 | <a name="input_lan1_vnic_name"></a> [lan1\_vnic\_name](#input\_lan1\_vnic\_name) | Display name for the secondary (LAN1) VNIC. | `string` | `"nios-lan1-vnic"` | no |
-| <a name="input_legacy_shape"></a> [legacy\_shape](#input\_legacy\_shape) | Fixed shape for NIOS < 9.0.2 (e.g. VM.Standard2.2). | `string` | `"VM.Standard2.2"` | no |
+| <a name="input_legacy_shape"></a> [legacy\_shape](#input\_legacy\_shape) | Fixed shape for NIOS < 9.x.x (e.g. VM.Standard2.2). | `string` | `"VM.Standard2.2"` | no |
 | <a name="input_mgmt_assign_public_ip"></a> [mgmt\_assign\_public\_ip](#input\_mgmt\_assign\_public\_ip) | Assign a public IP to the MGMT VNIC. | `bool` | `false` | no |
 | <a name="input_mgmt_subnet_id"></a> [mgmt\_subnet\_id](#input\_mgmt\_subnet\_id) | OCID of the subnet for the MGMT interface. | `string` | n/a | yes |
 | <a name="input_mgmt_vnic_name"></a> [mgmt\_vnic\_name](#input\_mgmt\_vnic\_name) | Display name for the primary (MGMT) VNIC. | `string` | `"nios-mgmt-vnic"` | no |
@@ -66,7 +66,7 @@ the infrastructure is deployed and NIOS is fully booted (~30 minutes).
 | <a name="input_nios_model"></a> [nios\_model](#input\_nios\_model) | NIOS appliance model — sets OCPUs and memory for Flex shape.<br/>One of: IB-V926, IB-V1516, IB-V1526, IB-V2326, IB-V4126, IB-V5005. | `string` | `"IB-V926"` | no |
 | <a name="input_nios_object_name"></a> [nios\_object\_name](#input\_nios\_object\_name) | Object name to store the QCOW2 as in the bucket. | `string` | n/a | yes |
 | <a name="input_nios_qcow2_local_path"></a> [nios\_qcow2\_local\_path](#input\_nios\_qcow2\_local\_path) | Absolute local path to the NIOS QCOW2 image file. | `string` | n/a | yes |
-| <a name="input_nios_version_gte_902"></a> [nios\_version\_gte\_902](#input\_nios\_version\_gte\_902) | true → VM.Standard3.Flex (NIOS >= 9.0.2). false → legacy\_shape. | `bool` | `true` | no |
+| <a name="input_nios_version_gte_9xx"></a> [nios\_version\_gte\_9xx](#input\_nios\_version\_gte\_9xx) | true → VM.Standard3.Flex (NIOS >= 9.x.x). false → legacy\_shape. | `bool` | `true` | no |
 | <a name="input_remote_console_enabled"></a> [remote\_console\_enabled](#input\_remote\_console\_enabled) | Enable remote console access. | `bool` | `true` | no |
 | <a name="input_reporting_volume_name"></a> [reporting\_volume\_name](#input\_reporting\_volume\_name) | Display name for the reporting block volume. | `string` | `"nios-reporting-volume"` | no |
 | <a name="input_reporting_volume_size_gb"></a> [reporting\_volume\_size\_gb](#input\_reporting\_volume\_size\_gb) | Size in GB for the reporting volume. Minimum 250 GB recommended. | `number` | `250` | no |
@@ -83,20 +83,6 @@ the infrastructure is deployed and NIOS is fully booted (~30 minutes).
 <!-- END_TF_DOCS -->
 
 ---
-
-## NIOS Model → Shape Configuration
-
-| NIOS Model | OCPUs | Memory (GB) | Notes |
-|---|---|---|---|
-| IB-V926  | 4  | 32  | NIOS >= 9.0.2 |
-| IB-V1516 | 6  | 64  | NIOS >= 9.0.2 |
-| IB-V1526 | 8  | 64  | NIOS >= 9.0.2 |
-| IB-V2326 | 10 | 192 | NIOS >= 9.0.2 |
-| IB-V4126 | 16 | 384 | NIOS >= 9.0.2 |
-| IB-V5005 | user-defined | user-defined | NIOS >= 9.0.6 (reporting appliance) |
-
-> For **IB-V5005** set `instance_ocpus` and `instance_memory_in_gbs` in your `tfvars`.  
-> For **NIOS < 9.0.2** set `nios_version_gte_902 = false` and provide `legacy_shape`.
 
 ## Deployment Order
 
@@ -115,7 +101,7 @@ the infrastructure is deployed and NIOS is fully booted (~30 minutes).
 
 ```hcl
 module "nios_grid_member" {
-  source = "github.com/infobloxopen/terraform-provider-nios//modules/nios_grid_member_oci"
+  source = "github.com/infobloxopen/terraform-provider-nios//modules/nios_deploy_oci"
 
   # OCI authentication
   tenancy_ocid     = var.tenancy_ocid
@@ -130,15 +116,15 @@ module "nios_grid_member" {
   # Image
   create_bucket         = true
   bucket_name           = "nios-images"
-  nios_object_name      = "nios-9.0.2.qcow2"
-  nios_qcow2_local_path = "/path/to/nios-9.0.2.qcow2"
-  image_name            = "nios-9.0.2"
+  nios_object_name      = "nios.qcow2"
+  nios_qcow2_local_path = "/path/to/nios.qcow2"
+  image_name            = "nios"
 
   # Instance
   instance_name        = "nios-grid-member-1"
   availability_domain  = "Uocm:PHX-AD-1"
   nios_model           = "IB-V1526"
-  nios_version_gte_902 = true
+  nios_version_gte_9xx = true
 
   # Networking
   mgmt_subnet_id        = var.mgmt_subnet_id
@@ -174,12 +160,10 @@ Once Grid is up and running, configure the grid member and join to the grid.
 ```hcl
 module "node1" {
   // ... (same config as Step 1)
-  ha_enable = false
 }
 
 module "node2" {
   // ... (same config as Step 1)
-  ha_enable = false
 }
 
 // After NIOS is ready (~30 mins), configure grid member
