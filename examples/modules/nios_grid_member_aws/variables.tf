@@ -112,3 +112,22 @@ variable "private_ips_count_eth2" {
   type        = number
   default     = 0
 }
+
+
+variable "aws_region" {
+  description = "AWS region to deploy resources in."
+  type        = string
+  default     = "us-west-1"
+}
+
+variable "aws_access_key" {
+  description = "AWS access key for authentication."
+  type        = string
+  default     = null
+}
+
+variable "aws_secret_key" {
+  description = "AWS secret key for authentication."
+  type        = string
+  default     = null
+}
