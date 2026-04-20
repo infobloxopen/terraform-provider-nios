@@ -1,8 +1,8 @@
-# NIOS Grid Member Azure Module
+# Deploy vNIOS on Azure
 
 ## Overview
 
-This module provisions the Azure infrastructure (Virtual Machine, NICs, Managed Disk, etc.) for NIOS Grid. The NIOS configuration (`nios_grid_member` and `nios_grid_join` resources) should be applied after the infrastructure is deployed and NIOS grid is fully booted (~30 minutes).
+This module provisions vNIOS on Azure. The NIOS configuration (`nios_grid_member` and `nios_grid_join` resources) should be applied after the infrastructure is deployed and NIOS grid is fully booted (~30 minutes).
 
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
@@ -89,7 +89,7 @@ provider "azurerm" {
 }
 
 module "node1" {
-  source = "github.com/infobloxopen/terraform-provider-nios//modules/nios_grid_member_azure"
+  source = "github.com/infobloxopen/terraform-provider-nios//modules/nios_deploy_azure"
 
   resource_group = var.resource_group
   location       = var.location
@@ -130,12 +130,12 @@ Once Grid is up and running, configure the grid member and join to the grid.
 
 ```hcl
 module "node1" {
-  source = "github.com/infobloxopen/terraform-provider-nios//modules/nios_grid_member_azure"
+  source = "github.com/infobloxopen/terraform-provider-nios//modules/nios_deploy_azure"
   // ... (same config as Step 1)
 }
 
 module "node2" {
-  source = "github.com/infobloxopen/terraform-provider-nios//modules/nios_grid_member_azure"
+  source = "github.com/infobloxopen/terraform-provider-nios//modules/nios_deploy_azure"
   // ... (same config as Step 1)
 }
 ```

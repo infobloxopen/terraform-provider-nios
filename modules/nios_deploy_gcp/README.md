@@ -1,8 +1,8 @@
-# NIOS Grid Member GCP Module
+# Deploy vNIOS on GCP
 
 ## Overview
 
-This module provisions the GCP infrastructure (Compute Instance, network interfaces, etc.) for a single NIOS Grid member. Use one module call per instance — Grid Master, IB member, CP member, Reporting, or Discovery — they all share the same resource structure. The NIOS configuration (`nios_grid_member` and `nios_grid_join` resources) should be applied after the infrastructure is deployed and NIOS grid is fully booted (~30 minutes).
+This module provisions vNIOS on GCP. Use one module call per instance — Grid Master, IB member, CP member, Reporting, or Discovery — they all share the same resource structure. The NIOS configuration (`nios_grid_member` and `nios_grid_join` resources) should be applied after the infrastructure is deployed and NIOS grid is fully booted (~30 minutes).
 
 ### NIOS Model -> Machine Type Mapping
 
@@ -87,7 +87,7 @@ provider "google" {
 }
 
 module "node1" {
-  source = "github.com/infobloxopen/terraform-provider-nios//modules/nios_grid_member_gcp"
+  source = "github.com/infobloxopen/terraform-provider-nios//modules/nios_deploy_gcp"
 
   project = var.project
   region     = var.region
@@ -131,12 +131,12 @@ Once Grid is up and running, configure the grid member and join to the grid.
 
 ```hcl
 module "node1" {
-  source = "github.com/infobloxopen/terraform-provider-nios//modules/nios_grid_member_gcp"
+  source = "github.com/infobloxopen/terraform-provider-nios//modules/nios_deploy_gcp"
   // ...(same config as Step 1)
 }
 
 module "node2" {
-  source = "github.com/infobloxopen/terraform-provider-nios//modules/nios_grid_member_gcp"
+  source = "github.com/infobloxopen/terraform-provider-nios//modules/nios_deploy_gcp"
   // ... (same config as Step 1)
 }
 ```
