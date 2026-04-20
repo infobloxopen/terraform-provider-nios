@@ -89,30 +89,6 @@ the infrastructure is deployed and NIOS is fully booted (~15–25 minutes).
 
 ---
 
-## Architecture
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│  OCI Compartment                                            │
-│                                                             │
-│  ┌──────────────────────────────────────────────────────┐  │
-│  │  Object Storage Bucket                               │  │
-│  │  └── NIOS QCOW2 Object                               │  │
-│  └──────────────────────────────────────────────────────┘  │
-│               │ import (30–60 min)                          │
-│  ┌────────────▼─────────────────────────────────────────┐  │
-│  │  Custom Image  (PARAVIRTUALIZED launch mode)         │  │
-│  └──────────────────────────────────────────────────────┘  │
-│               │ boot                                        │
-│  ┌────────────▼─────────────────────────────────────────┐  │
-│  │  Compute Instance  (VM.Standard3.Flex / legacy)      │  │
-│  │  ├── Primary VNIC    (MGMT  / eth0 equivalent)       │  │
-│  │  ├── Secondary VNIC  (LAN1  / eth1 equivalent)       │  │
-│  │  └── Block Volume    (Reporting — optional)          │  │
-│  └──────────────────────────────────────────────────────┘  │
-└─────────────────────────────────────────────────────────────┘
-```
-
 ## NIOS Model → Shape Configuration
 
 | NIOS Model | OCPUs | Memory (GB) | Notes |
