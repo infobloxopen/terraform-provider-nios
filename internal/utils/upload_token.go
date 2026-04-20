@@ -32,7 +32,7 @@ func GenerateUploadToken(ctx context.Context, baseURL, username, password string
 	}
 
 	// Generate upload token and URL by calling uploadinit
-	uploadInitURL := fmt.Sprintf("%s/wapi/v2.13.6/fileop?_function=uploadinit", baseURL)
+	uploadInitURL := fmt.Sprintf("%s/wapi/v2.14/fileop?_function=uploadinit", baseURL)
 	req, err := http.NewRequestWithContext(ctx, "POST", uploadInitURL, bytes.NewReader([]byte("{}")))
 	if err != nil {
 		return &uploadInitResponse, fmt.Errorf("error creating uploadinit request: %w", err)

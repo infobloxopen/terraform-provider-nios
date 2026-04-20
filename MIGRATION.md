@@ -7,8 +7,8 @@ This guide covers the changes introduced in the NIOS Terraform provider and outl
 
 ## Prerequisites
 
-- Terraform v1.8.0 or later
-- Infoblox NIOS (version 9.0.6 or higher)
+- Terraform v1.12.1 or later
+- Infoblox NIOS (version 9.1.0 or higher)
 - Backup of your current Terraform state files
 
 
@@ -33,7 +33,7 @@ terraform {
   required_providers {
     nios = {
       source  = "infobloxopen/nios"
-      version = "1.1.0"
+      version = "2.0.0"
     }
   }
 }
@@ -146,10 +146,12 @@ terraform state rm infoblox_a_record.example
 
 ### Import New Resource into State
 
-Import the new resource using the same ID:
+> **Note**: In provider version 2.0.0, imports use UUID-based identification format instead of the legacy ref format.
+
+Import the new resource using UUID:
 
 ```bash
-terraform import nios_dns_record_a.example "record:a/ZG5zLmEkLl9kZWZhdWx0LmNvbS5pbmZvYmxveC50ZXN0:a-record.example.com/default"
+terraform import nios_dns_record_a.example "bf94eb18feee486aa608bb27ca2dcf0a"
 ```
 
 **Recommended Approach**: If you are using Terraform v1.5.0 or later, use the import block with configuration generation:
@@ -157,7 +159,7 @@ terraform import nios_dns_record_a.example "record:a/ZG5zLmEkLl9kZWZhdWx0LmNvbS5
 ```hcl
 import {
   to = nios_dns_record_a.example
-  id = "record:a/ZG5zLmEkLl9kZWZhdWx0LmNvbS5pbmZvYmxveC50ZXN0:a-record.example.com/default"
+  id = "bf94eb18feee486aa608bb27ca2dcf0a"
 }
 ```
 
