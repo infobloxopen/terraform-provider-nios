@@ -18,12 +18,12 @@ locals {
 
   // NIOS model -> VM.Standard3.Flex shape config
   nios_model_config = {
-    "IB-V926"  = { ocpus = 4,                      memory = 32                         }
-    "IB-V1516" = { ocpus = 6,                      memory = 64                         }
-    "IB-V1526" = { ocpus = 8,                      memory = 64                         }
-    "IB-V2326" = { ocpus = 10,                     memory = 192                        }
-    "IB-V4126" = { ocpus = 16,                     memory = 384                        }
-    "IB-V5005" = { ocpus = var.instance_ocpus,     memory = var.instance_memory_in_gbs }
+    "IB-V926"  = { ocpus = 4, memory = 32 }
+    "IB-V1516" = { ocpus = 6, memory = 64 }
+    "IB-V1526" = { ocpus = 8, memory = 64 }
+    "IB-V2326" = { ocpus = 10, memory = 192 }
+    "IB-V4126" = { ocpus = 16, memory = 384 }
+    "IB-V5005" = { ocpus = var.instance_ocpus, memory = var.instance_memory_in_gbs }
   }
 
   effective_ocpus  = local.nios_model_config[var.nios_model].ocpus
@@ -32,12 +32,12 @@ locals {
   // Cloud-Init resolution
   cloud_init_user_data = (
     var.cloud_init_content != "" ? base64encode(var.cloud_init_content) :
-      var.cloud_init_script_path != "" ? filebase64(var.cloud_init_script_path) :
-      base64encode(templatefile("${path.module}/user_data.tftpl", {
-        nios_license           = var.nios_license
-        remote_console_enabled = var.remote_console_enabled ? "y" : "n"
-        default_admin_password = var.default_admin_password
-      }))
+    var.cloud_init_script_path != "" ? filebase64(var.cloud_init_script_path) :
+    base64encode(templatefile("${path.module}/user_data.tftpl", {
+      nios_license           = var.nios_license
+      remote_console_enabled = var.remote_console_enabled ? "y" : "n"
+      default_admin_password = var.default_admin_password
+    }))
   )
 }
 

@@ -127,7 +127,7 @@ terraform apply
 
 ### Step 2: Wait for NIOS to Boot
 
-NIOS takes approximately **30 minutes** to fully boot, make sure the grid is up and running before making joining the instances.
+NIOS takes approximately **30 minutes** to fully boot, make sure the grid is up and running before triggering the grid join.
 
 ### Step 3: Join the Grid Member to the Master Grid / Configure HA
 
@@ -287,7 +287,7 @@ resource "nios_grid_join" "ha_member_join" {
 ```
 
 ### Boot Time
-- NIOS takes around **30 minutes** to fully boot after EC2 instance creation, make sure the grid is up and running before making joining the instances.
+- NIOS takes around **30 minutes** to fully boot after EC2 instance creation, make sure the grid is up and running before triggering the grid join.
 - Always verify NIOS API is responding before applying `nios_grid_member` resources
 
 ### HA Requirements

@@ -58,8 +58,8 @@ variable "nios_model" {
     NIOS appliance model — sets OCPUs and memory for Flex shape.
     One of: IB-V926, IB-V1516, IB-V1526, IB-V2326, IB-V4126, IB-V5005.
   EOT
-  type    = string
-  default = "IB-V926"
+  type        = string
+  default     = "IB-V926"
   validation {
     condition     = contains(["IB-V926", "IB-V1516", "IB-V1526", "IB-V2326", "IB-V4126", "IB-V5005"], var.nios_model)
     error_message = "nios_model must be one of: IB-V926, IB-V1516, IB-V1526, IB-V2326, IB-V4126, IB-V5005."

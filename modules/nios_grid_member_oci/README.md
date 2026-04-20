@@ -224,7 +224,7 @@ resource "nios_grid_join" "member_join" {
 
 
 ### Boot Time
-- NIOS takes around **30 minutes** to fully boot after instance creation, make sure the grid is up and running before making joining the instances.
+- NIOS takes around **30 minutes** to fully boot after instance creation, make sure the grid is up and running before triggering grid join.
 - Always verify the NIOS API is responding before applying `nios_grid_member` resources
 
 ### Cloud-Init
