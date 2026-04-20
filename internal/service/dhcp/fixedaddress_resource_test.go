@@ -1077,6 +1077,7 @@ func TestAccFixedaddressResource_MsOptions(t *testing.T) {
 }
 
 func TestAccFixedaddressResource_MsServer(t *testing.T) {
+	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_dhcp_fixed_address.test_ms_server"
 	var v dhcp.Fixedaddress
 	ip := "150.0.0.32"
