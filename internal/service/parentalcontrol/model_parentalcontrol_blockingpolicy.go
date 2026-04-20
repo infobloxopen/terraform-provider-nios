@@ -19,7 +19,6 @@ import (
 type ParentalcontrolBlockingpolicyModel struct {
 	Ref   types.String `tfsdk:"ref"`
 	Uuid  types.String `tfsdk:"uuid"`
-	UUID  types.String `tfsdk:"uuid"`
 	Name  types.String `tfsdk:"name"`
 	Value types.String `tfsdk:"value"`
 }

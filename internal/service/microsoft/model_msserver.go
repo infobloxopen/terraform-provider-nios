@@ -27,7 +27,6 @@ import (
 type MsserverModel struct {
 	Ref                         types.String `tfsdk:"ref"`
 	Uuid                        types.String `tfsdk:"uuid"`
-	UUID                        types.String `tfsdk:"uuid"`
 	AdDomain                    types.String `tfsdk:"ad_domain"`
 	AdSites                     types.Object `tfsdk:"ad_sites"`
 	AdUser                      types.Object `tfsdk:"ad_user"`
