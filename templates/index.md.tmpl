@@ -16,7 +16,7 @@ The table below shows the compatibility between different versions of the Terraf
 
 | Provider Version | Go Version | Terraform Version | NIOS Version | WAPI Version |
 |-----------------|------------|-------------------|--------------|--------------|
-| 2.0.0 | >= 1.18 (recommended 1.25.1) | >= 1.12.1 | 9.1.0 or higher | v2.14 |
+| 2.0.0 | >= 1.25.1 | >= 1.12.1 | 9.1.0 or higher | v2.14 |
 | 1.1.0 , 1.0.0 , 0.0.1 | >= 1.18 | >= 1.8.0 | 9.0.6 or higher | v2.13.6 |
 
 
