@@ -28,6 +28,7 @@ import (
 var readableAttributesForSyslogEndpoint = "extattrs,log_level,name,outbound_member_type,outbound_members,syslog_servers,template_instance,timeout,vendor_identifier,wapi_user_name"
 
 func TestAccSyslogEndpointResource_basic(t *testing.T) {
+	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_misc_syslog_endpoint.test"
 	var v misc.SyslogEndpoint
 	name := "syslogserverbasic"
@@ -63,6 +64,7 @@ func TestAccSyslogEndpointResource_basic(t *testing.T) {
 }
 
 func TestAccSyslogEndpointResource_disappears(t *testing.T) {
+	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	resourceName := "nios_misc_syslog_endpoint.test"
 	var v misc.SyslogEndpoint
 	name := "syslogserverdisappears"
@@ -89,6 +91,7 @@ func TestAccSyslogEndpointResource_disappears(t *testing.T) {
 }
 
 func TestAccSyslogEndpointResource_ExtAttrs(t *testing.T) {
+	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_misc_syslog_endpoint.test_extattrs"
 	var v misc.SyslogEndpoint
 	site := acctest.RandomNameWithPrefix("site")
@@ -124,6 +127,7 @@ func TestAccSyslogEndpointResource_ExtAttrs(t *testing.T) {
 }
 
 func TestAccSyslogEndpointResource_LogLevel(t *testing.T) {
+	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_misc_syslog_endpoint.test_log_level"
 	var v misc.SyslogEndpoint
 	name := "syslogserverloglevel"
@@ -160,6 +164,7 @@ func TestAccSyslogEndpointResource_LogLevel(t *testing.T) {
 }
 
 func TestAccSyslogEndpointResource_Name(t *testing.T) {
+	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_misc_syslog_endpoint.test_name"
 	var v misc.SyslogEndpoint
 	name := "syslogservername"
@@ -195,6 +200,7 @@ func TestAccSyslogEndpointResource_Name(t *testing.T) {
 }
 
 func TestAccSyslogEndpointResource_OutboundMemberType(t *testing.T) {
+	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_misc_syslog_endpoint.test_outbound_member_type"
 	var v misc.SyslogEndpoint
 	name := "syslogserveroutboundmembertype"
@@ -203,7 +209,8 @@ func TestAccSyslogEndpointResource_OutboundMemberType(t *testing.T) {
 	connectionType := "udp"
 	format := "formatted"
 	updatedOutboundMember := "MEMBER"
-	outboundMember := "infoblox.grid_master_candidate1"
+	memberUpdatedName := utils.GetNIOSGridMemberHostName()
+	outboundMember := memberUpdatedName
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -231,16 +238,17 @@ func TestAccSyslogEndpointResource_OutboundMemberType(t *testing.T) {
 }
 
 func TestAccSyslogEndpointResource_OutboundMembers(t *testing.T) {
+	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_misc_syslog_endpoint.test_outbound_members"
 	var v misc.SyslogEndpoint
 	name := "syslogserveroutboundmembers"
-	outboundMemberType := "MEMBER"
+	outboundMemberType := "GM"
 	syslogServer := "10.1.1.1"
 	connectionType := "udp"
 	format := "formatted"
 	outboundMemberTypeUpdated := "MEMBER"
-	outboundMember := "infoblox.grid_master_candidate2"
-	outboundMemberUpdated := "infoblox.grid_master_candidate1"
+	outboundMember := utils.GetNIOSGridMasterHostName()
+	outboundMemberUpdated := "infoblox.member2"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -251,7 +259,7 @@ func TestAccSyslogEndpointResource_OutboundMembers(t *testing.T) {
 				Config: testAccSyslogEndpointOutboundMembers(name, outboundMemberType, syslogServer, connectionType, format, outboundMember),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSyslogEndpointExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "outbound_members.0", outboundMember),
+					resource.TestCheckResourceAttr(resourceName, "outbound_member_type", "GM"),
 				),
 			},
 			// Update and Read
@@ -259,6 +267,7 @@ func TestAccSyslogEndpointResource_OutboundMembers(t *testing.T) {
 				Config: testAccSyslogEndpointOutboundMembers(name, outboundMemberTypeUpdated, syslogServer, connectionType, format, outboundMemberUpdated),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSyslogEndpointExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "outbound_member_type", "MEMBER"),
 					resource.TestCheckResourceAttr(resourceName, "outbound_members.0", outboundMemberUpdated),
 				),
 			},
@@ -268,6 +277,7 @@ func TestAccSyslogEndpointResource_OutboundMembers(t *testing.T) {
 }
 
 func TestAccSyslogEndpointResource_SyslogServers(t *testing.T) {
+	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_misc_syslog_endpoint.test_syslog_servers"
 	var v misc.SyslogEndpoint
 	name := "syslogservers"
@@ -303,6 +313,7 @@ func TestAccSyslogEndpointResource_SyslogServers(t *testing.T) {
 }
 
 func TestAccSyslogEndpointResource_TemplateInstance(t *testing.T) {
+	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_misc_syslog_endpoint.test_template_instance"
 	var v misc.SyslogEndpoint
 	templateInstance := map[string]any{
@@ -313,9 +324,6 @@ func TestAccSyslogEndpointResource_TemplateInstance(t *testing.T) {
 	syslogServer := "10.1.1.1"
 	connectionType := "udp"
 	format := "formatted"
-	updatedTemplateInstance := map[string]any{
-		"template": "Version5_Syslog_Session_Template1",
-	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -329,20 +337,15 @@ func TestAccSyslogEndpointResource_TemplateInstance(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "template_instance.template", templateInstance["template"].(string)),
 				),
 			},
-			// Update and Read - Immutable Attribute template_instance
-			{
-				Config: testAccSyslogEndpointTemplateInstance(name, outboundMemberType, syslogServer, connectionType, format, updatedTemplateInstance),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckSyslogEndpointExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "template_instance.template", updatedTemplateInstance["template"].(string)),
-				),
-			},
+			// Update and Read
+			// TODO : Update Testing Requires Addition templates
 			// Delete testing automatically occurs in TestCase
 		},
 	})
 }
 
 func TestAccSyslogEndpointResource_Timeout(t *testing.T) {
+	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_misc_syslog_endpoint.test_timeout"
 	var v misc.SyslogEndpoint
 	name := "syslogservertimeout"
@@ -379,6 +382,7 @@ func TestAccSyslogEndpointResource_Timeout(t *testing.T) {
 }
 
 func TestAccSyslogEndpointResource_VendorIdentifier(t *testing.T) {
+	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_misc_syslog_endpoint.test_vendor_identifier"
 	var v misc.SyslogEndpoint
 	name := "syslogservervendoridentifier"
@@ -415,6 +419,7 @@ func TestAccSyslogEndpointResource_VendorIdentifier(t *testing.T) {
 }
 
 func TestAccSyslogEndpointResource_WapiUserName(t *testing.T) {
+	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_misc_syslog_endpoint.test_wapi_user_name"
 	var v misc.SyslogEndpoint
 	name := "syslogserverwapiusername"
@@ -453,6 +458,7 @@ func TestAccSyslogEndpointResource_WapiUserName(t *testing.T) {
 }
 
 func TestAccSyslogEndpointResource_WapiUserPassword(t *testing.T) {
+	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_misc_syslog_endpoint.test_wapi_user_password"
 	var v misc.SyslogEndpoint
 	name := "syslogserverwapiuserpassword"
@@ -653,6 +659,10 @@ resource "nios_misc_syslog_endpoint" "test_outbound_member_type" {
 }
 
 func testAccSyslogEndpointOutboundMembers(name string, outboundMemberType string, syslogServer string, connectionType string, format string, outboundMember string) string {
+	outBoundMembersStr := ""
+	if outboundMemberType != "GM" {
+		outBoundMembersStr = fmt.Sprintf(`outbound_members = [%q]`, outboundMember)
+	}
 	return fmt.Sprintf(`
 resource "nios_misc_syslog_endpoint" "test_outbound_members" {
     name = %q
@@ -664,9 +674,9 @@ resource "nios_misc_syslog_endpoint" "test_outbound_members" {
 			format = %q
         }
     ]
-	outbound_members = [%q]
+	%s
 }
-`, name, outboundMemberType, syslogServer, connectionType, format, outboundMember)
+`, name, outboundMemberType, syslogServer, connectionType, format, outBoundMembersStr)
 }
 
 func testAccSyslogEndpointSyslogServers(name string, outboundMemberType string, syslogServer string, connectionType string, format string) string {

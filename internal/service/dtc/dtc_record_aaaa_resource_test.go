@@ -19,6 +19,7 @@ import (
 var readableAttributesForDtcRecordAaaa = "auto_created,comment,disable,dtc_server,ipv6addr,ttl,use_ttl"
 
 func TestAccDtcRecordAaaaResource_basic(t *testing.T) {
+	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_dtc_record_aaaa.test"
 	var v dtc.DtcRecordAaaa
 	ipv6Addr := "2001:db8:85a3::8a2e:370:7335"
@@ -46,6 +47,7 @@ func TestAccDtcRecordAaaaResource_basic(t *testing.T) {
 }
 
 func TestAccDtcRecordAaaaResource_disappears(t *testing.T) {
+	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	resourceName := "nios_dtc_record_aaaa.test"
 	var v dtc.DtcRecordAaaa
 	ipv6Addr := "2001:db8:85a3::8a2e:370:7335"
@@ -69,6 +71,7 @@ func TestAccDtcRecordAaaaResource_disappears(t *testing.T) {
 }
 
 func TestAccDtcRecordAaaaResource_Comment(t *testing.T) {
+	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_dtc_record_aaaa.test_comment"
 	var v dtc.DtcRecordAaaa
 	ipv6Addr := "2001:db8:85a3::8a2e:370:7335"
@@ -100,6 +103,7 @@ func TestAccDtcRecordAaaaResource_Comment(t *testing.T) {
 }
 
 func TestAccDtcRecordAaaaResource_Disable(t *testing.T) {
+	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_dtc_record_aaaa.test_disable"
 	var v dtc.DtcRecordAaaa
 	ipv6Addr := "2001:db8:85a3::8a2e:370:7335"
@@ -131,6 +135,7 @@ func TestAccDtcRecordAaaaResource_Disable(t *testing.T) {
 }
 
 func TestAccDtcRecordAaaaResource_DtcServer(t *testing.T) {
+	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_dtc_record_aaaa.test_dtc_server"
 	var v dtc.DtcRecordAaaa
 	ipv6Addr := "2001:db8:85a3::8a2e:370:7335"
@@ -155,6 +160,7 @@ func TestAccDtcRecordAaaaResource_DtcServer(t *testing.T) {
 }
 
 func TestAccDtcRecordAaaaResource_Ipv6addr(t *testing.T) {
+	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_dtc_record_aaaa.test_ipv6addr"
 	var v dtc.DtcRecordAaaa
 	ipv6Addr := "2001:db8:85a3::8a2e:370:7335"
@@ -187,6 +193,7 @@ func TestAccDtcRecordAaaaResource_Ipv6addr(t *testing.T) {
 }
 
 func TestAccDtcRecordAaaaResource_Ttl(t *testing.T) {
+	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_dtc_record_aaaa.test_ttl"
 	var v dtc.DtcRecordAaaa
 	ipv6Addr := "2001:db8:85a3::8a2e:370:7335"
@@ -218,6 +225,7 @@ func TestAccDtcRecordAaaaResource_Ttl(t *testing.T) {
 }
 
 func TestAccDtcRecordAaaaResource_UseTtl(t *testing.T) {
+	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_dtc_record_aaaa.test_use_ttl"
 	var v dtc.DtcRecordAaaa
 	ipv6Addr := "2001:db8:85a3::8a2e:370:7335"

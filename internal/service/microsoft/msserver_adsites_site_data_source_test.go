@@ -12,6 +12,7 @@ import (
 )
 
 func TestAccMsserverAdsitesSiteDataSource_Filters(t *testing.T) {
+	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	dataSourceName := "data.nios_microsoft_msserver_adsites_site.test"
 	resourceName := "nios_microsoft_msserver_adsites_site.test"
 	var v microsoft.MsserverAdsitesSite

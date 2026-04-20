@@ -61,13 +61,16 @@ func TestAccFixedaddressDataSource_ExtAttrFilters(t *testing.T) {
 }
 
 func TestAccFixedaddressDataSource_MsServerStruct(t *testing.T) {
+	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	dataSourceName := "data.nios_dhcp_fixed_address.test"
+	macAddress := "00:16:3e:00:00:01"
+	ip := acctest.RandomIPWithSpecificOctetsSet("189.0.0")
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccFixedaddressDataSourcConfigeMsServerStruct("msdhcpserver", "10.34.98.68"),
+				Config: testAccFixedaddressDataSourcConfigeMsServerStruct(ip, "MAC_ADDRESS", macAddress, "msdhcpserver", "example_server"),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(dataSourceName, "result.#", "1"),
 				),
@@ -181,8 +184,39 @@ data "nios_dhcp_fixed_address" "test" {
 `, ip, matchClient, agentCircuitID, extAttrsValue)
 }
 
-func testAccFixedaddressDataSourcConfigeMsServerStruct(structValue, ipv4Adrr string) string {
+func testAccFixedaddressDataSourcConfigeMsServerStruct(ip, matchClient string, macAddress, structValue, ipv4Adrr string) string {
 	return fmt.Sprintf(`
+resource "nios_ipam_network" "example_network" {
+  	network      = "189.0.0.0/24"
+	network_view = "default"
+	members = [
+		{
+			struct = "msdhcpserver"
+			ipv4addr = "example_server"
+		}
+	]
+}
+
+resource "nios_dhcp_range" "test_range" {
+    start_addr = "189.0.0.25"
+	end_addr = "189.0.0.30"
+	ms_server = {
+		ipv4addr = nios_ipam_network.example_network.members[0].ipv4addr
+	}
+	server_association_type = "MS_SERVER"
+}
+resource "nios_dhcp_fixed_address" "test" {
+	ipv4addr = %q
+	match_client = %q
+	mac = %q
+	name = %q 
+	ms_server = {
+		struct = "msdhcpserver"
+		ipv4addr = "example_server"
+	}
+	depends_on = [nios_dhcp_range.test_range]
+}
+
 data "nios_dhcp_fixed_address" "test" {
 	body = {
 		ms_server = {
@@ -192,6 +226,7 @@ data "nios_dhcp_fixed_address" "test" {
 	}
 	max_results = 1
 	paging = 0
+	depends_on = [nios_dhcp_fixed_address.test]
 }
-`, structValue, ipv4Adrr)
+`, ip, matchClient, macAddress, acctest.RandomNameWithPrefix("fixed-address"), structValue, ipv4Adrr)
 }

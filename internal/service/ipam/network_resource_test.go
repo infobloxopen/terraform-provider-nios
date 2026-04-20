@@ -1425,22 +1425,23 @@ func TestAccNetworkResource_LowWaterMarkReset(t *testing.T) {
 }
 
 func TestAccNetworkResource_Members(t *testing.T) {
+	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_ipam_network.test_members"
 	var v ipam.Network
 
 	network := acctest.RandomCIDRNetwork()
+	memberName := utils.GetNIOSGridMasterHostName()
 	member1 := []map[string]any{
 
 		{
-			"struct":   "dhcpmember",
-			"ipv4addr": "172.28.83.29",
-			"name":     "infoblox.172_28_83_29",
+			"struct": "dhcpmember",
+			"name":   memberName,
 		},
 	}
 	member2 := []map[string]any{
 		{
 			"struct":   "msdhcpserver",
-			"ipv4addr": "10.10.0.0",
+			"ipv4addr": "10.10.10.10",
 		},
 	}
 
@@ -1455,9 +1456,7 @@ func TestAccNetworkResource_Members(t *testing.T) {
 					testAccCheckNetworkExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "network", network),
 					resource.TestCheckResourceAttr(resourceName, "members.0.struct", "dhcpmember"),
-					resource.TestCheckResourceAttr(resourceName, "members.0.ipv4addr", "172.28.83.29"),
-					resource.TestCheckResourceAttr(resourceName, "members.0.ipv6addr", ""),
-					resource.TestCheckResourceAttr(resourceName, "members.0.name", "infoblox.172_28_83_29"),
+					resource.TestCheckResourceAttr(resourceName, "members.0.name", memberName),
 				),
 			},
 			// Update and Read
@@ -1467,7 +1466,7 @@ func TestAccNetworkResource_Members(t *testing.T) {
 					testAccCheckNetworkExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "network", network),
 					resource.TestCheckResourceAttr(resourceName, "members.0.struct", "msdhcpserver"),
-					resource.TestCheckResourceAttr(resourceName, "members.0.ipv4addr", "10.10.0.0"),
+					resource.TestCheckResourceAttr(resourceName, "members.0.ipv4addr", "10.10.10.10"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase

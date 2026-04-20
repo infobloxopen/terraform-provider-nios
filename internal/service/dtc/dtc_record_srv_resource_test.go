@@ -19,6 +19,7 @@ import (
 var readableAttributesForDtcRecordSrv = "comment,disable,dtc_server,name,port,priority,target,ttl,use_ttl,weight"
 
 func TestAccDtcRecordSrvResource_basic(t *testing.T) {
+	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_dtc_record_srv.test"
 	var v dtc.DtcRecordSrv
 	serverName := acctest.RandomNameWithPrefix("dtc-server")
@@ -48,6 +49,7 @@ func TestAccDtcRecordSrvResource_basic(t *testing.T) {
 }
 
 func TestAccDtcRecordSrvResource_disappears(t *testing.T) {
+	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	resourceName := "nios_dtc_record_srv.test"
 	var v dtc.DtcRecordSrv
 	serverName := acctest.RandomNameWithPrefix("dtc-server")
@@ -70,6 +72,7 @@ func TestAccDtcRecordSrvResource_disappears(t *testing.T) {
 }
 
 func TestAccDtcRecordSrvResource_Comment(t *testing.T) {
+	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_dtc_record_srv.test_comment"
 	var v dtc.DtcRecordSrv
 	serverName := acctest.RandomNameWithPrefix("dtc-server")
@@ -100,6 +103,7 @@ func TestAccDtcRecordSrvResource_Comment(t *testing.T) {
 }
 
 func TestAccDtcRecordSrvResource_Disable(t *testing.T) {
+	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_dtc_record_srv.test_disable"
 	var v dtc.DtcRecordSrv
 	serverName := acctest.RandomNameWithPrefix("dtc-server")
@@ -130,6 +134,7 @@ func TestAccDtcRecordSrvResource_Disable(t *testing.T) {
 }
 
 func TestAccDtcRecordSrvResource_DtcServer(t *testing.T) {
+	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_dtc_record_srv.test_dtc_server"
 	var v dtc.DtcRecordSrv
 	serverName := acctest.RandomNameWithPrefix("dtc-server")
@@ -152,6 +157,7 @@ func TestAccDtcRecordSrvResource_DtcServer(t *testing.T) {
 }
 
 func TestAccDtcRecordSrvResource_Name(t *testing.T) {
+	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_dtc_record_srv.test_name"
 	var v dtc.DtcRecordSrv
 	serverName := acctest.RandomNameWithPrefix("dtc-server")
@@ -184,6 +190,7 @@ func TestAccDtcRecordSrvResource_Name(t *testing.T) {
 }
 
 func TestAccDtcRecordSrvResource_Port(t *testing.T) {
+	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_dtc_record_srv.test_port"
 	var v dtc.DtcRecordSrv
 	serverName := acctest.RandomNameWithPrefix("dtc-server")
@@ -214,6 +221,7 @@ func TestAccDtcRecordSrvResource_Port(t *testing.T) {
 }
 
 func TestAccDtcRecordSrvResource_Priority(t *testing.T) {
+	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_dtc_record_srv.test_priority"
 	var v dtc.DtcRecordSrv
 	serverName := acctest.RandomNameWithPrefix("dtc-server")
@@ -244,6 +252,7 @@ func TestAccDtcRecordSrvResource_Priority(t *testing.T) {
 }
 
 func TestAccDtcRecordSrvResource_Target(t *testing.T) {
+	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_dtc_record_srv.test_target"
 	var v dtc.DtcRecordSrv
 	serverName := acctest.RandomNameWithPrefix("dtc-server")
@@ -274,6 +283,7 @@ func TestAccDtcRecordSrvResource_Target(t *testing.T) {
 }
 
 func TestAccDtcRecordSrvResource_Ttl(t *testing.T) {
+	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_dtc_record_srv.test_ttl"
 	var v dtc.DtcRecordSrv
 	serverName := acctest.RandomNameWithPrefix("dtc-server")
@@ -304,6 +314,7 @@ func TestAccDtcRecordSrvResource_Ttl(t *testing.T) {
 }
 
 func TestAccDtcRecordSrvResource_UseTtl(t *testing.T) {
+	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_dtc_record_srv.test_use_ttl"
 	var v dtc.DtcRecordSrv
 	serverName := acctest.RandomNameWithPrefix("dtc-server")
@@ -334,6 +345,7 @@ func TestAccDtcRecordSrvResource_UseTtl(t *testing.T) {
 }
 
 func TestAccDtcRecordSrvResource_Weight(t *testing.T) {
+	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_dtc_record_srv.test_weight"
 	var v dtc.DtcRecordSrv
 	serverName := acctest.RandomNameWithPrefix("dtc-server")

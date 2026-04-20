@@ -455,6 +455,14 @@ func (r *RangeResource) ValidateConfig(ctx context.Context, req resource.Validat
 				"The 'member' field cannot be set when 'server_association_type' is set to 'NONE' (default).",
 			)
 		}
+		if !data.MsServer.IsNull() && !data.MsServer.IsUnknown() {
+			resp.Diagnostics.AddAttributeError(
+				path.Root("ms_server"),
+				"Invalid Configuration",
+				"The 'ms_server' field cannot be set when 'server_association_type' is set to 'NONE' (default). "+
+					"Modify the 'server_association_type' field to 'MS_SERVER' to allow setting 'ms_server'.",
+			)
+		}
 	}
 
 	// Validate discovery_blackout_setting blackout_schedule

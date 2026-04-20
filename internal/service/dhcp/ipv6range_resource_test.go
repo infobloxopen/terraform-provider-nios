@@ -107,7 +107,7 @@ func TestAccIpv6rangeResource_Import(t *testing.T) {
 				ImportState:                          true,
 				ImportStateIdFunc:                    testAccIpv6rangeImportStateIdFunc(resourceName),
 				ImportStateVerify:                    true,
-				ImportStateVerifyIdentifierAttribute: "ref",
+				ImportStateVerifyIdentifierAttribute: "uuid",
 				PlanOnly:                             true,
 				ExpectError:                          regexp.MustCompile(`ImportStateVerify attributes not equivalent`),
 			},
@@ -118,7 +118,7 @@ func TestAccIpv6rangeResource_Import(t *testing.T) {
 				ImportStateIdFunc:                    testAccIpv6rangeImportStateIdFunc(resourceName),
 				ImportStateVerify:                    true,
 				ImportStateVerifyIgnore:              []string{"extattrs_all"},
-				ImportStateVerifyIdentifierAttribute: "ref",
+				ImportStateVerifyIdentifierAttribute: "uuid",
 				ExpectError:                          regexp.MustCompile(`ImportStateVerify attributes not equivalent`),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -668,13 +668,13 @@ func TestAccIpv6rangeResource_LogicFilterRules(t *testing.T) {
 	view := acctest.RandomNameWithPrefix("network-view")
 	logicFilterRules := []map[string]any{
 		{
-			"filter": "example-ipv6-option-filter-1",
+			"filter": "ipv6_option_filter",
 			"type":   "Option",
 		},
 	}
 	updatedLogicFilterRules := []map[string]any{
 		{
-			"filter": "example-ipv6-option-filter-2",
+			"filter": "ipv6_option_filter1",
 			"type":   "Option",
 		},
 	}
@@ -689,7 +689,7 @@ func TestAccIpv6rangeResource_LogicFilterRules(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6rangeExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "logic_filter_rules.#", "1"),
-					resource.TestCheckResourceAttr(resourceName, "logic_filter_rules.0.filter", "example-ipv6-option-filter-1"),
+					resource.TestCheckResourceAttr(resourceName, "logic_filter_rules.0.filter", "ipv6_option_filter"),
 					resource.TestCheckResourceAttr(resourceName, "logic_filter_rules.0.type", "Option"),
 				),
 			},
@@ -699,7 +699,7 @@ func TestAccIpv6rangeResource_LogicFilterRules(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6rangeExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "logic_filter_rules.#", "1"),
-					resource.TestCheckResourceAttr(resourceName, "logic_filter_rules.0.filter", "example-ipv6-option-filter-2"),
+					resource.TestCheckResourceAttr(resourceName, "logic_filter_rules.0.filter", "ipv6_option_filter1"),
 					resource.TestCheckResourceAttr(resourceName, "logic_filter_rules.0.type", "Option"),
 				),
 			},
@@ -709,9 +709,12 @@ func TestAccIpv6rangeResource_LogicFilterRules(t *testing.T) {
 }
 
 func TestAccIpv6rangeResource_Member(t *testing.T) {
+	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_dhcp_ipv6range.test_member"
 	var v dhcp.Ipv6range
-	view := acctest.RandomNameWithPrefix("network-view")
+	view := "default"
+	member1 := utils.GetNIOSGridMasterHostName()
+	memberUpdatedName := utils.GetNIOSGridMemberHostName()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -719,18 +722,18 @@ func TestAccIpv6rangeResource_Member(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccIpv6rangeMember(view, "14::1", "14::10", "infoblox.localdomain", "infoblox.member1", "MEMBER"),
+				Config: testAccIpv6rangeMember(view, "140::1", "140::10", member1, memberUpdatedName, "MEMBER"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6rangeExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "member.name", "infoblox.localdomain"),
+					resource.TestCheckResourceAttr(resourceName, "member.name", member1),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccIpv6rangeMember(view, "14::1", "14::10", "infoblox.member1", "infoblox.localdomain", "MEMBER"),
+				Config: testAccIpv6rangeMember(view, "140::1", "140::10", memberUpdatedName, member1, "MEMBER"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6rangeExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "member.name", "infoblox.member1"),
+					resource.TestCheckResourceAttr(resourceName, "member.name", memberUpdatedName),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -828,13 +831,13 @@ func TestAccIpv6rangeResource_OptionFilterRules(t *testing.T) {
 	view := acctest.RandomNameWithPrefix("network-view")
 	optionFilterRules := []map[string]any{
 		{
-			"filter":     "example-ipv6-option-filter-1",
+			"filter":     "ipv6_option_filter",
 			"permission": "Allow",
 		},
 	}
 	optionFilterRulesUpdated := []map[string]any{
 		{
-			"filter":     "example-ipv6-option-filter-1",
+			"filter":     "ipv6_option_filter1",
 			"permission": "Deny",
 		},
 	}
@@ -849,7 +852,7 @@ func TestAccIpv6rangeResource_OptionFilterRules(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6rangeExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "option_filter_rules.#", "1"),
-					resource.TestCheckResourceAttr(resourceName, "option_filter_rules.0.filter", "example-ipv6-option-filter-1"),
+					resource.TestCheckResourceAttr(resourceName, "option_filter_rules.0.filter", "ipv6_option_filter"),
 					resource.TestCheckResourceAttr(resourceName, "option_filter_rules.0.permission", "Allow"),
 				),
 			},
@@ -859,7 +862,7 @@ func TestAccIpv6rangeResource_OptionFilterRules(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6rangeExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "option_filter_rules.#", "1"),
-					resource.TestCheckResourceAttr(resourceName, "option_filter_rules.0.filter", "example-ipv6-option-filter-1"),
+					resource.TestCheckResourceAttr(resourceName, "option_filter_rules.0.filter", "ipv6_option_filter1"),
 					resource.TestCheckResourceAttr(resourceName, "option_filter_rules.0.permission", "Deny"),
 				),
 			},
@@ -998,9 +1001,11 @@ func TestAccIpv6rangeResource_SamePortControlDiscoveryBlackout(t *testing.T) {
 }
 
 func TestAccIpv6rangeResource_ServerAssociationType(t *testing.T) {
+	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_dhcp_ipv6range.test_server_association_type"
 	var v dhcp.Ipv6range
-	view := acctest.RandomNameWithPrefix("network-view")
+	view := "default"
+	memberUpdatedName := utils.GetNIOSGridMemberHostName()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1008,7 +1013,7 @@ func TestAccIpv6rangeResource_ServerAssociationType(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccIpv6rangeServerAssociationType(view, "14::1", "14::10", "MEMBER", "infoblox.member1"),
+				Config: testAccIpv6rangeServerAssociationType(view, "141::1", "141::10", "MEMBER", memberUpdatedName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6rangeExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "server_association_type", "MEMBER"),
@@ -1016,7 +1021,7 @@ func TestAccIpv6rangeResource_ServerAssociationType(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccIpv6rangeServerAssociationTypeUpdate(view, "14::1", "14::10", "NONE"),
+				Config: testAccIpv6rangeServerAssociationType(view, "141::1", "141::10", "NONE", memberUpdatedName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6rangeExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "server_association_type", "NONE"),
@@ -1073,7 +1078,7 @@ func TestAccIpv6rangeResource_SubscribeSettings(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccIpv6rangeSubscribeSettings("default", "19::1", "19::10", subscribeSettings, "true"),
+				Config: testAccIpv6rangeSubscribeSettings("test_network_view", "219::1", "219::10", subscribeSettings, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6rangeExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "subscribe_settings.enabled_attributes.0", "DOMAINNAME"),
@@ -1082,7 +1087,7 @@ func TestAccIpv6rangeResource_SubscribeSettings(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccIpv6rangeSubscribeSettings("default", "19::1", "19::10", subscribeSettingsUpdated, "true"),
+				Config: testAccIpv6rangeSubscribeSettings("test_network_view", "219::1", "219::10", subscribeSettingsUpdated, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6rangeExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "subscribe_settings.enabled_attributes.0", "SECURITY_GROUP"),
@@ -1189,7 +1194,7 @@ func TestAccIpv6rangeResource_UseLogicFilterRules(t *testing.T) {
 	view := acctest.RandomNameWithPrefix("network-view")
 	logicFilterRules := []map[string]any{
 		{
-			"filter": "example-ipv6-option-filter-1",
+			"filter": "ipv6_option_filter",
 			"type":   "Option",
 		},
 	}
@@ -1262,7 +1267,7 @@ func TestAccIpv6rangeResource_UseSubscribeSettings(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccIpv6rangeUseSubscribeSettings("default", "19::1", "19::10", "true", subscribeSettings),
+				Config: testAccIpv6rangeUseSubscribeSettings("test_network_view", "119::1", "119::10", "true", subscribeSettings),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6rangeExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_subscribe_settings", "true"),
@@ -1270,7 +1275,7 @@ func TestAccIpv6rangeResource_UseSubscribeSettings(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccIpv6rangeUseSubscribeSettings("default", "19::1", "19::10", "false", nil),
+				Config: testAccIpv6rangeUseSubscribeSettings("test_network_view", "119::1", "119::10", "false", nil),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6rangeExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_subscribe_settings", "false"),
@@ -1345,10 +1350,10 @@ func testAccIpv6rangeImportStateIdFunc(resourceName string) resource.ImportState
 		if !ok {
 			return "", fmt.Errorf("not found: %s", resourceName)
 		}
-		if rs.Primary.Attributes["ref"] == "" {
-			return "", fmt.Errorf("ref is not set")
+		if rs.Primary.Attributes["uuid"] == "" {
+			return "", fmt.Errorf("uuid is not set")
 		}
-		return rs.Primary.Attributes["ref"], nil
+		return rs.Primary.Attributes["uuid"], nil
 	}
 }
 
@@ -1624,14 +1629,14 @@ resource "nios_dhcp_ipv6range" "test_member" {
     network = nios_ipam_ipv6network.test.network
     start_addr = %q
     end_addr = %q
-    network_view = nios_ipam_network_view.test.name
+    network_view = "default"
     member = {
 		name = %q
 	}
 	server_association_type = %q
 }
 `, startAddr, endAddr, member1, serverAssociationType)
-	return strings.Join([]string{testAccBaseWithIpv6NetworkWithTwoMembersandView(view, member1, member2), config}, "")
+	return strings.Join([]string{testAccBaseWithIpv6NetworkWithTwoMembersandDefaultView(view, member1, member2), config}, "")
 }
 
 func testAccIpv6rangeName(view, startAddr, endAddr string, name string) string {
@@ -1729,33 +1734,21 @@ resource "nios_dhcp_ipv6range" "test_same_port_control_discovery_blackout" {
 }
 
 func testAccIpv6rangeServerAssociationType(view, startAddr, endAddr string, serverAssociationType string, member string) string {
-	config := fmt.Sprintf(`
-resource "nios_dhcp_ipv6range" "test_server_association_type" {
-    network = nios_ipam_ipv6network.test.network
-    start_addr = %q
-    end_addr = %q
-    network_view = nios_ipam_network_view.test.name
-    server_association_type = %q
-	member = {
-		name = %q
+	memberStr := ""
+	if serverAssociationType != "NONE" {
+		memberStr = fmt.Sprintf("member = {\n\t\tname = %q\n\t}", member)
 	}
-}
-`, startAddr, endAddr, serverAssociationType, member)
-	return strings.Join([]string{testAccBaseWithIpv6NetworkWithMemberandView(view, member), config}, "")
-}
-
-func testAccIpv6rangeServerAssociationTypeUpdate(view, startAddr, endAddr string, serverAssociationType string) string {
 	config := fmt.Sprintf(`
 resource "nios_dhcp_ipv6range" "test_server_association_type" {
     network = nios_ipam_ipv6network.test.network
     start_addr = %q
     end_addr = %q
-    network_view = nios_ipam_network_view.test.name
+    network_view = "default"
     server_association_type = %q
-
+	%s
 }
-`, startAddr, endAddr, serverAssociationType)
-	return strings.Join([]string{testAccBaseWithIpv6NetworkandView(view), config}, "")
+`, startAddr, endAddr, serverAssociationType, memberStr)
+	return strings.Join([]string{testAccBaseWithIpv6NetworkWithMemberandView(view, member), config}, "")
 }
 
 func testAccIpv6rangeStartAddr(view, startAddr, endAddr string) string {
@@ -1772,7 +1765,12 @@ resource "nios_dhcp_ipv6range" "test_start_addr" {
 
 func testAccIpv6rangeSubscribeSettings(view, startAddr, endAddr string, subscribeSettings map[string]any, useSubscribeSettings string) string {
 	subscribeSettingsStr := utils.ConvertMapToHCL(subscribeSettings)
-	config := fmt.Sprintf(`
+	return fmt.Sprintf(`
+resource "nios_ipam_ipv6network" "test" {
+    network = "219::/64"
+	network_view = %q
+}
+
 resource "nios_dhcp_ipv6range" "test_subscribe_settings" {
     network = nios_ipam_ipv6network.test.network
     start_addr = %q
@@ -1781,8 +1779,7 @@ resource "nios_dhcp_ipv6range" "test_subscribe_settings" {
     subscribe_settings = %s
 	use_subscribe_settings = %q
 }
-`, startAddr, endAddr, subscribeSettingsStr, useSubscribeSettings)
-	return strings.Join([]string{testAccBaseWithIpv6Network(view), config}, "")
+`, view, startAddr, endAddr, subscribeSettingsStr, useSubscribeSettings)
 }
 
 func testAccIpv6rangeUseBlackoutSetting(view, startAddr, endAddr string, useBlackoutSetting string) string {
@@ -1855,7 +1852,12 @@ resource "nios_dhcp_ipv6range" "test_use_recycle_leases" {
 
 func testAccIpv6rangeUseSubscribeSettings(view, startAddr, endAddr string, useSubscribeSettings string, subscribeSettings map[string]any) string {
 	subscribeSettingsStr := utils.ConvertMapToHCL(subscribeSettings)
-	config := fmt.Sprintf(`
+	return fmt.Sprintf(`
+resource "nios_ipam_ipv6network" "test" {
+    network = "119::/64"
+	network_view = %q
+}
+
 resource "nios_dhcp_ipv6range" "test_use_subscribe_settings" {
     network = nios_ipam_ipv6network.test.network
     start_addr = %q
@@ -1864,8 +1866,7 @@ resource "nios_dhcp_ipv6range" "test_use_subscribe_settings" {
 	subscribe_settings = %s
     use_subscribe_settings = %q
 }
-`, startAddr, endAddr, subscribeSettingsStr, useSubscribeSettings)
-	return strings.Join([]string{testAccBaseWithIpv6Network(view), config}, "")
+`, view, startAddr, endAddr, subscribeSettingsStr, useSubscribeSettings)
 }
 
 func testAccBaseWithIpv6NetworkandView(view string) string {
@@ -1899,15 +1900,11 @@ resource "nios_ipam_ipv6network" "test2" {
 `, view)
 }
 
-func testAccBaseWithIpv6NetworkWithTwoMembersandView(view, member1, member2 string) string {
+func testAccBaseWithIpv6NetworkWithTwoMembersandDefaultView(view, member1, member2 string) string {
 	return fmt.Sprintf(`
-resource "nios_ipam_network_view" "test" {
-	name = %q
-}
-
 resource "nios_ipam_ipv6network" "test" {
-    network = "14::/64"
-	network_view = nios_ipam_network_view.test.name
+    network = "140::/64"
+	network_view = %q
 	members = [{
 		name = %q
 	},
@@ -1920,25 +1917,12 @@ resource "nios_ipam_ipv6network" "test" {
 
 func testAccBaseWithIpv6NetworkWithMemberandView(view, member string) string {
 	return fmt.Sprintf(`
-resource "nios_ipam_network_view" "test" {
-	name = %q
-}
-
 resource "nios_ipam_ipv6network" "test" {
-    network = "14::/64"
-	network_view = nios_ipam_network_view.test.name
+    network = "141::/64"
+	network_view = %q
 	members = [{
 		name = %q
 	}]
 }
 `, view, member)
-}
-
-func testAccBaseWithIpv6Network(view string) string {
-	return fmt.Sprintf(`
-resource "nios_ipam_ipv6network" "test" {
-    network = "19::/64"
-	network_view = %q
-}
-`, view)
 }

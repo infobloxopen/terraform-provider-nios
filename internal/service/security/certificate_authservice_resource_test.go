@@ -27,9 +27,7 @@ func TestAccCertificateAuthserviceResource_basic(t *testing.T) {
 	var resourceName = "nios_security_certificate_authservice.test"
 	var v security.CertificateAuthservice
 	name := acctest.RandomNameWithPrefix("certificate_authservice")
-	caCertificate := []string{
-		"cacertificate/b25lLmVhcF9jYV9jZXJ0JDAuNzg5Y2IyOGVkZDgyMDE5MTYzODljOGQ5MGI2MTM4YmFlNDIxODY1YmY2YWZlMTdiMmEyNDRjNTIwNDRkMGQ3NWFiMGY0MGFjNTBmYzc3ZGMwM2YwOTI2NWRhNDRkYzllMjQ0OTBkZmMyMWEyOWVlYmIxODhlMDFlMWY5OGYwOTg:CN%3D%22ib-root-ca%22",
-	}
+	caCertificate := []string{utils.GetNIOSCACert1Ref()}
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -66,9 +64,7 @@ func TestAccCertificateAuthserviceResource_disappears(t *testing.T) {
 	resourceName := "nios_security_certificate_authservice.test"
 	var v security.CertificateAuthservice
 	name := acctest.RandomNameWithPrefix("certificate_authservice")
-	caCertificate := []string{
-		"cacertificate/b25lLmVhcF9jYV9jZXJ0JDAuNzg5Y2IyOGVkZDgyMDE5MTYzODljOGQ5MGI2MTM4YmFlNDIxODY1YmY2YWZlMTdiMmEyNDRjNTIwNDRkMGQ3NWFiMGY0MGFjNTBmYzc3ZGMwM2YwOTI2NWRhNDRkYzllMjQ0OTBkZmMyMWEyOWVlYmIxODhlMDFlMWY5OGYwOTg:CN%3D%22ib-root-ca%22",
-	}
+	caCertificate := []string{utils.GetNIOSCACert1Ref()}
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -90,9 +86,7 @@ func TestAccCertificateAuthserviceResource_AutoPopulateLogin(t *testing.T) {
 	var resourceName = "nios_security_certificate_authservice.test_auto_populate_login"
 	var v security.CertificateAuthservice
 	name := acctest.RandomNameWithPrefix("certificate_authservice")
-	caCertificate := []string{
-		"cacertificate/b25lLmVhcF9jYV9jZXJ0JDAuNzg5Y2IyOGVkZDgyMDE5MTYzODljOGQ5MGI2MTM4YmFlNDIxODY1YmY2YWZlMTdiMmEyNDRjNTIwNDRkMGQ3NWFiMGY0MGFjNTBmYzc3ZGMwM2YwOTI2NWRhNDRkYzllMjQ0OTBkZmMyMWEyOWVlYmIxODhlMDFlMWY5OGYwOTg:CN%3D%22ib-root-ca%22",
-	}
+	caCertificate := []string{utils.GetNIOSCACert1Ref()}
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -123,12 +117,8 @@ func TestAccCertificateAuthserviceResource_CaCertificates(t *testing.T) {
 	var resourceName = "nios_security_certificate_authservice.test_ca_certificates"
 	var v security.CertificateAuthservice
 	name := acctest.RandomNameWithPrefix("certificate_authservice")
-	caCertificate := []string{
-		"cacertificate/b25lLmVhcF9jYV9jZXJ0JDAuNzg5Y2IyOGVkZDgyMDE5MTYzODljOGQ5MGI2MTM4YmFlNDIxODY1YmY2YWZlMTdiMmEyNDRjNTIwNDRkMGQ3NWFiMGY0MGFjNTBmYzc3ZGMwM2YwOTI2NWRhNDRkYzllMjQ0OTBkZmMyMWEyOWVlYmIxODhlMDFlMWY5OGYwOTg:CN%3D%22ib-root-ca%22",
-	}
-	caCertificateUpdate := []string{
-		"cacertificate/b25lLmVhcF9jYV9jZXJ0JDAuZGM2MTlhMWYyYmI0NGYwYjUzMWFiNzcwZjk1ZDQ0MDRhNWY2ODQxZGQxOTQ3Y2Q0YjcxMjU1YWU1MjY5MzM1MTRhMDljNWI5OTMwNmNhYzRiMjczY2JhN2NhODYwOWQ5ODY2YWYxYzU3NDdkNTVmNTFjZjM0ZGY4NzRmYTFjZWU:CN%3D%22ib-root-ca%22",
-	}
+	caCertificate := []string{utils.GetNIOSCACert1Ref()}
+	caCertificateUpdate := []string{utils.GetNIOSCACert2Ref()}
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -159,9 +149,7 @@ func TestAccCertificateAuthserviceResource_Comment(t *testing.T) {
 	var resourceName = "nios_security_certificate_authservice.test_comment"
 	var v security.CertificateAuthservice
 	name := acctest.RandomNameWithPrefix("certificate_authservice")
-	caCertificate := []string{
-		"cacertificate/b25lLmVhcF9jYV9jZXJ0JDAuNzg5Y2IyOGVkZDgyMDE5MTYzODljOGQ5MGI2MTM4YmFlNDIxODY1YmY2YWZlMTdiMmEyNDRjNTIwNDRkMGQ3NWFiMGY0MGFjNTBmYzc3ZGMwM2YwOTI2NWRhNDRkYzllMjQ0OTBkZmMyMWEyOWVlYmIxODhlMDFlMWY5OGYwOTg:CN%3D%22ib-root-ca%22",
-	}
+	caCertificate := []string{utils.GetNIOSCACert1Ref()}
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -192,9 +180,7 @@ func TestAccCertificateAuthserviceResource_Disabled(t *testing.T) {
 	var resourceName = "nios_security_certificate_authservice.test_disabled"
 	var v security.CertificateAuthservice
 	name := acctest.RandomNameWithPrefix("certificate_authservice")
-	caCertificate := []string{
-		"cacertificate/b25lLmVhcF9jYV9jZXJ0JDAuNzg5Y2IyOGVkZDgyMDE5MTYzODljOGQ5MGI2MTM4YmFlNDIxODY1YmY2YWZlMTdiMmEyNDRjNTIwNDRkMGQ3NWFiMGY0MGFjNTBmYzc3ZGMwM2YwOTI2NWRhNDRkYzllMjQ0OTBkZmMyMWEyOWVlYmIxODhlMDFlMWY5OGYwOTg:CN%3D%22ib-root-ca%22",
-	}
+	caCertificate := []string{utils.GetNIOSCACert1Ref()}
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -225,9 +211,7 @@ func TestAccCertificateAuthserviceResource_EnablePasswordRequest(t *testing.T) {
 	var resourceName = "nios_security_certificate_authservice.test_enable_password_request"
 	var v security.CertificateAuthservice
 	name := acctest.RandomNameWithPrefix("certificate_authservice")
-	caCertificate := []string{
-		"cacertificate/b25lLmVhcF9jYV9jZXJ0JDAuNzg5Y2IyOGVkZDgyMDE5MTYzODljOGQ5MGI2MTM4YmFlNDIxODY1YmY2YWZlMTdiMmEyNDRjNTIwNDRkMGQ3NWFiMGY0MGFjNTBmYzc3ZGMwM2YwOTI2NWRhNDRkYzllMjQ0OTBkZmMyMWEyOWVlYmIxODhlMDFlMWY5OGYwOTg:CN%3D%22ib-root-ca%22",
-	}
+	caCertificate := []string{utils.GetNIOSCACert1Ref()}
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -255,13 +239,13 @@ func TestAccCertificateAuthserviceResource_EnablePasswordRequest(t *testing.T) {
 }
 
 func TestAccCertificateAuthserviceResource_EnableRemoteLookup(t *testing.T) {
+	// Remote Lookup Service cannot be configured as it prevents changing Member Type
+	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_security_certificate_authservice.test_enable_remote_lookup"
 	var v security.CertificateAuthservice
 	name := acctest.RandomNameWithPrefix("certificate_authservice")
-	caCertificate := []string{
-		"cacertificate/b25lLmVhcF9jYV9jZXJ0JDAuNzg5Y2IyOGVkZDgyMDE5MTYzODljOGQ5MGI2MTM4YmFlNDIxODY1YmY2YWZlMTdiMmEyNDRjNTIwNDRkMGQ3NWFiMGY0MGFjNTBmYzc3ZGMwM2YwOTI2NWRhNDRkYzllMjQ0OTBkZmMyMWEyOWVlYmIxODhlMDFlMWY5OGYwOTg:CN%3D%22ib-root-ca%22",
-	}
-	remoteLookupService := "ad_auth_service/b25lLmFkX2F1dGhfc2VydmljZSRhY3RpdmVfZGly:active_dir"
+	caCertificate := []string{utils.GetNIOSCACert1Ref()}
+	remoteLookupService := utils.GetNIOSADAuthServiceRef()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -292,9 +276,7 @@ func TestAccCertificateAuthserviceResource_MaxRetries(t *testing.T) {
 	var resourceName = "nios_security_certificate_authservice.test_max_retries"
 	var v security.CertificateAuthservice
 	name := acctest.RandomNameWithPrefix("certificate_authservice")
-	caCertificate := []string{
-		"cacertificate/b25lLmVhcF9jYV9jZXJ0JDAuNzg5Y2IyOGVkZDgyMDE5MTYzODljOGQ5MGI2MTM4YmFlNDIxODY1YmY2YWZlMTdiMmEyNDRjNTIwNDRkMGQ3NWFiMGY0MGFjNTBmYzc3ZGMwM2YwOTI2NWRhNDRkYzllMjQ0OTBkZmMyMWEyOWVlYmIxODhlMDFlMWY5OGYwOTg:CN%3D%22ib-root-ca%22",
-	}
+	caCertificate := []string{utils.GetNIOSCACert1Ref()}
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -326,9 +308,7 @@ func TestAccCertificateAuthserviceResource_Name(t *testing.T) {
 	var v security.CertificateAuthservice
 	name := acctest.RandomNameWithPrefix("certificate_authservice")
 	nameUpdate := acctest.RandomNameWithPrefix("certificate_authservice")
-	caCertificate := []string{
-		"cacertificate/b25lLmVhcF9jYV9jZXJ0JDAuNzg5Y2IyOGVkZDgyMDE5MTYzODljOGQ5MGI2MTM4YmFlNDIxODY1YmY2YWZlMTdiMmEyNDRjNTIwNDRkMGQ3NWFiMGY0MGFjNTBmYzc3ZGMwM2YwOTI2NWRhNDRkYzllMjQ0OTBkZmMyMWEyOWVlYmIxODhlMDFlMWY5OGYwOTg:CN%3D%22ib-root-ca%22",
-	}
+	caCertificate := []string{utils.GetNIOSCACert1Ref()}
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -359,9 +339,7 @@ func TestAccCertificateAuthserviceResource_OcspCheck(t *testing.T) {
 	var resourceName = "nios_security_certificate_authservice.test_ocsp_check"
 	var v security.CertificateAuthservice
 	name := acctest.RandomNameWithPrefix("certificate_authservice")
-	caCertificate := []string{
-		"cacertificate/b25lLmVhcF9jYV9jZXJ0JDAuNzg5Y2IyOGVkZDgyMDE5MTYzODljOGQ5MGI2MTM4YmFlNDIxODY1YmY2YWZlMTdiMmEyNDRjNTIwNDRkMGQ3NWFiMGY0MGFjNTBmYzc3ZGMwM2YwOTI2NWRhNDRkYzllMjQ0OTBkZmMyMWEyOWVlYmIxODhlMDFlMWY5OGYwOTg:CN%3D%22ib-root-ca%22",
-	}
+	caCertificate := []string{utils.GetNIOSCACert1Ref()}
 	testDataPath := getTestDataPath()
 	ocspResponders := []map[string]any{
 		{
@@ -399,9 +377,7 @@ func TestAccCertificateAuthserviceResource_OcspResponders(t *testing.T) {
 	var resourceName = "nios_security_certificate_authservice.test_ocsp_responders"
 	var v security.CertificateAuthservice
 	name := acctest.RandomNameWithPrefix("certificate_authservice")
-	caCertificate := []string{
-		"cacertificate/b25lLmVhcF9jYV9jZXJ0JDAuNzg5Y2IyOGVkZDgyMDE5MTYzODljOGQ5MGI2MTM4YmFlNDIxODY1YmY2YWZlMTdiMmEyNDRjNTIwNDRkMGQ3NWFiMGY0MGFjNTBmYzc3ZGMwM2YwOTI2NWRhNDRkYzllMjQ0OTBkZmMyMWEyOWVlYmIxODhlMDFlMWY5OGYwOTg:CN%3D%22ib-root-ca%22",
-	}
+	caCertificate := []string{utils.GetNIOSCACert1Ref()}
 
 	testDataPath := getTestDataPath()
 	ocspResponders := []map[string]any{
@@ -418,7 +394,7 @@ func TestAccCertificateAuthserviceResource_OcspResponders(t *testing.T) {
 	ocspRespondersUpdate := []map[string]any{
 		{
 			"fqdn_or_ip":            "3.3.32.3",
-			"certificate_file_path": "/Users/chaithra/go/src/github.com/infobloxopen/terraform-provider-nios/internal/testdata/nios_security_certificate_authservice/client.cert.pem",
+			"certificate_file_path": filepath.Join(testDataPath, "client.cert.pem"),
 		},
 	}
 
@@ -457,9 +433,7 @@ func TestAccCertificateAuthserviceResource_RecoveryInterval(t *testing.T) {
 	var resourceName = "nios_security_certificate_authservice.test_recovery_interval"
 	var v security.CertificateAuthservice
 	name := acctest.RandomNameWithPrefix("certificate_authservice")
-	caCertificate := []string{
-		"cacertificate/b25lLmVhcF9jYV9jZXJ0JDAuNzg5Y2IyOGVkZDgyMDE5MTYzODljOGQ5MGI2MTM4YmFlNDIxODY1YmY2YWZlMTdiMmEyNDRjNTIwNDRkMGQ3NWFiMGY0MGFjNTBmYzc3ZGMwM2YwOTI2NWRhNDRkYzllMjQ0OTBkZmMyMWEyOWVlYmIxODhlMDFlMWY5OGYwOTg:CN%3D%22ib-root-ca%22",
-	}
+	caCertificate := []string{utils.GetNIOSCACert1Ref()}
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -490,11 +464,9 @@ func TestAccCertificateAuthserviceResource_RemoteLookupService(t *testing.T) {
 	var resourceName = "nios_security_certificate_authservice.test_remote_lookup_service"
 	var v security.CertificateAuthservice
 	name := acctest.RandomNameWithPrefix("certificate_authservice")
-	caCertificate := []string{
-		"cacertificate/b25lLmVhcF9jYV9jZXJ0JDAuNzg5Y2IyOGVkZDgyMDE5MTYzODljOGQ5MGI2MTM4YmFlNDIxODY1YmY2YWZlMTdiMmEyNDRjNTIwNDRkMGQ3NWFiMGY0MGFjNTBmYzc3ZGMwM2YwOTI2NWRhNDRkYzllMjQ0OTBkZmMyMWEyOWVlYmIxODhlMDFlMWY5OGYwOTg:CN%3D%22ib-root-ca%22",
-	}
-	remoteLookupService := "ad_auth_service/b25lLmFkX2F1dGhfc2VydmljZSRhY3RpdmVfZGly:active_dir"
-	remoteLookupServiceUpdate := "ad_auth_service/b25lLmFkX2F1dGhfc2VydmljZSRhY3RpdmVfZGlyX3Rlc3Q:active_dir_test"
+	caCertificate := []string{utils.GetNIOSCACert1Ref()}
+	remoteLookupService := utils.GetNIOSADAuthServiceRef()
+	remoteLookupServiceUpdate := utils.GetNIOSADAuthServiceRef2()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -525,9 +497,7 @@ func TestAccCertificateAuthserviceResource_RemoteLookupUsername(t *testing.T) {
 	var resourceName = "nios_security_certificate_authservice.test_remote_lookup_username"
 	var v security.CertificateAuthservice
 	name := acctest.RandomNameWithPrefix("certificate_authservice")
-	caCertificate := []string{
-		"cacertificate/b25lLmVhcF9jYV9jZXJ0JDAuNzg5Y2IyOGVkZDgyMDE5MTYzODljOGQ5MGI2MTM4YmFlNDIxODY1YmY2YWZlMTdiMmEyNDRjNTIwNDRkMGQ3NWFiMGY0MGFjNTBmYzc3ZGMwM2YwOTI2NWRhNDRkYzllMjQ0OTBkZmMyMWEyOWVlYmIxODhlMDFlMWY5OGYwOTg:CN%3D%22ib-root-ca%22",
-	}
+	caCertificate := []string{utils.GetNIOSCACert1Ref()}
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -558,9 +528,7 @@ func TestAccCertificateAuthserviceResource_ResponseTimeout(t *testing.T) {
 	var resourceName = "nios_security_certificate_authservice.test_response_timeout"
 	var v security.CertificateAuthservice
 	name := acctest.RandomNameWithPrefix("certificate_authservice")
-	caCertificate := []string{
-		"cacertificate/b25lLmVhcF9jYV9jZXJ0JDAuNzg5Y2IyOGVkZDgyMDE5MTYzODljOGQ5MGI2MTM4YmFlNDIxODY1YmY2YWZlMTdiMmEyNDRjNTIwNDRkMGQ3NWFiMGY0MGFjNTBmYzc3ZGMwM2YwOTI2NWRhNDRkYzllMjQ0OTBkZmMyMWEyOWVlYmIxODhlMDFlMWY5OGYwOTg:CN%3D%22ib-root-ca%22",
-	}
+	caCertificate := []string{utils.GetNIOSCACert1Ref()}
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -591,9 +559,7 @@ func TestAccCertificateAuthserviceResource_TrustModel(t *testing.T) {
 	var resourceName = "nios_security_certificate_authservice.test_trust_model"
 	var v security.CertificateAuthservice
 	name := acctest.RandomNameWithPrefix("certificate_authservice")
-	caCertificate := []string{
-		"cacertificate/b25lLmVhcF9jYV9jZXJ0JDAuNzg5Y2IyOGVkZDgyMDE5MTYzODljOGQ5MGI2MTM4YmFlNDIxODY1YmY2YWZlMTdiMmEyNDRjNTIwNDRkMGQ3NWFiMGY0MGFjNTBmYzc3ZGMwM2YwOTI2NWRhNDRkYzllMjQ0OTBkZmMyMWEyOWVlYmIxODhlMDFlMWY5OGYwOTg:CN%3D%22ib-root-ca%22",
-	}
+	caCertificate := []string{utils.GetNIOSCACert1Ref()}
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -624,9 +590,7 @@ func TestAccCertificateAuthserviceResource_UserMatchType(t *testing.T) {
 	var resourceName = "nios_security_certificate_authservice.test_user_match_type"
 	var v security.CertificateAuthservice
 	name := acctest.RandomNameWithPrefix("certificate_authservice")
-	caCertificate := []string{
-		"cacertificate/b25lLmVhcF9jYV9jZXJ0JDAuNzg5Y2IyOGVkZDgyMDE5MTYzODljOGQ5MGI2MTM4YmFlNDIxODY1YmY2YWZlMTdiMmEyNDRjNTIwNDRkMGQ3NWFiMGY0MGFjNTBmYzc3ZGMwM2YwOTI2NWRhNDRkYzllMjQ0OTBkZmMyMWEyOWVlYmIxODhlMDFlMWY5OGYwOTg:CN%3D%22ib-root-ca%22",
-	}
+	caCertificate := []string{utils.GetNIOSCACert1Ref()}
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },

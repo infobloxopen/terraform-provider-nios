@@ -322,4 +322,17 @@ func (r *Awsrte53taskgroupResource) ValidateConfig(ctx context.Context, req reso
 			}
 		}
 	}
+
+	// if sync_child_accounts is false or unknown, role_arn should not be set
+	if !data.SyncChildAccounts.IsUnknown() {
+		if data.SyncChildAccounts.IsNull() || !data.SyncChildAccounts.ValueBool() {
+			if !data.RoleArn.IsUnknown() && !data.RoleArn.IsNull() && data.RoleArn.ValueString() != "" {
+				resp.Diagnostics.AddError(
+					"Invalid Configuration",
+					"'role_arn' should not be set when 'sync_child_accounts' is disabled. "+
+						"Please remove 'role_arn' or set 'sync_child_accounts' to true.",
+				)
+			}
+		}
+	}
 }

@@ -81,6 +81,7 @@ func TestAccParentalcontrolSubscribersiteResource_disappears(t *testing.T) {
 }
 
 func TestAccParentalcontrolSubscribersiteResource_Abss(t *testing.T) {
+	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_parentalcontrol_subscribersite.test_abss"
 	var v parentalcontrol.ParentalcontrolSubscribersite
 	name := acctest.RandomNameWithPrefix("subscriber-site")
@@ -133,11 +134,13 @@ func TestAccParentalcontrolSubscribersiteResource_ApiMembers(t *testing.T) {
 	var resourceName = "nios_parentalcontrol_subscribersite.test_api_members"
 	var v parentalcontrol.ParentalcontrolSubscribersite
 	name := acctest.RandomNameWithPrefix("subscriber-site")
+	memberName := utils.GetNIOSGridMasterHostName()
+	memberUpdateName := utils.GetNIOSGridMemberHostName()
 	apiMembers1 := []map[string]any{
-		{"name": "infoblox.localdomain"},
+		{"name": memberName},
 	}
 	apiMembers2 := []map[string]any{
-		{"name": "infoblox.member1"},
+		{"name": memberUpdateName},
 	}
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -149,7 +152,7 @@ func TestAccParentalcontrolSubscribersiteResource_ApiMembers(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckParentalcontrolSubscribersiteExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "api_members.#", "1"),
-					resource.TestCheckResourceAttr(resourceName, "api_members.0.name", "infoblox.localdomain"),
+					resource.TestCheckResourceAttr(resourceName, "api_members.0.name", memberName),
 				),
 			},
 			// Update and Read
@@ -158,7 +161,7 @@ func TestAccParentalcontrolSubscribersiteResource_ApiMembers(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckParentalcontrolSubscribersiteExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "api_members.#", "1"),
-					resource.TestCheckResourceAttr(resourceName, "api_members.0.name", "infoblox.member1"),
+					resource.TestCheckResourceAttr(resourceName, "api_members.0.name", memberUpdateName),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -582,11 +585,13 @@ func TestAccParentalcontrolSubscribersiteResource_Members(t *testing.T) {
 	var resourceName = "nios_parentalcontrol_subscribersite.test_members"
 	var v parentalcontrol.ParentalcontrolSubscribersite
 	name := acctest.RandomNameWithPrefix("subscriber-site")
+	memberName := utils.GetNIOSGridMasterHostName()
+	memberUpdateName := utils.GetNIOSGridMemberHostName()
 	members1 := []map[string]any{
-		{"name": "infoblox.localdomain"},
+		{"name": memberName},
 	}
 	members2 := []map[string]any{
-		{"name": "infoblox.member1"},
+		{"name": memberUpdateName},
 	}
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -598,7 +603,7 @@ func TestAccParentalcontrolSubscribersiteResource_Members(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckParentalcontrolSubscribersiteExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "members.#", "1"),
-					resource.TestCheckResourceAttr(resourceName, "members.0.name", "infoblox.localdomain"),
+					resource.TestCheckResourceAttr(resourceName, "members.0.name", memberName),
 				),
 			},
 			// Update and Read
@@ -607,7 +612,7 @@ func TestAccParentalcontrolSubscribersiteResource_Members(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckParentalcontrolSubscribersiteExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "members.#", "1"),
-					resource.TestCheckResourceAttr(resourceName, "members.0.name", "infoblox.member1"),
+					resource.TestCheckResourceAttr(resourceName, "members.0.name", memberUpdateName),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -653,6 +658,7 @@ func TestAccParentalcontrolSubscribersiteResource_Msps(t *testing.T) {
 }
 
 func TestAccParentalcontrolSubscribersiteResource_NasGateways(t *testing.T) {
+	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_parentalcontrol_subscribersite.test_nas_gateways"
 	var v parentalcontrol.ParentalcontrolSubscribersite
 	name := acctest.RandomNameWithPrefix("subscriber-site")

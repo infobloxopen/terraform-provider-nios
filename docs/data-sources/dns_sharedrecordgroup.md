@@ -69,10 +69,7 @@ Read-Only:
 <a id="nestedatt--result--zone_associations"></a>
 ### Nested Schema for `result.zone_associations`
 
-Required:
-
-- `fqdn` (String) The FQDN of the authoritative forward zone.
-
 Optional:
 
+- `fqdn` (String) The FQDN of the authoritative forward zone.
 - `view` (String) The view to which the zone belongs. If a view is not specified, the default view is used.

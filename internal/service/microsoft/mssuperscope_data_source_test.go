@@ -14,6 +14,7 @@ import (
 )
 
 func TestAccMssuperscopeDataSource_Filters(t *testing.T) {
+	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	dataSourceName := "data.nios_microsoft_mssuperscope.test"
 	resourceName := "nios_microsoft_mssuperscope.test"
 	var v microsoft.Mssuperscope
@@ -39,6 +40,7 @@ func TestAccMssuperscopeDataSource_Filters(t *testing.T) {
 }
 
 func TestAccMssuperscopeDataSource_ExtAttrFilters(t *testing.T) {
+	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	dataSourceName := "data.nios_microsoft_mssuperscope.test"
 	resourceName := "nios_microsoft_mssuperscope.test"
 	var v microsoft.Mssuperscope

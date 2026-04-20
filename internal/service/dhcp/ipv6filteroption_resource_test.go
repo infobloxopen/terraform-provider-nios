@@ -90,7 +90,7 @@ func TestAccIpv6filteroptionResource_Import(t *testing.T) {
 				ImportState:                          true,
 				ImportStateIdFunc:                    testAccIpv6filteroptionImportStateIdFunc(resourceName),
 				ImportStateVerify:                    true,
-				ImportStateVerifyIdentifierAttribute: "ref",
+				ImportStateVerifyIdentifierAttribute: "uuid",
 				PlanOnly:                             true,
 			},
 			// Import and Verify
@@ -100,7 +100,7 @@ func TestAccIpv6filteroptionResource_Import(t *testing.T) {
 				ImportStateIdFunc:                    testAccIpv6filteroptionImportStateIdFunc(resourceName),
 				ImportStateVerify:                    true,
 				ImportStateVerifyIgnore:              []string{"extattrs_all"},
-				ImportStateVerifyIdentifierAttribute: "ref",
+				ImportStateVerifyIdentifierAttribute: "uuid",
 			},
 			// Delete testing automatically occurs in TestCase
 		},
@@ -470,10 +470,10 @@ func testAccIpv6filteroptionImportStateIdFunc(resourceName string) resource.Impo
 		if !ok {
 			return "", fmt.Errorf("not found: %s", resourceName)
 		}
-		if rs.Primary.Attributes["ref"] == "" {
-			return "", fmt.Errorf("ref is not set")
+		if rs.Primary.Attributes["uuid"] == "" {
+			return "", fmt.Errorf("uuid is not set")
 		}
-		return rs.Primary.Attributes["ref"], nil
+		return rs.Primary.Attributes["uuid"], nil
 	}
 }
 

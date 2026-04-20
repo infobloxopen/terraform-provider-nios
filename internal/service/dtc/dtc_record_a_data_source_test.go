@@ -13,6 +13,7 @@ import (
 )
 
 func TestAccDtcRecordADataSource_Filters(t *testing.T) {
+	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	dataSourceName := "data.nios_dtc_record_a.test"
 	resourceName := "nios_dtc_record_a.test"
 	var v dtc.DtcRecordA

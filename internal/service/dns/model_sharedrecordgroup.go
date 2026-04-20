@@ -115,6 +115,7 @@ var SharedrecordgroupResourceSchemaAttributes = map[string]schema.Attribute{
 			listvalidator.SizeAtLeast(1),
 		},
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The list of zones associated with this shared record group. Starting from NIOS-9.0.6, this field has been updated to a structure that includes FQDN and DNS view details.",
 	},
 }
