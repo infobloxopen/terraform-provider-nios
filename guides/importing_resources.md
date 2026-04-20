@@ -5,7 +5,7 @@
 Resources can be imported using their UUID:
 
 ```bash
-terraform import nios_dns_record_a.example "a3faa2e03c0c4a3a89cf7dc72a8e7706"
+terraform import nios_dns_record_a.example "bf94eb18feee486aa608bb27ca2dcf0a"
 ```
 
 You can use Terraform's import blocks (available in Terraform 1.5.0 and later) to declaratively import resources:
@@ -13,7 +13,7 @@ You can use Terraform's import blocks (available in Terraform 1.5.0 and later) t
 ```hcl
 import {
   to = nios_dns_record_a.example
-  id = "a3faa2e03c0c4a3a89cf7dc72a8e7706"
+  id = "bf94eb18feee486aa608bb27ca2dcf0a"
 }
 
 resource "nios_dns_record_a" "example" {
