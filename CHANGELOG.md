@@ -6,84 +6,108 @@
 
 #### DHCP
 
-- `nios_dhcp_filteroption` : Manage DHCP filter options and retrieve existing filter option configurations. ([#338](https://github.com/infobloxopen/terraform-provider-nios/pull/338))
-- `nios_dhcp_filterrelayagent` : Manage DHCP filter relay agent and retrieve existing relay agent configurations. ([#320](https://github.com/infobloxopen/terraform-provider-nios/pull/320))
-- `nios_dhcp_ipv6filteroption` : Manage DHCP IPv6 filter options and retrieve existing IPv6 filter option configurations. ([#330](https://github.com/infobloxopen/terraform-provider-nios/pull/330))
-- `nios_dhcp_ipv6fixedaddress` : Manage DHCP IPv6 fixed addresses and retrieve existing IPv6 fixed address data. ([#277](https://github.com/infobloxopen/terraform-provider-nios/pull/277))
-- `nios_dhcp_fingerprint` : Manage DHCP fingerprints and retrieve existing fingerprint data. ([#311](https://github.com/infobloxopen/terraform-provider-nios/pull/311))
-- `nios_dhcp_filterfingerprint` : Manage DHCP filter fingerprints and retrieve existing filter fingerprint configurations. ([#311](https://github.com/infobloxopen/terraform-provider-nios/pull/311))
-- `nios_dhcp_roaminghost` : Manage DHCP roaming hosts and retrieve existing roaming host configurations. ([#297](https://github.com/infobloxopen/terraform-provider-nios/pull/297))
-- `nios_dhcp_filternac` : Manage DHCP filter NAC and retrieve existing NAC filter configurations. ([#308](https://github.com/infobloxopen/terraform-provider-nios/pull/308))
-- `nios_dhcp_macfilteraddress` : Manage DHCP MAC filter addresses and retrieve existing MAC filter address data. ([#309](https://github.com/infobloxopen/terraform-provider-nios/pull/309))
+- `nios_dhcp_failover` : Manage DHCP failover and retrieve existing DHCP failovers. ([#287](https://github.com/infobloxopen/terraform-provider-nios/pull/287))
+- `nios_dhcp_filteroption` : Manage DHCP filter options and retrieve existing filter options. ([#338](https://github.com/infobloxopen/terraform-provider-nios/pull/338))
+- `nios_dhcp_filterrelayagent` : Manage DHCP filter relay agents and retrieve existing filter relay agents. ([#320](https://github.com/infobloxopen/terraform-provider-nios/pull/320))
+- `nios_dhcp_filtermac` : Manage DHCP MAC filters and retrieve existing MAC filters. ([#267](https://github.com/infobloxopen/terraform-provider-nios/pull/267))
+- `nios_dhcp_filternac` : Manage DHCP NAC filters and retrieve existing NAC filters. ([#308](https://github.com/infobloxopen/terraform-provider-nios/pull/308))
+- `nios_dhcp_fingerprint` : Manage DHCP fingerprints and retrieve existing DHCP fingerprints. ([#311](https://github.com/infobloxopen/terraform-provider-nios/pull/311))
+- `nios_dhcp_filterfingerprint` : Manage DHCP filter fingerprints and retrieve existing filter fingerprints. ([#311](https://github.com/infobloxopen/terraform-provider-nios/pull/311))
+- `nios_dhcp_fixedaddresstemplate` : Manage DHCP fixed address templates and retrieve existing fixed address templates. ([#261](https://github.com/infobloxopen/terraform-provider-nios/pull/261))
+- `nios_dhcp_ipv6filteroption` : Manage DHCP IPv6 filter options and retrieve existing IPv6 filter options. ([#330](https://github.com/infobloxopen/terraform-provider-nios/pull/330))
+- `nios_dhcp_ipv6fixedaddress` : Manage DHCP IPv6 fixed addresses and retrieve existing IPv6 fixed addresses. ([#277](https://github.com/infobloxopen/terraform-provider-nios/pull/277))
+- `nios_dhcp_ipv6range` : Manage DHCP IPv6 ranges and retrieve existing IPv6 ranges. ([#273](https://github.com/infobloxopen/terraform-provider-nios/pull/273))
+- `nios_dhcp_ipv6sharednetwork` : Manage DHCP IPv6 shared networks and retrieve existing IPv6 shared networks. ([#282](https://github.com/infobloxopen/terraform-provider-nios/pull/282))
+- `nios_dhcp_macfilteraddress` : Manage DHCP MAC filter addresses and retrieve existing MAC filter addresses. ([#309](https://github.com/infobloxopen/terraform-provider-nios/pull/309))
+- `nios_dhcp_optiondefinition` : Manage DHCP option definitions and retrieve existing option definitions. ([#252](https://github.com/infobloxopen/terraform-provider-nios/pull/252))
+- `nios_dhcp_optionspace` : Manage DHCP option spaces and retrieve existing option spaces. ([#252](https://github.com/infobloxopen/terraform-provider-nios/pull/252))
+- `nios_dhcp_roaminghost` : Manage DHCP roaming hosts and retrieve existing roaming hosts. ([#297](https://github.com/infobloxopen/terraform-provider-nios/pull/297))
+
+#### DNS
+
+- `nios_dns_sharedrecord_a` : Manage DNS Shared A records and retrieve existing Shared A records. ([#259](https://github.com/infobloxopen/terraform-provider-nios/pull/259))
+- `nios_dns_sharedrecord_aaaa` : Manage DNS Shared AAAA records and retrieve existing Shared AAAA records. ([#269](https://github.com/infobloxopen/terraform-provider-nios/pull/269))
+- `nios_dns_sharedrecord_cname` : Manage DNS Shared CNAME records and retrieve existing Shared CNAME records. ([#263](https://github.com/infobloxopen/terraform-provider-nios/pull/263))
+- `nios_dns_sharedrecord_mx` : Manage DNS Shared MX records and retrieve existing Shared MX records. ([#246](https://github.com/infobloxopen/terraform-provider-nios/pull/246))
+- `nios_dns_sharedrecord_srv` : Manage DNS Shared SRV records and retrieve existing Shared SRV records. ([#254](https://github.com/infobloxopen/terraform-provider-nios/pull/254))
 
 #### DTC
 
-- `nios_dtc_record_a` : Manage DTC A records and retrieve existing DTC A record data. ([#307](https://github.com/infobloxopen/terraform-provider-nios/pull/307))
-- `nios_dtc_record_aaaa` : Manage DTC AAAA records and retrieve existing DTC AAAA record data. ([#315](https://github.com/infobloxopen/terraform-provider-nios/pull/315))
-- `nios_dtc_record_cname` : Manage DTC CNAME records and retrieve existing DTC CNAME record data. ([#314](https://github.com/infobloxopen/terraform-provider-nios/pull/314))
-- `nios_dtc_record_naptr` : Manage DTC NAPTR records and retrieve existing DTC NAPTR record data. ([#319](https://github.com/infobloxopen/terraform-provider-nios/pull/319))
-- `nios_dtc_record_srv` : Manage DTC SRV records and retrieve existing DTC SRV record data. ([#310](https://github.com/infobloxopen/terraform-provider-nios/pull/310))
-- `nios_dtc_topology_rule` : Retrieve existing DTC topology rule configurations. ([#331](https://github.com/infobloxopen/terraform-provider-nios/pull/331))
+- `nios_dtc_monitor_http` : Manage DTC HTTP monitors and retrieve existing HTTP monitors. ([#268](https://github.com/infobloxopen/terraform-provider-nios/pull/268))
+- `nios_dtc_monitor_icmp` : Manage DTC ICMP monitors and retrieve existing ICMP monitors. ([#274](https://github.com/infobloxopen/terraform-provider-nios/pull/274))
+- `nios_dtc_monitor_pdp` : Manage DTC PDP monitors and retrieve existing PDP monitors. ([#283](https://github.com/infobloxopen/terraform-provider-nios/pull/283))
+- `nios_dtc_monitor_sip` : Manage DTC SIP monitors and retrieve existing SIP monitors. ([#296](https://github.com/infobloxopen/terraform-provider-nios/pull/296))
+- `nios_dtc_monitor_snmp` : Manage DTC SNMP monitors and retrieve existing SNMP monitors. ([#251](https://github.com/infobloxopen/terraform-provider-nios/pull/251))
+- `nios_dtc_monitor_tcp` : Manage DTC TCP monitors and retrieve existing TCP monitors. ([#275](https://github.com/infobloxopen/terraform-provider-nios/pull/275))
+- `nios_dtc_record_a` : Manage DTC A records and retrieve existing DTC A records. ([#307](https://github.com/infobloxopen/terraform-provider-nios/pull/307))
+- `nios_dtc_record_aaaa` : Manage DTC AAAA records and retrieve existing DTC AAAA records. ([#315](https://github.com/infobloxopen/terraform-provider-nios/pull/315))
+- `nios_dtc_record_cname` : Manage DTC CNAME records and retrieve existing DTC CNAME records. ([#314](https://github.com/infobloxopen/terraform-provider-nios/pull/314))
+- `nios_dtc_record_naptr` : Manage DTC NAPTR records and retrieve existing DTC NAPTR records. ([#319](https://github.com/infobloxopen/terraform-provider-nios/pull/319))
+- `nios_dtc_record_srv` : Manage DTC SRV records and retrieve existing DTC SRV records. ([#310](https://github.com/infobloxopen/terraform-provider-nios/pull/310))
+- `nios_dtc_topology` : Manage DTC topologies and retrieve existing DTC topologies. ([#245](https://github.com/infobloxopen/terraform-provider-nios/pull/245))
+- `nios_dtc_topology_rule` : Retrieve existing DTC topology rules. ([#331](https://github.com/infobloxopen/terraform-provider-nios/pull/331))
 
 #### RPZ
 
-- `nios_dns_record_rpz_a_ipaddress` : Manage RPZ A IP address records and retrieve existing RPZ A IP address data. ([#327](https://github.com/infobloxopen/terraform-provider-nios/pull/327))
-- `nios_dns_record_rpz_aaaa` : Manage RPZ AAAA records and retrieve existing RPZ AAAA record data. ([#305](https://github.com/infobloxopen/terraform-provider-nios/pull/305))
-- `nios_dns_record_rpz_aaaa_ipaddress` : Manage RPZ AAAA IP address records and retrieve existing RPZ AAAA IP address data. ([#326](https://github.com/infobloxopen/terraform-provider-nios/pull/326))
-- `nios_dns_record_rpz_cname` : Manage RPZ CNAME records and retrieve existing RPZ CNAME record data. ([#321](https://github.com/infobloxopen/terraform-provider-nios/pull/321))
-- `nios_dns_record_rpz_cname_clientipaddress` : Manage RPZ CNAME client IP address records and retrieve existing RPZ CNAME client IP address data. ([#342](https://github.com/infobloxopen/terraform-provider-nios/pull/342))
-- `nios_dns_record_rpz_cname_clientipaddressdn` : Manage RPZ CNAME client IP address DN records and retrieve existing RPZ CNAME client IP address DN data. ([#334](https://github.com/infobloxopen/terraform-provider-nios/pull/334))
-- `nios_dns_record_rpz_cname_ipaddressdn` : Manage RPZ CNAME IP address DN records and retrieve existing RPZ CNAME IP address DN data. ([#334](https://github.com/infobloxopen/terraform-provider-nios/pull/334))
-- `nios_dns_record_rpz_txt` : Manage RPZ TXT records and retrieve existing RPZ TXT record data. ([#300](https://github.com/infobloxopen/terraform-provider-nios/pull/300))
+- `nios_rpz_record_a` : Manage RPZ A records and retrieve existing RPZ A records. ([#256](https://github.com/infobloxopen/terraform-provider-nios/pull/256))
+- `nios_rpz_record_a_ipaddress` : Manage RPZ A IP address records and retrieve existing RPZ A IP address records. ([#327](https://github.com/infobloxopen/terraform-provider-nios/pull/327))
+- `nios_rpz_record_aaaa` : Manage RPZ AAAA records and retrieve existing RPZ AAAA records. ([#305](https://github.com/infobloxopen/terraform-provider-nios/pull/305))
+- `nios_rpz_record_aaaa_ipaddress` : Manage RPZ AAAA IP address records and retrieve existing RPZ AAAA IP address records. ([#326](https://github.com/infobloxopen/terraform-provider-nios/pull/326))
+- `nios_rpz_record_cname` : Manage RPZ CNAME records and retrieve existing RPZ CNAME records. ([#289](https://github.com/infobloxopen/terraform-provider-nios/pull/289))
+- `nios_rpz_record_cname_clientipaddress` : Manage RPZ CNAME client IP address records and retrieve existing RPZ CNAME client IP address records. ([#342](https://github.com/infobloxopen/terraform-provider-nios/pull/342))
+- `nios_rpz_record_cname_clientipaddressdn` : Manage RPZ CNAME client IP address DN records and retrieve existing RPZ CNAME client IP address DN records. ([#334](https://github.com/infobloxopen/terraform-provider-nios/pull/334))
+- `nios_rpz_record_cname_ipaddress` : Manage RPZ CNAME IP address records and retrieve existing RPZ CNAME IP address records. ([#321](https://github.com/infobloxopen/terraform-provider-nios/pull/321))
+- `nios_rpz_record_cname_ipaddressdn` : Manage RPZ CNAME IP address DN records and retrieve existing RPZ CNAME IP address DN records. ([#334](https://github.com/infobloxopen/terraform-provider-nios/pull/334))
+- `nios_rpz_record_mx` : Manage RPZ MX records and retrieve existing RPZ MX records. ([#276](https://github.com/infobloxopen/terraform-provider-nios/pull/276))
+- `nios_rpz_record_naptr` : Manage RPZ NAPTR records and retrieve existing RPZ NAPTR records. ([#280](https://github.com/infobloxopen/terraform-provider-nios/pull/280))
+- `nios_rpz_record_ptr` : Manage RPZ PTR records and retrieve existing RPZ PTR records. ([#278](https://github.com/infobloxopen/terraform-provider-nios/pull/278))
+- `nios_rpz_record_srv` : Manage RPZ SRV records and retrieve existing RPZ SRV records. ([#295](https://github.com/infobloxopen/terraform-provider-nios/pull/295))
+- `nios_rpz_record_txt` : Manage RPZ TXT records and retrieve existing RPZ TXT records. ([#300](https://github.com/infobloxopen/terraform-provider-nios/pull/300))
 
 #### Grid
 
-- `nios_grid_member` : Manage grid members and retrieve existing member configurations. ([#425](https://github.com/infobloxopen/terraform-provider-nios/pull/425))
-- `nios_grid_upgradeschedule` : Manage grid upgrade schedules and retrieve existing upgrade schedule configurations. ([#391](https://github.com/infobloxopen/terraform-provider-nios/pull/391))
+- `nios_grid_member` : Manage grid members and retrieve existing grid members. ([#425](https://github.com/infobloxopen/terraform-provider-nios/pull/425))
+- `nios_grid_upgradeschedule` : Manage grid upgrade schedules and retrieve current upgrade schedule. ([#391](https://github.com/infobloxopen/terraform-provider-nios/pull/391))
 
 #### IPAM
 
-- `nios_ipam_ipv6networktemplate` : Manage IPAM IPv6 network templates and retrieve existing IPv6 network template configurations. ([#339](https://github.com/infobloxopen/terraform-provider-nios/pull/339))
-- `nios_ipam_superhost` : Manage IPAM super hosts and retrieve existing super host data. ([#323](https://github.com/infobloxopen/terraform-provider-nios/pull/323))
+- `nios_ipam_ipv6networktemplate` : Manage IPAM IPv6 network templates and retrieve existing IPv6 network templates. ([#339](https://github.com/infobloxopen/terraform-provider-nios/pull/339))
+- `nios_ipam_networktemplate` : Manage IPAM network templates and retrieve existing network templates. ([#288](https://github.com/infobloxopen/terraform-provider-nios/pull/288))
+- `nios_ipam_superhost` : Manage IPAM super hosts and retrieve existing super hosts. ([#323](https://github.com/infobloxopen/terraform-provider-nios/pull/323))
+- `nios_ipam_vlan` : Manage IPAM VLANs and retrieve existing VLANs. ([#255](https://github.com/infobloxopen/terraform-provider-nios/pull/255))
+- `nios_ipam_vlanrange` : Manage IPAM VLAN ranges and retrieve existing VLAN ranges. ([#272](https://github.com/infobloxopen/terraform-provider-nios/pull/272))
+- `nios_ipam_vlanview` : Manage IPAM VLAN views and retrieve existing VLAN views. ([#250](https://github.com/infobloxopen/terraform-provider-nios/pull/250))
 
 #### Microsoft
 
-- `nios_microsoft_superscope` : Manage Microsoft super scopes and retrieve existing super scope configurations. ([#401](https://github.com/infobloxopen/terraform-provider-nios/pull/401))
-- `nios_microsoft_adsites` : Manage Microsoft AD sites and retrieve existing AD site data. ([#402](https://github.com/infobloxopen/terraform-provider-nios/pull/402))
-- `nios_microsoft_server` : Manage Microsoft servers and retrieve existing Microsoft server configurations. ([#395](https://github.com/infobloxopen/terraform-provider-nios/pull/395))
-
-#### Notification
-
-- `nios_notification_syslog_endpoint` : Manage syslog notification endpoints and retrieve existing syslog endpoint configurations. ([#438](https://github.com/infobloxopen/terraform-provider-nios/pull/438))
+- `nios_microsoft_mssuperscope` : Manage Microsoft super scopes and retrieve existing super scopes. ([#401](https://github.com/infobloxopen/terraform-provider-nios/pull/401))
+- `nios_microsoft_msserver_adsites_site` : Manage Microsoft AD sites and retrieve existing AD sites. ([#402](https://github.com/infobloxopen/terraform-provider-nios/pull/402))
+- `nios_microsoft_msserver` : Manage Microsoft servers and retrieve existing Microsoft servers. ([#395](https://github.com/infobloxopen/terraform-provider-nios/pull/395))
 
 #### Parental Control
 
-- `nios_parentalcontrol_subscriberrecord` : Manage subscriber records and retrieve existing subscriber record data. ([#407](https://github.com/infobloxopen/terraform-provider-nios/pull/407))
-- `nios_parentalcontrol_subscribersite` : Manage subscriber sites and retrieve existing subscriber site configurations. ([#408](https://github.com/infobloxopen/terraform-provider-nios/pull/408))
-- `nios_parentalcontrol_blockingpolicy` : Manage blocking policies and retrieve existing blocking policy data. ([#392](https://github.com/infobloxopen/terraform-provider-nios/pull/392))
-- `nios_parentalcontrol_avp` : Manage parental control AVP and retrieve existing AVP configurations. ([#385](https://github.com/infobloxopen/terraform-provider-nios/pull/385))
+- `nios_parentalcontrol_subscriberrecord` : Manage subscriber records and retrieve existing subscriber records. ([#407](https://github.com/infobloxopen/terraform-provider-nios/pull/407))
+- `nios_parentalcontrol_subscribersite` : Manage subscriber sites and retrieve existing subscriber sites. ([#408](https://github.com/infobloxopen/terraform-provider-nios/pull/408))
+- `nios_parentalcontrol_blockingpolicy` : Manage blocking policies and retrieve existing blocking policies. ([#392](https://github.com/infobloxopen/terraform-provider-nios/pull/392))
+- `nios_parentalcontrol_avp` : Manage parental control AVPs and retrieve existing parental control AVPs. ([#385](https://github.com/infobloxopen/terraform-provider-nios/pull/385))
 
 #### RIR
 
-- `nios_rir_organization` : Manage RIR organizations and retrieve existing RIR organization data. ([#378](https://github.com/infobloxopen/terraform-provider-nios/pull/378))
+- `nios_rir_organization` : Manage RIR organizations and retrieve existing RIR organizations. ([#378](https://github.com/infobloxopen/terraform-provider-nios/pull/378))
 
 #### Security
 
-- `nios_security_radius_authservice` : Manage RADIUS authentication services and retrieve existing RADIUS auth service configurations. ([#405](https://github.com/infobloxopen/terraform-provider-nios/pull/405))
-- `nios_security_tacacsplus_authservice` : Manage TACACS+ authentication services and retrieve existing TACACS+ auth service data. ([#406](https://github.com/infobloxopen/terraform-provider-nios/pull/406))
-- `nios_security_ldap_authservice` : Manage LDAP authentication services and retrieve existing LDAP auth service configurations. ([#396](https://github.com/infobloxopen/terraform-provider-nios/pull/396))
-- `nios_security_saml_authservice` : Manage SAML authentication services and retrieve existing SAML auth service data. ([#393](https://github.com/infobloxopen/terraform-provider-nios/pull/393))
+- `nios_security_radius_authservice` : Manage RADIUS authentication services and retrieve existing RADIUS auth services. ([#405](https://github.com/infobloxopen/terraform-provider-nios/pull/405))
+- `nios_security_tacacsplus_authservice` : Manage TACACS+ authentication services and retrieve existing TACACS+ auth services. ([#406](https://github.com/infobloxopen/terraform-provider-nios/pull/406))
+- `nios_security_ldap_auth_service` : Manage LDAP authentication services and retrieve existing LDAP auth services. ([#396](https://github.com/infobloxopen/terraform-provider-nios/pull/396))
+- `nios_security_saml_authservice` : Manage SAML authentication services and retrieve existing SAML auth services. ([#393](https://github.com/infobloxopen/terraform-provider-nios/pull/393))
 
 #### Miscellaneous
 
-- `nios_misc_tftp_filedir` : Manage TFTP file directories and retrieve existing TFTP file directory configurations. ([#411](https://github.com/infobloxopen/terraform-provider-nios/pull/411))
-- `nios_misc_dxl_endpoint` : Manage DXL endpoints and retrieve existing DXL endpoint data. ([#389](https://github.com/infobloxopen/terraform-provider-nios/pull/389))
+- `nios_misc_tftpfiledir` : Manage TFTP file directories and retrieve existing TFTP file directories. ([#411](https://github.com/infobloxopen/terraform-provider-nios/pull/411))
+- `nios_misc_dxl_endpoint` : Manage DXL endpoints and retrieve existing DXL endpoints. ([#389](https://github.com/infobloxopen/terraform-provider-nios/pull/389))
+- `nios_misc_syslog_endpoint` : Manage syslog endpoints and retrieve existing syslog endpoints. ([#438](https://github.com/infobloxopen/terraform-provider-nios/pull/438))
 
-### Enhancements
-
-- Added comprehensive IPv4, IPv6, CIDR, and domain name validation support across multiple resource types. ([#345](https://github.com/infobloxopen/terraform-provider-nios/pull/345))
-- Enhanced validation for schedule configurations across various object groups. ([#333](https://github.com/infobloxopen/terraform-provider-nios/pull/333))
-- Improved handling of unknown values in ValidateConfig to support variable resolution. ([#375](https://github.com/infobloxopen/terraform-provider-nios/pull/375))
 
 ### Fixes
 
@@ -96,8 +120,8 @@
 
 #### DHCP
 
-- `nios_dhcp_ipv6dhcpoptiondefinition` : Manage DHCP IPv6 option definition and retrieve existing IPv6 option definitions. ([#242](https://github.com/infobloxopen/terraform-provider-nios/pull/242))
-- `nios_dhcp_ipv6dhcpoptionspace` : Manage DHCP IPv6 option space and retrieve existing IPv6 option spaces. ([#242](https://github.com/infobloxopen/terraform-provider-nios/pull/242))
+- `nios_dhcp_ipv6optiondefinition` : Manage DHCP IPv6 option definition and retrieve existing IPv6 option definitions. ([#242](https://github.com/infobloxopen/terraform-provider-nios/pull/242))
+- `nios_dhcp_ipv6optionspace` : Manage DHCP IPv6 option space and retrieve existing IPv6 option spaces. ([#242](https://github.com/infobloxopen/terraform-provider-nios/pull/242))
 - `nios_dhcp_ipv6fixedaddresstemplate` : Manage DHCP IPv6 fixed address template and retrieve existing IPv6 fixed address templates. ([#247](https://github.com/infobloxopen/terraform-provider-nios/pull/247))
 
 #### DNS
@@ -127,6 +151,10 @@
 
 - `nios_cloud_aws_route53_task_group` : Manage AWS Route53 task groups and retrieve existing task group configurations. ([#112](https://github.com/infobloxopen/terraform-provider-nios/pull/112))
 - `nios_cloud_aws_user` : Manage AWS users and retrieve existing AWS user data. ([#105](https://github.com/infobloxopen/terraform-provider-nios/pull/105))
+
+#### DHCP
+
+- `nios_dhcp_ipv6_range_template` : Manage DHCP IPv6 range templates and retrieve existing IPv6 range template data. ([#180](https://github.com/infobloxopen/terraform-provider-nios/pull/180))
 
 #### Discovery
 
@@ -181,7 +209,7 @@
 - `nios_security_permission` : Manage permissions and retrieve existing permission configurations. ([#139](https://github.com/infobloxopen/terraform-provider-nios/pull/139))
 - `nios_security_ftpuser` : Manage FTP users and retrieve existing FTP user data. ([#146](https://github.com/infobloxopen/terraform-provider-nios/pull/146))
 - `nios_security_certificate_authservice` : Manage certificate authentication services and retrieve existing certificate data. ([#153](https://github.com/infobloxopen/terraform-provider-nios/pull/153))
-- `nios_security_snmpuser` : Manage SNMP users and retrieve existing SNMP user configurations. ([#137](https://github.com/infobloxopen/terraform-provider-nios/pull/137))
+- `nios_security_snmp_user` : Manage SNMP users and retrieve existing SNMP user configurations. ([#137](https://github.com/infobloxopen/terraform-provider-nios/pull/137))
 
 #### SmartFolder
 
