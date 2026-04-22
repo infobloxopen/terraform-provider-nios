@@ -542,6 +542,7 @@ type PreConfigClients struct {
 	DHCP         *dhcp.APIClient
 	DNS          *dns.APIClient
 	GRID         *grid.APIClient
+	MISC         *misc.APIClient
 	MICROSOFT    *microsoft.APIClient
 	NOTIFICATION *notification.APIClient
 	PARENTAL     *parentalcontrol.APIClient
@@ -563,6 +564,9 @@ func PreConfig(clients PreConfigClients, hostnames GridHostnames) error {
 	}
 	if clients.GRID == nil {
 		return fmt.Errorf("preconfig: GRID client is required")
+	}
+	if clients.MISC == nil {
+		return fmt.Errorf("preconfig: MISC client is required")
 	}
 	if clients.MICROSOFT == nil {
 		return fmt.Errorf("preconfig: MICROSOFT client is required")
@@ -679,7 +683,6 @@ func PreConfig(clients PreConfigClients, hostnames GridHostnames) error {
 
 		_, _, err = clients.PARENTAL.ParentalcontrolSubscriberAPI.Update(context.Background(), parentalControlRef).
 			ParentalcontrolSubscriber(parentalControlSubscriberBody).
-			ReturnAsObject(1).
 			Execute()
 		if err != nil {
 			return fmt.Errorf("failed to enable parental control on %q: %w", *parentalSubscriber.Ref, err)
@@ -1546,14 +1549,16 @@ func PreConfig(clients PreConfigClients, hostnames GridHostnames) error {
 				return fmt.Errorf("failed to list notification REST endpoints to capture existing ref: %w", listErr)
 			}
 
-			if existingResp.ListNotificationRestEndpointResponseObject != nil && len(existingResp.ListNotificationRestEndpointResponseObject.Result) > 0 {
+			if existingResp.ListNotificationRestEndpointResponseObject != nil &&
+				len(existingResp.ListNotificationRestEndpointResponseObject.Result) > 0 {
 				for _, existingEndpoint := range existingResp.ListNotificationRestEndpointResponseObject.Result {
 					if existingEndpoint.Name != nil && *existingEndpoint.Name == *notificationRestEndpointBody.Name {
 						existingRef := existingEndpoint.GetRef()
 						if err := writePipelineEnvVar("NIOS_NOTIFICATION_REST_ENDPOINT_REF", existingRef); err != nil {
 							return fmt.Errorf("failed to write NIOS_NOTIFICATION_REST_ENDPOINT_REF for existing endpoint: %w", err)
 						}
-						fmt.Printf("Captured ref for existing notification REST endpoint %q: %s\n", *notificationRestEndpointBody.Name, existingRef)
+						fmt.Printf("Captured ref for existing notification REST endpoint %q: %s\n",
+							*notificationRestEndpointBody.Name, existingRef)
 						break
 					}
 				}
@@ -1563,7 +1568,9 @@ func PreConfig(clients PreConfigClients, hostnames GridHostnames) error {
 			return fmt.Errorf("failed to create notification REST endpoint %q: %w", *notificationRestEndpointBody.Name, err)
 		}
 	} else {
-		if notificationResp.CreateNotificationRestEndpointResponseAsObject == nil || notificationResp.CreateNotificationRestEndpointResponseAsObject.Result == nil || notificationResp.CreateNotificationRestEndpointResponseAsObject.Result.Ref == nil {
+		if notificationResp.CreateNotificationRestEndpointResponseAsObject == nil ||
+			notificationResp.CreateNotificationRestEndpointResponseAsObject.Result == nil ||
+			notificationResp.CreateNotificationRestEndpointResponseAsObject.Result.Ref == nil {
 			return fmt.Errorf("notification REST endpoint create response missing ref")
 		}
 
@@ -1572,7 +1579,73 @@ func PreConfig(clients PreConfigClients, hostnames GridHostnames) error {
 			return fmt.Errorf("failed to write NIOS_NOTIFICATION_REST_ENDPOINT_REF: %w", err)
 		}
 
-		fmt.Printf("Notification REST endpoint %q created successfully (ref: %s)\n", *notificationRestEndpointBody.Name, notifRestEndpointRef)
+		fmt.Printf("Notification REST endpoint %q created successfully (ref: %s)\n",
+			*notificationRestEndpointBody.Name, notifRestEndpointRef)
+	}
+
+	// Create syslog endpoint and persist its ref.
+	syslogEndpointBody := misc.SyslogEndpoint{
+		Name:               misc.PtrString("syslogendpoint123"),
+		OutboundMemberType: misc.PtrString("GM"),
+		SyslogServers: []misc.SyslogEndpointSyslogServers{
+			{
+				Address:        misc.PtrString("127.0.0.1"),
+				Port:           misc.PtrInt64(514),
+				ConnectionType: misc.PtrString("udp"),
+				Format:         misc.PtrString("formatted"),
+			},
+		},
+	}
+
+	syslogResp, _, err := clients.MISC.SyslogEndpointAPI.Create(context.Background()).
+		SyslogEndpoint(syslogEndpointBody).
+		ReturnAsObject(1).
+		ReturnFieldsPlus("name").
+		Execute()
+	if err != nil {
+		if strings.Contains(err.Error(), "already exists") {
+			filtersSyslog := map[string]interface{}{
+				"name": *syslogEndpointBody.Name,
+			}
+
+			existingResp, _, listErr := clients.MISC.SyslogEndpointAPI.List(context.Background()).
+				ReturnAsObject(1).
+				Filters(filtersSyslog).
+				ReturnFieldsPlus("name").
+				Execute()
+			if listErr != nil {
+				return fmt.Errorf("failed to list syslog endpoints to capture existing ref: %w", listErr)
+			}
+
+			if existingResp.ListSyslogEndpointResponseObject != nil && len(existingResp.ListSyslogEndpointResponseObject.Result) > 0 {
+				for _, existingEndpoint := range existingResp.ListSyslogEndpointResponseObject.Result {
+					if existingEndpoint.Name != nil && *existingEndpoint.Name == *syslogEndpointBody.Name {
+						existingRef := existingEndpoint.GetRef()
+						if err := writePipelineEnvVar("NIOS_SYSLOG_ENDPOINT_REF", existingRef); err != nil {
+							return fmt.Errorf("failed to write NIOS_SYSLOG_ENDPOINT_REF for existing endpoint: %w", err)
+						}
+						fmt.Printf("Captured ref for existing syslog endpoint %q: %s\n", *syslogEndpointBody.Name, existingRef)
+						break
+					}
+				}
+			}
+
+			fmt.Printf("Syslog endpoint %q already exists, skipping creation\n", *syslogEndpointBody.Name)
+		} else {
+			return fmt.Errorf("failed to create syslog endpoint %q: %w", *syslogEndpointBody.Name, err)
+		}
+	} else {
+		if syslogResp.CreateSyslogEndpointResponseAsObject == nil || syslogResp.CreateSyslogEndpointResponseAsObject.Result == nil ||
+			syslogResp.CreateSyslogEndpointResponseAsObject.Result.Ref == nil {
+			return fmt.Errorf("syslog endpoint create response missing ref")
+		}
+
+		syslogEndpointRef := *syslogResp.CreateSyslogEndpointResponseAsObject.Result.Ref
+		if err := writePipelineEnvVar("NIOS_SYSLOG_ENDPOINT_REF", syslogEndpointRef); err != nil {
+			return fmt.Errorf("failed to write NIOS_SYSLOG_ENDPOINT_REF: %w", err)
+		}
+
+		fmt.Printf("Syslog endpoint %q created successfully (ref: %s)\n", *syslogEndpointBody.Name, syslogEndpointRef)
 	}
 
 	return nil
@@ -1649,36 +1722,154 @@ func main() {
 
 	ecosystemTemplatePath := filepath.Join(cwd, "internal/testdata/nios_ecosystem_templates", "Version5_DXL_Session_Template.json")
 
-	err = ConfigureEcoSystemTemplates(host, wapiVer, username, password, ecosystemTemplatePath)
-	if err != nil {
-		fmt.Printf("Error uploading ecosystem templates: %v\n", err)
+	if _, statErr := os.Stat(ecosystemTemplatePath); statErr == nil {
+		err = ConfigureEcoSystemTemplates(host, wapiVer, username, password, ecosystemTemplatePath)
+		if err != nil {
+			fmt.Printf("Error uploading ecosystem templates: %v\n", err)
+			return
+		}
+		fmt.Println("Ecosystem template 1 uploaded successfully")
+	} else if os.IsNotExist(statErr) {
+		fmt.Printf("Ecosystem template 1 not found at %s, skipping upload\n", ecosystemTemplatePath)
+	} else {
+		fmt.Printf("Error checking ecosystem template 1 path %s: %v\n", ecosystemTemplatePath, statErr)
 		return
 	}
-	fmt.Println("Ecosystem template 1 uploaded successfully")
 
 	ecosystemTemplatePath2 := filepath.Join(cwd, "internal/testdata/nios_ecosystem_templates", "Version5_Syslog_Session_Template.json")
 
-	err = ConfigureEcoSystemTemplates(host, wapiVer, username, password, ecosystemTemplatePath2)
-	if err != nil {
-		fmt.Printf("Error uploading ecosystem templates: %v\n", err)
+	if _, statErr := os.Stat(ecosystemTemplatePath2); statErr == nil {
+		err = ConfigureEcoSystemTemplates(host, wapiVer, username, password, ecosystemTemplatePath2)
+		if err != nil {
+			fmt.Printf("Error uploading ecosystem templates: %v\n", err)
+			return
+		}
+		fmt.Println("Ecosystem template 2 uploaded successfully")
+	} else if os.IsNotExist(statErr) {
+		fmt.Printf("Ecosystem template 2 not found at %s, skipping upload\n", ecosystemTemplatePath2)
+	} else {
+		fmt.Printf("Error checking ecosystem template 2 path %s: %v\n", ecosystemTemplatePath2, statErr)
 		return
 	}
-	fmt.Println("Ecosystem template 2 uploaded successfully")
 
-	ecosystemTemplatePath3 := filepath.Join(cwd, "internal/testdata/nios_ecosystem_templates", "event_dhcp_lease_template.json")
+	ecosystemTemplatePath3 := filepath.Join(cwd, "internal/testdata/nios_ecosystem_templates", "Version5_Syslog_Action_Template.json")
 
-	err = ConfigureEcoSystemTemplates(host, wapiVer, username, password, ecosystemTemplatePath3)
-	if err != nil {
-		fmt.Printf("Error uploading ecosystem templates: %v\n", err)
+	if _, statErr := os.Stat(ecosystemTemplatePath3); statErr == nil {
+		err = ConfigureEcoSystemTemplates(host, wapiVer, username, password, ecosystemTemplatePath3)
+		if err != nil {
+			fmt.Printf("Error uploading ecosystem templates: %v\n", err)
+			return
+		}
+		fmt.Println("Ecosystem template 3 uploaded successfully")
+	} else if os.IsNotExist(statErr) {
+		fmt.Printf("Ecosystem template 3 not found at %s, skipping upload\n", ecosystemTemplatePath3)
+	} else {
+		fmt.Printf("Error checking ecosystem template 3 path %s: %v\n", ecosystemTemplatePath3, statErr)
 		return
 	}
-	fmt.Println("Ecosystem template 3 uploaded successfully")
+
+	ecosystemTemplatePath4 := filepath.Join(cwd, "internal/testdata/nios_ecosystem_templates", "Version5_DXL_action_template.json")
+
+	if _, statErr := os.Stat(ecosystemTemplatePath4); statErr == nil {
+		err = ConfigureEcoSystemTemplates(host, wapiVer, username, password, ecosystemTemplatePath4)
+		if err != nil {
+			fmt.Printf("Error uploading ecosystem templates: %v\n", err)
+			return
+		}
+		fmt.Println("Ecosystem template 4 uploaded successfully")
+	} else if os.IsNotExist(statErr) {
+		fmt.Printf("Ecosystem template 4 not found at %s, skipping upload\n", ecosystemTemplatePath4)
+	} else {
+		fmt.Printf("Error checking ecosystem template 4 path %s: %v\n", ecosystemTemplatePath4, statErr)
+		return
+	}
+
+	ecosystemTemplatePath5 := filepath.Join(cwd, "internal/testdata/nios_ecosystem_templates", "Version5_DNS_Zone_and_Records.json")
+
+	if _, statErr := os.Stat(ecosystemTemplatePath5); statErr == nil {
+		err = ConfigureEcoSystemTemplates(host, wapiVer, username, password, ecosystemTemplatePath5)
+		if err != nil {
+			fmt.Printf("Error uploading ecosystem templates: %v\n", err)
+			return
+		}
+		fmt.Println("Ecosystem template 5 uploaded successfully")
+	} else if os.IsNotExist(statErr) {
+		fmt.Printf("Ecosystem template 5 not found at %s, skipping upload\n", ecosystemTemplatePath5)
+	} else {
+		fmt.Printf("Error checking ecosystem template 5 path %s: %v\n", ecosystemTemplatePath5, statErr)
+		return
+	}
+
+	ecosystemTemplatePath6 := filepath.Join(cwd, "internal/testdata/nios_ecosystem_templates", "Version5_REST_API_Session_Template.json")
+
+	if _, statErr := os.Stat(ecosystemTemplatePath6); statErr == nil {
+		err = ConfigureEcoSystemTemplates(host, wapiVer, username, password, ecosystemTemplatePath6)
+		if err != nil {
+			fmt.Printf("Error uploading ecosystem templates: %v\n", err)
+			return
+		}
+		fmt.Println("Ecosystem template 6 uploaded successfully")
+	} else if os.IsNotExist(statErr) {
+		fmt.Printf("Ecosystem template 6 not found at %s, skipping upload\n", ecosystemTemplatePath6)
+	} else {
+		fmt.Printf("Error checking ecosystem template 6 path %s: %v\n", ecosystemTemplatePath6, statErr)
+		return
+	}
+
+	ecosystemTemplatePath7 := filepath.Join(cwd, "internal/testdata/nios_ecosystem_templates", "event_dhcp_lease_template.json")
+
+	if _, statErr := os.Stat(ecosystemTemplatePath7); statErr == nil {
+		err = ConfigureEcoSystemTemplates(host, wapiVer, username, password, ecosystemTemplatePath7)
+		if err != nil {
+			fmt.Printf("Error uploading ecosystem templates: %v\n", err)
+			return
+		}
+		fmt.Println("Ecosystem template 7 uploaded successfully")
+	} else if os.IsNotExist(statErr) {
+		fmt.Printf("Ecosystem template 7 not found at %s, skipping upload\n", ecosystemTemplatePath7)
+	} else {
+		fmt.Printf("Error checking ecosystem template 7 path %s: %v\n", ecosystemTemplatePath7, statErr)
+		return
+	}
+
+	ecosystemTemplatePath8 := filepath.Join(cwd, "internal/testdata/nios_ecosystem_templates", "Version5_DNS_Zone_and_Records.json")
+
+	if _, statErr := os.Stat(ecosystemTemplatePath8); statErr == nil {
+		err = ConfigureEcoSystemTemplates(host, wapiVer, username, password, ecosystemTemplatePath8)
+		if err != nil {
+			fmt.Printf("Error uploading ecosystem templates: %v\n", err)
+			return
+		}
+		fmt.Println("Ecosystem template 8 uploaded successfully")
+	} else if os.IsNotExist(statErr) {
+		fmt.Printf("Ecosystem template 8 not found at %s, skipping upload\n", ecosystemTemplatePath8)
+	} else {
+		fmt.Printf("Error checking ecosystem template 8 path %s: %v\n", ecosystemTemplatePath8, statErr)
+		return
+	}
+
+	ecosystemTemplatePath9 := filepath.Join(cwd, "internal/testdata/nios_ecosystem_templates", "IPAM_PxgridEvent.json")
+
+	if _, statErr := os.Stat(ecosystemTemplatePath9); statErr == nil {
+		err = ConfigureEcoSystemTemplates(host, wapiVer, username, password, ecosystemTemplatePath9)
+		if err != nil {
+			fmt.Printf("Error uploading ecosystem templates: %v\n", err)
+			return
+		}
+		fmt.Println("Ecosystem template 9 uploaded successfully")
+	} else if os.IsNotExist(statErr) {
+		fmt.Printf("Ecosystem template 9 not found at %s, skipping upload\n", ecosystemTemplatePath9)
+	} else {
+		fmt.Printf("Error checking ecosystem template 9 path %s: %v\n", ecosystemTemplatePath9, statErr)
+		return
+	}
 
 	clients := PreConfigClients{
 		IPAM:         apiClient.IPAMAPI,
 		DHCP:         apiClient.DHCPAPI,
 		DNS:          apiClient.DNSAPI,
 		GRID:         apiClient.GridAPI,
+		MISC:         apiClient.MiscAPI,
 		MICROSOFT:    apiClient.MicrosoftAPI,
 		NOTIFICATION: apiClient.NotificationAPI,
 		PARENTAL:     apiClient.ParentalControlAPI,
