@@ -621,6 +621,7 @@ var NetworkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 	"ms_ad_user_data": schema.SingleNestedAttribute{
 		Attributes: NetworkcontainerMsAdUserDataResourceSchemaAttributes,
 		Optional:   true,
+		Computed:   true,
 	},
 	"network": schema.StringAttribute{
 		CustomType:          cidrtypes.IPv4PrefixType{},

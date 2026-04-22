@@ -17,7 +17,6 @@ import (
 var readableAttributesForDistributionschedule = "active,start_time,time_zone,upgrade_groups"
 
 func TestAccDistributionscheduleResource_basic(t *testing.T) {
-	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_grid_distributionschedule.test"
 	var v grid.Distributionschedule
 	start_time := time.Now().Add(12 * time.Hour).Format(utils.NaiveDatetimeLayout)
@@ -42,7 +41,6 @@ func TestAccDistributionscheduleResource_basic(t *testing.T) {
 }
 
 func TestAccDistributionscheduleResource_Active(t *testing.T) {
-	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_grid_distributionschedule.test_active"
 	var v grid.Distributionschedule
 
@@ -72,7 +70,6 @@ func TestAccDistributionscheduleResource_Active(t *testing.T) {
 }
 
 func TestAccDistributionscheduleResource_StartTime(t *testing.T) {
-	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_grid_distributionschedule.test_start_time"
 	var v grid.Distributionschedule
 	now := time.Now()
@@ -105,7 +102,6 @@ func TestAccDistributionscheduleResource_StartTime(t *testing.T) {
 }
 
 func TestAccDistributionscheduleResource_UpgradeGroups(t *testing.T) {
-	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_grid_distributionschedule.test_upgrade_groups"
 	var v grid.Distributionschedule
 

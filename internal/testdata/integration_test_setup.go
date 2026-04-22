@@ -1294,6 +1294,132 @@ func PreConfig(clients PreConfigClients, hostnames GridHostnames) error {
 		fmt.Printf("Upgrade dependent group %q created successfully\n", groupName)
 	}
 
+	// Ensure upgrade schedule has required start time and group upgrade times.
+	upgradeScheduleResp, _, err := clients.GRID.UpgradescheduleAPI.List(context.Background()).
+		ReturnAsObject(1).
+		ReturnFieldsPlus("start_time,upgrade_groups").
+		Execute()
+	if err != nil {
+		return fmt.Errorf("failed to list upgrade schedule: %w", err)
+	}
+	if upgradeScheduleResp.ListUpgradescheduleResponseObject == nil || len(upgradeScheduleResp.ListUpgradescheduleResponseObject.Result) == 0 {
+		return fmt.Errorf("upgrade schedule list returned no results")
+	}
+
+	upgradeSchedule := upgradeScheduleResp.ListUpgradescheduleResponseObject.Result[0]
+	if upgradeSchedule.Ref == nil || *upgradeSchedule.Ref == "" {
+		return fmt.Errorf("upgrade schedule ref is empty")
+	}
+
+	const defaultUpgradeScheduleStartTime int64 = 1829280600
+	const defaultUpgradeGroupTime int64 = 1830144600
+
+	shouldUpdateUpgradeSchedule := false
+	upgradeScheduleBody := grid.Upgradeschedule{}
+
+	if !upgradeSchedule.HasStartTime() {
+		upgradeScheduleBody.StartTime = grid.PtrInt64(defaultUpgradeScheduleStartTime)
+		shouldUpdateUpgradeSchedule = true
+	}
+
+	if upgradeSchedule.HasUpgradeGroups() {
+		scheduleUpgradeGroups := upgradeSchedule.GetUpgradeGroups()
+		hasMissingGroupUpgradeTime := false
+
+		var upgradeGroupsForBody []grid.UpgradescheduleUpgradeGroups
+		for _, ug := range scheduleUpgradeGroups {
+			groupBody := grid.UpgradescheduleUpgradeGroups{}
+			if ug.HasName() {
+				groupBody.SetName(ug.GetName())
+			}
+			groupBody.SetUpgradeTime(defaultUpgradeGroupTime)
+			hasMissingGroupUpgradeTime = true
+			upgradeGroupsForBody = append(upgradeGroupsForBody, groupBody)
+		}
+
+		if hasMissingGroupUpgradeTime {
+			upgradeScheduleBody.SetUpgradeGroups(upgradeGroupsForBody)
+			shouldUpdateUpgradeSchedule = true
+		}
+	}
+
+	if shouldUpdateUpgradeSchedule {
+		upgradeScheduleRef := utils.ExtractResourceRef(*upgradeSchedule.Ref)
+		_, _, err = clients.GRID.UpgradescheduleAPI.Update(context.Background(), upgradeScheduleRef).
+			Upgradeschedule(upgradeScheduleBody).
+			Execute()
+		if err != nil {
+			return fmt.Errorf("failed to update upgrade schedule %q: %w", *upgradeSchedule.Ref, err)
+		}
+
+		fmt.Printf("Upgrade schedule %q updated with default start/upgrade times where missing\n", *upgradeSchedule.Ref)
+	} else {
+		fmt.Printf("Upgrade schedule %q already has start and upgrade times, skipping update\n", *upgradeSchedule.Ref)
+	}
+
+	// Ensure distribution schedule has required start time and group upgrade times.
+	distributionScheduleResp, _, err := clients.GRID.DistributionscheduleAPI.List(context.Background()).
+		ReturnAsObject(1).
+		ReturnFieldsPlus("start_time,upgrade_groups").
+		Execute()
+	if err != nil {
+		return fmt.Errorf("failed to list distribution schedule: %w", err)
+	}
+	if distributionScheduleResp.ListDistributionscheduleResponseObject == nil || len(distributionScheduleResp.ListDistributionscheduleResponseObject.Result) == 0 {
+		return fmt.Errorf("distribution schedule list returned no results")
+	}
+
+	distributionSchedule := distributionScheduleResp.ListDistributionscheduleResponseObject.Result[0]
+	if distributionSchedule.Ref == nil || *distributionSchedule.Ref == "" {
+		return fmt.Errorf("distribution schedule ref is empty")
+	}
+
+	const defaultDistributionScheduleStartTime int64 = 1829280600
+	const defaultDistributionScheduleGroupTime int64 = 1830144600
+
+	shouldUpdateDistributionSchedule := false
+	distributionScheduleBody := grid.Distributionschedule{}
+
+	if !distributionSchedule.HasStartTime() {
+		distributionScheduleBody.StartTime = grid.PtrInt64(defaultDistributionScheduleStartTime)
+		shouldUpdateDistributionSchedule = true
+	}
+
+	if distributionSchedule.HasUpgradeGroups() {
+		scheduleUpgradeGroups := distributionSchedule.GetUpgradeGroups()
+		hasMissingGroupUpgradeTime := false
+
+		var upgradeGroupsForBody []grid.DistributionscheduleUpgradeGroups
+		for _, ug := range scheduleUpgradeGroups {
+			groupBody := grid.DistributionscheduleUpgradeGroups{}
+			if ug.HasName() {
+				groupBody.SetName(ug.GetName())
+			}
+			groupBody.SetDistributionTime(defaultDistributionScheduleGroupTime)
+			hasMissingGroupUpgradeTime = true
+			upgradeGroupsForBody = append(upgradeGroupsForBody, groupBody)
+		}
+
+		if hasMissingGroupUpgradeTime {
+			distributionScheduleBody.SetUpgradeGroups(upgradeGroupsForBody)
+			shouldUpdateDistributionSchedule = true
+		}
+	}
+
+	if shouldUpdateDistributionSchedule {
+		distributionScheduleRef := utils.ExtractResourceRef(*distributionSchedule.Ref)
+		_, _, err = clients.GRID.DistributionscheduleAPI.Update(context.Background(), distributionScheduleRef).
+			Distributionschedule(distributionScheduleBody).
+			Execute()
+		if err != nil {
+			return fmt.Errorf("failed to update distribution schedule %q: %w", *distributionSchedule.Ref, err)
+		}
+
+		fmt.Printf("Distribution schedule %q updated with default start/upgrade times where missing\n", *distributionSchedule.Ref)
+	} else {
+		fmt.Printf("Distribution schedule %q already has start and upgrade times, skipping update\n", *distributionSchedule.Ref)
+	}
+
 	// Create Active Directory auth services
 	adAuthServices := []struct {
 		name      string
