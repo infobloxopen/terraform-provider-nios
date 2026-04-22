@@ -417,7 +417,7 @@ func ConfigurePxgridEndpoint(host, wapiVer, username, password, certUploadFilePa
 		ReturnFieldsPlus("name").
 		Execute()
 	if err != nil {
-		if strings.Contains(err.Error(), "already exists") {
+		if strings.Contains(err.Error(), "already exists") || strings.Contains(err.Error(), "is already in use for another endpoint") {
 			filters := map[string]interface{}{"name": endpointName}
 			existingResp, _, listErr := miscClient.PxgridEndpointAPI.List(context.Background()).
 				ReturnAsObject(1).
