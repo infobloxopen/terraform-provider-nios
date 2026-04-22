@@ -404,6 +404,14 @@ func TestAccDxlEndpointResource_OutboundMembers(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
+				Config: testAccDxlEndpointOutboundMembers(clientCertificateFile, broker, name, "GM", outboundMembersVal),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckDxlEndpointExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "outbound_member_type", "GM"),
+				),
+			},
+			// Update and Read
+			{
 				Config: testAccDxlEndpointOutboundMembers(clientCertificateFile, broker, name, "MEMBER", outboundMembersVal),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDxlEndpointExists(context.Background(), resourceName, &v),
@@ -791,16 +799,20 @@ resource "nios_misc_dxl_endpoint" "test_outbound_member_type" {
 
 func testAccDxlEndpointOutboundMembers(clientCertificateToken string, broker []map[string]any, name string, outboundMemberType string, outboundMembers []string) string {
 	brokerStr := utils.ConvertSliceOfMapsToHCL(broker)
-	outboundMembersStr := utils.ConvertStringSliceToHCL(outboundMembers)
+	outBoundMembersHCL := ""
+	if outboundMemberType != "GM" {
+		outBoundMembersStr := utils.ConvertStringSliceToHCL(outboundMembers)
+		outBoundMembersHCL = fmt.Sprintf("outbound_members = %s", outBoundMembersStr)
+	}
 	return fmt.Sprintf(`
 resource "nios_misc_dxl_endpoint" "test_outbound_members" {
     client_certificate_file = %q
     name = %q
     outbound_member_type = %q
-    outbound_members = %s
+    %s
 	brokers = %s
 }
-`, clientCertificateToken, name, outboundMemberType, outboundMembersStr, brokerStr)
+`, clientCertificateToken, name, outboundMemberType, outBoundMembersHCL, brokerStr)
 }
 
 func testAccDxlEndpointTemplateInstance(clientCertificateToken string, broker []map[string]any, name string, outboundMemberType string, templateInstance map[string]any) string {

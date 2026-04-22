@@ -185,7 +185,7 @@ data "nios_dhcp_fixed_address" "test" {
 func testAccFixedaddressDataSourcConfigeMsServerStruct(ip, matchClient string, macAddress, structValue, ipv4Adrr string) string {
 	return fmt.Sprintf(`
 resource "nios_ipam_network" "example_network" {
-  	network      = "189.0.0.0/24"
+  	network      = "199.0.0.0/24"
 	network_view = "default"
 	members = [
 		{

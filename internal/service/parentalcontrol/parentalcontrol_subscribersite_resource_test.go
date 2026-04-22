@@ -18,7 +18,7 @@ import (
 
 var readableAttributesForParentalcontrolSubscribersite = "abss,api_members,api_port,block_size,blocking_ipv4_vip1,blocking_ipv4_vip2,blocking_ipv6_vip1,blocking_ipv6_vip2,comment,dca_sub_bw_list,dca_sub_query_count,enable_global_allow_list_rpz,enable_rpz_filtering_bypass,extattrs,first_port,global_allow_list_rpz,maximum_subscribers,members,msps,name,nas_gateways,nas_port,proxy_rpz_passthru,spms,stop_anycast,strict_nat,subscriber_collection_type"
 
-// TODO : Required parents for the execution of tests - members (infoblox.localdomain, infoblox.member1)
+// TODO : Required parents for the execution of tests - members (infoblox.localdomain, infoblox.member2)
 
 func TestAccParentalcontrolSubscribersiteResource_basic(t *testing.T) {
 	var resourceName = "nios_parentalcontrol_subscribersite.test"
@@ -84,8 +84,8 @@ func TestAccParentalcontrolSubscribersiteResource_Abss(t *testing.T) {
 	var resourceName = "nios_parentalcontrol_subscribersite.test_abss"
 	var v parentalcontrol.ParentalcontrolSubscribersite
 	name := acctest.RandomNameWithPrefix("subscriber-site")
-	blockingPolicy1 := acctest.RandomNameWithPrefix("blocking-policy-")
-	blockingPolicy2 := acctest.RandomNameWithPrefix("blocking-policy-")
+	blockingPolicy1 := acctest.RandomNameWithPrefix("blocking-policy")
+	blockingPolicy2 := acctest.RandomNameWithPrefix("blocking-policy")
 	value1 := acctest.Random32Hexadecimal()
 	value2 := acctest.Random32Hexadecimal()
 	abss1 := []map[string]any{
@@ -106,7 +106,7 @@ func TestAccParentalcontrolSubscribersiteResource_Abss(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccParentalcontrolSubscribersiteAbss(name, abss1, blockingPolicy1, value1),
+				Config: testAccParentalcontrolSubscribersiteAbss(name, abss1, blockingPolicy1, value1, blockingPolicy2, value2),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckParentalcontrolSubscribersiteExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "abss.#", "1"),
@@ -116,7 +116,7 @@ func TestAccParentalcontrolSubscribersiteResource_Abss(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccParentalcontrolSubscribersiteAbss(name, abss2, blockingPolicy2, value2),
+				Config: testAccParentalcontrolSubscribersiteAbss(name, abss2, blockingPolicy1, value1, blockingPolicy2, value2),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckParentalcontrolSubscribersiteExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "abss.#", "1"),
@@ -134,11 +134,12 @@ func TestAccParentalcontrolSubscribersiteResource_ApiMembers(t *testing.T) {
 	var v parentalcontrol.ParentalcontrolSubscribersite
 	name := acctest.RandomNameWithPrefix("subscriber-site")
 	memberName := utils.GetNIOSGridMasterHostName()
+	member2Name := utils.GetNIOSGridMemberHostName()
 	apiMembers1 := []map[string]any{
 		{"name": memberName},
 	}
 	apiMembers2 := []map[string]any{
-		{"name": "infoblox.member1"},
+		{"name": member2Name},
 	}
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -159,7 +160,7 @@ func TestAccParentalcontrolSubscribersiteResource_ApiMembers(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckParentalcontrolSubscribersiteExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "api_members.#", "1"),
-					resource.TestCheckResourceAttr(resourceName, "api_members.0.name", "infoblox.member1"),
+					resource.TestCheckResourceAttr(resourceName, "api_members.0.name", member2Name),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -584,11 +585,12 @@ func TestAccParentalcontrolSubscribersiteResource_Members(t *testing.T) {
 	var v parentalcontrol.ParentalcontrolSubscribersite
 	name := acctest.RandomNameWithPrefix("subscriber-site")
 	memberName := utils.GetNIOSGridMasterHostName()
+	member2Name := utils.GetNIOSGridMemberHostName()
 	members1 := []map[string]any{
 		{"name": memberName},
 	}
 	members2 := []map[string]any{
-		{"name": "infoblox.member1"},
+		{"name": member2Name},
 	}
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -609,7 +611,7 @@ func TestAccParentalcontrolSubscribersiteResource_Members(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckParentalcontrolSubscribersiteExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "members.#", "1"),
-					resource.TestCheckResourceAttr(resourceName, "members.0.name", "infoblox.member1"),
+					resource.TestCheckResourceAttr(resourceName, "members.0.name", member2Name),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -919,16 +921,16 @@ resource "nios_parentalcontrol_subscribersite" "test" {
 `, name)
 }
 
-func testAccParentalcontrolSubscribersiteAbss(name string, abss []map[string]any, blockingPolicy, value string) string {
+func testAccParentalcontrolSubscribersiteAbss(name string, abss []map[string]any, blockingPolicy, value, blockingPolicy2, value2 string) string {
 	abssStr := utils.ConvertSliceOfMapsToHCL(abss)
 	config := fmt.Sprintf(`
 resource "nios_parentalcontrol_subscribersite" "test_abss" {
     name = %q
     abss = %s
-	depends_on = [nios_parentalcontrol_blockingpolicy.test_blocking_policy]
+	depends_on = [nios_parentalcontrol_blockingpolicy.test_blocking_policy,nios_parentalcontrol_blockingpolicy.test_blocking_policy2]
 }
 `, name, abssStr)
-	return strings.Join([]string{testAccParentBlockingPolicy(blockingPolicy, value), config}, "")
+	return strings.Join([]string{testAccParentBlockingPolicy(blockingPolicy, value, blockingPolicy2, value2), config}, "")
 }
 
 func testAccParentalcontrolSubscribersiteApiMembers(name string, apiMembers []map[string]any) string {
@@ -947,6 +949,7 @@ func testAccParentalcontrolSubscribersiteBlockSize(name, blockSize string) strin
 resource "nios_parentalcontrol_subscribersite" "test_block_size" {
     name = %q
     block_size = %q
+	strict_nat = false
 }
 `, name, blockSize)
 }
@@ -1156,11 +1159,16 @@ resource "nios_parentalcontrol_subscribersite" "test_strict_nat" {
 `, name, strictNat)
 }
 
-func testAccParentBlockingPolicy(name, value string) string {
+func testAccParentBlockingPolicy(name, value, name2, value2 string) string {
 	return fmt.Sprintf(`
 resource "nios_parentalcontrol_blockingpolicy" "test_blocking_policy" {
 	name = %q
 	value = %q
 }
-`, name, value)
+
+resource "nios_parentalcontrol_blockingpolicy" "test_blocking_policy2" {
+	name = %q
+	value = %q
+}
+`, name, value, name2, value2)
 }

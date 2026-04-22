@@ -640,6 +640,9 @@ func PreConfig(clients PreConfigClients, hostnames GridHostnames) error {
 			EnableNetworkUsers: grid.PtrBool(true),
 		},
 		EnableRirSwip: grid.PtrBool(true),
+		DnsResolverSetting: &grid.GridDnsResolverSetting{
+			Resolvers: []string{"127.0.0.1"},
+		},
 	}
 	_, _, err = clients.GRID.GridAPI.Update(context.Background(), utils.ExtractResourceRef(*gridRef)).
 		Grid(gridBody).
@@ -1626,8 +1629,9 @@ func PreConfig(clients PreConfigClients, hostnames GridHostnames) error {
 
 	dnsGridPropertiesRef := utils.ExtractResourceRef(*gridDNSRef)
 	rpzLoggingLevel := gridDNSResp.ListGridDnsResponseObject.Result[0].LoggingCategories.LogRpz
+	allowRecursiveQuery := gridDNSResp.ListGridDnsResponseObject.Result[0].AllowRecursiveQuery
 
-	if rpzLoggingLevel == nil || !*rpzLoggingLevel {
+	if rpzLoggingLevel == nil || !*rpzLoggingLevel || allowRecursiveQuery == nil || !*allowRecursiveQuery {
 		fmt.Printf("RPZ logging level is %v, updating to true\n", rpzLoggingLevel)
 		dnsGridUpdateBody := grid.GridDns{
 			LoggingCategories: &grid.GridDnsLoggingCategories{

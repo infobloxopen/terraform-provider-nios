@@ -17,6 +17,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
+	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/parentalcontrol"
 
@@ -383,7 +385,14 @@ func (m *ParentalcontrolSubscribersiteModel) Flatten(ctx context.Context, from *
 	m.Members = flex.FlattenFrameworkListNestedBlock(ctx, from.Members, ParentalcontrolSubscribersiteMembersAttrTypes, diags, FlattenParentalcontrolSubscribersiteMembers)
 	m.Msps = flex.FlattenFrameworkListNestedBlock(ctx, from.Msps, ParentalcontrolSubscribersiteMspsAttrTypes, diags, FlattenParentalcontrolSubscribersiteMsps)
 	m.Name = flex.FlattenStringPointer(from.Name)
+	planNasGateways := m.NasGateways
 	m.NasGateways = flex.FlattenFrameworkListNestedBlock(ctx, from.NasGateways, ParentalcontrolSubscribersiteNasGatewaysAttrTypes, diags, FlattenParentalcontrolSubscribersiteNasGateways)
+	if !planNasGateways.IsUnknown() {
+		result, diags := utils.CopyFieldFromPlanToRespList(ctx, planNasGateways, m.NasGateways, "shared_secret")
+		if !diags.HasError() {
+			m.NasGateways = result.(basetypes.ListValue)
+		}
+	}
 	m.NasPort = flex.FlattenInt64Pointer(from.NasPort)
 	m.ProxyRpzPassthru = types.BoolPointerValue(from.ProxyRpzPassthru)
 	m.Spms = flex.FlattenFrameworkListNestedBlock(ctx, from.Spms, ParentalcontrolSubscribersiteSpmsAttrTypes, diags, FlattenParentalcontrolSubscribersiteSpms)
