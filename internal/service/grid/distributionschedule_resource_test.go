@@ -19,7 +19,7 @@ var readableAttributesForDistributionschedule = "active,start_time,time_zone,upg
 func TestAccDistributionscheduleResource_basic(t *testing.T) {
 	var resourceName = "nios_grid_distributionschedule.test"
 	var v grid.Distributionschedule
-	start_time := time.Now().Add(12 * time.Hour).Format(utils.NaiveDatetimeLayout)
+	startTime := time.Now().Add(12 * time.Hour).Format(utils.NaiveDatetimeLayout)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -27,10 +27,10 @@ func TestAccDistributionscheduleResource_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccDistributionscheduleBasicConfig(false, start_time),
+				Config: testAccDistributionscheduleBasicConfig(false, startTime),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDistributionscheduleExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "start_time", start_time),
+					resource.TestCheckResourceAttr(resourceName, "start_time", startTime),
 					// Test fields with default value
 					resource.TestCheckResourceAttr(resourceName, "active", "false"),
 				),
@@ -73,8 +73,8 @@ func TestAccDistributionscheduleResource_StartTime(t *testing.T) {
 	var resourceName = "nios_grid_distributionschedule.test_start_time"
 	var v grid.Distributionschedule
 	now := time.Now()
-	start_time := now.Add(6 * time.Hour).Format(utils.NaiveDatetimeLayout)
-	updated_start_time := now.Add(10 * time.Hour).Format(utils.NaiveDatetimeLayout)
+	startTime := now.Add(6 * time.Hour).Format(utils.NaiveDatetimeLayout)
+	updatedStartTime := now.Add(10 * time.Hour).Format(utils.NaiveDatetimeLayout)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -82,18 +82,18 @@ func TestAccDistributionscheduleResource_StartTime(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccDistributionscheduleStartTime(start_time),
+				Config: testAccDistributionscheduleStartTime(startTime),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDistributionscheduleExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "start_time", start_time),
+					resource.TestCheckResourceAttr(resourceName, "start_time", startTime),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccDistributionscheduleStartTime(updated_start_time),
+				Config: testAccDistributionscheduleStartTime(updatedStartTime),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDistributionscheduleExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "start_time", updated_start_time),
+					resource.TestCheckResourceAttr(resourceName, "start_time", updatedStartTime),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -111,7 +111,7 @@ func TestAccDistributionscheduleResource_UpgradeGroups(t *testing.T) {
 
 	startTime := now.Add(12 * time.Hour).Format(utils.NaiveDatetimeLayout)
 
-	distributionTime := now.Add(24 * time.Hour).Format(utils.NaiveDatetimeLayout)
+	distributionTime := now.Add(20 * time.Hour).Format(utils.NaiveDatetimeLayout)
 
 	upgradeGroups := []map[string]any{
 		{
@@ -124,7 +124,7 @@ func TestAccDistributionscheduleResource_UpgradeGroups(t *testing.T) {
 		},
 	}
 
-	updatedDistributionTime := now.Add(48 * time.Hour).Format(utils.NaiveDatetimeLayout)
+	updatedDistributionTime := now.Add(23 * time.Hour).Format(utils.NaiveDatetimeLayout)
 
 	updatedUpgradeGroups := []map[string]any{
 		{

@@ -449,6 +449,9 @@ func TestAccMemberResource_Comment(t *testing.T) {
 }
 
 func TestAccMemberResource_ConfigAddrType(t *testing.T) {
+	if utils.GetNIOSGridMasterConfigAddrType() != "BOTH" {
+		t.Skip("Skipping test since grid master config addr type is not set to BOTH")
+	}
 	var resourceName = "nios_grid_member.test_config_addr_type"
 	var v grid.Member
 	hostName := fmt.Sprintf("infoblox-%s.localdomain", acctest.RandomName())
@@ -936,6 +939,9 @@ func TestAccMemberResource_EnableMemberRedirect(t *testing.T) {
 }
 
 func TestAccMemberResource_EnableRoApiAccess(t *testing.T) {
+	if utils.GetNIOSGridMasterConfigAddrType() != "BOTH" {
+		t.Skip("Skipping test since grid master config addr type is not set to BOTH")
+	}
 	var resourceName = "nios_grid_member.test_enable_ro_api_access"
 	var v grid.Member
 	hostName := fmt.Sprintf("infoblox-%s.localdomain", acctest.RandomName())
@@ -2331,6 +2337,9 @@ func TestAccMemberResource_RouterId(t *testing.T) {
 }
 
 func TestAccMemberResource_ServiceTypeConfiguration(t *testing.T) {
+	if utils.GetNIOSGridMasterConfigAddrType() != "BOTH" {
+		t.Skip("Skipping test since grid master config addr type is not set to BOTH")
+	}
 	var resourceName = "nios_grid_member.test_service_type_configuration"
 	var v grid.Member
 	hostName := fmt.Sprintf("infoblox-%s.localdomain", acctest.RandomName())
@@ -3035,6 +3044,9 @@ func TestAccMemberResource_TrafficCaptureQpsSetting(t *testing.T) {
 }
 
 func TestAccMemberResource_TrafficCaptureRecDnsSetting(t *testing.T) {
+	if utils.GetNIOSGridMasterConfigAddrType() != "BOTH" {
+		t.Skip("Skipping test since grid master config addr type is not set to BOTH")
+	}
 	var resourceName = "nios_grid_member.test_traffic_capture_rec_dns_setting"
 	var v grid.Member
 
@@ -4172,6 +4184,9 @@ func TestAccMemberResource_UseV4Vrrp(t *testing.T) {
 }
 
 func TestAccMemberResource_MasterCandidate(t *testing.T) {
+	if utils.GetNIOSGridMasterConfigAddrType() != "BOTH" {
+		t.Skip("Skipping test since grid master config addr type is not set to BOTH")
+	}
 	var resourceName = "nios_grid_member.test_master_candidate"
 	var v grid.Member
 

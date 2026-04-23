@@ -141,7 +141,7 @@ func TestAccParentalcontrolSubscribersiteResource_ApiMembers(t *testing.T) {
 	apiMembers2 := []map[string]any{
 		{"name": member2Name},
 	}
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
@@ -585,14 +585,13 @@ func TestAccParentalcontrolSubscribersiteResource_Members(t *testing.T) {
 	var v parentalcontrol.ParentalcontrolSubscribersite
 	name := acctest.RandomNameWithPrefix("subscriber-site")
 	memberName := utils.GetNIOSGridMasterHostName()
-	member2Name := utils.GetNIOSGridMemberHostName()
 	members1 := []map[string]any{
 		{"name": memberName},
 	}
 	members2 := []map[string]any{
-		{"name": member2Name},
+		{"name": "infoblox.member2"},
 	}
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
@@ -611,7 +610,7 @@ func TestAccParentalcontrolSubscribersiteResource_Members(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckParentalcontrolSubscribersiteExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "members.#", "1"),
-					resource.TestCheckResourceAttr(resourceName, "members.0.name", member2Name),
+					resource.TestCheckResourceAttr(resourceName, "members.0.name", "infoblox.member2"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase

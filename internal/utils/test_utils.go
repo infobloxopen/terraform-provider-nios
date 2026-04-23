@@ -53,3 +53,7 @@ func GetNIOSPxgridEndpointRef() string {
 func GetGSSTSIGCertRef() string {
 	return os.Getenv("NIOS_GSS_TSIG_CERT_REF")
 }
+
+func GetNIOSGridMasterConfigAddrType() string {
+	return os.Getenv("NIOS_GRID_MASTER_CONFIG_ADDR_TYPE")
+}
