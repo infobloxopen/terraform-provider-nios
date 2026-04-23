@@ -59,7 +59,7 @@ var MemberCspMemberSettingResourceSchemaAttributes = map[string]schema.Attribute
 		Computed: true,
 		Optional: true,
 		Validators: []validator.String{
-			stringvalidator.AlsoRequires(path.MatchRoot("use_csp_join_token")),
+			stringvalidator.AlsoRequires(path.MatchRelative().AtParent().AtName("use_csp_join_token")),
 		},
 		MarkdownDescription: "Join token required to connect to a cluster",
 	},
@@ -75,7 +75,7 @@ var MemberCspMemberSettingResourceSchemaAttributes = map[string]schema.Attribute
 		Computed: true,
 		Optional: true,
 		Validators: []validator.String{
-			stringvalidator.AlsoRequires(path.MatchRoot("use_csp_https_proxy")),
+			stringvalidator.AlsoRequires(path.MatchRelative().AtParent().AtName("use_csp_https_proxy")),
 		},
 		MarkdownDescription: "HTTP Proxy IP address of CSP Portal",
 	},
