@@ -1,4 +1,4 @@
-package dns_test
+package dhcp_test
 
 import (
 	"context"
@@ -9,16 +9,17 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/querycheck"
 	"github.com/hashicorp/terraform-plugin-testing/tfversion"
 
-	"github.com/infobloxopen/infoblox-nios-go-client/dns"
+	"github.com/infobloxopen/infoblox-nios-go-client/dhcp"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/acctest"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
-func TestAccRecordAList_basic(t *testing.T) {
-	var resourceName = "nios_dns_record_a.test"
-	var v dns.RecordA
-	name := acctest.RandomName() + ".example.com"
+func TestAccFixedaddressList_basic(t *testing.T) {
+	var resourceName = "nios_dhcp_fixed_address.test"
+	var v dhcp.Fixedaddress
+	ip := "15.0.0.111"
+	agentCircuitID := acctest.RandomNumber(1000)
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -33,16 +34,54 @@ func TestAccRecordAList_basic(t *testing.T) {
 			},
 			// Create and Read
 			{
-				Config: testAccRecordABasicConfig(name, "10.0.0.20", "default"),
+				Config: testAccFixedaddressBasicConfig(ip, "CIRCUIT_ID", agentCircuitID),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckRecordAExists(context.Background(), resourceName, &v),
+					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
 				),
 			},
+			// Query the object
 			{
 				Query:  true,
-				Config: testAccRecordAListBasicConfig(),
+				Config: testAccFixedaddressListBasicConfig(),
 				QueryResultChecks: []querycheck.QueryResultCheck{
-					querycheck.ExpectLengthAtLeast("nios_dns_record_a.test", 1),
+					querycheck.ExpectLengthAtLeast("nios_dhcp_fixed_address.test", 1),
+				},
+			},
+		},
+	})
+}
+
+func TestAccFixedaddressList_Filters(t *testing.T) {
+	var resourceName = "nios_dhcp_fixed_address.test"
+	var v dhcp.Fixedaddress
+	ip := "15.0.0.112"
+	agentCircuitID := acctest.RandomNumber(1000)
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		TerraformVersionChecks: []tfversion.TerraformVersionCheck{
+			tfversion.SkipBelow(tfversion.Version0_14_0),
+		},
+		Steps: []resource.TestStep{
+			// Provider Setup
+			{
+				Config: utils.ProviderSetup(),
+			},
+			// Create and Read
+			{
+				Config: testAccFixedaddressBasicConfig(ip, "CIRCUIT_ID", agentCircuitID),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "ipv4addr", ip),
+				),
+			},
+			// Query the object
+			{
+				Query:  true,
+				Config: testAccFixedaddressListConfigFilters(ip),
+				QueryResultChecks: []querycheck.QueryResultCheck{
+					querycheck.ExpectLength("nios_dhcp_fixed_address.test", 1),
 				},
 			},
 			// Delete testing automatically occurs in TestCase
@@ -50,45 +89,12 @@ func TestAccRecordAList_basic(t *testing.T) {
 	})
 }
 
-func TestAccRecordAList_Filters(t *testing.T) {
-	var resourceName = "nios_dns_record_a.test"
-	var v dns.RecordA
-	name := acctest.RandomName() + ".example.com"
+func TestAccFixedaddressList_ExtAttrFilters(t *testing.T) {
+	var resourceName = "nios_dhcp_fixed_address.test_extattrs"
+	var v dhcp.Fixedaddress
+	ip := "15.0.0.113"
+	agentCircuitID := acctest.RandomNumber(1000)
 
-	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.PreCheck(t) },
-		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-		TerraformVersionChecks: []tfversion.TerraformVersionCheck{
-			tfversion.SkipBelow(tfversion.Version0_14_0),
-		},
-		Steps: []resource.TestStep{
-			// Provider Setup
-			{
-				Config: utils.ProviderSetup(),
-			},
-			// Create and Read
-			{
-				Config: testAccRecordABasicConfig(name, "10.0.0.21", "default"),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckRecordAExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "name", name),
-				),
-			},
-			{
-				Query:  true,
-				Config: testAccRecordAListConfigFilters(name),
-				QueryResultChecks: []querycheck.QueryResultCheck{
-					querycheck.ExpectLength("nios_dns_record_a.test", 1),
-				},
-			},
-		},
-	})
-}
-
-func TestAccRecordAList_ExtAttrFilters(t *testing.T) {
-	var resourceName = "nios_dns_record_a.test_extattrs"
-	var v dns.RecordA
-	name := acctest.RandomName() + ".example.com"
 	extAttrValue := acctest.RandomName()
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -104,50 +110,52 @@ func TestAccRecordAList_ExtAttrFilters(t *testing.T) {
 			},
 			// Create and Read
 			{
-				Config: testAccRecordAExtattrs(name, "10.0.0.22", "default", map[string]string{
+				Config: testAccFixedaddressExtAttrs(ip, "CIRCUIT_ID", agentCircuitID, map[string]string{
 					"Site": extAttrValue,
 				}),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckRecordAExists(context.Background(), resourceName, &v),
+					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "extattrs.Site", extAttrValue),
 				),
 			},
+			// Query the object
 			{
 				Query:  true,
-				Config: testAccRecordAListConfigExtAttrFilters(extAttrValue),
+				Config: testAccFixedaddressListConfigExtAttrFilters(extAttrValue),
 				QueryResultChecks: []querycheck.QueryResultCheck{
-					querycheck.ExpectLength("nios_dns_record_a.test", 1),
+					querycheck.ExpectLength("nios_dhcp_fixed_address.test", 1),
 				},
 			},
+			// Delete testing automatically occurs in TestCase
 		},
 	})
 }
 
-func testAccRecordAListBasicConfig() string {
+func testAccFixedaddressListBasicConfig() string {
 	return `
-list "nios_dns_record_a" "test" {
+list "nios_dhcp_fixed_address" "test" {
 	provider = nios
 	limit = 5
 }
 `
 }
 
-func testAccRecordAListConfigFilters(name string) string {
+func testAccFixedaddressListConfigFilters(ip4addr string) string {
 	return fmt.Sprintf(`
-list "nios_dns_record_a" "test" {
+list "nios_dhcp_fixed_address" "test" {
 	provider = nios
 	config {
 		filters = {
-			name =  %q
+			ipv4addr =  %q
 		}
 	}
 }
-`, name)
+`, ip4addr)
 }
 
-func testAccRecordAListConfigExtAttrFilters(name string) string {
+func testAccFixedaddressListConfigExtAttrFilters(extAttrVal string) string {
 	return fmt.Sprintf(`
-list "nios_dns_record_a" "test" {
+list "nios_dhcp_fixed_address" "test" {
 	provider = nios
 	config {
 		extattrfilters = {
@@ -155,5 +163,5 @@ list "nios_dns_record_a" "test" {
 		}
 	}
 }
-`, name)
+`, extAttrVal)
 }

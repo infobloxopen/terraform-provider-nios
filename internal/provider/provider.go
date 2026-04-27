@@ -447,6 +447,8 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 func (p *NIOSProvider) ListResources(ctx context.Context) []func() list.ListResource {
 	return []func() list.ListResource{
 		dns.NewRecordAList,
+
+		dhcp.NewFixedaddressList,
 	}
 }
 
