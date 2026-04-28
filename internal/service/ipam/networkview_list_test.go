@@ -27,7 +27,7 @@ func TestAccNetworkviewList_basic(t *testing.T) {
 			tfversion.SkipBelow(tfversion.Version0_14_0),
 		},
 		Steps: []resource.TestStep{
-			//Provider Setup
+			// Provider Setup
 			{
 				Config: utils.ProviderSetup(),
 			},
@@ -117,8 +117,7 @@ func TestAccNetworkviewList_ExtAttrFilters(t *testing.T) {
 			},
 			// Query the object
 			{
-				Query: true,
-
+				Query:  true,
 				Config: testAccNetworkviewListConfigExtAttrFilters(extAttrValue),
 				QueryResultChecks: []querycheck.QueryResultCheck{
 					querycheck.ExpectLength("nios_ipam_network_view.test", 1),
