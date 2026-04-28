@@ -449,6 +449,8 @@ func (p *NIOSProvider) ListResources(ctx context.Context) []func() list.ListReso
 		dns.NewRecordAList,
 
 		dhcp.NewFixedaddressList,
+
+		ipam.NewNetworkviewList,
 	}
 }
 
