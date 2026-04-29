@@ -418,11 +418,17 @@ func ParseInterfaceValue(valStr string) interface{} {
 		}
 	}
 
+	return valStr
+}
+
+func ParseInterfaceValueWithIntFallback(valStr string) interface{} {
+	value := ParseInterfaceValue(valStr)
+
 	// Try to parse the value as an integer
 	if intVal, err := strconv.ParseInt(valStr, 10, 64); err == nil {
 		return intVal
 	}
-	return valStr
+	return value
 }
 
 // ConvertSliceOfMapsToHCL serializes a slice of []map[string]any into an HCL format.
@@ -441,6 +447,8 @@ func ConvertSliceOfMapsToHCL(data []map[string]any) string {
 				formattedValue = nestedHCL
 			case map[string]any:
 				formattedValue = ConvertMapToHCL(v)
+			case []string:
+				formattedValue = ConvertStringSliceToHCL(v)
 			case string:
 				formattedValue = fmt.Sprintf("%q", v)
 			case int, int64, float64:
