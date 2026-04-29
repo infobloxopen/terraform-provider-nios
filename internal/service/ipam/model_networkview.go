@@ -258,8 +258,6 @@ func (m *NetworkviewModel) Flatten(ctx context.Context, from *ipam.Networkview, 
 	m.CloudInfo = FlattenNetworkviewCloudInfo(ctx, from.CloudInfo, diags)
 	m.Comment = flex.FlattenStringPointer(from.Comment)
 	m.DdnsDnsView = flex.FlattenStringPointer(from.DdnsDnsView)
-	// NIOS qualifies ddns_dns_view by appending ".<network_view_name>" (e.g. "default" -> "default.my_nv").
-	// Normalize by stripping the suffix so state matches the user-provided config value.
 	if !m.DdnsDnsView.IsNull() && from.Name != nil {
 		if val := m.DdnsDnsView.ValueString(); strings.HasSuffix(val, "."+*from.Name) {
 			m.DdnsDnsView = types.StringValue(strings.TrimSuffix(val, "."+*from.Name))
