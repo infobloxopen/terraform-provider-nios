@@ -426,18 +426,11 @@ func (r *FixedaddressResource) ValidateConfig(ctx context.Context, req resource.
 			)
 		}
 	} else if data.MatchClient.ValueString() == "RESERVED" {
-		if data.Mac.IsNull() {
+		if !data.Mac.IsNull() && data.Mac.ValueString() != "00:00:00:00:00:00" {
 			resp.Diagnostics.AddAttributeError(
 				path.Root("mac"),
 				"Invalid configuration",
-				"The 'mac' attribute must be set when 'match_client' is set to 'RESERVED'.",
-			)
-		}
-		if data.Mac.ValueString() != "00:00:00:00:00:00" {
-			resp.Diagnostics.AddAttributeError(
-				path.Root("mac"),
-				"Invalid configuration",
-				"The 'mac' attribute must be set to '00:00:00:00:00:00' when 'match_client' is set to 'RESERVED'.",
+				"When 'match_client' is set to 'RESERVED', the 'mac' attribute must be set to '00:00:00:00:00:00' or left unset.",
 			)
 		}
 		if !data.AgentCircuitId.IsNull() || !data.AgentRemoteId.IsNull() || !data.DhcpClientIdentifier.IsNull() {
