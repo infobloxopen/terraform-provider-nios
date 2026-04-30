@@ -111,9 +111,9 @@ func (p *NIOSProvider) Configure(ctx context.Context, req provider.ConfigureRequ
 
 	err := checkAndCreatePreRequisites(ctx, client)
 	if err != nil {
-		resp.Diagnostics.AddError(
-			"Failed to ensure Terraform extensible attribute exists",
-			err.Error(),
+		resp.Diagnostics.AddWarning(
+			"Unable to verify Terraform extensible attribute during provider configuration",
+			fmt.Sprintf("The provider could not ensure the %q extensible attribute exists while configuring the client. Terraform can still continue when no nios-managed resources or data sources are used, but NIOS operations may fail later: %s", terraformInternalIDEA, err),
 		)
 	}
 	resp.DataSourceData = client
