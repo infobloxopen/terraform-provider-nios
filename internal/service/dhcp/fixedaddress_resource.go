@@ -364,6 +364,84 @@ func (r *FixedaddressResource) ValidateConfig(ctx context.Context, req resource.
 		return
 	}
 
+	if data.MatchClient.ValueString() == "MAC_ADDRESS" {
+		if data.Mac.IsNull() || data.Mac.IsUnknown() {
+			resp.Diagnostics.AddAttributeError(
+				path.Root("mac"),
+				"Invalid configuration",
+				"The 'mac' attribute must be set when 'match_client' is set to 'MAC_ADDRESS'.",
+			)
+		}
+		if !data.AgentCircuitId.IsNull() || !data.AgentRemoteId.IsNull() || !data.DhcpClientIdentifier.IsNull() {
+			resp.Diagnostics.AddAttributeError(
+				path.Root("match_client"),
+				"Invalid configuration",
+				"When 'match_client' is set to 'MAC_ADDRESS', the 'agent_circuit_id', 'agent_remote_id', and 'dhcp_client_identifier' attributes must not be set.",
+			)
+		}
+
+	} else if data.MatchClient.ValueString() == "CLIENT_ID" {
+		if data.DhcpClientIdentifier.IsNull() || data.DhcpClientIdentifier.IsUnknown() {
+			resp.Diagnostics.AddAttributeError(
+				path.Root("dhcp_client_identifier"),
+				"Invalid configuration",
+				"The 'dhcp_client_identifier' attribute must be set when 'match_client' is set to 'CLIENT_ID'.",
+			)
+		}
+		if !data.AgentCircuitId.IsNull() || !data.AgentRemoteId.IsNull() || !data.Mac.IsNull() {
+			resp.Diagnostics.AddAttributeError(
+				path.Root("match_client"),
+				"Invalid configuration",
+				"When 'match_client' is set to 'CLIENT_ID', the 'agent_circuit_id', 'agent_remote_id', and 'mac' attributes must not be set.",
+			)
+		}
+	} else if data.MatchClient.ValueString() == "CIRCUIT_ID" {
+		if data.AgentCircuitId.IsNull() || data.AgentCircuitId.IsUnknown() {
+			resp.Diagnostics.AddAttributeError(
+				path.Root("agent_circuit_id"),
+				"Invalid configuration",
+				"The 'agent_circuit_id' attribute must be set when 'match_client' is set to 'CIRCUIT_ID'.",
+			)
+		}
+		if !data.Mac.IsNull() || !data.DhcpClientIdentifier.IsNull() {
+			resp.Diagnostics.AddAttributeError(
+				path.Root("match_client"),
+				"Invalid configuration",
+				"When 'match_client' is set to 'CIRCUIT_ID', the  'mac' and 'dhcp_client_identifier' attributes must not be set.",
+			)
+		}
+	} else if data.MatchClient.ValueString() == "REMOTE_ID" {
+		if data.AgentRemoteId.IsNull() || data.AgentRemoteId.IsUnknown() {
+			resp.Diagnostics.AddAttributeError(
+				path.Root("agent_remote_id"),
+				"Invalid configuration",
+				"The 'agent_remote_id' attribute must be set when 'match_client' is set to 'REMOTE_ID'.",
+			)
+		}
+		if !data.Mac.IsNull() || !data.DhcpClientIdentifier.IsNull() {
+			resp.Diagnostics.AddAttributeError(
+				path.Root("match_client"),
+				"Invalid configuration",
+				"When 'match_client' is set to 'REMOTE_ID', the  'mac' and 'dhcp_client_identifier' attributes must not be set.",
+			)
+		}
+	} else if data.MatchClient.ValueString() == "RESERVED" {
+		if !data.Mac.IsNull() && data.Mac.ValueString() != "00:00:00:00:00:00" {
+			resp.Diagnostics.AddAttributeError(
+				path.Root("mac"),
+				"Invalid configuration",
+				"When 'match_client' is set to 'RESERVED', the 'mac' attribute must be set to '00:00:00:00:00:00' or left unset.",
+			)
+		}
+		if !data.AgentCircuitId.IsNull() || !data.AgentRemoteId.IsNull() || !data.DhcpClientIdentifier.IsNull() {
+			resp.Diagnostics.AddAttributeError(
+				path.Root("match_client"),
+				"Invalid configuration",
+				"When 'match_client' is set to 'RESERVED', the 'agent_circuit_id', 'agent_remote_id', and 'dhcp_client_identifier' attributes must not be set.",
+			)
+		}
+	}
+
 	// Check if options are defined
 	if !data.Options.IsNull() && !data.Options.IsUnknown() {
 		// Special DHCP option names that require use_option to be set
