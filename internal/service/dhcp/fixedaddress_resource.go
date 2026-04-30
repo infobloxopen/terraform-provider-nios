@@ -425,6 +425,28 @@ func (r *FixedaddressResource) ValidateConfig(ctx context.Context, req resource.
 				"When 'match_client' is set to 'REMOTE_ID', the  'mac' and 'dhcp_client_identifier' attributes must not be set.",
 			)
 		}
+	} else if data.MatchClient.ValueString() == "RESERVED" {
+		if data.Mac.IsNull() {
+			resp.Diagnostics.AddAttributeError(
+				path.Root("mac"),
+				"Invalid configuration",
+				"The 'mac' attribute must be set when 'match_client' is set to 'RESERVED'.",
+			)
+		}
+		if data.Mac.ValueString() != "00:00:00:00:00:00" {
+			resp.Diagnostics.AddAttributeError(
+				path.Root("mac"),
+				"Invalid configuration",
+				"The 'mac' attribute must be set to '00:00:00:00:00:00' when 'match_client' is set to 'RESERVED'.",
+			)
+		}
+		if !data.AgentCircuitId.IsNull() || !data.AgentRemoteId.IsNull() || !data.DhcpClientIdentifier.IsNull() {
+			resp.Diagnostics.AddAttributeError(
+				path.Root("match_client"),
+				"Invalid configuration",
+				"When 'match_client' is set to 'RESERVED', the 'agent_circuit_id', 'agent_remote_id', and 'dhcp_client_identifier' attributes must not be set.",
+			)
+		}
 	}
 
 	// Check if options are defined
