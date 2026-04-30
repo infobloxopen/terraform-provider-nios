@@ -3,7 +3,9 @@ properties([
     parameters([
         string(name: 'GM_URL',     defaultValue: 'https://host-a.infoblox.com', description: 'URL For the GRID Master'),
         string(name: 'MEMBER_URL', defaultValue: 'https://host-b.infoblox.com', description: 'URL for the GRID Member'),
-        string(name: 'TF_VERSION', defaultValue: '1.8.0',                       description: 'Terraform version to install e.g. 1.8.0')
+        string(name: 'TF_VERSION', defaultValue: '1.8.0',                       description: 'Terraform version to install e.g. 1.8.0'),
+        string(name: 'REPO_USER',  defaultValue: 'unasra',                      description: 'GitHub repository owner/user (for using forks)'),
+        string(name: 'BRANCH',     defaultValue: 'fix_tests',                   description: 'Branch name to checkout')
     ])
 ])
 
@@ -43,7 +45,7 @@ node('Cloud-test1-172.28.81.12-label') {
 
                 // ── Checkout ──────────────────────────────────────────────────
                 stage('Checkout') {
-                    git url: 'https://github.com/unasra/terraform-provider-nios.git', branch: 'fix_tests'
+                    git url: "https://github.com/${params.REPO_USER}/terraform-provider-nios.git", branch: params.BRANCH
                 }
 
                 // ── Install toolchain ─────────────────────────────────────────
