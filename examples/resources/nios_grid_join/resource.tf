@@ -30,6 +30,7 @@ resource "nios_grid_member" "example_grid_member_2" {
     virtual_ip  = "2600:1f1c:e86:5e01:a1df:ceec:98c4:2b30"
     cidr_prefix = 64
     gateway     = "fe80::4e5:f7ff:fe5d:84e3"
+    enabled     = true
   }
 }
 
@@ -58,10 +59,11 @@ resource "nios_grid_member" "example_grid_member_3" {
     virtual_ip  = "2600:1f1c:e86:5e01:a1df:ceec:98c4:2b30"
     cidr_prefix = 64
     gateway     = "fe80::4e5:f7ff:fe5d:84e3"
+    enabled     = true
   }
 }
 
-//// Join the member to the grid master
+// Join the member to the grid master
 resource "nios_grid_join" "member_join_3" {
   member_url      = "https://172.28.83.21"
   member_username = "username"
