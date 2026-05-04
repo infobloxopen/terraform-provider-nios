@@ -81,6 +81,30 @@ func (r *SharednetworkResource) ValidateConfig(ctx context.Context, req resource
 		}
 	}
 
+	// If ignore_client_identifier and use_ignore_client_identifier are both true,
+// then ignore_id must be "CLIENT" and use_ignore_id must be true.
+if !data.IgnoreClientIdentifier.IsNull() && !data.IgnoreClientIdentifier.IsUnknown() &&
+    data.IgnoreClientIdentifier.ValueBool() &&
+    !data.UseIgnoreClientIdentifier.IsNull() && !data.UseIgnoreClientIdentifier.IsUnknown() &&
+    data.UseIgnoreClientIdentifier.ValueBool() {
+
+    if data.IgnoreId.IsNull() || data.IgnoreId.IsUnknown() || data.IgnoreId.ValueString() != "CLIENT" {
+        resp.Diagnostics.AddAttributeError(
+            path.Root("ignore_id"),
+            "Invalid Configuration",
+            "ignore_id must be set to \"CLIENT\" when ignore_client_identifier and use_ignore_client_identifier are both set to true.",
+        )
+    }
+
+    if data.UseIgnoreId.IsNull() || data.UseIgnoreId.IsUnknown() || !data.UseIgnoreId.ValueBool() {
+        resp.Diagnostics.AddAttributeError(
+            path.Root("use_ignore_id"),
+            "Invalid Configuration",
+            "use_ignore_id must be set to true when ignore_client_identifier and use_ignore_client_identifier are both set to true.",
+        )
+    }
+}
+
 	if !data.Options.IsNull() && !data.Options.IsUnknown() {
 		// Special DHCP option names that require use_option to be set
 		specialOptions := map[string]bool{
