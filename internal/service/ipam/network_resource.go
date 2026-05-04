@@ -13,8 +13,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
+	"github.com/infobloxopen/infoblox-nios-go-client/ipam"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/config"
+	"github.com/infobloxopen/terraform-provider-nios/internal/retry"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
@@ -88,14 +90,37 @@ func (r *NetworkResource) Create(ctx context.Context, req resource.CreateRequest
 		data.FuncCall = r.UpdateFuncCallAttributeName(ctx, data, &resp.Diagnostics)
 	}
 
-	apiRes, _, err := r.client.IPAMAPI.
-		NetworkAPI.
-		Create(ctx).
-		Network(*data.Expand(ctx, &resp.Diagnostics, true)).
-		ReturnFieldsPlus(readableAttributesForNetwork).
-		ReturnAsObject(1).
-		Execute()
+	var apiRes *ipam.CreateNetworkResponse
+
+	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		var (
+			httpRes *http.Response
+			callErr error
+		)
+
+		apiRes, httpRes, callErr = r.client.IPAMAPI.
+			NetworkAPI.
+			Create(ctx).
+			Network(*data.Expand(ctx, &resp.Diagnostics, true)).
+			ReturnFieldsPlus(readableAttributesForNetwork).
+			ReturnAsObject(1).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
+
 	if err != nil {
+		if retry.IsAlreadyExistsErr(err) {
+			// Resource already exists, import required
+			resp.Diagnostics.AddError(
+				"Resource Already Exists",
+				fmt.Sprintf("Resource already exists, error: %s.\nPlease import the existing resource into terraform state.", err.Error()),
+			)
+			return
+		}
 		errVal := err.Error()
 		if ((strings.Contains(errVal, "The search parameters") &&
 			strings.Contains(errVal, "for object network did not return any result")) ||
@@ -148,13 +173,28 @@ func (r *NetworkResource) Read(ctx context.Context, req resource.ReadRequest, re
 		return
 	}
 
-	apiRes, httpRes, err := r.client.IPAMAPI.
-		NetworkAPI.
-		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
-		ReturnFieldsPlus(readableAttributesForNetwork).
-		ReturnAsObject(1).
-		ProxySearch(config.GetProxySearch()).
-		Execute()
+	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
+
+	var (
+		httpRes *http.Response
+		apiRes  *ipam.GetNetworkResponse
+	)
+
+	err := retry.Do(ctx, nil, func(ctx context.Context) (int, error) {
+		var callErr error
+		apiRes, httpRes, callErr = r.client.IPAMAPI.
+			NetworkAPI.
+			Read(ctx, resourceRef).
+			ReturnFieldsPlus(readableAttributesForNetwork).
+			ReturnAsObject(1).
+			ProxySearch(config.GetProxySearch()).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
 
 	// If the resource is not found, try searching using Extensible Attributes
 	if err != nil {
@@ -300,13 +340,30 @@ func (r *NetworkResource) Update(ctx context.Context, req resource.UpdateRequest
 		return
 	}
 
-	apiRes, _, err := r.client.IPAMAPI.
-		NetworkAPI.
-		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
-		Network(*data.Expand(ctx, &resp.Diagnostics, false)).
-		ReturnFieldsPlus(readableAttributesForNetwork).
-		ReturnAsObject(1).
-		Execute()
+	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
+
+	var apiRes *ipam.UpdateNetworkResponse
+
+	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		var (
+			httpRes *http.Response
+			callErr error
+		)
+
+		apiRes, httpRes, callErr = r.client.IPAMAPI.
+			NetworkAPI.
+			Update(ctx, resourceRef).
+			Network(*data.Expand(ctx, &resp.Diagnostics, false)).
+			ReturnFieldsPlus(readableAttributesForNetwork).
+			ReturnAsObject(1).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
+
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update Network, got error: %s", err))
 		return
@@ -340,14 +397,24 @@ func (r *NetworkResource) Delete(ctx context.Context, req resource.DeleteRequest
 		return
 	}
 
-	httpRes, err := r.client.IPAMAPI.
-		NetworkAPI.
-		Delete(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
-		Execute()
-	if err != nil {
-		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
-			return
+	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
+
+	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		httpRes, callErr := r.client.IPAMAPI.
+			NetworkAPI.
+			Delete(ctx, resourceRef).
+			Execute()
+
+		if httpRes != nil {
+			if httpRes.StatusCode == http.StatusNotFound {
+				return 0, nil
+			}
+			return httpRes.StatusCode, callErr
 		}
+		return 0, callErr
+	})
+
+	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete Network, got error: %s", err))
 		return
 	}
