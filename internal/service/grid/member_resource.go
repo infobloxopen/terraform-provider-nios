@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
 
@@ -87,6 +88,19 @@ func (r *MemberResource) Create(ctx context.Context, req resource.CreateRequest,
 			return
 		}
 		data.SyslogServers = processedList
+	}
+
+	if !data.GridLevelDnsResolverSetting.IsNull() && !data.GridLevelDnsResolverSetting.IsUnknown() {
+		dnsResolverSetting := ExpandMemberDnsResolverSetting(ctx, data.GridLevelDnsResolverSetting, &resp.Diagnostics)
+		if resp.Diagnostics.HasError() {
+			return
+		}
+
+		err := utils.ConfigureGridDNSResolver(ctx, r.client.GridAPI, dnsResolverSetting)
+		if err != nil {
+			resp.Diagnostics.AddError("Grid DNS Resolver Configuration Error", fmt.Sprintf("Unable to configure grid-level DNS resolver: %s", err))
+			return
+		}
 	}
 
 	apiRes, _, err := r.client.GridAPI.
@@ -309,6 +323,28 @@ func (r *MemberResource) Update(ctx context.Context, req resource.UpdateRequest,
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
+	}
+
+	if !data.GridLevelDnsResolverSetting.IsNull() && !data.GridLevelDnsResolverSetting.IsUnknown() {
+		var stateGridLevelDnsResolverSetting types.Object
+		// Check if grid-level DNS resolver setting has changed.
+		diags = req.State.GetAttribute(ctx, path.Root("grid_level_dns_resolver_setting"), &stateGridLevelDnsResolverSetting)
+		if diags.HasError() {
+			resp.Diagnostics.Append(diags...)
+			return
+		}
+		if !data.GridLevelDnsResolverSetting.Equal(stateGridLevelDnsResolverSetting) {
+			dnsResolverSetting := ExpandMemberDnsResolverSetting(ctx, data.GridLevelDnsResolverSetting, &resp.Diagnostics)
+			if resp.Diagnostics.HasError() {
+				return
+			}
+
+			err := utils.ConfigureGridDNSResolver(ctx, r.client.GridAPI, dnsResolverSetting)
+			if err != nil {
+				resp.Diagnostics.AddError("Grid DNS Resolver Configuration Error", fmt.Sprintf("Unable to configure grid-level DNS resolver: %s", err))
+				return
+			}
+		}
 	}
 
 	apiRes, _, err := r.client.GridAPI.

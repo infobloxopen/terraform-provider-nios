@@ -72,6 +72,7 @@ Optional:
 - `extattrs` (Map of String) Extensible attributes associated with the object.
 - `external_syslog_backup_servers` (Attributes List) The list of external syslog backup servers. (see [below for nested schema](#nestedatt--result--external_syslog_backup_servers))
 - `external_syslog_server_enable` (Boolean) Determines if external syslog servers should be enabled.
+- `grid_level_dns_resolver_setting` (Attributes) Grid-level DNS resolver setting. When configured, this will update the grid DNS resolver settings and restart grid services. To unset resolvers, set resolvers to null in this block. (see [below for nested schema](#nestedatt--result--grid_level_dns_resolver_setting))
 - `ha_cloud_platform` (String) Cloud platform for HA.
 - `ha_on_cloud` (Boolean) True: HA on cloud. False: HA not on cloud.
 - `ipv6_setting` (Attributes) IPV6 setting for member. (see [below for nested schema](#nestedatt--result--ipv6_setting))
@@ -298,6 +299,15 @@ Optional:
 - `enable` (Boolean) If set to True, the syslog backup server is enabled.
 - `port` (Number) The port used to connect to the backup syslog server.
 - `protocol` (String) The transport protocol used to connect to the backup syslog server.
+
+
+<a id="nestedatt--result--grid_level_dns_resolver_setting"></a>
+### Nested Schema for `result.grid_level_dns_resolver_setting`
+
+Optional:
+
+- `resolvers` (List of String) The resolvers of a Grid member. The Grid member sends queries to the first name server address in the list. The second name server address is used if first one does not response.
+- `search_domains` (List of String) The Search Domain Group, which is a group of domain names that the Infoblox device can add to partial queries that do not specify a domain name. Note that you can set this parameter only when prefer_resolver or alternate_resolver is set.
 
 
 <a id="nestedatt--result--ipv6_setting"></a>
