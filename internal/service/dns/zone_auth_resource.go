@@ -12,8 +12,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
+	"github.com/infobloxopen/infoblox-nios-go-client/dns"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/config"
+	"github.com/infobloxopen/terraform-provider-nios/internal/retry"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
@@ -178,14 +180,36 @@ func (r *ZoneAuthResource) Create(ctx context.Context, req resource.CreateReques
 		return
 	}
 
-	apiRes, _, err := r.client.DNSAPI.
-		ZoneAuthAPI.
-		Create(ctx).
-		ZoneAuth(*data.Expand(ctx, &resp.Diagnostics, true)).
-		ReturnFieldsPlus(readableAttributesForZoneAuth).
-		ReturnAsObject(1).
-		Execute()
+	var apiRes *dns.CreateZoneAuthResponse
+
+	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		var (
+			httpRes *http.Response
+			callErr error
+		)
+		apiRes, httpRes, callErr = r.client.DNSAPI.
+			ZoneAuthAPI.
+			Create(ctx).
+			ZoneAuth(*data.Expand(ctx, &resp.Diagnostics, true)).
+			ReturnFieldsPlus(readableAttributesForZoneAuth).
+			ReturnAsObject(1).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
+
 	if err != nil {
+		if retry.IsAlreadyExistsErr(err) {
+			// Resource already exists, import required
+			resp.Diagnostics.AddError(
+				"Resource Already Exists",
+				fmt.Sprintf("Resource already exists, error: %s.\nPlease import the existing resource into terraform state.", err.Error()),
+			)
+			return
+		}
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create ZoneAuth, got error: %s", err))
 		return
 	}
@@ -220,13 +244,28 @@ func (r *ZoneAuthResource) Read(ctx context.Context, req resource.ReadRequest, r
 		return
 	}
 
-	apiRes, httpRes, err := r.client.DNSAPI.
-		ZoneAuthAPI.
-		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
-		ReturnFieldsPlus(readableAttributesForZoneAuth).
-		ReturnAsObject(1).
-		ProxySearch(config.GetProxySearch()).
-		Execute()
+	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
+
+	var (
+		httpRes *http.Response
+		apiRes  *dns.GetZoneAuthResponse
+	)
+
+	err := retry.Do(ctx, nil, func(ctx context.Context) (int, error) {
+		var callErr error
+		apiRes, httpRes, callErr = r.client.DNSAPI.
+			ZoneAuthAPI.
+			Read(ctx, resourceRef).
+			ReturnFieldsPlus(readableAttributesForZoneAuth).
+			ReturnAsObject(1).
+			ProxySearch(config.GetProxySearch()).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
 
 	// If the resource is not found, try searching using Extensible Attributes
 	if err != nil {
@@ -372,13 +411,29 @@ func (r *ZoneAuthResource) Update(ctx context.Context, req resource.UpdateReques
 		return
 	}
 
-	apiRes, _, err := r.client.DNSAPI.
-		ZoneAuthAPI.
-		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
-		ZoneAuth(*data.Expand(ctx, &resp.Diagnostics, false)).
-		ReturnFieldsPlus(readableAttributesForZoneAuth).
-		ReturnAsObject(1).
-		Execute()
+	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
+
+	var apiRes *dns.UpdateZoneAuthResponse
+
+	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		var (
+			httpRes *http.Response
+			callErr error
+		)
+		apiRes, httpRes, callErr = r.client.DNSAPI.
+			ZoneAuthAPI.
+			Update(ctx, resourceRef).
+			ZoneAuth(*data.Expand(ctx, &resp.Diagnostics, false)).
+			ReturnFieldsPlus(readableAttributesForZoneAuth).
+			ReturnAsObject(1).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
+
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update ZoneAuth, got error: %s", err))
 		return
@@ -412,14 +467,24 @@ func (r *ZoneAuthResource) Delete(ctx context.Context, req resource.DeleteReques
 		return
 	}
 
-	httpRes, err := r.client.DNSAPI.
-		ZoneAuthAPI.
-		Delete(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
-		Execute()
-	if err != nil {
-		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
-			return
+	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
+
+	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		httpRes, callErr := r.client.DNSAPI.
+			ZoneAuthAPI.
+			Delete(ctx, resourceRef).
+			Execute()
+
+		if httpRes != nil {
+			if httpRes.StatusCode == http.StatusNotFound {
+				return 0, nil
+			}
+			return httpRes.StatusCode, callErr
 		}
+		return 0, callErr
+	})
+
+	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete ZoneAuth, got error: %s", err))
 		return
 	}

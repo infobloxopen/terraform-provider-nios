@@ -11,7 +11,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
+	"github.com/infobloxopen/infoblox-nios-go-client/dns"
 	"github.com/infobloxopen/terraform-provider-nios/internal/config"
+	"github.com/infobloxopen/terraform-provider-nios/internal/retry"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
@@ -72,14 +74,36 @@ func (r *SharedrecordTxtResource) Create(ctx context.Context, req resource.Creat
 		return
 	}
 
-	apiRes, _, err := r.client.DNSAPI.
-		SharedrecordTxtAPI.
-		Create(ctx).
-		SharedrecordTxt(*data.Expand(ctx, &resp.Diagnostics, true)).
-		ReturnFieldsPlus(readableAttributesForSharedrecordTxt).
-		ReturnAsObject(1).
-		Execute()
+	var apiRes *dns.CreateSharedrecordTxtResponse
+
+	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		var (
+			httpRes *http.Response
+			callErr error
+		)
+		apiRes, httpRes, callErr = r.client.DNSAPI.
+			SharedrecordTxtAPI.
+			Create(ctx).
+			SharedrecordTxt(*data.Expand(ctx, &resp.Diagnostics, true)).
+			ReturnFieldsPlus(readableAttributesForSharedrecordTxt).
+			ReturnAsObject(1).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
+
 	if err != nil {
+		if retry.IsAlreadyExistsErr(err) {
+			// Resource already exists, import required
+			resp.Diagnostics.AddError(
+				"Resource Already Exists",
+				fmt.Sprintf("Resource already exists, error: %s.\nPlease import the existing resource into terraform state.", err.Error()),
+			)
+			return
+		}
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create SharedrecordTxt, got error: %s", err))
 		return
 	}
@@ -108,13 +132,28 @@ func (r *SharedrecordTxtResource) Read(ctx context.Context, req resource.ReadReq
 		return
 	}
 
-	apiRes, httpRes, err := r.client.DNSAPI.
-		SharedrecordTxtAPI.
-		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
-		ReturnFieldsPlus(readableAttributesForSharedrecordTxt).
-		ReturnAsObject(1).
-		ProxySearch(config.GetProxySearch()).
-		Execute()
+	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
+
+	var (
+		httpRes *http.Response
+		apiRes  *dns.GetSharedrecordTxtResponse
+	)
+
+	err := retry.Do(ctx, nil, func(ctx context.Context) (int, error) {
+		var callErr error
+		apiRes, httpRes, callErr = r.client.DNSAPI.
+			SharedrecordTxtAPI.
+			Read(ctx, resourceRef).
+			ReturnFieldsPlus(readableAttributesForSharedrecordTxt).
+			ReturnAsObject(1).
+			ProxySearch(config.GetProxySearch()).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
 
 	if err != nil {
 		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
@@ -169,13 +208,29 @@ func (r *SharedrecordTxtResource) Update(ctx context.Context, req resource.Updat
 		return
 	}
 
-	apiRes, _, err := r.client.DNSAPI.
-		SharedrecordTxtAPI.
-		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
-		SharedrecordTxt(*data.Expand(ctx, &resp.Diagnostics, false)).
-		ReturnFieldsPlus(readableAttributesForSharedrecordTxt).
-		ReturnAsObject(1).
-		Execute()
+	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
+
+	var apiRes *dns.UpdateSharedrecordTxtResponse
+
+	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		var (
+			httpRes *http.Response
+			callErr error
+		)
+		apiRes, httpRes, callErr = r.client.DNSAPI.
+			SharedrecordTxtAPI.
+			Update(ctx, resourceRef).
+			SharedrecordTxt(*data.Expand(ctx, &resp.Diagnostics, false)).
+			ReturnFieldsPlus(readableAttributesForSharedrecordTxt).
+			ReturnAsObject(1).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
+
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update SharedrecordTxt, got error: %s", err))
 		return
@@ -205,14 +260,24 @@ func (r *SharedrecordTxtResource) Delete(ctx context.Context, req resource.Delet
 		return
 	}
 
-	httpRes, err := r.client.DNSAPI.
-		SharedrecordTxtAPI.
-		Delete(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
-		Execute()
-	if err != nil {
-		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
-			return
+	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
+
+	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		httpRes, callErr := r.client.DNSAPI.
+			SharedrecordTxtAPI.
+			Delete(ctx, resourceRef).
+			Execute()
+
+		if httpRes != nil {
+			if httpRes.StatusCode == http.StatusNotFound {
+				return 0, nil
+			}
+			return httpRes.StatusCode, callErr
 		}
+		return 0, callErr
+	})
+
+	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete SharedrecordTxt, got error: %s", err))
 		return
 	}

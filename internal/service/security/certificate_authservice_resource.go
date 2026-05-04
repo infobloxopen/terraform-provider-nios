@@ -12,7 +12,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
+	"github.com/infobloxopen/infoblox-nios-go-client/security"
 	"github.com/infobloxopen/terraform-provider-nios/internal/config"
+	"github.com/infobloxopen/terraform-provider-nios/internal/retry"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
@@ -78,14 +80,41 @@ func (r *CertificateAuthserviceResource) Create(ctx context.Context, req resourc
 		return
 	}
 
-	apiRes, _, err := r.client.SecurityAPI.
-		CertificateAuthserviceAPI.
-		Create(ctx).
-		CertificateAuthservice(*data.Expand(ctx, &resp.Diagnostics)).
-		ReturnFieldsPlus(readableAttributesForCertificateAuthservice).
-		ReturnAsObject(1).
-		Execute()
+	payload := data.Expand(ctx, &resp.Diagnostics)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	var apiRes *security.CreateCertificateAuthserviceResponse
+
+	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		var (
+			httpRes *http.Response
+			callErr error
+		)
+		apiRes, httpRes, callErr = r.client.SecurityAPI.
+			CertificateAuthserviceAPI.
+			Create(ctx).
+			CertificateAuthservice(*payload).
+			ReturnFieldsPlus(readableAttributesForCertificateAuthservice).
+			ReturnAsObject(1).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
+
 	if err != nil {
+		if retry.IsAlreadyExistsErr(err) {
+			// Resource already exists, import required
+			resp.Diagnostics.AddError(
+				"Resource Already Exists",
+				fmt.Sprintf("Resource already exists, error: %s.\nPlease import the existing resource into terraform state.", err.Error()),
+			)
+			return
+		}
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create CertificateAuthservice, got error: %s", err))
 		return
 	}
@@ -109,13 +138,28 @@ func (r *CertificateAuthserviceResource) Read(ctx context.Context, req resource.
 		return
 	}
 
-	apiRes, httpRes, err := r.client.SecurityAPI.
-		CertificateAuthserviceAPI.
-		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
-		ReturnFieldsPlus(readableAttributesForCertificateAuthservice).
-		ReturnAsObject(1).
-		ProxySearch(config.GetProxySearch()).
-		Execute()
+	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
+
+	var (
+		httpRes *http.Response
+		apiRes  *security.GetCertificateAuthserviceResponse
+	)
+
+	err := retry.Do(ctx, nil, func(ctx context.Context) (int, error) {
+		var callErr error
+		apiRes, httpRes, callErr = r.client.SecurityAPI.
+			CertificateAuthserviceAPI.
+			Read(ctx, resourceRef).
+			ReturnFieldsPlus(readableAttributesForCertificateAuthservice).
+			ReturnAsObject(1).
+			ProxySearch(config.GetProxySearch()).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
 
 	//remove from the state if not found
 	if err != nil {
@@ -156,13 +200,34 @@ func (r *CertificateAuthserviceResource) Update(ctx context.Context, req resourc
 		return
 	}
 
-	apiRes, _, err := r.client.SecurityAPI.
-		CertificateAuthserviceAPI.
-		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
-		CertificateAuthservice(*data.Expand(ctx, &resp.Diagnostics)).
-		ReturnFieldsPlus(readableAttributesForCertificateAuthservice).
-		ReturnAsObject(1).
-		Execute()
+	payload := data.Expand(ctx, &resp.Diagnostics)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
+
+	var apiRes *security.UpdateCertificateAuthserviceResponse
+
+	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		var (
+			httpRes *http.Response
+			callErr error
+		)
+		apiRes, httpRes, callErr = r.client.SecurityAPI.
+			CertificateAuthserviceAPI.
+			Update(ctx, resourceRef).
+			CertificateAuthservice(*payload).
+			ReturnFieldsPlus(readableAttributesForCertificateAuthservice).
+			ReturnAsObject(1).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
+
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update CertificateAuthservice, got error: %s", err))
 		return
@@ -186,14 +251,24 @@ func (r *CertificateAuthserviceResource) Delete(ctx context.Context, req resourc
 		return
 	}
 
-	httpRes, err := r.client.SecurityAPI.
-		CertificateAuthserviceAPI.
-		Delete(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
-		Execute()
-	if err != nil {
-		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
-			return
+	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
+
+	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		httpRes, callErr := r.client.SecurityAPI.
+			CertificateAuthserviceAPI.
+			Delete(ctx, resourceRef).
+			Execute()
+
+		if httpRes != nil {
+			if httpRes.StatusCode == http.StatusNotFound {
+				return 0, nil
+			}
+			return httpRes.StatusCode, callErr
 		}
+		return 0, callErr
+	})
+
+	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete CertificateAuthservice, got error: %s", err))
 		return
 	}

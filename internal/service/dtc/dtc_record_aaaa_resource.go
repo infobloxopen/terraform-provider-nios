@@ -11,8 +11,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
+	"github.com/infobloxopen/infoblox-nios-go-client/dtc"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/config"
+	"github.com/infobloxopen/terraform-provider-nios/internal/retry"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
@@ -71,14 +73,36 @@ func (r *DtcRecordAaaaResource) Create(ctx context.Context, req resource.CreateR
 		return
 	}
 
-	apiRes, _, err := r.client.DTCAPI.
-		DtcRecordAaaaAPI.
-		Create(ctx).
-		DtcRecordAaaa(*data.Expand(ctx, &resp.Diagnostics, true)).
-		ReturnFieldsPlus(readableAttributesForDtcRecordAaaa).
-		ReturnAsObject(1).
-		Execute()
+	var apiRes *dtc.CreateDtcRecordAaaaResponse
+
+	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		var (
+			httpRes *http.Response
+			callErr error
+		)
+		apiRes, httpRes, callErr = r.client.DTCAPI.
+			DtcRecordAaaaAPI.
+			Create(ctx).
+			DtcRecordAaaa(*data.Expand(ctx, &resp.Diagnostics, true)).
+			ReturnFieldsPlus(readableAttributesForDtcRecordAaaa).
+			ReturnAsObject(1).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
+
 	if err != nil {
+		if retry.IsAlreadyExistsErr(err) {
+			// Resource already exists, import required
+			resp.Diagnostics.AddError(
+				"Resource Already Exists",
+				fmt.Sprintf("Resource already exists, error: %s.\nPlease import the existing resource into terraform state.", err.Error()),
+			)
+			return
+		}
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create DtcRecordAaaa, got error: %s", err))
 		return
 	}
@@ -101,15 +125,30 @@ func (r *DtcRecordAaaaResource) Read(ctx context.Context, req resource.ReadReque
 		return
 	}
 
-	apiRes, httpRes, err := r.client.DTCAPI.
-		DtcRecordAaaaAPI.
-		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
-		ReturnFieldsPlus(readableAttributesForDtcRecordAaaa).
-		ReturnAsObject(1).
-		ProxySearch(config.GetProxySearch()).
-		Execute()
+	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
 
-		// Handle not found case
+	var (
+		httpRes *http.Response
+		apiRes  *dtc.GetDtcRecordAaaaResponse
+	)
+
+	err := retry.Do(ctx, nil, func(ctx context.Context) (int, error) {
+		var callErr error
+		apiRes, httpRes, callErr = r.client.DTCAPI.
+			DtcRecordAaaaAPI.
+			Read(ctx, resourceRef).
+			ReturnFieldsPlus(readableAttributesForDtcRecordAaaa).
+			ReturnAsObject(1).
+			ProxySearch(config.GetProxySearch()).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
+
+	// Handle not found case
 	if err != nil {
 		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
 			// Resource no longer exists, remove from state
@@ -145,13 +184,29 @@ func (r *DtcRecordAaaaResource) Update(ctx context.Context, req resource.UpdateR
 		return
 	}
 
-	apiRes, _, err := r.client.DTCAPI.
-		DtcRecordAaaaAPI.
-		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
-		DtcRecordAaaa(*data.Expand(ctx, &resp.Diagnostics, false)).
-		ReturnFieldsPlus(readableAttributesForDtcRecordAaaa).
-		ReturnAsObject(1).
-		Execute()
+	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
+
+	var apiRes *dtc.UpdateDtcRecordAaaaResponse
+
+	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		var (
+			httpRes *http.Response
+			callErr error
+		)
+		apiRes, httpRes, callErr = r.client.DTCAPI.
+			DtcRecordAaaaAPI.
+			Update(ctx, resourceRef).
+			DtcRecordAaaa(*data.Expand(ctx, &resp.Diagnostics, false)).
+			ReturnFieldsPlus(readableAttributesForDtcRecordAaaa).
+			ReturnAsObject(1).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
+
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update DtcRecordAaaa, got error: %s", err))
 		return
@@ -175,14 +230,24 @@ func (r *DtcRecordAaaaResource) Delete(ctx context.Context, req resource.DeleteR
 		return
 	}
 
-	httpRes, err := r.client.DTCAPI.
-		DtcRecordAaaaAPI.
-		Delete(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
-		Execute()
-	if err != nil {
-		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
-			return
+	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
+
+	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		httpRes, callErr := r.client.DTCAPI.
+			DtcRecordAaaaAPI.
+			Delete(ctx, resourceRef).
+			Execute()
+
+		if httpRes != nil {
+			if httpRes.StatusCode == http.StatusNotFound {
+				return 0, nil
+			}
+			return httpRes.StatusCode, callErr
 		}
+		return 0, callErr
+	})
+
+	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete DtcRecordAaaa, got error: %s", err))
 		return
 	}
