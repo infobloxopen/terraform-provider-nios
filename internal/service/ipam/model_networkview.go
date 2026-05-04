@@ -2,6 +2,7 @@ package ipam
 
 import (
 	"context"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
@@ -256,7 +257,18 @@ func (m *NetworkviewModel) Flatten(ctx context.Context, from *ipam.Networkview, 
 	m.AssociatedMembers = flex.FlattenFrameworkListNestedBlock(ctx, from.AssociatedMembers, NetworkviewAssociatedMembersAttrTypes, diags, FlattenNetworkviewAssociatedMembers)
 	m.CloudInfo = FlattenNetworkviewCloudInfo(ctx, from.CloudInfo, diags)
 	m.Comment = flex.FlattenStringPointer(from.Comment)
+
+	configDdnsDnsView := m.DdnsDnsView
 	m.DdnsDnsView = flex.FlattenStringPointer(from.DdnsDnsView)
+	if !m.DdnsDnsView.IsNull() && from.Name != nil {
+		if val := m.DdnsDnsView.ValueString(); strings.HasSuffix(val, "."+*from.Name) {
+			stripped := strings.TrimSuffix(val, "."+*from.Name)
+			if configDdnsDnsView.IsNull() || configDdnsDnsView.IsUnknown() || configDdnsDnsView.ValueString() == stripped {
+				m.DdnsDnsView = types.StringValue(stripped)
+			}
+		}
+	}
+	
 	m.DdnsZonePrimaries = flex.FlattenFrameworkListNestedBlock(ctx, from.DdnsZonePrimaries, NetworkviewDdnsZonePrimariesAttrTypes, diags, FlattenNetworkviewDdnsZonePrimaries)
 	m.ExtAttrs = FlattenExtAttrs(ctx, m.ExtAttrs, from.ExtAttrs, diags)
 	m.FederatedRealms = flex.FlattenFrameworkListNestedBlock(ctx, from.FederatedRealms, NetworkviewFederatedRealmsAttrTypes, diags, FlattenNetworkviewFederatedRealms)

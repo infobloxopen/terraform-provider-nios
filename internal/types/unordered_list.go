@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	"github.com/hashicorp/terraform-plugin-go/tftypes"
-	"golang.org/x/exp/slices"
+	"slices"
 )
 
 var UnorderedListOfStringType = UnorderedList{basetypes.ListType{ElemType: basetypes.StringType{}}}
