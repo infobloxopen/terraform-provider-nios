@@ -6,7 +6,7 @@ provider "google" {
 }
 
 module "node1" {
-  source = "<path_to_module>"
+  source = "github.com/infobloxopen/terraform-provider-nios//modules/nios_deploy_gcp?ref=nios_v9.1.0"
 
   project = var.project
   region  = var.region
