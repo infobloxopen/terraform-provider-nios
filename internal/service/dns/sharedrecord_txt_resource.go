@@ -74,6 +74,11 @@ func (r *SharedrecordTxtResource) Create(ctx context.Context, req resource.Creat
 		return
 	}
 
+	payload := data.Expand(ctx, &resp.Diagnostics, true)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
 	var apiRes *dns.CreateSharedrecordTxtResponse
 
 	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
@@ -84,7 +89,7 @@ func (r *SharedrecordTxtResource) Create(ctx context.Context, req resource.Creat
 		apiRes, httpRes, callErr = r.client.DNSAPI.
 			SharedrecordTxtAPI.
 			Create(ctx).
-			SharedrecordTxt(*data.Expand(ctx, &resp.Diagnostics, true)).
+			SharedrecordTxt(*payload).
 			ReturnFieldsPlus(readableAttributesForSharedrecordTxt).
 			ReturnAsObject(1).
 			Execute()
@@ -210,6 +215,11 @@ func (r *SharedrecordTxtResource) Update(ctx context.Context, req resource.Updat
 
 	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
 
+	payload := data.Expand(ctx, &resp.Diagnostics, false)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
 	var apiRes *dns.UpdateSharedrecordTxtResponse
 
 	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
@@ -220,7 +230,7 @@ func (r *SharedrecordTxtResource) Update(ctx context.Context, req resource.Updat
 		apiRes, httpRes, callErr = r.client.DNSAPI.
 			SharedrecordTxtAPI.
 			Update(ctx, resourceRef).
-			SharedrecordTxt(*data.Expand(ctx, &resp.Diagnostics, false)).
+			SharedrecordTxt(*payload).
 			ReturnFieldsPlus(readableAttributesForSharedrecordTxt).
 			ReturnAsObject(1).
 			Execute()

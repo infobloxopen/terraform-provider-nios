@@ -81,6 +81,11 @@ func (r *RecordSrvResource) Create(ctx context.Context, req resource.CreateReque
 		return
 	}
 
+	payload := data.Expand(ctx, &resp.Diagnostics, true)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
 	var apiRes *dns.CreateRecordSrvResponse
 
 	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
@@ -91,7 +96,7 @@ func (r *RecordSrvResource) Create(ctx context.Context, req resource.CreateReque
 		apiRes, httpRes, callErr = r.client.DNSAPI.
 			RecordSrvAPI.
 			Create(ctx).
-			RecordSrv(*data.Expand(ctx, &resp.Diagnostics, true)).
+			RecordSrv(*payload).
 			ReturnFieldsPlus(readableAttributesForRecordSrv).
 			ReturnAsObject(1).
 			Execute()
@@ -314,6 +319,11 @@ func (r *RecordSrvResource) Update(ctx context.Context, req resource.UpdateReque
 
 	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
 
+	payload := data.Expand(ctx, &resp.Diagnostics, false)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
 	var apiRes *dns.UpdateRecordSrvResponse
 
 	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
@@ -324,7 +334,7 @@ func (r *RecordSrvResource) Update(ctx context.Context, req resource.UpdateReque
 		apiRes, httpRes, callErr = r.client.DNSAPI.
 			RecordSrvAPI.
 			Update(ctx, resourceRef).
-			RecordSrv(*data.Expand(ctx, &resp.Diagnostics, false)).
+			RecordSrv(*payload).
 			ReturnFieldsPlus(readableAttributesForRecordSrv).
 			ReturnAsObject(1).
 			Execute()

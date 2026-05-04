@@ -82,6 +82,11 @@ func (r *VlanviewResource) Create(ctx context.Context, req resource.CreateReques
 		return
 	}
 
+	payload := data.Expand(ctx, &resp.Diagnostics, true)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
 	var apiRes *ipam.CreateVlanviewResponse
 
 	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
@@ -92,7 +97,7 @@ func (r *VlanviewResource) Create(ctx context.Context, req resource.CreateReques
 		apiRes, httpRes, callErr = r.client.IPAMAPI.
 			VlanviewAPI.
 			Create(ctx).
-			Vlanview(*data.Expand(ctx, &resp.Diagnostics, true)).
+			Vlanview(*payload).
 			ReturnFieldsPlus(readableAttributesForVlanview).
 			ReturnAsObject(1).
 			Execute()
@@ -316,6 +321,11 @@ func (r *VlanviewResource) Update(ctx context.Context, req resource.UpdateReques
 
 	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
 
+	payload := data.Expand(ctx, &resp.Diagnostics, false)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
 	var apiRes *ipam.UpdateVlanviewResponse
 
 	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
@@ -326,7 +336,7 @@ func (r *VlanviewResource) Update(ctx context.Context, req resource.UpdateReques
 		apiRes, httpRes, callErr = r.client.IPAMAPI.
 			VlanviewAPI.
 			Update(ctx, resourceRef).
-			Vlanview(*data.Expand(ctx, &resp.Diagnostics, false)).
+			Vlanview(*payload).
 			ReturnFieldsPlus(readableAttributesForVlanview).
 			ReturnAsObject(1).
 			Execute()

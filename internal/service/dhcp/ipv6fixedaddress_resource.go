@@ -89,6 +89,11 @@ func (r *Ipv6fixedaddressResource) Create(ctx context.Context, req resource.Crea
 		data.FuncCall = r.UpdateFuncCallAttributeName(ctx, data, &resp.Diagnostics)
 	}
 
+	payload := data.Expand(ctx, &resp.Diagnostics, true)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
 	var apiRes *dhcp.CreateIpv6fixedaddressResponse
 
 	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
@@ -99,7 +104,7 @@ func (r *Ipv6fixedaddressResource) Create(ctx context.Context, req resource.Crea
 		apiRes, httpRes, callErr = r.client.DHCPAPI.
 			Ipv6fixedaddressAPI.
 			Create(ctx).
-			Ipv6fixedaddress(*data.Expand(ctx, &resp.Diagnostics, true)).
+			Ipv6fixedaddress(*payload).
 			ReturnFieldsPlus(readableAttributesForIpv6fixedaddress).
 			ReturnAsObject(1).
 			Execute()
@@ -328,6 +333,11 @@ func (r *Ipv6fixedaddressResource) Update(ctx context.Context, req resource.Upda
 
 	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
 
+	payload := data.Expand(ctx, &resp.Diagnostics, false)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
 	var apiRes *dhcp.UpdateIpv6fixedaddressResponse
 
 	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
@@ -338,7 +348,7 @@ func (r *Ipv6fixedaddressResource) Update(ctx context.Context, req resource.Upda
 		apiRes, httpRes, callErr = r.client.DHCPAPI.
 			Ipv6fixedaddressAPI.
 			Update(ctx, resourceRef).
-			Ipv6fixedaddress(*data.Expand(ctx, &resp.Diagnostics, false)).
+			Ipv6fixedaddress(*payload).
 			ReturnFieldsPlus(readableAttributesForIpv6fixedaddress).
 			ReturnAsObject(1).
 			Execute()

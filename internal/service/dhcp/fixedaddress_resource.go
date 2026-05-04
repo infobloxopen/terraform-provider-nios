@@ -88,6 +88,11 @@ func (r *FixedaddressResource) Create(ctx context.Context, req resource.CreateRe
 		data.FuncCall = r.UpdateFuncCallAttributeName(ctx, data, &resp.Diagnostics)
 	}
 
+	payload := data.Expand(ctx, &resp.Diagnostics, true)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
 	var apiRes *dhcp.CreateFixedaddressResponse
 
 	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
@@ -98,7 +103,7 @@ func (r *FixedaddressResource) Create(ctx context.Context, req resource.CreateRe
 		apiRes, httpRes, callErr = r.client.DHCPAPI.
 			FixedaddressAPI.
 			Create(ctx).
-			Fixedaddress(*data.Expand(ctx, &resp.Diagnostics, true)).
+			Fixedaddress(*payload).
 			ReturnFieldsPlus(readableAttributesForFixedaddress).
 			ReturnAsObject(1).
 			Execute()
@@ -326,6 +331,11 @@ func (r *FixedaddressResource) Update(ctx context.Context, req resource.UpdateRe
 
 	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
 
+	payload := data.Expand(ctx, &resp.Diagnostics, false)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
 	var apiRes *dhcp.UpdateFixedaddressResponse
 
 	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
@@ -336,7 +346,7 @@ func (r *FixedaddressResource) Update(ctx context.Context, req resource.UpdateRe
 		apiRes, httpRes, callErr = r.client.DHCPAPI.
 			FixedaddressAPI.
 			Update(ctx, resourceRef).
-			Fixedaddress(*data.Expand(ctx, &resp.Diagnostics, false)).
+			Fixedaddress(*payload).
 			ReturnFieldsPlus(readableAttributesForFixedaddress).
 			ReturnAsObject(1).
 			Execute()

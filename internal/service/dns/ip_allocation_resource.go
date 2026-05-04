@@ -141,6 +141,11 @@ func (r *IPAllocationResource) Create(ctx context.Context, req resource.CreateRe
 	// Save original IPv6 function call attributes
 	savedIPv6FuncCalls := r.saveNestedFuncCallAttrs(data.Ipv6addrs)
 
+	payload := data.Expand(ctx, &resp.Diagnostics)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
 	var apiRes *dns.CreateRecordHostResponse
 
 	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
@@ -151,7 +156,7 @@ func (r *IPAllocationResource) Create(ctx context.Context, req resource.CreateRe
 		apiRes, httpRes, callErr = r.client.DNSAPI.
 			RecordHostAPI.
 			Create(ctx).
-			RecordHost(*data.Expand(ctx, &resp.Diagnostics)).
+			RecordHost(*payload).
 			ReturnFieldsPlus(readableAttributesForIPAllocation).
 			ReturnAsObject(1).
 			Execute()

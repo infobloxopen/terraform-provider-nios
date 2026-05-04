@@ -80,6 +80,11 @@ func (r *Ipv6dhcpoptionspaceResource) Create(ctx context.Context, req resource.C
 		return
 	}
 
+	payload := data.Expand(ctx, &resp.Diagnostics)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
 	var apiRes *dhcp.CreateIpv6dhcpoptionspaceResponse
 
 	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
@@ -87,11 +92,10 @@ func (r *Ipv6dhcpoptionspaceResource) Create(ctx context.Context, req resource.C
 			httpRes *http.Response
 			callErr error
 		)
-
 		apiRes, httpRes, callErr = r.client.DHCPAPI.
 			Ipv6dhcpoptionspaceAPI.
 			Create(ctx).
-			Ipv6dhcpoptionspace(*data.Expand(ctx, &resp.Diagnostics)).
+			Ipv6dhcpoptionspace(*payload).
 			ReturnFieldsPlus(readableAttributesForIpv6dhcpoptionspace).
 			ReturnAsObject(1).
 			Execute()
@@ -191,6 +195,11 @@ func (r *Ipv6dhcpoptionspaceResource) Update(ctx context.Context, req resource.U
 		return
 	}
 
+	payload := data.Expand(ctx, &resp.Diagnostics)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
 	var apiRes *dhcp.UpdateIpv6dhcpoptionspaceResponse
 
 	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
@@ -198,11 +207,10 @@ func (r *Ipv6dhcpoptionspaceResource) Update(ctx context.Context, req resource.U
 			httpRes *http.Response
 			callErr error
 		)
-
 		apiRes, httpRes, callErr = r.client.DHCPAPI.
 			Ipv6dhcpoptionspaceAPI.
 			Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
-			Ipv6dhcpoptionspace(*data.Expand(ctx, &resp.Diagnostics)).
+			Ipv6dhcpoptionspace(*payload).
 			ReturnFieldsPlus(readableAttributesForIpv6dhcpoptionspace).
 			ReturnAsObject(1).
 			Execute()

@@ -75,6 +75,11 @@ func (r *ExtensibleattributedefResource) Create(ctx context.Context, req resourc
 		return
 	}
 
+	payload := data.Expand(ctx, &resp.Diagnostics, true)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
 	var apiRes *grid.CreateExtensibleattributedefResponse
 
 	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
@@ -85,7 +90,7 @@ func (r *ExtensibleattributedefResource) Create(ctx context.Context, req resourc
 		apiRes, httpRes, callErr = r.client.GridAPI.
 			ExtensibleattributedefAPI.
 			Create(ctx).
-			Extensibleattributedef(*data.Expand(ctx, &resp.Diagnostics, true)).
+			Extensibleattributedef(*payload).
 			ReturnFieldsPlus(readableAttributesForExtensibleattributedef).
 			ReturnAsObject(1).
 			Execute()
@@ -188,6 +193,11 @@ func (r *ExtensibleattributedefResource) Update(ctx context.Context, req resourc
 
 	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
 
+	payload := data.Expand(ctx, &resp.Diagnostics, false)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
 	var apiRes *grid.UpdateExtensibleattributedefResponse
 
 	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
@@ -198,7 +208,7 @@ func (r *ExtensibleattributedefResource) Update(ctx context.Context, req resourc
 		apiRes, httpRes, callErr = r.client.GridAPI.
 			ExtensibleattributedefAPI.
 			Update(ctx, resourceRef).
-			Extensibleattributedef(*data.Expand(ctx, &resp.Diagnostics, false)).
+			Extensibleattributedef(*payload).
 			ReturnFieldsPlus(readableAttributesForExtensibleattributedef).
 			ReturnAsObject(1).
 			Execute()

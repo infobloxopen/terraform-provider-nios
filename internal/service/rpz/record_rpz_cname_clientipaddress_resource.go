@@ -106,6 +106,11 @@ func (r *RecordRpzCnameClientipaddressResource) Create(ctx context.Context, req 
 		return
 	}
 
+	payload := data.Expand(ctx, &resp.Diagnostics, true)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
 	var apiRes *rpz.CreateRecordRpzCnameClientipaddressResponse
 
 	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
@@ -116,7 +121,7 @@ func (r *RecordRpzCnameClientipaddressResource) Create(ctx context.Context, req 
 		apiRes, httpRes, callErr = r.client.RPZAPI.
 			RecordRpzCnameClientipaddressAPI.
 			Create(ctx).
-			RecordRpzCnameClientipaddress(*data.Expand(ctx, &resp.Diagnostics, true)).
+			RecordRpzCnameClientipaddress(*payload).
 			ReturnFieldsPlus(readableAttributesForRecordRpzCnameClientipaddress).
 			ReturnAsObject(1).
 			Execute()
@@ -343,6 +348,11 @@ func (r *RecordRpzCnameClientipaddressResource) Update(ctx context.Context, req 
 
 	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
 
+	payload := data.Expand(ctx, &resp.Diagnostics, false)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
 	var apiRes *rpz.UpdateRecordRpzCnameClientipaddressResponse
 
 	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
@@ -353,7 +363,7 @@ func (r *RecordRpzCnameClientipaddressResource) Update(ctx context.Context, req 
 		apiRes, httpRes, callErr = r.client.RPZAPI.
 			RecordRpzCnameClientipaddressAPI.
 			Update(ctx, resourceRef).
-			RecordRpzCnameClientipaddress(*data.Expand(ctx, &resp.Diagnostics, false)).
+			RecordRpzCnameClientipaddress(*payload).
 			ReturnFieldsPlus(readableAttributesForRecordRpzCnameClientipaddress).
 			ReturnAsObject(1).
 			Execute()

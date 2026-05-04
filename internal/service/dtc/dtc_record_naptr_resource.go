@@ -74,6 +74,11 @@ func (r *DtcRecordNaptrResource) Create(ctx context.Context, req resource.Create
 		return
 	}
 
+	payload := data.Expand(ctx, &resp.Diagnostics, true)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
 	var apiRes *dtc.CreateDtcRecordNaptrResponse
 
 	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
@@ -84,7 +89,7 @@ func (r *DtcRecordNaptrResource) Create(ctx context.Context, req resource.Create
 		apiRes, httpRes, callErr = r.client.DTCAPI.
 			DtcRecordNaptrAPI.
 			Create(ctx).
-			DtcRecordNaptr(*data.Expand(ctx, &resp.Diagnostics, true)).
+			DtcRecordNaptr(*payload).
 			ReturnFieldsPlus(readableAttributesForDtcRecordNaptr).
 			ReturnAsObject(1).
 			Execute()
@@ -187,6 +192,11 @@ func (r *DtcRecordNaptrResource) Update(ctx context.Context, req resource.Update
 
 	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
 
+	payload := data.Expand(ctx, &resp.Diagnostics, false)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
 	var apiRes *dtc.UpdateDtcRecordNaptrResponse
 
 	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
@@ -197,7 +207,7 @@ func (r *DtcRecordNaptrResource) Update(ctx context.Context, req resource.Update
 		apiRes, httpRes, callErr = r.client.DTCAPI.
 			DtcRecordNaptrAPI.
 			Update(ctx, resourceRef).
-			DtcRecordNaptr(*data.Expand(ctx, &resp.Diagnostics, false)).
+			DtcRecordNaptr(*payload).
 			ReturnFieldsPlus(readableAttributesForDtcRecordNaptr).
 			ReturnAsObject(1).
 			Execute()

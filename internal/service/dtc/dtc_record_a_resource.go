@@ -74,6 +74,11 @@ func (r *DtcRecordAResource) Create(ctx context.Context, req resource.CreateRequ
 		return
 	}
 
+	payload := data.Expand(ctx, &resp.Diagnostics, true)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
 	var apiRes *dtc.CreateDtcRecordAResponse
 
 	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
@@ -84,7 +89,7 @@ func (r *DtcRecordAResource) Create(ctx context.Context, req resource.CreateRequ
 		apiRes, httpRes, callErr = r.client.DTCAPI.
 			DtcRecordAAPI.
 			Create(ctx).
-			DtcRecordA(*data.Expand(ctx, &resp.Diagnostics, true)).
+			DtcRecordA(*payload).
 			ReturnFieldsPlus(readableAttributesForDtcRecordA).
 			ReturnAsObject(1).
 			Execute()
@@ -187,6 +192,11 @@ func (r *DtcRecordAResource) Update(ctx context.Context, req resource.UpdateRequ
 
 	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
 
+	payload := data.Expand(ctx, &resp.Diagnostics, false)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
 	var apiRes *dtc.UpdateDtcRecordAResponse
 
 	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
@@ -197,7 +207,7 @@ func (r *DtcRecordAResource) Update(ctx context.Context, req resource.UpdateRequ
 		apiRes, httpRes, callErr = r.client.DTCAPI.
 			DtcRecordAAPI.
 			Update(ctx, resourceRef).
-			DtcRecordA(*data.Expand(ctx, &resp.Diagnostics, false)).
+			DtcRecordA(*payload).
 			ReturnFieldsPlus(readableAttributesForDtcRecordA).
 			ReturnAsObject(1).
 			Execute()

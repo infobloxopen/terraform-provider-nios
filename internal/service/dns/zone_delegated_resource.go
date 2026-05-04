@@ -81,6 +81,11 @@ func (r *ZoneDelegatedResource) Create(ctx context.Context, req resource.CreateR
 		return
 	}
 
+	payload := data.Expand(ctx, &resp.Diagnostics, true)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
 	var apiRes *dns.CreateZoneDelegatedResponse
 
 	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
@@ -91,7 +96,7 @@ func (r *ZoneDelegatedResource) Create(ctx context.Context, req resource.CreateR
 		apiRes, httpRes, callErr = r.client.DNSAPI.
 			ZoneDelegatedAPI.
 			Create(ctx).
-			ZoneDelegated(*data.Expand(ctx, &resp.Diagnostics, true)).
+			ZoneDelegated(*payload).
 			ReturnFieldsPlus(readableAttributesForZoneDelegated).
 			ReturnAsObject(1).
 			Execute()
@@ -314,6 +319,11 @@ func (r *ZoneDelegatedResource) Update(ctx context.Context, req resource.UpdateR
 
 	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
 
+	payload := data.Expand(ctx, &resp.Diagnostics, false)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
 	var apiRes *dns.UpdateZoneDelegatedResponse
 
 	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
@@ -324,7 +334,7 @@ func (r *ZoneDelegatedResource) Update(ctx context.Context, req resource.UpdateR
 		apiRes, httpRes, callErr = r.client.DNSAPI.
 			ZoneDelegatedAPI.
 			Update(ctx, resourceRef).
-			ZoneDelegated(*data.Expand(ctx, &resp.Diagnostics, false)).
+			ZoneDelegated(*payload).
 			ReturnFieldsPlus(readableAttributesForZoneDelegated).
 			ReturnAsObject(1).
 			Execute()

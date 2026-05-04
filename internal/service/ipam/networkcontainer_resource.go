@@ -88,6 +88,11 @@ func (r *NetworkcontainerResource) Create(ctx context.Context, req resource.Crea
 		data.FuncCall = r.UpdateFuncCallAttributeName(ctx, data, &resp.Diagnostics)
 	}
 
+	payload := data.Expand(ctx, &resp.Diagnostics, true)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
 	var apiRes *ipam.CreateNetworkcontainerResponse
 
 	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
@@ -98,7 +103,7 @@ func (r *NetworkcontainerResource) Create(ctx context.Context, req resource.Crea
 		apiRes, httpRes, callErr = r.client.IPAMAPI.
 			NetworkcontainerAPI.
 			Create(ctx).
-			Networkcontainer(*data.Expand(ctx, &resp.Diagnostics, true)).
+			Networkcontainer(*payload).
 			ReturnFieldsPlus(readableAttributesForNetworkcontainer).
 			ReturnAsObject(1).
 			Execute()
@@ -326,6 +331,11 @@ func (r *NetworkcontainerResource) Update(ctx context.Context, req resource.Upda
 
 	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
 
+	payload := data.Expand(ctx, &resp.Diagnostics, false)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
 	var apiRes *ipam.UpdateNetworkcontainerResponse
 
 	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
@@ -336,7 +346,7 @@ func (r *NetworkcontainerResource) Update(ctx context.Context, req resource.Upda
 		apiRes, httpRes, callErr = r.client.IPAMAPI.
 			NetworkcontainerAPI.
 			Update(ctx, resourceRef).
-			Networkcontainer(*data.Expand(ctx, &resp.Diagnostics, false)).
+			Networkcontainer(*payload).
 			ReturnFieldsPlus(readableAttributesForNetworkcontainer).
 			ReturnAsObject(1).
 			Execute()

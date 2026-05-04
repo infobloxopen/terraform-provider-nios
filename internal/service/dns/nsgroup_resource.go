@@ -82,6 +82,11 @@ func (r *NsgroupResource) Create(ctx context.Context, req resource.CreateRequest
 		return
 	}
 
+	payload := data.Expand(ctx, &resp.Diagnostics, true)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
 	var apiRes *dns.CreateNsgroupResponse
 
 	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
@@ -92,7 +97,7 @@ func (r *NsgroupResource) Create(ctx context.Context, req resource.CreateRequest
 		apiRes, httpRes, callErr = r.client.DNSAPI.
 			NsgroupAPI.
 			Create(ctx).
-			Nsgroup(*data.Expand(ctx, &resp.Diagnostics, true)).
+			Nsgroup(*payload).
 			ReturnFieldsPlus(readableAttributesForNsgroup).
 			ReturnAsObject(1).
 			Execute()
@@ -315,6 +320,11 @@ func (r *NsgroupResource) Update(ctx context.Context, req resource.UpdateRequest
 
 	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
 
+	payload := data.Expand(ctx, &resp.Diagnostics, false)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
 	var apiRes *dns.UpdateNsgroupResponse
 
 	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
@@ -325,7 +335,7 @@ func (r *NsgroupResource) Update(ctx context.Context, req resource.UpdateRequest
 		apiRes, httpRes, callErr = r.client.DNSAPI.
 			NsgroupAPI.
 			Update(ctx, resourceRef).
-			Nsgroup(*data.Expand(ctx, &resp.Diagnostics, false)).
+			Nsgroup(*payload).
 			ReturnFieldsPlus(readableAttributesForNsgroup).
 			ReturnAsObject(1).
 			Execute()

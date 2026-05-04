@@ -81,6 +81,11 @@ func (r *DhcpoptionspaceResource) Create(ctx context.Context, req resource.Creat
 		return
 	}
 
+	payload := data.Expand(ctx, &resp.Diagnostics)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
 	var apiRes *dhcp.CreateDhcpoptionspaceResponse
 
 	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
@@ -88,11 +93,10 @@ func (r *DhcpoptionspaceResource) Create(ctx context.Context, req resource.Creat
 			httpRes *http.Response
 			callErr error
 		)
-
 		apiRes, httpRes, callErr = r.client.DHCPAPI.
 			DhcpoptionspaceAPI.
 			Create(ctx).
-			Dhcpoptionspace(*data.Expand(ctx, &resp.Diagnostics)).
+			Dhcpoptionspace(*payload).
 			ReturnFieldsPlus(readableAttributesForDhcpoptionspace).
 			ReturnAsObject(1).
 			Execute()
@@ -194,6 +198,11 @@ func (r *DhcpoptionspaceResource) Update(ctx context.Context, req resource.Updat
 
 	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
 
+	payload := data.Expand(ctx, &resp.Diagnostics)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
 	var apiRes *dhcp.UpdateDhcpoptionspaceResponse
 
 	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
@@ -201,11 +210,10 @@ func (r *DhcpoptionspaceResource) Update(ctx context.Context, req resource.Updat
 			httpRes *http.Response
 			callErr error
 		)
-
 		apiRes, httpRes, callErr = r.client.DHCPAPI.
 			DhcpoptionspaceAPI.
 			Update(ctx, resourceRef).
-			Dhcpoptionspace(*data.Expand(ctx, &resp.Diagnostics)).
+			Dhcpoptionspace(*payload).
 			ReturnFieldsPlus(readableAttributesForDhcpoptionspace).
 			ReturnAsObject(1).
 			Execute()

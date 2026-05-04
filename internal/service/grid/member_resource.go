@@ -91,6 +91,11 @@ func (r *MemberResource) Create(ctx context.Context, req resource.CreateRequest,
 		data.SyslogServers = processedList
 	}
 
+	payload := data.Expand(ctx, &resp.Diagnostics, true)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
 	var apiRes *grid.CreateMemberResponse
 
 	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
@@ -101,7 +106,7 @@ func (r *MemberResource) Create(ctx context.Context, req resource.CreateRequest,
 		apiRes, httpRes, callErr = r.client.GridAPI.
 			MemberAPI.
 			Create(ctx).
-			Member(*data.Expand(ctx, &resp.Diagnostics, true)).
+			Member(*payload).
 			ReturnFieldsPlus(readableAttributesForMember).
 			ReturnAsObject(1).
 			Execute()
@@ -352,6 +357,11 @@ func (r *MemberResource) Update(ctx context.Context, req resource.UpdateRequest,
 
 	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
 
+	payload := data.Expand(ctx, &resp.Diagnostics, false)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
 	var apiRes *grid.UpdateMemberResponse
 
 	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
@@ -362,7 +372,7 @@ func (r *MemberResource) Update(ctx context.Context, req resource.UpdateRequest,
 		apiRes, httpRes, callErr = r.client.GridAPI.
 			MemberAPI.
 			Update(ctx, resourceRef).
-			Member(*data.Expand(ctx, &resp.Diagnostics, false)).
+			Member(*payload).
 			ReturnFieldsPlus(readableAttributesForMember).
 			ReturnAsObject(1).
 			Execute()

@@ -91,6 +91,11 @@ func (r *Ipv6networkResource) Create(ctx context.Context, req resource.CreateReq
 		data.FuncCall = r.UpdateFuncCallAttributeName(ctx, data, &resp.Diagnostics)
 	}
 
+	payload := data.Expand(ctx, &resp.Diagnostics, true)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
 	var apiRes *ipam.CreateIpv6networkResponse
 
 	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
@@ -98,11 +103,10 @@ func (r *Ipv6networkResource) Create(ctx context.Context, req resource.CreateReq
 			httpRes *http.Response
 			callErr error
 		)
-
 		apiRes, httpRes, callErr = r.client.IPAMAPI.
 			Ipv6networkAPI.
 			Create(ctx).
-			Ipv6network(*data.Expand(ctx, &resp.Diagnostics, true)).
+			Ipv6network(*payload).
 			ReturnFieldsPlus(readableAttributesForIpv6network).
 			ReturnAsObject(1).
 			Execute()
@@ -343,6 +347,11 @@ func (r *Ipv6networkResource) Update(ctx context.Context, req resource.UpdateReq
 
 	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
 
+	payload := data.Expand(ctx, &resp.Diagnostics, false)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
 	var apiRes *ipam.UpdateIpv6networkResponse
 
 	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
@@ -350,11 +359,10 @@ func (r *Ipv6networkResource) Update(ctx context.Context, req resource.UpdateReq
 			httpRes *http.Response
 			callErr error
 		)
-
 		apiRes, httpRes, callErr = r.client.IPAMAPI.
 			Ipv6networkAPI.
 			Update(ctx, resourceRef).
-			Ipv6network(*data.Expand(ctx, &resp.Diagnostics, false)).
+			Ipv6network(*payload).
 			ReturnFieldsPlus(readableAttributesForIpv6network).
 			ReturnAsObject(1).
 			Execute()

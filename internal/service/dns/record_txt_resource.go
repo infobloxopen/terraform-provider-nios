@@ -81,6 +81,11 @@ func (r *RecordTxtResource) Create(ctx context.Context, req resource.CreateReque
 		return
 	}
 
+	payload := data.Expand(ctx, &resp.Diagnostics, true)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
 	var apiRes *dns.CreateRecordTxtResponse
 
 	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
@@ -91,7 +96,7 @@ func (r *RecordTxtResource) Create(ctx context.Context, req resource.CreateReque
 		apiRes, httpRes, callErr = r.client.DNSAPI.
 			RecordTxtAPI.
 			Create(ctx).
-			RecordTxt(*data.Expand(ctx, &resp.Diagnostics, true)).
+			RecordTxt(*payload).
 			ReturnFieldsPlus(readableAttributesForRecordTxt).
 			ReturnAsObject(1).
 			Execute()
@@ -314,6 +319,11 @@ func (r *RecordTxtResource) Update(ctx context.Context, req resource.UpdateReque
 
 	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
 
+	payload := data.Expand(ctx, &resp.Diagnostics, false)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
 	var apiRes *dns.UpdateRecordTxtResponse
 
 	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
@@ -324,7 +334,7 @@ func (r *RecordTxtResource) Update(ctx context.Context, req resource.UpdateReque
 		apiRes, httpRes, callErr = r.client.DNSAPI.
 			RecordTxtAPI.
 			Update(ctx, resourceRef).
-			RecordTxt(*data.Expand(ctx, &resp.Diagnostics, false)).
+			RecordTxt(*payload).
 			ReturnFieldsPlus(readableAttributesForRecordTxt).
 			ReturnAsObject(1).
 			Execute()

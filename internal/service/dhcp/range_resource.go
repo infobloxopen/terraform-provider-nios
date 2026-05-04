@@ -81,6 +81,11 @@ func (r *RangeResource) Create(ctx context.Context, req resource.CreateRequest, 
 		return
 	}
 
+	payload := data.Expand(ctx, &resp.Diagnostics, true)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
 	var apiRes *dhcp.CreateRangeResponse
 
 	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
@@ -91,7 +96,7 @@ func (r *RangeResource) Create(ctx context.Context, req resource.CreateRequest, 
 		apiRes, httpRes, callErr = r.client.DHCPAPI.
 			RangeAPI.
 			Create(ctx).
-			Range_(*data.Expand(ctx, &resp.Diagnostics, true)).
+			Range_(*payload).
 			ReturnFieldsPlus(readableAttributesForRange).
 			ReturnAsObject(1).
 			Execute()
@@ -314,6 +319,11 @@ func (r *RangeResource) Update(ctx context.Context, req resource.UpdateRequest, 
 
 	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
 
+	payload := data.Expand(ctx, &resp.Diagnostics, false)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
 	var apiRes *dhcp.UpdateRangeResponse
 
 	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
@@ -324,7 +334,7 @@ func (r *RangeResource) Update(ctx context.Context, req resource.UpdateRequest, 
 		apiRes, httpRes, callErr = r.client.DHCPAPI.
 			RangeAPI.
 			Update(ctx, resourceRef).
-			Range_(*data.Expand(ctx, &resp.Diagnostics, false)).
+			Range_(*payload).
 			ReturnFieldsPlus(readableAttributesForRange).
 			ReturnAsObject(1).
 			Execute()

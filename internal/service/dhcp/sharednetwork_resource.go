@@ -186,6 +186,11 @@ func (r *SharednetworkResource) Create(ctx context.Context, req resource.CreateR
 		return
 	}
 
+	payload := data.Expand(ctx, &resp.Diagnostics, true)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
 	var apiRes *dhcp.CreateSharednetworkResponse
 
 	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
@@ -196,7 +201,7 @@ func (r *SharednetworkResource) Create(ctx context.Context, req resource.CreateR
 		apiRes, httpRes, callErr = r.client.DHCPAPI.
 			SharednetworkAPI.
 			Create(ctx).
-			Sharednetwork(*data.Expand(ctx, &resp.Diagnostics, true)).
+			Sharednetwork(*payload).
 			ReturnFieldsPlus(readableAttributesForSharednetwork).
 			ReturnAsObject(1).
 			Execute()
@@ -419,6 +424,11 @@ func (r *SharednetworkResource) Update(ctx context.Context, req resource.UpdateR
 
 	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
 
+	payload := data.Expand(ctx, &resp.Diagnostics, false)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
 	var apiRes *dhcp.UpdateSharednetworkResponse
 
 	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
@@ -429,7 +439,7 @@ func (r *SharednetworkResource) Update(ctx context.Context, req resource.UpdateR
 		apiRes, httpRes, callErr = r.client.DHCPAPI.
 			SharednetworkAPI.
 			Update(ctx, resourceRef).
-			Sharednetwork(*data.Expand(ctx, &resp.Diagnostics, false)).
+			Sharednetwork(*payload).
 			ReturnFieldsPlus(readableAttributesForSharednetwork).
 			ReturnAsObject(1).
 			Execute()

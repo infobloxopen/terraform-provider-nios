@@ -180,6 +180,11 @@ func (r *ZoneAuthResource) Create(ctx context.Context, req resource.CreateReques
 		return
 	}
 
+	payload := data.Expand(ctx, &resp.Diagnostics, true)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
 	var apiRes *dns.CreateZoneAuthResponse
 
 	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
@@ -190,7 +195,7 @@ func (r *ZoneAuthResource) Create(ctx context.Context, req resource.CreateReques
 		apiRes, httpRes, callErr = r.client.DNSAPI.
 			ZoneAuthAPI.
 			Create(ctx).
-			ZoneAuth(*data.Expand(ctx, &resp.Diagnostics, true)).
+			ZoneAuth(*payload).
 			ReturnFieldsPlus(readableAttributesForZoneAuth).
 			ReturnAsObject(1).
 			Execute()
@@ -413,6 +418,11 @@ func (r *ZoneAuthResource) Update(ctx context.Context, req resource.UpdateReques
 
 	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
 
+	payload := data.Expand(ctx, &resp.Diagnostics, false)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
 	var apiRes *dns.UpdateZoneAuthResponse
 
 	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
@@ -423,7 +433,7 @@ func (r *ZoneAuthResource) Update(ctx context.Context, req resource.UpdateReques
 		apiRes, httpRes, callErr = r.client.DNSAPI.
 			ZoneAuthAPI.
 			Update(ctx, resourceRef).
-			ZoneAuth(*data.Expand(ctx, &resp.Diagnostics, false)).
+			ZoneAuth(*payload).
 			ReturnFieldsPlus(readableAttributesForZoneAuth).
 			ReturnAsObject(1).
 			Execute()

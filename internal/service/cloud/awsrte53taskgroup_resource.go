@@ -82,6 +82,11 @@ func (r *Awsrte53taskgroupResource) Create(ctx context.Context, req resource.Cre
 		}
 	}
 
+	payload := data.Expand(ctx, &resp.Diagnostics, true)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
 	var apiRes *cloud.CreateAwsrte53taskgroupResponse
 
 	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
@@ -92,7 +97,7 @@ func (r *Awsrte53taskgroupResource) Create(ctx context.Context, req resource.Cre
 		apiRes, httpRes, callErr = r.client.CloudAPI.
 			Awsrte53taskgroupAPI.
 			Create(ctx).
-			Awsrte53taskgroup(*data.Expand(ctx, &resp.Diagnostics, true)).
+			Awsrte53taskgroup(*payload).
 			ReturnFieldsPlus(readableAttributesForAwsrte53taskgroup).
 			ReturnAsObject(1).
 			Execute()
@@ -202,6 +207,11 @@ func (r *Awsrte53taskgroupResource) Update(ctx context.Context, req resource.Upd
 
 	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
 
+	payload := data.Expand(ctx, &resp.Diagnostics, false)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
 	var apiRes *cloud.UpdateAwsrte53taskgroupResponse
 
 	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
@@ -212,7 +222,7 @@ func (r *Awsrte53taskgroupResource) Update(ctx context.Context, req resource.Upd
 		apiRes, httpRes, callErr = r.client.CloudAPI.
 			Awsrte53taskgroupAPI.
 			Update(ctx, resourceRef).
-			Awsrte53taskgroup(*data.Expand(ctx, &resp.Diagnostics, false)).
+			Awsrte53taskgroup(*payload).
 			ReturnFieldsPlus(readableAttributesForAwsrte53taskgroup).
 			ReturnAsObject(1).
 			Execute()

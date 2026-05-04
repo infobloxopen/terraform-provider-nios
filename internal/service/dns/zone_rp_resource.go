@@ -134,6 +134,11 @@ func (r *ZoneRpResource) Create(ctx context.Context, req resource.CreateRequest,
 		return
 	}
 
+	payload := data.Expand(ctx, &resp.Diagnostics, true)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
 	var apiRes *dns.CreateZoneRpResponse
 
 	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
@@ -144,7 +149,7 @@ func (r *ZoneRpResource) Create(ctx context.Context, req resource.CreateRequest,
 		apiRes, httpRes, callErr = r.client.DNSAPI.
 			ZoneRpAPI.
 			Create(ctx).
-			ZoneRp(*data.Expand(ctx, &resp.Diagnostics, true)).
+			ZoneRp(*payload).
 			ReturnFieldsPlus(readableAttributesForZoneRp).
 			ReturnAsObject(1).
 			Execute()
@@ -367,6 +372,11 @@ func (r *ZoneRpResource) Update(ctx context.Context, req resource.UpdateRequest,
 
 	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
 
+	payload := data.Expand(ctx, &resp.Diagnostics, false)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
 	var apiRes *dns.UpdateZoneRpResponse
 
 	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
@@ -377,7 +387,7 @@ func (r *ZoneRpResource) Update(ctx context.Context, req resource.UpdateRequest,
 		apiRes, httpRes, callErr = r.client.DNSAPI.
 			ZoneRpAPI.
 			Update(ctx, resourceRef).
-			ZoneRp(*data.Expand(ctx, &resp.Diagnostics, false)).
+			ZoneRp(*payload).
 			ReturnFieldsPlus(readableAttributesForZoneRp).
 			ReturnAsObject(1).
 			Execute()

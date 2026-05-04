@@ -76,6 +76,11 @@ func (r *TftpfiledirResource) Create(ctx context.Context, req resource.CreateReq
 		return
 	}
 
+	payload := data.Expand(ctx, &resp.Diagnostics, true)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
 	var apiRes *misc.CreateTftpfiledirResponse
 
 	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
@@ -83,11 +88,10 @@ func (r *TftpfiledirResource) Create(ctx context.Context, req resource.CreateReq
 			httpRes *http.Response
 			callErr error
 		)
-
 		apiRes, httpRes, callErr = r.client.MiscAPI.
 			TftpfiledirAPI.
 			Create(ctx).
-			Tftpfiledir(*data.Expand(ctx, &resp.Diagnostics, true)).
+			Tftpfiledir(*payload).
 			ReturnFieldsPlus(readableAttributesForTftpfiledir).
 			ReturnAsObject(1).
 			Execute()
@@ -211,6 +215,11 @@ func (r *TftpfiledirResource) Update(ctx context.Context, req resource.UpdateReq
 
 	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
 
+	payload := data.Expand(ctx, &resp.Diagnostics, false)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
 	var apiRes *misc.UpdateTftpfiledirResponse
 
 	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
@@ -221,7 +230,7 @@ func (r *TftpfiledirResource) Update(ctx context.Context, req resource.UpdateReq
 		apiRes, httpRes, callErr = r.client.MiscAPI.
 			TftpfiledirAPI.
 			Update(ctx, resourceRef).
-			Tftpfiledir(*data.Expand(ctx, &resp.Diagnostics, false)).
+			Tftpfiledir(*payload).
 			ReturnFieldsPlus(readableAttributesForTftpfiledir).
 			ReturnAsObject(1).
 			Execute()

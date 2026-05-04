@@ -88,6 +88,11 @@ func (r *RecordAResource) Create(ctx context.Context, req resource.CreateRequest
 		data.FuncCall = r.UpdateFuncCallAttributeName(ctx, data, &resp.Diagnostics)
 	}
 
+	payload := data.Expand(ctx, &resp.Diagnostics, true)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
 	var apiRes *dns.CreateRecordAResponse
 
 	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
@@ -98,7 +103,7 @@ func (r *RecordAResource) Create(ctx context.Context, req resource.CreateRequest
 		apiRes, httpRes, callErr = r.client.DNSAPI.
 			RecordAAPI.
 			Create(ctx).
-			RecordA(*data.Expand(ctx, &resp.Diagnostics, true)).
+			RecordA(*payload).
 			ReturnFieldsPlus(readableAttributesForRecordA).
 			ReturnAsObject(1).
 			Execute()
@@ -327,6 +332,11 @@ func (r *RecordAResource) Update(ctx context.Context, req resource.UpdateRequest
 
 	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
 
+	payload := data.Expand(ctx, &resp.Diagnostics, false)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
 	var apiRes *dns.UpdateRecordAResponse
 
 	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
@@ -337,7 +347,7 @@ func (r *RecordAResource) Update(ctx context.Context, req resource.UpdateRequest
 		apiRes, httpRes, callErr = r.client.DNSAPI.
 			RecordAAPI.
 			Update(ctx, resourceRef).
-			RecordA(*data.Expand(ctx, &resp.Diagnostics, false)).
+			RecordA(*payload).
 			ReturnFieldsPlus(readableAttributesForRecordA).
 			ReturnAsObject(1).
 			Execute()

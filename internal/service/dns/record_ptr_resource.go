@@ -114,6 +114,11 @@ func (r *RecordPtrResource) Create(ctx context.Context, req resource.CreateReque
 		data.FuncCall = r.UpdateFuncCallAttributeName(ctx, data, &resp.Diagnostics)
 	}
 
+	payload := data.Expand(ctx, &resp.Diagnostics, true)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
 	var apiRes *dns.CreateRecordPtrResponse
 
 	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
@@ -124,7 +129,7 @@ func (r *RecordPtrResource) Create(ctx context.Context, req resource.CreateReque
 		apiRes, httpRes, callErr = r.client.DNSAPI.
 			RecordPtrAPI.
 			Create(ctx).
-			RecordPtr(*data.Expand(ctx, &resp.Diagnostics, true)).
+			RecordPtr(*payload).
 			ReturnFieldsPlus(readableAttributesForRecordPtr).
 			ReturnAsObject(1).
 			Execute()
@@ -352,6 +357,11 @@ func (r *RecordPtrResource) Update(ctx context.Context, req resource.UpdateReque
 
 	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
 
+	payload := data.Expand(ctx, &resp.Diagnostics, false)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
 	var apiRes *dns.UpdateRecordPtrResponse
 
 	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
@@ -362,7 +372,7 @@ func (r *RecordPtrResource) Update(ctx context.Context, req resource.UpdateReque
 		apiRes, httpRes, callErr = r.client.DNSAPI.
 			RecordPtrAPI.
 			Update(ctx, resourceRef).
-			RecordPtr(*data.Expand(ctx, &resp.Diagnostics, false)).
+			RecordPtr(*payload).
 			ReturnFieldsPlus(readableAttributesForRecordPtr).
 			ReturnAsObject(1).
 			Execute()

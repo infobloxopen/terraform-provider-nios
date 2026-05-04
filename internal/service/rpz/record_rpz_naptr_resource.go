@@ -82,6 +82,11 @@ func (r *RecordRpzNaptrResource) Create(ctx context.Context, req resource.Create
 		return
 	}
 
+	payload := data.Expand(ctx, &resp.Diagnostics, true)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
 	var apiRes *rpz.CreateRecordRpzNaptrResponse
 
 	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
@@ -92,7 +97,7 @@ func (r *RecordRpzNaptrResource) Create(ctx context.Context, req resource.Create
 		apiRes, httpRes, callErr = r.client.RPZAPI.
 			RecordRpzNaptrAPI.
 			Create(ctx).
-			RecordRpzNaptr(*data.Expand(ctx, &resp.Diagnostics, true)).
+			RecordRpzNaptr(*payload).
 			ReturnFieldsPlus(readableAttributesForRecordRpzNaptr).
 			ReturnAsObject(1).
 			Execute()
@@ -317,6 +322,11 @@ func (r *RecordRpzNaptrResource) Update(ctx context.Context, req resource.Update
 
 	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
 
+	payload := data.Expand(ctx, &resp.Diagnostics, false)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
 	var apiRes *rpz.UpdateRecordRpzNaptrResponse
 
 	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
@@ -327,7 +337,7 @@ func (r *RecordRpzNaptrResource) Update(ctx context.Context, req resource.Update
 		apiRes, httpRes, callErr = r.client.RPZAPI.
 			RecordRpzNaptrAPI.
 			Update(ctx, resourceRef).
-			RecordRpzNaptr(*data.Expand(ctx, &resp.Diagnostics, false)).
+			RecordRpzNaptr(*payload).
 			ReturnFieldsPlus(readableAttributesForRecordRpzNaptr).
 			ReturnAsObject(1).
 			Execute()

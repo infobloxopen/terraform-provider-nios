@@ -82,6 +82,11 @@ func (r *ParentalcontrolSubscribersiteResource) Create(ctx context.Context, req 
 		return
 	}
 
+	payload := data.Expand(ctx, &resp.Diagnostics, true)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
 	var apiRes *parentalcontrol.CreateParentalcontrolSubscribersiteResponse
 
 	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
@@ -92,7 +97,7 @@ func (r *ParentalcontrolSubscribersiteResource) Create(ctx context.Context, req 
 		apiRes, httpRes, callErr = r.client.ParentalControlAPI.
 			ParentalcontrolSubscribersiteAPI.
 			Create(ctx).
-			ParentalcontrolSubscribersite(*data.Expand(ctx, &resp.Diagnostics, true)).
+			ParentalcontrolSubscribersite(*payload).
 			ReturnFieldsPlus(readableAttributesForParentalcontrolSubscribersite).
 			ReturnAsObject(1).
 			Execute()
@@ -318,6 +323,11 @@ func (r *ParentalcontrolSubscribersiteResource) Update(ctx context.Context, req 
 
 	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
 
+	payload := data.Expand(ctx, &resp.Diagnostics, false)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
 	var apiRes *parentalcontrol.UpdateParentalcontrolSubscribersiteResponse
 
 	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
@@ -328,7 +338,7 @@ func (r *ParentalcontrolSubscribersiteResource) Update(ctx context.Context, req 
 		apiRes, httpRes, callErr = r.client.ParentalControlAPI.
 			ParentalcontrolSubscribersiteAPI.
 			Update(ctx, resourceRef).
-			ParentalcontrolSubscribersite(*data.Expand(ctx, &resp.Diagnostics, false)).
+			ParentalcontrolSubscribersite(*payload).
 			ReturnFieldsPlus(readableAttributesForParentalcontrolSubscribersite).
 			ReturnAsObject(1).
 			Execute()

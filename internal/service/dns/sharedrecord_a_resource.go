@@ -75,6 +75,11 @@ func (r *SharedrecordAResource) Create(ctx context.Context, req resource.CreateR
 		return
 	}
 
+	payload := data.Expand(ctx, &resp.Diagnostics, true)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
 	var apiRes *dns.CreateSharedrecordAResponse
 
 	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
@@ -85,7 +90,7 @@ func (r *SharedrecordAResource) Create(ctx context.Context, req resource.CreateR
 		apiRes, httpRes, callErr = r.client.DNSAPI.
 			SharedrecordAAPI.
 			Create(ctx).
-			SharedrecordA(*data.Expand(ctx, &resp.Diagnostics, true)).
+			SharedrecordA(*payload).
 			ReturnFieldsPlus(readableAttributesForSharedrecordA).
 			ReturnAsObject(1).
 			Execute()
@@ -213,6 +218,11 @@ func (r *SharedrecordAResource) Update(ctx context.Context, req resource.UpdateR
 
 	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
 
+	payload := data.Expand(ctx, &resp.Diagnostics, false)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
 	var apiRes *dns.UpdateSharedrecordAResponse
 
 	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
@@ -223,7 +233,7 @@ func (r *SharedrecordAResource) Update(ctx context.Context, req resource.UpdateR
 		apiRes, httpRes, callErr = r.client.DNSAPI.
 			SharedrecordAAPI.
 			Update(ctx, resourceRef).
-			SharedrecordA(*data.Expand(ctx, &resp.Diagnostics, false)).
+			SharedrecordA(*payload).
 			ReturnFieldsPlus(readableAttributesForSharedrecordA).
 			ReturnAsObject(1).
 			Execute()

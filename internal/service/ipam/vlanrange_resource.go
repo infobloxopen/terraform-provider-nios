@@ -81,6 +81,11 @@ func (r *VlanrangeResource) Create(ctx context.Context, req resource.CreateReque
 		return
 	}
 
+	payload := data.Expand(ctx, &resp.Diagnostics, true)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
 	var apiRes *ipam.CreateVlanrangeResponse
 
 	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
@@ -91,7 +96,7 @@ func (r *VlanrangeResource) Create(ctx context.Context, req resource.CreateReque
 		apiRes, httpRes, callErr = r.client.IPAMAPI.
 			VlanrangeAPI.
 			Create(ctx).
-			Vlanrange(*data.Expand(ctx, &resp.Diagnostics, true)).
+			Vlanrange(*payload).
 			ReturnFieldsPlus(readableAttributesForVlanrange).
 			ReturnAsObject(1).
 			Execute()
@@ -315,6 +320,11 @@ func (r *VlanrangeResource) Update(ctx context.Context, req resource.UpdateReque
 
 	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
 
+	payload := data.Expand(ctx, &resp.Diagnostics, false)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
 	var apiRes *ipam.UpdateVlanrangeResponse
 
 	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
@@ -325,7 +335,7 @@ func (r *VlanrangeResource) Update(ctx context.Context, req resource.UpdateReque
 		apiRes, httpRes, callErr = r.client.IPAMAPI.
 			VlanrangeAPI.
 			Update(ctx, resourceRef).
-			Vlanrange(*data.Expand(ctx, &resp.Diagnostics, false)).
+			Vlanrange(*payload).
 			ReturnFieldsPlus(readableAttributesForVlanrange).
 			ReturnAsObject(1).
 			Execute()

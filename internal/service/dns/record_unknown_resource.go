@@ -81,6 +81,11 @@ func (r *RecordUnknownResource) Create(ctx context.Context, req resource.CreateR
 		return
 	}
 
+	payload := data.Expand(ctx, &resp.Diagnostics, true)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
 	var apiRes *dns.CreateRecordUnknownResponse
 
 	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
@@ -91,7 +96,7 @@ func (r *RecordUnknownResource) Create(ctx context.Context, req resource.CreateR
 		apiRes, httpRes, callErr = r.client.DNSAPI.
 			RecordUnknownAPI.
 			Create(ctx).
-			RecordUnknown(*data.Expand(ctx, &resp.Diagnostics, true)).
+			RecordUnknown(*payload).
 			ReturnFieldsPlus(readableAttributesForRecordUnknown).
 			ReturnAsObject(1).
 			Execute()
@@ -314,6 +319,11 @@ func (r *RecordUnknownResource) Update(ctx context.Context, req resource.UpdateR
 
 	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
 
+	payload := data.Expand(ctx, &resp.Diagnostics, false)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
 	var apiRes *dns.UpdateRecordUnknownResponse
 
 	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
@@ -324,7 +334,7 @@ func (r *RecordUnknownResource) Update(ctx context.Context, req resource.UpdateR
 		apiRes, httpRes, callErr = r.client.DNSAPI.
 			RecordUnknownAPI.
 			Update(ctx, resourceRef).
-			RecordUnknown(*data.Expand(ctx, &resp.Diagnostics, false)).
+			RecordUnknown(*payload).
 			ReturnFieldsPlus(readableAttributesForRecordUnknown).
 			ReturnAsObject(1).
 			Execute()

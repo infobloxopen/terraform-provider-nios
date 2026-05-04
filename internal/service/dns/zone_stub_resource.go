@@ -81,6 +81,11 @@ func (r *ZoneStubResource) Create(ctx context.Context, req resource.CreateReques
 		return
 	}
 
+	payload := data.Expand(ctx, &resp.Diagnostics, true)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
 	var apiRes *dns.CreateZoneStubResponse
 
 	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
@@ -91,7 +96,7 @@ func (r *ZoneStubResource) Create(ctx context.Context, req resource.CreateReques
 		apiRes, httpRes, callErr = r.client.DNSAPI.
 			ZoneStubAPI.
 			Create(ctx).
-			ZoneStub(*data.Expand(ctx, &resp.Diagnostics, true)).
+			ZoneStub(*payload).
 			ReturnFieldsPlus(readableAttributesForZoneStub).
 			ReturnAsObject(1).
 			Execute()
@@ -314,6 +319,11 @@ func (r *ZoneStubResource) Update(ctx context.Context, req resource.UpdateReques
 
 	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
 
+	payload := data.Expand(ctx, &resp.Diagnostics, false)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
 	var apiRes *dns.UpdateZoneStubResponse
 
 	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
@@ -324,7 +334,7 @@ func (r *ZoneStubResource) Update(ctx context.Context, req resource.UpdateReques
 		apiRes, httpRes, callErr = r.client.DNSAPI.
 			ZoneStubAPI.
 			Update(ctx, resourceRef).
-			ZoneStub(*data.Expand(ctx, &resp.Diagnostics, false)).
+			ZoneStub(*payload).
 			ReturnFieldsPlus(readableAttributesForZoneStub).
 			ReturnAsObject(1).
 			Execute()

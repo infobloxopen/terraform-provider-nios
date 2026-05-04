@@ -84,6 +84,11 @@ func (r *RoaminghostResource) Create(ctx context.Context, req resource.CreateReq
 		return
 	}
 
+	payload := data.Expand(ctx, &resp.Diagnostics, true)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
 	var apiRes *dhcp.CreateRoaminghostResponse
 
 	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
@@ -94,7 +99,7 @@ func (r *RoaminghostResource) Create(ctx context.Context, req resource.CreateReq
 		apiRes, httpRes, callErr = r.client.DHCPAPI.
 			RoaminghostAPI.
 			Create(ctx).
-			Roaminghost(*data.Expand(ctx, &resp.Diagnostics, true)).
+			Roaminghost(*payload).
 			ReturnFieldsPlus(readableAttributesForRoaminghost).
 			ReturnAsObject(1).
 			Execute()
@@ -322,6 +327,11 @@ func (r *RoaminghostResource) Update(ctx context.Context, req resource.UpdateReq
 
 	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
 
+	payload := data.Expand(ctx, &resp.Diagnostics, false)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
 	var apiRes *dhcp.UpdateRoaminghostResponse
 
 	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
@@ -332,7 +342,7 @@ func (r *RoaminghostResource) Update(ctx context.Context, req resource.UpdateReq
 		apiRes, httpRes, callErr = r.client.DHCPAPI.
 			RoaminghostAPI.
 			Update(ctx, resourceRef).
-			Roaminghost(*data.Expand(ctx, &resp.Diagnostics, false)).
+			Roaminghost(*payload).
 			ReturnFieldsPlus(readableAttributesForRoaminghost).
 			ReturnAsObject(1).
 			Execute()

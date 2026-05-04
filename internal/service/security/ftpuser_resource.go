@@ -81,6 +81,11 @@ func (r *FtpuserResource) Create(ctx context.Context, req resource.CreateRequest
 		return
 	}
 
+	payload := data.Expand(ctx, &resp.Diagnostics, true)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
 	var apiRes *security.CreateFtpuserResponse
 
 	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
@@ -91,7 +96,7 @@ func (r *FtpuserResource) Create(ctx context.Context, req resource.CreateRequest
 		apiRes, httpRes, callErr = r.client.SecurityAPI.
 			FtpuserAPI.
 			Create(ctx).
-			Ftpuser(*data.Expand(ctx, &resp.Diagnostics, true)).
+			Ftpuser(*payload).
 			ReturnFieldsPlus(readableAttributesForFtpuser).
 			ReturnAsObject(1).
 			Execute()
@@ -314,6 +319,11 @@ func (r *FtpuserResource) Update(ctx context.Context, req resource.UpdateRequest
 
 	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
 
+	payload := data.Expand(ctx, &resp.Diagnostics, false)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
 	var apiRes *security.UpdateFtpuserResponse
 
 	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
@@ -324,7 +334,7 @@ func (r *FtpuserResource) Update(ctx context.Context, req resource.UpdateRequest
 		apiRes, httpRes, callErr = r.client.SecurityAPI.
 			FtpuserAPI.
 			Update(ctx, resourceRef).
-			Ftpuser(*data.Expand(ctx, &resp.Diagnostics, false)).
+			Ftpuser(*payload).
 			ReturnFieldsPlus(readableAttributesForFtpuser).
 			ReturnAsObject(1).
 			Execute()

@@ -83,6 +83,11 @@ func (r *Ipv6sharednetworkResource) Create(ctx context.Context, req resource.Cre
 		return
 	}
 
+	payload := data.Expand(ctx, &resp.Diagnostics, true)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
 	var apiRes *dhcp.CreateIpv6sharednetworkResponse
 
 	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
@@ -93,7 +98,7 @@ func (r *Ipv6sharednetworkResource) Create(ctx context.Context, req resource.Cre
 		apiRes, httpRes, callErr = r.client.DHCPAPI.
 			Ipv6sharednetworkAPI.
 			Create(ctx).
-			Ipv6sharednetwork(*data.Expand(ctx, &resp.Diagnostics, true)).
+			Ipv6sharednetwork(*payload).
 			ReturnFieldsPlus(readableAttributesForIpv6sharednetwork).
 			ReturnAsObject(1).
 			Execute()
@@ -317,6 +322,11 @@ func (r *Ipv6sharednetworkResource) Update(ctx context.Context, req resource.Upd
 
 	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
 
+	payload := data.Expand(ctx, &resp.Diagnostics, false)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
 	var apiRes *dhcp.UpdateIpv6sharednetworkResponse
 
 	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
@@ -327,7 +337,7 @@ func (r *Ipv6sharednetworkResource) Update(ctx context.Context, req resource.Upd
 		apiRes, httpRes, callErr = r.client.DHCPAPI.
 			Ipv6sharednetworkAPI.
 			Update(ctx, resourceRef).
-			Ipv6sharednetwork(*data.Expand(ctx, &resp.Diagnostics, false)).
+			Ipv6sharednetwork(*payload).
 			ReturnFieldsPlus(readableAttributesForIpv6sharednetwork).
 			ReturnAsObject(1).
 			Execute()
