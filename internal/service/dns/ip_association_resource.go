@@ -351,6 +351,7 @@ func (r *IPAssociationResource) updateHostRecord(ctx context.Context, hostRec *d
 	updateReq.CreationTime = nil
 	updateReq.DnsAliases = nil
 	updateReq.DnsName = nil
+	updateReq.MsAdUserData = nil
 	updateReq.LastQueried = nil
 	updateReq.NetworkView = nil
 	updateReq.Zone = nil

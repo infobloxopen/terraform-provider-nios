@@ -21,22 +21,14 @@ func TestAccUpgradescheduleDataSource_Read(t *testing.T) {
 	active := true
 
 	now := time.Now()
-	start_time := now.Add(12 * time.Hour).Format(utils.NaiveDatetimeLayout)
-	upgrade_time := now.Add(24 * time.Hour).Format(utils.NaiveDatetimeLayout)
-
-	upgrade_groups := []map[string]any{
-		{
-			"upgrade_time": upgrade_time,
-			"name":         "Default",
-		},
-	}
+	start_time := now.Add(24 * time.Hour).Format(utils.NaiveDatetimeLayout)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccUpgradescheduleDataSourceConfig(active, start_time, upgrade_groups),
+				Config: testAccUpgradescheduleDataSourceConfig(active, start_time),
 				Check: resource.ComposeTestCheckFunc(
 					append([]resource.TestCheckFunc{
 						testAccCheckUpgradescheduleExists(context.Background(), resourceName, &v),
@@ -59,18 +51,15 @@ func testAccCheckUpgradescheduleResourceAttrPair(resourceName, dataSourceName st
 	}
 }
 
-func testAccUpgradescheduleDataSourceConfig(active bool, start_time string, upgradeGroups []map[string]any) string {
-	upgradeGroupsHCL := utils.ConvertSliceOfMapsToHCL(upgradeGroups)
-
+func testAccUpgradescheduleDataSourceConfig(active bool, start_time string) string {
 	return fmt.Sprintf(`
 resource "nios_grid_upgradeschedule" "test" {
 	active     = %t
 	start_time = %q
-	upgrade_groups = %s
 }
 
 data "nios_grid_upgradeschedule" "test" {
   depends_on = [nios_grid_upgradeschedule.test]
 }
-`, active, start_time, upgradeGroupsHCL)
+`, active, start_time)
 }

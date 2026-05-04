@@ -799,7 +799,9 @@ func (m *FixedaddressModel) Flatten(ctx context.Context, from *dhcp.Fixedaddress
 		}
 	}
 	m.SnmpCredential = FlattenFixedaddressSnmpCredential(ctx, from.SnmpCredential, diags)
-	m.Template = flex.FlattenStringPointer(from.Template)
+	if m.Template.IsUnknown() || m.Template.IsNull() {
+		m.Template = flex.FlattenStringPointer(from.Template)
+	}
 	m.UseBootfile = types.BoolPointerValue(from.UseBootfile)
 	m.UseBootserver = types.BoolPointerValue(from.UseBootserver)
 	m.UseCliCredentials = types.BoolPointerValue(from.UseCliCredentials)

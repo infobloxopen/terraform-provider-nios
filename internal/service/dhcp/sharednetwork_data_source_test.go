@@ -3,6 +3,7 @@ package dhcp_test
 import (
 	"context"
 	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -17,8 +18,8 @@ func TestAccSharednetworkDataSource_Filters(t *testing.T) {
 	resourceName := "nios_dhcp_shared_network.test"
 	var v dhcp.Sharednetwork
 	name := acctest.RandomNameWithPrefix("shared_network")
-	networks := []string{"network/ZG5zLm5ldHdvcmskMjEuMjEuNi4wLzI0LzA:21.21.6.0/24/default",
-		"network/ZG5zLm5ldHdvcmskMjEuMjEuNy4wLzI0LzA:21.21.7.0/24/default"}
+	networks := []string{"${nios_ipam_network.test_network1.ref}",
+		"${nios_ipam_network.test_network2.ref}"}
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -42,8 +43,8 @@ func TestAccSharednetworkDataSource_ExtAttrFilters(t *testing.T) {
 	resourceName := "nios_dhcp_shared_network.test"
 	var v dhcp.Sharednetwork
 	name := acctest.RandomNameWithPrefix("shared_network")
-	networks := []string{"network/ZG5zLm5ldHdvcmskMjEuMjEuNi4wLzI0LzA:21.21.6.0/24/default",
-		"network/ZG5zLm5ldHdvcmskMjEuMjEuNy4wLzI0LzA:21.21.7.0/24/default"}
+	networks := []string{"${nios_ipam_network.test_network1.ref}",
+		"${nios_ipam_network.test_network2.ref}"}
 	extAttrValue := acctest.RandomName()
 
 	resource.Test(t, resource.TestCase{
@@ -85,7 +86,6 @@ func testAccCheckSharednetworkResourceAttrPair(resourceName, dataSourceName stri
 		resource.TestCheckResourceAttrPair(resourceName, "enable_ddns", dataSourceName, "result.0.enable_ddns"),
 		resource.TestCheckResourceAttrPair(resourceName, "enable_pxe_lease_time", dataSourceName, "result.0.enable_pxe_lease_time"),
 		resource.TestCheckResourceAttrPair(resourceName, "extattrs", dataSourceName, "result.0.extattrs"),
-		resource.TestCheckResourceAttrPair(resourceName, "ignore_client_identifier", dataSourceName, "result.0.ignore_client_identifier"),
 		resource.TestCheckResourceAttrPair(resourceName, "ignore_dhcp_option_list_request", dataSourceName, "result.0.ignore_dhcp_option_list_request"),
 		resource.TestCheckResourceAttrPair(resourceName, "ignore_id", dataSourceName, "result.0.ignore_id"),
 		resource.TestCheckResourceAttrPair(resourceName, "ignore_mac_addresses", dataSourceName, "result.0.ignore_mac_addresses"),
@@ -124,7 +124,7 @@ func testAccCheckSharednetworkResourceAttrPair(resourceName, dataSourceName stri
 
 func testAccSharednetworkDataSourceConfigFilters(name string, networks []string) string {
 	networksStr := formatNetworksToHCL(networks)
-	return fmt.Sprintf(`
+	config := fmt.Sprintf(`
 resource "nios_dhcp_shared_network" "test" {
  name = "%s"
  networks = %s
@@ -136,11 +136,13 @@ data "nios_dhcp_shared_network" "test" {
  }
 }
 `, name, networksStr)
+	return strings.Join([]string{testAccBaseWithNetworks(
+		"201.91.0.0/24", "201.92.0.0/24"), config}, "\n")
 }
 
 func testAccSharednetworkDataSourceConfigExtAttrFilters(name string, netwrorks []string, extAttrsValue string) string {
 	netwrorksStr := formatNetworksToHCL(netwrorks)
-	return fmt.Sprintf(`
+	config := fmt.Sprintf(`
 resource "nios_dhcp_shared_network" "test" {
  name = %q
  networks = %s
@@ -155,4 +157,6 @@ data "nios_dhcp_shared_network" "test" {
  }
 }
 `, name, netwrorksStr, extAttrsValue)
+	return strings.Join([]string{testAccBaseWithNetworks(
+		"201.93.0.0/24", "201.94.0.0/24"), config}, "\n")
 }

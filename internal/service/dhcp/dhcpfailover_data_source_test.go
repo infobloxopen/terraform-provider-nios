@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/dhcp"
 	"github.com/infobloxopen/terraform-provider-nios/internal/acctest"
@@ -16,8 +17,8 @@ func TestAccDhcpfailoverDataSource_Filters(t *testing.T) {
 	resourceName := "nios_dhcp_failover.test"
 	var v dhcp.Dhcpfailover
 	failoverName := acctest.RandomNameWithPrefix("failover")
-	primary := "infoblox.localdomain"
-	secondary := "infoblox.member1"
+	primary := utils.GetNIOSGridMasterHostName()
+	secondary := utils.GetNIOSGridMemberHostName()
 	primaryServerType := "GRID"
 	secondaryServerType := "GRID"
 
@@ -43,8 +44,8 @@ func TestAccDhcpfailoverDataSource_ExtAttrFilters(t *testing.T) {
 	resourceName := "nios_dhcp_failover.test"
 	var v dhcp.Dhcpfailover
 	extAttrValue := acctest.RandomNameWithPrefix("Site")
-	primary := "infoblox.localdomain"
-	secondary := "infoblox.member1"
+	primary := utils.GetNIOSGridMasterHostName()
+	secondary := utils.GetNIOSGridMemberHostName()
 	primaryServerType := "GRID"
 	secondaryServerType := "GRID"
 	dhcpfailoverName := acctest.RandomNameWithPrefix("failover")

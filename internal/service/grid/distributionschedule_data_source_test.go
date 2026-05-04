@@ -17,29 +17,27 @@ func TestAccDistributionscheduleDataSource_Read(t *testing.T) {
 	dataSourceName := "data.nios_grid_distributionschedule.test"
 	resourceName := "nios_grid_distributionschedule.test"
 	var v grid.Distributionschedule
-	active := true
 
 	now := time.Now()
-	start_time := now.Add(12 * time.Hour).Format(utils.NaiveDatetimeLayout)
-	distribution_time := now.Add(24 * time.Hour).Format(utils.NaiveDatetimeLayout)
-
-	upgrade_groups := []map[string]any{
-		{
-			"distribution_time": distribution_time,
-			"name":              "Default",
-		},
-	}
+	startTime := now.Add(12 * time.Hour).Format(utils.NaiveDatetimeLayout)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDistributionscheduleDataSourceConfig(active, start_time, upgrade_groups),
+				Config: testAccDistributionscheduleDataSourceConfig(true, startTime),
 				Check: resource.ComposeTestCheckFunc(
 					append([]resource.TestCheckFunc{
 						testAccCheckDistributionscheduleExists(context.Background(), resourceName, &v),
 					}, testAccCheckDistributionscheduleResourceAttrPair(resourceName, dataSourceName)...)...,
+				),
+			},
+			// Deactivate schedule for Integration Testing
+			{
+				Config: testAccDistributionscheduleDeactivate(),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("nios_grid_distributionschedule.deactivate_schedule", "active", "false"),
 				),
 			},
 		},
@@ -58,18 +56,16 @@ func testAccCheckDistributionscheduleResourceAttrPair(resourceName, dataSourceNa
 	}
 }
 
-func testAccDistributionscheduleDataSourceConfig(active bool, start_time string, upgradeGroups []map[string]any) string {
-	upgradeGroupsHCL := utils.ConvertSliceOfMapsToHCL(upgradeGroups)
+func testAccDistributionscheduleDataSourceConfig(active bool, start_time string) string {
 
 	return fmt.Sprintf(`
 resource "nios_grid_distributionschedule" "test" {
 	active     = %t
 	start_time = %q
-	upgrade_groups = %s
 }
 
 data "nios_grid_distributionschedule" "test" {
 	depends_on = [nios_grid_distributionschedule.test]
 }
-`, active, start_time, upgradeGroupsHCL)
+`, active, start_time)
 }

@@ -86,6 +86,7 @@ func testAccDtcLbdnDataSourceConfigFilters(name, lbMethod string) string {
 resource "nios_dtc_lbdn" "test" {
 	name = %q
 	lb_method = %q
+	types = ["A", "AAAA"]
 }
 
 data "nios_dtc_lbdn" "test" {
@@ -101,6 +102,7 @@ func testAccDtcLbdnDataSourceConfigExtAttrFilters(name, lbMethod, extAttrsValue 
 resource "nios_dtc_lbdn" "test" {
   name = %q
   lb_method = %q
+  types = ["A", "AAAA"]
   extattrs = {
     Site = %q
   	}
