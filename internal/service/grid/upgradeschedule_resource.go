@@ -11,8 +11,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
+	"github.com/infobloxopen/infoblox-nios-go-client/grid"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/config"
+	"github.com/infobloxopen/terraform-provider-nios/internal/retry"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
@@ -130,15 +132,42 @@ func (r *UpgradescheduleResource) Create(ctx context.Context, req resource.Creat
 	listObj := list[0]
 
 	// Update it with desired plan
-	apiRes, _, err := r.client.GridAPI.
-		UpgradescheduleAPI.
-		Update(ctx, utils.ExtractResourceRef(listObj.GetRef())).
-		Upgradeschedule(*data.Expand(ctx, &resp.Diagnostics)).
-		ReturnFieldsPlus(readableAttributesForUpgradeschedule).
-		ReturnAsObject(1).
-		Execute()
+	payload := data.Expand(ctx, &resp.Diagnostics)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	var apiRes *grid.UpdateUpgradescheduleResponse
+
+	err = retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		var (
+			httpRes *http.Response
+			callErr error
+		)
+		apiRes, httpRes, callErr = r.client.GridAPI.
+			UpgradescheduleAPI.
+			Update(ctx, utils.ExtractResourceRef(listObj.GetRef())).
+			Upgradeschedule(*payload).
+			ReturnFieldsPlus(readableAttributesForUpgradeschedule).
+			ReturnAsObject(1).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
+
 	if err != nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update UpgradeSchedule: %s", err))
+		if retry.IsAlreadyExistsErr(err) {
+			// Resource already exists, import required
+			resp.Diagnostics.AddError(
+				"Resource Already Exists",
+				fmt.Sprintf("Resource already exists, error: %s.\nPlease import the existing resource into terraform state.", err.Error()),
+			)
+			return
+		}
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create Upgradeschedule, got error: %s", err))
 		return
 	}
 
@@ -159,15 +188,30 @@ func (r *UpgradescheduleResource) Read(ctx context.Context, req resource.ReadReq
 		return
 	}
 
-	apiRes, httpRes, err := r.client.GridAPI.
-		UpgradescheduleAPI.
-		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
-		ReturnFieldsPlus(readableAttributesForUpgradeschedule).
-		ReturnAsObject(1).
-		ProxySearch(config.GetProxySearch()).
-		Execute()
+	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
 
-		// Handle not found case
+	var (
+		httpRes *http.Response
+		apiRes  *grid.GetUpgradescheduleResponse
+	)
+
+	err := retry.Do(ctx, nil, func(ctx context.Context) (int, error) {
+		var callErr error
+		apiRes, httpRes, callErr = r.client.GridAPI.
+			UpgradescheduleAPI.
+			Read(ctx, resourceRef).
+			ReturnFieldsPlus(readableAttributesForUpgradeschedule).
+			ReturnAsObject(1).
+			ProxySearch(config.GetProxySearch()).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
+
+	// Handle not found case
 	if err != nil {
 		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
 			// Resource no longer exists, remove from state
@@ -203,13 +247,34 @@ func (r *UpgradescheduleResource) Update(ctx context.Context, req resource.Updat
 		return
 	}
 
-	apiRes, _, err := r.client.GridAPI.
-		UpgradescheduleAPI.
-		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
-		Upgradeschedule(*data.Expand(ctx, &resp.Diagnostics)).
-		ReturnFieldsPlus(readableAttributesForUpgradeschedule).
-		ReturnAsObject(1).
-		Execute()
+	payload := data.Expand(ctx, &resp.Diagnostics)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
+
+	var apiRes *grid.UpdateUpgradescheduleResponse
+
+	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		var (
+			httpRes *http.Response
+			callErr error
+		)
+		apiRes, httpRes, callErr = r.client.GridAPI.
+			UpgradescheduleAPI.
+			Update(ctx, resourceRef).
+			Upgradeschedule(*payload).
+			ReturnFieldsPlus(readableAttributesForUpgradeschedule).
+			ReturnAsObject(1).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
+
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update Upgradeschedule, got error: %s", err))
 		return

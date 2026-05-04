@@ -11,8 +11,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
+	"github.com/infobloxopen/infoblox-nios-go-client/grid"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/config"
+	"github.com/infobloxopen/terraform-provider-nios/internal/retry"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
@@ -130,15 +132,42 @@ func (r *DistributionscheduleResource) Create(ctx context.Context, req resource.
 	listObj := list[0]
 
 	// Update it with desired plan
-	apiRes, _, err := r.client.GridAPI.
-		DistributionscheduleAPI.
-		Update(ctx, utils.ExtractResourceRef(listObj.GetRef())).
-		Distributionschedule(*data.Expand(ctx, &resp.Diagnostics)).
-		ReturnFieldsPlus(readableAttributesForDistributionschedule).
-		ReturnAsObject(1).
-		Execute()
+	payload := data.Expand(ctx, &resp.Diagnostics)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	var apiRes *grid.UpdateDistributionscheduleResponse
+
+	err = retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		var (
+			httpRes *http.Response
+			callErr error
+		)
+		apiRes, httpRes, callErr = r.client.GridAPI.
+			DistributionscheduleAPI.
+			Update(ctx, utils.ExtractResourceRef(listObj.GetRef())).
+			Distributionschedule(*payload).
+			ReturnFieldsPlus(readableAttributesForDistributionschedule).
+			ReturnAsObject(1).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
+
 	if err != nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update DistributionSchedule: %s", err))
+		if retry.IsAlreadyExistsErr(err) {
+			// Resource already exists, import required
+			resp.Diagnostics.AddError(
+				"Resource Already Exists",
+				fmt.Sprintf("Resource already exists, error: %s.\nPlease import the existing resource into terraform state.", err.Error()),
+			)
+			return
+		}
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create Distributionschedule, got error: %s", err))
 		return
 	}
 
@@ -158,13 +187,28 @@ func (r *DistributionscheduleResource) Read(ctx context.Context, req resource.Re
 		return
 	}
 
-	apiRes, httpRes, err := r.client.GridAPI.
-		DistributionscheduleAPI.
-		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
-		ReturnFieldsPlus(readableAttributesForDistributionschedule).
-		ReturnAsObject(1).
-		ProxySearch(config.GetProxySearch()).
-		Execute()
+	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
+
+	var (
+		httpRes *http.Response
+		apiRes  *grid.GetDistributionscheduleResponse
+	)
+
+	err := retry.Do(ctx, nil, func(ctx context.Context) (int, error) {
+		var callErr error
+		apiRes, httpRes, callErr = r.client.GridAPI.
+			DistributionscheduleAPI.
+			Read(ctx, resourceRef).
+			ReturnFieldsPlus(readableAttributesForDistributionschedule).
+			ReturnAsObject(1).
+			ProxySearch(config.GetProxySearch()).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
 
 	// Handle not found case
 	if err != nil {
@@ -204,13 +248,34 @@ func (r *DistributionscheduleResource) Update(ctx context.Context, req resource.
 		return
 	}
 
-	apiRes, _, err := r.client.GridAPI.
-		DistributionscheduleAPI.
-		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
-		Distributionschedule(*data.Expand(ctx, &resp.Diagnostics)).
-		ReturnFieldsPlus(readableAttributesForDistributionschedule).
-		ReturnAsObject(1).
-		Execute()
+	payload := data.Expand(ctx, &resp.Diagnostics)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
+
+	var apiRes *grid.UpdateDistributionscheduleResponse
+
+	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		var (
+			httpRes *http.Response
+			callErr error
+		)
+		apiRes, httpRes, callErr = r.client.GridAPI.
+			DistributionscheduleAPI.
+			Update(ctx, resourceRef).
+			Distributionschedule(*payload).
+			ReturnFieldsPlus(readableAttributesForDistributionschedule).
+			ReturnAsObject(1).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
+
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update Distributionschedule, got error: %s", err))
 		return

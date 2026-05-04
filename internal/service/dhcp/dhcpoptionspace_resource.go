@@ -11,9 +11,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
+	"github.com/infobloxopen/infoblox-nios-go-client/dhcp"
+	"github.com/infobloxopen/terraform-provider-nios/internal/retry"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/config"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
@@ -80,14 +81,41 @@ func (r *DhcpoptionspaceResource) Create(ctx context.Context, req resource.Creat
 		return
 	}
 
-	apiRes, _, err := r.client.DHCPAPI.
-		DhcpoptionspaceAPI.
-		Create(ctx).
-		Dhcpoptionspace(*data.Expand(ctx, &resp.Diagnostics)).
-		ReturnFieldsPlus(readableAttributesForDhcpoptionspace).
-		ReturnAsObject(1).
-		Execute()
+	payload := data.Expand(ctx, &resp.Diagnostics)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	var apiRes *dhcp.CreateDhcpoptionspaceResponse
+
+	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		var (
+			httpRes *http.Response
+			callErr error
+		)
+		apiRes, httpRes, callErr = r.client.DHCPAPI.
+			DhcpoptionspaceAPI.
+			Create(ctx).
+			Dhcpoptionspace(*payload).
+			ReturnFieldsPlus(readableAttributesForDhcpoptionspace).
+			ReturnAsObject(1).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
+
 	if err != nil {
+		if retry.IsAlreadyExistsErr(err) {
+			// Resource already exists, import required
+			resp.Diagnostics.AddError(
+				"Resource Already Exists",
+				fmt.Sprintf("Resource already exists, error: %s.\nPlease import the existing resource into terraform state.", err.Error()),
+			)
+			return
+		}
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create Dhcpoptionspace, got error: %s", err))
 		return
 	}
@@ -110,15 +138,29 @@ func (r *DhcpoptionspaceResource) Read(ctx context.Context, req resource.ReadReq
 		return
 	}
 
-	apiRes, httpRes, err := r.client.DHCPAPI.
-		DhcpoptionspaceAPI.
-		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
-		ReturnFieldsPlus(readableAttributesForDhcpoptionspace).
-		ReturnAsObject(1).
-		ProxySearch(config.GetProxySearch()).
-		Execute()
+	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
 
-		// Handle not found case
+	var (
+		httpRes *http.Response
+		apiRes  *dhcp.GetDhcpoptionspaceResponse
+	)
+
+	err := retry.Do(ctx, nil, func(ctx context.Context) (int, error) {
+		var callErr error
+		apiRes, httpRes, callErr = r.client.DHCPAPI.
+			DhcpoptionspaceAPI.
+			Read(ctx, resourceRef).
+			ReturnFieldsPlus(readableAttributesForDhcpoptionspace).
+			ReturnAsObject(1).
+			ProxySearch(config.GetProxySearch()).
+			Execute()
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
+
+	// Handle not found case
 	if err != nil {
 		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
 			// Resource no longer exists, remove from state
@@ -154,13 +196,34 @@ func (r *DhcpoptionspaceResource) Update(ctx context.Context, req resource.Updat
 		return
 	}
 
-	apiRes, _, err := r.client.DHCPAPI.
-		DhcpoptionspaceAPI.
-		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
-		Dhcpoptionspace(*data.Expand(ctx, &resp.Diagnostics)).
-		ReturnFieldsPlus(readableAttributesForDhcpoptionspace).
-		ReturnAsObject(1).
-		Execute()
+	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
+
+	payload := data.Expand(ctx, &resp.Diagnostics)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	var apiRes *dhcp.UpdateDhcpoptionspaceResponse
+
+	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		var (
+			httpRes *http.Response
+			callErr error
+		)
+		apiRes, httpRes, callErr = r.client.DHCPAPI.
+			DhcpoptionspaceAPI.
+			Update(ctx, resourceRef).
+			Dhcpoptionspace(*payload).
+			ReturnFieldsPlus(readableAttributesForDhcpoptionspace).
+			ReturnAsObject(1).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
+
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update Dhcpoptionspace, got error: %s", err))
 		return
@@ -184,28 +247,37 @@ func (r *DhcpoptionspaceResource) Delete(ctx context.Context, req resource.Delet
 		return
 	}
 
-	err := retry.RetryContext(ctx, OptionSpaceOperationTimeout, func() *retry.RetryError {
-		httpRes, err := r.client.DHCPAPI.
+	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
+
+	err := retry.DoWithTimeout(ctx, OptionSpaceOperationTimeout, IsOptionDefinitionReferenced, func(ctx context.Context) (int, error) {
+		httpRes, callErr := r.client.DHCPAPI.
 			DhcpoptionspaceAPI.
-			Delete(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
+			Delete(ctx, resourceRef).
 			Execute()
-		if err != nil {
-			if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
-				return nil
+
+		if httpRes != nil {
+			if httpRes.StatusCode == http.StatusNotFound {
+				return 0, nil
 			}
-			if strings.Contains(err.Error(), "cannot be deleted as it has an option referenced") {
-				return retry.RetryableError(err)
-			}
-			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete Dhcpoptionspace, got error: %s", err))
-			return retry.NonRetryableError(err)
+			return httpRes.StatusCode, callErr
 		}
-		return nil
+		return 0, callErr
 	})
 	if err != nil {
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete Dhcpoptionspace, got error: %s", err))
 		return
 	}
 }
 
 func (r *DhcpoptionspaceResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("ref"), req, resp)
+}
+
+// IsOptionDefinitionReferenced checks if the error indicates that the option definition is referenced.
+func IsOptionDefinitionReferenced(err error) bool {
+	if err == nil {
+		return false
+	}
+	errStr := strings.ToLower(err.Error())
+	return strings.Contains(errStr, "cannot be deleted as it has an option referenced") || retry.TransientErrors(err)
 }
