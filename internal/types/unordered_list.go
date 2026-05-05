@@ -121,6 +121,7 @@ func (v UnorderedListValue) ListSemanticEquals(ctx context.Context, newValuable 
 		found := false
 		for i, oldElem := range oldElems {
 			if oldElem.Equal(newElem) {
+				//nolint:govet
 				oldElems = slices.Delete(oldElems, i, i+1)
 				found = true
 				break
