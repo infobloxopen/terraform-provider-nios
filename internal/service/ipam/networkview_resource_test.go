@@ -157,7 +157,7 @@ func TestAccNetworkviewResource_DdnsDnsView(t *testing.T) {
 				Config: testAccNetworkviewDdnsDnsView(name, "null"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkviewExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ddns_dns_view", DdnsDnsView),
+					resource.TestCheckResourceAttr(resourceName, "ddns_dns_view", "default"),
 				),
 			},
 			// Update and Read
