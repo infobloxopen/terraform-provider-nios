@@ -53,6 +53,7 @@ type NIOSProviderModel struct {
 	NIOSPassword types.String `tfsdk:"nios_password"`
 	ProxyURL     types.String `tfsdk:"proxy_url"`
 	ProxySearch  types.String `tfsdk:"proxy_search"`
+	Sandbox      types.Bool   `tfsdk:"sandbox"`
 }
 
 func (p *NIOSProvider) Metadata(_ context.Context, _ provider.MetadataRequest, resp *provider.MetadataResponse) {
@@ -84,6 +85,10 @@ func (p *NIOSProvider) Schema(_ context.Context, _ provider.SchemaRequest, resp 
 					stringvalidator.OneOf("LOCAL", "GM"),
 				},
 			},
+			"sandbox": schema.BoolAttribute{
+				Optional:    true,
+				Description: "Whether to use sandbox environment. Default is false.",
+			},
 		},
 	}
 }
@@ -109,13 +114,33 @@ func (p *NIOSProvider) Configure(ctx context.Context, req provider.ConfigureRequ
 	// Set ProxySearch configuration
 	config.SetProxySearch(data.ProxySearch.ValueString())
 
-	err := checkAndCreatePreRequisites(ctx, client)
-	if err != nil {
-		resp.Diagnostics.AddError(
-			"Failed to ensure Terraform extensible attribute exists",
-			err.Error(),
-		)
+	if data.Sandbox.IsUnknown() || data.Sandbox.IsNull() {
+		data.Sandbox = types.BoolValue(false)
 	}
+
+	err := checkAndCreatePreRequisites(ctx, client)
+	if data.Sandbox.ValueBool() {
+		// Sandbox environment allows provider to be configured even if pre-requisites check fails, as it is intended for testing and development purposes. Hence, only a warning is added to diagnostics in case of error.
+		if err != nil {
+			resp.Diagnostics.AddWarning(
+				"Terraform Extensible Attribute Verification Failed",
+				fmt.Sprintf("Unable to verify that the %q extensible attribute exists in NIOS. "+
+					"The provider is running in sandbox mode and will continue, but operations on NIOS-managed resources may fail.\n "+
+					"Error: %s\n\n"+
+					"To resolve this issue, ensure your NIOS credentials have sufficient permissions to create extensible attributes, "+
+					"or manually create the %q extensible attribute in NIOS with type STRING and flags CR.",
+					terraformInternalIDEA, err, terraformInternalIDEA),
+			)
+		}
+	} else {
+		if err != nil {
+			resp.Diagnostics.AddError(
+				"Failed to ensure Terraform extensible attribute exists",
+				err.Error(),
+			)
+		}
+	}
+
 	resp.DataSourceData = client
 	resp.ResourceData = client
 }
