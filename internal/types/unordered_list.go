@@ -4,11 +4,12 @@ import (
 	"context"
 	"fmt"
 
+	"slices"
+
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	"github.com/hashicorp/terraform-plugin-go/tftypes"
-	"slices"
 )
 
 var UnorderedListOfStringType = UnorderedList{basetypes.ListType{ElemType: basetypes.StringType{}}}
