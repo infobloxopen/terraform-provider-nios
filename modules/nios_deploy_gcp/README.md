@@ -34,7 +34,8 @@ The module automatically maps NIOS models to GCP machine types:
 | Name | Type |
 |------|------|
 | [google_compute_instance.grid](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_instance) | resource |
-| [google_compute_subnetwork.lan1](https://registry.terraform.io/providers/hashicorp/google/latest/docs/data-sources/compute_subnetwork) | data source |
+| [google_compute_subnetwork.ha](https://registry.terraform.io/providers/hashicorp/google/latest/docs/data-sources/compute_subnetwork) | data source |
+| [google_compute_subnetwork.lan](https://registry.terraform.io/providers/hashicorp/google/latest/docs/data-sources/compute_subnetwork) | data source |
 | [google_compute_subnetwork.mgmt](https://registry.terraform.io/providers/hashicorp/google/latest/docs/data-sources/compute_subnetwork) | data source |
 
 ## Inputs
@@ -44,9 +45,12 @@ The module automatically maps NIOS models to GCP machine types:
 | <a name="input_boot_disk_size"></a> [boot\_disk\_size](#input\_boot\_disk\_size) | The size of the boot disk in GB. | `number` | `250` | no |
 | <a name="input_boot_disk_type"></a> [boot\_disk\_type](#input\_boot\_disk\_type) | The type of the boot disk. | `string` | `"pd-standard"` | no |
 | <a name="input_default_admin_password"></a> [default\_admin\_password](#input\_default\_admin\_password) | The default admin password for the NIOS instance. | `string` | n/a | yes |
+| <a name="input_enable_ha"></a> [enable\_ha](#input\_enable\_ha) | Whether to enable high availability (HA) for the NIOS instance. | `bool` | `false` | no |
+| <a name="input_enable_ipv6"></a> [enable\_ipv6](#input\_enable\_ipv6) | Enable IPv6 (dual-stack) on network interfaces | `bool` | `false` | no |
+| <a name="input_ha_subnet_name"></a> [ha\_subnet\_name](#input\_ha\_subnet\_name) | The name of the subnetwork to attach to the high availability network interface (nic2). | `string` | `null` | no |
 | <a name="input_image_name"></a> [image\_name](#input\_image\_name) | The image from which to initialize this disk. | `string` | n/a | yes |
-| <a name="input_labels"></a> [labels](#input\_labels) | A map of key/value labels to assign to the instance. | `map(string)` | <pre>{<br/>  "dontstop": "no",<br/>  "dontterminate": "yes",<br/>  "product": "nios"<br/>}</pre> | no |
-| <a name="input_lan1_subnet_name"></a> [lan1\_subnet\_name](#input\_lan1\_subnet\_name) | The name of the subnetwork to attach to the secondary network interface (nic1). | `string` | n/a | yes |
+| <a name="input_labels"></a> [labels](#input\_labels) | A map of key/value labels to assign to the instance. | `map(string)` | <pre>{<br/>  "dontstop": "yes",<br/>  "dontterminate": "yes",<br/>  "product": "nios"<br/>}</pre> | no |
+| <a name="input_lan_subnet_name"></a> [lan\_subnet\_name](#input\_lan\_subnet\_name) | The name of the subnetwork to attach to the secondary network interface (nic1). | `string` | n/a | yes |
 | <a name="input_machine_type"></a> [machine\_type](#input\_machine\_type) | The machine type to use for the instance. Used if nios\_model is not mapped. | `string` | `"n2-standard-4"` | no |
 | <a name="input_mgmt_subnet_name"></a> [mgmt\_subnet\_name](#input\_mgmt\_subnet\_name) | The name of the subnetwork to attach to the primary network interface (nic0). | `string` | n/a | yes |
 | <a name="input_name"></a> [name](#input\_name) | The name of the compute instance. | `string` | `"nios-gcp-instance"` | no |
@@ -63,13 +67,20 @@ The module automatically maps NIOS models to GCP machine types:
 
 | Name | Description |
 |------|-------------|
+| <a name="output_ha_gateway"></a> [ha\_gateway](#output\_ha\_gateway) | Gateway IP for the HA subnetwork. |
+| <a name="output_ha_ip"></a> [ha\_ip](#output\_ha\_ip) | Internal IP of the HA interface (nic2). |
+| <a name="output_ha_subnet_mask"></a> [ha\_subnet\_mask](#output\_ha\_subnet\_mask) | Subnet mask of the HA subnetwork. |
 | <a name="output_instance_id"></a> [instance\_id](#output\_instance\_id) | ID of the NIOS Grid Member instance. |
-| <a name="output_lan1_gateway"></a> [lan1\_gateway](#output\_lan1\_gateway) | Gateway IP for the LAN1 subnetwork (first usable IP). |
-| <a name="output_lan1_ip"></a> [lan1\_ip](#output\_lan1\_ip) | Internal IP of the LAN1 interface (nic1). |
-| <a name="output_lan1_subnet_mask"></a> [lan1\_subnet\_mask](#output\_lan1\_subnet\_mask) | Subnet mask of the LAN1 subnetwork. |
-| <a name="output_mgmt_gateway"></a> [mgmt\_gateway](#output\_mgmt\_gateway) | Gateway IP for the MGMT subnetwork (first usable IP). |
+| <a name="output_instance_name"></a> [instance\_name](#output\_instance\_name) | Name of the NIOS Grid Member instance. |
+| <a name="output_lan_gateway"></a> [lan\_gateway](#output\_lan\_gateway) | Gateway IP for the LAN subnetwork. |
+| <a name="output_lan_ip"></a> [lan\_ip](#output\_lan\_ip) | Internal IP of the LAN interface (nic1). |
+| <a name="output_lan_ipv6_address"></a> [lan\_ipv6\_address](#output\_lan\_ipv6\_address) | IPv6 address of the LAN interface (nic1). |
+| <a name="output_lan_subnet_mask"></a> [lan\_subnet\_mask](#output\_lan\_subnet\_mask) | Subnet mask of the LAN subnetwork. |
+| <a name="output_mgmt_gateway"></a> [mgmt\_gateway](#output\_mgmt\_gateway) | Gateway IP for the MGMT subnetwork. |
 | <a name="output_mgmt_ip"></a> [mgmt\_ip](#output\_mgmt\_ip) | Internal IP of the MGMT interface (nic0). |
+| <a name="output_mgmt_ipv6_address"></a> [mgmt\_ipv6\_address](#output\_mgmt\_ipv6\_address) | IPv6 address of the MGMT interface (nic0). |
 | <a name="output_mgmt_subnet_mask"></a> [mgmt\_subnet\_mask](#output\_mgmt\_subnet\_mask) | Subnet Mask of the Mgmt Subnetwork |
+| <a name="output_vip"></a> [vip](#output\_vip) | VIP address from the HA interface alias IP range (nic2). |
 <!-- END_TF_DOCS -->
 
 ---
@@ -87,7 +98,7 @@ provider "google" {
 }
 
 module "node1" {
-  source = "github.com/infobloxopen/terraform-provider-nios//modules/nios_deploy_gcp"
+  source = "github.com/infobloxopen/terraform-provider-nios//modules/nios_deploy_gcp?ref=nios_v9.1.0"
 
   project = var.project
   region     = var.region
@@ -97,7 +108,7 @@ module "node1" {
   name              = var.name
   nios_model        = var.nios_model
   mgmt_subnet_name  = var.mgmt_subnet_name
-  lan1_subnet_name  = var.lan1_subnet_name
+  lan_subnet_name  = var.lan_subnet_name
 
   boot_disk_type = var.boot_disk_type
   boot_disk_size = var.boot_disk_size
@@ -125,18 +136,18 @@ NIOS takes approximately around **30 minutes** to fully boot.
 
 Once Grid is up and running, configure the grid member and join to the grid.
 
-#### Example: Join a Member to a Master
+#### Example 1: Join a Member to a Master
 
 ##### Deploy GCP infrastructure for Master and Member
 
 ```hcl
 module "node1" {
-  source = "github.com/infobloxopen/terraform-provider-nios//modules/nios_deploy_gcp"
+  source = "github.com/infobloxopen/terraform-provider-nios//modules/nios_deploy_gcp?ref=nios_v9.1.0"
   // ...(same config as Step 1)
 }
 
 module "node2" {
-  source = "github.com/infobloxopen/terraform-provider-nios//modules/nios_deploy_gcp"
+  source = "github.com/infobloxopen/terraform-provider-nios//modules/nios_deploy_gcp?ref=nios_v9.1.0"
   // ... (same config as Step 1)
 }
 ```
@@ -145,7 +156,7 @@ module "node2" {
 
 ```hcl
 provider "nios" {
-  nios_host_url = "https://${module.node1.lan1_ip}"
+  nios_host_url = "https://${module.node1.lan_ip}"
   nios_username = "username"
   nios_password = "password"
 }
@@ -156,19 +167,177 @@ resource "nios_grid_member" "member" {
   platform         = "VNIOS"
 
   vip_setting = {
-    address     = module.node2.lan1_ip
-    gateway     = module.node2.lan1_gateway
-    subnet_mask = module.node2.lan1_subnet_mask
+    address     = module.node2.lan_ip
+    gateway     = module.node2.lan_gateway
+    subnet_mask = module.node2.lan_subnet_mask
   }
 }
 
 // Join member to existing grid master
 resource "nios_grid_join" "member_join" {
-  member_url      = "https://${module.node2.lan1_ip}"
+  member_url      = "https://${module.node2.lan_ip}"
   member_username = "Username"
   member_password = "Password"
   grid_name       = "Infoblox"
-  master          = module.node1.lan1_ip
+  master          = module.node1.lan_ip
+  shared_secret   = "<secret>"
+  depends_on      = [nios_grid_member.member]
+}
+```
+
+### Example 2: HA Grid Configuration
+
+Deploy two GCP instances for SA-HA Config
+
+> **Note:** HA configuration only supports IPv4. Dual-stack (IPv6) is not supported with HA on GCP.
+
+```hcl
+// Deploy GCP infrastructure for Node 1 (Active Node)
+module "node1" {
+  // ... (same config as Step 1)
+  enable_ha         = true
+}
+
+// Deploy GCP infrastructure for Node 2 (Passive Node)
+module "node2" {
+  // ... (same config as Step 1)
+  enable_ha         = true
+}
+```
+#### After both the grids are up and running (~30 min), configure HA
+
+> **Important:** Before configuring HA, you must attach the GCP service account JSON file to both NIOS grids. 
+
+1. Import Node1 under nios_grid_member.ha_pair
+
+```hcl 
+resource "nios_grid_member" "ha_pair"{}
+```
+
+```hcl 
+terraform import nios_grid_member.ha_pair <uuid>
+```
+
+2. Modify the resource to set ha_on_cloud to true and provide the cloud attributes.
+
+```
+provider "nios" {
+  nios_host_url = "https://${module.node1.vip}"
+  nios_username = "username"
+  nios_password = "password"
+}
+
+resource "nios_grid_member" "ha_pair" {
+  host_name         = "infoblox.localdomain"
+  config_addr_type  = "IPV4"
+  platform          = "VNIOS"
+  enable_ha         = true
+  router_id         = 100
+  ha_on_cloud       = true
+  ha_cloud_platform = "GCP"
+
+  vip_setting = {
+    address         = module.node1.vip
+    gateway         = module.node1.ha_gateway
+    subnet_mask     = module.node1.ha_subnet_mask
+    lan_gateway     = module.node1.lan_gateway
+    lan_subnet_mask = module.node1.lan_subnet_mask
+    dscp            = 0
+    primary         = true
+    use_dscp        = false
+  }
+
+  node_info = [
+    {
+      lan_ha_port_setting = {
+        ha_ip_address      = module.node1.ha_ip
+        mgmt_lan           = module.node1.lan_ip
+        ha_cloud_attribute = module.node1.instance_name
+      }
+    },
+    {
+      lan_ha_port_setting = {
+        ha_ip_address      = module.node2.ha_ip
+        mgmt_lan           = module.node2.lan_ip
+        ha_cloud_attribute = module.node2.instance_name
+      }
+    }
+  ]
+
+  // To configure grid level dns resolver settings, use the grid_level_dns_resolver_setting attribute 
+  grid_level_dns_resolver_setting = {
+    resolvers = [
+      "10.10.10.10"
+  ] }
+}
+```
+
+3. Join Node2 (Passive Node) to Node1 (Active Node).
+
+```
+resource "nios_grid_join" "ha_member_join" {
+  member_url      = "https://${module.node2.lan_ip}"
+  member_username = "username"
+  member_password = "password"
+  grid_name       = "Infoblox"
+  master          = module.node1.vip
+  shared_secret   = "shared-secret"
+}
+```
+
+#### Example 3: Join a Member to a Master with Dual Stack Config
+
+##### Deploy GCP infrastructure for Master and Member
+
+```hcl
+module "node1" {
+  source = "github.com/infobloxopen/terraform-provider-nios//modules/nios_deploy_gcp?ref=nios_v9.1.0"
+  // ...(same config as Step 1)
+  enable_ipv6 = true
+}
+
+module "node2" {
+  source = "github.com/infobloxopen/terraform-provider-nios//modules/nios_deploy_gcp?ref=nios_v9.1.0"
+  // ... (same config as Step 1)
+  enable_ipv6 = true
+}
+```
+
+##### After NIOS is ready (~30 min), configure grid member
+
+> **Note:** On GCP, even though the IPv6 address is available in the Terraform state (`lan_ipv6_address` output), you must manually configure the IPv6 settings on the NIOS grid through the UI or API. Unlike AWS, GCP does not automatically configure IPv6 on the NIOS instance.
+
+```hcl
+provider "nios" {
+  nios_host_url = "https://${module.node1.lan_ip}"
+  nios_username = "username"
+  nios_password = "password"
+}
+
+resource "nios_grid_member" "member" {
+  host_name        = "infoblox.member"
+  config_addr_type = "BOTH"
+  platform         = "VNIOS"
+  vip_setting = {
+    address     = module.node2.lan_ip
+    gateway     = module.node2.lan_gateway
+    subnet_mask = module.node2.lan_subnet_mask
+  }
+  ipv6_setting = {
+    virtual_ip  = module.node2.lan_ipv6_address
+    cidr_prefix = 64
+    gateway     = "<ipv6_lan_gateway>"
+    enabled     = true
+  }
+}
+
+// Join member to existing grid master
+resource "nios_grid_join" "member_join" {
+  member_url      = "https://${module.node2.lan_ip}"
+  member_username = "<username>"
+  member_password = "<password>"
+  grid_name       = "Infoblox"
+  master          = module.node1.lan_ip
   shared_secret   = "<secret>"
   depends_on      = [nios_grid_member.member]
 }

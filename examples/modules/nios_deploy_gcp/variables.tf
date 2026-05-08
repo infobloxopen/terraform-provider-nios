@@ -23,7 +23,7 @@ variable "image_name" {
 variable "name" {
   description = "The name of the compute instance."
   type        = string
-  default     = "nios-gcp-instance"
+  default     = "nios-gcp-instance-2"
 }
 
 variable "nios_model" {
@@ -43,7 +43,12 @@ variable "mgmt_subnet_name" {
   type        = string
 }
 
-variable "lan1_subnet_name" {
+variable "ha_subnet_name" {
+  description = "The name of the subnetwork to attach to the high availability network interface (nic2)."
+  type        = string
+}
+
+variable "lan_subnet_name" {
   description = "The name of the subnetwork to attach to the secondary network interface (nic1)."
   type        = string
 }
@@ -95,7 +100,7 @@ variable "labels" {
   type        = map(string)
   default = {
     product       = "nios"
-    dontstop      = "no"
+    dontstop      = "yes"
     dontterminate = "yes"
   }
 }

@@ -43,9 +43,15 @@ variable "mgmt_subnet_name" {
   type        = string
 }
 
-variable "lan1_subnet_name" {
+variable "lan_subnet_name" {
   description = "The name of the subnetwork to attach to the secondary network interface (nic1)."
   type        = string
+}
+
+variable "ha_subnet_name" {
+  description = "The name of the subnetwork to attach to the high availability network interface (nic2)."
+  type        = string
+  default     = null
 }
 
 variable "boot_disk_type" {
@@ -95,7 +101,19 @@ variable "labels" {
   type        = map(string)
   default = {
     product       = "nios"
-    dontstop      = "no"
+    dontstop      = "yes"
     dontterminate = "yes"
   }
+}
+
+variable "enable_ha" {
+  description = "Whether to enable high availability (HA) for the NIOS instance."
+  type        = bool
+  default     = false
+}
+
+variable "enable_ipv6" {
+  description = "Enable IPv6 (dual-stack) on network interfaces"
+  type        = bool
+  default     = false
 }

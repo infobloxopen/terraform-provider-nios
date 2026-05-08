@@ -6,7 +6,7 @@ provider "google" {
 }
 
 module "node1" {
-  source = "<path_to_module>"
+  source = "github.com/infobloxopen/terraform-provider-nios//examples/modules/nios_deploy_gcp?ref=nios_v9.1.0"
 
   project = var.project
   region  = var.region
@@ -16,7 +16,7 @@ module "node1" {
   name             = var.name
   nios_model       = var.nios_model
   mgmt_subnet_name = var.mgmt_subnet_name
-  lan1_subnet_name = var.lan1_subnet_name
+  lan_subnet_name  = var.lan_subnet_name
 
   boot_disk_type = var.boot_disk_type
   boot_disk_size = var.boot_disk_size
@@ -28,4 +28,7 @@ module "node1" {
   service_account_scopes = var.service_account_scopes
 
   labels = var.labels
+
+  // To enable IPv6 (dual-stack) on network interfaces, set enable_ipv6 to true
+  enable_ipv6 = var.enable_ipv6
 }
