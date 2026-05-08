@@ -138,9 +138,46 @@ func (m *NamedaclModel) Flatten(ctx context.Context, from *acl.Namedacl, diags *
 		*m = NamedaclModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
-	m.AccessList = flex.FlattenFrameworkListNestedBlock(ctx, from.AccessList, NamedaclAccessListAttrTypes, diags, FlattenNamedaclAccessList)
+	m.AccessList = flattenAccessListWithPlanAddress(ctx, m.AccessList, from.AccessList, diags)
 	m.Comment = flex.FlattenStringPointer(from.Comment)
 	m.ExplodedAccessList = flex.FlattenFrameworkListNestedBlock(ctx, from.ExplodedAccessList, NamedaclExplodedAccessListAttrTypes, diags, FlattenNamedaclExplodedAccessList)
 	m.ExtAttrs = FlattenExtAttrs(ctx, m.ExtAttrs, from.ExtAttrs, diags)
 	m.Name = flex.FlattenStringPointer(from.Name)
+}
+
+// flattenAccessListWithPlanAddress flattens the API access list and reconciles
+// each entry's address with the corresponding plan/state value via
+// FlattenNamedaclAddress so that user-specified "/32" CIDR suffixes stripped
+// by the API are preserved in state.
+func flattenAccessListWithPlanAddress(ctx context.Context, planList types.List, fromList []acl.NamedaclAccessList, diags *diag.Diagnostics) types.List {
+	var planAccessList []NamedaclAccessListModel
+	if !planList.IsNull() && !planList.IsUnknown() {
+		diags.Append(planList.ElementsAs(ctx, &planAccessList, false)...)
+	}
+
+	apiList := flex.FlattenFrameworkListNestedBlock(ctx, fromList, NamedaclAccessListAttrTypes, diags, FlattenNamedaclAccessList)
+
+	if len(planAccessList) == 0 || apiList.IsNull() || apiList.IsUnknown() {
+		return apiList
+	}
+
+	var apiAccessList []NamedaclAccessListModel
+	diags.Append(apiList.ElementsAs(ctx, &apiAccessList, false)...)
+	if diags.HasError() {
+		return apiList
+	}
+
+	for i := range apiAccessList {
+		if i >= len(planAccessList) {
+			break
+		}
+		apiAccessList[i].Address = FlattenNamedaclAddress(planAccessList[i].Address, apiAccessList[i].Address)
+	}
+
+	newList, d := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: NamedaclAccessListAttrTypes}, apiAccessList)
+	diags.Append(d...)
+	if d.HasError() {
+		return apiList
+	}
+	return newList
 }

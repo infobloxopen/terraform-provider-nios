@@ -2,6 +2,7 @@ package acl
 
 import (
 	"context"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
@@ -164,4 +165,22 @@ func (m *NamedaclAccessListModel) Flatten(ctx context.Context, from *acl.Namedac
 	m.TsigKeyAlg = flex.FlattenStringPointerNilAsNotEmpty(from.TsigKeyAlg)
 	m.TsigKeyName = flex.FlattenStringPointerNilAsNotEmpty(from.TsigKeyName)
 	m.UseTsigKeyName = types.BoolPointerValue(from.UseTsigKeyName)
+}
+
+// FlattenNamedaclAddress reconciles the API response address with the plan
+// address. If the plan address was specified with a "/32" CIDR suffix but the
+// API response strips it (returning just the bare IP), the suffix is added
+// back so the state matches what the user configured and avoids drift.
+func FlattenNamedaclAddress(planAddr, apiAddr types.String) types.String {
+	if apiAddr.IsNull() || apiAddr.IsUnknown() {
+		return apiAddr
+	}
+	addr := apiAddr.ValueString()
+	if !planAddr.IsNull() && !planAddr.IsUnknown() {
+		plan := planAddr.ValueString()
+		if strings.HasSuffix(plan, "/32") && !strings.HasSuffix(addr, "/32") {
+			addr = addr + "/32"
+		}
+	}
+	return types.StringValue(addr)
 }
