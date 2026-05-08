@@ -23,7 +23,7 @@ variable "image_name" {
 variable "name" {
   description = "The name of the compute instance."
   type        = string
-  default     = "nios-gcp-instance-2"
+  default     = "nios-gcp-instance"
 }
 
 variable "nios_model" {
