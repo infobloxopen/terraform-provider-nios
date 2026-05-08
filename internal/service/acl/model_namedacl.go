@@ -145,7 +145,6 @@ func (m *NamedaclModel) Flatten(ctx context.Context, from *acl.Namedacl, diags *
 		*m = NamedaclModel{}
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
-	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.AccessList = flattenAccessListWithPlanAddress(ctx, m.AccessList, from.AccessList, diags)
 	m.Comment = flex.FlattenStringPointer(from.Comment)
 	m.ExplodedAccessList = flex.FlattenFrameworkListNestedBlock(ctx, from.ExplodedAccessList, NamedaclExplodedAccessListAttrTypes, diags, FlattenNamedaclExplodedAccessList)
