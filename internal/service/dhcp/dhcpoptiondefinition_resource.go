@@ -12,8 +12,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
+	"github.com/infobloxopen/infoblox-nios-go-client/dhcp"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/config"
+	"github.com/infobloxopen/terraform-provider-nios/internal/retry"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
@@ -73,14 +75,41 @@ func (r *DhcpoptiondefinitionResource) Create(ctx context.Context, req resource.
 		return
 	}
 
-	apiRes, _, err := r.client.DHCPAPI.
-		DhcpoptiondefinitionAPI.
-		Create(ctx).
-		Dhcpoptiondefinition(*data.Expand(ctx, &resp.Diagnostics)).
-		ReturnFieldsPlus(readableAttributesForDhcpoptiondefinition).
-		ReturnAsObject(1).
-		Execute()
+	payload := data.Expand(ctx, &resp.Diagnostics)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	var apiRes *dhcp.CreateDhcpoptiondefinitionResponse
+
+	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		var (
+			httpRes *http.Response
+			callErr error
+		)
+		apiRes, httpRes, callErr = r.client.DHCPAPI.
+			DhcpoptiondefinitionAPI.
+			Create(ctx).
+			Dhcpoptiondefinition(*payload).
+			ReturnFieldsPlus(readableAttributesForDhcpoptiondefinition).
+			ReturnAsObject(1).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
+
 	if err != nil {
+		if retry.IsAlreadyExistsErr(err) {
+			// Resource already exists, import required
+			resp.Diagnostics.AddError(
+				"Resource Already Exists",
+				fmt.Sprintf("Resource already exists, error: %s.\nPlease import the existing resource into terraform state.", err.Error()),
+			)
+			return
+		}
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create Dhcpoptiondefinition, got error: %s", err))
 		return
 	}
@@ -103,15 +132,30 @@ func (r *DhcpoptiondefinitionResource) Read(ctx context.Context, req resource.Re
 		return
 	}
 
-	apiRes, httpRes, err := r.client.DHCPAPI.
-		DhcpoptiondefinitionAPI.
-		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
-		ReturnFieldsPlus(readableAttributesForDhcpoptiondefinition).
-		ReturnAsObject(1).
-		ProxySearch(config.GetProxySearch()).
-		Execute()
+	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
 
-		// Handle not found case
+	var (
+		httpRes *http.Response
+		apiRes  *dhcp.GetDhcpoptiondefinitionResponse
+	)
+
+	err := retry.Do(ctx, nil, func(ctx context.Context) (int, error) {
+		var callErr error
+		apiRes, httpRes, callErr = r.client.DHCPAPI.
+			DhcpoptiondefinitionAPI.
+			Read(ctx, resourceRef).
+			ReturnFieldsPlus(readableAttributesForDhcpoptiondefinition).
+			ReturnAsObject(1).
+			ProxySearch(config.GetProxySearch()).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
+
+	// Handle not found case
 	if err != nil {
 		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
 			// Resource no longer exists, remove from state
@@ -157,13 +201,34 @@ func (r *DhcpoptiondefinitionResource) Update(ctx context.Context, req resource.
 		}
 	}
 
-	apiRes, _, err := r.client.DHCPAPI.
-		DhcpoptiondefinitionAPI.
-		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
-		Dhcpoptiondefinition(*data.Expand(ctx, &resp.Diagnostics)).
-		ReturnFieldsPlus(readableAttributesForDhcpoptiondefinition).
-		ReturnAsObject(1).
-		Execute()
+	payload := data.Expand(ctx, &resp.Diagnostics)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
+
+	var apiRes *dhcp.UpdateDhcpoptiondefinitionResponse
+
+	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		var (
+			httpRes *http.Response
+			callErr error
+		)
+		apiRes, httpRes, callErr = r.client.DHCPAPI.
+			DhcpoptiondefinitionAPI.
+			Update(ctx, resourceRef).
+			Dhcpoptiondefinition(*payload).
+			ReturnFieldsPlus(readableAttributesForDhcpoptiondefinition).
+			ReturnAsObject(1).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
+
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update Dhcpoptiondefinition, got error: %s", err))
 		return
@@ -187,14 +252,24 @@ func (r *DhcpoptiondefinitionResource) Delete(ctx context.Context, req resource.
 		return
 	}
 
-	httpRes, err := r.client.DHCPAPI.
-		DhcpoptiondefinitionAPI.
-		Delete(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
-		Execute()
-	if err != nil {
-		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
-			return
+	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
+
+	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		httpRes, callErr := r.client.DHCPAPI.
+			DhcpoptiondefinitionAPI.
+			Delete(ctx, resourceRef).
+			Execute()
+
+		if httpRes != nil {
+			if httpRes.StatusCode == http.StatusNotFound {
+				return 0, nil
+			}
+			return httpRes.StatusCode, callErr
 		}
+		return 0, callErr
+	})
+
+	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete Dhcpoptiondefinition, got error: %s", err))
 		return
 	}
