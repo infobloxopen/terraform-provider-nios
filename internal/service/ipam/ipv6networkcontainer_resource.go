@@ -13,8 +13,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
+	"github.com/infobloxopen/infoblox-nios-go-client/ipam"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/config"
+	"github.com/infobloxopen/terraform-provider-nios/internal/retry"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
@@ -88,14 +90,41 @@ func (r *Ipv6networkcontainerResource) Create(ctx context.Context, req resource.
 		data.FuncCall = r.UpdateFuncCallAttributeName(ctx, data, &resp.Diagnostics)
 	}
 
-	apiRes, _, err := r.client.IPAMAPI.
-		Ipv6networkcontainerAPI.
-		Create(ctx).
-		Ipv6networkcontainer(*data.Expand(ctx, &resp.Diagnostics, true)).
-		ReturnFieldsPlus(readableAttributesForIpv6networkcontainer).
-		ReturnAsObject(1).
-		Execute()
+	payload := data.Expand(ctx, &resp.Diagnostics, true)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	var apiRes *ipam.CreateIpv6networkcontainerResponse
+
+	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		var (
+			httpRes *http.Response
+			callErr error
+		)
+		apiRes, httpRes, callErr = r.client.IPAMAPI.
+			Ipv6networkcontainerAPI.
+			Create(ctx).
+			Ipv6networkcontainer(*payload).
+			ReturnFieldsPlus(readableAttributesForIpv6networkcontainer).
+			ReturnAsObject(1).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
+
 	if err != nil {
+		if retry.IsAlreadyExistsErr(err) {
+			// Resource already exists, import required
+			resp.Diagnostics.AddError(
+				"Resource Already Exists",
+				fmt.Sprintf("Resource already exists, error: %s.\nPlease import the existing resource into terraform state.", err.Error()),
+			)
+			return
+		}
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create Ipv6networkcontainer, got error: %s", err))
 		return
 	}
@@ -135,13 +164,28 @@ func (r *Ipv6networkcontainerResource) Read(ctx context.Context, req resource.Re
 		return
 	}
 
-	apiRes, httpRes, err := r.client.IPAMAPI.
-		Ipv6networkcontainerAPI.
-		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
-		ReturnFieldsPlus(readableAttributesForIpv6networkcontainer).
-		ReturnAsObject(1).
-		ProxySearch(config.GetProxySearch()).
-		Execute()
+	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
+
+	var (
+		httpRes *http.Response
+		apiRes  *ipam.GetIpv6networkcontainerResponse
+	)
+
+	err := retry.Do(ctx, nil, func(ctx context.Context) (int, error) {
+		var callErr error
+		apiRes, httpRes, callErr = r.client.IPAMAPI.
+			Ipv6networkcontainerAPI.
+			Read(ctx, resourceRef).
+			ReturnFieldsPlus(readableAttributesForIpv6networkcontainer).
+			ReturnAsObject(1).
+			ProxySearch(config.GetProxySearch()).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
 
 	// If the resource is not found, try searching using Extensible Attributes
 	if err != nil {
@@ -287,13 +331,34 @@ func (r *Ipv6networkcontainerResource) Update(ctx context.Context, req resource.
 		return
 	}
 
-	apiRes, _, err := r.client.IPAMAPI.
-		Ipv6networkcontainerAPI.
-		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
-		Ipv6networkcontainer(*data.Expand(ctx, &resp.Diagnostics, false)).
-		ReturnFieldsPlus(readableAttributesForIpv6networkcontainer).
-		ReturnAsObject(1).
-		Execute()
+	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
+
+	payload := data.Expand(ctx, &resp.Diagnostics, false)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	var apiRes *ipam.UpdateIpv6networkcontainerResponse
+
+	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		var (
+			httpRes *http.Response
+			callErr error
+		)
+		apiRes, httpRes, callErr = r.client.IPAMAPI.
+			Ipv6networkcontainerAPI.
+			Update(ctx, resourceRef).
+			Ipv6networkcontainer(*payload).
+			ReturnFieldsPlus(readableAttributesForIpv6networkcontainer).
+			ReturnAsObject(1).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
+
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update Ipv6networkcontainer, got error: %s", err))
 		return
@@ -327,14 +392,24 @@ func (r *Ipv6networkcontainerResource) Delete(ctx context.Context, req resource.
 		return
 	}
 
-	httpRes, err := r.client.IPAMAPI.
-		Ipv6networkcontainerAPI.
-		Delete(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
-		Execute()
-	if err != nil {
-		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
-			return
+	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
+
+	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		httpRes, callErr := r.client.IPAMAPI.
+			Ipv6networkcontainerAPI.
+			Delete(ctx, resourceRef).
+			Execute()
+
+		if httpRes != nil {
+			if httpRes.StatusCode == http.StatusNotFound {
+				return 0, nil
+			}
+			return httpRes.StatusCode, callErr
 		}
+		return 0, callErr
+	})
+
+	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete Ipv6networkcontainer, got error: %s", err))
 		return
 	}
