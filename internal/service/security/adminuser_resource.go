@@ -171,8 +171,14 @@ func (r *AdminuserResource) Create(ctx context.Context, req resource.CreateReque
 		return
 	}
 
+	payload := data.Expand(ctx, &resp.Diagnostics)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	var apiRes *security.CreateAdminuserResponse
+
 	passwordRevision := types.Int64Value(0)
-	createRequest := data.Expand(ctx, &resp.Diagnostics)
 	var password types.String
 	resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("password"), &password)...)
 
@@ -180,7 +186,7 @@ func (r *AdminuserResource) Create(ctx context.Context, req resource.CreateReque
 
 	if !password.IsNull() && !password.IsUnknown() {
 
-		createRequest.Password = password.ValueStringPointer()
+		payload.Password = password.ValueStringPointer()
 		passwordRevision = types.Int64Value(1)
 		h := sha256.New()
 		h.Write([]byte(password.ValueString()))
@@ -195,13 +201,6 @@ func (r *AdminuserResource) Create(ctx context.Context, req resource.CreateReque
 		}
 		resp.Diagnostics.Append(resp.Private.SetKey(ctx, "password_hash", hashedPassword)...)
 	}
-
-	payload := data.Expand(ctx, &resp.Diagnostics)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-
-	var apiRes *security.CreateAdminuserResponse
 
 	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
 		var (
@@ -453,14 +452,13 @@ func (r *AdminuserResource) Update(ctx context.Context, req resource.UpdateReque
 		resp.Diagnostics.Append(diags...)
 		return
 	}
-	updateReq := data.Expand(ctx, &resp.Diagnostics)
-	if !password.IsNull() && !password.IsUnknown() {
-		updateReq.Password = password.ValueStringPointer()
-	}
 
 	payload := data.Expand(ctx, &resp.Diagnostics)
 	if resp.Diagnostics.HasError() {
 		return
+	}
+	if !password.IsNull() && !password.IsUnknown() {
+		payload.Password = password.ValueStringPointer()
 	}
 
 	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
