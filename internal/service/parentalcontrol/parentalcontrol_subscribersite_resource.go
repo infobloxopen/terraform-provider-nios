@@ -11,8 +11,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
+	"github.com/infobloxopen/infoblox-nios-go-client/parentalcontrol"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/config"
+	"github.com/infobloxopen/terraform-provider-nios/internal/retry"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
@@ -80,14 +82,41 @@ func (r *ParentalcontrolSubscribersiteResource) Create(ctx context.Context, req 
 		return
 	}
 
-	apiRes, _, err := r.client.ParentalControlAPI.
-		ParentalcontrolSubscribersiteAPI.
-		Create(ctx).
-		ParentalcontrolSubscribersite(*data.Expand(ctx, &resp.Diagnostics, true)).
-		ReturnFieldsPlus(readableAttributesForParentalcontrolSubscribersite).
-		ReturnAsObject(1).
-		Execute()
+	payload := data.Expand(ctx, &resp.Diagnostics, true)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	var apiRes *parentalcontrol.CreateParentalcontrolSubscribersiteResponse
+
+	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		var (
+			httpRes *http.Response
+			callErr error
+		)
+		apiRes, httpRes, callErr = r.client.ParentalControlAPI.
+			ParentalcontrolSubscribersiteAPI.
+			Create(ctx).
+			ParentalcontrolSubscribersite(*payload).
+			ReturnFieldsPlus(readableAttributesForParentalcontrolSubscribersite).
+			ReturnAsObject(1).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
+
 	if err != nil {
+		if retry.IsAlreadyExistsErr(err) {
+			// Resource already exists, import required
+			resp.Diagnostics.AddError(
+				"Resource Already Exists",
+				fmt.Sprintf("Resource already exists, error: %s.\nPlease import the existing resource into terraform state.", err.Error()),
+			)
+			return
+		}
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create ParentalcontrolSubscribersite, got error: %s", err))
 		return
 	}
@@ -123,13 +152,28 @@ func (r *ParentalcontrolSubscribersiteResource) Read(ctx context.Context, req re
 		return
 	}
 
-	apiRes, httpRes, err := r.client.ParentalControlAPI.
-		ParentalcontrolSubscribersiteAPI.
-		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
-		ReturnFieldsPlus(readableAttributesForParentalcontrolSubscribersite).
-		ReturnAsObject(1).
-		ProxySearch(config.GetProxySearch()).
-		Execute()
+	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
+
+	var (
+		httpRes *http.Response
+		apiRes  *parentalcontrol.GetParentalcontrolSubscribersiteResponse
+	)
+
+	err := retry.Do(ctx, nil, func(ctx context.Context) (int, error) {
+		var callErr error
+		apiRes, httpRes, callErr = r.client.ParentalControlAPI.
+			ParentalcontrolSubscribersiteAPI.
+			Read(ctx, resourceRef).
+			ReturnFieldsPlus(readableAttributesForParentalcontrolSubscribersite).
+			ReturnAsObject(1).
+			ProxySearch(config.GetProxySearch()).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
 
 	// If the resource is not found, try searching using Extensible Attributes
 	if err != nil {
@@ -277,13 +321,34 @@ func (r *ParentalcontrolSubscribersiteResource) Update(ctx context.Context, req 
 		return
 	}
 
-	apiRes, _, err := r.client.ParentalControlAPI.
-		ParentalcontrolSubscribersiteAPI.
-		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
-		ParentalcontrolSubscribersite(*data.Expand(ctx, &resp.Diagnostics, false)).
-		ReturnFieldsPlus(readableAttributesForParentalcontrolSubscribersite).
-		ReturnAsObject(1).
-		Execute()
+	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
+
+	payload := data.Expand(ctx, &resp.Diagnostics, false)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	var apiRes *parentalcontrol.UpdateParentalcontrolSubscribersiteResponse
+
+	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		var (
+			httpRes *http.Response
+			callErr error
+		)
+		apiRes, httpRes, callErr = r.client.ParentalControlAPI.
+			ParentalcontrolSubscribersiteAPI.
+			Update(ctx, resourceRef).
+			ParentalcontrolSubscribersite(*payload).
+			ReturnFieldsPlus(readableAttributesForParentalcontrolSubscribersite).
+			ReturnAsObject(1).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
+
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update ParentalcontrolSubscribersite, got error: %s", err))
 		return
@@ -317,14 +382,24 @@ func (r *ParentalcontrolSubscribersiteResource) Delete(ctx context.Context, req 
 		return
 	}
 
-	httpRes, err := r.client.ParentalControlAPI.
-		ParentalcontrolSubscribersiteAPI.
-		Delete(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
-		Execute()
-	if err != nil {
-		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
-			return
+	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
+
+	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		httpRes, callErr := r.client.ParentalControlAPI.
+			ParentalcontrolSubscribersiteAPI.
+			Delete(ctx, resourceRef).
+			Execute()
+
+		if httpRes != nil {
+			if httpRes.StatusCode == http.StatusNotFound {
+				return 0, nil
+			}
+			return httpRes.StatusCode, callErr
 		}
+		return 0, callErr
+	})
+
+	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete ParentalcontrolSubscribersite, got error: %s", err))
 		return
 	}
