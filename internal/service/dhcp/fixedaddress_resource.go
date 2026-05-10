@@ -365,7 +365,7 @@ func (r *FixedaddressResource) ValidateConfig(ctx context.Context, req resource.
 	}
 
 	if data.MatchClient.ValueString() == "MAC_ADDRESS" {
-		if data.Mac.IsNull() || data.Mac.IsUnknown() {
+		if data.Mac.IsNull() {
 			resp.Diagnostics.AddAttributeError(
 				path.Root("mac"),
 				"Invalid configuration",
@@ -381,11 +381,11 @@ func (r *FixedaddressResource) ValidateConfig(ctx context.Context, req resource.
 		}
 
 	} else if data.MatchClient.ValueString() == "CLIENT_ID" {
-		if data.DhcpClientIdentifier.IsNull() || data.DhcpClientIdentifier.IsUnknown() {
+		if data.DhcpClientIdentifier.IsNull() || data.DhcpClientIdentifier.IsUnknown() || data.DhcpClientIdentifier.ValueString() == "" {
 			resp.Diagnostics.AddAttributeError(
 				path.Root("dhcp_client_identifier"),
 				"Invalid configuration",
-				"The 'dhcp_client_identifier' attribute must be set when 'match_client' is set to 'CLIENT_ID'.",
+				"The 'dhcp_client_identifier' attribute must be set and cannot be empty when 'match_client' is set to 'CLIENT_ID'.",
 			)
 		}
 		if !data.AgentCircuitId.IsNull() || !data.AgentRemoteId.IsNull() || !data.Mac.IsNull() {
@@ -407,7 +407,7 @@ func (r *FixedaddressResource) ValidateConfig(ctx context.Context, req resource.
 			resp.Diagnostics.AddAttributeError(
 				path.Root("match_client"),
 				"Invalid configuration",
-				"When 'match_client' is set to 'CIRCUIT_ID', the  'mac' and 'dhcp_client_identifier' attributes must not be set.",
+				"When 'match_client' is set to 'CIRCUIT_ID', the 'mac' and 'dhcp_client_identifier' attributes must not be set.",
 			)
 		}
 	} else if data.MatchClient.ValueString() == "REMOTE_ID" {
@@ -422,7 +422,7 @@ func (r *FixedaddressResource) ValidateConfig(ctx context.Context, req resource.
 			resp.Diagnostics.AddAttributeError(
 				path.Root("match_client"),
 				"Invalid configuration",
-				"When 'match_client' is set to 'REMOTE_ID', the  'mac' and 'dhcp_client_identifier' attributes must not be set.",
+				"When 'match_client' is set to 'REMOTE_ID', the 'mac' and 'dhcp_client_identifier' attributes must not be set.",
 			)
 		}
 	} else if data.MatchClient.ValueString() == "RESERVED" {
