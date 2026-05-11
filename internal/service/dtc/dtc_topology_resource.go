@@ -15,6 +15,7 @@ import (
 	"github.com/infobloxopen/infoblox-nios-go-client/dtc"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/config"
+	"github.com/infobloxopen/terraform-provider-nios/internal/retry"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
@@ -81,14 +82,41 @@ func (r *DtcTopologyResource) Create(ctx context.Context, req resource.CreateReq
 		return
 	}
 
-	apiRes, _, err := r.client.DTCAPI.
-		DtcTopologyAPI.
-		Create(ctx).
-		DtcTopology(*data.Expand(ctx, &resp.Diagnostics)).
-		ReturnFieldsPlus(readableAttributesForDtcTopology).
-		ReturnAsObject(1).
-		Execute()
+	payload := data.Expand(ctx, &resp.Diagnostics)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	var apiRes *dtc.CreateDtcTopologyResponse
+
+	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		var (
+			httpRes *http.Response
+			callErr error
+		)
+		apiRes, httpRes, callErr = r.client.DTCAPI.
+			DtcTopologyAPI.
+			Create(ctx).
+			DtcTopology(*payload).
+			ReturnFieldsPlus(readableAttributesForDtcTopology).
+			ReturnAsObject(1).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
+
 	if err != nil {
+		if retry.IsAlreadyExistsErr(err) {
+			// Resource already exists, import required
+			resp.Diagnostics.AddError(
+				"Resource Already Exists",
+				fmt.Sprintf("Resource already exists, error: %s.\nPlease import the existing resource into terraform state.", err.Error()),
+			)
+			return
+		}
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create DtcTopology, got error: %s", err))
 		return
 	}
@@ -128,13 +156,28 @@ func (r *DtcTopologyResource) Read(ctx context.Context, req resource.ReadRequest
 		return
 	}
 
-	apiRes, httpRes, err := r.client.DTCAPI.
-		DtcTopologyAPI.
-		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
-		ReturnFieldsPlus(readableAttributesForDtcTopology).
-		ReturnAsObject(1).
-		ProxySearch(config.GetProxySearch()).
-		Execute()
+	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
+
+	var (
+		httpRes *http.Response
+		apiRes  *dtc.GetDtcTopologyResponse
+	)
+
+	err := retry.Do(ctx, nil, func(ctx context.Context) (int, error) {
+		var callErr error
+		apiRes, httpRes, callErr = r.client.DTCAPI.
+			DtcTopologyAPI.
+			Read(ctx, resourceRef).
+			ReturnFieldsPlus(readableAttributesForDtcTopology).
+			ReturnAsObject(1).
+			ProxySearch(config.GetProxySearch()).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
 
 	// If the resource is not found, try searching using Extensible Attributes
 	if err != nil {
@@ -287,13 +330,34 @@ func (r *DtcTopologyResource) Update(ctx context.Context, req resource.UpdateReq
 		return
 	}
 
-	apiRes, _, err := r.client.DTCAPI.
-		DtcTopologyAPI.
-		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
-		DtcTopology(*data.Expand(ctx, &resp.Diagnostics)).
-		ReturnFieldsPlus(readableAttributesForDtcTopology).
-		ReturnAsObject(1).
-		Execute()
+	payload := data.Expand(ctx, &resp.Diagnostics)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
+
+	var apiRes *dtc.UpdateDtcTopologyResponse
+
+	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		var (
+			httpRes *http.Response
+			callErr error
+		)
+		apiRes, httpRes, callErr = r.client.DTCAPI.
+			DtcTopologyAPI.
+			Update(ctx, resourceRef).
+			DtcTopology(*payload).
+			ReturnFieldsPlus(readableAttributesForDtcTopology).
+			ReturnAsObject(1).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
+
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update DtcTopology, got error: %s", err))
 		return
@@ -332,14 +396,24 @@ func (r *DtcTopologyResource) Delete(ctx context.Context, req resource.DeleteReq
 		return
 	}
 
-	httpRes, err := r.client.DTCAPI.
-		DtcTopologyAPI.
-		Delete(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
-		Execute()
-	if err != nil {
-		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
-			return
+	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
+
+	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		httpRes, callErr := r.client.DTCAPI.
+			DtcTopologyAPI.
+			Delete(ctx, resourceRef).
+			Execute()
+
+		if httpRes != nil {
+			if httpRes.StatusCode == http.StatusNotFound {
+				return 0, nil
+			}
+			return httpRes.StatusCode, callErr
 		}
+		return 0, callErr
+	})
+
+	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete DtcTopology, got error: %s", err))
 		return
 	}

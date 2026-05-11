@@ -11,8 +11,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
+	"github.com/infobloxopen/infoblox-nios-go-client/dns"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/config"
+	"github.com/infobloxopen/terraform-provider-nios/internal/retry"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
@@ -21,6 +23,7 @@ var readableAttributesForNsgroup = "comment,extattrs,external_primaries,external
 // Ensure provider defined types fully satisfy framework interfaces.
 var _ resource.Resource = &NsgroupResource{}
 var _ resource.ResourceWithImportState = &NsgroupResource{}
+var _ resource.ResourceWithValidateConfig = &NsgroupResource{}
 
 func NewNsgroupResource() resource.Resource {
 	return &NsgroupResource{}
@@ -79,14 +82,41 @@ func (r *NsgroupResource) Create(ctx context.Context, req resource.CreateRequest
 		return
 	}
 
-	apiRes, _, err := r.client.DNSAPI.
-		NsgroupAPI.
-		Create(ctx).
-		Nsgroup(*data.Expand(ctx, &resp.Diagnostics, true)).
-		ReturnFieldsPlus(readableAttributesForNsgroup).
-		ReturnAsObject(1).
-		Execute()
+	payload := data.Expand(ctx, &resp.Diagnostics, true)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	var apiRes *dns.CreateNsgroupResponse
+
+	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		var (
+			httpRes *http.Response
+			callErr error
+		)
+		apiRes, httpRes, callErr = r.client.DNSAPI.
+			NsgroupAPI.
+			Create(ctx).
+			Nsgroup(*payload).
+			ReturnFieldsPlus(readableAttributesForNsgroup).
+			ReturnAsObject(1).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
+
 	if err != nil {
+		if retry.IsAlreadyExistsErr(err) {
+			// Resource already exists, import required
+			resp.Diagnostics.AddError(
+				"Resource Already Exists",
+				fmt.Sprintf("Resource already exists, error: %s.\nPlease import the existing resource into terraform state.", err.Error()),
+			)
+			return
+		}
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create Nsgroup, got error: %s", err))
 		return
 	}
@@ -121,13 +151,28 @@ func (r *NsgroupResource) Read(ctx context.Context, req resource.ReadRequest, re
 		return
 	}
 
-	apiRes, httpRes, err := r.client.DNSAPI.
-		NsgroupAPI.
-		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
-		ReturnFieldsPlus(readableAttributesForNsgroup).
-		ReturnAsObject(1).
-		ProxySearch(config.GetProxySearch()).
-		Execute()
+	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
+
+	var (
+		httpRes *http.Response
+		apiRes  *dns.GetNsgroupResponse
+	)
+
+	err := retry.Do(ctx, nil, func(ctx context.Context) (int, error) {
+		var callErr error
+		apiRes, httpRes, callErr = r.client.DNSAPI.
+			NsgroupAPI.
+			Read(ctx, resourceRef).
+			ReturnFieldsPlus(readableAttributesForNsgroup).
+			ReturnAsObject(1).
+			ProxySearch(config.GetProxySearch()).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
 
 	// If the resource is not found, try searching using Extensible Attributes
 	if err != nil {
@@ -273,13 +318,34 @@ func (r *NsgroupResource) Update(ctx context.Context, req resource.UpdateRequest
 		return
 	}
 
-	apiRes, _, err := r.client.DNSAPI.
-		NsgroupAPI.
-		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
-		Nsgroup(*data.Expand(ctx, &resp.Diagnostics, false)).
-		ReturnFieldsPlus(readableAttributesForNsgroup).
-		ReturnAsObject(1).
-		Execute()
+	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
+
+	payload := data.Expand(ctx, &resp.Diagnostics, false)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	var apiRes *dns.UpdateNsgroupResponse
+
+	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		var (
+			httpRes *http.Response
+			callErr error
+		)
+		apiRes, httpRes, callErr = r.client.DNSAPI.
+			NsgroupAPI.
+			Update(ctx, resourceRef).
+			Nsgroup(*payload).
+			ReturnFieldsPlus(readableAttributesForNsgroup).
+			ReturnAsObject(1).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
+
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update Nsgroup, got error: %s", err))
 		return
@@ -313,14 +379,24 @@ func (r *NsgroupResource) Delete(ctx context.Context, req resource.DeleteRequest
 		return
 	}
 
-	httpRes, err := r.client.DNSAPI.
-		NsgroupAPI.
-		Delete(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
-		Execute()
-	if err != nil {
-		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
-			return
+	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
+
+	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		httpRes, callErr := r.client.DNSAPI.
+			NsgroupAPI.
+			Delete(ctx, resourceRef).
+			Execute()
+
+		if httpRes != nil {
+			if httpRes.StatusCode == http.StatusNotFound {
+				return 0, nil
+			}
+			return httpRes.StatusCode, callErr
 		}
+		return 0, callErr
+	})
+
+	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete Nsgroup, got error: %s", err))
 		return
 	}
@@ -329,4 +405,47 @@ func (r *NsgroupResource) Delete(ctx context.Context, req resource.DeleteRequest
 func (r *NsgroupResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("ref"), req.ID)...)
 	resp.Diagnostics.Append(resp.Private.SetKey(ctx, "associate_internal_id", []byte("true"))...)
+}
+
+func (r *NsgroupResource) ValidateConfig(ctx context.Context, req resource.ValidateConfigRequest, resp *resource.ValidateConfigResponse) {
+	var data NsgroupModel
+	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	externalPrimariesSet := !data.ExternalPrimaries.IsNull() && !data.ExternalPrimaries.IsUnknown()
+	gridSecondariesSet := !data.GridSecondaries.IsNull() && !data.GridSecondaries.IsUnknown()
+
+	// If external_primaries is set, grid_secondaries must be provided
+	if externalPrimariesSet && !gridSecondariesSet {
+		resp.Diagnostics.AddAttributeError(
+			path.Root("grid_secondaries"),
+			"Missing Grid Secondary Server",
+			"An NS group must contain at least one grid secondary server if an external primary server is specified.",
+		)
+	}
+
+	// Multimaster validations only apply when is_multimaster is true
+	if data.IsMultimaster.IsNull() || data.IsMultimaster.IsUnknown() || !data.IsMultimaster.ValueBool() {
+		return
+	}
+
+	gridPrimarySet := !data.GridPrimary.IsNull() && !data.GridPrimary.IsUnknown()
+
+	if gridPrimarySet && len(data.GridPrimary.Elements()) <= 1 {
+		resp.Diagnostics.AddAttributeError(
+			path.Root("grid_primary"),
+			"Invalid Multimaster Configuration",
+			"When 'is_multimaster' is set to true, 'grid_primary' must contain more than one entry.",
+		)
+	}
+
+	if externalPrimariesSet && len(data.ExternalPrimaries.Elements()) <= 1 {
+		resp.Diagnostics.AddAttributeError(
+			path.Root("external_primaries"),
+			"Invalid Multimaster Configuration",
+			"When 'is_multimaster' is set to true, 'external_primaries' must contain more than one entry.",
+		)
+	}
 }

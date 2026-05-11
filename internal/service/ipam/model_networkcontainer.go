@@ -29,6 +29,7 @@ import (
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 	planmodifiers "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/immutable"
 	importmod "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/import"
+	internaltypes "github.com/infobloxopen/terraform-provider-nios/internal/types"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
@@ -174,7 +175,7 @@ var NetworkcontainerAttrTypes = map[string]attr.Type{
 	"high_water_mark_reset":                types.Int64Type,
 	"ignore_dhcp_option_list_request":      types.BoolType,
 	"ignore_id":                            types.StringType,
-	"ignore_mac_addresses":                 types.ListType{ElemType: types.StringType},
+	"ignore_mac_addresses":                 types.ListType{ElemType: internaltypes.MACAddressType{}},
 	"ipam_email_addresses":                 types.ListType{ElemType: types.StringType},
 	"ipam_threshold_settings":              types.ObjectType{AttrTypes: NetworkcontainerIpamThresholdSettingsAttrTypes},
 	"ipam_trap_settings":                   types.ObjectType{AttrTypes: NetworkcontainerIpamTrapSettingsAttrTypes},
@@ -518,7 +519,7 @@ var NetworkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 		},
 	},
 	"ignore_mac_addresses": schema.ListAttribute{
-		ElementType: types.StringType,
+		ElementType: internaltypes.MACAddressType{},
 		Optional:    true,
 		Validators: []validator.List{
 			listvalidator.SizeAtLeast(1),
