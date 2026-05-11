@@ -378,7 +378,7 @@ func ExtractResourceRef(ref string) string {
 
 func FindModelFieldByTFSdkTag(model any, tagName string) (string, bool) {
 	modelType := reflect.TypeOf(model)
-	if modelType.Kind() == reflect.Ptr {
+	if modelType.Kind() == reflect.Pointer {
 		modelType = modelType.Elem()
 	}
 
@@ -447,6 +447,8 @@ func ConvertSliceOfMapsToHCL(data []map[string]any) string {
 				formattedValue = nestedHCL
 			case map[string]any:
 				formattedValue = ConvertMapToHCL(v)
+			case []string:
+				formattedValue = ConvertStringSliceToHCL(v)
 			case string:
 				formattedValue = fmt.Sprintf("%q", v)
 			case int, int64, float64:

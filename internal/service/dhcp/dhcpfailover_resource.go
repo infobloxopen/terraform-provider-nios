@@ -3,6 +3,7 @@ package dhcp
 import (
 	"context"
 	"fmt"
+	"net"
 	"net/http"
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -11,8 +12,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
+	"github.com/infobloxopen/infoblox-nios-go-client/dhcp"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/config"
+	"github.com/infobloxopen/terraform-provider-nios/internal/retry"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
@@ -21,6 +24,7 @@ var readableAttributesForDhcpfailover = "association_type,comment,extattrs,failo
 // Ensure provider defined types fully satisfy framework interfaces.
 var _ resource.Resource = &DhcpfailoverResource{}
 var _ resource.ResourceWithImportState = &DhcpfailoverResource{}
+var _ resource.ResourceWithValidateConfig = &DhcpfailoverResource{}
 
 func NewDhcpfailoverResource() resource.Resource {
 	return &DhcpfailoverResource{}
@@ -79,14 +83,41 @@ func (r *DhcpfailoverResource) Create(ctx context.Context, req resource.CreateRe
 		return
 	}
 
-	apiRes, _, err := r.client.DHCPAPI.
-		DhcpfailoverAPI.
-		Create(ctx).
-		Dhcpfailover(*data.Expand(ctx, &resp.Diagnostics)).
-		ReturnFieldsPlus(readableAttributesForDhcpfailover).
-		ReturnAsObject(1).
-		Execute()
+	payload := data.Expand(ctx, &resp.Diagnostics)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	var apiRes *dhcp.CreateDhcpfailoverResponse
+
+	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		var (
+			httpRes *http.Response
+			callErr error
+		)
+		apiRes, httpRes, callErr = r.client.DHCPAPI.
+			DhcpfailoverAPI.
+			Create(ctx).
+			Dhcpfailover(*payload).
+			ReturnFieldsPlus(readableAttributesForDhcpfailover).
+			ReturnAsObject(1).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
+
 	if err != nil {
+		if retry.IsAlreadyExistsErr(err) {
+			// Resource already exists, import required
+			resp.Diagnostics.AddError(
+				"Resource Already Exists",
+				fmt.Sprintf("Resource already exists, error: %s.\nPlease import the existing resource into terraform state.", err.Error()),
+			)
+			return
+		}
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create Dhcpfailover, got error: %s", err))
 		return
 	}
@@ -121,13 +152,28 @@ func (r *DhcpfailoverResource) Read(ctx context.Context, req resource.ReadReques
 		return
 	}
 
-	apiRes, httpRes, err := r.client.DHCPAPI.
-		DhcpfailoverAPI.
-		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
-		ReturnFieldsPlus(readableAttributesForDhcpfailover).
-		ReturnAsObject(1).
-		ProxySearch(config.GetProxySearch()).
-		Execute()
+	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
+
+	var (
+		httpRes *http.Response
+		apiRes  *dhcp.GetDhcpfailoverResponse
+	)
+
+	err := retry.Do(ctx, nil, func(ctx context.Context) (int, error) {
+		var callErr error
+		apiRes, httpRes, callErr = r.client.DHCPAPI.
+			DhcpfailoverAPI.
+			Read(ctx, resourceRef).
+			ReturnFieldsPlus(readableAttributesForDhcpfailover).
+			ReturnAsObject(1).
+			ProxySearch(config.GetProxySearch()).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
 
 	// If the resource is not found, try searching using Extensible Attributes
 	if err != nil {
@@ -274,13 +320,34 @@ func (r *DhcpfailoverResource) Update(ctx context.Context, req resource.UpdateRe
 		return
 	}
 
-	apiRes, _, err := r.client.DHCPAPI.
-		DhcpfailoverAPI.
-		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
-		Dhcpfailover(*data.Expand(ctx, &resp.Diagnostics)).
-		ReturnFieldsPlus(readableAttributesForDhcpfailover).
-		ReturnAsObject(1).
-		Execute()
+	payload := data.Expand(ctx, &resp.Diagnostics)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
+
+	var apiRes *dhcp.UpdateDhcpfailoverResponse
+
+	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		var (
+			httpRes *http.Response
+			callErr error
+		)
+		apiRes, httpRes, callErr = r.client.DHCPAPI.
+			DhcpfailoverAPI.
+			Update(ctx, resourceRef).
+			Dhcpfailover(*payload).
+			ReturnFieldsPlus(readableAttributesForDhcpfailover).
+			ReturnAsObject(1).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
+
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update Dhcpfailover, got error: %s", err))
 		return
@@ -313,14 +380,24 @@ func (r *DhcpfailoverResource) Delete(ctx context.Context, req resource.DeleteRe
 		return
 	}
 
-	httpRes, err := r.client.DHCPAPI.
-		DhcpfailoverAPI.
-		Delete(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
-		Execute()
-	if err != nil {
-		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
-			return
+	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
+
+	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		httpRes, callErr := r.client.DHCPAPI.
+			DhcpfailoverAPI.
+			Delete(ctx, resourceRef).
+			Execute()
+
+		if httpRes != nil {
+			if httpRes.StatusCode == http.StatusNotFound {
+				return 0, nil
+			}
+			return httpRes.StatusCode, callErr
 		}
+		return 0, callErr
+	})
+
+	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete Dhcpfailover, got error: %s", err))
 		return
 	}
@@ -329,4 +406,56 @@ func (r *DhcpfailoverResource) Delete(ctx context.Context, req resource.DeleteRe
 func (r *DhcpfailoverResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("ref"), req.ID)...)
 	resp.Diagnostics.Append(resp.Private.SetKey(ctx, "associate_internal_id", []byte("true"))...)
+}
+
+func (r *DhcpfailoverResource) ValidateConfig(ctx context.Context, req resource.ValidateConfigRequest, resp *resource.ValidateConfigResponse) {
+	var data DhcpfailoverModel
+
+	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+	primaryServerType := ""
+	secondaryServerType := ""
+	// Get the values or default to empty string
+	if !data.PrimaryServerType.IsNull() && !data.PrimaryServerType.IsUnknown() {
+		primaryServerType = data.PrimaryServerType.ValueString()
+	}
+
+	if !data.SecondaryServerType.IsNull() && !data.SecondaryServerType.IsUnknown() {
+		secondaryServerType = data.SecondaryServerType.ValueString()
+	}
+
+	if secondaryServerType == "EXTERNAL" && primaryServerType == "EXTERNAL" {
+		resp.Diagnostics.AddError(
+			"Invalid Server Types",
+			"Both primary_server_type and secondary_server_type cannot be set to EXTERNAL.",
+		)
+	}
+
+	if secondaryServerType == "EXTERNAL" {
+		secondaryValue := data.Secondary.ValueString()
+		if secondaryValue != "" {
+			ip := net.ParseIP(secondaryValue)
+			if ip == nil || ip.To4() == nil {
+				resp.Diagnostics.AddError(
+					"Invalid Secondary Server",
+					"secondary must be a valid IPv4 address when secondary_server_type is set to EXTERNAL.",
+				)
+			}
+		}
+	}
+
+	if primaryServerType == "EXTERNAL" {
+		primaryValue := data.Primary.ValueString()
+		if primaryValue != "" {
+			ip := net.ParseIP(primaryValue)
+			if ip == nil || ip.To4() == nil {
+				resp.Diagnostics.AddError(
+					"Invalid Primary Server",
+					"primary must be a valid IPv4 address when primary_server_type is set to EXTERNAL.",
+				)
+			}
+		}
+	}
 }

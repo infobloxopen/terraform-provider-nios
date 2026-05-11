@@ -2,6 +2,9 @@ package security
 
 import (
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
+	"encoding/json"
 	"fmt"
 	"net/http"
 
@@ -9,10 +12,13 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
+	"github.com/infobloxopen/infoblox-nios-go-client/security"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/config"
+	"github.com/infobloxopen/terraform-provider-nios/internal/retry"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
@@ -21,6 +27,7 @@ var readableAttributesForAdminuser = "admin_groups,auth_method,auth_type,ca_cert
 // Ensure provider defined types fully satisfy framework interfaces.
 var _ resource.Resource = &AdminuserResource{}
 var _ resource.ResourceWithImportState = &AdminuserResource{}
+var _ resource.ResourceWithModifyPlan = &AdminuserResource{}
 
 func NewAdminuserResource() resource.Resource {
 	return &AdminuserResource{}
@@ -29,6 +36,10 @@ func NewAdminuserResource() resource.Resource {
 // AdminuserResource defines the resource implementation.
 type AdminuserResource struct {
 	client *niosclient.APIClient
+}
+
+type secretsHashState struct {
+	Password string `json:"password_hash"`
 }
 
 func (r *AdminuserResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -62,6 +73,87 @@ func (r *AdminuserResource) Configure(ctx context.Context, req resource.Configur
 	r.client = client
 }
 
+func (r *AdminuserResource) ModifyPlan(ctx context.Context, req resource.ModifyPlanRequest, resp *resource.ModifyPlanResponse) {
+	if req.Plan.Raw.IsNull() {
+		return
+	}
+
+	var statePwdRevision types.Int64
+	var planPassword, statePassword types.String
+
+	resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("password"), &planPassword)...)
+	resp.Diagnostics.Append(req.State.GetAttribute(ctx, path.Root("password"), &statePassword)...)
+	resp.Diagnostics.Append(req.State.GetAttribute(ctx, path.Root("password_revision"), &statePwdRevision)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	computeNewHash := !planPassword.IsNull() && !planPassword.IsUnknown()
+
+	prevHashes := secretsHashState{}
+	plannedHashes := secretsHashState{}
+	// Normalize stateRev if null (e.g., first apply)
+	curRev := int64(0)
+	if !statePwdRevision.IsNull() && !statePwdRevision.IsUnknown() {
+		curRev = statePwdRevision.ValueInt64()
+	}
+
+	if computeNewHash {
+
+		var prev struct {
+			Algo string `json:"algo"`
+			Hash string `json:"hash"`
+		}
+
+		if b, diags := req.Private.GetKey(ctx, "password_hash"); diags != nil {
+			resp.Diagnostics.Append(diags...)
+		} else if b != nil {
+			if err := json.Unmarshal(b, &prev); err != nil {
+				// Older buggy format: ignore and treat as different
+				prev.Hash = ""
+			}
+		}
+		// plannedHash := prev.Hash
+		var plannedHash string
+
+		if prev.Hash != "" {
+			// Best-effort parse; if this fails, treat prev.Hash as a legacy value and
+			// leave prevHashes at its zero value so that we will recompute as needed.
+			_ = json.Unmarshal([]byte(prev.Hash), &prevHashes)
+		}
+
+		if !planPassword.IsUnknown() {
+			if planPassword.IsNull() {
+				plannedHashes.Password = ""
+			} else {
+				h := sha256.New()
+				h.Write([]byte(planPassword.ValueString()))
+				plannedHashes.Password = hex.EncodeToString(h.Sum(nil))
+			}
+		}
+		if data, err := json.Marshal(plannedHashes); err == nil {
+			plannedHash = string(data)
+		}
+
+		if plannedHashes.Password != "" && plannedHashes.Password != prevHashes.Password {
+			// Increment revision and store new hash if password
+			newRev := types.Int64Value(curRev + 1)
+			resp.Diagnostics.Append(resp.Plan.SetAttribute(ctx, path.Root("password_revision"), newRev)...)
+
+			val := map[string]string{"algo": "sha256", "hash": plannedHash}
+			b, err := json.Marshal(val)
+			if err != nil {
+				resp.Diagnostics.AddError("Private State Marshal Error", err.Error())
+				return
+			}
+			resp.Diagnostics.Append(resp.Private.SetKey(ctx, "password_hash", b)...)
+		} else {
+			resp.Diagnostics.Append(resp.Plan.SetAttribute(ctx, path.Root("password_revision"), curRev)...)
+		}
+	}
+
+}
+
 func (r *AdminuserResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var diags diag.Diagnostics
 	var data AdminuserModel
@@ -79,14 +171,66 @@ func (r *AdminuserResource) Create(ctx context.Context, req resource.CreateReque
 		return
 	}
 
-	apiRes, _, err := r.client.SecurityAPI.
-		AdminuserAPI.
-		Create(ctx).
-		Adminuser(*data.Expand(ctx, &resp.Diagnostics)).
-		ReturnFieldsPlus(readableAttributesForAdminuser).
-		ReturnAsObject(1).
-		Execute()
+	passwordRevision := types.Int64Value(0)
+	createRequest := data.Expand(ctx, &resp.Diagnostics)
+	var password types.String
+	resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("password"), &password)...)
+
+	secretData := secretsHashState{}
+
+	if !password.IsNull() && !password.IsUnknown() {
+
+		createRequest.Password = password.ValueStringPointer()
+		passwordRevision = types.Int64Value(1)
+		h := sha256.New()
+		h.Write([]byte(password.ValueString()))
+		secretData.Password = hex.EncodeToString(h.Sum(nil))
+
+		secretDataJSON, _ := json.Marshal(secretData)
+		val := map[string]string{"algo": "sha256", "hash": string(secretDataJSON)}
+		hashedPassword, err := json.Marshal(val)
+		if err != nil {
+			resp.Diagnostics.AddError("Private State Marshal Error", err.Error())
+			return
+		}
+		resp.Diagnostics.Append(resp.Private.SetKey(ctx, "password_hash", hashedPassword)...)
+	}
+
+	payload := data.Expand(ctx, &resp.Diagnostics)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	var apiRes *security.CreateAdminuserResponse
+
+	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		var (
+			httpRes *http.Response
+			callErr error
+		)
+		apiRes, httpRes, callErr = r.client.SecurityAPI.
+			AdminuserAPI.
+			Create(ctx).
+			Adminuser(*payload).
+			ReturnFieldsPlus(readableAttributesForAdminuser).
+			ReturnAsObject(1).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
+
 	if err != nil {
+		if retry.IsAlreadyExistsErr(err) {
+			// Resource already exists, import required
+			resp.Diagnostics.AddError(
+				"Resource Already Exists",
+				fmt.Sprintf("Resource already exists, error: %s.\nPlease import the existing resource into terraform state.", err.Error()),
+			)
+			return
+		}
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create Adminuser, got error: %s", err))
 		return
 	}
@@ -98,7 +242,14 @@ func (r *AdminuserResource) Create(ctx context.Context, req resource.CreateReque
 		return
 	}
 
+	data.PasswordRevsion = passwordRevision
+	plannedSshKeys := data.SshKeys
 	data.Flatten(ctx, &res, &resp.Diagnostics)
+	// The API may return ssh_keys even when not configured (e.g. use_ssh_keys=false).
+	// Restore the planned value to avoid a plan/state inconsistency.
+	if plannedSshKeys.IsNull() {
+		data.SshKeys = plannedSshKeys
+	}
 
 	// Save data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
@@ -121,13 +272,28 @@ func (r *AdminuserResource) Read(ctx context.Context, req resource.ReadRequest, 
 		return
 	}
 
-	apiRes, httpRes, err := r.client.SecurityAPI.
-		AdminuserAPI.
-		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
-		ReturnFieldsPlus(readableAttributesForAdminuser).
-		ReturnAsObject(1).
-		ProxySearch(config.GetProxySearch()).
-		Execute()
+	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
+
+	var (
+		httpRes *http.Response
+		apiRes  *security.GetAdminuserResponse
+	)
+
+	err := retry.Do(ctx, nil, func(ctx context.Context) (int, error) {
+		var callErr error
+		apiRes, httpRes, callErr = r.client.SecurityAPI.
+			AdminuserAPI.
+			Read(ctx, resourceRef).
+			ReturnFieldsPlus(readableAttributesForAdminuser).
+			ReturnAsObject(1).
+			ProxySearch(config.GetProxySearch()).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
 
 	// If the resource is not found, try searching using Extensible Attributes
 	if err != nil {
@@ -169,7 +335,11 @@ func (r *AdminuserResource) Read(ctx context.Context, req resource.ReadRequest, 
 		return
 	}
 
+	priorSshKeys := data.SshKeys
 	data.Flatten(ctx, &res, &resp.Diagnostics)
+	if priorSshKeys.IsNull() {
+		data.SshKeys = priorSshKeys
+	}
 
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
@@ -225,7 +395,11 @@ func (r *AdminuserResource) ReadByExtAttrs(ctx context.Context, data *AdminuserM
 		return true
 	}
 
+	priorSshKeys := data.SshKeys
 	data.Flatten(ctx, &res, &resp.Diagnostics)
+	if priorSshKeys.IsNull() {
+		data.SshKeys = priorSshKeys
+	}
 	resp.Diagnostics.Append(resp.State.Set(ctx, data)...)
 
 	return true
@@ -273,13 +447,45 @@ func (r *AdminuserResource) Update(ctx context.Context, req resource.UpdateReque
 		return
 	}
 
-	apiRes, _, err := r.client.SecurityAPI.
-		AdminuserAPI.
-		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
-		Adminuser(*data.Expand(ctx, &resp.Diagnostics)).
-		ReturnFieldsPlus(readableAttributesForAdminuser).
-		ReturnAsObject(1).
-		Execute()
+	var password types.String
+	resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("password"), &password)...)
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+		return
+	}
+	updateReq := data.Expand(ctx, &resp.Diagnostics)
+	if !password.IsNull() && !password.IsUnknown() {
+		updateReq.Password = password.ValueStringPointer()
+	}
+
+	payload := data.Expand(ctx, &resp.Diagnostics)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
+
+	var apiRes *security.UpdateAdminuserResponse
+
+	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		var (
+			httpRes *http.Response
+			callErr error
+		)
+		apiRes, httpRes, callErr = r.client.SecurityAPI.
+			AdminuserAPI.
+			Update(ctx, resourceRef).
+			Adminuser(*payload).
+			ReturnFieldsPlus(readableAttributesForAdminuser).
+			ReturnAsObject(1).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
+
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update Adminuser, got error: %s", err))
 		return
@@ -293,7 +499,13 @@ func (r *AdminuserResource) Update(ctx context.Context, req resource.UpdateReque
 		return
 	}
 
+	plannedSshKeys := data.SshKeys
 	data.Flatten(ctx, &res, &resp.Diagnostics)
+	// The API may return ssh_keys even when not configured (e.g. use_ssh_keys=false).
+	// Restore the planned value to avoid a plan/state inconsistency.
+	if plannedSshKeys.IsNull() {
+		data.SshKeys = plannedSshKeys
+	}
 
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
@@ -313,14 +525,24 @@ func (r *AdminuserResource) Delete(ctx context.Context, req resource.DeleteReque
 		return
 	}
 
-	httpRes, err := r.client.SecurityAPI.
-		AdminuserAPI.
-		Delete(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
-		Execute()
-	if err != nil {
-		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
-			return
+	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
+
+	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		httpRes, callErr := r.client.SecurityAPI.
+			AdminuserAPI.
+			Delete(ctx, resourceRef).
+			Execute()
+
+		if httpRes != nil {
+			if httpRes.StatusCode == http.StatusNotFound {
+				return 0, nil
+			}
+			return httpRes.StatusCode, callErr
 		}
+		return 0, callErr
+	})
+
+	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete Adminuser, got error: %s", err))
 		return
 	}

@@ -1,0 +1,131 @@
+package grid
+
+import (
+	"context"
+
+	"github.com/hashicorp/terraform-plugin-framework/attr"
+	"github.com/hashicorp/terraform-plugin-framework/diag"
+	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
+
+	"github.com/infobloxopen/infoblox-nios-go-client/grid"
+
+	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+)
+
+type MembersnmpsettingSnmpv3QueriesUsersModel struct {
+	Ref                    types.String `tfsdk:"ref"`
+	User                   types.String `tfsdk:"user"`
+	AuthenticationProtocol types.String `tfsdk:"authentication_protocol"`
+	Comment                types.String `tfsdk:"comment"`
+	Disable                types.Bool   `tfsdk:"disable"`
+	ExtAttrs               types.Map    `tfsdk:"extattrs"`
+	Name                   types.String `tfsdk:"name"`
+	PrivacyProtocol        types.String `tfsdk:"privacy_protocol"`
+}
+
+var MembersnmpsettingSnmpv3QueriesUsersAttrTypes = map[string]attr.Type{
+	"ref":                     types.StringType,
+	"user":                    types.StringType,
+	"authentication_protocol": types.StringType,
+	"comment":                 types.StringType,
+	"disable":                 types.BoolType,
+	"extattrs":                types.MapType{ElemType: types.StringType},
+	"name":                    types.StringType,
+	"privacy_protocol":        types.StringType,
+}
+
+var MembersnmpsettingSnmpv3QueriesUsersResourceSchemaAttributes = map[string]schema.Attribute{
+	"ref": schema.StringAttribute{
+		Computed:            true,
+		MarkdownDescription: "The reference to the SNMPv3 user object",
+	},
+	"user": schema.StringAttribute{
+		Optional:            true,
+		MarkdownDescription: "The SNMPv3 user.",
+	},
+	"authentication_protocol": schema.StringAttribute{
+		Computed:            true,
+		MarkdownDescription: "The authentication protocol to be used for this user.",
+	},
+	"comment": schema.StringAttribute{
+		Computed:            true,
+		MarkdownDescription: "A descriptive comment for the SNMPv3 User.",
+	},
+	"disable": schema.BoolAttribute{
+		Computed:            true,
+		MarkdownDescription: "Determines if SNMPv3 user is disabled or not.",
+	},
+	"extattrs": schema.MapAttribute{
+		ElementType:         types.StringType,
+		Computed:            true,
+		MarkdownDescription: "Extensible attributes associated with the object. For valid values for extensible attributes, see {extattrs:values}.",
+	},
+	"name": schema.StringAttribute{
+		Computed:            true,
+		MarkdownDescription: "The name of the user.",
+	},
+	"privacy_protocol": schema.StringAttribute{
+		Computed:            true,
+		MarkdownDescription: "The privacy protocol to be used for this user.",
+	},
+}
+
+func ExpandMembersnmpsettingSnmpv3QueriesUsers(ctx context.Context, o types.Object, diags *diag.Diagnostics) *grid.MembersnmpsettingSnmpv3QueriesUsers {
+	if o.IsNull() || o.IsUnknown() {
+		return nil
+	}
+	var m MembersnmpsettingSnmpv3QueriesUsersModel
+	diags.Append(o.As(ctx, &m, basetypes.ObjectAsOptions{})...)
+	if diags.HasError() {
+		return nil
+	}
+	return m.Expand(ctx, diags)
+}
+
+func (m *MembersnmpsettingSnmpv3QueriesUsersModel) Expand(ctx context.Context, diags *diag.Diagnostics) *grid.MembersnmpsettingSnmpv3QueriesUsers {
+	if m == nil {
+		return nil
+	}
+	var oneOf *grid.MembersnmpsettingSnmpv3QueriesUsersOneOf
+	if !m.User.IsNull() && !m.User.IsUnknown() {
+		oneOf = &grid.MembersnmpsettingSnmpv3QueriesUsersOneOf{
+			User: flex.ExpandStringPointer(m.User),
+		}
+	}
+
+	to := &grid.MembersnmpsettingSnmpv3QueriesUsers{
+		MembersnmpsettingSnmpv3QueriesUsersOneOf: oneOf,
+	}
+
+	return to
+}
+
+func FlattenMembersnmpsettingSnmpv3QueriesUsers(ctx context.Context, from *grid.MembersnmpsettingSnmpv3QueriesUsers, diags *diag.Diagnostics) types.Object {
+	if from == nil {
+		return types.ObjectNull(MembersnmpsettingSnmpv3QueriesUsersAttrTypes)
+	}
+	m := MembersnmpsettingSnmpv3QueriesUsersModel{}
+	m.Flatten(ctx, from, diags)
+	t, d := types.ObjectValueFrom(ctx, MembersnmpsettingSnmpv3QueriesUsersAttrTypes, m)
+	diags.Append(d...)
+	return t
+}
+
+func (m *MembersnmpsettingSnmpv3QueriesUsersModel) Flatten(ctx context.Context, from *grid.MembersnmpsettingSnmpv3QueriesUsers, diags *diag.Diagnostics) {
+	if from == nil {
+		return
+	}
+	if m == nil {
+		*m = MembersnmpsettingSnmpv3QueriesUsersModel{}
+	}
+	m.User = flex.FlattenStringPointer(from.MembersnmpsettingSnmpv3QueriesUsersOneOf1.User.Ref)
+	m.Ref = flex.FlattenStringPointer(from.MembersnmpsettingSnmpv3QueriesUsersOneOf1.User.Ref)
+	m.AuthenticationProtocol = flex.FlattenStringPointer(from.MembersnmpsettingSnmpv3QueriesUsersOneOf1.User.AuthenticationProtocol)
+	m.Comment = flex.FlattenStringPointer(from.MembersnmpsettingSnmpv3QueriesUsersOneOf1.User.Comment)
+	m.Disable = types.BoolPointerValue(from.MembersnmpsettingSnmpv3QueriesUsersOneOf1.User.Disable)
+	m.ExtAttrs = FlattenExtAttrs(ctx, m.ExtAttrs, from.MembersnmpsettingSnmpv3QueriesUsersOneOf1.User.ExtAttrs, diags)
+	m.Name = flex.FlattenStringPointer(from.MembersnmpsettingSnmpv3QueriesUsersOneOf1.User.Name)
+	m.PrivacyProtocol = flex.FlattenStringPointer(from.MembersnmpsettingSnmpv3QueriesUsersOneOf1.User.PrivacyProtocol)
+}

@@ -383,13 +383,19 @@ func ExpandFrameworkListNestedBlock[T any, U any](ctx context.Context, tfList in
 	}
 
 	var data []T
-
 	diags.Append(tfList.ElementsAs(ctx, &data, false)...)
 
-	return ApplyToAll(data, func(t T) U {
-		return *f(ctx, t, diags)
-	})
+	expanded := make([]U, 0, len(data))
+	for _, t := range data {
+		v := f(ctx, t, diags)
+		if v == nil {
+			// Skip unknown/null nested objects safely.
+			continue
+		}
+		expanded = append(expanded, *v)
+	}
 
+	return expanded
 }
 
 func ExpandFrameworkListNestedBlockEmptyAsNil[T any, U any](ctx context.Context, tfList interface {
@@ -795,7 +801,7 @@ func GetOptionName[T any](option T) *string {
 	val := reflect.ValueOf(option)
 
 	// Handle pointer types by dereferencing
-	if val.Kind() == reflect.Ptr {
+	if val.Kind() == reflect.Pointer {
 		if val.IsNil() {
 			return nil
 		}
@@ -809,7 +815,7 @@ func GetOptionName[T any](option T) *string {
 	}
 
 	// If Name is a pointer to string
-	if nameField.Kind() == reflect.Ptr {
+	if nameField.Kind() == reflect.Pointer {
 		if nameField.IsNil() {
 			return nil
 		}
@@ -832,7 +838,7 @@ func GetOptionUseFlag[T any](option T) *bool {
 	val := reflect.ValueOf(option)
 
 	// Handle pointer types by dereferencing
-	if val.Kind() == reflect.Ptr {
+	if val.Kind() == reflect.Pointer {
 		if val.IsNil() {
 			return nil
 		}
@@ -846,7 +852,7 @@ func GetOptionUseFlag[T any](option T) *bool {
 	}
 
 	// If UseOption is a pointer to bool
-	if useField.Kind() == reflect.Ptr {
+	if useField.Kind() == reflect.Pointer {
 		if useField.IsNil() {
 			return nil
 		}
