@@ -313,7 +313,10 @@ func (r *IPAllocationResource) Create(ctx context.Context, req resource.CreateRe
 
 	resp.Diagnostics.Append(req.Plan.GetAttribute(ctx, path.Root("snmp3_credential"), &planSnmp3)...)
 
-	createRequest := data.Expand(ctx, &resp.Diagnostics)
+	payload := data.Expand(ctx, &resp.Diagnostics)
+	if resp.Diagnostics.HasError() {
+		return
+	}
 	if !planSnmp3.IsNull() {
 		// Read write-only from CONFIG
 		var authPwd, privPwd types.String
@@ -328,11 +331,11 @@ func (r *IPAllocationResource) Create(ctx context.Context, req resource.CreateRe
 		if !authPwd.IsNull() || !privPwd.IsNull() {
 			if !authPwd.IsNull() && !authPwd.IsUnknown() {
 				ap = authPwd.ValueString()
-				createRequest.Snmp3Credential.AuthenticationPassword = &ap
+				payload.Snmp3Credential.AuthenticationPassword = &ap
 			}
 			if !privPwd.IsNull() && !privPwd.IsUnknown() {
 				pp = privPwd.ValueString()
-				createRequest.Snmp3Credential.PrivacyPassword = &pp
+				payload.Snmp3Credential.PrivacyPassword = &pp
 			}
 			secretData := secretsHashState{}
 			if !authPwd.IsUnknown() {
@@ -364,11 +367,6 @@ func (r *IPAllocationResource) Create(ctx context.Context, req resource.CreateRe
 			}
 			resp.Diagnostics.Append(resp.Private.SetKey(ctx, "snmp3_secrets_hash", hashSecrets)...)
 		}
-	}
-
-	payload := data.Expand(ctx, &resp.Diagnostics)
-	if resp.Diagnostics.HasError() {
-		return
 	}
 
 	var apiRes *dns.CreateRecordHostResponse
