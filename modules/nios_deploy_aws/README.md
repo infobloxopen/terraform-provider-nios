@@ -16,7 +16,7 @@ This module provisions vNIOS on AWS. The NIOS configuration (`nios_grid_member` 
 
 | Name | Version |
 |------|---------|
-| <a name="provider_aws"></a> [aws](#provider\_aws) | 6.41.0 |
+| <a name="provider_aws"></a> [aws](#provider\_aws) | >= 6.38.0 |
 
 ## Resources
 
