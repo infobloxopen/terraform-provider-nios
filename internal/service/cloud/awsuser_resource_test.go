@@ -19,6 +19,7 @@ var readableAttributesForAwsuser = "access_key_id,account_id,govcloud_enabled,la
 
 // TODO: OBJECTS TO BE PRESENT IN GRID FOR TESTS
 // Admin User - aws1, aws2
+
 func TestAccAwsuserResource_basic(t *testing.T) {
 	var resourceName = "nios_cloud_aws_user.test"
 	var v cloud.Awsuser
