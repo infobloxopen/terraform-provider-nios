@@ -33,9 +33,6 @@ type RecordAList struct {
 
 func (l *RecordAList) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_" + "dns_record_a"
-	resp.ResourceBehavior = resource.ResourceBehavior{
-		MutableIdentity: true,
-	}
 }
 
 func (l *RecordAList) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {

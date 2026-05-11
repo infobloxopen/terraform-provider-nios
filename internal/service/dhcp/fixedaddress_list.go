@@ -33,9 +33,6 @@ type FixedaddressList struct {
 
 func (l *FixedaddressList) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_" + "dhcp_fixed_address"
-	resp.ResourceBehavior = resource.ResourceBehavior{
-		MutableIdentity: true,
-	}
 }
 
 func (l *FixedaddressList) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {

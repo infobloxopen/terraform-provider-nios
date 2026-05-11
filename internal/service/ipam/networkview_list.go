@@ -33,9 +33,6 @@ type NetworkviewList struct {
 
 func (l *NetworkviewList) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_" + "ipam_network_view"
-	resp.ResourceBehavior = resource.ResourceBehavior{
-		MutableIdentity: true,
-	}
 }
 
 func (l *NetworkviewList) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
