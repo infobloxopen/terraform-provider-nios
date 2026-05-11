@@ -24,13 +24,9 @@ func TestAccNetworkviewList_basic(t *testing.T) {
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		TerraformVersionChecks: []tfversion.TerraformVersionCheck{
-			tfversion.SkipBelow(tfversion.Version0_14_0),
+			tfversion.SkipBelow(tfversion.Version1_14_0),
 		},
 		Steps: []resource.TestStep{
-			// Provider Setup
-			{
-				Config: utils.ProviderSetup(),
-			},
 			// Create and Read
 			{
 				Config: testAccNetworkviewBasicConfig(name),
@@ -41,7 +37,7 @@ func TestAccNetworkviewList_basic(t *testing.T) {
 			// Query the object
 			{
 				Query:  true,
-				Config: testAccNetworkviewListBasicConfig(),
+				Config: utils.ProviderSetup() + testAccNetworkviewListBasicConfig(),
 				QueryResultChecks: []querycheck.QueryResultCheck{
 					querycheck.ExpectLengthAtLeast("nios_ipam_network_view.test", 1),
 				},
@@ -59,13 +55,9 @@ func TestAccNetworkviewList_Filters(t *testing.T) {
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		TerraformVersionChecks: []tfversion.TerraformVersionCheck{
-			tfversion.SkipBelow(tfversion.Version0_14_0),
+			tfversion.SkipBelow(tfversion.Version1_14_0),
 		},
 		Steps: []resource.TestStep{
-			// Provider Setup
-			{
-				Config: utils.ProviderSetup(),
-			},
 			// Create and Read
 			{
 				Config: testAccNetworkviewBasicConfig(name),
@@ -77,7 +69,7 @@ func TestAccNetworkviewList_Filters(t *testing.T) {
 			// Query the object
 			{
 				Query:  true,
-				Config: testAccNetworkviewListConfigFilters(name),
+				Config: utils.ProviderSetup() + testAccNetworkviewListConfigFilters(name),
 				QueryResultChecks: []querycheck.QueryResultCheck{
 					querycheck.ExpectLength("nios_ipam_network_view.test", 1),
 				},
@@ -98,13 +90,9 @@ func TestAccNetworkviewList_ExtAttrFilters(t *testing.T) {
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		TerraformVersionChecks: []tfversion.TerraformVersionCheck{
-			tfversion.SkipBelow(tfversion.Version0_14_0),
+			tfversion.SkipBelow(tfversion.Version1_14_0),
 		},
 		Steps: []resource.TestStep{
-			// Provider Setup
-			{
-				Config: utils.ProviderSetup(),
-			},
 			// Create and Read
 			{
 				Config: testAccNetworkviewExtAttrs(name, map[string]string{
@@ -118,7 +106,7 @@ func TestAccNetworkviewList_ExtAttrFilters(t *testing.T) {
 			// Query the object
 			{
 				Query:  true,
-				Config: testAccNetworkviewListConfigExtAttrFilters(extAttrValue),
+				Config: utils.ProviderSetup() + testAccNetworkviewListConfigExtAttrFilters(extAttrValue),
 				QueryResultChecks: []querycheck.QueryResultCheck{
 					querycheck.ExpectLength("nios_ipam_network_view.test", 1),
 				},

@@ -24,13 +24,9 @@ func TestAccRecordAList_basic(t *testing.T) {
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		TerraformVersionChecks: []tfversion.TerraformVersionCheck{
-			tfversion.SkipBelow(tfversion.Version0_14_0),
+			tfversion.SkipBelow(tfversion.Version1_14_0),
 		},
 		Steps: []resource.TestStep{
-			// Provider Setup
-			{
-				Config: utils.ProviderSetup(),
-			},
 			// Create and Read
 			{
 				Config: testAccRecordABasicConfig(name, "10.0.0.20", "default"),
@@ -40,7 +36,7 @@ func TestAccRecordAList_basic(t *testing.T) {
 			},
 			{
 				Query:  true,
-				Config: testAccRecordAListBasicConfig(),
+				Config: utils.ProviderSetup() + testAccRecordAListBasicConfig(),
 				QueryResultChecks: []querycheck.QueryResultCheck{
 					querycheck.ExpectLengthAtLeast("nios_dns_record_a.test", 1),
 				},
@@ -59,13 +55,9 @@ func TestAccRecordAList_Filters(t *testing.T) {
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		TerraformVersionChecks: []tfversion.TerraformVersionCheck{
-			tfversion.SkipBelow(tfversion.Version0_14_0),
+			tfversion.SkipBelow(tfversion.Version1_14_0),
 		},
 		Steps: []resource.TestStep{
-			// Provider Setup
-			{
-				Config: utils.ProviderSetup(),
-			},
 			// Create and Read
 			{
 				Config: testAccRecordABasicConfig(name, "10.0.0.21", "default"),
@@ -76,7 +68,7 @@ func TestAccRecordAList_Filters(t *testing.T) {
 			},
 			{
 				Query:  true,
-				Config: testAccRecordAListConfigFilters(name),
+				Config: utils.ProviderSetup() + testAccRecordAListConfigFilters(name),
 				QueryResultChecks: []querycheck.QueryResultCheck{
 					querycheck.ExpectLength("nios_dns_record_a.test", 1),
 				},
@@ -95,13 +87,9 @@ func TestAccRecordAList_ExtAttrFilters(t *testing.T) {
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		TerraformVersionChecks: []tfversion.TerraformVersionCheck{
-			tfversion.SkipBelow(tfversion.Version0_14_0),
+			tfversion.SkipBelow(tfversion.Version1_14_0),
 		},
 		Steps: []resource.TestStep{
-			// Provider Setup
-			{
-				Config: utils.ProviderSetup(),
-			},
 			// Create and Read
 			{
 				Config: testAccRecordAExtattrs(name, "10.0.0.22", "default", map[string]string{
@@ -114,7 +102,7 @@ func TestAccRecordAList_ExtAttrFilters(t *testing.T) {
 			},
 			{
 				Query:  true,
-				Config: testAccRecordAListConfigExtAttrFilters(extAttrValue),
+				Config: utils.ProviderSetup() + testAccRecordAListConfigExtAttrFilters(extAttrValue),
 				QueryResultChecks: []querycheck.QueryResultCheck{
 					querycheck.ExpectLength("nios_dns_record_a.test", 1),
 				},

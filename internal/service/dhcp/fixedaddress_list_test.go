@@ -25,13 +25,9 @@ func TestAccFixedaddressList_basic(t *testing.T) {
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		TerraformVersionChecks: []tfversion.TerraformVersionCheck{
-			tfversion.SkipBelow(tfversion.Version0_14_0),
+			tfversion.SkipBelow(tfversion.Version1_14_0),
 		},
 		Steps: []resource.TestStep{
-			// Provider Setup
-			{
-				Config: utils.ProviderSetup(),
-			},
 			// Create and Read
 			{
 				Config: testAccFixedaddressBasicConfig(ip, "CIRCUIT_ID", agentCircuitID),
@@ -42,7 +38,7 @@ func TestAccFixedaddressList_basic(t *testing.T) {
 			// Query the object
 			{
 				Query:  true,
-				Config: testAccFixedaddressListBasicConfig(),
+				Config: utils.ProviderSetup() + testAccFixedaddressListBasicConfig(),
 				QueryResultChecks: []querycheck.QueryResultCheck{
 					querycheck.ExpectLengthAtLeast("nios_dhcp_fixed_address.test", 1),
 				},
@@ -61,13 +57,9 @@ func TestAccFixedaddressList_Filters(t *testing.T) {
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		TerraformVersionChecks: []tfversion.TerraformVersionCheck{
-			tfversion.SkipBelow(tfversion.Version0_14_0),
+			tfversion.SkipBelow(tfversion.Version1_14_0),
 		},
 		Steps: []resource.TestStep{
-			// Provider Setup
-			{
-				Config: utils.ProviderSetup(),
-			},
 			// Create and Read
 			{
 				Config: testAccFixedaddressBasicConfig(ip, "CIRCUIT_ID", agentCircuitID),
@@ -79,7 +71,7 @@ func TestAccFixedaddressList_Filters(t *testing.T) {
 			// Query the object
 			{
 				Query:  true,
-				Config: testAccFixedaddressListConfigFilters(ip),
+				Config: utils.ProviderSetup() + testAccFixedaddressListConfigFilters(ip),
 				QueryResultChecks: []querycheck.QueryResultCheck{
 					querycheck.ExpectLength("nios_dhcp_fixed_address.test", 1),
 				},
@@ -101,13 +93,9 @@ func TestAccFixedaddressList_ExtAttrFilters(t *testing.T) {
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		TerraformVersionChecks: []tfversion.TerraformVersionCheck{
-			tfversion.SkipBelow(tfversion.Version0_14_0),
+			tfversion.SkipBelow(tfversion.Version1_14_0),
 		},
 		Steps: []resource.TestStep{
-			// Provider Setup
-			{
-				Config: utils.ProviderSetup(),
-			},
 			// Create and Read
 			{
 				Config: testAccFixedaddressExtAttrs(ip, "CIRCUIT_ID", agentCircuitID, map[string]string{
@@ -121,7 +109,7 @@ func TestAccFixedaddressList_ExtAttrFilters(t *testing.T) {
 			// Query the object
 			{
 				Query:  true,
-				Config: testAccFixedaddressListConfigExtAttrFilters(extAttrValue),
+				Config: utils.ProviderSetup() + testAccFixedaddressListConfigExtAttrFilters(extAttrValue),
 				QueryResultChecks: []querycheck.QueryResultCheck{
 					querycheck.ExpectLength("nios_dhcp_fixed_address.test", 1),
 				},
