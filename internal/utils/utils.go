@@ -378,7 +378,7 @@ func ExtractResourceRef(ref string) string {
 
 func FindModelFieldByTFSdkTag(model any, tagName string) (string, bool) {
 	modelType := reflect.TypeOf(model)
-	if modelType.Kind() == reflect.Ptr {
+	if modelType.Kind() == reflect.Pointer {
 		modelType = modelType.Elem()
 	}
 
@@ -884,4 +884,17 @@ func ReorderAndFilterDHCPOptions(
 	diags.Append(d...)
 
 	return newList, &diags
+}
+
+func ProviderSetup() string {
+	return `
+	terraform {
+	  required_providers {
+		nios = {
+		  source  = "registry.terraform.io/infobloxopen/nios"
+		  version = "1.1.0"
+		}
+	  }
+	}
+`
 }
