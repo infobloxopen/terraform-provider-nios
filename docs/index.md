@@ -43,3 +43,4 @@ provider "nios" {
 - `proxy_search` (String) Proxy search mode. Allowed values: LOCAL (default), GM.
 - `proxy_url` (String) Proxy URL to connect to Infoblox NIOS.
 - `retry_timeout` (Number) Specifies the timeout duration (in seconds) for retrying operations that fail due to transient errors.
+- `sandbox` (Boolean) Whether to use sandbox environment. Default is false.

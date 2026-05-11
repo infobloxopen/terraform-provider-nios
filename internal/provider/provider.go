@@ -59,6 +59,7 @@ type NIOSProviderModel struct {
 	ProxyURL     types.String `tfsdk:"proxy_url"`
 	ProxySearch  types.String `tfsdk:"proxy_search"`
 	RetryTimeout types.Int64  `tfsdk:"retry_timeout"`
+	Sandbox      types.Bool   `tfsdk:"sandbox"`
 }
 
 func (p *NIOSProvider) Metadata(_ context.Context, _ provider.MetadataRequest, resp *provider.MetadataResponse) {
@@ -94,6 +95,10 @@ func (p *NIOSProvider) Schema(_ context.Context, _ provider.SchemaRequest, resp 
 				Optional:    true,
 				Description: "Specifies the timeout duration (in seconds) for retrying operations that fail due to transient errors.",
 			},
+			"sandbox": schema.BoolAttribute{
+				Optional:    true,
+				Description: "Whether to use sandbox environment. Default is false.",
+			},
 		},
 	}
 }
@@ -124,13 +129,33 @@ func (p *NIOSProvider) Configure(ctx context.Context, req provider.ConfigureRequ
 		retry.SetRetryTimeout(data.RetryTimeout.ValueInt64())
 	}
 
-	err := checkAndCreatePreRequisites(ctx, client)
-	if err != nil {
-		resp.Diagnostics.AddError(
-			"Failed to ensure Terraform extensible attribute exists",
-			err.Error(),
-		)
+	if data.Sandbox.IsUnknown() || data.Sandbox.IsNull() {
+		data.Sandbox = types.BoolValue(false)
 	}
+
+	err := checkAndCreatePreRequisites(ctx, client)
+	if data.Sandbox.ValueBool() {
+		// Sandbox environment allows provider to be configured even if pre-requisites check fails, as it is intended for testing and development purposes. Hence, only a warning is added to diagnostics in case of error.
+		if err != nil {
+			resp.Diagnostics.AddWarning(
+				"Terraform Extensible Attribute Verification Failed",
+				fmt.Sprintf("Unable to verify that the %q extensible attribute exists in NIOS. "+
+					"The provider is running in sandbox mode and will continue, but operations on NIOS-managed resources may fail.\n "+
+					"Error: %s\n\n"+
+					"To resolve this issue, ensure your NIOS credentials have sufficient permissions to create extensible attributes, "+
+					"or manually create the %q extensible attribute in NIOS with type STRING and flags CR.",
+					terraformInternalIDEA, err, terraformInternalIDEA),
+			)
+		}
+	} else {
+		if err != nil {
+			resp.Diagnostics.AddError(
+				"Failed to ensure Terraform extensible attribute exists",
+				err.Error(),
+			)
+		}
+	}
+
 	resp.DataSourceData = client
 	resp.ResourceData = client
 	resp.ListResourceData = client
