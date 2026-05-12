@@ -83,89 +83,89 @@ func (r *SharednetworkResource) ValidateConfig(ctx context.Context, req resource
 		}
 	}
 
-// If ignore_client_identifier and use_ignore_client_identifier are both true,
-// then ignore_id must be "CLIENT" and use_ignore_id must be true.
-icidEnabled := !data.IgnoreClientIdentifier.IsNull() && !data.IgnoreClientIdentifier.IsUnknown() &&
-    data.IgnoreClientIdentifier.ValueBool()
-useIcidEnabled := !data.UseIgnoreClientIdentifier.IsNull() && !data.UseIgnoreClientIdentifier.IsUnknown() &&
-    data.UseIgnoreClientIdentifier.ValueBool()
+	// If ignore_client_identifier and use_ignore_client_identifier are both true,
+	// then ignore_id must be "CLIENT" and use_ignore_id must be true.
+	icidEnabled := !data.IgnoreClientIdentifier.IsNull() && !data.IgnoreClientIdentifier.IsUnknown() &&
+		data.IgnoreClientIdentifier.ValueBool()
+	useIcidEnabled := !data.UseIgnoreClientIdentifier.IsNull() && !data.UseIgnoreClientIdentifier.IsUnknown() &&
+		data.UseIgnoreClientIdentifier.ValueBool()
 
-if icidEnabled && useIcidEnabled {
-    invalidIgnoreId := data.IgnoreId.IsNull() || data.IgnoreId.IsUnknown() || data.IgnoreId.ValueString() != "CLIENT"
-    invalidUseIgnoreId := data.UseIgnoreId.IsNull() || data.UseIgnoreId.IsUnknown() || !data.UseIgnoreId.ValueBool()
+	if icidEnabled && useIcidEnabled {
+		invalidIgnoreId := data.IgnoreId.IsNull() || data.IgnoreId.IsUnknown() || data.IgnoreId.ValueString() != "CLIENT"
+		invalidUseIgnoreId := data.UseIgnoreId.IsNull() || data.UseIgnoreId.IsUnknown() || !data.UseIgnoreId.ValueBool()
 
-    if invalidIgnoreId || invalidUseIgnoreId {
-        resp.Diagnostics.AddAttributeError(
-            path.Root("ignore_id"),
-            "Invalid Configuration",
-            "ignore_id must be set to \"CLIENT\" and use_ignore_id must be set to true when ignore_client_identifier and use_ignore_client_identifier are both set to true.",
-        )
-    }
-}
+		if invalidIgnoreId || invalidUseIgnoreId {
+			resp.Diagnostics.AddAttributeError(
+				path.Root("ignore_id"),
+				"Invalid Configuration",
+				"ignore_id must be set to \"CLIENT\" and use_ignore_id must be set to true when ignore_client_identifier and use_ignore_client_identifier are both set to true.",
+			)
+		}
+	}
 
-// If ignore_id is "CLIENT" and use_ignore_id is true, then
-// ignore_client_identifier and use_ignore_client_identifier must both be true.
-ignoreIdIsClient := !data.IgnoreId.IsNull() && !data.IgnoreId.IsUnknown() &&
-    data.IgnoreId.ValueString() == "CLIENT"
-useIgnoreIdIsTrue := !data.UseIgnoreId.IsNull() && !data.UseIgnoreId.IsUnknown() &&
-    data.UseIgnoreId.ValueBool()
+	// If ignore_id is "CLIENT" and use_ignore_id is true, then
+	// ignore_client_identifier and use_ignore_client_identifier must both be true.
+	ignoreIdIsClient := !data.IgnoreId.IsNull() && !data.IgnoreId.IsUnknown() &&
+		data.IgnoreId.ValueString() == "CLIENT"
+	useIgnoreIdIsTrue := !data.UseIgnoreId.IsNull() && !data.UseIgnoreId.IsUnknown() &&
+		data.UseIgnoreId.ValueBool()
 
-if ignoreIdIsClient && useIgnoreIdIsTrue {
-    invalidIcid := data.IgnoreClientIdentifier.IsNull() || data.IgnoreClientIdentifier.IsUnknown() ||
-        !data.IgnoreClientIdentifier.ValueBool()
-    invalidUseIcid := data.UseIgnoreClientIdentifier.IsNull() || data.UseIgnoreClientIdentifier.IsUnknown() ||
-        !data.UseIgnoreClientIdentifier.ValueBool()
+	if ignoreIdIsClient && useIgnoreIdIsTrue {
+		invalidIcid := data.IgnoreClientIdentifier.IsNull() || data.IgnoreClientIdentifier.IsUnknown() ||
+			!data.IgnoreClientIdentifier.ValueBool()
+		invalidUseIcid := data.UseIgnoreClientIdentifier.IsNull() || data.UseIgnoreClientIdentifier.IsUnknown() ||
+			!data.UseIgnoreClientIdentifier.ValueBool()
 
-    if invalidIcid || invalidUseIcid {
-        resp.Diagnostics.AddAttributeError(
-            path.Root("ignore_client_identifier"),
-            "Invalid Configuration",
-            "ignore_client_identifier and use_ignore_client_identifier must both be set to true when ignore_id is \"CLIENT\" and use_ignore_id is true.",
-        )
-    }
-}
+		if invalidIcid || invalidUseIcid {
+			resp.Diagnostics.AddAttributeError(
+				path.Root("ignore_client_identifier"),
+				"Invalid Configuration",
+				"ignore_client_identifier and use_ignore_client_identifier must both be set to true when ignore_id is \"CLIENT\" and use_ignore_id is true.",
+			)
+		}
+	}
 
-// If ignore_id is "NONE" and use_ignore_id is false, then both
-// ignore_client_identifier and use_ignore_client_identifier must be false.
-ignoreIdIsNone := !data.IgnoreId.IsNull() && !data.IgnoreId.IsUnknown() &&
-    data.IgnoreId.ValueString() == "NONE"
-useIgnoreIdDisabled := !data.UseIgnoreId.IsNull() && !data.UseIgnoreId.IsUnknown() &&
-    !data.UseIgnoreId.ValueBool()
+	// If ignore_id is "NONE" and use_ignore_id is false, then both
+	// ignore_client_identifier and use_ignore_client_identifier must be false.
+	ignoreIdIsNone := !data.IgnoreId.IsNull() && !data.IgnoreId.IsUnknown() &&
+		data.IgnoreId.ValueString() == "NONE"
+	useIgnoreIdDisabled := !data.UseIgnoreId.IsNull() && !data.UseIgnoreId.IsUnknown() &&
+		!data.UseIgnoreId.ValueBool()
 
-if ignoreIdIsNone && useIgnoreIdDisabled {
-    icidSet := !data.IgnoreClientIdentifier.IsNull() && !data.IgnoreClientIdentifier.IsUnknown() &&
-        data.IgnoreClientIdentifier.ValueBool()
-    useIcidSet := !data.UseIgnoreClientIdentifier.IsNull() && !data.UseIgnoreClientIdentifier.IsUnknown() &&
-        data.UseIgnoreClientIdentifier.ValueBool()
+	if ignoreIdIsNone && useIgnoreIdDisabled {
+		icidSet := !data.IgnoreClientIdentifier.IsNull() && !data.IgnoreClientIdentifier.IsUnknown() &&
+			data.IgnoreClientIdentifier.ValueBool()
+		useIcidSet := !data.UseIgnoreClientIdentifier.IsNull() && !data.UseIgnoreClientIdentifier.IsUnknown() &&
+			data.UseIgnoreClientIdentifier.ValueBool()
 
-    if icidSet || useIcidSet {
-        resp.Diagnostics.AddAttributeError(
-            path.Root("ignore_client_identifier"),
-            "Invalid Configuration",
-            "ignore_client_identifier and use_ignore_client_identifier must both be set to false when ignore_id is \"NONE\" and use_ignore_id is false.",
-        )
-    }
-}
+		if icidSet || useIcidSet {
+			resp.Diagnostics.AddAttributeError(
+				path.Root("ignore_client_identifier"),
+				"Invalid Configuration",
+				"ignore_client_identifier and use_ignore_client_identifier must both be set to false when ignore_id is \"NONE\" and use_ignore_id is false.",
+			)
+		}
+	}
 
-// If ignore_id is "NONE" and use_ignore_id is true, then
-// ignore_client_identifier must be false and use_ignore_client_identifier must be true.
-useIgnoreIdEnabled := !data.UseIgnoreId.IsNull() && !data.UseIgnoreId.IsUnknown() &&
-    data.UseIgnoreId.ValueBool()
+	// If ignore_id is "NONE" and use_ignore_id is true, then
+	// ignore_client_identifier must be false and use_ignore_client_identifier must be true.
+	useIgnoreIdEnabled := !data.UseIgnoreId.IsNull() && !data.UseIgnoreId.IsUnknown() &&
+		data.UseIgnoreId.ValueBool()
 
-if ignoreIdIsNone && useIgnoreIdEnabled {
-    invalidIcid := !data.IgnoreClientIdentifier.IsNull() && !data.IgnoreClientIdentifier.IsUnknown() &&
-        data.IgnoreClientIdentifier.ValueBool()
-    invalidUseIcid := data.UseIgnoreClientIdentifier.IsNull() || data.UseIgnoreClientIdentifier.IsUnknown() ||
-        !data.UseIgnoreClientIdentifier.ValueBool()
+	if ignoreIdIsNone && useIgnoreIdEnabled {
+		invalidIcid := !data.IgnoreClientIdentifier.IsNull() && !data.IgnoreClientIdentifier.IsUnknown() &&
+			data.IgnoreClientIdentifier.ValueBool()
+		invalidUseIcid := data.UseIgnoreClientIdentifier.IsNull() || data.UseIgnoreClientIdentifier.IsUnknown() ||
+			!data.UseIgnoreClientIdentifier.ValueBool()
 
-    if invalidIcid || invalidUseIcid {
-        resp.Diagnostics.AddAttributeError(
-            path.Root("ignore_client_identifier"),
-            "Invalid Configuration",
-            "ignore_client_identifier must be set to false and use_ignore_client_identifier must be set to true when ignore_id is \"NONE\" and use_ignore_id is true.",
-        )
-    }
-}
+		if invalidIcid || invalidUseIcid {
+			resp.Diagnostics.AddAttributeError(
+				path.Root("ignore_client_identifier"),
+				"Invalid Configuration",
+				"ignore_client_identifier must be set to false and use_ignore_client_identifier must be set to true when ignore_id is \"NONE\" and use_ignore_id is true.",
+			)
+		}
+	}
 
 	if !data.Options.IsNull() && !data.Options.IsUnknown() {
 		// Special DHCP option names that require use_option to be set
