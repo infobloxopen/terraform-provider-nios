@@ -53,7 +53,7 @@ variable "ha_subnet_name" {
   type        = string
   default     = null
   validation {
-    condition     = !var.enable_ha || var.ha_subnet_name != null
+    condition     = !var.enable_ha || (var.ha_subnet_name != null && trimspace(var.ha_subnet_name) != "")
     error_message = "ha_subnet_name must be set to a non-empty subnet name when enable_ha is true."
   }
 }

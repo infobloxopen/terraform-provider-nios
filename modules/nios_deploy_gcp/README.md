@@ -157,7 +157,7 @@ module "node2" {
 
 ```hcl
 provider "nios" {
-  nios_host_url = "https://${module.node1.lan_ip}"
+  nios_host_url = "https://${module.node1.lan1_ip}"
   nios_username = "username"
   nios_password = "password"
 }
@@ -170,17 +170,17 @@ resource "nios_grid_member" "member" {
   vip_setting = {
     address     = module.node2.lan1_ip
     gateway     = module.node2.lan1_gateway
-    subnet_mask = module.node2.lan_subnet_mask
+    subnet_mask = module.node2.lan1_subnet_mask
   }
 }
 
 // Join member to existing grid master
 resource "nios_grid_join" "member_join" {
-  member_url      = "https://${module.node2.lan_ip}"
+  member_url      = "https://${module.node2.lan1_ip}"
   member_username = "Username"
   member_password = "Password"
   grid_name       = "Infoblox"
-  master          = module.node1.lan_ip
+  master          = module.node1.lan1_ip
   shared_secret   = "<secret>"
   depends_on      = [nios_grid_member.member]
 }
@@ -308,7 +308,7 @@ module "node2" {
 
 ##### After NIOS is ready (~30 min), configure grid member
 
-> **Note:** On GCP, even though the IPv6 address is available in the Terraform state (`lan_ipv6_address` output), you must manually configure the IPv6 settings on the NIOS grid through the UI or API. Unlike AWS, GCP does not automatically configure IPv6 on the NIOS instance.
+On GCP, even though the IPv6 addresses are available in the Terraform state (`mgmt_ipv6_address` and `lan1_ipv6_address` outputs), you must manually configure the IPv6 settings on the NIOS grid through the UI or API. Unlike AWS, GCP does not automatically configure IPv6 on the NIOS instance.
 
 ```hcl
 provider "nios" {

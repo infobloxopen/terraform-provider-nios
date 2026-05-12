@@ -104,3 +104,9 @@ variable "labels" {
     dontterminate = "yes"
   }
 }
+
+variable "enable_ipv6" {
+  description = "Whether to enable IPv6 (dual-stack) on network interfaces."
+  type        = bool
+  default     = false
+}
