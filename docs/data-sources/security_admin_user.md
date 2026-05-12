@@ -73,7 +73,7 @@ Optional:
 Read-Only:
 
 - `extattrs_all` (Map of String) Extensible attributes associated with the object , including default attributes.
-- `password_revision` (Number) Internal revision incremented when SNMPv3 secrets change.
+- `password_revision` (Number) Internal revision incremented when admin user password changes.
 - `ref` (String) The reference to the object.
 - `status` (String) Status of the user account.
 

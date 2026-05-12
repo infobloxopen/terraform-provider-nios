@@ -79,11 +79,21 @@ func (r *AdminuserResource) ModifyPlan(ctx context.Context, req resource.ModifyP
 	}
 
 	var statePwdRevision types.Int64
-	var planPassword, statePassword types.String
+	var planPassword types.String
 
+	// Normalize stateRev if null (e.g., first apply)
+	curRev := int64(0)
+
+	if !req.State.Raw.IsNull() && req.State.Raw.IsKnown() {
+		resp.Diagnostics.Append(req.State.GetAttribute(ctx, path.Root("password_revision"), &statePwdRevision)...)
+		if resp.Diagnostics.HasError() {
+			return
+		}
+		if !statePwdRevision.IsNull() && !statePwdRevision.IsUnknown() {
+			curRev = statePwdRevision.ValueInt64()
+		}
+	}
 	resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("password"), &planPassword)...)
-	resp.Diagnostics.Append(req.State.GetAttribute(ctx, path.Root("password"), &statePassword)...)
-	resp.Diagnostics.Append(req.State.GetAttribute(ctx, path.Root("password_revision"), &statePwdRevision)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
@@ -92,11 +102,6 @@ func (r *AdminuserResource) ModifyPlan(ctx context.Context, req resource.ModifyP
 
 	prevHashes := secretsHashState{}
 	plannedHashes := secretsHashState{}
-	// Normalize stateRev if null (e.g., first apply)
-	curRev := int64(0)
-	if !statePwdRevision.IsNull() && !statePwdRevision.IsUnknown() {
-		curRev = statePwdRevision.ValueInt64()
-	}
 
 	if computeNewHash {
 
@@ -241,7 +246,7 @@ func (r *AdminuserResource) Create(ctx context.Context, req resource.CreateReque
 		return
 	}
 
-	data.PasswordRevsion = passwordRevision
+	data.PasswordRevision = passwordRevision
 	plannedSshKeys := data.SshKeys
 	data.Flatten(ctx, &res, &resp.Diagnostics)
 	// The API may return ssh_keys even when not configured (e.g. use_ssh_keys=false).
@@ -448,8 +453,7 @@ func (r *AdminuserResource) Update(ctx context.Context, req resource.UpdateReque
 
 	var password types.String
 	resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("password"), &password)...)
-	if diags.HasError() {
-		resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
 		return
 	}
 

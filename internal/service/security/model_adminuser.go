@@ -39,7 +39,7 @@ type AdminuserModel struct {
 	ExtAttrsAll                     types.Map    `tfsdk:"extattrs_all"`
 	Name                            types.String `tfsdk:"name"`
 	Password                        types.String `tfsdk:"password"`
-	PasswordRevsion                 types.Int64  `tfsdk:"password_revision"`
+	PasswordRevision                types.Int64  `tfsdk:"password_revision"`
 	SshKeys                         types.List   `tfsdk:"ssh_keys"`
 	Status                          types.String `tfsdk:"status"`
 	TimeZone                        types.String `tfsdk:"time_zone"`
@@ -171,7 +171,7 @@ var AdminuserResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"password_revision": schema.Int64Attribute{
 		Computed:            true,
-		MarkdownDescription: "Internal revision incremented when SNMPv3 secrets change.",
+		MarkdownDescription: "Internal revision incremented when admin user password changes.",
 		PlanModifiers: []planmodifier.Int64{
 			int64planmodifier.UseStateForUnknown(),
 		},
