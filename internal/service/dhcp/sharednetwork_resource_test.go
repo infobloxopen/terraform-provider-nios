@@ -569,15 +569,15 @@ func TestAccSharednetworkResource_IgnoreClientIdentifier(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccSharednetworkIgnoreClientIdentifier(name, networks, false, true),
+				Config: testAccSharednetworkIgnoreClientIdentifier(name, networks, true, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSharednetworkExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ignore_client_identifier", "false"),
+					resource.TestCheckResourceAttr(resourceName, "ignore_client_identifier", "true"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccSharednetworkIgnoreClientIdentifier(name, networks, true, true),
+				Config: testAccSharednetworkIgnoreClientIdentifierUpdate(name, networks, true, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSharednetworkExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "ignore_client_identifier", "true"),
@@ -1830,7 +1830,21 @@ resource "nios_dhcp_shared_network" "test_ignore_client_identifier" {
    networks = %s
    ignore_client_identifier = %t
    use_ignore_client_identifier = %t
+   use_ignore_id = false
+}
+`, name, networksStr, ignoreClientIdentifier, useIgnoreClientIdentifier)
+}
+
+func testAccSharednetworkIgnoreClientIdentifierUpdate(name string, networks []string, ignoreClientIdentifier, useIgnoreClientIdentifier bool) string {
+	networksStr := formatNetworksToHCL(networks)
+	return fmt.Sprintf(`
+resource "nios_dhcp_shared_network" "test_ignore_client_identifier" {
+   name = %q
+   networks = %s
+   ignore_client_identifier = %t
+   use_ignore_client_identifier = %t
    use_ignore_id = true
+   ignore_id = "CLIENT"
 }
 `, name, networksStr, ignoreClientIdentifier, useIgnoreClientIdentifier)
 }
