@@ -45,7 +45,8 @@ node('Cloud-test1-172.28.81.12-label') {
 
                 // ── Checkout ──────────────────────────────────────────────────
                 stage('Checkout') {
-                    git url: "https://github.com/${params.REPO_USER}/terraform-provider-nios.git", branch: params.BRANCH
+                    //git url: "https://github.com/${params.REPO_USER}/terraform-provider-nios.git", branch: params.BRANCH
+                    checkout scm
                 }
 
                 // ── Install toolchain ─────────────────────────────────────────
