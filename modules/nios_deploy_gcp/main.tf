@@ -7,7 +7,7 @@ data "google_compute_subnetwork" "mgmt" {
 
 // Retrieve information about existing LAN subnetwork
 data "google_compute_subnetwork" "lan" {
-  name    = var.lan_subnet_name
+  name    = var.lan1_subnet_name
   region  = var.region
   project = var.project
 }
@@ -42,7 +42,7 @@ locals {
 
   // Subnetwork self-links
   subnetwork_mgmt = "projects/${var.project}/regions/${var.region}/subnetworks/${var.mgmt_subnet_name}"
-  subnetwork_lan  = "projects/${var.project}/regions/${var.region}/subnetworks/${var.lan_subnet_name}"
+  subnetwork_lan1 = "projects/${var.project}/regions/${var.region}/subnetworks/${var.lan1_subnet_name}"
   subnetwork_ha   = var.ha_subnet_name != null ? "projects/${var.project}/regions/${var.region}/subnetworks/${var.ha_subnet_name}" : null
 }
 
@@ -69,9 +69,9 @@ resource "google_compute_instance" "grid" {
     stack_type = var.enable_ipv6 ? "IPV4_IPV6" : "IPV4_ONLY"
   }
 
-  // nic1 – LAN
+  // nic1 – LAN1
   network_interface {
-    subnetwork = local.subnetwork_lan
+    subnetwork = local.subnetwork_lan1
     stack_type = var.enable_ipv6 ? "IPV4_IPV6" : "IPV4_ONLY"
   }
 
@@ -80,8 +80,11 @@ resource "google_compute_instance" "grid" {
     for_each = var.enable_ha ? [1] : []
     content {
       subnetwork = local.subnetwork_ha
-      alias_ip_range {
-        ip_cidr_range = "/32"
+      dynamic "alias_ip_range" {
+        for_each = var.is_primary ? [1] : []
+        content {
+          ip_cidr_range = "/32"
+        }
       }
     }
   }

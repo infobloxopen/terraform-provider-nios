@@ -48,7 +48,7 @@ variable "ha_subnet_name" {
   type        = string
 }
 
-variable "lan_subnet_name" {
+variable "lan1_subnet_name" {
   description = "The name of the subnetwork to attach to the secondary network interface (nic1)."
   type        = string
 }

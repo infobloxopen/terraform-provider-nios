@@ -49,8 +49,9 @@ The module automatically maps NIOS models to GCP machine types:
 | <a name="input_enable_ipv6"></a> [enable\_ipv6](#input\_enable\_ipv6) | Enable IPv6 (dual-stack) on network interfaces | `bool` | `false` | no |
 | <a name="input_ha_subnet_name"></a> [ha\_subnet\_name](#input\_ha\_subnet\_name) | The name of the subnetwork to attach to the high availability network interface (nic2). | `string` | `null` | no |
 | <a name="input_image_name"></a> [image\_name](#input\_image\_name) | The image from which to initialize this disk. | `string` | n/a | yes |
+| <a name="input_is_primary"></a> [is\_primary](#input\_is\_primary) | Whether this is the primary node in an HA pair. If true, an alias IP (VIP) is allocated on the HA interface. | `bool` | `false` | no |
 | <a name="input_labels"></a> [labels](#input\_labels) | A map of key/value labels to assign to the instance. | `map(string)` | <pre>{<br/>  "dontstop": "yes",<br/>  "dontterminate": "yes",<br/>  "product": "nios"<br/>}</pre> | no |
-| <a name="input_lan_subnet_name"></a> [lan\_subnet\_name](#input\_lan\_subnet\_name) | The name of the subnetwork to attach to the secondary network interface (nic1). | `string` | n/a | yes |
+| <a name="input_lan1_subnet_name"></a> [lan1\_subnet\_name](#input\_lan1\_subnet\_name) | The name of the subnetwork to attach to the secondary network interface (nic1). | `string` | n/a | yes |
 | <a name="input_machine_type"></a> [machine\_type](#input\_machine\_type) | The machine type to use for the instance. Used if nios\_model is not mapped. | `string` | `"n2-standard-4"` | no |
 | <a name="input_mgmt_subnet_name"></a> [mgmt\_subnet\_name](#input\_mgmt\_subnet\_name) | The name of the subnetwork to attach to the primary network interface (nic0). | `string` | n/a | yes |
 | <a name="input_name"></a> [name](#input\_name) | The name of the compute instance. | `string` | `"nios-gcp-instance"` | no |
@@ -72,15 +73,15 @@ The module automatically maps NIOS models to GCP machine types:
 | <a name="output_ha_subnet_mask"></a> [ha\_subnet\_mask](#output\_ha\_subnet\_mask) | Subnet mask of the HA subnetwork. |
 | <a name="output_instance_id"></a> [instance\_id](#output\_instance\_id) | ID of the NIOS Grid Member instance. |
 | <a name="output_instance_name"></a> [instance\_name](#output\_instance\_name) | Name of the NIOS Grid Member instance. |
-| <a name="output_lan_gateway"></a> [lan\_gateway](#output\_lan\_gateway) | Gateway IP for the LAN subnetwork. |
-| <a name="output_lan_ip"></a> [lan\_ip](#output\_lan\_ip) | Internal IP of the LAN interface (nic1). |
-| <a name="output_lan_ipv6_address"></a> [lan\_ipv6\_address](#output\_lan\_ipv6\_address) | IPv6 address of the LAN interface (nic1). |
-| <a name="output_lan_subnet_mask"></a> [lan\_subnet\_mask](#output\_lan\_subnet\_mask) | Subnet mask of the LAN subnetwork. |
+| <a name="output_lan1_gateway"></a> [lan1\_gateway](#output\_lan1\_gateway) | Gateway IP for the LAN1 subnetwork. |
+| <a name="output_lan1_ip"></a> [lan1\_ip](#output\_lan1\_ip) | Internal IP of the LAN interface (nic1). |
+| <a name="output_lan1_ipv6_address"></a> [lan1\_ipv6\_address](#output\_lan1\_ipv6\_address) | IPv6 address of the LAN1 interface (nic1). |
+| <a name="output_lan1_subnet_mask"></a> [lan1\_subnet\_mask](#output\_lan1\_subnet\_mask) | Subnet mask of the LAN1 subnetwork. |
 | <a name="output_mgmt_gateway"></a> [mgmt\_gateway](#output\_mgmt\_gateway) | Gateway IP for the MGMT subnetwork. |
 | <a name="output_mgmt_ip"></a> [mgmt\_ip](#output\_mgmt\_ip) | Internal IP of the MGMT interface (nic0). |
 | <a name="output_mgmt_ipv6_address"></a> [mgmt\_ipv6\_address](#output\_mgmt\_ipv6\_address) | IPv6 address of the MGMT interface (nic0). |
 | <a name="output_mgmt_subnet_mask"></a> [mgmt\_subnet\_mask](#output\_mgmt\_subnet\_mask) | Subnet Mask of the Mgmt Subnetwork |
-| <a name="output_vip"></a> [vip](#output\_vip) | VIP address from the HA interface alias IP range (nic2). |
+| <a name="output_vip"></a> [vip](#output\_vip) | n/a |
 <!-- END_TF_DOCS -->
 
 ---
@@ -108,7 +109,7 @@ module "node1" {
   name              = var.name
   nios_model        = var.nios_model
   mgmt_subnet_name  = var.mgmt_subnet_name
-  lan_subnet_name  = var.lan_subnet_name
+  lan1_subnet_name  = var.lan1_subnet_name
 
   boot_disk_type = var.boot_disk_type
   boot_disk_size = var.boot_disk_size
@@ -167,8 +168,8 @@ resource "nios_grid_member" "member" {
   platform         = "VNIOS"
 
   vip_setting = {
-    address     = module.node2.lan_ip
-    gateway     = module.node2.lan_gateway
+    address     = module.node2.lan1_ip
+    gateway     = module.node2.lan1_gateway
     subnet_mask = module.node2.lan_subnet_mask
   }
 }
@@ -196,12 +197,14 @@ Deploy two GCP instances for SA-HA Config
 module "node1" {
   // ... (same config as Step 1)
   enable_ha         = true
+  ha_subnet_name = "example-ha-subnet"
 }
 
 // Deploy GCP infrastructure for Node 2 (Passive Node)
 module "node2" {
   // ... (same config as Step 1)
   enable_ha         = true
+  ha_subnet_name = "example-ha-subnet"
 }
 ```
 #### After both the grids are up and running (~30 min), configure HA
@@ -240,8 +243,8 @@ resource "nios_grid_member" "ha_pair" {
     address         = module.node1.vip
     gateway         = module.node1.ha_gateway
     subnet_mask     = module.node1.ha_subnet_mask
-    lan_gateway     = module.node1.lan_gateway
-    lan_subnet_mask = module.node1.lan_subnet_mask
+    lan1_gateway     = module.node1.lan1_gateway
+    lan1_subnet_mask = module.node1.lan1_subnet_mask
     dscp            = 0
     primary         = true
     use_dscp        = false
@@ -251,14 +254,14 @@ resource "nios_grid_member" "ha_pair" {
     {
       lan_ha_port_setting = {
         ha_ip_address      = module.node1.ha_ip
-        mgmt_lan           = module.node1.lan_ip
+        mgmt_lan           = module.node1.lan1_ip
         ha_cloud_attribute = module.node1.instance_name
       }
     },
     {
       lan_ha_port_setting = {
         ha_ip_address      = module.node2.ha_ip
-        mgmt_lan           = module.node2.lan_ip
+        mgmt_lan           = module.node2.lan1_ip
         ha_cloud_attribute = module.node2.instance_name
       }
     }
@@ -276,7 +279,7 @@ resource "nios_grid_member" "ha_pair" {
 
 ```
 resource "nios_grid_join" "ha_member_join" {
-  member_url      = "https://${module.node2.lan_ip}"
+  member_url      = "https://${module.node2.lan1_ip}"
   member_username = "username"
   member_password = "password"
   grid_name       = "Infoblox"
@@ -309,7 +312,7 @@ module "node2" {
 
 ```hcl
 provider "nios" {
-  nios_host_url = "https://${module.node1.lan_ip}"
+  nios_host_url = "https://${module.node1.lan1_ip}"
   nios_username = "username"
   nios_password = "password"
 }
@@ -319,25 +322,25 @@ resource "nios_grid_member" "member" {
   config_addr_type = "BOTH"
   platform         = "VNIOS"
   vip_setting = {
-    address     = module.node2.lan_ip
-    gateway     = module.node2.lan_gateway
-    subnet_mask = module.node2.lan_subnet_mask
+    address     = module.node2.lan1_ip
+    gateway     = module.node2.lan1_gateway
+    subnet_mask = module.node2.lan1_subnet_mask
   }
   ipv6_setting = {
-    virtual_ip  = module.node2.lan_ipv6_address
+    virtual_ip  = module.node2.lan1_ipv6_address
     cidr_prefix = 64
-    gateway     = "<ipv6_lan_gateway>"
+    gateway     = "<ipv6_lan1_gateway>"
     enabled     = true
   }
 }
 
 // Join member to existing grid master
 resource "nios_grid_join" "member_join" {
-  member_url      = "https://${module.node2.lan_ip}"
+  member_url      = "https://${module.node2.lan1_ip}"
   member_username = "<username>"
   member_password = "<password>"
   grid_name       = "Infoblox"
-  master          = module.node1.lan_ip
+  master          = module.node1.lan1_ip
   shared_secret   = "<secret>"
   depends_on      = [nios_grid_member.member]
 }

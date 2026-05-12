@@ -43,7 +43,7 @@ variable "mgmt_subnet_name" {
   type        = string
 }
 
-variable "lan_subnet_name" {
+variable "lan1_subnet_name" {
   description = "The name of the subnetwork to attach to the secondary network interface (nic1)."
   type        = string
 }
@@ -52,6 +52,10 @@ variable "ha_subnet_name" {
   description = "The name of the subnetwork to attach to the high availability network interface (nic2)."
   type        = string
   default     = null
+  validation {
+    condition     = !var.enable_ha || var.ha_subnet_name != null
+    error_message = "ha_subnet_name must be set to a non-empty subnet name when enable_ha is true."
+  }
 }
 
 variable "boot_disk_type" {
@@ -117,3 +121,10 @@ variable "enable_ipv6" {
   type        = bool
   default     = false
 }
+
+variable "is_primary" {
+  description = "Whether this is the primary node in an HA pair. If true, an alias IP (VIP) is allocated on the HA interface."
+  type        = bool
+  default     = false
+}
+

@@ -12,7 +12,7 @@ output "mgmt_ip" {
   value       = google_compute_instance.grid.network_interface[0].network_ip
 }
 
-output "lan_ip" {
+output "lan1_ip" {
   description = "Internal IP of the LAN interface (nic1)."
   value       = google_compute_instance.grid.network_interface[1].network_ip
 }
@@ -32,13 +32,13 @@ output "mgmt_gateway" {
   value       = cidrhost(data.google_compute_subnetwork.mgmt.ip_cidr_range, 1)
 }
 
-output "lan_subnet_mask" {
-  description = "Subnet mask of the LAN subnetwork."
+output "lan1_subnet_mask" {
+  description = "Subnet mask of the LAN1 subnetwork."
   value       = cidrnetmask(data.google_compute_subnetwork.lan.ip_cidr_range)
 }
 
-output "lan_gateway" {
-  description = "Gateway IP for the LAN subnetwork."
+output "lan1_gateway" {
+  description = "Gateway IP for the LAN1 subnetwork."
   value       = cidrhost(data.google_compute_subnetwork.lan.ip_cidr_range, 1)
 }
 
@@ -53,8 +53,10 @@ output "ha_gateway" {
 }
 
 output "vip" {
-  description = "VIP address from the HA interface alias IP range (nic2)."
-  value       = var.enable_ha ? cidrhost(google_compute_instance.grid.network_interface[2].alias_ip_range[0].ip_cidr_range, 0) : null
+  value = try(
+    split("/", google_compute_instance.grid.network_interface[2].alias_ip_range[0].ip_cidr_range)[0],
+    null
+  )
 }
 
 output "mgmt_ipv6_address" {
@@ -62,7 +64,7 @@ output "mgmt_ipv6_address" {
   value       = var.enable_ipv6 ? google_compute_instance.grid.network_interface[0].ipv6_address : null
 }
 
-output "lan_ipv6_address" {
-  description = "IPv6 address of the LAN interface (nic1)."
+output "lan1_ipv6_address" {
+  description = "IPv6 address of the LAN1 interface (nic1)."
   value       = var.enable_ipv6 ? google_compute_instance.grid.network_interface[1].ipv6_address : null
 }
