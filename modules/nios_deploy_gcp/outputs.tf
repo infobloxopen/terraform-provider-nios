@@ -53,6 +53,7 @@ output "ha_gateway" {
 }
 
 output "vip" {
+  description = "Alias IP (floating VIP) on nic2 for HA."
   value = try(
     split("/", google_compute_instance.grid.network_interface[2].alias_ip_range[0].ip_cidr_range)[0],
     null

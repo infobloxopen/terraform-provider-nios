@@ -5,7 +5,7 @@ provider "google" {
   credentials = file("<path_to_service_account_key.json>")
 }
 
-// Deploy vNIOS for IPv4 coonfiguration
+// Deploy vNIOS for IPv4 configuration
 module "node1" {
   source = "github.com/infobloxopen/terraform-provider-nios//modules/nios_deploy_gcp?ref=nios_v9.1.0"
 

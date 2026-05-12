@@ -81,7 +81,7 @@ The module automatically maps NIOS models to GCP machine types:
 | <a name="output_mgmt_ip"></a> [mgmt\_ip](#output\_mgmt\_ip) | Internal IP of the MGMT interface (nic0). |
 | <a name="output_mgmt_ipv6_address"></a> [mgmt\_ipv6\_address](#output\_mgmt\_ipv6\_address) | IPv6 address of the MGMT interface (nic0). |
 | <a name="output_mgmt_subnet_mask"></a> [mgmt\_subnet\_mask](#output\_mgmt\_subnet\_mask) | Subnet Mask of the Mgmt Subnetwork |
-| <a name="output_vip"></a> [vip](#output\_vip) | n/a |
+| <a name="output_vip"></a> [vip](#output\_vip) | Alias IP (floating VIP) on nic2 for HA. |
 <!-- END_TF_DOCS -->
 
 ---
@@ -197,6 +197,7 @@ Deploy two GCP instances for SA-HA Config
 module "node1" {
   // ... (same config as Step 1)
   enable_ha         = true
+  is_primary = true
   ha_subnet_name = "example-ha-subnet"
 }
 
