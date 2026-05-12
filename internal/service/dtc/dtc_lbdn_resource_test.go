@@ -701,7 +701,7 @@ resource "nios_dtc_lbdn" "test_auth_zones" {
     auth_zones = %[7]s
     pools = %[8]s
     patterns = %[9]s
-	disable = "true"
+	disable = true
 	types = ["A", "AAAA"]
 }
 `, authZoneNames[0], memberName, authZoneNames[1], authZoneNames[2],

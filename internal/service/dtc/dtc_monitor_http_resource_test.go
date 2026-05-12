@@ -110,7 +110,7 @@ func TestAccDtcMonitorHttpResource_ClientCert(t *testing.T) {
 	var resourceName = "nios_dtc_monitor_http.test_client_cert"
 	var v dtc.DtcMonitorHttp
 	name := acctest.RandomNameWithPrefix("dtc-monitor-http")
-	certificate1 := utils.GetNIOSDtcCertRef()
+	certificate1 := utils.GetNIOSDtcCert1Ref()
 	certificate2 := utils.GetNIOSDtcCert2Ref()
 	if certificate1 == "" || certificate2 == "" {
 		t.Skip("Both certificates for testing client_cert must be set in environment variables NIOS_DTC_CERT_REF and NIOS_DTC_CERT2_REF")
