@@ -84,7 +84,6 @@ func (r *SharednetworkResource) ValidateConfig(ctx context.Context, req resource
 		}
 	}
 
-	// Helpers: treat unknown/null as "not set" so validation only fires on concrete values.
 	boolIsTrue := func(b types.Bool) bool {
 		return !b.IsNull() && !b.IsUnknown() && b.ValueBool()
 	}
