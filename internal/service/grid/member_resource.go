@@ -400,15 +400,8 @@ func (r *MemberResource) ValidateConfig(ctx context.Context, req resource.Valida
 	// HA Cloud Platform Validations - bidirectional checks
 	if !data.HaCloudPlatform.IsNull() && !data.HaCloudPlatform.IsUnknown() {
 		// When ha_cloud_platform is provided, ha_on_cloud must be true
-		if data.HaOnCloud.IsNull() && data.HaOnCloud.IsUnknown() && !data.HaOnCloud.ValueBool() {
+		if data.HaOnCloud.IsNull() || data.HaOnCloud.IsUnknown() || !data.HaOnCloud.ValueBool() {
 			resp.Diagnostics.AddError("Validation Error", "ha_on_cloud must be set to true when ha_cloud_platform is provided")
-		}
-	}
-
-	// If enable ha is true, ha_on_cloud must be true
-	if !data.EnableHa.IsNull() && !data.EnableHa.IsUnknown() && data.EnableHa.ValueBool() {
-		if !data.HaOnCloud.IsNull() && !data.HaOnCloud.IsUnknown() && !data.HaOnCloud.ValueBool() {
-			resp.Diagnostics.AddError("Validation Error", "ha_on_cloud must be set to true when enable_ha is true")
 		}
 	}
 
@@ -424,6 +417,13 @@ func (r *MemberResource) ValidateConfig(ctx context.Context, req resource.Valida
 		// When ha_on_cloud is true, platform must be VNIOS
 		if data.Platform.IsNull() || data.Platform.IsUnknown() || data.Platform.ValueString() != "VNIOS" {
 			resp.Diagnostics.AddError("Validation Error", "platform must be set to VNIOS when ha_on_cloud is true")
+		}
+	}
+
+	// Validation: enable_ha requires node_info to be provided
+	if !data.EnableHa.IsNull() && !data.EnableHa.IsUnknown() && data.EnableHa.ValueBool() {
+		if data.NodeInfo.IsNull() || data.NodeInfo.IsUnknown() {
+			resp.Diagnostics.AddError("Validation Error", "node_info must be provided when enable_ha is true")
 		}
 	}
 
