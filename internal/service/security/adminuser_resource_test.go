@@ -38,7 +38,7 @@ func TestAccAdminuserResource_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAdminuserExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "name", name),
-					resource.TestCheckResourceAttr(resourceName, "password_revision", "1"),
+					resource.TestCheckResourceAttr(resourceName, "password", password),
 					// Test fields with default value
 					resource.TestCheckResourceAttr(resourceName, "auth_method", "KEYPAIR"),
 					resource.TestCheckResourceAttr(resourceName, "auth_type", "LOCAL"),
@@ -197,10 +197,10 @@ func TestAccAdminuserResource_CaCertificateIssuer(t *testing.T) {
 	var v security.Adminuser
 	name := acctest.RandomNameWithPrefix("admin-user")
 	password := "Example-Admin123!"
-	caCertificateIssuer := "cacertificate/b25lLmVhcF9jYV9jZXJ0JDAuYTlkNTNlYTkzMjc2MjljZDUxZGI0ZWY4ZDMxMWM2ZDZkNWUwMmE1ODNjN2QxN2NmOWM1MWE0ODgzODA5YjU0M2I5YzYxNzYyMDZiMTk1MDAxNTgyNzk1MzIwZWVlMGZkZmY5YmI0ZDBlN2U5ZTEwYjBjOTM1ODdmOWNlMDY1OWI:CN%3D%22ib-root-ca%22"
-	caCertificateIssuer1 := "cacertificate/b25lLmVhcF9jYV9jZXJ0JDAuNzBlNzU3MDcyMDVmNGFjOGRlYTMwOWVhNjkwNjhlNjQwNjY5YzBiN2I0YTY3YWE1MTUxOTEzN2EzMDM5NzIxYzcwMDhmNWIwNGFiZGY0ODY1ZDk1MjMzNmUwNGRhMWY3YWU1MzdlZjA1ODUzMGMzZWRmMDM2ZjU4ZWI0ZmIxNGE:CN%3D%22ib-root-ca%22"
-	clientCertificateSerialNumber := "dfe522a477c3caf6"
-	clientCertificateSerialNumber1 := "ef40ae374d39d47a"
+	caCertificateIssuer := "cacertificate/b25lLmVhcF9jYV9jZXJ0JDAuNzg5Y2IyOGVkZDgyMDE5MTYzODljOGQ5MGI2MTM4YmFlNDIxODY1YmY2YWZlMTdiMmEyNDRjNTIwNDRkMGQ3NWFiMGY0MGFjNTBmYzc3ZGMwM2YwOTI2NWRhNDRkYzllMjQ0OTBkZmMyMWEyOWVlYmIxODhlMDFlMWY5OGYwOTg:CN%3D%22ib-root-ca%22"
+	caCertificateIssuer1 := "cacertificate/b25lLmVhcF9jYV9jZXJ0JDAuZGM2MTlhMWYyYmI0NGYwYjUzMWFiNzcwZjk1ZDQ0MDRhNWY2ODQxZGQxOTQ3Y2Q0YjcxMjU1YWU1MjY5MzM1MTRhMDljNWI5OTMwNmNhYzRiMjczY2JhN2NhODYwOWQ5ODY2YWYxYzU3NDdkNTVmNTFjZjM0ZGY4NzRmYTFjZWU:CN%3D%22ib-root-ca%22"
+	clientCertificateSerialNumber := "4e7c675cd972ecd2e5b895ad6cb4e38e6d77b4b4"
+	clientCertificateSerialNumber1 := "682f792e09c242093c192cee888d44658e88abfb"
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
@@ -231,10 +231,10 @@ func TestAccAdminuserResource_ClientCertificateSerialNumber(t *testing.T) {
 	var v security.Adminuser
 	name := acctest.RandomNameWithPrefix("admin-user")
 	password := "Example-Admin123!"
-	caCertificateIssuer := "cacertificate/b25lLmVhcF9jYV9jZXJ0JDAuYTlkNTNlYTkzMjc2MjljZDUxZGI0ZWY4ZDMxMWM2ZDZkNWUwMmE1ODNjN2QxN2NmOWM1MWE0ODgzODA5YjU0M2I5YzYxNzYyMDZiMTk1MDAxNTgyNzk1MzIwZWVlMGZkZmY5YmI0ZDBlN2U5ZTEwYjBjOTM1ODdmOWNlMDY1OWI:CN%3D%22ib-root-ca%22"
-	caCertificateIssuer1 := "cacertificate/b25lLmVhcF9jYV9jZXJ0JDAuNzBlNzU3MDcyMDVmNGFjOGRlYTMwOWVhNjkwNjhlNjQwNjY5YzBiN2I0YTY3YWE1MTUxOTEzN2EzMDM5NzIxYzcwMDhmNWIwNGFiZGY0ODY1ZDk1MjMzNmUwNGRhMWY3YWU1MzdlZjA1ODUzMGMzZWRmMDM2ZjU4ZWI0ZmIxNGE:CN%3D%22ib-root-ca%22"
-	clientCertificateSerialNumber := "dfe522a477c3caf6"
-	clientCertificateSerialNumber1 := "ef40ae374d39d47a"
+	caCertificateIssuer := "cacertificate/b25lLmVhcF9jYV9jZXJ0JDAuNzg5Y2IyOGVkZDgyMDE5MTYzODljOGQ5MGI2MTM4YmFlNDIxODY1YmY2YWZlMTdiMmEyNDRjNTIwNDRkMGQ3NWFiMGY0MGFjNTBmYzc3ZGMwM2YwOTI2NWRhNDRkYzllMjQ0OTBkZmMyMWEyOWVlYmIxODhlMDFlMWY5OGYwOTg:CN%3D%22ib-root-ca%22"
+	caCertificateIssuer1 := "cacertificate/b25lLmVhcF9jYV9jZXJ0JDAuZGM2MTlhMWYyYmI0NGYwYjUzMWFiNzcwZjk1ZDQ0MDRhNWY2ODQxZGQxOTQ3Y2Q0YjcxMjU1YWU1MjY5MzM1MTRhMDljNWI5OTMwNmNhYzRiMjczY2JhN2NhODYwOWQ5ODY2YWYxYzU3NDdkNTVmNTFjZjM0ZGY4NzRmYTFjZWU:CN%3D%22ib-root-ca%22"
+	clientCertificateSerialNumber := "4e7c675cd972ecd2e5b895ad6cb4e38e6d77b4b4"
+	clientCertificateSerialNumber1 := "682f792e09c242093c192cee888d44658e88abfb"
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
@@ -357,8 +357,8 @@ func TestAccAdminuserResource_EnableCertificateAuthentication(t *testing.T) {
 	var v security.Adminuser
 	name := acctest.RandomNameWithPrefix("admin-user")
 	password := "Example-Admin123!"
-	caCertificateIssuer := "cacertificate/b25lLmVhcF9jYV9jZXJ0JDAuNzBlNzU3MDcyMDVmNGFjOGRlYTMwOWVhNjkwNjhlNjQwNjY5YzBiN2I0YTY3YWE1MTUxOTEzN2EzMDM5NzIxYzcwMDhmNWIwNGFiZGY0ODY1ZDk1MjMzNmUwNGRhMWY3YWU1MzdlZjA1ODUzMGMzZWRmMDM2ZjU4ZWI0ZmIxNGE:CN%3D%22ib-root-ca%22"
-	clientCertificateSerialNumber := "ef40ae374d39d47a"
+	caCertificateIssuer := "cacertificate/b25lLmVhcF9jYV9jZXJ0JDAuNzg5Y2IyOGVkZDgyMDE5MTYzODljOGQ5MGI2MTM4YmFlNDIxODY1YmY2YWZlMTdiMmEyNDRjNTIwNDRkMGQ3NWFiMGY0MGFjNTBmYzc3ZGMwM2YwOTI2NWRhNDRkYzllMjQ0OTBkZmMyMWEyOWVlYmIxODhlMDFlMWY5OGYwOTg:CN%3D%22ib-root-ca%22"
+	clientCertificateSerialNumber := "4e7c675cd972ecd2e5b895ad6cb4e38e6d77b4b4"
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
@@ -464,7 +464,7 @@ func TestAccAdminuserResource_Password(t *testing.T) {
 				Config: testAccAdminuserPassword(name, password, "admin-group"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAdminuserExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "password_revision", "1"),
+					resource.TestCheckResourceAttr(resourceName, "password", password),
 				),
 			},
 			// Update and Read
@@ -472,7 +472,7 @@ func TestAccAdminuserResource_Password(t *testing.T) {
 				Config: testAccAdminuserPassword(name, password1, "admin-group"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAdminuserExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "password_revision", "2"),
+					resource.TestCheckResourceAttr(resourceName, "password", password1),
 				),
 			},
 			// Delete testing automatically occurs in TestCase

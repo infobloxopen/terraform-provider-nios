@@ -11,7 +11,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
@@ -39,7 +38,6 @@ type AdminuserModel struct {
 	ExtAttrsAll                     types.Map    `tfsdk:"extattrs_all"`
 	Name                            types.String `tfsdk:"name"`
 	Password                        types.String `tfsdk:"password"`
-	PasswordRevsion                 types.Int64  `tfsdk:"password_revision"`
 	SshKeys                         types.List   `tfsdk:"ssh_keys"`
 	Status                          types.String `tfsdk:"status"`
 	TimeZone                        types.String `tfsdk:"time_zone"`
@@ -62,7 +60,6 @@ var AdminuserAttrTypes = map[string]attr.Type{
 	"extattrs_all":                      types.MapType{ElemType: types.StringType},
 	"name":                              types.StringType,
 	"password":                          types.StringType,
-	"password_revision":                 types.Int64Type,
 	"ssh_keys":                          types.ListType{ElemType: types.ObjectType{AttrTypes: AdminuserSshKeysAttrTypes}},
 	"status":                            types.StringType,
 	"time_zone":                         types.StringType,
@@ -109,6 +106,7 @@ var AdminuserResourceSchemaAttributes = map[string]schema.Attribute{
 	"client_certificate_serial_number": schema.StringAttribute{
 		Optional:            true,
 		Computed:            true,
+		Default:             stringdefault.StaticString(""),
 		MarkdownDescription: "The serial number of the client certificate.",
 	},
 	"comment": schema.StringAttribute{
@@ -163,18 +161,11 @@ var AdminuserResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"password": schema.StringAttribute{
 		Required:  true,
-		WriteOnly: true,
+		Sensitive: true,
 		Validators: []validator.String{
 			customvalidator.IsStrongPassword(),
 		},
 		MarkdownDescription: "The password for the administrator to use when logging in.",
-	},
-	"password_revision": schema.Int64Attribute{
-		Computed:            true,
-		MarkdownDescription: "Internal revision incremented when SNMPv3 secrets change.",
-		PlanModifiers: []planmodifier.Int64{
-			int64planmodifier.UseStateForUnknown(),
-		},
 	},
 	"ssh_keys": schema.ListNestedAttribute{
 		NestedObject: schema.NestedAttributeObject{
@@ -221,8 +212,8 @@ func (m *AdminuserModel) Expand(ctx context.Context, diags *diag.Diagnostics) *s
 		AdminGroups:                     flex.ExpandFrameworkListString(ctx, m.AdminGroups, diags),
 		AuthMethod:                      flex.ExpandStringPointer(m.AuthMethod),
 		AuthType:                        flex.ExpandStringPointer(m.AuthType),
-		CaCertificateIssuer:             flex.ExpandStringPointerEmptyAsNil(m.CaCertificateIssuer),
-		ClientCertificateSerialNumber:   flex.ExpandStringPointerEmptyAsNil(m.ClientCertificateSerialNumber),
+		CaCertificateIssuer:             flex.ExpandStringPointer(m.CaCertificateIssuer),
+		ClientCertificateSerialNumber:   flex.ExpandStringPointer(m.ClientCertificateSerialNumber),
 		Comment:                         flex.ExpandStringPointer(m.Comment),
 		Disable:                         flex.ExpandBoolPointer(m.Disable),
 		Email:                           flex.ExpandStringPointer(m.Email),
@@ -261,8 +252,8 @@ func (m *AdminuserModel) Flatten(ctx context.Context, from *security.Adminuser, 
 	m.AdminGroups = flex.FlattenFrameworkListString(ctx, from.AdminGroups, diags)
 	m.AuthMethod = flex.FlattenStringPointer(from.AuthMethod)
 	m.AuthType = flex.FlattenStringPointer(from.AuthType)
-	m.CaCertificateIssuer = flex.FlattenStringPointerNilAsNotEmpty(from.CaCertificateIssuer)
-	m.ClientCertificateSerialNumber = flex.FlattenStringPointerNilAsNotEmpty(from.ClientCertificateSerialNumber)
+	m.CaCertificateIssuer = flex.FlattenStringPointer(from.CaCertificateIssuer)
+	m.ClientCertificateSerialNumber = flex.FlattenStringPointer(from.ClientCertificateSerialNumber)
 	m.Comment = flex.FlattenStringPointer(from.Comment)
 	m.Disable = types.BoolPointerValue(from.Disable)
 	m.Email = flex.FlattenStringPointer(from.Email)
