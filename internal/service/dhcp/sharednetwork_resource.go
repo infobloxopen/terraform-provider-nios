@@ -103,6 +103,28 @@ if icidEnabled && useIcidEnabled {
     }
 }
 
+// If ignore_id is "CLIENT" and use_ignore_id is true, then
+// ignore_client_identifier and use_ignore_client_identifier must both be true.
+ignoreIdIsClient := !data.IgnoreId.IsNull() && !data.IgnoreId.IsUnknown() &&
+    data.IgnoreId.ValueString() == "CLIENT"
+useIgnoreIdIsTrue := !data.UseIgnoreId.IsNull() && !data.UseIgnoreId.IsUnknown() &&
+    data.UseIgnoreId.ValueBool()
+
+if ignoreIdIsClient && useIgnoreIdIsTrue {
+    invalidIcid := data.IgnoreClientIdentifier.IsNull() || data.IgnoreClientIdentifier.IsUnknown() ||
+        !data.IgnoreClientIdentifier.ValueBool()
+    invalidUseIcid := data.UseIgnoreClientIdentifier.IsNull() || data.UseIgnoreClientIdentifier.IsUnknown() ||
+        !data.UseIgnoreClientIdentifier.ValueBool()
+
+    if invalidIcid || invalidUseIcid {
+        resp.Diagnostics.AddAttributeError(
+            path.Root("ignore_client_identifier"),
+            "Invalid Configuration",
+            "ignore_client_identifier and use_ignore_client_identifier must both be set to true when ignore_id is \"CLIENT\" and use_ignore_id is true.",
+        )
+    }
+}
+
 // If ignore_id is "NONE" and use_ignore_id is false, then both
 // ignore_client_identifier and use_ignore_client_identifier must be false.
 ignoreIdIsNone := !data.IgnoreId.IsNull() && !data.IgnoreId.IsUnknown() &&
