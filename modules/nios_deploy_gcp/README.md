@@ -87,7 +87,7 @@ provider "google" {
 }
 
 module "node1" {
-  source = "github.com/infobloxopen/terraform-provider-nios//modules/nios_deploy_gcp"
+  source = "github.com/infobloxopen/terraform-provider-nios//modules/nios_deploy_gcp?ref=nios_v9.1.0"
 
   project = var.project
   region     = var.region
@@ -131,12 +131,12 @@ Once Grid is up and running, configure the grid member and join to the grid.
 
 ```hcl
 module "node1" {
-  source = "github.com/infobloxopen/terraform-provider-nios//modules/nios_deploy_gcp"
+  source = "github.com/infobloxopen/terraform-provider-nios//modules/nios_deploy_gcp?ref=nios_v9.1.0"
   // ...(same config as Step 1)
 }
 
 module "node2" {
-  source = "github.com/infobloxopen/terraform-provider-nios//modules/nios_deploy_gcp"
+  source = "github.com/infobloxopen/terraform-provider-nios//modules/nios_deploy_gcp?ref=nios_v9.1.0"
   // ... (same config as Step 1)
 }
 ```

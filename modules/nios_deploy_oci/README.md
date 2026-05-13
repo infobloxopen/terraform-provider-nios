@@ -101,7 +101,7 @@ the infrastructure is deployed and NIOS is fully booted (~30 minutes).
 
 ```hcl
 module "nios_grid_member" {
-  source = "github.com/infobloxopen/terraform-provider-nios//modules/nios_deploy_oci"
+  source = "github.com/infobloxopen/terraform-provider-nios//modules/nios_deploy_oci?ref=nios_v9.1.0"
 
   # OCI authentication
   tenancy_ocid     = var.tenancy_ocid

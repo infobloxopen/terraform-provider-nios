@@ -16,7 +16,7 @@ This module provisions vNIOS on AWS. The NIOS configuration (`nios_grid_member` 
 
 | Name | Version |
 |------|---------|
-| <a name="provider_aws"></a> [aws](#provider\_aws) | 6.41.0 |
+| <a name="provider_aws"></a> [aws](#provider\_aws) | >= 6.38.0 |
 
 ## Resources
 
@@ -93,7 +93,7 @@ provider "aws" {
 }
 
 module "node1" {
-  source = "github.com/infobloxopen/terraform-provider-nios//modules/nios_deploy_aws"
+  source = "github.com/infobloxopen/terraform-provider-nios//modules/nios_deploy_aws?ref=nios_v9.1.0"
 
   security_group_id = var.security_group_id
   mgmt_subnet_id    = var.mgmt_subnet_id

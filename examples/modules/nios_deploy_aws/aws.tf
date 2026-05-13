@@ -5,7 +5,7 @@ provider "aws" {
 }
 
 module "node1" {
-  source = "<path_to_module>"
+  source = "github.com/infobloxopen/terraform-provider-nios//modules/nios_deploy_aws?ref=nios_v9.1.0"
 
   security_group_id = var.security_group_id
   mgmt_subnet_id    = var.mgmt_subnet_id

@@ -7,7 +7,7 @@ provider "oci" {
 }
 
 module "node1" {
-  source = "<path_to_module>"
+  source = "github.com/infobloxopen/terraform-provider-nios//modules/nios_deploy_oci?ref=nios_v9.1.0"
 
   tenancy_ocid             = var.tenancy_ocid
   user_ocid                = var.user_ocid
