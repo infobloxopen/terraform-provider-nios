@@ -1,4 +1,4 @@
-// Copyright IBM Corp. 2019, 2026
+// Copyright (c) HashiCorp, Inc.
 // SPDX-License-Identifier: MPL-2.0
 
 // Package addrs contains types that represent "addresses", which are

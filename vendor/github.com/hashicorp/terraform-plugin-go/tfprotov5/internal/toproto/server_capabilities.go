@@ -1,4 +1,4 @@
-// Copyright IBM Corp. 2020, 2026
+// Copyright (c) HashiCorp, Inc.
 // SPDX-License-Identifier: MPL-2.0
 
 package toproto
@@ -17,7 +17,6 @@ func ServerCapabilities(in *tfprotov5.ServerCapabilities) *tfplugin5.ServerCapab
 		GetProviderSchemaOptional: in.GetProviderSchemaOptional,
 		MoveResourceState:         in.MoveResourceState,
 		PlanDestroy:               in.PlanDestroy,
-		GenerateResourceConfig:    in.GenerateResourceConfig,
 	}
 
 	return resp

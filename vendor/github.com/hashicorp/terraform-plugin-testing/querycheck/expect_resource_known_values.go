@@ -1,11 +1,10 @@
-// Copyright IBM Corp. 2014, 2026
+// Copyright (c) HashiCorp, Inc.
 // SPDX-License-Identifier: MPL-2.0
 
 package querycheck
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	tfjson "github.com/hashicorp/terraform-json"
 	"strings"
@@ -72,7 +71,11 @@ func (e expectResourceKnownValues) CheckQuery(_ context.Context, req CheckQueryR
 	}
 
 	if diags != nil {
-		resp.Error = fmt.Errorf("the following errors were found while checking values: %w", errors.Join(diags...))
+		var diagsStr string
+		for _, diag := range diags {
+			diagsStr += diag.Error() + "; "
+		}
+		resp.Error = fmt.Errorf("the following errors were found while checking values: %s", diagsStr)
 		return
 	}
 }

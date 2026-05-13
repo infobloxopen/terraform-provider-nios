@@ -1,4 +1,4 @@
-// Copyright IBM Corp. 2014, 2026
+// Copyright (c) HashiCorp, Inc.
 // SPDX-License-Identifier: MPL-2.0
 
 package resource
@@ -71,21 +71,21 @@ func (s TestStep) providerConfig(_ context.Context, skipProviderBlock bool, tfVe
 
 	for name, externalProvider := range s.ExternalProviders {
 		if !skipProviderBlock {
-			fmt.Fprintf(&providerBlocks, "provider %q {}\n", name)
+			providerBlocks.WriteString(fmt.Sprintf("provider %q {}\n", name))
 		}
 
 		if externalProvider.Source == "" && externalProvider.VersionConstraint == "" {
 			continue
 		}
 
-		fmt.Fprintf(&requiredProviderBlocks, "    %s = {\n", name)
+		requiredProviderBlocks.WriteString(fmt.Sprintf("    %s = {\n", name))
 
 		if externalProvider.Source != "" {
-			fmt.Fprintf(&requiredProviderBlocks, "      source = %q\n", externalProvider.Source)
+			requiredProviderBlocks.WriteString(fmt.Sprintf("      source = %q\n", externalProvider.Source))
 		}
 
 		if externalProvider.VersionConstraint != "" {
-			fmt.Fprintf(&requiredProviderBlocks, "      version = %q\n", externalProvider.VersionConstraint)
+			requiredProviderBlocks.WriteString(fmt.Sprintf("      version = %q\n", externalProvider.VersionConstraint))
 		}
 
 		requiredProviderBlocks.WriteString("    }\n")
@@ -154,30 +154,30 @@ func (s TestStep) providerConfigTestCase(_ context.Context, skipProviderBlock bo
 	//      is being used and not the others, but leaving it here just in case
 	//      it does have a special purpose that wasn't being unit tested prior.
 	for name := range providerNames {
-		fmt.Fprintf(&providerBlocks, "provider %q {}\n", name)
+		providerBlocks.WriteString(fmt.Sprintf("provider %q {}\n", name))
 
-		fmt.Fprintf(&requiredProviderBlocks, "    %s = {\n", name)
+		requiredProviderBlocks.WriteString(fmt.Sprintf("    %s = {\n", name))
 
 		requiredProviderBlocks.WriteString("    }\n")
 	}
 
 	for name, externalProvider := range testCase.ExternalProviders {
 		if !skipProviderBlock {
-			fmt.Fprintf(&providerBlocks, "provider %q {}\n", name)
+			providerBlocks.WriteString(fmt.Sprintf("provider %q {}\n", name))
 		}
 
 		if externalProvider.Source == "" && externalProvider.VersionConstraint == "" {
 			continue
 		}
 
-		fmt.Fprintf(&requiredProviderBlocks, "    %s = {\n", name)
+		requiredProviderBlocks.WriteString(fmt.Sprintf("    %s = {\n", name))
 
 		if externalProvider.Source != "" {
-			fmt.Fprintf(&requiredProviderBlocks, "      source = %q\n", externalProvider.Source)
+			requiredProviderBlocks.WriteString(fmt.Sprintf("      source = %q\n", externalProvider.Source))
 		}
 
 		if externalProvider.VersionConstraint != "" {
-			fmt.Fprintf(&requiredProviderBlocks, "      version = %q\n", externalProvider.VersionConstraint)
+			requiredProviderBlocks.WriteString(fmt.Sprintf("      version = %q\n", externalProvider.VersionConstraint))
 		}
 
 		requiredProviderBlocks.WriteString("    }\n")
@@ -250,8 +250,8 @@ func addTerraformBlockSource(name, config string) string {
 
 	var providerBlocks strings.Builder
 
-	fmt.Fprintf(&providerBlocks, "    %s = {\n", name)
-	fmt.Fprintf(&providerBlocks, "      source = %q\n", getProviderAddr(name))
+	providerBlocks.WriteString(fmt.Sprintf("    %s = {\n", name))
+	providerBlocks.WriteString(fmt.Sprintf("      source = %q\n", getProviderAddr(name)))
 	providerBlocks.WriteString("    }\n")
 
 	return providerBlocks.String()

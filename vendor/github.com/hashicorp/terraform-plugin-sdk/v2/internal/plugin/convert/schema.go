@@ -1,4 +1,4 @@
-// Copyright IBM Corp. 2019, 2026
+// Copyright (c) HashiCorp, Inc.
 // SPDX-License-Identifier: MPL-2.0
 
 package convert
@@ -135,26 +135,24 @@ func ctyTypeFromTFType(in tftypes.Type) (cty.Type, error) {
 // tfprotov5.SchemaBlock for a grpc response.
 func ConfigSchemaToProto(ctx context.Context, b *configschema.Block) *tfprotov5.SchemaBlock {
 	block := &tfprotov5.SchemaBlock{
-		Description:        b.Description,
-		DescriptionKind:    protoStringKind(ctx, b.DescriptionKind),
-		Deprecated:         b.Deprecated,
-		DeprecationMessage: b.DeprecationMessage,
+		Description:     b.Description,
+		DescriptionKind: protoStringKind(ctx, b.DescriptionKind),
+		Deprecated:      b.Deprecated,
 	}
 
 	for _, name := range sortedKeys(b.Attributes) {
 		a := b.Attributes[name]
 
 		attr := &tfprotov5.SchemaAttribute{
-			Name:               name,
-			Description:        a.Description,
-			DescriptionKind:    protoStringKind(ctx, a.DescriptionKind),
-			Optional:           a.Optional,
-			Computed:           a.Computed,
-			Required:           a.Required,
-			Sensitive:          a.Sensitive,
-			Deprecated:         a.Deprecated,
-			DeprecationMessage: a.DeprecationMessage,
-			WriteOnly:          a.WriteOnly,
+			Name:            name,
+			Description:     a.Description,
+			DescriptionKind: protoStringKind(ctx, a.DescriptionKind),
+			Optional:        a.Optional,
+			Computed:        a.Computed,
+			Required:        a.Required,
+			Sensitive:       a.Sensitive,
+			Deprecated:      a.Deprecated,
+			WriteOnly:       a.WriteOnly,
 		}
 
 		var err error
@@ -243,22 +241,20 @@ func ProtoToConfigSchema(ctx context.Context, b *tfprotov5.SchemaBlock) *configs
 		Attributes: make(map[string]*configschema.Attribute),
 		BlockTypes: make(map[string]*configschema.NestedBlock),
 
-		Description:        b.Description,
-		DescriptionKind:    schemaStringKind(ctx, b.DescriptionKind),
-		Deprecated:         b.Deprecated,
-		DeprecationMessage: b.DeprecationMessage,
+		Description:     b.Description,
+		DescriptionKind: schemaStringKind(ctx, b.DescriptionKind),
+		Deprecated:      b.Deprecated,
 	}
 
 	for _, a := range b.Attributes {
 		attr := &configschema.Attribute{
-			Description:        a.Description,
-			DescriptionKind:    schemaStringKind(ctx, a.DescriptionKind),
-			Required:           a.Required,
-			Optional:           a.Optional,
-			Computed:           a.Computed,
-			Sensitive:          a.Sensitive,
-			Deprecated:         a.Deprecated,
-			DeprecationMessage: a.DeprecationMessage,
+			Description:     a.Description,
+			DescriptionKind: schemaStringKind(ctx, a.DescriptionKind),
+			Required:        a.Required,
+			Optional:        a.Optional,
+			Computed:        a.Computed,
+			Sensitive:       a.Sensitive,
+			Deprecated:      a.Deprecated,
 		}
 
 		var err error

@@ -1,4 +1,4 @@
-// Copyright IBM Corp. 2020, 2026
+// Copyright (c) HashiCorp, Inc.
 // SPDX-License-Identifier: MPL-2.0
 
 package tfprotov6
@@ -74,10 +74,6 @@ type ProviderServer interface {
 	/* // Add this back once temporary interface is removed
 	   // ActionServer is an interface encapsulating all the action-related RPC requests.
 	   ActionServer*/
-
-	/* // Add this back once temporary interface is removed
-	   // StateStoreServer is an interface encapsulating all the state store related RPC requests.
-	   StateStoreServer*/
 }
 
 // ProviderServerWithListResource is a temporary interface for servers
@@ -113,28 +109,6 @@ type ProviderServerWithActions interface {
 	ActionServer
 }
 
-// ProviderServerWithStateStores is a temporary interface for servers
-// to implement StateStore RPCs
-//
-// - ValidateStateStoreConfig
-// - ConfigureStateStore
-// - GetStates
-// - DeleteState
-// - LockState
-// - UnlockState
-// - ReadStateBytes
-// - WriteStateBytes
-//
-// Deprecated: All methods will be moved into the
-// ProviderServer interface and this interface will be removed in a future
-// version.
-type ProviderServerWithStateStores interface {
-	ProviderServer
-
-	// StateStoreServer is an interface encapsulating all the state store related RPC requests.
-	StateStoreServer
-}
-
 // GetMetadataRequest represents a GetMetadata RPC request.
 type GetMetadataRequest struct{}
 
@@ -166,9 +140,6 @@ type GetMetadataResponse struct {
 
 	// Actions returns metadata for all actions.
 	Actions []ActionMetadata
-
-	// StateStores returns metadata for all state stores.
-	StateStores []StateStoreMetadata
 }
 
 // GetProviderSchemaRequest represents a Terraform RPC request for the
@@ -229,9 +200,6 @@ type GetProviderSchemaResponse struct {
 	// The name should be an action name that is prefixed with your provider's
 	// shortname and an underscore.
 	ActionSchemas map[string]*ActionSchema
-
-	// StateStoreSchemas is a map of state store name and its schema
-	StateStoreSchemas map[string]*Schema
 
 	// Diagnostics report errors or warnings related to returning the
 	// provider's schemas. Returning an empty slice indicates success, with

@@ -1,4 +1,4 @@
-// Copyright IBM Corp. 2014, 2026
+// Copyright (c) HashiCorp, Inc.
 // SPDX-License-Identifier: MPL-2.0
 
 package query
@@ -25,7 +25,6 @@ func RunQueryChecks(ctx context.Context, t testing.T, query []tfjson.LogMsg, que
 	}
 
 	found := make([]tfjson.ListResourceFoundData, 0)
-	summaries := make([]tfjson.ListCompleteData, 0)
 	summary := tfjson.ListCompleteData{}
 
 	for _, msg := range query {
@@ -33,7 +32,6 @@ func RunQueryChecks(ctx context.Context, t testing.T, query []tfjson.LogMsg, que
 		case tfjson.ListResourceFoundMessage:
 			found = append(found, v.ListResourceFound)
 		case tfjson.ListCompleteMessage:
-			summaries = append(summaries, v.ListComplete)
 			summary = v.ListComplete
 			// TODO diagnostics and errors?
 		default:
@@ -53,9 +51,8 @@ func RunQueryChecks(ctx context.Context, t testing.T, query []tfjson.LogMsg, que
 		}
 		resp := querycheck.CheckQueryResponse{}
 		queryCheck.CheckQuery(ctx, querycheck.CheckQueryRequest{
-			Query:          reqQueryData,
-			QuerySummary:   &summary,
-			QuerySummaries: summaries,
+			Query:        reqQueryData,
+			QuerySummary: &summary,
 		}, &resp)
 
 		result = append(result, resp.Error)

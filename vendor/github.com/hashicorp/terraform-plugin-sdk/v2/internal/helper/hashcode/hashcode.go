@@ -1,4 +1,4 @@
-// Copyright IBM Corp. 2019, 2026
+// Copyright (c) HashiCorp, Inc.
 // SPDX-License-Identifier: MPL-2.0
 
 package hashcode
@@ -31,7 +31,7 @@ func Strings(strings []string) string {
 	var buf bytes.Buffer
 
 	for _, s := range strings {
-		fmt.Fprintf(&buf, "%s-", s)
+		buf.WriteString(fmt.Sprintf("%s-", s))
 	}
 
 	return fmt.Sprintf("%d", String(buf.String()))
