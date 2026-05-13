@@ -1,4 +1,4 @@
-// Copyright IBM Corp. 2021, 2026
+// Copyright (c) HashiCorp, Inc.
 // SPDX-License-Identifier: MPL-2.0
 
 package int64planmodifier
@@ -17,10 +17,6 @@ import (
 // and Computed attributes to an unknown value "(known after apply)" on update.
 // Using this plan modifier will instead display the prior state value in the
 // plan, unless a prior plan modifier adjusts the value.
-//
-// Null is also a known value in Terraform and will be copied to the planned value
-// by this plan modifier. For use-cases like a child attribute of a nested attribute or
-// if null is desired to be marked as unknown in the case of an update, use [UseNonNullStateForUnknown].
 func UseStateForUnknown() planmodifier.Int64 {
 	return useStateForUnknownModifier{}
 }

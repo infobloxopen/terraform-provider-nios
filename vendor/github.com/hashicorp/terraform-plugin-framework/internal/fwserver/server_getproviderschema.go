@@ -1,4 +1,4 @@
-// Copyright IBM Corp. 2021, 2026
+// Copyright (c) HashiCorp, Inc.
 // SPDX-License-Identifier: MPL-2.0
 
 package fwserver
@@ -28,7 +28,6 @@ type GetProviderSchemaResponse struct {
 	EphemeralResourceSchemas map[string]fwschema.Schema
 	FunctionDefinitions      map[string]function.Definition
 	ListResourceSchemas      map[string]fwschema.Schema
-	StateStoreSchemas        map[string]fwschema.Schema
 	Diagnostics              diag.Diagnostics
 }
 
@@ -94,11 +93,4 @@ func (s *Server) GetProviderSchema(ctx context.Context, req *GetProviderSchemaRe
 		return
 	}
 	resp.ActionSchemas = actionSchemas
-
-	stateStoreSchemas, diags := s.StateStoreSchemas(ctx)
-	resp.Diagnostics.Append(diags...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-	resp.StateStoreSchemas = stateStoreSchemas
 }

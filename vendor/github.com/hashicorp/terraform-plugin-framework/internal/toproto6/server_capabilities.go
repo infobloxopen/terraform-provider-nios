@@ -1,4 +1,4 @@
-// Copyright IBM Corp. 2021, 2026
+// Copyright (c) HashiCorp, Inc.
 // SPDX-License-Identifier: MPL-2.0
 
 package toproto6
@@ -21,15 +21,5 @@ func ServerCapabilities(ctx context.Context, fw *fwserver.ServerCapabilities) *t
 		GetProviderSchemaOptional: fw.GetProviderSchemaOptional,
 		MoveResourceState:         fw.MoveResourceState,
 		PlanDestroy:               fw.PlanDestroy,
-	}
-}
-
-func StateStoreServerCapabilities(fw *fwserver.StateStoreServerCapabilities) *tfprotov6.StateStoreServerCapabilities {
-	if fw == nil {
-		return nil
-	}
-
-	return &tfprotov6.StateStoreServerCapabilities{
-		ChunkSize: fw.ChunkSize,
 	}
 }

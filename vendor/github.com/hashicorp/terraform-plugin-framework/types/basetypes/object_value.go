@@ -1,4 +1,4 @@
-// Copyright IBM Corp. 2021, 2026
+// Copyright (c) HashiCorp, Inc.
 // SPDX-License-Identifier: MPL-2.0
 
 package basetypes
@@ -387,7 +387,6 @@ func (o ObjectValue) String() string {
 		if i != 0 {
 			res.WriteString(",")
 		}
-		//nolint:staticcheck
 		res.WriteString(fmt.Sprintf(`"%s":%s`, k, o.Attributes()[k].String()))
 	}
 	res.WriteString("}")
