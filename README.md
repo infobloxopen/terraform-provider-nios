@@ -38,6 +38,7 @@ The table below shows the compatibility between different versions of the Terraf
 - **Version 1.1.0 and earlier** uses reference based resource identification. Resources must be imported using ref.
 - **Recommended**: When upgrading from provider v1.x.x to v2.x.x, execute `terraform plan -refresh-only` followed by `terraform apply -refresh-only` to automatically update your state file with UUID.
 - For migration from the legacy terraform provider, refer to the [Migration Guide](MIGRATION.md).
+- The `terraform refresh` command is [deprecated](https://developer.hashicorp.com/terraform/cli/commands/refresh). To update Terraform state with the latest information from your infrastructure, use `terraform plan -refresh-only` followed by `terraform apply -refresh-only` instead.
 
 ### Known Issues
 
