@@ -898,3 +898,15 @@ func ProviderSetup() string {
 	}
 `
 }
+
+// Added IsObjectNotFoundErr helper in utils.go to centralize the 400-not-found detection logic for reuse.
+
+// IsObjectNotFoundErr checks if a NIOS API error indicates the object was not found.
+// Some NIOS object types return 400 Bad Request instead of 404 when the object doesn't exist.
+func IsObjectNotFoundErr(statusCode int, err error) bool {
+	if err == nil || statusCode != 400 {
+		return false
+	}
+	errStr := strings.ToLower(err.Error())
+	return strings.Contains(errStr, "could not be found") || strings.Contains(errStr, "object not found")
+}

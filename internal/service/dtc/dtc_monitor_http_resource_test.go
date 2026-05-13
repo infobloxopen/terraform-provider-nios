@@ -110,8 +110,11 @@ func TestAccDtcMonitorHttpResource_ClientCert(t *testing.T) {
 	var resourceName = "nios_dtc_monitor_http.test_client_cert"
 	var v dtc.DtcMonitorHttp
 	name := acctest.RandomNameWithPrefix("dtc-monitor-http")
-	certificate1 := "dtc:certificate/ZG5zLmlkbnNfY2VydGlmaWNhdGUkYjNiY2FjYjM0YjYzNWM4NzkwMGMxODUxN2MzODA0NTIyMGI1MTEyZTQwNzMzZTM1YzNkNTdmZjk3MGMwYTliY2NkN2Q4NzhkODBmYjE0MmQzZmYzYTRkNjI3Zjk5NDlmZmYwOWMwMDdkZGEzMmQxMDhiMWZkMTlmYjRkOThiNTI:7e78dced4c4715b761a25427848e7153671c496d"
-	certificate2 := "dtc:certificate/ZG5zLmlkbnNfY2VydGlmaWNhdGUkYmJiNmU0NDBlZGY5NDA3ODQ0NzAzMDA3MzgxN2RmYWU4OTg3YzQwYjg5N2E1NmQyZDMwMWQ5YjlkY2NkZjFiYmM3MmJmZmNlODg1ZTJkODdmMzQ5YjczYzI0OTY3YmYyMGFlNDQ5MTI2Zjg5OGMzMDk2MzJiYzI4YWFlMDM0NzI:6595a8c26f84ac126cec62e770dff3058118e658"
+	certificate1 := utils.GetNIOSDtcCertRef()
+	certificate2 := utils.GetNIOSDtcCert2Ref()
+	if certificate1 == "" || certificate2 == "" {
+		t.Skip("Both certificates for testing client_cert must be set in environment variables NIOS_DTC_CERT_REF and NIOS_DTC_CERT2_REF")
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -860,7 +863,6 @@ resource "nios_dtc_monitor_http" "test" {
 }
 `, name)
 }
-
 
 func testAccDtcMonitorHttpCiphers(name, ciphers string) string {
 	return fmt.Sprintf(`
