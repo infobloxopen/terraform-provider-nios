@@ -39,7 +39,7 @@ The table below shows the compatibility between different versions of the Terraf
 - **Recommended**: When upgrading from provider v1.x.x to v2.x.x, execute `terraform plan -refresh-only` followed by `terraform apply -refresh-only` to automatically update your state file with UUID.
 - For migration from the legacy terraform provider, refer to the [Migration Guide](MIGRATION.md).
 
-> **Note:** The `terraform refresh` command is deprecated. To update Terraform state with the latest information from your infrastructure, use `terraform plan -refresh-only` followed by `terraform apply -refresh-only` instead. See the [Terraform refresh documentation](https://developer.hashicorp.com/terraform/cli/commands/refresh) for more details.
+> **Note:** The `terraform refresh` command is deprecated. Use the refresh-only workflow instead. See the [Terraform refresh documentation](https://developer.hashicorp.com/terraform/cli/commands/refresh) for more details.
 
 ### Known Issues
 
