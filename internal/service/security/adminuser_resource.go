@@ -118,7 +118,6 @@ func (r *AdminuserResource) ModifyPlan(ctx context.Context, req resource.ModifyP
 				prev.Hash = ""
 			}
 		}
-		// plannedHash := prev.Hash
 		var plannedHash string
 
 		if prev.Hash != "" {
@@ -141,7 +140,7 @@ func (r *AdminuserResource) ModifyPlan(ctx context.Context, req resource.ModifyP
 		}
 
 		if plannedHashes.Password != "" && plannedHashes.Password != prevHashes.Password {
-			// Increment revision and store new hash if password
+			// Increment revision and store new hash if password modified
 			newRev := types.Int64Value(curRev + 1)
 			resp.Diagnostics.Append(resp.Plan.SetAttribute(ctx, path.Root("password_revision"), newRev)...)
 
