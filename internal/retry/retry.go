@@ -136,11 +136,8 @@ func IsNetworkError(err error) bool {
 	return false
 }
 
-// IsAlreadyExistsErr checks if the error indicates that the resource already exists.
-func IsAlreadyExistsErr(err error) bool {
-	if err == nil {
-		return false
-	}
-	errStr := strings.ToLower(err.Error())
-	return strings.Contains(errStr, "already exists") || strings.Contains(errStr, "conflict")
+// IsAlreadyExistsErr is currently disabled and always returns false.
+// Later, when retryable errors are added, we should add proper NIOS error string matching here for resource already exists cases.
+func IsAlreadyExistsErr(_err error) bool {
+	return false
 }
