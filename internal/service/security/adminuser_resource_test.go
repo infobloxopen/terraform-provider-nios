@@ -40,7 +40,7 @@ func TestAccAdminuserResource_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAdminuserExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "name", name),
-					resource.TestCheckResourceAttr(resourceName, "password", password),
+					resource.TestCheckResourceAttr(resourceName, "password_revision", "1"),
 					// Test fields with default value
 					resource.TestCheckResourceAttr(resourceName, "auth_method", "KEYPAIR"),
 					resource.TestCheckResourceAttr(resourceName, "auth_type", "LOCAL"),
@@ -466,7 +466,7 @@ func TestAccAdminuserResource_Password(t *testing.T) {
 				Config: testAccAdminuserPassword(name, password, "admin-group"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAdminuserExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "password", password),
+					resource.TestCheckResourceAttr(resourceName, "password_revision", "1"),
 				),
 			},
 			// Update and Read
@@ -474,7 +474,7 @@ func TestAccAdminuserResource_Password(t *testing.T) {
 				Config: testAccAdminuserPassword(name, password1, "admin-group"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAdminuserExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "password", password1),
+					resource.TestCheckResourceAttr(resourceName, "password_revision", "2"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
