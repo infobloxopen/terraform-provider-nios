@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
+	"github.com/hashicorp/terraform-plugin-framework/resource/identityschema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
@@ -23,6 +24,7 @@ var readableAttributesForBulkhostnametemplate = "is_grid_default,pre_defined,tem
 // Ensure provider defined types fully satisfy framework interfaces.
 var _ resource.Resource = &BulkhostnametemplateResource{}
 var _ resource.ResourceWithImportState = &BulkhostnametemplateResource{}
+var _ resource.ResourceWithIdentity = &BulkhostnametemplateResource{}
 
 func NewBulkhostnametemplateResource() resource.Resource {
 	return &BulkhostnametemplateResource{}
@@ -41,6 +43,16 @@ func (r *BulkhostnametemplateResource) Schema(ctx context.Context, req resource.
 	resp.Schema = schema.Schema{
 		MarkdownDescription: "Manages a Bulk Hostname Template.",
 		Attributes:          BulkhostnametemplateResourceSchemaAttributes,
+	}
+}
+
+func (r *BulkhostnametemplateResource) IdentitySchema(ctx context.Context, req resource.IdentitySchemaRequest, resp *resource.IdentitySchemaResponse) {
+	resp.IdentitySchema = identityschema.Schema{
+		Attributes: map[string]identityschema.Attribute{
+			"ref": identityschema.StringAttribute{
+				RequiredForImport: true,
+			},
+		},
 	}
 }
 
@@ -117,6 +129,9 @@ func (r *BulkhostnametemplateResource) Create(ctx context.Context, req resource.
 
 	data.Flatten(ctx, &res, &resp.Diagnostics)
 
+	// Save the Identity of the Resource
+	resp.Diagnostics.Append(resp.Identity.SetAttribute(ctx, path.Root("ref"), &data.Ref)...)
+
 	// Save data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
@@ -154,7 +169,7 @@ func (r *BulkhostnametemplateResource) Read(ctx context.Context, req resource.Re
 		return 0, callErr
 	})
 
-	// Handle not found case
+		// Handle not found case
 	if err != nil {
 		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
 			// Resource no longer exists, remove from state
@@ -168,6 +183,9 @@ func (r *BulkhostnametemplateResource) Read(ctx context.Context, req resource.Re
 	res := apiRes.GetBulkhostnametemplateResponseObjectAsResult.GetResult()
 
 	data.Flatten(ctx, &res, &resp.Diagnostics)
+
+	// Save the Identity of the Resource
+	resp.Diagnostics.Append(resp.Identity.SetAttribute(ctx, path.Root("ref"), &data.Ref)...)
 
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
@@ -227,6 +245,9 @@ func (r *BulkhostnametemplateResource) Update(ctx context.Context, req resource.
 
 	data.Flatten(ctx, &res, &resp.Diagnostics)
 
+	// Save the Identity of the Resource
+	resp.Diagnostics.Append(resp.Identity.SetAttribute(ctx, path.Root("ref"), &data.Ref)...)
+
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
@@ -265,5 +286,12 @@ func (r *BulkhostnametemplateResource) Delete(ctx context.Context, req resource.
 }
 
 func (r *BulkhostnametemplateResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+	if req.Identity.Raw.IsKnown() {
+		diags := req.Identity.GetAttribute(ctx, path.Root("ref"), &req.ID)
+		if diags.HasError() {
+			resp.Diagnostics.Append(diags...)
+			return
+		}
+	}
 	resource.ImportStatePassthroughID(ctx, path.Root("ref"), req, resp)
 }
