@@ -2012,7 +2012,7 @@ func TestAccMemberResource_NtpSetting(t *testing.T) {
 
 func TestAccMemberResource_OspfList(t *testing.T) {
 	// Authentication Key Issue
-	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
+	// t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_grid_member.test_ospf_list"
 	var v grid.Member
 

@@ -18,7 +18,6 @@ import (
 var readableAttributesForParentalcontrolSubscriberrecord = "accounting_session_id,alt_ip_addr,ans0,ans1,ans2,ans3,ans4,black_list,bwflag,dynamic_category_policy,flags,ip_addr,ipsd,localid,nas_contextual,op_code,parental_control_policy,prefix,proxy_all,site,subscriber_id,subscriber_secure_policy,unknown_category_policy,white_list,wpc_category_policy"
 
 func TestAccParentalcontrolSubscriberrecordResource_basic(t *testing.T) {
-	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_parentalcontrol_subscriberrecord.test"
 	var v parentalcontrol.ParentalcontrolSubscriberrecord
 	ipAddr := acctest.RandomIP()
@@ -52,7 +51,6 @@ func TestAccParentalcontrolSubscriberrecordResource_basic(t *testing.T) {
 }
 
 func TestAccParentalcontrolSubscriberrecordResource_disappears(t *testing.T) {
-	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	resourceName := "nios_parentalcontrol_subscriberrecord.test"
 	var v parentalcontrol.ParentalcontrolSubscriberrecord
 	ipAddr := acctest.RandomIP()
@@ -79,7 +77,6 @@ func TestAccParentalcontrolSubscriberrecordResource_disappears(t *testing.T) {
 }
 
 func TestAccParentalcontrolSubscriberrecordResource_AccountingSessionId(t *testing.T) {
-	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_parentalcontrol_subscriberrecord.test_accounting_session_id"
 	var v parentalcontrol.ParentalcontrolSubscriberrecord
 	ipAddr := acctest.RandomIP()
@@ -116,7 +113,6 @@ func TestAccParentalcontrolSubscriberrecordResource_AccountingSessionId(t *testi
 }
 
 func TestAccParentalcontrolSubscriberrecordResource_AltIpAddr(t *testing.T) {
-	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_parentalcontrol_subscriberrecord.test_alt_ip_addr"
 	var v parentalcontrol.ParentalcontrolSubscriberrecord
 	ipAddr := acctest.RandomIP()
@@ -153,7 +149,6 @@ func TestAccParentalcontrolSubscriberrecordResource_AltIpAddr(t *testing.T) {
 }
 
 func TestAccParentalcontrolSubscriberrecordResource_Ans0(t *testing.T) {
-	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_parentalcontrol_subscriberrecord.test_ans0"
 	var v parentalcontrol.ParentalcontrolSubscriberrecord
 	ipAddr := acctest.RandomIP()
@@ -188,7 +183,6 @@ func TestAccParentalcontrolSubscriberrecordResource_Ans0(t *testing.T) {
 }
 
 func TestAccParentalcontrolSubscriberrecordResource_Ans1(t *testing.T) {
-	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_parentalcontrol_subscriberrecord.test_ans1"
 	var v parentalcontrol.ParentalcontrolSubscriberrecord
 	ipAddr := acctest.RandomIP()
@@ -223,7 +217,6 @@ func TestAccParentalcontrolSubscriberrecordResource_Ans1(t *testing.T) {
 }
 
 func TestAccParentalcontrolSubscriberrecordResource_Ans2(t *testing.T) {
-	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_parentalcontrol_subscriberrecord.test_ans2"
 	var v parentalcontrol.ParentalcontrolSubscriberrecord
 	ipAddr := acctest.RandomIP()
@@ -258,7 +251,6 @@ func TestAccParentalcontrolSubscriberrecordResource_Ans2(t *testing.T) {
 }
 
 func TestAccParentalcontrolSubscriberrecordResource_Ans3(t *testing.T) {
-	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_parentalcontrol_subscriberrecord.test_ans3"
 	var v parentalcontrol.ParentalcontrolSubscriberrecord
 	ipAddr := acctest.RandomIP()
@@ -293,7 +285,6 @@ func TestAccParentalcontrolSubscriberrecordResource_Ans3(t *testing.T) {
 }
 
 func TestAccParentalcontrolSubscriberrecordResource_Ans4(t *testing.T) {
-	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_parentalcontrol_subscriberrecord.test_ans4"
 	var v parentalcontrol.ParentalcontrolSubscriberrecord
 	ipAddr := acctest.RandomIP()
@@ -328,7 +319,6 @@ func TestAccParentalcontrolSubscriberrecordResource_Ans4(t *testing.T) {
 }
 
 func TestAccParentalcontrolSubscriberrecordResource_BlackList(t *testing.T) {
-	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_parentalcontrol_subscriberrecord.test_black_list"
 	var v parentalcontrol.ParentalcontrolSubscriberrecord
 	ipAddr := acctest.RandomIP()
@@ -363,7 +353,6 @@ func TestAccParentalcontrolSubscriberrecordResource_BlackList(t *testing.T) {
 }
 
 func TestAccParentalcontrolSubscriberrecordResource_Bwflag(t *testing.T) {
-	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_parentalcontrol_subscriberrecord.test_bwflag"
 	var v parentalcontrol.ParentalcontrolSubscriberrecord
 	ipAddr := acctest.RandomIP()
@@ -398,7 +387,6 @@ func TestAccParentalcontrolSubscriberrecordResource_Bwflag(t *testing.T) {
 }
 
 func TestAccParentalcontrolSubscriberrecordResource_DynamicCategoryPolicy(t *testing.T) {
-	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_parentalcontrol_subscriberrecord.test_dynamic_category_policy"
 	var v parentalcontrol.ParentalcontrolSubscriberrecord
 	ipAddr := acctest.RandomIP()
@@ -433,7 +421,6 @@ func TestAccParentalcontrolSubscriberrecordResource_DynamicCategoryPolicy(t *tes
 }
 
 func TestAccParentalcontrolSubscriberrecordResource_Flags(t *testing.T) {
-	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_parentalcontrol_subscriberrecord.test_flags"
 	var v parentalcontrol.ParentalcontrolSubscriberrecord
 	ipAddr := acctest.RandomIP()
@@ -468,7 +455,6 @@ func TestAccParentalcontrolSubscriberrecordResource_Flags(t *testing.T) {
 }
 
 func TestAccParentalcontrolSubscriberrecordResource_IpAddr(t *testing.T) {
-	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_parentalcontrol_subscriberrecord.test_ip_addr"
 	var v parentalcontrol.ParentalcontrolSubscriberrecord
 	ipAddr1 := acctest.RandomIP()
@@ -504,7 +490,6 @@ func TestAccParentalcontrolSubscriberrecordResource_IpAddr(t *testing.T) {
 }
 
 func TestAccParentalcontrolSubscriberrecordResource_Ipsd(t *testing.T) {
-	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_parentalcontrol_subscriberrecord.test_ipsd"
 	var v parentalcontrol.ParentalcontrolSubscriberrecord
 	ipAddr := acctest.RandomIP()
@@ -540,7 +525,6 @@ func TestAccParentalcontrolSubscriberrecordResource_Ipsd(t *testing.T) {
 }
 
 func TestAccParentalcontrolSubscriberrecordResource_Localid(t *testing.T) {
-	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_parentalcontrol_subscriberrecord.test_localid"
 	var v parentalcontrol.ParentalcontrolSubscriberrecord
 	ipAddr := acctest.RandomIP()
@@ -576,7 +560,6 @@ func TestAccParentalcontrolSubscriberrecordResource_Localid(t *testing.T) {
 }
 
 func TestAccParentalcontrolSubscriberrecordResource_NasContextual(t *testing.T) {
-	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_parentalcontrol_subscriberrecord.test_nas_contextual"
 	var v parentalcontrol.ParentalcontrolSubscriberrecord
 	ipAddr := acctest.RandomIP()
@@ -613,7 +596,6 @@ func TestAccParentalcontrolSubscriberrecordResource_NasContextual(t *testing.T) 
 }
 
 func TestAccParentalcontrolSubscriberrecordResource_OpCode(t *testing.T) {
-	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_parentalcontrol_subscriberrecord.test_op_code"
 	var v parentalcontrol.ParentalcontrolSubscriberrecord
 	ipAddr := acctest.RandomIP()
@@ -648,7 +630,6 @@ func TestAccParentalcontrolSubscriberrecordResource_OpCode(t *testing.T) {
 }
 
 func TestAccParentalcontrolSubscriberrecordResource_ParentalControlPolicy(t *testing.T) {
-	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_parentalcontrol_subscriberrecord.test_parental_control_policy"
 	var v parentalcontrol.ParentalcontrolSubscriberrecord
 	ipAddr := acctest.RandomIP()
@@ -685,7 +666,6 @@ func TestAccParentalcontrolSubscriberrecordResource_ParentalControlPolicy(t *tes
 }
 
 func TestAccParentalcontrolSubscriberrecordResource_Prefix(t *testing.T) {
-	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_parentalcontrol_subscriberrecord.test_prefix"
 	var v parentalcontrol.ParentalcontrolSubscriberrecord
 	ipAddr := acctest.RandomIP()
@@ -721,7 +701,6 @@ func TestAccParentalcontrolSubscriberrecordResource_Prefix(t *testing.T) {
 }
 
 func TestAccParentalcontrolSubscriberrecordResource_ProxyAll(t *testing.T) {
-	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_parentalcontrol_subscriberrecord.test_proxy_all"
 	var v parentalcontrol.ParentalcontrolSubscriberrecord
 	ipAddr := acctest.RandomIP()
@@ -792,7 +771,6 @@ func TestAccParentalcontrolSubscriberrecordResource_Site(t *testing.T) {
 }
 
 func TestAccParentalcontrolSubscriberrecordResource_SubscriberId(t *testing.T) {
-	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_parentalcontrol_subscriberrecord.test_subscriber_id"
 	var v parentalcontrol.ParentalcontrolSubscriberrecord
 	ipAddr := acctest.RandomIP()
@@ -828,7 +806,6 @@ func TestAccParentalcontrolSubscriberrecordResource_SubscriberId(t *testing.T) {
 }
 
 func TestAccParentalcontrolSubscriberrecordResource_SubscriberSecurePolicy(t *testing.T) {
-	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_parentalcontrol_subscriberrecord.test_subscriber_secure_policy"
 	var v parentalcontrol.ParentalcontrolSubscriberrecord
 	ipAddr := acctest.RandomIP()
@@ -865,7 +842,6 @@ func TestAccParentalcontrolSubscriberrecordResource_SubscriberSecurePolicy(t *te
 }
 
 func TestAccParentalcontrolSubscriberrecordResource_UnknownCategoryPolicy(t *testing.T) {
-	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_parentalcontrol_subscriberrecord.test_unknown_category_policy"
 	var v parentalcontrol.ParentalcontrolSubscriberrecord
 	ipAddr := acctest.RandomIP()
@@ -900,7 +876,6 @@ func TestAccParentalcontrolSubscriberrecordResource_UnknownCategoryPolicy(t *tes
 }
 
 func TestAccParentalcontrolSubscriberrecordResource_WhiteList(t *testing.T) {
-	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_parentalcontrol_subscriberrecord.test_white_list"
 	var v parentalcontrol.ParentalcontrolSubscriberrecord
 	ipAddr := acctest.RandomIP()
@@ -935,7 +910,6 @@ func TestAccParentalcontrolSubscriberrecordResource_WhiteList(t *testing.T) {
 }
 
 func TestAccParentalcontrolSubscriberrecordResource_WpcCategoryPolicy(t *testing.T) {
-	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_parentalcontrol_subscriberrecord.test_wpc_category_policy"
 	var v parentalcontrol.ParentalcontrolSubscriberrecord
 	ipAddr := acctest.RandomIP()
@@ -1003,7 +977,7 @@ func testAccCheckParentalcontrolSubscriberrecordDestroy(ctx context.Context, v *
 			ReturnFieldsPlus(readableAttributesForParentalcontrolSubscriberrecord).
 			Execute()
 		if err != nil {
-			if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
+			if httpRes != nil && (httpRes.StatusCode == http.StatusNotFound || httpRes.StatusCode == http.StatusBadRequest) {
 				// resource was deleted
 				return nil
 			}
