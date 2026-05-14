@@ -12,7 +12,9 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
+
 	"github.com/infobloxopen/infoblox-nios-go-client/security"
+
 	"github.com/infobloxopen/terraform-provider-nios/internal/acctest"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
@@ -197,10 +199,10 @@ func TestAccAdminuserResource_CaCertificateIssuer(t *testing.T) {
 	var v security.Adminuser
 	name := acctest.RandomNameWithPrefix("admin-user")
 	password := "Example-Admin123!"
-	caCertificateIssuer := "cacertificate/b25lLmVhcF9jYV9jZXJ0JDAuYTlkNTNlYTkzMjc2MjljZDUxZGI0ZWY4ZDMxMWM2ZDZkNWUwMmE1ODNjN2QxN2NmOWM1MWE0ODgzODA5YjU0M2I5YzYxNzYyMDZiMTk1MDAxNTgyNzk1MzIwZWVlMGZkZmY5YmI0ZDBlN2U5ZTEwYjBjOTM1ODdmOWNlMDY1OWI:CN%3D%22ib-root-ca%22"
-	caCertificateIssuer1 := "cacertificate/b25lLmVhcF9jYV9jZXJ0JDAuNzBlNzU3MDcyMDVmNGFjOGRlYTMwOWVhNjkwNjhlNjQwNjY5YzBiN2I0YTY3YWE1MTUxOTEzN2EzMDM5NzIxYzcwMDhmNWIwNGFiZGY0ODY1ZDk1MjMzNmUwNGRhMWY3YWU1MzdlZjA1ODUzMGMzZWRmMDM2ZjU4ZWI0ZmIxNGE:CN%3D%22ib-root-ca%22"
-	clientCertificateSerialNumber := "dfe522a477c3caf6"
-	clientCertificateSerialNumber1 := "ef40ae374d39d47a"
+	caCertificateIssuer := utils.GetNIOSCACert1Ref()
+	caCertificateIssuer1 := utils.GetNIOSCACert2Ref()
+	clientCertificateSerialNumber := utils.GetNIOSCACert1Serial()
+	clientCertificateSerialNumber1 := utils.GetNIOSCACert2Serial()
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
@@ -231,10 +233,10 @@ func TestAccAdminuserResource_ClientCertificateSerialNumber(t *testing.T) {
 	var v security.Adminuser
 	name := acctest.RandomNameWithPrefix("admin-user")
 	password := "Example-Admin123!"
-	caCertificateIssuer := "cacertificate/b25lLmVhcF9jYV9jZXJ0JDAuYTlkNTNlYTkzMjc2MjljZDUxZGI0ZWY4ZDMxMWM2ZDZkNWUwMmE1ODNjN2QxN2NmOWM1MWE0ODgzODA5YjU0M2I5YzYxNzYyMDZiMTk1MDAxNTgyNzk1MzIwZWVlMGZkZmY5YmI0ZDBlN2U5ZTEwYjBjOTM1ODdmOWNlMDY1OWI:CN%3D%22ib-root-ca%22"
-	caCertificateIssuer1 := "cacertificate/b25lLmVhcF9jYV9jZXJ0JDAuNzBlNzU3MDcyMDVmNGFjOGRlYTMwOWVhNjkwNjhlNjQwNjY5YzBiN2I0YTY3YWE1MTUxOTEzN2EzMDM5NzIxYzcwMDhmNWIwNGFiZGY0ODY1ZDk1MjMzNmUwNGRhMWY3YWU1MzdlZjA1ODUzMGMzZWRmMDM2ZjU4ZWI0ZmIxNGE:CN%3D%22ib-root-ca%22"
-	clientCertificateSerialNumber := "dfe522a477c3caf6"
-	clientCertificateSerialNumber1 := "ef40ae374d39d47a"
+	caCertificateIssuer := utils.GetNIOSCACert1Ref()
+	caCertificateIssuer1 := utils.GetNIOSCACert2Ref()
+	clientCertificateSerialNumber := utils.GetNIOSCACert1Serial()
+	clientCertificateSerialNumber1 := utils.GetNIOSCACert2Serial()
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
@@ -357,8 +359,8 @@ func TestAccAdminuserResource_EnableCertificateAuthentication(t *testing.T) {
 	var v security.Adminuser
 	name := acctest.RandomNameWithPrefix("admin-user")
 	password := "Example-Admin123!"
-	caCertificateIssuer := "cacertificate/b25lLmVhcF9jYV9jZXJ0JDAuNzBlNzU3MDcyMDVmNGFjOGRlYTMwOWVhNjkwNjhlNjQwNjY5YzBiN2I0YTY3YWE1MTUxOTEzN2EzMDM5NzIxYzcwMDhmNWIwNGFiZGY0ODY1ZDk1MjMzNmUwNGRhMWY3YWU1MzdlZjA1ODUzMGMzZWRmMDM2ZjU4ZWI0ZmIxNGE:CN%3D%22ib-root-ca%22"
-	clientCertificateSerialNumber := "ef40ae374d39d47a"
+	caCertificateIssuer := utils.GetNIOSCACert1Ref()
+	clientCertificateSerialNumber := utils.GetNIOSCACert1Serial()
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
@@ -587,18 +589,18 @@ func TestAccAdminuserResource_UseSshKeys(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccAdminuserUseSshKeys(name, password, "admin-group", true, utils.Ptr("sample-key"), utils.Ptr("RSA"), &sshkeys),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckAdminuserExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_ssh_keys", "true"),
-				),
-			},
-			// Update and Read
-			{
 				Config: testAccAdminuserUseSshKeys(name, password, "admin-group", false, nil, nil, nil),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAdminuserExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_ssh_keys", "false"),
+				),
+			},
+			// Update and Read
+			{
+				Config: testAccAdminuserUseSshKeys(name, password, "admin-group", true, utils.Ptr("sample-key"), utils.Ptr("RSA"), &sshkeys),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckAdminuserExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "use_ssh_keys", "true"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -695,7 +697,6 @@ func testAccCheckAdminuserDisappears(ctx context.Context, v *security.Adminuser)
 }
 
 func testAccAdminuserBasicConfig(name, password, adminGroups string) string {
-	// TODO: create basic resource with required fields
 	return fmt.Sprintf(`
 resource "nios_security_admin_user" "test" {
   name = %q

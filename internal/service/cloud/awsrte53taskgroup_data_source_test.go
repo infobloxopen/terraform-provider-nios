@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/cloud"
 	"github.com/infobloxopen/terraform-provider-nios/internal/acctest"
@@ -16,7 +17,7 @@ func TestAccAwsrte53taskgroupDataSource_Filters(t *testing.T) {
 	resourceName := "nios_cloud_aws_route53_task_group.test"
 	var v cloud.Awsrte53taskgroup
 	taskGroupName := acctest.RandomNameWithPrefix("test-taskgroup")
-	gridMember := "infoblox.localdomain"
+	gridMember := utils.GetNIOSGridMasterHostName()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
