@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
 
@@ -72,13 +73,69 @@ func (r *SharednetworkResource) ValidateConfig(ctx context.Context, req resource
 
 	if !data.DdnsServerAlwaysUpdates.IsNull() && !data.DdnsServerAlwaysUpdates.IsUnknown() {
 		// Check if ddns_use_option81 is set to false
-		if data.DdnsUseOption81.IsNull() && data.DdnsUseOption81.IsUnknown() && !data.DdnsUseOption81.ValueBool() {
+		if data.DdnsUseOption81.IsNull() || data.DdnsUseOption81.IsUnknown() || !data.DdnsUseOption81.ValueBool() {
 			resp.Diagnostics.AddAttributeError(
 				path.Root("ddns_server_always_updates"),
 				"Invalid Configuration",
 				"ddns_use_option81 must be set to true if ddns_server_always_updates is configured.",
 			)
 		}
+	}
+
+	boolIsTrue := func(b types.Bool) bool {
+		return !b.IsNull() && !b.IsUnknown() && b.ValueBool()
+	}
+	boolIsFalse := func(b types.Bool) bool {
+		return !b.IsNull() && !b.IsUnknown() && !b.ValueBool()
+	}
+	strEquals := func(s types.String, want string) bool {
+		return !s.IsNull() && !s.IsUnknown() && s.ValueString() == want
+	}
+
+	icidTrue := boolIsTrue(data.IgnoreClientIdentifier)
+	icidFalse := boolIsFalse(data.IgnoreClientIdentifier)
+	useIcidTrue := boolIsTrue(data.UseIgnoreClientIdentifier)
+	useIcidFalse := boolIsFalse(data.UseIgnoreClientIdentifier)
+
+	ignoreIdClient := strEquals(data.IgnoreId, "CLIENT")
+	ignoreIdNone := strEquals(data.IgnoreId, "NONE")
+	useIgnoreIdTrue := boolIsTrue(data.UseIgnoreId)
+	useIgnoreIdFalse := boolIsFalse(data.UseIgnoreId)
+
+	// Case 1: icid=true && useIcid=true  =>  ignore_id="CLIENT" && use_ignore_id=true
+	if icidTrue && useIcidTrue && (!ignoreIdClient || !useIgnoreIdTrue) {
+		resp.Diagnostics.AddAttributeError(
+			path.Root("ignore_id"),
+			"Invalid Configuration",
+			"ignore_id must be set to \"CLIENT\" and use_ignore_id must be set to true when ignore_client_identifier and use_ignore_client_identifier are both set to true.",
+		)
+	}
+
+	// Case 2: ignore_id="CLIENT" && use_ignore_id=true  =>  icid=true && useIcid=true
+	if ignoreIdClient && useIgnoreIdTrue && (!icidTrue || !useIcidTrue) {
+		resp.Diagnostics.AddAttributeError(
+			path.Root("ignore_client_identifier"),
+			"Invalid Configuration",
+			"ignore_client_identifier and use_ignore_client_identifier must both be set to true when ignore_id is \"CLIENT\" and use_ignore_id is true.",
+		)
+	}
+
+	// Case 3: ignore_id="NONE" && use_ignore_id=false  =>  icid=false && useIcid=false
+	if ignoreIdNone && useIgnoreIdFalse && (!icidFalse || !useIcidFalse) {
+		resp.Diagnostics.AddAttributeError(
+			path.Root("ignore_client_identifier"),
+			"Invalid Configuration",
+			"ignore_client_identifier and use_ignore_client_identifier must both be set to false when ignore_id is \"NONE\" and use_ignore_id is false.",
+		)
+	}
+
+	// Case 4: ignore_id="NONE" && use_ignore_id=true  =>  icid=false && useIcid=true
+	if ignoreIdNone && useIgnoreIdTrue && (icidTrue || !useIcidTrue) {
+		resp.Diagnostics.AddAttributeError(
+			path.Root("ignore_client_identifier"),
+			"Invalid Configuration",
+			"ignore_client_identifier must be set to false and use_ignore_client_identifier must be set to true when ignore_id is \"NONE\" and use_ignore_id is true.",
+		)
 	}
 
 	if !data.Options.IsNull() && !data.Options.IsUnknown() {
@@ -165,6 +222,7 @@ func (r *SharednetworkResource) ValidateConfig(ctx context.Context, req resource
 			}
 		}
 	}
+
 }
 
 func (r *SharednetworkResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
