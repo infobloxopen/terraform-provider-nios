@@ -12,7 +12,6 @@ import (
 	"github.com/infobloxopen/infoblox-nios-go-client/ipam"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/acctest"
-	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
 func TestAccNetworkviewList_basic(t *testing.T) {
@@ -21,23 +20,24 @@ func TestAccNetworkviewList_basic(t *testing.T) {
 	name := acctest.RandomNameWithPrefix("test-network-view")
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.PreCheck(t) },
-		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		PreCheck: func() { acctest.PreCheck(t) },
 		TerraformVersionChecks: []tfversion.TerraformVersionCheck{
 			tfversion.SkipBelow(tfversion.Version1_14_0),
 		},
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccNetworkviewBasicConfig(name),
+				ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+				Config:                   testAccNetworkviewBasicConfig(name),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkviewExists(context.Background(), resourceName, &v),
 				),
 			},
 			// Query the object
 			{
-				Query:  true,
-				Config: utils.ProviderSetup() + testAccNetworkviewListBasicConfig(),
+				ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+				Query:                    true,
+				Config:                   testAccNetworkviewListBasicConfig(),
 				QueryResultChecks: []querycheck.QueryResultCheck{
 					querycheck.ExpectLengthAtLeast("nios_ipam_network_view.test", 1),
 				},
@@ -52,15 +52,15 @@ func TestAccNetworkviewList_Filters(t *testing.T) {
 	name := acctest.RandomNameWithPrefix("test-network-view")
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.PreCheck(t) },
-		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		PreCheck: func() { acctest.PreCheck(t) },
 		TerraformVersionChecks: []tfversion.TerraformVersionCheck{
 			tfversion.SkipBelow(tfversion.Version1_14_0),
 		},
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccNetworkviewBasicConfig(name),
+				ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+				Config:                   testAccNetworkviewBasicConfig(name),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkviewExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "name", name),
@@ -68,8 +68,9 @@ func TestAccNetworkviewList_Filters(t *testing.T) {
 			},
 			// Query the object
 			{
-				Query:  true,
-				Config: utils.ProviderSetup() + testAccNetworkviewListConfigFilters(name),
+				ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+				Query:                    true,
+				Config:                   testAccNetworkviewListConfigFilters(name),
 				QueryResultChecks: []querycheck.QueryResultCheck{
 					querycheck.ExpectLength("nios_ipam_network_view.test", 1),
 				},
@@ -87,14 +88,14 @@ func TestAccNetworkviewList_ExtAttrFilters(t *testing.T) {
 	extAttrValue := acctest.RandomName()
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.PreCheck(t) },
-		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		PreCheck: func() { acctest.PreCheck(t) },
 		TerraformVersionChecks: []tfversion.TerraformVersionCheck{
 			tfversion.SkipBelow(tfversion.Version1_14_0),
 		},
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
+				ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 				Config: testAccNetworkviewExtAttrs(name, map[string]string{
 					"Site": extAttrValue,
 				}),
@@ -105,8 +106,9 @@ func TestAccNetworkviewList_ExtAttrFilters(t *testing.T) {
 			},
 			// Query the object
 			{
-				Query:  true,
-				Config: utils.ProviderSetup() + testAccNetworkviewListConfigExtAttrFilters(extAttrValue),
+				ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+				Query:                    true,
+				Config:                   testAccNetworkviewListConfigExtAttrFilters(extAttrValue),
 				QueryResultChecks: []querycheck.QueryResultCheck{
 					querycheck.ExpectLength("nios_ipam_network_view.test", 1),
 				},

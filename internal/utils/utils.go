@@ -885,9 +885,3 @@ func ReorderAndFilterDHCPOptions(
 
 	return newList, &diags
 }
-
-func ProviderSetup() string {
-	return `
-	provider "nios" {}
-`
-}
