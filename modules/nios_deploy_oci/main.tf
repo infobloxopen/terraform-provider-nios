@@ -31,8 +31,6 @@ locals {
 
   // Cloud-Init resolution
   cloud_init_user_data = (
-    var.cloud_init_content != "" ? base64encode(var.cloud_init_content) :
-    var.cloud_init_script_path != "" ? filebase64(var.cloud_init_script_path) :
     base64encode(templatefile("${path.module}/user_data.tftpl", {
       nios_license           = var.nios_license
       remote_console_enabled = var.remote_console_enabled ? "y" : "n"

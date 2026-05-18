@@ -120,19 +120,6 @@ variable "lan1_assign_public_ip" {
   default     = false
 }
 
-// Cloud-Init
-variable "cloud_init_script_path" {
-  description = "Path to a cloud-init YAML file. Used when cloud_init_content is empty. If both this and cloud_init_content are empty, the module uses its built-in default cloud-init template."
-  type        = string
-  default     = ""
-}
-
-variable "cloud_init_content" {
-  description = "Inline cloud-init YAML. Takes precedence over cloud_init_script_path. If both are empty, the module uses its built-in default cloud-init template."
-  type        = string
-  default     = ""
-}
-
 // Reporting Block Volume (optional — attached to member)
 variable "enable_reporting_volume" {
   description = "Create and attach a reporting block volume to the Grid Member."
