@@ -195,7 +195,7 @@ func TestAccDtcTopologyResource_RulesWithPool(t *testing.T) {
 	var resourceName = "nios_dtc_topology.test_rules_pool"
 	var v dtc.DtcTopology
 	name := acctest.RandomNameWithPrefix("dtc-topology")
-	poolName := acctest.RandomNameWithPrefix("dtc-topology")
+	poolName := acctest.RandomNameWithPrefix("dtc-pool")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },

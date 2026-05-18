@@ -18,7 +18,7 @@ import (
 )
 
 // TODO: OBJECTS TO BE PRESENT IN THE GRID FOR TESTS
-// Network views: custom_private_view, custom_public_view
+// Network views: test_network_view, test_network_view2
 // DNS view : custom_dns_view
 // GCP service account files
 // CSV files for cdiscovery if muliple accounts sync policy is UPLOAD
@@ -28,6 +28,7 @@ var readableAttributesForVdiscoverytask = "accounts_list,allow_unsecured_connect
 func TestAccVdiscoverytaskResource_basic(t *testing.T) {
 	var resourceName = "nios_discovery_vdiscovery_task.test"
 	var v discovery.Vdiscoverytask
+	memberName := utils.GetNIOSGridMasterHostName()
 
 	name := acctest.RandomNameWithPrefix("example-vDiscovery-task-")
 
@@ -37,12 +38,12 @@ func TestAccVdiscoverytaskResource_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccVdiscoverytaskBasicConfig(name, true, true, true, "AWS", "infoblox.172_28_83_29", "AUTO_CREATE", "AUTO_CREATE", true, false, "us-east-1", "aws_access_key", "aws_secret_key"),
+				Config: testAccVdiscoverytaskBasicConfig(name, true, true, true, "AWS", memberName, "AUTO_CREATE", "AUTO_CREATE", true, false, "us-east-1", "aws_access_key", "aws_secret_key"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckVdiscoverytaskExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "name", name),
 					resource.TestCheckResourceAttr(resourceName, "driver_type", "AWS"),
-					resource.TestCheckResourceAttr(resourceName, "member", "infoblox.172_28_83_29"),
+					resource.TestCheckResourceAttr(resourceName, "member", memberName),
 					resource.TestCheckResourceAttr(resourceName, "auto_consolidate_cloud_ea", "true"),
 					resource.TestCheckResourceAttr(resourceName, "auto_consolidate_managed_tenant", "true"),
 					resource.TestCheckResourceAttr(resourceName, "auto_consolidate_managed_vm", "true"),
@@ -72,6 +73,7 @@ func TestAccVdiscoverytaskResource_basic(t *testing.T) {
 func TestAccVdiscoverytaskResource_disappears(t *testing.T) {
 	resourceName := "nios_discovery_vdiscovery_task.test"
 	var v discovery.Vdiscoverytask
+	memberName := utils.GetNIOSGridMasterHostName()
 
 	name := acctest.RandomNameWithPrefix("example-vDiscovery-task-")
 
@@ -81,7 +83,7 @@ func TestAccVdiscoverytaskResource_disappears(t *testing.T) {
 		CheckDestroy:             testAccCheckVdiscoverytaskDestroy(context.Background(), &v),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccVdiscoverytaskBasicConfig(name, true, true, true, "AWS", "infoblox.172_28_83_29", "AUTO_CREATE", "AUTO_CREATE", true, false, "us-east-1", "aws_access_key", "aws_secret_key"),
+				Config: testAccVdiscoverytaskBasicConfig(name, true, true, true, "AWS", memberName, "AUTO_CREATE", "AUTO_CREATE", true, false, "us-east-1", "aws_access_key", "aws_secret_key"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckVdiscoverytaskExists(context.Background(), resourceName, &v),
 					testAccCheckVdiscoverytaskDisappears(context.Background(), &v),
@@ -95,6 +97,7 @@ func TestAccVdiscoverytaskResource_disappears(t *testing.T) {
 func TestAccVdiscoverytaskResource_AllowUnsecuredConnection(t *testing.T) {
 	var resourceName = "nios_discovery_vdiscovery_task.test_allow_unsecured_connection"
 	var v discovery.Vdiscoverytask
+	memberName := utils.GetNIOSGridMasterHostName()
 
 	name := acctest.RandomNameWithPrefix("example-vDiscovery-task-")
 
@@ -104,7 +107,7 @@ func TestAccVdiscoverytaskResource_AllowUnsecuredConnection(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccVdiscoverytaskAllowUnsecuredConnection(name, true, true, true, true, true, false, "VMWARE", "vcenter.example.com", "infoblox.172_28_83_29", "vmware_password", "AUTO_CREATE", "HTTPS", "AUTO_CREATE", "us-east-1", "vc_admin", 443),
+				Config: testAccVdiscoverytaskAllowUnsecuredConnection(name, true, true, true, true, true, false, "VMWARE", "vcenter.example.com", memberName, "vmware_password", "AUTO_CREATE", "HTTPS", "AUTO_CREATE", "us-east-1", "vc_admin", 443),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckVdiscoverytaskExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "allow_unsecured_connection", "true"),
@@ -112,7 +115,7 @@ func TestAccVdiscoverytaskResource_AllowUnsecuredConnection(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccVdiscoverytaskAllowUnsecuredConnection(name, false, true, true, true, true, false, "VMWARE", "vcenter.example.com", "infoblox.172_28_83_29", "vmware_password", "AUTO_CREATE", "HTTPS", "AUTO_CREATE", "us-east-1", "vc_admin", 443),
+				Config: testAccVdiscoverytaskAllowUnsecuredConnection(name, false, true, true, true, true, false, "VMWARE", "vcenter.example.com", memberName, "vmware_password", "AUTO_CREATE", "HTTPS", "AUTO_CREATE", "us-east-1", "vc_admin", 443),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckVdiscoverytaskExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "allow_unsecured_connection", "false"),
@@ -126,6 +129,7 @@ func TestAccVdiscoverytaskResource_AllowUnsecuredConnection(t *testing.T) {
 func TestAccVdiscoverytaskResource_AutoConsolidateCloudEa(t *testing.T) {
 	var resourceName = "nios_discovery_vdiscovery_task.test_auto_consolidate_cloud_ea"
 	var v discovery.Vdiscoverytask
+	memberName := utils.GetNIOSGridMasterHostName()
 
 	name := acctest.RandomNameWithPrefix("example-vDiscovery-task-")
 
@@ -135,7 +139,7 @@ func TestAccVdiscoverytaskResource_AutoConsolidateCloudEa(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccVdiscoverytaskAutoConsolidateCloudEa(name, true, true, true, true, false, "AWS", "infoblox.172_28_83_29", "AUTO_CREATE", "AUTO_CREATE", "us-east-1", "aws_access_key", "aws_secret_key"),
+				Config: testAccVdiscoverytaskAutoConsolidateCloudEa(name, true, true, true, true, false, "AWS", memberName, "AUTO_CREATE", "AUTO_CREATE", "us-east-1", "aws_access_key", "aws_secret_key"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckVdiscoverytaskExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "auto_consolidate_cloud_ea", "true"),
@@ -143,7 +147,7 @@ func TestAccVdiscoverytaskResource_AutoConsolidateCloudEa(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccVdiscoverytaskAutoConsolidateCloudEa(name, false, true, true, true, false, "AWS", "infoblox.172_28_83_29", "AUTO_CREATE", "AUTO_CREATE", "us-east-1", "aws_access_key", "aws_secret_key"),
+				Config: testAccVdiscoverytaskAutoConsolidateCloudEa(name, false, true, true, true, false, "AWS", memberName, "AUTO_CREATE", "AUTO_CREATE", "us-east-1", "aws_access_key", "aws_secret_key"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckVdiscoverytaskExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "auto_consolidate_cloud_ea", "false"),
@@ -157,6 +161,7 @@ func TestAccVdiscoverytaskResource_AutoConsolidateCloudEa(t *testing.T) {
 func TestAccVdiscoverytaskResource_AutoConsolidateManagedTenant(t *testing.T) {
 	var resourceName = "nios_discovery_vdiscovery_task.test_auto_consolidate_managed_tenant"
 	var v discovery.Vdiscoverytask
+	memberName := utils.GetNIOSGridMasterHostName()
 
 	name := acctest.RandomNameWithPrefix("example-vDiscovery-task-")
 
@@ -166,7 +171,7 @@ func TestAccVdiscoverytaskResource_AutoConsolidateManagedTenant(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccVdiscoverytaskAutoConsolidateManagedTenant(name, true, true, true, true, false, "AWS", "infoblox.172_28_83_29", "AUTO_CREATE", "AUTO_CREATE", "us-east-1", "aws_access_key", "aws_secret_key"),
+				Config: testAccVdiscoverytaskAutoConsolidateManagedTenant(name, true, true, true, true, false, "AWS", memberName, "AUTO_CREATE", "AUTO_CREATE", "us-east-1", "aws_access_key", "aws_secret_key"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckVdiscoverytaskExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "auto_consolidate_managed_tenant", "true"),
@@ -174,7 +179,7 @@ func TestAccVdiscoverytaskResource_AutoConsolidateManagedTenant(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccVdiscoverytaskAutoConsolidateManagedTenant(name, false, true, true, true, false, "AWS", "infoblox.172_28_83_29", "AUTO_CREATE", "AUTO_CREATE", "us-east-1", "aws_access_key", "aws_secret_key"),
+				Config: testAccVdiscoverytaskAutoConsolidateManagedTenant(name, false, true, true, true, false, "AWS", memberName, "AUTO_CREATE", "AUTO_CREATE", "us-east-1", "aws_access_key", "aws_secret_key"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckVdiscoverytaskExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "auto_consolidate_managed_tenant", "false"),
@@ -188,6 +193,7 @@ func TestAccVdiscoverytaskResource_AutoConsolidateManagedTenant(t *testing.T) {
 func TestAccVdiscoverytaskResource_AutoConsolidateManagedVm(t *testing.T) {
 	var resourceName = "nios_discovery_vdiscovery_task.test_auto_consolidate_managed_vm"
 	var v discovery.Vdiscoverytask
+	memberName := utils.GetNIOSGridMasterHostName()
 
 	name := acctest.RandomNameWithPrefix("example-vDiscovery-task-")
 
@@ -197,7 +203,7 @@ func TestAccVdiscoverytaskResource_AutoConsolidateManagedVm(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccVdiscoverytaskAutoConsolidateManagedVm(name, true, true, true, true, false, "AWS", "infoblox.172_28_83_29", "AUTO_CREATE", "AUTO_CREATE", "us-east-1", "aws_access_key", "aws_secret_key"),
+				Config: testAccVdiscoverytaskAutoConsolidateManagedVm(name, true, true, true, true, false, "AWS", memberName, "AUTO_CREATE", "AUTO_CREATE", "us-east-1", "aws_access_key", "aws_secret_key"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckVdiscoverytaskExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "auto_consolidate_managed_vm", "true"),
@@ -205,7 +211,7 @@ func TestAccVdiscoverytaskResource_AutoConsolidateManagedVm(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccVdiscoverytaskAutoConsolidateManagedVm(name, false, true, true, true, false, "AWS", "infoblox.172_28_83_29", "AUTO_CREATE", "AUTO_CREATE", "us-east-1", "aws_access_key", "aws_secret_key"),
+				Config: testAccVdiscoverytaskAutoConsolidateManagedVm(name, false, true, true, true, false, "AWS", memberName, "AUTO_CREATE", "AUTO_CREATE", "us-east-1", "aws_access_key", "aws_secret_key"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckVdiscoverytaskExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "auto_consolidate_managed_vm", "false"),
@@ -218,6 +224,7 @@ func TestAccVdiscoverytaskResource_AutoConsolidateManagedVm(t *testing.T) {
 func TestAccVdiscoverytaskResource_AutoCreateDnsHostnameTemplate(t *testing.T) {
 	var resourceName = "nios_discovery_vdiscovery_task.test_auto_create_dns_hostname_template"
 	var v discovery.Vdiscoverytask
+	memberName := utils.GetNIOSGridMasterHostName()
 
 	name := acctest.RandomNameWithPrefix("example-vDiscovery-task-")
 
@@ -227,7 +234,7 @@ func TestAccVdiscoverytaskResource_AutoCreateDnsHostnameTemplate(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccVdiscoverytaskAutoCreateDnsHostnameTemplate(name, "$${vm_name}.testdomain.com", true, true, true, true, "HOST_RECORD", "AWS", "infoblox.172_28_83_29", "AUTO_CREATE", "AUTO_CREATE", "ap-northeast-1", "aws_access_key", "aws_secret_key", true, false),
+				Config: testAccVdiscoverytaskAutoCreateDnsHostnameTemplate(name, "$${vm_name}.testdomain.com", true, true, true, true, "HOST_RECORD", "AWS", memberName, "AUTO_CREATE", "AUTO_CREATE", "ap-northeast-1", "aws_access_key", "aws_secret_key", true, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckVdiscoverytaskExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "auto_create_dns_hostname_template", "${vm_name}.testdomain.com"),
@@ -235,7 +242,7 @@ func TestAccVdiscoverytaskResource_AutoCreateDnsHostnameTemplate(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccVdiscoverytaskAutoCreateDnsHostnameTemplate(name, "$${vm_name}.updatedtestdomain.com", true, true, true, true, "HOST_RECORD", "AWS", "infoblox.172_28_83_29", "AUTO_CREATE", "AUTO_CREATE", "ap-northeast-1", "aws_access_key", "aws_secret_key", true, false),
+				Config: testAccVdiscoverytaskAutoCreateDnsHostnameTemplate(name, "$${vm_name}.updatedtestdomain.com", true, true, true, true, "HOST_RECORD", "AWS", memberName, "AUTO_CREATE", "AUTO_CREATE", "ap-northeast-1", "aws_access_key", "aws_secret_key", true, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckVdiscoverytaskExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "auto_create_dns_hostname_template", "${vm_name}.updatedtestdomain.com"),
@@ -248,6 +255,7 @@ func TestAccVdiscoverytaskResource_AutoCreateDnsHostnameTemplate(t *testing.T) {
 func TestAccVdiscoverytaskResource_AutoCreateDnsRecord(t *testing.T) {
 	var resourceName = "nios_discovery_vdiscovery_task.test_auto_create_dns_record"
 	var v discovery.Vdiscoverytask
+	memberName := utils.GetNIOSGridMasterHostName()
 
 	name := acctest.RandomNameWithPrefix("example-vDiscovery-task-")
 
@@ -257,7 +265,7 @@ func TestAccVdiscoverytaskResource_AutoCreateDnsRecord(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccVdiscoverytaskAutoCreateDnsRecord(name, true, true, true, true, "$${vm_name}.testdomain.com", "HOST_RECORD", "AWS", "infoblox.172_28_83_29", "AUTO_CREATE", "AUTO_CREATE", "ap-northeast-1", "aws_access_key", "aws_secret_key", true, false),
+				Config: testAccVdiscoverytaskAutoCreateDnsRecord(name, true, true, true, true, "$${vm_name}.testdomain.com", "HOST_RECORD", "AWS", memberName, "AUTO_CREATE", "AUTO_CREATE", "ap-northeast-1", "aws_access_key", "aws_secret_key", true, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckVdiscoverytaskExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "auto_create_dns_record", "true"),
@@ -265,7 +273,7 @@ func TestAccVdiscoverytaskResource_AutoCreateDnsRecord(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccVdiscoverytaskAutoCreateDnsRecord(name, false, true, true, true, "$${vm_name}.testdomain.com", "HOST_RECORD", "AWS", "infoblox.172_28_83_29", "AUTO_CREATE", "AUTO_CREATE", "ap-northeast-1", "aws_access_key", "aws_secret_key", true, false),
+				Config: testAccVdiscoverytaskAutoCreateDnsRecord(name, false, true, true, true, "$${vm_name}.testdomain.com", "HOST_RECORD", "AWS", memberName, "AUTO_CREATE", "AUTO_CREATE", "ap-northeast-1", "aws_access_key", "aws_secret_key", true, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckVdiscoverytaskExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "auto_create_dns_record", "false"),
@@ -278,6 +286,7 @@ func TestAccVdiscoverytaskResource_AutoCreateDnsRecord(t *testing.T) {
 func TestAccVdiscoverytaskResource_AutoCreateDnsRecordType(t *testing.T) {
 	var resourceName = "nios_discovery_vdiscovery_task.test_auto_create_dns_record_type"
 	var v discovery.Vdiscoverytask
+	memberName := utils.GetNIOSGridMasterHostName()
 
 	name := acctest.RandomNameWithPrefix("example-vDiscovery-task-")
 
@@ -287,7 +296,7 @@ func TestAccVdiscoverytaskResource_AutoCreateDnsRecordType(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccVdiscoverytaskAutoCreateDnsRecordType(name, "HOST_RECORD", true, true, true, true, "$${vm_name}.testdomain.com", "AWS", "infoblox.172_28_83_29", "AUTO_CREATE", "AUTO_CREATE", "ap-northeast-1", "aws_access_key", "aws_secret_key", true, false),
+				Config: testAccVdiscoverytaskAutoCreateDnsRecordType(name, "HOST_RECORD", true, true, true, true, "$${vm_name}.testdomain.com", "AWS", memberName, "AUTO_CREATE", "AUTO_CREATE", "ap-northeast-1", "aws_access_key", "aws_secret_key", true, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckVdiscoverytaskExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "auto_create_dns_record_type", "HOST_RECORD"),
@@ -295,7 +304,7 @@ func TestAccVdiscoverytaskResource_AutoCreateDnsRecordType(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccVdiscoverytaskAutoCreateDnsRecordType(name, "A_PTR_RECORD", true, true, true, true, "$${vm_name}.testdomain.com", "AWS", "infoblox.172_28_83_29", "AUTO_CREATE", "AUTO_CREATE", "ap-northeast-1", "aws_access_key", "aws_secret_key", true, false),
+				Config: testAccVdiscoverytaskAutoCreateDnsRecordType(name, "A_PTR_RECORD", true, true, true, true, "$${vm_name}.testdomain.com", "AWS", memberName, "AUTO_CREATE", "AUTO_CREATE", "ap-northeast-1", "aws_access_key", "aws_secret_key", true, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckVdiscoverytaskExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "auto_create_dns_record_type", "A_PTR_RECORD"),
@@ -309,6 +318,7 @@ func TestAccVdiscoverytaskResource_AutoCreateDnsRecordType(t *testing.T) {
 func TestAccVdiscoverytaskResource_CdiscoveryFileToken(t *testing.T) {
 	var resourceName = "nios_discovery_vdiscovery_task.test_aws_cdiscovery_file"
 	var v discovery.Vdiscoverytask
+	memberName := utils.GetNIOSGridMasterHostName()
 
 	name := acctest.RandomNameWithPrefix("example-vDiscovery-task-")
 
@@ -323,7 +333,7 @@ func TestAccVdiscoverytaskResource_CdiscoveryFileToken(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccVdiscoverytaskCdiscoveryFile(name, "AWS", "infoblox.172_28_83_29", cdiscoveryFile1, "UPLOAD", "aws_access_key", "aws_secret_key", "arn:aws:iam::123456789012:role/InfobloxDiscoveryRole", true, true, false, true, true, true, "AUTO_CREATE", "AUTO_CREATE", true, "us-east-1", "AWS CDiscovery file test"),
+				Config: testAccVdiscoverytaskCdiscoveryFile(name, "AWS", memberName, cdiscoveryFile1, "UPLOAD", "aws_access_key", "aws_secret_key", "arn:aws:iam::123456789012:role/InfobloxDiscoveryRole", true, true, false, true, true, true, "AUTO_CREATE", "AUTO_CREATE", true, "us-east-1", "AWS CDiscovery file test"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckVdiscoverytaskExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "cdiscovery_file", cdiscoveryFile1),
@@ -331,7 +341,7 @@ func TestAccVdiscoverytaskResource_CdiscoveryFileToken(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccVdiscoverytaskCdiscoveryFile(name, "AWS", "infoblox.172_28_83_29", cdiscoveryFile2, "UPLOAD", "aws_access_key", "aws_secret_key", "arn:aws:iam::123456789012:role/UpdatedInfobloxRole", false, false, true, true, true, true, "AUTO_CREATE", "AUTO_CREATE", false, "us-west-1", "Updated AWS CDiscovery file test"),
+				Config: testAccVdiscoverytaskCdiscoveryFile(name, "AWS", memberName, cdiscoveryFile2, "UPLOAD", "aws_access_key", "aws_secret_key", "arn:aws:iam::123456789012:role/UpdatedInfobloxRole", false, false, true, true, true, true, "AUTO_CREATE", "AUTO_CREATE", false, "us-west-1", "Updated AWS CDiscovery file test"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckVdiscoverytaskExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "cdiscovery_file", cdiscoveryFile2),
@@ -345,6 +355,7 @@ func TestAccVdiscoverytaskResource_CdiscoveryFileToken(t *testing.T) {
 func TestAccVdiscoverytaskResource_Comment(t *testing.T) {
 	var resourceName = "nios_discovery_vdiscovery_task.test_comment"
 	var v discovery.Vdiscoverytask
+	memberName := utils.GetNIOSGridMasterHostName()
 
 	name := acctest.RandomNameWithPrefix("example-vDiscovery-task-")
 
@@ -354,7 +365,7 @@ func TestAccVdiscoverytaskResource_Comment(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccVdiscoverytaskComment(name, "This is a test comment", true, true, true, "infoblox.172_28_83_29", "AWS", "AUTO_CREATE", "AUTO_CREATE", true, false, "ap-northeast-1", "aws_access_key", "aws_secret_key"),
+				Config: testAccVdiscoverytaskComment(name, "This is a test comment", true, true, true, memberName, "AWS", "AUTO_CREATE", "AUTO_CREATE", true, false, "ap-northeast-1", "aws_access_key", "aws_secret_key"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckVdiscoverytaskExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "comment", "This is a test comment"),
@@ -362,7 +373,7 @@ func TestAccVdiscoverytaskResource_Comment(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccVdiscoverytaskComment(name, "This is an updated comment", true, true, true, "infoblox.172_28_83_29", "AWS", "AUTO_CREATE", "AUTO_CREATE", true, false, "ap-northeast-1", "aws_access_key", "aws_secret_key"),
+				Config: testAccVdiscoverytaskComment(name, "This is an updated comment", true, true, true, memberName, "AWS", "AUTO_CREATE", "AUTO_CREATE", true, false, "ap-northeast-1", "aws_access_key", "aws_secret_key"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckVdiscoverytaskExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "comment", "This is an updated comment"),
@@ -376,6 +387,7 @@ func TestAccVdiscoverytaskResource_Comment(t *testing.T) {
 func TestAccVdiscoverytaskResource_CredentialsType(t *testing.T) {
 	var resourceName = "nios_discovery_vdiscovery_task.test_credentials_type"
 	var v discovery.Vdiscoverytask
+	memberName := utils.GetNIOSGridMasterHostName()
 
 	name := acctest.RandomNameWithPrefix("example-vDiscovery-task-")
 
@@ -385,7 +397,7 @@ func TestAccVdiscoverytaskResource_CredentialsType(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccVdiscoverytaskCredentialsTypeIndirect(name, "INDIRECT", "arn:aws:iam::123456789012:role/InfobloxDiscoveryRole", "DISCOVER", "infoblox.172_28_83_29", true, true, true, "AWS", "AUTO_CREATE", "AUTO_CREATE", true, true, true, "us-east-1"),
+				Config: testAccVdiscoverytaskCredentialsTypeIndirect(name, "INDIRECT", "arn:aws:iam::123456789012:role/InfobloxDiscoveryRole", "DISCOVER", memberName, true, true, true, "AWS", "AUTO_CREATE", "AUTO_CREATE", true, true, true, "us-east-1"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckVdiscoverytaskExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "credentials_type", "INDIRECT"),
@@ -393,7 +405,7 @@ func TestAccVdiscoverytaskResource_CredentialsType(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccVdiscoverytaskCredentialsTypeDirect(name, "DIRECT", "aws_access_key", "aws_secret_key", "infoblox.172_28_83_29", true, true, true, "AWS", "AUTO_CREATE", "AUTO_CREATE", true, false, "us-east-1"),
+				Config: testAccVdiscoverytaskCredentialsTypeDirect(name, "DIRECT", "aws_access_key", "aws_secret_key", memberName, true, true, true, "AWS", "AUTO_CREATE", "AUTO_CREATE", true, false, "us-east-1"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckVdiscoverytaskExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "credentials_type", "DIRECT"),
@@ -407,6 +419,7 @@ func TestAccVdiscoverytaskResource_CredentialsType(t *testing.T) {
 func TestAccVdiscoverytaskResource_DnsViewPrivateIp(t *testing.T) {
 	var resourceName = "nios_discovery_vdiscovery_task.test_dns_view_private_ip"
 	var v discovery.Vdiscoverytask
+	memberName := utils.GetNIOSGridMasterHostName()
 
 	name := acctest.RandomNameWithPrefix("example-vDiscovery-task-")
 
@@ -416,7 +429,7 @@ func TestAccVdiscoverytaskResource_DnsViewPrivateIp(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccVdiscoverytaskDnsViewPrivateIp(name, "default", true, "$${vm_name}.testdomain.com", "aws_access_key", "aws_secret_key", "infoblox.172_28_83_29", true, true, true, "AWS", "DIRECT", "default", "AUTO_CREATE", true, false, "us-east-1"),
+				Config: testAccVdiscoverytaskDnsViewPrivateIp(name, "default", true, "$${vm_name}.testdomain.com", "aws_access_key", "aws_secret_key", memberName, true, true, true, "AWS", "DIRECT", "default", "AUTO_CREATE", true, false, "us-east-1"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckVdiscoverytaskExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "dns_view_private_ip", "default"),
@@ -424,7 +437,7 @@ func TestAccVdiscoverytaskResource_DnsViewPrivateIp(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccVdiscoverytaskDnsViewPrivateIp(name, "custom_dns_view", true, "$${vm_name}.testdomain.com", "aws_access_key", "aws_secret_key", "infoblox.172_28_83_29", true, true, true, "AWS", "DIRECT", "default", "AUTO_CREATE", true, false, "us-east-1"),
+				Config: testAccVdiscoverytaskDnsViewPrivateIp(name, "custom_dns_view", true, "$${vm_name}.testdomain.com", "aws_access_key", "aws_secret_key", memberName, true, true, true, "AWS", "DIRECT", "default", "AUTO_CREATE", true, false, "us-east-1"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckVdiscoverytaskExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "dns_view_private_ip", "custom_dns_view"),
@@ -438,6 +451,7 @@ func TestAccVdiscoverytaskResource_DnsViewPrivateIp(t *testing.T) {
 func TestAccVdiscoverytaskResource_DnsViewPublicIp(t *testing.T) {
 	var resourceName = "nios_discovery_vdiscovery_task.test_dns_view_public_ip"
 	var v discovery.Vdiscoverytask
+	memberName := utils.GetNIOSGridMasterHostName()
 
 	name := acctest.RandomNameWithPrefix("example-vDiscovery-task-")
 
@@ -447,7 +461,7 @@ func TestAccVdiscoverytaskResource_DnsViewPublicIp(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccVdiscoverytaskDnsViewPublicIp(name, "default", true, "$${vm_name}.testdomain.com", "aws_access_key", "aws_secret_key", "infoblox.172_28_83_29", true, true, true, "AWS", "AUTO_CREATE", "DIRECT", "default", true, false, "us-east-1"),
+				Config: testAccVdiscoverytaskDnsViewPublicIp(name, "default", true, "$${vm_name}.testdomain.com", "aws_access_key", "aws_secret_key", memberName, true, true, true, "AWS", "AUTO_CREATE", "DIRECT", "default", true, false, "us-east-1"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckVdiscoverytaskExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "dns_view_public_ip", "default"),
@@ -455,7 +469,7 @@ func TestAccVdiscoverytaskResource_DnsViewPublicIp(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccVdiscoverytaskDnsViewPublicIp(name, "custom_dns_view", true, "$${vm_name}.testdomain.com", "aws_access_key", "aws_secret_key", "infoblox.172_28_83_29", true, true, true, "AWS", "AUTO_CREATE", "DIRECT", "default", true, false, "us-east-1"),
+				Config: testAccVdiscoverytaskDnsViewPublicIp(name, "custom_dns_view", true, "$${vm_name}.testdomain.com", "aws_access_key", "aws_secret_key", memberName, true, true, true, "AWS", "AUTO_CREATE", "DIRECT", "default", true, false, "us-east-1"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckVdiscoverytaskExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "dns_view_public_ip", "custom_dns_view"),
@@ -469,6 +483,7 @@ func TestAccVdiscoverytaskResource_DnsViewPublicIp(t *testing.T) {
 func TestAccVdiscoverytaskResource_DomainName(t *testing.T) {
 	var resourceName = "nios_discovery_vdiscovery_task.test_domain_name"
 	var v discovery.Vdiscoverytask
+	memberName := utils.GetNIOSGridMasterHostName()
 
 	name := acctest.RandomNameWithPrefix("example-vDiscovery-task-")
 
@@ -478,7 +493,7 @@ func TestAccVdiscoverytaskResource_DomainName(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccVdiscoverytaskDomainName(name, "default", "openstack.example.com", "infoblox.172_28_83_29", "KEYSTONE_V3", "openstack_user", "openstack_password", true, true, true, true, "OPENSTACK", "AUTO_CREATE", "AUTO_CREATE", true, false, 443, "HTTPS"),
+				Config: testAccVdiscoverytaskDomainName(name, "default", "openstack.example.com", memberName, "KEYSTONE_V3", "openstack_user", "openstack_password", true, true, true, true, "OPENSTACK", "AUTO_CREATE", "AUTO_CREATE", true, false, 443, "HTTPS"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckVdiscoverytaskExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "domain_name", "default"),
@@ -486,7 +501,7 @@ func TestAccVdiscoverytaskResource_DomainName(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccVdiscoverytaskDomainName(name, "custom", "openstack.example.com", "infoblox.172_28_83_29", "KEYSTONE_V3", "openstack_user", "openstack_password", true, true, true, true, "OPENSTACK", "AUTO_CREATE", "AUTO_CREATE", true, false, 443, "HTTPS"),
+				Config: testAccVdiscoverytaskDomainName(name, "custom", "openstack.example.com", memberName, "KEYSTONE_V3", "openstack_user", "openstack_password", true, true, true, true, "OPENSTACK", "AUTO_CREATE", "AUTO_CREATE", true, false, 443, "HTTPS"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckVdiscoverytaskExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "domain_name", "custom"),
@@ -500,6 +515,7 @@ func TestAccVdiscoverytaskResource_DomainName(t *testing.T) {
 func TestAccVdiscoverytaskResource_DriverType(t *testing.T) {
 	var resourceName = "nios_discovery_vdiscovery_task.test_driver_type"
 	var v discovery.Vdiscoverytask
+	memberName := utils.GetNIOSGridMasterHostName()
 
 	name := acctest.RandomNameWithPrefix("example-vDiscovery-task-")
 
@@ -509,7 +525,7 @@ func TestAccVdiscoverytaskResource_DriverType(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccVdiscoverytaskDriverTypeOpenstack(name, "OPENSTACK", "openstack.example.com", "infoblox.172_28_83_29", "KEYSTONE_V2", "openstack_user", "openstack_password", true, true, true, true, "AUTO_CREATE", "AUTO_CREATE", true, false, 80, "HTTP"),
+				Config: testAccVdiscoverytaskDriverTypeOpenstack(name, "OPENSTACK", "openstack.example.com", memberName, "KEYSTONE_V2", "openstack_user", "openstack_password", true, true, true, true, "AUTO_CREATE", "AUTO_CREATE", true, false, 80, "HTTP"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckVdiscoverytaskExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "driver_type", "OPENSTACK"),
@@ -517,7 +533,7 @@ func TestAccVdiscoverytaskResource_DriverType(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccVdiscoverytaskDriverTypeVmware(name, "VMWARE", "vcenter.example.com", "infoblox.172_28_83_29", "vc_admin", "vmware_password", false, true, true, true, "AUTO_CREATE", "AUTO_CREATE", true, false, 80, "HTTP"),
+				Config: testAccVdiscoverytaskDriverTypeVmware(name, "VMWARE", "vcenter.example.com", memberName, "vc_admin", "vmware_password", false, true, true, true, "AUTO_CREATE", "AUTO_CREATE", true, false, 80, "HTTP"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckVdiscoverytaskExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "driver_type", "VMWARE"),
@@ -534,6 +550,7 @@ func TestAccVdiscoverytaskResource_DriverType(t *testing.T) {
 func TestAccVdiscoverytaskResource_EnableFilter(t *testing.T) {
 	var resourceName = "nios_discovery_vdiscovery_task.test_enable_filter"
 	var v discovery.Vdiscoverytask
+	memberName := utils.GetNIOSGridMasterHostName()
 
 	name := acctest.RandomNameWithPrefix("example-vDiscovery-task-")
 	networklist := []string{"10.0.0.0/8", "20.0.0.0/16"}
@@ -544,7 +561,7 @@ func TestAccVdiscoverytaskResource_EnableFilter(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccVdiscoverytaskEnableFilter(name, true, networklist, "INCLUDE", "aws_access_key", "aws_secret_key", "infoblox.172_28_83_29", true, true, true, "AWS", "AUTO_CREATE", "AUTO_CREATE", true, false, "us-east-1"),
+				Config: testAccVdiscoverytaskEnableFilter(name, true, networklist, "INCLUDE", "aws_access_key", "aws_secret_key", memberName, true, true, true, "AWS", "AUTO_CREATE", "AUTO_CREATE", true, false, "us-east-1"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckVdiscoverytaskExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "enable_filter", "true"),
@@ -552,7 +569,7 @@ func TestAccVdiscoverytaskResource_EnableFilter(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccVdiscoverytaskEnableFilter(name, false, networklist, "INCLUDE", "aws_access_key", "aws_secret_key", "infoblox.172_28_83_29", true, true, true, "AWS", "AUTO_CREATE", "AUTO_CREATE", true, false, "us-east-1"),
+				Config: testAccVdiscoverytaskEnableFilter(name, false, networklist, "INCLUDE", "aws_access_key", "aws_secret_key", memberName, true, true, true, "AWS", "AUTO_CREATE", "AUTO_CREATE", true, false, "us-east-1"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckVdiscoverytaskExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "enable_filter", "false"),
@@ -566,6 +583,7 @@ func TestAccVdiscoverytaskResource_EnableFilter(t *testing.T) {
 func TestAccVdiscoverytaskResource_Enabled(t *testing.T) {
 	var resourceName = "nios_discovery_vdiscovery_task.test_enabled"
 	var v discovery.Vdiscoverytask
+	memberName := utils.GetNIOSGridMasterHostName()
 
 	name := acctest.RandomNameWithPrefix("vdiscoverytask-enabled")
 
@@ -575,7 +593,7 @@ func TestAccVdiscoverytaskResource_Enabled(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccVdiscoverytaskEnabled(name, false, "azure_client_id", "azure_client_secret", "tenant_id", "infoblox.172_28_83_29", "AZURE", true, true, true, "AUTO_CREATE", "AUTO_CREATE", true, false),
+				Config: testAccVdiscoverytaskEnabled(name, false, "azure_client_id", "azure_client_secret", "tenant_id", memberName, "AZURE", true, true, true, "AUTO_CREATE", "AUTO_CREATE", true, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckVdiscoverytaskExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "enabled", "false"),
@@ -583,7 +601,7 @@ func TestAccVdiscoverytaskResource_Enabled(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccVdiscoverytaskEnabled(name, true, "azure_client_id", "azure_client_secret", "tenant_id", "infoblox.172_28_83_29", "AZURE", true, true, true, "AUTO_CREATE", "AUTO_CREATE", true, false),
+				Config: testAccVdiscoverytaskEnabled(name, true, "azure_client_id", "azure_client_secret", "tenant_id", memberName, "AZURE", true, true, true, "AUTO_CREATE", "AUTO_CREATE", true, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckVdiscoverytaskExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "enabled", "true"),
@@ -597,6 +615,7 @@ func TestAccVdiscoverytaskResource_Enabled(t *testing.T) {
 func TestAccVdiscoverytaskResource_FqdnOrIp(t *testing.T) {
 	var resourceName = "nios_discovery_vdiscovery_task.test_fqdn_or_ip"
 	var v discovery.Vdiscoverytask
+	memberName := utils.GetNIOSGridMasterHostName()
 
 	name := acctest.RandomNameWithPrefix("example-vDiscovery-task-")
 
@@ -606,7 +625,7 @@ func TestAccVdiscoverytaskResource_FqdnOrIp(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccVdiscoverytaskFqdnOrIp(name, "vcenter.example.com", "vc_admin", "vmware_password", "infoblox.172_28_83_29", true, true, true, true, false, "VMWARE", "AUTO_CREATE", "HTTPS", "AUTO_CREATE", "us-east-1", 443),
+				Config: testAccVdiscoverytaskFqdnOrIp(name, "vcenter.example.com", "vc_admin", "vmware_password", memberName, true, true, true, true, false, "VMWARE", "AUTO_CREATE", "HTTPS", "AUTO_CREATE", "us-east-1", 443),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckVdiscoverytaskExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "fqdn_or_ip", "vcenter.example.com"),
@@ -614,7 +633,7 @@ func TestAccVdiscoverytaskResource_FqdnOrIp(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccVdiscoverytaskFqdnOrIp(name, "vcenter2.example.com", "vc_admin", "vmware_password", "infoblox.172_28_83_29", true, true, true, true, false, "VMWARE", "AUTO_CREATE", "HTTPS", "AUTO_CREATE", "us-east-1", 443),
+				Config: testAccVdiscoverytaskFqdnOrIp(name, "vcenter2.example.com", "vc_admin", "vmware_password", memberName, true, true, true, true, false, "VMWARE", "AUTO_CREATE", "HTTPS", "AUTO_CREATE", "us-east-1", 443),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckVdiscoverytaskExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "fqdn_or_ip", "vcenter2.example.com"),
@@ -622,7 +641,7 @@ func TestAccVdiscoverytaskResource_FqdnOrIp(t *testing.T) {
 			},
 			//Update and Read
 			{
-				Config: testAccVdiscoverytaskFqdnOrIp(name, "15.0.0.1", "vc_admin", "vmware_password", "infoblox.172_28_83_29", true, true, true, true, false, "VMWARE", "AUTO_CREATE", "HTTPS", "AUTO_CREATE", "us-east-1", 443),
+				Config: testAccVdiscoverytaskFqdnOrIp(name, "15.0.0.1", "vc_admin", "vmware_password", memberName, true, true, true, true, false, "VMWARE", "AUTO_CREATE", "HTTPS", "AUTO_CREATE", "us-east-1", 443),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckVdiscoverytaskExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "fqdn_or_ip", "15.0.0.1"),
@@ -637,6 +656,7 @@ func TestAccVdiscoverytaskResource_FqdnOrIp(t *testing.T) {
 func TestAccVdiscoverytaskResource_GovcloudEnabled(t *testing.T) {
 	var resourceName = "nios_discovery_vdiscovery_task.test_govcloud_enabled"
 	var v discovery.Vdiscoverytask
+	memberName := utils.GetNIOSGridMasterHostName()
 
 	name := acctest.RandomNameWithPrefix("example-vDiscovery-task-")
 
@@ -646,7 +666,7 @@ func TestAccVdiscoverytaskResource_GovcloudEnabled(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccVdiscoverytaskGovcloudEnabled(name, true, "aws_access_key", "aws_secret_key", "infoblox.172_28_83_29", true, true, true, "AWS", "AUTO_CREATE", "AUTO_CREATE", true, false, "us-gov-east-1"),
+				Config: testAccVdiscoverytaskGovcloudEnabled(name, true, "aws_access_key", "aws_secret_key", memberName, true, true, true, "AWS", "AUTO_CREATE", "AUTO_CREATE", true, false, "us-gov-east-1"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckVdiscoverytaskExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "govcloud_enabled", "true"),
@@ -660,6 +680,7 @@ func TestAccVdiscoverytaskResource_GovcloudEnabled(t *testing.T) {
 func TestAccVdiscoverytaskResource_IdentityVersion(t *testing.T) {
 	var resourceName = "nios_discovery_vdiscovery_task.test_identity_version"
 	var v discovery.Vdiscoverytask
+	memberName := utils.GetNIOSGridMasterHostName()
 
 	name := acctest.RandomNameWithPrefix("example-vDiscovery-task-")
 
@@ -669,7 +690,7 @@ func TestAccVdiscoverytaskResource_IdentityVersion(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccVdiscoverytaskIdentityVersionV2(name, "KEYSTONE_V2", "openstack.example.com", "infoblox.172_28_83_29", "openstack_user", "openstack_password", true, true, true, true, "OPENSTACK", "AUTO_CREATE", "AUTO_CREATE", true, false, 80, "HTTP"),
+				Config: testAccVdiscoverytaskIdentityVersionV2(name, "KEYSTONE_V2", "openstack.example.com", memberName, "openstack_user", "openstack_password", true, true, true, true, "OPENSTACK", "AUTO_CREATE", "AUTO_CREATE", true, false, 80, "HTTP"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckVdiscoverytaskExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "identity_version", "KEYSTONE_V2"),
@@ -677,7 +698,7 @@ func TestAccVdiscoverytaskResource_IdentityVersion(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccVdiscoverytaskIdentityVersionV3(name, "KEYSTONE_V3", "default", "openstack.example.com", "infoblox.172_28_83_29", "openstack_user", "openstack_password", true, true, true, true, "OPENSTACK", "AUTO_CREATE", "AUTO_CREATE", true, false, 80, "HTTP"),
+				Config: testAccVdiscoverytaskIdentityVersionV3(name, "KEYSTONE_V3", "default", "openstack.example.com", memberName, "openstack_user", "openstack_password", true, true, true, true, "OPENSTACK", "AUTO_CREATE", "AUTO_CREATE", true, false, 80, "HTTP"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckVdiscoverytaskExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "identity_version", "KEYSTONE_V3"),
@@ -691,6 +712,8 @@ func TestAccVdiscoverytaskResource_IdentityVersion(t *testing.T) {
 func TestAccVdiscoverytaskResource_Member(t *testing.T) {
 	var resourceName = "nios_discovery_vdiscovery_task.test_member"
 	var v discovery.Vdiscoverytask
+	memberName := utils.GetNIOSGridMasterHostName()
+	memberUpdatedName := utils.GetNIOSGridMemberHostName()
 
 	name := acctest.RandomNameWithPrefix("example-vDiscovery-task-")
 
@@ -700,18 +723,18 @@ func TestAccVdiscoverytaskResource_Member(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccVdiscoverytaskMember(name, "infoblox.172_28_83_29", true, true, true, "AWS", "AUTO_CREATE", "AUTO_CREATE", true, false, "us-east-1", "aws_access_key", "aws_secret_key"),
+				Config: testAccVdiscoverytaskMember(name, memberName, true, true, true, "AWS", "AUTO_CREATE", "AUTO_CREATE", true, false, "us-east-1", "aws_access_key", "aws_secret_key"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckVdiscoverytaskExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "member", "infoblox.172_28_83_29"),
+					resource.TestCheckResourceAttr(resourceName, "member", memberName),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccVdiscoverytaskMember(name, "infoblox.172_28_82_115", true, true, true, "AWS", "AUTO_CREATE", "AUTO_CREATE", true, false, "us-east-1", "aws_access_key", "aws_secret_key"),
+				Config: testAccVdiscoverytaskMember(name, memberUpdatedName, true, true, true, "AWS", "AUTO_CREATE", "AUTO_CREATE", true, false, "us-east-1", "aws_access_key", "aws_secret_key"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckVdiscoverytaskExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "member", "infoblox.172_28_82_115"),
+					resource.TestCheckResourceAttr(resourceName, "member", memberUpdatedName),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -722,6 +745,7 @@ func TestAccVdiscoverytaskResource_Member(t *testing.T) {
 func TestAccVdiscoverytaskResource_MergeData(t *testing.T) {
 	var resourceName = "nios_discovery_vdiscovery_task.test_merge_data"
 	var v discovery.Vdiscoverytask
+	memberName := utils.GetNIOSGridMasterHostName()
 
 	name := acctest.RandomNameWithPrefix("example-vDiscovery-task-")
 
@@ -731,7 +755,7 @@ func TestAccVdiscoverytaskResource_MergeData(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccVdiscoverytaskMergeData(name, true, "aws_access_key", "aws_secret_key", "infoblox.172_28_83_29", true, true, true, "AWS", "AUTO_CREATE", "AUTO_CREATE", "us-east-1", false),
+				Config: testAccVdiscoverytaskMergeData(name, true, "aws_access_key", "aws_secret_key", memberName, true, true, true, "AWS", "AUTO_CREATE", "AUTO_CREATE", "us-east-1", false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckVdiscoverytaskExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "merge_data", "true"),
@@ -739,7 +763,7 @@ func TestAccVdiscoverytaskResource_MergeData(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccVdiscoverytaskMergeData(name, false, "aws_access_key", "aws_secret_key", "infoblox.172_28_83_29", true, true, true, "AWS", "AUTO_CREATE", "AUTO_CREATE", "us-east-1", false),
+				Config: testAccVdiscoverytaskMergeData(name, false, "aws_access_key", "aws_secret_key", memberName, true, true, true, "AWS", "AUTO_CREATE", "AUTO_CREATE", "us-east-1", false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckVdiscoverytaskExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "merge_data", "false"),
@@ -757,6 +781,7 @@ func TestAccVdiscoverytaskResource_MultipleAccountsSyncPolicy(t *testing.T) {
 	name := acctest.RandomNameWithPrefix("example-vDiscovery-task-")
 	testDataPath := getTestDataPath()
 	cdiscoveryFile := filepath.Join(testDataPath, "cdiscoveryfile1_aws.csv")
+	memberUpdatedName := utils.GetNIOSGridMemberHostName()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -764,7 +789,7 @@ func TestAccVdiscoverytaskResource_MultipleAccountsSyncPolicy(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccVdiscoverytaskMultipleAccountsSyncPolicyDiscover(name, "DISCOVER", true, "arn:aws:iam::123456789012:role/InfobloxDiscoveryRole", "aws_access_key", "aws_secret_key", "infoblox.172_28_83_140", true, true, true, "AWS", "AUTO_CREATE", "AUTO_CREATE", true, true, "us-east-1"),
+				Config: testAccVdiscoverytaskMultipleAccountsSyncPolicyDiscover(name, "DISCOVER", true, "arn:aws:iam::123456789012:role/InfobloxDiscoveryRole", "aws_access_key", "aws_secret_key", memberUpdatedName, true, true, true, "AWS", "AUTO_CREATE", "AUTO_CREATE", true, true, "us-east-1"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckVdiscoverytaskExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "multiple_accounts_sync_policy", "DISCOVER"),
@@ -772,7 +797,7 @@ func TestAccVdiscoverytaskResource_MultipleAccountsSyncPolicy(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccVdiscoverytaskMultipleAccountsSyncPolicyUpload(name, "UPLOAD", true, cdiscoveryFile, "arn:aws:iam::123456789012:role/InfobloxDiscoveryRole", "aws_access_key", "aws_secret_key", "infoblox.172_28_83_140", true, true, true, "AWS", "AUTO_CREATE", "AUTO_CREATE", true, true, "us-east-1"),
+				Config: testAccVdiscoverytaskMultipleAccountsSyncPolicyUpload(name, "UPLOAD", true, cdiscoveryFile, "arn:aws:iam::123456789012:role/InfobloxDiscoveryRole", "aws_access_key", "aws_secret_key", memberUpdatedName, true, true, true, "AWS", "AUTO_CREATE", "AUTO_CREATE", true, true, "us-east-1"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckVdiscoverytaskExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "multiple_accounts_sync_policy", "UPLOAD"),
@@ -786,6 +811,7 @@ func TestAccVdiscoverytaskResource_MultipleAccountsSyncPolicy(t *testing.T) {
 func TestAccVdiscoverytaskResource_Name(t *testing.T) {
 	var resourceName = "nios_discovery_vdiscovery_task.test_name"
 	var v discovery.Vdiscoverytask
+	memberName := utils.GetNIOSGridMasterHostName()
 
 	name1 := acctest.RandomNameWithPrefix("vdiscoverytask-")
 	name2 := acctest.RandomNameWithPrefix("updated-vdiscoverytask-")
@@ -796,7 +822,7 @@ func TestAccVdiscoverytaskResource_Name(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccVdiscoverytaskName(name1, "infoblox.172_28_83_29", true, true, true, "AWS", "AUTO_CREATE", "AUTO_CREATE", true, false, "us-east-1", "aws_access_key", "aws_secret_key"),
+				Config: testAccVdiscoverytaskName(name1, memberName, true, true, true, "AWS", "AUTO_CREATE", "AUTO_CREATE", true, false, "us-east-1", "aws_access_key", "aws_secret_key"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckVdiscoverytaskExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "name", name1),
@@ -804,7 +830,7 @@ func TestAccVdiscoverytaskResource_Name(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccVdiscoverytaskName(name2, "infoblox.172_28_83_29", true, true, true, "AWS", "AUTO_CREATE", "AUTO_CREATE", true, false, "us-east-1", "aws_access_key", "aws_secret_key"),
+				Config: testAccVdiscoverytaskName(name2, memberName, true, true, true, "AWS", "AUTO_CREATE", "AUTO_CREATE", true, false, "us-east-1", "aws_access_key", "aws_secret_key"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckVdiscoverytaskExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "name", name2),
@@ -818,6 +844,7 @@ func TestAccVdiscoverytaskResource_Name(t *testing.T) {
 func TestAccVdiscoverytaskResource_NetworkFilter(t *testing.T) {
 	var resourceName = "nios_discovery_vdiscovery_task.test_network_filter"
 	var v discovery.Vdiscoverytask
+	memberName := utils.GetNIOSGridMasterHostName()
 
 	name := acctest.RandomNameWithPrefix("example-vDiscovery-task-")
 	networkList := []string{"10.0.0.0/8", "25.0.0.0/16"}
@@ -828,7 +855,7 @@ func TestAccVdiscoverytaskResource_NetworkFilter(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccVdiscoverytaskNetworkFilter(name, true, "INCLUDE", networkList, "aws_access_key", "aws_secret_key", "infoblox.172_28_83_29", true, true, true, "AWS", "AUTO_CREATE", "AUTO_CREATE", true, false, "us-east-1"),
+				Config: testAccVdiscoverytaskNetworkFilter(name, true, "INCLUDE", networkList, "aws_access_key", "aws_secret_key", memberName, true, true, true, "AWS", "AUTO_CREATE", "AUTO_CREATE", true, false, "us-east-1"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckVdiscoverytaskExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "network_filter", "INCLUDE"),
@@ -836,7 +863,7 @@ func TestAccVdiscoverytaskResource_NetworkFilter(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccVdiscoverytaskNetworkFilter(name, true, "EXCLUDE", networkList, "aws_access_key", "aws_secret_key", "infoblox.172_28_83_29", true, true, true, "AWS", "AUTO_CREATE", "AUTO_CREATE", true, false, "us-east-1"),
+				Config: testAccVdiscoverytaskNetworkFilter(name, true, "EXCLUDE", networkList, "aws_access_key", "aws_secret_key", memberName, true, true, true, "AWS", "AUTO_CREATE", "AUTO_CREATE", true, false, "us-east-1"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckVdiscoverytaskExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "network_filter", "EXCLUDE"),
@@ -850,6 +877,7 @@ func TestAccVdiscoverytaskResource_NetworkFilter(t *testing.T) {
 func TestAccVdiscoverytaskResource_NetworkList(t *testing.T) {
 	var resourceName = "nios_discovery_vdiscovery_task.test_network_list"
 	var v discovery.Vdiscoverytask
+	memberName := utils.GetNIOSGridMasterHostName()
 
 	name := acctest.RandomNameWithPrefix("example-vDiscovery-task-")
 	networkList1 := []string{"10.0.0.0/8", "192.168.0.0/16"}
@@ -861,7 +889,7 @@ func TestAccVdiscoverytaskResource_NetworkList(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccVdiscoverytaskNetworkList(name, networkList1, "aws_access_key", "aws_secret_key", "infoblox.172_28_83_29", true, true, true, "AWS", "AUTO_CREATE", "AUTO_CREATE", true, false, "us-east-1"),
+				Config: testAccVdiscoverytaskNetworkList(name, networkList1, "aws_access_key", "aws_secret_key", memberName, true, true, true, "AWS", "AUTO_CREATE", "AUTO_CREATE", true, false, "us-east-1"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckVdiscoverytaskExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "network_list.#", "2"),
@@ -871,7 +899,7 @@ func TestAccVdiscoverytaskResource_NetworkList(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccVdiscoverytaskNetworkList(name, networkList2, "aws_access_key", "aws_secret_key", "infoblox.172_28_83_29", true, true, true, "AWS", "AUTO_CREATE", "AUTO_CREATE", true, false, "us-east-1"),
+				Config: testAccVdiscoverytaskNetworkList(name, networkList2, "aws_access_key", "aws_secret_key", memberName, true, true, true, "AWS", "AUTO_CREATE", "AUTO_CREATE", true, false, "us-east-1"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckVdiscoverytaskExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "network_list.#", "3"),
@@ -888,6 +916,7 @@ func TestAccVdiscoverytaskResource_NetworkList(t *testing.T) {
 func TestAccVdiscoverytaskResource_Password(t *testing.T) {
 	var resourceName = "nios_discovery_vdiscovery_task.test_password"
 	var v discovery.Vdiscoverytask
+	memberName := utils.GetNIOSGridMasterHostName()
 
 	name := acctest.RandomNameWithPrefix("example-vDiscovery-task-")
 	password1 := "aws_secret_key1"
@@ -899,7 +928,7 @@ func TestAccVdiscoverytaskResource_Password(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccVdiscoverytaskPassword(name, "aws_access_key", password1, "infoblox.172_28_83_29", true, true, true, "AWS", "AUTO_CREATE", "AUTO_CREATE", true, false, "us-east-1"),
+				Config: testAccVdiscoverytaskPassword(name, "aws_access_key", password1, memberName, true, true, true, "AWS", "AUTO_CREATE", "AUTO_CREATE", true, false, "us-east-1"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckVdiscoverytaskExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "password", password1),
@@ -907,7 +936,7 @@ func TestAccVdiscoverytaskResource_Password(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccVdiscoverytaskPassword(name, "aws_access_key", password2, "infoblox.172_28_83_29", true, true, true, "AWS", "AUTO_CREATE", "AUTO_CREATE", true, false, "us-east-1"),
+				Config: testAccVdiscoverytaskPassword(name, "aws_access_key", password2, memberName, true, true, true, "AWS", "AUTO_CREATE", "AUTO_CREATE", true, false, "us-east-1"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckVdiscoverytaskExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "password", password2),
@@ -921,6 +950,7 @@ func TestAccVdiscoverytaskResource_Password(t *testing.T) {
 func TestAccVdiscoverytaskResource_Port(t *testing.T) {
 	var resourceName = "nios_discovery_vdiscovery_task.test_port"
 	var v discovery.Vdiscoverytask
+	memberName := utils.GetNIOSGridMasterHostName()
 
 	name := acctest.RandomNameWithPrefix("example-vDiscovery-task-")
 
@@ -930,7 +960,7 @@ func TestAccVdiscoverytaskResource_Port(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccVdiscoverytaskPort(name, 443, "vc_admin", "vmware_password", "infoblox.172_28_83_29", "vcenter.example.com", true, true, true, true, false, "VMWARE", "AUTO_CREATE", "HTTPS", "AUTO_CREATE", "us-east-1"),
+				Config: testAccVdiscoverytaskPort(name, 443, "vc_admin", "vmware_password", memberName, "vcenter.example.com", true, true, true, true, false, "VMWARE", "AUTO_CREATE", "HTTPS", "AUTO_CREATE", "us-east-1"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckVdiscoverytaskExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "port", "443"),
@@ -938,7 +968,7 @@ func TestAccVdiscoverytaskResource_Port(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccVdiscoverytaskPort(name, 8080, "vc_admin", "vmware_password", "infoblox.172_28_83_29", "vcenter.example.com", true, true, true, true, false, "VMWARE", "AUTO_CREATE", "HTTPS", "AUTO_CREATE", "us-east-1"),
+				Config: testAccVdiscoverytaskPort(name, 8080, "vc_admin", "vmware_password", memberName, "vcenter.example.com", true, true, true, true, false, "VMWARE", "AUTO_CREATE", "HTTPS", "AUTO_CREATE", "us-east-1"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckVdiscoverytaskExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "port", "8080"),
@@ -952,6 +982,7 @@ func TestAccVdiscoverytaskResource_Port(t *testing.T) {
 func TestAccVdiscoverytaskResource_PrivateNetworkView(t *testing.T) {
 	var resourceName = "nios_discovery_vdiscovery_task.test_private_network_view"
 	var v discovery.Vdiscoverytask
+	memberName := utils.GetNIOSGridMasterHostName()
 
 	name := acctest.RandomNameWithPrefix("example-vDiscovery-task-")
 
@@ -961,7 +992,7 @@ func TestAccVdiscoverytaskResource_PrivateNetworkView(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccVdiscoverytaskPrivateNetworkView(name, "default", "DIRECT", "aws_access_key", "aws_secret_key", "infoblox.172_28_83_29", true, true, true, "AWS", "AUTO_CREATE", true, false, "us-east-1"),
+				Config: testAccVdiscoverytaskPrivateNetworkView(name, "default", "DIRECT", "aws_access_key", "aws_secret_key", memberName, true, true, true, "AWS", "AUTO_CREATE", true, false, "us-east-1"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckVdiscoverytaskExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "private_network_view", "default"),
@@ -969,10 +1000,10 @@ func TestAccVdiscoverytaskResource_PrivateNetworkView(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccVdiscoverytaskPrivateNetworkView(name, "custom_private_view", "DIRECT", "aws_access_key", "aws_secret_key", "infoblox.172_28_83_29", true, true, true, "AWS", "AUTO_CREATE", true, false, "us-east-1"),
+				Config: testAccVdiscoverytaskPrivateNetworkView(name, "test_network_view", "DIRECT", "aws_access_key", "aws_secret_key", memberName, true, true, true, "AWS", "AUTO_CREATE", true, false, "us-east-1"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckVdiscoverytaskExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "private_network_view", "custom_private_view"),
+					resource.TestCheckResourceAttr(resourceName, "private_network_view", "test_network_view"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -982,6 +1013,7 @@ func TestAccVdiscoverytaskResource_PrivateNetworkView(t *testing.T) {
 func TestAccVdiscoverytaskResource_PrivateNetworkViewMappingPolicy(t *testing.T) {
 	var resourceName = "nios_discovery_vdiscovery_task.test_private_network_view_mapping_policy"
 	var v discovery.Vdiscoverytask
+	memberName := utils.GetNIOSGridMasterHostName()
 
 	name := acctest.RandomNameWithPrefix("example-vDiscovery-task-")
 
@@ -991,7 +1023,7 @@ func TestAccVdiscoverytaskResource_PrivateNetworkViewMappingPolicy(t *testing.T)
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccVdiscoverytaskPrivateNetworkViewMappingPolicyAutoCreate(name, "AUTO_CREATE", "aws_access_key", "aws_secret_key", "infoblox.172_28_83_29", true, true, true, "AWS", "AUTO_CREATE", true, false, "us-east-1"),
+				Config: testAccVdiscoverytaskPrivateNetworkViewMappingPolicyAutoCreate(name, "AUTO_CREATE", "aws_access_key", "aws_secret_key", memberName, true, true, true, "AWS", "AUTO_CREATE", true, false, "us-east-1"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckVdiscoverytaskExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "private_network_view_mapping_policy", "AUTO_CREATE"),
@@ -999,7 +1031,7 @@ func TestAccVdiscoverytaskResource_PrivateNetworkViewMappingPolicy(t *testing.T)
 			},
 			// Update and Read
 			{
-				Config: testAccVdiscoverytaskPrivateNetworkViewMappingPolicyDirect(name, "DIRECT", "default", "aws_access_key", "aws_secret_key", "infoblox.172_28_83_29", true, true, true, "AWS", "AUTO_CREATE", true, false, "us-east-1"),
+				Config: testAccVdiscoverytaskPrivateNetworkViewMappingPolicyDirect(name, "DIRECT", "default", "aws_access_key", "aws_secret_key", memberName, true, true, true, "AWS", "AUTO_CREATE", true, false, "us-east-1"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckVdiscoverytaskExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "private_network_view_mapping_policy", "DIRECT"),
@@ -1013,6 +1045,7 @@ func TestAccVdiscoverytaskResource_PrivateNetworkViewMappingPolicy(t *testing.T)
 func TestAccVdiscoverytaskResource_Protocol(t *testing.T) {
 	var resourceName = "nios_discovery_vdiscovery_task.test_protocol"
 	var v discovery.Vdiscoverytask
+	memberName := utils.GetNIOSGridMasterHostName()
 
 	name := acctest.RandomNameWithPrefix("example-vDiscovery-task-")
 
@@ -1022,7 +1055,7 @@ func TestAccVdiscoverytaskResource_Protocol(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccVdiscoverytaskProtocol(name, "HTTPS", "vc_admin", "vmware_password", "infoblox.172_28_83_29", "vcenter.example.com", true, true, true, true, false, "VMWARE", "AUTO_CREATE", "AUTO_CREATE", "us-east-1", 443),
+				Config: testAccVdiscoverytaskProtocol(name, "HTTPS", "vc_admin", "vmware_password", memberName, "vcenter.example.com", true, true, true, true, false, "VMWARE", "AUTO_CREATE", "AUTO_CREATE", "us-east-1", 443),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckVdiscoverytaskExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "protocol", "HTTPS"),
@@ -1030,7 +1063,7 @@ func TestAccVdiscoverytaskResource_Protocol(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccVdiscoverytaskProtocol(name, "HTTP", "vc_admin", "vmware_password", "infoblox.172_28_83_29", "vcenter.example.com", true, true, true, true, false, "VMWARE", "AUTO_CREATE", "AUTO_CREATE", "us-east-1", 443),
+				Config: testAccVdiscoverytaskProtocol(name, "HTTP", "vc_admin", "vmware_password", memberName, "vcenter.example.com", true, true, true, true, false, "VMWARE", "AUTO_CREATE", "AUTO_CREATE", "us-east-1", 443),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckVdiscoverytaskExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "protocol", "HTTP"),
@@ -1044,6 +1077,7 @@ func TestAccVdiscoverytaskResource_Protocol(t *testing.T) {
 func TestAccVdiscoverytaskResource_PublicNetworkView(t *testing.T) {
 	var resourceName = "nios_discovery_vdiscovery_task.test_public_network_view"
 	var v discovery.Vdiscoverytask
+	memberName := utils.GetNIOSGridMasterHostName()
 
 	name := acctest.RandomNameWithPrefix("example-vDiscovery-task-")
 
@@ -1053,7 +1087,7 @@ func TestAccVdiscoverytaskResource_PublicNetworkView(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccVdiscoverytaskPublicNetworkView(name, "default", "DIRECT", "aws_access_key", "aws_secret_key", "infoblox.172_28_83_29", true, true, true, "AWS", "AUTO_CREATE", true, false, "us-east-1"),
+				Config: testAccVdiscoverytaskPublicNetworkView(name, "default", "DIRECT", "aws_access_key", "aws_secret_key", memberName, true, true, true, "AWS", "AUTO_CREATE", true, false, "us-east-1"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckVdiscoverytaskExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "public_network_view", "default"),
@@ -1061,10 +1095,10 @@ func TestAccVdiscoverytaskResource_PublicNetworkView(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccVdiscoverytaskPublicNetworkView(name, "custom_public_view", "DIRECT", "aws_access_key", "aws_secret_key", "infoblox.172_28_83_29", true, true, true, "AWS", "AUTO_CREATE", true, false, "us-east-1"),
+				Config: testAccVdiscoverytaskPublicNetworkView(name, "test_network_view2", "DIRECT", "aws_access_key", "aws_secret_key", memberName, true, true, true, "AWS", "AUTO_CREATE", true, false, "us-east-1"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckVdiscoverytaskExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "public_network_view", "custom_public_view"),
+					resource.TestCheckResourceAttr(resourceName, "public_network_view", "test_network_view2"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -1075,6 +1109,7 @@ func TestAccVdiscoverytaskResource_PublicNetworkView(t *testing.T) {
 func TestAccVdiscoverytaskResource_PublicNetworkViewMappingPolicy(t *testing.T) {
 	var resourceName = "nios_discovery_vdiscovery_task.test_public_network_view_mapping_policy"
 	var v discovery.Vdiscoverytask
+	memberName := utils.GetNIOSGridMasterHostName()
 
 	name := acctest.RandomNameWithPrefix("example-vDiscovery-task-")
 
@@ -1084,7 +1119,7 @@ func TestAccVdiscoverytaskResource_PublicNetworkViewMappingPolicy(t *testing.T) 
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccVdiscoverytaskPublicNetworkViewMappingPolicyAutoCreate(name, "AUTO_CREATE", "aws_access_key", "aws_secret_key", "infoblox.172_28_83_29", true, true, true, "AWS", "AUTO_CREATE", true, false, "us-east-1"),
+				Config: testAccVdiscoverytaskPublicNetworkViewMappingPolicyAutoCreate(name, "AUTO_CREATE", "aws_access_key", "aws_secret_key", memberName, true, true, true, "AWS", "AUTO_CREATE", true, false, "us-east-1"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckVdiscoverytaskExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "public_network_view_mapping_policy", "AUTO_CREATE"),
@@ -1092,7 +1127,7 @@ func TestAccVdiscoverytaskResource_PublicNetworkViewMappingPolicy(t *testing.T) 
 			},
 			// Update and Read
 			{
-				Config: testAccVdiscoverytaskPublicNetworkViewMappingPolicyDirect(name, "DIRECT", "default", "aws_access_key", "aws_secret_key", "infoblox.172_28_83_29", true, true, true, "AWS", "AUTO_CREATE", true, false, "us-east-1"),
+				Config: testAccVdiscoverytaskPublicNetworkViewMappingPolicyDirect(name, "DIRECT", "default", "aws_access_key", "aws_secret_key", memberName, true, true, true, "AWS", "AUTO_CREATE", true, false, "us-east-1"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckVdiscoverytaskExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "public_network_view_mapping_policy", "DIRECT"),
@@ -1108,6 +1143,7 @@ func TestAccVdiscoverytaskResource_RoleArn(t *testing.T) {
 	var v discovery.Vdiscoverytask
 
 	name := acctest.RandomNameWithPrefix("example-vDiscovery-task-")
+	memberUpdatedName := utils.GetNIOSGridMemberHostName()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1115,7 +1151,7 @@ func TestAccVdiscoverytaskResource_RoleArn(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccVdiscoverytaskRoleArn(name, "arn:aws:iam::123456789012:role/InfobloxDiscoveryRole", "DISCOVER", true, "aws_access_key", "aws_secret_key", "infoblox.172_28_83_140", true, true, true, "AWS", "AUTO_CREATE", "AUTO_CREATE", true, true, "us-east-1"),
+				Config: testAccVdiscoverytaskRoleArn(name, "arn:aws:iam::123456789012:role/InfobloxDiscoveryRole", "DISCOVER", true, "aws_access_key", "aws_secret_key", memberUpdatedName, true, true, true, "AWS", "AUTO_CREATE", "AUTO_CREATE", true, true, "us-east-1"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckVdiscoverytaskExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "role_arn", "arn:aws:iam::123456789012:role/InfobloxDiscoveryRole"),
@@ -1123,7 +1159,7 @@ func TestAccVdiscoverytaskResource_RoleArn(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccVdiscoverytaskRoleArn(name, "arn:aws:iam::123456789012:role/UpdatedInfobloxRole", "DISCOVER", true, "aws_access_key", "aws_secret_key", "infoblox.172_28_83_140", true, true, true, "AWS", "AUTO_CREATE", "AUTO_CREATE", true, true, "us-east-1"),
+				Config: testAccVdiscoverytaskRoleArn(name, "arn:aws:iam::123456789012:role/UpdatedInfobloxRole", "DISCOVER", true, "aws_access_key", "aws_secret_key", memberUpdatedName, true, true, true, "AWS", "AUTO_CREATE", "AUTO_CREATE", true, true, "us-east-1"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckVdiscoverytaskExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "role_arn", "arn:aws:iam::123456789012:role/UpdatedInfobloxRole"),
@@ -1137,6 +1173,7 @@ func TestAccVdiscoverytaskResource_RoleArn(t *testing.T) {
 func TestAccVdiscoverytaskResource_ScheduledRun(t *testing.T) {
 	var resourceName = "nios_discovery_vdiscovery_task.test_scheduled_run_block_azure"
 	var v discovery.Vdiscoverytask
+	memberName := utils.GetNIOSGridMasterHostName()
 
 	name := acctest.RandomNameWithPrefix("vdiscoverytask-azure-schedule")
 
@@ -1168,7 +1205,7 @@ func TestAccVdiscoverytaskResource_ScheduledRun(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccVdiscoverytaskScheduledRun(name, scheduledRun1, "azure_client_id", "azure_client_secret", "tenant_id", "infoblox.172_28_83_29", "AZURE", true, true, true, "AUTO_CREATE", "AUTO_CREATE", true, false),
+				Config: testAccVdiscoverytaskScheduledRun(name, scheduledRun1, "azure_client_id", "azure_client_secret", "tenant_id", memberName, "AZURE", true, true, true, "AUTO_CREATE", "AUTO_CREATE", true, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckVdiscoverytaskExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "scheduled_run.frequency", "WEEKLY"),
@@ -1179,7 +1216,7 @@ func TestAccVdiscoverytaskResource_ScheduledRun(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccVdiscoverytaskScheduledRun(name, scheduledRun2, "azure_client_id", "azure_client_secret", "tenant_id", "infoblox.172_28_83_29", "AZURE", true, true, true, "AUTO_CREATE", "AUTO_CREATE", true, false),
+				Config: testAccVdiscoverytaskScheduledRun(name, scheduledRun2, "azure_client_id", "azure_client_secret", "tenant_id", memberName, "AZURE", true, true, true, "AUTO_CREATE", "AUTO_CREATE", true, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckVdiscoverytaskExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "scheduled_run.time_zone", "Asia/Kolkata"),
@@ -1197,6 +1234,7 @@ func TestAccVdiscoverytaskResource_ScheduledRun(t *testing.T) {
 func TestAccVdiscoverytaskResource_SelectedRegions(t *testing.T) {
 	var resourceName = "nios_discovery_vdiscovery_task.test_selected_regions"
 	var v discovery.Vdiscoverytask
+	memberName := utils.GetNIOSGridMasterHostName()
 
 	name := acctest.RandomNameWithPrefix("example-vDiscovery-task-")
 
@@ -1206,7 +1244,7 @@ func TestAccVdiscoverytaskResource_SelectedRegions(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccVdiscoverytaskSelectedRegions(name, "us-east-1", "aws_access_key", "aws_secret_key", "infoblox.172_28_83_29", true, true, true, "AWS", "AUTO_CREATE", "AUTO_CREATE", true, false),
+				Config: testAccVdiscoverytaskSelectedRegions(name, "us-east-1", "aws_access_key", "aws_secret_key", memberName, true, true, true, "AWS", "AUTO_CREATE", "AUTO_CREATE", true, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckVdiscoverytaskExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "selected_regions", "us-east-1"),
@@ -1214,7 +1252,7 @@ func TestAccVdiscoverytaskResource_SelectedRegions(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccVdiscoverytaskSelectedRegions(name, "us-west-1", "aws_access_key", "aws_secret_key", "infoblox.172_28_83_29", true, true, true, "AWS", "AUTO_CREATE", "AUTO_CREATE", true, false),
+				Config: testAccVdiscoverytaskSelectedRegions(name, "us-west-1", "aws_access_key", "aws_secret_key", memberName, true, true, true, "AWS", "AUTO_CREATE", "AUTO_CREATE", true, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckVdiscoverytaskExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "selected_regions", "us-west-1"),
@@ -1236,6 +1274,7 @@ func TestAccVdiscoverytaskResource_ServiceAccountFile(t *testing.T) {
 	serviceAccountFile1 := filepath.Join(testDataPath, "service_account_file1_example.json")
 	serviceAccountFile2 := filepath.Join(testDataPath, "service_account_file2_example.json")
 	cdiscoveryFile := filepath.Join(testDataPath, "cdiscoveryfile_gcp.csv")
+	memberUpdatedName := utils.GetNIOSGridMemberHostName()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1243,7 +1282,7 @@ func TestAccVdiscoverytaskResource_ServiceAccountFile(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccVdiscoverytaskServiceAccountFile(name, "GCP", "infoblox.172_28_83_140", serviceAccountFile1, cdiscoveryFile, "DISCOVER", true, true, true, true, false, "AUTO_CREATE", "AUTO_CREATE", true),
+				Config: testAccVdiscoverytaskServiceAccountFile(name, "GCP", memberUpdatedName, serviceAccountFile1, cdiscoveryFile, "DISCOVER", true, true, true, true, false, "AUTO_CREATE", "AUTO_CREATE", true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckVdiscoverytaskExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "service_account_file", serviceAccountFile1),
@@ -1253,7 +1292,7 @@ func TestAccVdiscoverytaskResource_ServiceAccountFile(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccVdiscoverytaskServiceAccountFile(name, "GCP", "infoblox.172_28_83_140", serviceAccountFile2, cdiscoveryFile, "DISCOVER", false, false, true, true, true, "AUTO_CREATE", "AUTO_CREATE", false),
+				Config: testAccVdiscoverytaskServiceAccountFile(name, "GCP", memberUpdatedName, serviceAccountFile2, cdiscoveryFile, "DISCOVER", false, false, true, true, true, "AUTO_CREATE", "AUTO_CREATE", false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckVdiscoverytaskExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "service_account_file", serviceAccountFile2),
@@ -1270,6 +1309,7 @@ func TestAccVdiscoverytaskResource_SyncChildAccounts(t *testing.T) {
 	var v discovery.Vdiscoverytask
 
 	name := acctest.RandomNameWithPrefix("example-vDiscovery-task-")
+	memberUpdatedName := utils.GetNIOSGridMemberHostName()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1277,7 +1317,7 @@ func TestAccVdiscoverytaskResource_SyncChildAccounts(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccVdiscoverytaskSyncChildAccounts(name, true, "arn:aws:iam::123456789012:role/InfobloxDiscoveryRole", "DISCOVER", "aws_access_key", "aws_secret_key", "infoblox.172_28_83_140", true, true, true, "AWS", "AUTO_CREATE", "AUTO_CREATE", true, true, "us-east-1"),
+				Config: testAccVdiscoverytaskSyncChildAccounts(name, true, "arn:aws:iam::123456789012:role/InfobloxDiscoveryRole", "DISCOVER", "aws_access_key", "aws_secret_key", memberUpdatedName, true, true, true, "AWS", "AUTO_CREATE", "AUTO_CREATE", true, true, "us-east-1"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckVdiscoverytaskExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "sync_child_accounts", "true"),
@@ -1285,7 +1325,7 @@ func TestAccVdiscoverytaskResource_SyncChildAccounts(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccVdiscoverytaskSyncChildAccounts(name, false, "arn:aws:iam::123456789012:role/UpdatedInfobloxRole", "DISCOVER", "aws_access_key", "aws_secret_key", "infoblox.172_28_83_140", true, true, true, "AWS", "AUTO_CREATE", "AUTO_CREATE", true, true, "us-east-1"),
+				Config: testAccVdiscoverytaskSyncChildAccounts(name, false, "arn:aws:iam::123456789012:role/UpdatedInfobloxRole", "DISCOVER", "aws_access_key", "aws_secret_key", memberUpdatedName, true, true, true, "AWS", "AUTO_CREATE", "AUTO_CREATE", true, true, "us-east-1"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckVdiscoverytaskExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "sync_child_accounts", "false"),
@@ -1299,6 +1339,7 @@ func TestAccVdiscoverytaskResource_SyncChildAccounts(t *testing.T) {
 func TestAccVdiscoverytaskResource_UpdateDnsViewPrivateIp(t *testing.T) {
 	var resourceName = "nios_discovery_vdiscovery_task.test_update_dns_view_private_ip"
 	var v discovery.Vdiscoverytask
+	memberName := utils.GetNIOSGridMasterHostName()
 
 	name := acctest.RandomNameWithPrefix("example-vDiscovery-task-")
 
@@ -1307,14 +1348,14 @@ func TestAccVdiscoverytaskResource_UpdateDnsViewPrivateIp(t *testing.T) {
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccVdiscoverytaskUpdateDnsViewPrivateIpFalse(name, false, "aws_access_key", "aws_secret_key", "infoblox.172_28_83_29", true, true, true, "AWS", "AUTO_CREATE", "AUTO_CREATE", true, false, "us-east-1"),
+				Config: testAccVdiscoverytaskUpdateDnsViewPrivateIpFalse(name, false, "aws_access_key", "aws_secret_key", memberName, true, true, true, "AWS", "AUTO_CREATE", "AUTO_CREATE", true, false, "us-east-1"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckVdiscoverytaskExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "update_dns_view_private_ip", "false"),
 				),
 			},
 			{
-				Config: testAccVdiscoverytaskUpdateDnsViewPrivateIpTrue(name, true, "custom_dns_view", "aws_access_key", "aws_secret_key", "infoblox.172_28_83_29", true, true, true, "AWS", "DIRECT", "default", "AUTO_CREATE", true, false, "us-east-1"),
+				Config: testAccVdiscoverytaskUpdateDnsViewPrivateIpTrue(name, true, "custom_dns_view", "aws_access_key", "aws_secret_key", memberName, true, true, true, "AWS", "DIRECT", "default", "AUTO_CREATE", true, false, "us-east-1"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckVdiscoverytaskExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "update_dns_view_private_ip", "true"),
@@ -1328,6 +1369,7 @@ func TestAccVdiscoverytaskResource_UpdateDnsViewPrivateIp(t *testing.T) {
 func TestAccVdiscoverytaskResource_UpdateDnsViewPublicIp(t *testing.T) {
 	var resourceName = "nios_discovery_vdiscovery_task.test_update_dns_view_public_ip"
 	var v discovery.Vdiscoverytask
+	memberName := utils.GetNIOSGridMasterHostName()
 
 	name := acctest.RandomNameWithPrefix("example-vDiscovery-task-public")
 
@@ -1337,7 +1379,7 @@ func TestAccVdiscoverytaskResource_UpdateDnsViewPublicIp(t *testing.T) {
 		Steps: []resource.TestStep{
 			//Create and Read
 			{
-				Config: testAccVdiscoverytaskUpdateDnsViewPublicIpFalse(name, false, "aws_access_key", "aws_secret_key", "infoblox.172_28_83_29", true, true, true, "AWS", "AUTO_CREATE", "AUTO_CREATE", true, false, "us-east-1"),
+				Config: testAccVdiscoverytaskUpdateDnsViewPublicIpFalse(name, false, "aws_access_key", "aws_secret_key", memberName, true, true, true, "AWS", "AUTO_CREATE", "AUTO_CREATE", true, false, "us-east-1"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckVdiscoverytaskExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "update_dns_view_public_ip", "false"),
@@ -1345,7 +1387,7 @@ func TestAccVdiscoverytaskResource_UpdateDnsViewPublicIp(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccVdiscoverytaskUpdateDnsViewPublicIpTrue(name, true, "custom_dns_view", "aws_access_key", "aws_secret_key", "infoblox.172_28_83_29", true, true, true, "AWS", "AUTO_CREATE", "DIRECT", "default", true, false, "us-east-1"),
+				Config: testAccVdiscoverytaskUpdateDnsViewPublicIpTrue(name, true, "custom_dns_view", "aws_access_key", "aws_secret_key", memberName, true, true, true, "AWS", "AUTO_CREATE", "DIRECT", "default", true, false, "us-east-1"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckVdiscoverytaskExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "update_dns_view_public_ip", "true"),
@@ -1360,6 +1402,7 @@ func TestAccVdiscoverytaskResource_UpdateDnsViewPublicIp(t *testing.T) {
 func TestAccVdiscoverytaskResource_UpdateMetadata(t *testing.T) {
 	var resourceName = "nios_discovery_vdiscovery_task.test_update_metadata"
 	var v discovery.Vdiscoverytask
+	memberName := utils.GetNIOSGridMasterHostName()
 
 	name := acctest.RandomNameWithPrefix("example-vDiscovery-task-")
 
@@ -1369,7 +1412,7 @@ func TestAccVdiscoverytaskResource_UpdateMetadata(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccVdiscoverytaskUpdateMetadata(name, true, "aws_access_key", "aws_secret_key", "infoblox.172_28_83_29", true, true, true, "AWS", "AUTO_CREATE", "AUTO_CREATE", "us-east-1", true),
+				Config: testAccVdiscoverytaskUpdateMetadata(name, true, "aws_access_key", "aws_secret_key", memberName, true, true, true, "AWS", "AUTO_CREATE", "AUTO_CREATE", "us-east-1", true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckVdiscoverytaskExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "update_metadata", "true"),
@@ -1377,7 +1420,7 @@ func TestAccVdiscoverytaskResource_UpdateMetadata(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccVdiscoverytaskUpdateMetadata(name, false, "aws_access_key", "aws_secret_key", "infoblox.172_28_83_29", true, true, true, "AWS", "AUTO_CREATE", "AUTO_CREATE", "us-east-1", true),
+				Config: testAccVdiscoverytaskUpdateMetadata(name, false, "aws_access_key", "aws_secret_key", memberName, true, true, true, "AWS", "AUTO_CREATE", "AUTO_CREATE", "us-east-1", true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckVdiscoverytaskExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "update_metadata", "false"),
@@ -1390,6 +1433,7 @@ func TestAccVdiscoverytaskResource_UpdateMetadata(t *testing.T) {
 func TestAccVdiscoverytaskResource_UseIdentity(t *testing.T) {
 	var resourceName = "nios_discovery_vdiscovery_task.test_use_identity"
 	var v discovery.Vdiscoverytask
+	memberName := utils.GetNIOSGridMasterHostName()
 
 	name := acctest.RandomNameWithPrefix("example-vDiscovery-task-")
 
@@ -1399,7 +1443,7 @@ func TestAccVdiscoverytaskResource_UseIdentity(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccVdiscoverytaskUseIdentity(name, true, "openstack.example.com", 80, "HTTP", "infoblox.172_28_83_29", "KEYSTONE_V2", "openstack_user", "openstack_password", true, true, true, "OPENSTACK", "AUTO_CREATE", "AUTO_CREATE", true, false),
+				Config: testAccVdiscoverytaskUseIdentity(name, true, "openstack.example.com", 80, "HTTP", memberName, "KEYSTONE_V2", "openstack_user", "openstack_password", true, true, true, "OPENSTACK", "AUTO_CREATE", "AUTO_CREATE", true, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckVdiscoverytaskExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_identity", "true"),
@@ -1407,7 +1451,7 @@ func TestAccVdiscoverytaskResource_UseIdentity(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccVdiscoverytaskUseIdentity(name, false, "openstack.example.com", 80, "HTTP", "infoblox.172_28_83_29", "KEYSTONE_V2", "openstack_user", "openstack_password", true, true, true, "OPENSTACK", "AUTO_CREATE", "AUTO_CREATE", true, false),
+				Config: testAccVdiscoverytaskUseIdentity(name, false, "openstack.example.com", 80, "HTTP", memberName, "KEYSTONE_V2", "openstack_user", "openstack_password", true, true, true, "OPENSTACK", "AUTO_CREATE", "AUTO_CREATE", true, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckVdiscoverytaskExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_identity", "false"),
@@ -1420,6 +1464,7 @@ func TestAccVdiscoverytaskResource_UseIdentity(t *testing.T) {
 func TestAccVdiscoverytaskResource_Username(t *testing.T) {
 	var resourceName = "nios_discovery_vdiscovery_task.test_username"
 	var v discovery.Vdiscoverytask
+	memberName := utils.GetNIOSGridMasterHostName()
 
 	name := acctest.RandomNameWithPrefix("example-vDiscovery-task-")
 	username1 := "User1"
@@ -1431,7 +1476,7 @@ func TestAccVdiscoverytaskResource_Username(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccVdiscoverytaskUsername(name, username1, "aws_secret_key", "infoblox.172_28_83_29", true, true, true, "AWS", "AUTO_CREATE", "AUTO_CREATE", true, false, "us-east-1"),
+				Config: testAccVdiscoverytaskUsername(name, username1, "aws_secret_key", memberName, true, true, true, "AWS", "AUTO_CREATE", "AUTO_CREATE", true, false, "us-east-1"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckVdiscoverytaskExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "username", username1),
@@ -1439,7 +1484,7 @@ func TestAccVdiscoverytaskResource_Username(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccVdiscoverytaskUsername(name, username2, "aws_secret_key", "infoblox.172_28_83_29", true, true, true, "AWS", "AUTO_CREATE", "AUTO_CREATE", true, false, "us-east-1"),
+				Config: testAccVdiscoverytaskUsername(name, username2, "aws_secret_key", memberName, true, true, true, "AWS", "AUTO_CREATE", "AUTO_CREATE", true, false, "us-east-1"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckVdiscoverytaskExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "username", username2),
