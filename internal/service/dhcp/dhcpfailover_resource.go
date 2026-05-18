@@ -459,13 +459,11 @@ func (r *DhcpfailoverResource) ValidateConfig(ctx context.Context, req resource.
 		}
 	}
 
-	useMsSwithchoverInterval := data.UseMsSwitchoverInterval.ValueBool()
-	if useMsSwithchoverInterval {
-		if data.MsEnableSwitchoverInterval.ValueBool() == false {
-			resp.Diagnostics.AddError(
-				"Invalid Configuration",
-				"ms_enable_switchover_interval cannot be false when use_ms_switchover_interval is true.",
-			)
-		}
+	useMsSwitchoverInterval := data.UseMsSwitchoverInterval.ValueBool()
+	if useMsSwitchoverInterval && !data.MsEnableSwitchoverInterval.ValueBool() {
+		resp.Diagnostics.AddError(
+			"Invalid Configuration",
+			"ms_enable_switchover_interval cannot be false when use_ms_switchover_interval is true.",
+		)
 	}
 }
