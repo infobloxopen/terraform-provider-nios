@@ -323,7 +323,7 @@ Optional:
 
 Required:
 
-- `address` (String) The source address of a sortlist object.
+- `address` (String) The source address of a sortlist object. Valid Notations - IPv4 Address , Network with CIDR or `ANY`
 
 Optional:
 
