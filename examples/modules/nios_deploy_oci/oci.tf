@@ -9,11 +9,9 @@ provider "oci" {
 module "node1" {
   source = "github.com/infobloxopen/terraform-provider-nios//modules/nios_deploy_oci?ref=nios_v9.1.0"
 
-  tenancy_ocid             = var.tenancy_ocid
-  user_ocid                = var.user_ocid
-  fingerprint              = var.fingerprint
-  private_key_path         = var.private_key_path
-  region                   = var.region
+  default_admin_password = var.default_admin_password
+  remote_console_enabled = var.remote_console_enabled
+  nios_license           = var.nios_license
   compartment_id           = var.compartment_id
   availability_domain      = var.availability_domain
   bucket_name              = var.bucket_name
@@ -34,6 +32,4 @@ module "node1" {
   enable_reporting_volume  = var.enable_reporting_volume
   reporting_volume_name    = var.reporting_volume_name
   reporting_volume_size_gb = var.reporting_volume_size_gb
-  cloud_init_content       = var.cloud_init_content
-  cloud_init_script_path   = var.cloud_init_script_path
 }
