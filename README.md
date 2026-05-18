@@ -20,9 +20,18 @@ The Terraform Provider for Infoblox NIOS allows you to manage your Infoblox NIOS
 
 ## Requirements
 
-- [Go](https://golang.org/doc/install) >= 1.18 (to build the provider plugin) (recommended version is 1.24.4 or later)
-- [Terraform](https://www.terraform.io/downloads.html) >= 1.8.0
+- [Go](https://golang.org/doc/install) >= 1.25.1
+- [Terraform](https://www.terraform.io/downloads.html) >= 1.12.1
 - [Infoblox NIOS](https://www.infoblox.com/products/nios/) (version 9.0.6 or higher)
+
+## Version Compatibility Matrix
+
+The table below shows the compatibility between different versions of the Terraform Provider NIOS and the required versions of NIOS, WAPI, Terraform, and Go.
+
+| Provider Version | Go Version | Terraform Version | NIOS Version | WAPI Version |
+|-----------------|------------|-------------------|--------------|--------------|
+| 2.0.0 | >= 1.25.1 | >= 1.12.1 | 9.1.0 or higher | v2.14 |
+| 1.1.0 , 1.0.0 , 0.0.1 , 1.2.0 | >= 1.18 | >= 1.8.0 | 9.0.6 or higher | v2.13.6 |
 
 ## Getting Started
 
@@ -65,13 +74,17 @@ The object groups available in this provider are categorized as follows:
   - [DHCP](guides/resources_datasources.md#dhcp)
   - [DNS](guides/resources_datasources.md#dns)
   - [DTC](guides/resources_datasources.md#dtc)
+  - [RPZ](guides/resources_datasources.md#rpz)
   - [IPAM](guides/resources_datasources.md#ipam)
   - [CLOUD](guides/resources_datasources.md#cloud)
+  - [GRID](guides/resources_datasources.md#grid)
   - [SECURITY](guides/resources_datasources.md#security)
-  - [MISC](guides/resources_datasources.md#misc)
+  - [MICROSOFT](guides/resources_datasources.md#microsoft)
+  - [PARENTAL CONTROL](guides/resources_datasources.md#parental-control)
+  - [RIR](guides/resources_datasources.md#rir)
+  - [MISC](guides/resources_datasources.md#miscellaneous)
   - [SMARTFOLDER](guides/resources_datasources.md#smartfolder)
   - [ACL](guides/resources_datasources.md#acl)
-  - [GRID](guides/resources_datasources.md#grid)
   - [DISCOVERY](guides/resources_datasources.md#discovery)
   - [NOTIFICATION](guides/resources_datasources.md#notification)
 
