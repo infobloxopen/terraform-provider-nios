@@ -94,6 +94,7 @@ Read-Only:
 - `last_queried` (Number) The time of the last DNS query in Epoch seconds format.
 - `ms_ad_user_data` (Attributes) The Microsoft Active Directory user related information. (see [below for nested schema](#nestedatt--result--ms_ad_user_data))
 - `ref` (String) The reference to the object.
+- `snmp3_secret_revision` (Number) Internal revision incremented when SNMPv3 secrets change.
 - `zone` (String) The name of the zone in which the record resides. Example: "zone.com". If a view is not specified when searching by zone, the default view is used.
 
 <a id="nestedatt--result--cli_credentials"></a>
@@ -495,15 +496,18 @@ Read-Only:
 <a id="nestedatt--result--snmp3_credential"></a>
 ### Nested Schema for `result.snmp3_credential`
 
-Optional:
+Required:
 
 - `authentication_password` (String) Authentication password for the SNMPv3 user.
 - `authentication_protocol` (String) Authentication protocol for the SNMPv3 user.
-- `comment` (String) Comments for the SNMPv3 user.
-- `credential_group` (String) Group for the SNMPv3 credential.
 - `privacy_password` (String) Privacy password for the SNMPv3 user.
 - `privacy_protocol` (String) Privacy protocol for the SNMPv3 user.
 - `user` (String) The SNMPv3 user name.
+
+Optional:
+
+- `comment` (String) Comments for the SNMPv3 user.
+- `credential_group` (String) Group for the SNMPv3 credential.
 
 
 <a id="nestedatt--result--snmp_credential"></a>
