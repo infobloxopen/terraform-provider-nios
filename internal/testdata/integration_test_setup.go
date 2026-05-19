@@ -1399,6 +1399,41 @@ func PreConfig(clients PreConfigClients, hostnames GridHostnames) error {
 
 	fmt.Printf("Distribution schedule %q updated\n", *distributionSchedule.Ref)
 
+	// Cleanup orphaned upgrade groups from previous test runs.
+	// This prevents "Missing upgrade groups" errors when tests try to update
+	// singleton schedule resources on grids with leftover state.
+	cleanupGroupsResp, _, err := clients.GRID.UpgradegroupAPI.List(context.Background()).
+		ReturnAsObject(1).
+		ReturnFieldsPlus("name").
+		Execute()
+	if err != nil {
+		return fmt.Errorf("failed to list upgrade groups for cleanup: %w", err)
+	}
+
+	// Set of groups that should be preserved
+	preserveGroups := map[string]bool{
+		"Default":                          true,
+		"Grid Master":                      true,
+		"example_upgrade_dependent_group1": true,
+		"example_upgrade_dependent_group2": true,
+	}
+
+	cleanupGroups := cleanupGroupsResp.ListUpgradegroupResponseObject.GetResult()
+	for _, group := range cleanupGroups {
+		name := group.GetName()
+		if preserveGroups[name] {
+			continue
+		}
+		_, delErr := clients.GRID.UpgradegroupAPI.
+			Delete(context.Background(), utils.ExtractResourceRef(group.GetRef())).
+			Execute()
+		if delErr != nil {
+			fmt.Printf("Warning: failed to delete orphaned upgrade group %q: %s\n", name, delErr)
+		} else {
+			fmt.Printf("Cleaned up orphaned upgrade group: %s\n", name)
+		}
+	}
+
 	// Create upgrade dependent groups
 	upgradeGroups := []string{"example_upgrade_dependent_group1", "example_upgrade_dependent_group2"}
 
