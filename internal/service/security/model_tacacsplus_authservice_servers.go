@@ -62,7 +62,7 @@ var TacacsplusAuthserviceServersResourceSchemaAttributes = map[string]schema.Att
 	},
 	"shared_secret": schema.StringAttribute{
 		Required:  true,
-		Sensitive: true,
+		WriteOnly: true,
 		Validators: []validator.String{
 			customvalidator.ValidateTrimmedString(),
 		},

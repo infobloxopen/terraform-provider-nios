@@ -2,6 +2,9 @@ package rir
 
 import (
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"regexp"
@@ -10,10 +13,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
-
+	"github.com/hashicorp/terraform-plugin-framework/types"
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
 	"github.com/infobloxopen/infoblox-nios-go-client/rir"
-
 	"github.com/infobloxopen/terraform-provider-nios/internal/config"
 	"github.com/infobloxopen/terraform-provider-nios/internal/retry"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
@@ -69,6 +71,7 @@ var validRipeOrgTypes = map[string]struct{}{
 // Ensure provider defined types fully satisfy framework interfaces.
 var _ resource.Resource = &RirOrganizationResource{}
 var _ resource.ResourceWithImportState = &RirOrganizationResource{}
+var _ resource.ResourceWithModifyPlan = &RirOrganizationResource{}
 
 func NewRirOrganizationResource() resource.Resource {
 	return &RirOrganizationResource{}
@@ -77,6 +80,10 @@ func NewRirOrganizationResource() resource.Resource {
 // RirOrganizationResource defines the resource implementation.
 type RirOrganizationResource struct {
 	client *niosclient.APIClient
+}
+
+type secretsHashState struct {
+	Password string `json:"password_hash"`
 }
 
 func (r *RirOrganizationResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -110,6 +117,75 @@ func (r *RirOrganizationResource) Configure(ctx context.Context, req resource.Co
 	r.client = client
 }
 
+func (r *RirOrganizationResource) ModifyPlan(ctx context.Context, req resource.ModifyPlanRequest, resp *resource.ModifyPlanResponse) {
+	if req.Plan.Raw.IsNull() {
+		return
+	}
+
+	var stateRev types.Int64
+	resp.Diagnostics.Append(req.State.GetAttribute(ctx, path.Root("secret_revision"), &stateRev)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	curRev := int64(0)
+	if !stateRev.IsNull() && !stateRev.IsUnknown() {
+		curRev = stateRev.ValueInt64()
+	}
+
+	var planSecret types.String
+	resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("password"), &planSecret)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	var prev struct {
+		Algo string `json:"algo"`
+		Hash string `json:"hash"`
+	}
+	if b, diags := req.Private.GetKey(ctx, "password_hash"); diags != nil {
+		resp.Diagnostics.Append(diags...)
+		if resp.Diagnostics.HasError() {
+			return
+		}
+	} else if b != nil {
+		if err := json.Unmarshal(b, &prev); err != nil {
+			prev.Hash = ""
+		}
+	}
+
+	prevHashes := secretsHashState{}
+	if prev.Hash != "" {
+		_ = json.Unmarshal([]byte(prev.Hash), &prevHashes)
+	}
+	plannedHashes := prevHashes
+	computeNewHash := !planSecret.IsNull() && !planSecret.IsUnknown()
+	plannedHash := prev.Hash
+
+	if computeNewHash {
+		h := sha256.New()
+		h.Write([]byte(planSecret.ValueString()))
+		plannedHashes.Password = hex.EncodeToString(h.Sum(nil))
+		if data, err := json.Marshal(plannedHashes); err == nil {
+			plannedHash = string(data)
+		}
+	}
+
+	if computeNewHash && plannedHash != prev.Hash {
+		resp.Diagnostics.Append(resp.Plan.SetAttribute(ctx, path.Root("secret_revision"), types.Int64Value(curRev+1))...)
+		val := map[string]string{"algo": "sha256", "hash": plannedHash}
+		b, err := json.Marshal(val)
+		if err != nil {
+			resp.Diagnostics.AddError("Private State Marshal Error", err.Error())
+			return
+		}
+		resp.Diagnostics.Append(resp.Private.SetKey(ctx, "password_hash", b)...)
+		return
+	}
+
+	resp.Diagnostics.Append(resp.Plan.SetAttribute(ctx, path.Root("secret_revision"), types.Int64Value(curRev))...)
+}
+
 func (r *RirOrganizationResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var data RirOrganizationModel
 
@@ -123,6 +199,32 @@ func (r *RirOrganizationResource) Create(ctx context.Context, req resource.Creat
 	payload := data.Expand(ctx, &resp.Diagnostics)
 	if resp.Diagnostics.HasError() {
 		return
+	}
+
+	secret_revisionValue := types.Int64Value(0)
+	var password types.String
+	resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("password"), &password)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	if !password.IsNull() && !password.IsUnknown() {
+		secretVal := password.ValueString()
+		payload.Password = &secretVal
+		secret_revisionValue = types.Int64Value(1)
+
+		secretData := secretsHashState{}
+		h := sha256.New()
+		h.Write([]byte(password.ValueString()))
+		secretData.Password = hex.EncodeToString(h.Sum(nil))
+		secretDataJSON, _ := json.Marshal(secretData)
+		val := map[string]string{"algo": "sha256", "hash": string(secretDataJSON)}
+		hashedSecret, err := json.Marshal(val)
+		if err != nil {
+			resp.Diagnostics.AddError("Private State Marshal Error", err.Error())
+			return
+		}
+		resp.Diagnostics.Append(resp.Private.SetKey(ctx, "password_hash", hashedSecret)...)
 	}
 
 	var apiRes *rir.CreateRirOrganizationResponse
@@ -161,6 +263,7 @@ func (r *RirOrganizationResource) Create(ctx context.Context, req resource.Creat
 
 	res := apiRes.CreateRirOrganizationResponseAsObject.GetResult()
 
+	data.SecretRevision = secret_revisionValue
 	data.Flatten(ctx, &res, &resp.Diagnostics)
 
 	// Save data into Terraform state
@@ -239,6 +342,16 @@ func (r *RirOrganizationResource) Update(ctx context.Context, req resource.Updat
 	payload := data.Expand(ctx, &resp.Diagnostics)
 	if resp.Diagnostics.HasError() {
 		return
+	}
+
+	var password types.String
+	resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("password"), &password)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+	if !password.IsNull() && !password.IsUnknown() {
+		secretVal := password.ValueString()
+		payload.Password = &secretVal
 	}
 
 	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())

@@ -2,19 +2,18 @@ package misc
 
 import (
 	"context"
-
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-
 	"github.com/infobloxopen/infoblox-nios-go-client/misc"
-
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
@@ -22,6 +21,7 @@ import (
 type BfdtemplateModel struct {
 	Ref                 types.String `tfsdk:"ref"`
 	AuthenticationKey   types.String `tfsdk:"authentication_key"`
+	SecretRevision      types.Int64  `tfsdk:"secret_revision"`
 	AuthenticationKeyId types.Int64  `tfsdk:"authentication_key_id"`
 	AuthenticationType  types.String `tfsdk:"authentication_type"`
 	DetectionMultiplier types.Int64  `tfsdk:"detection_multiplier"`
@@ -33,6 +33,7 @@ type BfdtemplateModel struct {
 var BfdtemplateAttrTypes = map[string]attr.Type{
 	"ref":                   types.StringType,
 	"authentication_key":    types.StringType,
+	"secret_revision":       types.Int64Type,
 	"authentication_key_id": types.Int64Type,
 	"authentication_type":   types.StringType,
 	"detection_multiplier":  types.Int64Type,
@@ -48,10 +49,17 @@ var BfdtemplateResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"authentication_key": schema.StringAttribute{
 		Optional:            true,
+		WriteOnly:           true,
 		Computed:            true,
-		Sensitive:           true,
 		Default:             stringdefault.StaticString(""),
 		MarkdownDescription: "The authentication key for BFD protocol message-digest authentication.",
+	},
+	"secret_revision": schema.Int64Attribute{
+		Computed:            true,
+		MarkdownDescription: "Internal revision incremented when secret field changes.",
+		PlanModifiers: []planmodifier.Int64{
+			int64planmodifier.UseStateForUnknown(),
+		},
 	},
 	"authentication_key_id": schema.Int64Attribute{
 		Optional: true,

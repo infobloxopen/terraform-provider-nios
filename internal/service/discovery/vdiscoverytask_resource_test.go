@@ -931,7 +931,7 @@ func TestAccVdiscoverytaskResource_Password(t *testing.T) {
 				Config: testAccVdiscoverytaskPassword(name, "aws_access_key", password1, memberName, true, true, true, "AWS", "AUTO_CREATE", "AUTO_CREATE", true, false, "us-east-1"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckVdiscoverytaskExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "password", password1),
+					resource.TestCheckResourceAttr(resourceName, "secret_revision", "1"),
 				),
 			},
 			// Update and Read
@@ -939,7 +939,7 @@ func TestAccVdiscoverytaskResource_Password(t *testing.T) {
 				Config: testAccVdiscoverytaskPassword(name, "aws_access_key", password2, memberName, true, true, true, "AWS", "AUTO_CREATE", "AUTO_CREATE", true, false, "us-east-1"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckVdiscoverytaskExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "password", password2),
+					resource.TestCheckResourceAttr(resourceName, "secret_revision", "2"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase

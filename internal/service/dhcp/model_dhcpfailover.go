@@ -2,7 +2,6 @@ package dhcp
 
 import (
 	"context"
-
 	"github.com/hashicorp/terraform-plugin-framework-validators/boolvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
@@ -13,13 +12,13 @@ import (
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
-
 	"github.com/infobloxopen/infoblox-nios-go-client/dhcp"
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 	importmod "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/import"
@@ -47,6 +46,7 @@ type DhcpfailoverModel struct {
 	MsPreviousState            types.String `tfsdk:"ms_previous_state"`
 	MsServer                   types.String `tfsdk:"ms_server"`
 	MsSharedSecret             types.String `tfsdk:"ms_shared_secret"`
+	SecretRevision             types.Int64  `tfsdk:"secret_revision"`
 	MsState                    types.String `tfsdk:"ms_state"`
 	MsSwitchoverInterval       types.Int64  `tfsdk:"ms_switchover_interval"`
 	Name                       types.String `tfsdk:"name"`
@@ -84,6 +84,7 @@ var DhcpfailoverAttrTypes = map[string]attr.Type{
 	"ms_previous_state":             types.StringType,
 	"ms_server":                     types.StringType,
 	"ms_shared_secret":              types.StringType,
+	"secret_revision":               types.Int64Type,
 	"ms_state":                      types.StringType,
 	"ms_switchover_interval":        types.Int64Type,
 	"name":                          types.StringType,
@@ -246,8 +247,15 @@ var DhcpfailoverResourceSchemaAttributes = map[string]schema.Attribute{
 	"ms_shared_secret": schema.StringAttribute{
 		Computed:            true,
 		Optional:            true,
-		Sensitive:           true,
+		WriteOnly:           true,
 		MarkdownDescription: "The failover association authentication. This is a write-only attribute.",
+	},
+	"secret_revision": schema.Int64Attribute{
+		Computed:            true,
+		MarkdownDescription: "Internal revision incremented when secret field changes.",
+		PlanModifiers: []planmodifier.Int64{
+			int64planmodifier.UseStateForUnknown(),
+		},
 	},
 	"ms_state": schema.StringAttribute{
 		Computed:            true,
