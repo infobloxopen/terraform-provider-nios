@@ -132,6 +132,15 @@ func TestAccFixedaddressResource_AgentCircuitId(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "agent_circuit_id", "32"),
 				),
 			},
+			// Update and Read
+			{
+				Config: testAccFixedaddressAgentCircuitIdWithRemoteId(ip, "CIRCUIT_ID", 35, 34, "test_agent_circuit_id"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "agent_circuit_id", "35"),
+					resource.TestCheckResourceAttr(resourceName, "agent_remote_id", "34"),
+				),
+			},
 			// Delete testing automatically occurs in TestCase
 		},
 	})
@@ -161,6 +170,15 @@ func TestAccFixedaddressResource_AgentRemoteId(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "agent_remote_id", fmt.Sprintf("%v", agentRemoteID+10)),
+				),
+			},
+			// Update and Read
+			{
+				Config: testAccFixedaddressAgentCircuitIdWithRemoteId(ip, "REMOTE_ID", 35, agentRemoteID+20, "test_agent_remote_id"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "agent_circuit_id", "35"),
+					resource.TestCheckResourceAttr(resourceName, "agent_remote_id", fmt.Sprintf("%v", agentRemoteID+20)),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -1986,6 +2004,17 @@ resource "nios_dhcp_fixed_address" "test_agent_circuit_id" {
 	agent_circuit_id = %d
 }
 `, ip, matchClient, agentCircuitId)
+}
+
+func testAccFixedaddressAgentCircuitIdWithRemoteId(ip, matchClient string, agentCircuitId, agentRemoteId int, resourceName string) string {
+	return fmt.Sprintf(`
+resource "nios_dhcp_fixed_address" "%s" {
+	ipv4addr = %q
+	match_client = %q
+	agent_circuit_id = %d
+	agent_remote_id = %d
+}
+`, resourceName, ip, matchClient, agentCircuitId, agentRemoteId)
 }
 
 func testAccFixedaddressAgentRemoteId(ip, matchClient string, agentRemoteId int) string {
