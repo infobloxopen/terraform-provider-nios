@@ -3,10 +3,14 @@ package dhcp_test
 import (
 	"context"
 	"fmt"
+	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/knownvalue"
 	"github.com/hashicorp/terraform-plugin-testing/querycheck"
+	"github.com/hashicorp/terraform-plugin-testing/querycheck/queryfilter"
+	"github.com/hashicorp/terraform-plugin-testing/tfjsonpath"
 	"github.com/hashicorp/terraform-plugin-testing/tfversion"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/dhcp"
@@ -75,6 +79,26 @@ func TestAccFixedaddressList_Filters(t *testing.T) {
 				Config:                   testAccFixedaddressListConfigFilters(ip),
 				QueryResultChecks: []querycheck.QueryResultCheck{
 					querycheck.ExpectLength("nios_dhcp_fixed_address.test", 1),
+					querycheck.ExpectResourceKnownValues(
+						resourceName,
+						queryfilter.ByResourceIdentity(map[string]knownvalue.Check{
+							"ref": knownvalue.StringRegexp(regexp.MustCompile("fixedaddress/")),
+						}),
+						[]querycheck.KnownValueCheck{
+							{
+								Path:       tfjsonpath.New("ipv4addr"),
+								KnownValue: knownvalue.StringExact(ip),
+							},
+							{
+								Path:       tfjsonpath.New("match_client"),
+								KnownValue: knownvalue.StringExact("CIRCUIT_ID"),
+							},
+							{
+								Path:       tfjsonpath.New("agent_circuit_id"),
+								KnownValue: knownvalue.StringExact(fmt.Sprintf("%d", agentCircuitID)),
+							},
+						},
+					),
 				},
 			},
 			// Delete testing automatically occurs in TestCase
@@ -134,6 +158,7 @@ func testAccFixedaddressListConfigFilters(ip4addr string) string {
 	return fmt.Sprintf(`
 list "nios_dhcp_fixed_address" "test" {
 	provider = nios
+	include_resource = true
 	config {
 		filters = {
 			ipv4addr =  %q
