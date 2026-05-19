@@ -18,7 +18,7 @@ func GetNIOSCACert2Serial() string {
 	return os.Getenv("NIOS_CA_CERT2_SERIAL")
 }
 
-func GetNIOSDtcCertRef() string {
+func GetNIOSDtcCert1Ref() string {
 	return os.Getenv("NIOS_DTC_CERT1_REF")
 }
 

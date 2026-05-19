@@ -416,7 +416,7 @@ func (r *SharedrecordgroupResource) ValidateConfig(ctx context.Context, req reso
 		return
 	}
 
-	// Fqdn in Zone Associations must is required
+	// Fqdn in Zone Associations is required
 	for i, zoneAssociation := range zoneAssociations {
 		if zoneAssociation.Fqdn.IsUnknown() {
 			continue
