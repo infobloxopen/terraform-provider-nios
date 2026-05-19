@@ -37,7 +37,6 @@ func TestAccDhcpoptiondefinitionResource_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "code", "10"),
 					resource.TestCheckResourceAttr(resourceName, "name", name),
 					resource.TestCheckResourceAttr(resourceName, "type", "string"),
-					// Test fields with default value
 				),
 			},
 			// Delete testing automatically occurs in TestCase
