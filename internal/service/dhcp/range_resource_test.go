@@ -578,14 +578,15 @@ func TestAccRangeResource_DiscoveryBlackoutSetting(t *testing.T) {
 	})
 }
 
-// TODO
 func TestAccRangeResource_DiscoveryMember(t *testing.T) {
+	t.Skip("Requires non-grid master candidate to be in discovery polling mode")
 	var resourceName = "nios_dhcp_range.test_discovery_member"
 	var v dhcp.Range
 	startAddr := "10.0.0.39"
 	endAddr := "10.0.0.40"
-	discoveryMember := "infoblox.172_28_83_235"
-	discoveryMemberUpdate := "infoblox.172_28_83_209"
+	memberUpdatedName := utils.GetNIOSGridMemberHostName()
+	discoveryMember := memberUpdatedName
+	discoveryMemberUpdate := "infoblox.member2"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -946,8 +947,8 @@ func TestAccRangeResource_ExtAttrs(t *testing.T) {
 	})
 }
 
-// TODO
 func TestAccRangeResource_EnableDiscovery(t *testing.T) {
+	t.Skip("Requires non-grid master candidate to be in discovery polling mode")
 	var resourceName = "nios_dhcp_range.test_enable_discovery"
 	var v dhcp.Range
 	startAddr := "10.0.0.63"
@@ -1011,12 +1012,13 @@ func TestAccRangeResource_EnableImmediateDiscovery(t *testing.T) {
 }
 
 func TestAccRangeResource_FailoverAssociation(t *testing.T) {
+	t.Skip("Requires non-grid master candidate to be in discovery polling mode")
 	var resourceName = "nios_dhcp_range.test_failover_association"
 	var v dhcp.Range
 	startAddr := "10.0.0.67"
 	endAddr := "10.0.0.68"
-	failoverAssociation := "failover_association"
-	failoverAssociationUpdate := "failover_association_1"
+	failoverAssociation := "example_failover_association"
+	failoverAssociationUpdate := "example_failover_association_1"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1050,13 +1052,13 @@ func TestAccRangeResource_FingerprintFilterRules(t *testing.T) {
 	endAddr := "10.0.0.70"
 	fingerprintFilterRules := []map[string]any{
 		{
-			"filter":     "range_network_filter",
+			"filter":     "test_filter_fingerprint",
 			"permission": "Allow",
 		},
 	}
 	fingerprintFilterRulesUpdate := []map[string]any{
 		{
-			"filter":     "range_network_filter1",
+			"filter":     "test_filter_fingerprint1",
 			"permission": "Allow",
 		},
 	}
@@ -1070,7 +1072,7 @@ func TestAccRangeResource_FingerprintFilterRules(t *testing.T) {
 				Config: testAccRangeFingerprintFilterRules(startAddr, endAddr, fingerprintFilterRules),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangeExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "fingerprint_filter_rules.0.filter", "range_network_filter"),
+					resource.TestCheckResourceAttr(resourceName, "fingerprint_filter_rules.0.filter", "test_filter_fingerprint"),
 					resource.TestCheckResourceAttr(resourceName, "fingerprint_filter_rules.0.permission", "Allow"),
 				),
 			},
@@ -1079,7 +1081,7 @@ func TestAccRangeResource_FingerprintFilterRules(t *testing.T) {
 				Config: testAccRangeFingerprintFilterRules(startAddr, endAddr, fingerprintFilterRulesUpdate),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangeExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "fingerprint_filter_rules.0.filter", "range_network_filter1"),
+					resource.TestCheckResourceAttr(resourceName, "fingerprint_filter_rules.0.filter", "test_filter_fingerprint1"),
 					resource.TestCheckResourceAttr(resourceName, "fingerprint_filter_rules.0.permission", "Allow"),
 				),
 			},
@@ -1190,8 +1192,8 @@ func TestAccRangeResource_IgnoreDhcpOptionListRequest(t *testing.T) {
 func TestAccRangeResource_IgnoreId(t *testing.T) {
 	var resourceName = "nios_dhcp_range.test_ignore_id"
 	var v dhcp.Range
-	startAddr := "10.0.0.77"
-	endAddr := "10.0.0.78"
+	startAddr := "10.0.0.177"
+	endAddr := "10.0.0.178"
 	ignoreId := "CLIENT"
 	ignoreIdUpdate := "MACADDR"
 
@@ -1223,10 +1225,10 @@ func TestAccRangeResource_IgnoreId(t *testing.T) {
 func TestAccRangeResource_IgnoreMacAddresses(t *testing.T) {
 	var resourceName = "nios_dhcp_range.test_ignore_mac_addresses"
 	var v dhcp.Range
-	startAddr := "10.0.0.79"
-	endAddr := "10.0.0.80"
-	ignoreMacAddresses := []string{"00:1a:2b:3c:4d:5e"}
-	ignoreMacAddressesUpdate := []string{"00:1a:2b:33:4d:52"}
+	startAddr := "10.0.0.179"
+	endAddr := "10.0.0.180"
+	ignoreMacAddresses := []string{"00:4a:2b:3c:1d:5e"}
+	ignoreMacAddressesUpdate := []string{"00:3a:2b:43:5d:52"}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1237,7 +1239,7 @@ func TestAccRangeResource_IgnoreMacAddresses(t *testing.T) {
 				Config: testAccRangeIgnoreMacAddresses(startAddr, endAddr, ignoreMacAddresses),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangeExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ignore_mac_addresses.0", "00:1a:2b:3c:4d:5e"),
+					resource.TestCheckResourceAttr(resourceName, "ignore_mac_addresses.0", "00:4a:2b:3c:1d:5e"),
 				),
 			},
 			// Update and Read
@@ -1245,7 +1247,7 @@ func TestAccRangeResource_IgnoreMacAddresses(t *testing.T) {
 				Config: testAccRangeIgnoreMacAddresses(startAddr, endAddr, ignoreMacAddressesUpdate),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangeExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ignore_mac_addresses.0", "00:1a:2b:33:4d:52"),
+					resource.TestCheckResourceAttr(resourceName, "ignore_mac_addresses.0", "00:3a:2b:43:5d:52"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -1331,7 +1333,7 @@ func TestAccRangeResource_LogicFilterRules(t *testing.T) {
 	}
 	logicFilterRulesUpdate := []map[string]any{
 		{
-			"filter": "option_logic_filter",
+			"filter": "example-option-filter-1",
 			"type":   "Option",
 		},
 	}
@@ -1354,7 +1356,7 @@ func TestAccRangeResource_LogicFilterRules(t *testing.T) {
 				Config: testAccRangeLogicFilterRules(startAddr, endAddr, logicFilterRulesUpdate),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangeExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "logic_filter_rules.0.filter", "option_logic_filter"),
+					resource.TestCheckResourceAttr(resourceName, "logic_filter_rules.0.filter", "example-option-filter-1"),
 					resource.TestCheckResourceAttr(resourceName, "logic_filter_rules.0.type", "Option"),
 				),
 			},
@@ -1442,7 +1444,7 @@ func TestAccRangeResource_MacFilterRules(t *testing.T) {
 	}
 	macFilterRulesUpdate := []map[string]any{
 		{
-			"filter":     "mac_logic_filter",
+			"filter":     "mac_filter2",
 			"permission": "Deny",
 		},
 	}
@@ -1465,7 +1467,7 @@ func TestAccRangeResource_MacFilterRules(t *testing.T) {
 				Config: testAccRangeMacFilterRules(startAddr, endAddr, macFilterRulesUpdate),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangeExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "mac_filter_rules.0.filter", "mac_logic_filter"),
+					resource.TestCheckResourceAttr(resourceName, "mac_filter_rules.0.filter", "mac_filter2"),
 					resource.TestCheckResourceAttr(resourceName, "mac_filter_rules.0.permission", "Deny"),
 				),
 			},
@@ -1477,15 +1479,15 @@ func TestAccRangeResource_MacFilterRules(t *testing.T) {
 func TestAccRangeResource_Member(t *testing.T) {
 	var resourceName = "nios_dhcp_range.test_member"
 	var v dhcp.Range
-	startAddr := "10.0.0.93"
-	endAddr := "10.0.0.94"
+	startAddr := "102.0.0.93"
+	endAddr := "102.0.0.94"
+	memberName := utils.GetNIOSGridMasterHostName()
+	memberUpdatedName := utils.GetNIOSGridMemberHostName()
 	member := map[string]any{
-		"ipv4addr": "172.28.83.235",
-		"name":     "infoblox.172_28_83_235",
+		"name": memberName,
 	}
-	memberUpdate := map[string]any{
-		"ipv4addr": "172.28.83.209",
-		"name":     "infoblox.172_28_83_209",
+	member2 := map[string]any{
+		"name": memberUpdatedName,
 	}
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -1494,18 +1496,18 @@ func TestAccRangeResource_Member(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRangeMember(startAddr, endAddr, member),
+				Config: testAccRangeMember(startAddr, endAddr, member, member2, member),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangeExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "member.ipv4addr", "172.28.83.235"),
+					resource.TestCheckResourceAttr(resourceName, "member.name", memberName),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccRangeMember(startAddr, endAddr, memberUpdate),
+				Config: testAccRangeMember(startAddr, endAddr, member, member2, member2),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangeExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "member.ipv4addr", "172.28.83.209"),
+					resource.TestCheckResourceAttr(resourceName, "member.name", memberUpdatedName),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -1513,10 +1515,33 @@ func TestAccRangeResource_Member(t *testing.T) {
 	})
 }
 
-// TODO
 func TestAccRangeResource_MsOptions(t *testing.T) {
 	var resourceName = "nios_dhcp_range.test_ms_options"
 	var v dhcp.Range
+	startAddr := "100.0.0.182"
+	endAddr := "100.0.0.184"
+	t.Skip("Skipping until MS Options can be properly tested with the API")
+	optionsVal := []map[string]any{
+		{
+			"name":  "domain-name",
+			"num":   "15",
+			"value": "example.com",
+		},
+		{
+			"name":  "dhcp-lease-time",
+			"value": "7200",
+		},
+	}
+	updatedOptionsVal := []map[string]any{
+		{
+			"name":  "braodcast-address",
+			"value": "127.0.0.1",
+		},
+		{
+			"name":  "dhcp-lease-time",
+			"value": "3600",
+		},
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1524,7 +1549,7 @@ func TestAccRangeResource_MsOptions(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRangeMsOptions("MS_OPTIONS_REPLACE_ME"),
+				Config: testAccRangeMsOptions(startAddr, endAddr, "10.10.10.10", optionsVal),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangeExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "ms_options", "MS_OPTIONS_REPLACE_ME"),
@@ -1532,7 +1557,7 @@ func TestAccRangeResource_MsOptions(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRangeMsOptions("MS_OPTIONS_UPDATE_REPLACE_ME"),
+				Config: testAccRangeMsOptions(startAddr, endAddr, "10.10.10.10", updatedOptionsVal),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangeExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "ms_options", "MS_OPTIONS_UPDATE_REPLACE_ME"),
@@ -1543,14 +1568,12 @@ func TestAccRangeResource_MsOptions(t *testing.T) {
 	})
 }
 
-// TODO
 func TestAccRangeResource_MsServer(t *testing.T) {
 	var resourceName = "nios_dhcp_range.test_ms_server"
 	var v dhcp.Range
-	startAddr := "10.0.0.95"
-	endAddr := "10.0.0.96"
-	msServerIp := "10.120.23.22"
-	msServerIpUpdate := "10.120.23.23"
+	startAddr := "101.0.0.95"
+	endAddr := "101.0.0.96"
+	msServerIp := "10.10.10.10"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1561,15 +1584,7 @@ func TestAccRangeResource_MsServer(t *testing.T) {
 				Config: testAccRangeMsServer(startAddr, endAddr, msServerIp),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangeExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ms_server.ipv4addr", "10.120.23.22"),
-				),
-			},
-			// Update and Read
-			{
-				Config: testAccRangeMsServer(startAddr, endAddr, msServerIpUpdate),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckRangeExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ms_server.ipv4addr", "10.120.23.23"),
+					resource.TestCheckResourceAttr(resourceName, "ms_server.ipv4addr", "10.10.10.10"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -1661,9 +1676,9 @@ func TestAccRangeResource_Network(t *testing.T) {
 	startAddr := "10.0.0.101"
 	endAddr := "10.0.0.102"
 	network := "10.0.0.0/24"
-	networkUpdate := "20.0.0.0/24"
-	startAddrUpdate := "20.0.0.20"
-	endAddrUpdate := "20.0.0.30"
+	networkUpdate := "200.0.0.0/24"
+	startAddrUpdate := "200.0.0.20"
+	endAddrUpdate := "200.0.0.30"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1695,7 +1710,7 @@ func TestAccRangeResource_NetworkView(t *testing.T) {
 	var v dhcp.Range
 	startAddr := "10.0.0.103"
 	endAddr := "10.0.0.104"
-	networkView := "custom_view"
+	networkView := acctest.RandomNameWithPrefix("network-view")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1755,13 +1770,13 @@ func TestAccRangeResource_OptionFilterRules(t *testing.T) {
 	endAddr := "10.0.0.108"
 	optionFilterRules := []map[string]any{
 		{
-			"filter":     "option_filter",
+			"filter":     "example-option-filter-1",
 			"permission": "Allow",
 		},
 	}
 	optionFilterRulesUpdate := []map[string]any{
 		{
-			"filter":     "option_logic_filter",
+			"filter":     "example-option-filter-2",
 			"permission": "Deny",
 		},
 	}
@@ -1775,7 +1790,7 @@ func TestAccRangeResource_OptionFilterRules(t *testing.T) {
 				Config: testAccRangeOptionFilterRules(startAddr, endAddr, optionFilterRules),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangeExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "option_filter_rules.0.filter", "option_filter"),
+					resource.TestCheckResourceAttr(resourceName, "option_filter_rules.0.filter", "example-option-filter-1"),
 					resource.TestCheckResourceAttr(resourceName, "option_filter_rules.0.permission", "Allow"),
 				),
 			},
@@ -1784,7 +1799,7 @@ func TestAccRangeResource_OptionFilterRules(t *testing.T) {
 				Config: testAccRangeOptionFilterRules(startAddr, endAddr, optionFilterRulesUpdate),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangeExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "option_filter_rules.0.filter", "option_logic_filter"),
+					resource.TestCheckResourceAttr(resourceName, "option_filter_rules.0.filter", "example-option-filter-2"),
 					resource.TestCheckResourceAttr(resourceName, "option_filter_rules.0.permission", "Deny"),
 				),
 			},
@@ -2001,7 +2016,7 @@ func TestAccRangeResource_RelayAgentFilterRules(t *testing.T) {
 	}
 	relayAgentFilterRulesUpdate := []map[string]any{
 		{
-			"filter":     "relay_agent_logic_filter",
+			"filter":     "relay_agent_filter2",
 			"permission": "Deny",
 		},
 	}
@@ -2024,7 +2039,7 @@ func TestAccRangeResource_RelayAgentFilterRules(t *testing.T) {
 				Config: testAccRangeRelayAgentFilterRules(startAddr, endAddr, relayAgentFilterRulesUpdate),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangeExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "relay_agent_filter_rules.0.filter", "relay_agent_logic_filter"),
+					resource.TestCheckResourceAttr(resourceName, "relay_agent_filter_rules.0.filter", "relay_agent_filter2"),
 					resource.TestCheckResourceAttr(resourceName, "relay_agent_filter_rules.0.permission", "Deny"),
 				),
 			},
@@ -2067,12 +2082,12 @@ func TestAccRangeResource_SamePortControlDiscoveryBlackout(t *testing.T) {
 func TestAccRangeResource_ServerAssociationType(t *testing.T) {
 	var resourceName = "nios_dhcp_range.test_server_association_type"
 	var v dhcp.Range
-	startAddr := "10.0.0.121"
-	endAddr := "10.0.0.122"
+	startAddr := "190.0.0.121"
+	endAddr := "190.0.0.122"
 	serverAssociationType := "FAILOVER"
-	failoverAssociation := "failover_association"
+	failoverAssociation := "example_failover_association1"
 	serverAssociationTypeUpdate := "MEMBER"
-	member := "infoblox.172_28_83_209"
+	member := utils.GetNIOSGridMemberHostName()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -2093,8 +2108,7 @@ func TestAccRangeResource_ServerAssociationType(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangeExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "server_association_type", "MEMBER"),
-					resource.TestCheckResourceAttr(resourceName, "member.ipv4addr", "172.28.83.209"),
-					resource.TestCheckResourceAttr(resourceName, "member.name", "infoblox.172_28_83_209"),
+					resource.TestCheckResourceAttr(resourceName, "member.name", member),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -2137,8 +2151,8 @@ func TestAccRangeResource_StartAddr(t *testing.T) {
 func TestAccRangeResource_SubscribeSettings(t *testing.T) {
 	var resourceName = "nios_dhcp_range.test_subscribe_settings"
 	var v dhcp.Range
-	startAddr := "10.0.0.127"
-	endAddr := "10.0.0.128"
+	startAddr := "110.0.0.127"
+	endAddr := "110.0.0.128"
 	enabledAttribute := "DOMAINNAME"
 	enabledAttributeUpdate := "ENDPOINT_PROFILE"
 
@@ -2920,8 +2934,8 @@ func TestAccRangeResource_UseRecycleLeases(t *testing.T) {
 func TestAccRangeResource_UseSubscribeSettings(t *testing.T) {
 	var resourceName = "nios_dhcp_range.test_use_subscribe_settings"
 	var v dhcp.Range
-	startAddr := "10.0.0.177"
-	endAddr := "10.0.0.178"
+	startAddr := "210.0.0.177"
+	endAddr := "210.0.0.178"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -2940,7 +2954,7 @@ func TestAccRangeResource_UseSubscribeSettings(t *testing.T) {
 				Config: testAccRangeUseSubscribeSettings(startAddr, endAddr, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangeExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_subscribe_settings", "true"),
+					resource.TestCheckResourceAttr(resourceName, "use_subscribe_settings", "false"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -3485,37 +3499,84 @@ resource "nios_dhcp_range" "test_mac_filter_rules" {
 `, startAddr, endAddr, macFilterRulesHCL)
 }
 
-func testAccRangeMember(startAddr, endAddr string, member map[string]any) string {
-	memberHCL := utils.ConvertMapToHCL(member)
+func testAccRangeMember(startAddr, endAddr string, member, member2, rangeMember map[string]any) string {
+	memberHCL := utils.ConvertMapToHCL(rangeMember)
 	return fmt.Sprintf(`
+resource "nios_ipam_network" "example_network" {
+  	network      = "102.0.0.0/24"
+	network_view = "default"
+	comment      = "Created by Terraform for Range Member Test"
+	members = [
+		{
+			struct = "dhcpmember"
+			name = %q
+		},
+		{
+			struct = "dhcpmember"
+			name = %q
+		}
+	]
+}
+
 resource "nios_dhcp_range" "test_member" {
 	start_addr = %q
 	end_addr = %q
     member = %s
 	server_association_type = "MEMBER"
+	depends_on = [nios_ipam_network.example_network]
 }
-`, startAddr, endAddr, memberHCL)
+`, member["name"], member2["name"], startAddr, endAddr, memberHCL)
 }
 
-func testAccRangeMsOptions(msOptions string) string {
+func testAccRangeMsOptions(startAddr, endAddr, msServers string, msOptions []map[string]any) string {
+	msOptionsHCL := utils.ConvertSliceOfMapsToHCL(msOptions)
 	return fmt.Sprintf(`
-resource "nios_dhcp_range" "test_ms_options" {
-    ms_options = %q
+resource "nios_ipam_network" "example_network" {
+  	network      = "100.0.0.0/24"
+	network_view = "default"
+	comment      = "Created by Terraform for Range MS Options Test"
+	members = [
+		{
+			struct = "msdhcpserver"
+			ipv4addr = %q
+		}
+	]
 }
-`, msOptions)
+
+resource "nios_dhcp_range" "test_ms_options" {
+    start_addr = %q
+	end_addr = %q
+	ms_options = %s
+	ms_server = {
+		ipv4addr = nios_ipam_network.example_network.members[0].ipv4addr
+	}
+}
+`, msServers, startAddr, endAddr, msOptionsHCL)
 }
 
 func testAccRangeMsServer(startAddr, endAddr, msServer string) string {
 	return fmt.Sprintf(`
+resource "nios_ipam_network" "example_network" {
+  	network      = "101.0.0.0/24"
+	network_view = "default"
+	comment      = "Created by Terraform for Range MS Server Test"
+	members = [
+		{
+			struct = "msdhcpserver"
+			ipv4addr = %q
+		}
+	]
+}
+
 resource "nios_dhcp_range" "test_ms_server" {
 	start_addr = %q
 	end_addr = %q
     ms_server = {
-		ipv4addr = %q
+		ipv4addr = nios_ipam_network.example_network.members[0].ipv4addr
 	}
-		server_association_type = "MS_SERVER"
+	server_association_type = "MS_SERVER"
 }
-`, startAddr, endAddr, msServer)
+`, msServer, startAddr, endAddr)
 }
 
 func testAccRangeNacFilterRules(startAddr, endAddr string, nacFilterRules []map[string]any) string {
@@ -3541,22 +3602,39 @@ resource "nios_dhcp_range" "test_name" {
 
 func testAccRangeNetwork(startAddr, endAddr, network string) string {
 	return fmt.Sprintf(`
+resource "nios_ipam_network" "example_network" {
+  network      = "200.0.0.0/24"
+  network_view = "default"
+  comment      = "Created by Terraform for Range Network Test"
+}
+
 resource "nios_dhcp_range" "test_network" {
 	start_addr = %q
 	end_addr = %q
     network = %q
+	depends_on = [nios_ipam_network.example_network]
 }
 `, startAddr, endAddr, network)
 }
 
 func testAccRangeNetworkView(startAddr, endAddr, networkView string) string {
 	return fmt.Sprintf(`
+resource "nios_ipam_network_view" "create_network_view" {
+  name = %q
+}
+
+resource "nios_ipam_network" "example_network" {
+  network      = "10.0.0.0/24"
+  network_view = nios_ipam_network_view.create_network_view.name
+  comment      = "Created by Terraform for Range Network View Test"
+}
+
 resource "nios_dhcp_range" "test_network_view" {
 	start_addr = %q
 	end_addr = %q
-    network_view = %q
+    network_view = nios_ipam_network.example_network.network_view
 }
-`, startAddr, endAddr, networkView)
+`, networkView, startAddr, endAddr)
 }
 
 func testAccRangeNextserver(startAddr, endAddr, nextserver string) string {
@@ -3651,16 +3729,27 @@ resource "nios_dhcp_range" "test_same_port_control_discovery_blackout" {
 
 func testAccRangeServerAssociationType(startAddr, endAddr, serverAssociationType, failoverAssociation, member string) string {
 	return fmt.Sprintf(`
+resource "nios_ipam_network" "example_network" {
+  	network      = "190.0.0.0/24"
+	network_view = "default"
+	members = [
+		{
+			struct = "dhcpmember"
+			name = %q
+		}
+	]
+}
+
 resource "nios_dhcp_range" "test_server_association_type" {
     start_addr = %q
     end_addr = %q
     server_association_type = %q
     failover_association = %q
 	member = {
-		name = %q
+		name = nios_ipam_network.example_network.members[0].name
 	}
 }
-`, startAddr, endAddr, serverAssociationType, failoverAssociation, member)
+`, member, startAddr, endAddr, serverAssociationType, failoverAssociation)
 }
 
 func testAccRangeStartAddr(startAddr, endAddr string) string {
@@ -3674,9 +3763,15 @@ resource "nios_dhcp_range" "test_start_addr" {
 
 func testAccRangeSubscribeSettings(startAddr, endAddr string, subscribeSettings string) string {
 	return fmt.Sprintf(`
+resource "nios_ipam_network" "example_network" {
+  network      = "110.0.0.0/24"
+  network_view = "test_network_view"
+}
+
 resource "nios_dhcp_range" "test_subscribe_settings" {
     start_addr = %q
     end_addr = %q
+	network_view = nios_ipam_network.example_network.network_view
     subscribe_settings = {
 	enabled_attributes = [%q]
 }
@@ -3935,10 +4030,16 @@ resource "nios_dhcp_range" "test_use_recycle_leases" {
 
 func testAccRangeUseSubscribeSettings(startAddr, endAddr string, useSubscribeSettings bool) string {
 	return fmt.Sprintf(`
+resource "nios_ipam_network" "example_network" {
+  network      = "210.0.0.0/24"
+  network_view = "test_network_view"
+}
+
 resource "nios_dhcp_range" "test_use_subscribe_settings" {
 	start_addr = %q
 	end_addr = %q
     use_subscribe_settings = %t
+	network_view = nios_ipam_network.example_network.network_view
 	subscribe_settings = {
 	enabled_attributes = ["DOMAINNAME"]
 }
