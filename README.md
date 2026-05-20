@@ -36,8 +36,10 @@ The table below shows the compatibility between different versions of the Terraf
 **Important Notes:**
 - **Version 2.0.0+** introduces UUID based resource identification for NIOS 9.1.0. Resources must be imported using UUID instead of ref.
 - **Version 1.1.0 and earlier** uses reference based resource identification. Resources must be imported using ref.
-- **Recommended**: When upgrading from provider v1.x.x to v2.x.x, execute `terraform refresh` to automatically update your state file with UUID.
+- **Recommended**: When upgrading from provider v1.x.x to v2.x.x, execute `terraform plan -refresh-only` followed by `terraform apply -refresh-only` to automatically update your state file with UUID.
 - For migration from the legacy terraform provider, refer to the [Migration Guide](MIGRATION.md).
+
+> **Note:** The `terraform refresh` command is deprecated. Use the refresh-only workflow instead. See the [Terraform refresh documentation](https://developer.hashicorp.com/terraform/cli/commands/refresh) for more details.
 
 ### Known Issues
 

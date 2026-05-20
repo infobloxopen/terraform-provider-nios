@@ -45,8 +45,6 @@ the infrastructure is deployed and NIOS is fully booted (~30 minutes).
 |------|-------------|------|---------|:--------:|
 | <a name="input_availability_domain"></a> [availability\_domain](#input\_availability\_domain) | Full availability domain name (e.g. Uocm:US-ASHBURN-AD-1). | `string` | n/a | yes |
 | <a name="input_bucket_name"></a> [bucket\_name](#input\_bucket\_name) | Name of the Object Storage bucket for the NIOS QCOW2 image. | `string` | n/a | yes |
-| <a name="input_cloud_init_content"></a> [cloud\_init\_content](#input\_cloud\_init\_content) | Inline cloud-init YAML. Takes precedence over cloud\_init\_script\_path. If both are empty, the module uses its built-in default cloud-init template. | `string` | `""` | no |
-| <a name="input_cloud_init_script_path"></a> [cloud\_init\_script\_path](#input\_cloud\_init\_script\_path) | Path to a cloud-init YAML file. Used when cloud\_init\_content is empty. If both this and cloud\_init\_content are empty, the module uses its built-in default cloud-init template. | `string` | `""` | no |
 | <a name="input_compartment_id"></a> [compartment\_id](#input\_compartment\_id) | OCID of the compartment in which all resources will be created. | `string` | n/a | yes |
 | <a name="input_create_bucket"></a> [create\_bucket](#input\_create\_bucket) | Set to true to create a new bucket; false to reuse an existing one. | `bool` | `true` | no |
 | <a name="input_default_admin_password"></a> [default\_admin\_password](#input\_default\_admin\_password) | Default admin password for NIOS. | `string` | n/a | yes |
@@ -100,41 +98,48 @@ the infrastructure is deployed and NIOS is fully booted (~30 minutes).
 ### Step 1: Deploy OCI Infrastructure
 
 ```hcl
-module "nios_grid_member" {
-  source = "github.com/infobloxopen/terraform-provider-nios//modules/nios_deploy_oci"
-
-  # OCI authentication
+provider "oci" {
   tenancy_ocid     = var.tenancy_ocid
   user_ocid        = var.user_ocid
   fingerprint      = var.fingerprint
   private_key_path = var.private_key_path
   region           = var.region
+}
 
+module "node1" {
+  source = "github.com/infobloxopen/terraform-provider-nios//modules/nios_deploy_oci?ref=nios_v9.1.0"
+
+  default_admin_password = var.default_admin_password
+  remote_console_enabled = var.remote_console_enabled
+  nios_license           = var.nios_license
   # Compartment
-  compartment_id = var.compartment_id
+  compartment_id           = var.compartment_id
 
-  # Image
-  create_bucket         = true
-  bucket_name           = "nios-images"
-  nios_object_name      = "nios.qcow2"
-  nios_qcow2_local_path = "/path/to/nios.qcow2"
-  image_name            = "nios"
+
+   # Image
+  bucket_name              = var.bucket_name
+  create_bucket            = var.create_bucket
+  nios_qcow2_local_path    = var.nios_qcow2_local_path
+  nios_object_name         = var.nios_object_name
+  image_name               = var.image_name
 
   # Instance
-  instance_name        = "nios-grid-member-1"
-  availability_domain  = "Uocm:PHX-AD-1"
-  nios_model           = "IB-V1526"
-  nios_version_gte_9xx = true
-
+  instance_name            = var.instance_name
+  availability_domain      = var.availability_domain
+  nios_model               = var.nios_model
+  nios_version_gte_9xx     = var.nios_version_gte_9xx
+  legacy_shape             = var.legacy_shape
+  instance_ocpus           = var.instance_ocpus
+  instance_memory_in_gbs   = var.instance_memory_in_gbs
   # Networking
-  mgmt_subnet_id        = var.mgmt_subnet_id
-  lan1_subnet_id        = var.lan1_subnet_id
-  mgmt_assign_public_ip = true
-  lan1_assign_public_ip = false
-
-  # Reporting volume (optional)
-  enable_reporting_volume  = true
-  reporting_volume_size_gb = 250
+  mgmt_subnet_id           = var.mgmt_subnet_id
+  mgmt_assign_public_ip    = var.mgmt_assign_public_ip
+  lan1_subnet_id           = var.lan1_subnet_id
+  lan1_assign_public_ip    = var.lan1_assign_public_ip
+   # Reporting volume (optional)
+  enable_reporting_volume  = var.enable_reporting_volume
+  reporting_volume_name    = var.reporting_volume_name
+  reporting_volume_size_gb = var.reporting_volume_size_gb
 }
 ```
 

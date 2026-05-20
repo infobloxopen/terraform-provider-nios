@@ -19,27 +19,28 @@ import (
 	"github.com/infobloxopen/infoblox-nios-go-client/parentalcontrol"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	internaltypes "github.com/infobloxopen/terraform-provider-nios/internal/types"
 )
 
 type ParentalcontrolAvpModel struct {
-	Ref          types.String `tfsdk:"ref"`
-	Uuid         types.String `tfsdk:"uuid"`
-	Comment      types.String `tfsdk:"comment"`
-	DomainTypes  types.List   `tfsdk:"domain_types"`
-	IsRestricted types.Bool   `tfsdk:"is_restricted"`
-	Name         types.String `tfsdk:"name"`
-	Type         types.Int64  `tfsdk:"type"`
-	UserDefined  types.Bool   `tfsdk:"user_defined"`
-	ValueType    types.String `tfsdk:"value_type"`
-	VendorId     types.Int64  `tfsdk:"vendor_id"`
-	VendorType   types.Int64  `tfsdk:"vendor_type"`
+	Ref          types.String                     `tfsdk:"ref"`
+	Uuid         types.String                     `tfsdk:"uuid"`
+	Comment      types.String                     `tfsdk:"comment"`
+	DomainTypes  internaltypes.UnorderedListValue `tfsdk:"domain_types"`
+	IsRestricted types.Bool                       `tfsdk:"is_restricted"`
+	Name         types.String                     `tfsdk:"name"`
+	Type         types.Int64                      `tfsdk:"type"`
+	UserDefined  types.Bool                       `tfsdk:"user_defined"`
+	ValueType    types.String                     `tfsdk:"value_type"`
+	VendorId     types.Int64                      `tfsdk:"vendor_id"`
+	VendorType   types.Int64                      `tfsdk:"vendor_type"`
 }
 
 var ParentalcontrolAvpAttrTypes = map[string]attr.Type{
 	"ref":           types.StringType,
 	"uuid":          types.StringType,
 	"comment":       types.StringType,
-	"domain_types":  types.ListType{ElemType: types.StringType},
+	"domain_types":  internaltypes.UnorderedListOfStringType,
 	"is_restricted": types.BoolType,
 	"name":          types.StringType,
 	"type":          types.Int64Type,
@@ -68,6 +69,7 @@ var ParentalcontrolAvpResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The comment for the AVP.",
 	},
 	"domain_types": schema.ListAttribute{
+		CustomType:  internaltypes.UnorderedListOfStringType,
 		ElementType: types.StringType,
 		Validators: []validator.List{
 			listvalidator.SizeAtLeast(1),
@@ -176,7 +178,7 @@ func (m *ParentalcontrolAvpModel) Flatten(ctx context.Context, from *parentalcon
 	m.Ref = flex.FlattenStringPointer(from.Ref)
 	m.Uuid = flex.FlattenStringPointer(from.Uuid)
 	m.Comment = flex.FlattenStringPointer(from.Comment)
-	m.DomainTypes = flex.FlattenFrameworkListString(ctx, from.DomainTypes, diags)
+	m.DomainTypes = flex.FlattenFrameworkUnorderedList(ctx, types.StringType, from.DomainTypes, diags)
 	m.IsRestricted = types.BoolPointerValue(from.IsRestricted)
 	m.Name = flex.FlattenStringPointer(from.Name)
 	m.Type = flex.FlattenInt64Pointer(from.Type)

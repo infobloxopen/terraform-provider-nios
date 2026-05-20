@@ -8,7 +8,7 @@ provider "azurerm" {
 }
 
 module "node1" {
-  source = "<path_to_module>"
+  source = "github.com/infobloxopen/terraform-provider-nios//modules/nios_deploy_azure?ref=nios_v9.1.0"
 
   resource_group = var.resource_group
   location       = var.location
