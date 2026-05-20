@@ -885,4 +885,3 @@ func ReorderAndFilterDHCPOptions(
 
 	return newList, &diags
 }
-
