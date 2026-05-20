@@ -12,16 +12,6 @@ output "mgmt_ip" {
   value       = google_compute_instance.grid.network_interface[0].network_ip
 }
 
-output "lan1_ip" {
-  description = "Internal IP of the LAN interface (nic1)."
-  value       = google_compute_instance.grid.network_interface[1].network_ip
-}
-
-output "ha_ip" {
-  description = "Internal IP of the HA interface (nic2)."
-  value       = var.enable_ha ? google_compute_instance.grid.network_interface[2].network_ip : null
-}
-
 output "mgmt_subnet_mask" {
   description = "Subnet Mask of the Mgmt Subnetwork"
   value       = cidrnetmask(data.google_compute_subnetwork.mgmt.ip_cidr_range)
@@ -32,6 +22,11 @@ output "mgmt_gateway" {
   value       = cidrhost(data.google_compute_subnetwork.mgmt.ip_cidr_range, 1)
 }
 
+output "lan1_ip" {
+  description = "Internal IP of the LAN interface (nic1)."
+  value       = google_compute_instance.grid.network_interface[1].network_ip
+}
+
 output "lan1_subnet_mask" {
   description = "Subnet mask of the LAN1 subnetwork."
   value       = cidrnetmask(data.google_compute_subnetwork.lan1.ip_cidr_range)
@@ -40,6 +35,11 @@ output "lan1_subnet_mask" {
 output "lan1_gateway" {
   description = "Gateway IP for the LAN1 subnetwork."
   value       = cidrhost(data.google_compute_subnetwork.lan1.ip_cidr_range, 1)
+}
+
+output "ha_ip" {
+  description = "Internal IP of the HA interface (nic2)."
+  value       = var.enable_ha ? google_compute_instance.grid.network_interface[2].network_ip : null
 }
 
 output "ha_subnet_mask" {

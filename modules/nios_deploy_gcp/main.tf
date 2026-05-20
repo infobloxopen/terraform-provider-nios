@@ -5,7 +5,7 @@ data "google_compute_subnetwork" "mgmt" {
   project = var.project
 }
 
-// Retrieve information about existing LAN subnetwork
+// Retrieve information about existing LAN1 subnetwork
 data "google_compute_subnetwork" "lan1" {
   name    = var.lan1_subnet_name
   region  = var.region
