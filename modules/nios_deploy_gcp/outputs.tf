@@ -34,12 +34,12 @@ output "mgmt_gateway" {
 
 output "lan1_subnet_mask" {
   description = "Subnet mask of the LAN1 subnetwork."
-  value       = cidrnetmask(data.google_compute_subnetwork.lan.ip_cidr_range)
+  value       = cidrnetmask(data.google_compute_subnetwork.lan1.ip_cidr_range)
 }
 
 output "lan1_gateway" {
   description = "Gateway IP for the LAN1 subnetwork."
-  value       = cidrhost(data.google_compute_subnetwork.lan.ip_cidr_range, 1)
+  value       = cidrhost(data.google_compute_subnetwork.lan1.ip_cidr_range, 1)
 }
 
 output "ha_subnet_mask" {

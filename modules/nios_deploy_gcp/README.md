@@ -35,7 +35,7 @@ The module automatically maps NIOS models to GCP machine types:
 |------|------|
 | [google_compute_instance.grid](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_instance) | resource |
 | [google_compute_subnetwork.ha](https://registry.terraform.io/providers/hashicorp/google/latest/docs/data-sources/compute_subnetwork) | data source |
-| [google_compute_subnetwork.lan](https://registry.terraform.io/providers/hashicorp/google/latest/docs/data-sources/compute_subnetwork) | data source |
+| [google_compute_subnetwork.lan1](https://registry.terraform.io/providers/hashicorp/google/latest/docs/data-sources/compute_subnetwork) | data source |
 | [google_compute_subnetwork.mgmt](https://registry.terraform.io/providers/hashicorp/google/latest/docs/data-sources/compute_subnetwork) | data source |
 
 ## Inputs
@@ -95,7 +95,7 @@ provider "google" {
   project = var.project
   region  = var.region
   zone    = var.zone
-  credentials = file("path/to/service-account-key.json")
+  credentials = file("path/to/service-account-key-file.json")
 }
 
 module "node1" {
@@ -137,23 +137,21 @@ NIOS takes approximately around **30 minutes** to fully boot.
 
 Once Grid is up and running, configure the grid member and join to the grid.
 
-#### Example 1: Join a Member to a Master
+### Example 1: Join a Member to a Master
 
-##### Deploy GCP infrastructure for Master and Member
+#### Deploy GCP infrastructure for Master and Member
 
 ```hcl
 module "node1" {
-  source = "github.com/infobloxopen/terraform-provider-nios//modules/nios_deploy_gcp?ref=nios_v9.1.0"
   // ...(same config as Step 1)
 }
 
 module "node2" {
-  source = "github.com/infobloxopen/terraform-provider-nios//modules/nios_deploy_gcp?ref=nios_v9.1.0"
   // ... (same config as Step 1)
 }
 ```
 
-##### After NIOS is ready (~30 min), configure grid member
+#### After both the grids are up and running (~30 min), configure grid member
 
 ```hcl
 provider "nios" {
@@ -188,9 +186,11 @@ resource "nios_grid_join" "member_join" {
 
 ### Example 2: HA Grid Configuration
 
-Deploy two GCP instances for SA-HA Config
+#### Deploy two GCP instances for SA-HA Config
 
-> **Note:** HA configuration only supports IPv4. Dual-stack (IPv6) is not supported with HA on GCP.
+> **Note:** HA configuration only supports IPv4. Dual-stack (IPv4 and IPv6) is not supported with HA on GCP.
+
+> **Important - Service Account IAM Configuration:** HA formation fails when using predefined Google roles (e.g., `Compute Instance Admin (v1)`, `Compute Network Admin`, `Service Account User`) attached to the service account. To avoid this issue, create a **single custom IAM role** that combines all required permissions for both Terraform VM provisioning and HA operations. Attach only this custom role to the service account. This is a known limitation related to how NIOS validates IAM permissions with predefined Google roles.
 
 ```hcl
 // Deploy GCP infrastructure for Node 1 (Active Node)
@@ -210,31 +210,31 @@ module "node2" {
 ```
 #### After both the grids are up and running (~30 min), configure HA
 
-> **Important:** Before configuring HA, you must attach the GCP service account JSON file to both NIOS grids. 
-
 1. Import Node1 under nios_grid_member.ha_pair
 
 ```hcl 
-resource "nios_grid_member" "ha_pair"{}
-```
+provider "nios" {
+  nios_host_url = "https://${module.node1.lan1_vip}"
+  nios_username = "username"
+  nios_password = "password"
+}
 
-```hcl 
-terraform import nios_grid_member.ha_pair <uuid>
+import {
+  to = nios_grid_member.ha_pair
+  id = "5c08e1293cf34363878d4cae5bd37636"
+}
 ```
 
 2. Modify the resource to set ha_on_cloud to true and provide the cloud attributes.
 
 ```
-provider "nios" {
-  nios_host_url = "https://${module.node1.vip}"
-  nios_username = "username"
-  nios_password = "password"
-}
-
 resource "nios_grid_member" "ha_pair" {
   host_name         = "infoblox.localdomain"
   config_addr_type  = "IPV4"
   platform          = "VNIOS"
+  upgrade_group     = "Grid Master"
+  master_candidate  = true
+
   enable_ha         = true
   router_id         = 100
   ha_on_cloud       = true
@@ -268,7 +268,9 @@ resource "nios_grid_member" "ha_pair" {
     }
   ]
 
-  // To configure grid level dns resolver settings, use the grid_level_dns_resolver_setting attribute 
+  // To configure grid level dns resolver settings, use the 
+  // grid_level_dns_resolver_setting attribute 
+  
   grid_level_dns_resolver_setting = {
     resolvers = [
       "10.10.10.10"
@@ -279,6 +281,12 @@ resource "nios_grid_member" "ha_pair" {
 3. Join Node2 (Passive Node) to Node1 (Active Node).
 
 ```
+provider "nios" {
+  nios_host_url = "https://${module.node1.vip}"
+  nios_username = "username"
+  nios_password = "password"
+}
+
 resource "nios_grid_join" "ha_member_join" {
   member_url      = "https://${module.node2.lan1_ip}"
   member_username = "username"
@@ -289,27 +297,25 @@ resource "nios_grid_join" "ha_member_join" {
 }
 ```
 
-#### Example 3: Join a Member to a Master with Dual Stack Config
+### Example 3: Join a Member to a Master with Dual Stack Config
 
-##### Deploy GCP infrastructure for Master and Member
+#### Deploy GCP infrastructure for Master and Member
 
 ```hcl
 module "node1" {
-  source = "github.com/infobloxopen/terraform-provider-nios//modules/nios_deploy_gcp?ref=nios_v9.1.0"
   // ...(same config as Step 1)
   enable_ipv6 = true
 }
 
 module "node2" {
-  source = "github.com/infobloxopen/terraform-provider-nios//modules/nios_deploy_gcp?ref=nios_v9.1.0"
   // ... (same config as Step 1)
   enable_ipv6 = true
 }
 ```
 
-##### After NIOS is ready (~30 min), configure grid member
+#### After both the grids are up and running (~30 min), configure grid member
 
-On GCP, even though the IPv6 addresses are available in the Terraform state (`mgmt_ipv6_address` and `lan1_ipv6_address` outputs), you must manually configure the IPv6 settings on the NIOS grid through the UI or API. Unlike AWS, GCP does not automatically configure IPv6 on the NIOS instance.
+> **Note:** On GCP, IPv6 addresses are available in the Terraform state (`mgmt_ipv6_address` and `lan1_ipv6_address` outputs), but you must manually configure the IPv6 settings on the NIOS grid through the UI or API. Unlike AWS, GCP does not automatically configure IPv6 on the NIOS instance. This is a known limitation that will be addressed in a future NIOS release.
 
 ```hcl
 provider "nios" {
