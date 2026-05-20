@@ -1,4 +1,3 @@
-
 package ipam_test
 
 import (
@@ -13,7 +12,6 @@ import (
 	"github.com/infobloxopen/infoblox-nios-go-client/ipam"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/acctest"
-	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
 func TestAccVlanList_basic(t *testing.T) {
@@ -23,27 +21,25 @@ func TestAccVlanList_basic(t *testing.T) {
 	view := acctest.RandomNameWithPrefix("example-vlan-view")
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.PreCheck(t) },
-		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		PreCheck: func() { acctest.PreCheck(t) },
 		TerraformVersionChecks: []tfversion.TerraformVersionCheck{
-			tfversion.SkipBelow(tfversion.Version0_14_0),
+			tfversion.SkipBelow(tfversion.Version1_14_0),
 		},
 		Steps: []resource.TestStep{
-			// Provider Setup
-			{
-				Config: utils.ProviderSetup(),
-			},
 			// Create and Read
 			{
-				Config: testAccVlanBasicConfig(51, name, view),
+				ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+				Config:                   testAccVlanBasicConfig(51, name, view),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckVlanExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "name", name),
 				),
 			},
-            // Query the object
+			// Query the object
 			{
-				Query:  true,
-				Config: testAccVlanListBasicConfig(),
+				ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+				Query:                    true,
+				Config:                   testAccVlanListBasicConfig(),
 				QueryResultChecks: []querycheck.QueryResultCheck{
 					querycheck.ExpectLengthAtLeast("nios_ipam_vlan.test", 1),
 				},
@@ -59,19 +55,15 @@ func TestAccVlanList_Filters(t *testing.T) {
 	view := acctest.RandomNameWithPrefix("example-vlan-view")
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.PreCheck(t) },
-		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		PreCheck: func() { acctest.PreCheck(t) },
 		TerraformVersionChecks: []tfversion.TerraformVersionCheck{
-			tfversion.SkipBelow(tfversion.Version0_14_0),
+			tfversion.SkipBelow(tfversion.Version1_14_0),
 		},
 		Steps: []resource.TestStep{
-			// Provider Setup
-			{
-				Config: utils.ProviderSetup(),
-			},
 			// Create and Read
 			{
-				Config: testAccVlanBasicConfig(51, name, view),
+				ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+				Config:                   testAccVlanBasicConfig(51, name, view),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckVlanExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "name", name),
@@ -79,8 +71,9 @@ func TestAccVlanList_Filters(t *testing.T) {
 			},
 			// Query the object
 			{
-				Query:  true,
-				Config: testAccVlanListConfigFilters(name),
+				ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+				Query:                    true,
+				Config:                   testAccVlanListConfigFilters(name),
 				QueryResultChecks: []querycheck.QueryResultCheck{
 					querycheck.ExpectLength("nios_ipam_vlan.test", 1),
 				},
@@ -99,18 +92,14 @@ func TestAccVlanList_ExtAttrFilters(t *testing.T) {
 	extAttrValue := acctest.RandomName()
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.PreCheck(t) },
-		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		PreCheck: func() { acctest.PreCheck(t) },
 		TerraformVersionChecks: []tfversion.TerraformVersionCheck{
-			tfversion.SkipBelow(tfversion.Version0_14_0),
+			tfversion.SkipBelow(tfversion.Version1_14_0),
 		},
 		Steps: []resource.TestStep{
-			// Provider Setup
-			{
-				Config: utils.ProviderSetup(),
-			},
 			// Create and Read
 			{
+				ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 				Config: testAccVlanExtAttrs(51, name, view, map[string]string{
 					"Site": extAttrValue,
 				}),
@@ -121,8 +110,9 @@ func TestAccVlanList_ExtAttrFilters(t *testing.T) {
 			},
 			// Query the object
 			{
-				Query: true,
-				Config: testAccVlanListConfigExtAttrFilters(extAttrValue),
+				ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+				Query:                    true,
+				Config:                   testAccVlanListConfigExtAttrFilters(extAttrValue),
 				QueryResultChecks: []querycheck.QueryResultCheck{
 					querycheck.ExpectLength("nios_ipam_vlan.test", 1),
 				},
@@ -166,5 +156,3 @@ list "nios_ipam_vlan" "test" {
 }
 `, name)
 }
-
-
