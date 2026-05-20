@@ -1877,7 +1877,6 @@ func TestAccFixedaddressResource_UseSnmp3Credential(t *testing.T) {
 }
 
 func TestAccFixedaddressResource_UseSnmpCredential(t *testing.T) {
-	t.Skip("Skipping test as SNMP Credential are not set up in the GRID")
 	var resourceName = "nios_dhcp_fixed_address.test_use_snmp_credential"
 	var v dhcp.Fixedaddress
 	ip := "15.0.0.57"
@@ -1889,7 +1888,7 @@ func TestAccFixedaddressResource_UseSnmpCredential(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccFixedaddressUseSnmpCredential(ip, "CIRCUIT_ID", agentCircuitID, "true"),
+				Config: testAccFixedaddressUseSnmpCredentialSet(ip, "CIRCUIT_ID", agentCircuitID, "true", "COMMUNITY_STRING", "SNMP Credential Comment", "default"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_snmp_credential", "true"),
@@ -1897,7 +1896,8 @@ func TestAccFixedaddressResource_UseSnmpCredential(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccFixedaddressUseSnmpCredential(ip, "CIRCUIT_ID", agentCircuitID, "false"),
+				Config:             testAccFixedaddressUseSnmpCredential(ip, "CIRCUIT_ID", agentCircuitID, "false"),
+				ExpectNonEmptyPlan: true,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_snmp_credential", "false"),
@@ -2741,6 +2741,22 @@ resource "nios_dhcp_fixed_address" "test_use_snmp3_credential" {
 	use_cli_credentials = false
 }
 `, ip, matchClient, agentCircuitID, useSnmp3Credential)
+}
+
+func testAccFixedaddressUseSnmpCredentialSet(ip, matchClient string, agentCircuitID int, useSnmpCredential, snmpCredentialCommStr, snmpCredentialComment, snmpCredentialGroup string) string {
+	return fmt.Sprintf(`
+resource "nios_dhcp_fixed_address" "test_use_snmp_credential" {
+	ipv4addr = %q
+	match_client = %q
+	agent_circuit_id = %d
+	use_snmp_credential = %q
+	snmp_credential = {
+		community_string = %q
+		comment = %q
+		credential_group = %q
+	}
+}
+`, ip, matchClient, agentCircuitID, useSnmpCredential, snmpCredentialCommStr, snmpCredentialComment, snmpCredentialGroup)
 }
 
 func testAccFixedaddressUseSnmpCredential(ip, matchClient string, agentCircuitID int, useSnmpCredential string) string {

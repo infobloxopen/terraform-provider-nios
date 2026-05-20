@@ -1358,7 +1358,6 @@ func TestAccIpv6fixedaddressResource_UseSnmp3Credential(t *testing.T) {
 }
 
 func TestAccIpv6fixedaddressResource_UseSnmpCredential(t *testing.T) {
-	t.Skip("Skipping test as SNMP Credential are not set up in the GRID")
 	var resourceName = "nios_dhcp_ipv6fixedaddress.test_use_snmp_credential"
 	var v dhcp.Ipv6fixedaddress
 	ipv6Network := "2001:db8:abcd:1231::/64"
@@ -1379,7 +1378,8 @@ func TestAccIpv6fixedaddressResource_UseSnmpCredential(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccIpv6fixedaddressUseSnmpCredential(ipv6addr, duid, networkView, ipv6Network, false, "", "", ""),
+				Config:             testAccIpv6fixedaddressUseSnmpCredential(ipv6addr, duid, networkView, ipv6Network, false, "", "", ""),
+				ExpectNonEmptyPlan: true,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6fixedaddressExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_snmp_credential", "false"),
