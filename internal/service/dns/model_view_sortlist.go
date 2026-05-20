@@ -14,6 +14,7 @@ import (
 	"github.com/infobloxopen/infoblox-nios-go-client/dns"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
 type ViewSortlistModel struct {
@@ -28,8 +29,11 @@ var ViewSortlistAttrTypes = map[string]attr.Type{
 
 var ViewSortlistResourceSchemaAttributes = map[string]schema.Attribute{
 	"address": schema.StringAttribute{
-		Required:            true,
-		MarkdownDescription: "The source address of a sortlist object.",
+		Required: true,
+		Validators: []validator.String{
+			customvalidator.IsValidIPCIDR(),
+		},
+		MarkdownDescription: "The source address of a sortlist object. Valid Notations - IPv4 Address , Network with CIDR or `ANY`",
 	},
 	"match_list": schema.ListAttribute{
 		ElementType: types.StringType,

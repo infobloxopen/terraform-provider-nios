@@ -322,6 +322,7 @@ func TestAccRecordAaaaResource_FuncCall(t *testing.T) {
 	var resourceName = "nios_dns_record_aaaa.test_func_call"
 	var v dns.RecordAaaa
 	name := acctest.RandomName() + ".example.com"
+	ipv6Network := fmt.Sprintf("2001:db8:%x:%x::/64", acctest.RandomNumber(65535), acctest.RandomNumber(65535))
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -329,14 +330,14 @@ func TestAccRecordAaaaResource_FuncCall(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRecordAaaaFuncCall(name, "default", "ipv6addr", "next_available_ip", "ips", "ipv6network", "2001:db8:dcba:12::/64", "Original Function Call"),
+				Config: testAccRecordAaaaFuncCall(name, "default", "ipv6addr", "next_available_ip", "ips", "ipv6network", ipv6Network, "Original Function Call"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordAaaaExists(context.Background(), resourceName, &v),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccRecordAaaaFuncCall(name, "default", "ipv6addr", "next_available_ip", "ips", "ipv6network", "2001:db8:dcba:12::/64", "Updated Function Call"),
+				Config: testAccRecordAaaaFuncCall(name, "default", "ipv6addr", "next_available_ip", "ips", "ipv6network", ipv6Network, "Updated Function Call"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordAaaaExists(context.Background(), resourceName, &v),
 				),

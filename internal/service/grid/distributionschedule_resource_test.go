@@ -138,7 +138,9 @@ func TestAccDistributionscheduleResource_UpgradeGroups(t *testing.T) {
 	}
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:                 func() { acctest.PreCheck(t) },
+		PreCheck: func() {
+			acctest.PreCheck(t)
+		},
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			// Deactivate schedule for Integration Testing
@@ -211,11 +213,13 @@ resource "nios_grid_distributionschedule" "test" {
 }
 
 func testAccDistributionscheduleActive(active bool) string {
+	startTime := time.Now().Add(12 * time.Hour).Format(utils.NaiveDatetimeLayout)
 	return fmt.Sprintf(`
 resource "nios_grid_distributionschedule" "test_active" {
     active = %t
+    start_time = %q
 }
-`, active)
+`, active, startTime)
 }
 
 func testAccDistributionscheduleStartTime(startTime string) string {
@@ -242,9 +246,19 @@ resource "nios_grid_distributionschedule" "test_upgrade_groups" {
 }
 
 func testAccDistributionscheduleDeactivate() string {
-	return `
+	now := time.Now()
+	startTime := now.Add(12 * time.Hour).Format(utils.NaiveDatetimeLayout)
+	distributionTime := now.Add(20 * time.Hour).Format(utils.NaiveDatetimeLayout)
+	return fmt.Sprintf(`
 resource "nios_grid_distributionschedule" "deactivate_schedule" {
     active = false
+    start_time = %q
+    upgrade_groups = [
+        {
+            name = "Default"
+            distribution_time = %q
+        }
+    ]
 }
-`
+`, startTime, distributionTime)
 }
