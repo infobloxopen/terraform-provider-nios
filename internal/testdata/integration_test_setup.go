@@ -1402,6 +1402,7 @@ func PreConfig(clients PreConfigClients, hostnames GridHostnames) error {
 	// Cleanup orphaned upgrade groups from previous test runs.
 	// This prevents "Missing upgrade groups" errors when tests try to update
 	// singleton schedule resources on grids with leftover state.
+	// Delete ALL non-Default/non-"Grid Master" groups so schedules reference only "Default".
 	cleanupGroupsResp, _, err := clients.GRID.UpgradegroupAPI.List(context.Background()).
 		ReturnAsObject(1).
 		ReturnFieldsPlus("name").
@@ -1410,18 +1411,10 @@ func PreConfig(clients PreConfigClients, hostnames GridHostnames) error {
 		return fmt.Errorf("failed to list upgrade groups for cleanup: %w", err)
 	}
 
-	// Set of groups that should be preserved
-	preserveGroups := map[string]bool{
-		"Default":                          true,
-		"Grid Master":                      true,
-		"example_upgrade_dependent_group1": true,
-		"example_upgrade_dependent_group2": true,
-	}
-
 	cleanupGroups := cleanupGroupsResp.ListUpgradegroupResponseObject.GetResult()
 	for _, group := range cleanupGroups {
 		name := group.GetName()
-		if preserveGroups[name] {
+		if name == "Default" || name == "Grid Master" {
 			continue
 		}
 		_, delErr := clients.GRID.UpgradegroupAPI.
@@ -1433,6 +1426,67 @@ func PreConfig(clients PreConfigClients, hostnames GridHostnames) error {
 			fmt.Printf("Cleaned up orphaned upgrade group: %s\n", name)
 		}
 	}
+
+	// Re-deactivate schedules after orphan cleanup so they reference only remaining groups (Default).
+	refreshUpgradeResp, _, err := clients.GRID.UpgradescheduleAPI.List(context.Background()).
+		ReturnAsObject(1).
+		ReturnFieldsPlus("start_time,upgrade_groups").
+		Execute()
+	if err != nil {
+		return fmt.Errorf("failed to re-fetch upgrade schedule after cleanup: %w", err)
+	}
+	refreshedUpgrade := refreshUpgradeResp.ListUpgradescheduleResponseObject.Result[0]
+	refreshedUpgradeBody := grid.Upgradeschedule{Active: dns.PtrBool(false)}
+	refreshedUpgradeBody.StartTime = grid.PtrInt64(defaultUpgradeScheduleStartTime)
+	if refreshedUpgrade.HasUpgradeGroups() {
+		var refreshedGroups []grid.UpgradescheduleUpgradeGroups
+		for _, ug := range refreshedUpgrade.GetUpgradeGroups() {
+			g := grid.UpgradescheduleUpgradeGroups{}
+			if ug.HasName() {
+				g.SetName(ug.GetName())
+			}
+			g.SetUpgradeTime(defaultUpgradeGroupTime)
+			refreshedGroups = append(refreshedGroups, g)
+		}
+		refreshedUpgradeBody.SetUpgradeGroups(refreshedGroups)
+	}
+	_, _, err = clients.GRID.UpgradescheduleAPI.Update(context.Background(), upgradeScheduleRef).
+		Upgradeschedule(refreshedUpgradeBody).
+		Execute()
+	if err != nil {
+		return fmt.Errorf("failed to re-deactivate upgrade schedule after cleanup: %w", err)
+	}
+	fmt.Println("Upgrade schedule re-deactivated after orphan cleanup")
+
+	refreshDistResp, _, err := clients.GRID.DistributionscheduleAPI.List(context.Background()).
+		ReturnAsObject(1).
+		ReturnFieldsPlus("start_time,upgrade_groups").
+		Execute()
+	if err != nil {
+		return fmt.Errorf("failed to re-fetch distribution schedule after cleanup: %w", err)
+	}
+	refreshedDist := refreshDistResp.ListDistributionscheduleResponseObject.Result[0]
+	refreshedDistBody := grid.Distributionschedule{Active: dns.PtrBool(false)}
+	refreshedDistBody.StartTime = grid.PtrInt64(defaultDistributionScheduleStartTime)
+	if refreshedDist.HasUpgradeGroups() {
+		var refreshedDistGroups []grid.DistributionscheduleUpgradeGroups
+		for _, ug := range refreshedDist.GetUpgradeGroups() {
+			g := grid.DistributionscheduleUpgradeGroups{}
+			if ug.HasName() {
+				g.SetName(ug.GetName())
+			}
+			g.SetDistributionTime(defaultDistributionScheduleGroupTime)
+			refreshedDistGroups = append(refreshedDistGroups, g)
+		}
+		refreshedDistBody.SetUpgradeGroups(refreshedDistGroups)
+	}
+	_, _, err = clients.GRID.DistributionscheduleAPI.Update(context.Background(), distributionScheduleRef).
+		Distributionschedule(refreshedDistBody).
+		Execute()
+	if err != nil {
+		return fmt.Errorf("failed to re-deactivate distribution schedule after cleanup: %w", err)
+	}
+	fmt.Println("Distribution schedule re-deactivated after orphan cleanup")
 
 	// Create upgrade dependent groups
 	upgradeGroups := []string{"example_upgrade_dependent_group1", "example_upgrade_dependent_group2"}
