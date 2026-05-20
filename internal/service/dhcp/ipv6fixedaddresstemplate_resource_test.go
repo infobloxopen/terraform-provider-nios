@@ -215,13 +215,13 @@ func TestAccIpv6fixedaddresstemplateResource_LogicFilterRules(t *testing.T) {
 	name := acctest.RandomNameWithPrefix("ipv6-fixedaddress-template")
 	logicFilterRules := []map[string]any{
 		{
-			"filter": "example-ipv6-option-filter-1",
+			"filter": "ipv6_option_filter",
 			"type":   "Option",
 		},
 	}
 	updatedLogicFilterRules := []map[string]any{
 		{
-			"filter": "example-ipv6-option-filter-2",
+			"filter": "ipv6_option_filter1",
 			"type":   "Option",
 		},
 	}
@@ -236,7 +236,7 @@ func TestAccIpv6fixedaddresstemplateResource_LogicFilterRules(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6fixedaddresstemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "logic_filter_rules.#", "1"),
-					resource.TestCheckResourceAttr(resourceName, "logic_filter_rules.0.filter", "example-ipv6-option-filter-1"),
+					resource.TestCheckResourceAttr(resourceName, "logic_filter_rules.0.filter", "ipv6_option_filter"),
 					resource.TestCheckResourceAttr(resourceName, "logic_filter_rules.0.type", "Option"),
 				),
 			},
@@ -246,7 +246,7 @@ func TestAccIpv6fixedaddresstemplateResource_LogicFilterRules(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6fixedaddresstemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "logic_filter_rules.#", "1"),
-					resource.TestCheckResourceAttr(resourceName, "logic_filter_rules.0.filter", "example-ipv6-option-filter-2"),
+					resource.TestCheckResourceAttr(resourceName, "logic_filter_rules.0.filter", "ipv6_option_filter1"),
 					resource.TestCheckResourceAttr(resourceName, "logic_filter_rules.0.type", "Option"),
 				),
 			},
@@ -517,7 +517,7 @@ func TestAccIpv6fixedaddresstemplateResource_UseLogicFilterRules(t *testing.T) {
 	name := acctest.RandomNameWithPrefix("ipv6-fixedaddress-template")
 	logicFilterRules := []map[string]any{
 		{
-			"filter": "example-ipv6-option-filter-1",
+			"filter": "ipv6_option_filter1",
 			"type":   "Option",
 		},
 	}

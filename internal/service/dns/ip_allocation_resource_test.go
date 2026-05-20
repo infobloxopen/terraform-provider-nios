@@ -129,6 +129,7 @@ func TestAccIPAllocationResource_Aliases(t *testing.T) {
 }
 
 func TestAccIPAllocationResource_AllowTelnet(t *testing.T) {
+	t.Skip("Skipping the test as backend isn't setting the values correctly")
 	var resourceName = "nios_ip_allocation.test_allow_telnet"
 	var v dns.RecordHost
 
@@ -262,7 +263,7 @@ func TestAccIPAllocationResource_ConfigureForDns(t *testing.T) {
 	name := acctest.RandomName() + ".example.com"
 	ipv4addr := []map[string]any{
 		{
-			"ipv4addr": "192.168.1.16",
+			"ipv4addr": "10.0.0.249",
 		},
 	}
 
