@@ -74,7 +74,7 @@ The module automatically maps NIOS models to GCP machine types:
 | <a name="output_instance_id"></a> [instance\_id](#output\_instance\_id) | ID of the NIOS Grid Member instance. |
 | <a name="output_instance_name"></a> [instance\_name](#output\_instance\_name) | Name of the NIOS Grid Member instance. |
 | <a name="output_lan1_gateway"></a> [lan1\_gateway](#output\_lan1\_gateway) | Gateway IP for the LAN1 subnetwork. |
-| <a name="output_lan1_ip"></a> [lan1\_ip](#output\_lan1\_ip) | Internal IP of the LAN interface (nic1). |
+| <a name="output_lan1_ip"></a> [lan1\_ip](#output\_lan1\_ip) | Internal IP of the LAN1 interface (nic1). |
 | <a name="output_lan1_ipv6_address"></a> [lan1\_ipv6\_address](#output\_lan1\_ipv6\_address) | IPv6 address of the LAN1 interface (nic1). |
 | <a name="output_lan1_subnet_mask"></a> [lan1\_subnet\_mask](#output\_lan1\_subnet\_mask) | Subnet mask of the LAN1 subnetwork. |
 | <a name="output_mgmt_gateway"></a> [mgmt\_gateway](#output\_mgmt\_gateway) | Gateway IP for the MGMT subnetwork. |

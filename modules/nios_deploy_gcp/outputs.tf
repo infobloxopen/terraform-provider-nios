@@ -23,7 +23,7 @@ output "mgmt_gateway" {
 }
 
 output "lan1_ip" {
-  description = "Internal IP of the LAN interface (nic1)."
+  description = "Internal IP of the LAN1 interface (nic1)."
   value       = google_compute_instance.grid.network_interface[1].network_ip
 }
 
