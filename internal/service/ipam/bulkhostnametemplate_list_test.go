@@ -12,7 +12,6 @@ import (
 	"github.com/infobloxopen/infoblox-nios-go-client/ipam"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/acctest"
-	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
 func TestAccBulkhostnametemplateList_basic(t *testing.T) {
@@ -22,18 +21,14 @@ func TestAccBulkhostnametemplateList_basic(t *testing.T) {
 	templateFormat := "host-$4"
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.PreCheck(t) },
-		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		PreCheck: func() { acctest.PreCheck(t) },
 		TerraformVersionChecks: []tfversion.TerraformVersionCheck{
-			tfversion.SkipBelow(tfversion.Version0_14_0),
+			tfversion.SkipBelow(tfversion.Version1_14_0),
 		},
 		Steps: []resource.TestStep{
-			// Provider Setup
-			{
-				Config: utils.ProviderSetup(),
-			},
 			// Create and Read
 			{
+				ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 				Config: testAccBulkhostnametemplateBasicConfig(templateName, templateFormat),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckBulkhostnametemplateExists(context.Background(), resourceName, &v),
@@ -41,6 +36,7 @@ func TestAccBulkhostnametemplateList_basic(t *testing.T) {
 			},
 			// Query the object
 			{
+				ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 				Query:  true,
 				Config: testAccBulkhostnametemplateListBasicConfig(),
 				QueryResultChecks: []querycheck.QueryResultCheck{
@@ -58,18 +54,14 @@ func TestAccBulkhostnametemplateList_Filters(t *testing.T) {
 	templateFormat := "host-$4"
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.PreCheck(t) },
-		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		PreCheck: func() { acctest.PreCheck(t) },
 		TerraformVersionChecks: []tfversion.TerraformVersionCheck{
-			tfversion.SkipBelow(tfversion.Version0_14_0),
+			tfversion.SkipBelow(tfversion.Version1_14_0),
 		},
 		Steps: []resource.TestStep{
-			// Provider Setup
-			{
-				Config: utils.ProviderSetup(),
-			},
 			// Create and Read
 			{
+				ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 				Config: testAccBulkhostnametemplateBasicConfig(templateName, templateFormat),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckBulkhostnametemplateExists(context.Background(), resourceName, &v),
@@ -78,6 +70,8 @@ func TestAccBulkhostnametemplateList_Filters(t *testing.T) {
 			},
 			// Query the object
 			{
+
+				ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 				Query:  true,
 				Config: testAccBulkhostnametemplateListConfigFilters(templateName),
 				QueryResultChecks: []querycheck.QueryResultCheck{

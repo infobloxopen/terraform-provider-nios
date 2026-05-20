@@ -37,6 +37,9 @@ type BulkhostnametemplateResource struct {
 
 func (r *BulkhostnametemplateResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_" + "ipam_bulk_hostname_template"
+	resp.ResourceBehavior = resource.ResourceBehavior{
+		MutableIdentity: true,
+	}
 }
 
 func (r *BulkhostnametemplateResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
@@ -169,7 +172,7 @@ func (r *BulkhostnametemplateResource) Read(ctx context.Context, req resource.Re
 		return 0, callErr
 	})
 
-		// Handle not found case
+	// Handle not found case
 	if err != nil {
 		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
 			// Resource no longer exists, remove from state
