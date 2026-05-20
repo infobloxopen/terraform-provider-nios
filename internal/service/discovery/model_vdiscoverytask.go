@@ -2,6 +2,7 @@ package discovery
 
 import (
 	"context"
+
 	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
@@ -50,7 +51,7 @@ type VdiscoverytaskModel struct {
 	NetworkFilter                   types.String `tfsdk:"network_filter"`
 	NetworkList                     types.List   `tfsdk:"network_list"`
 	Password                        types.String `tfsdk:"password"`
-	SecretRevision                  types.Int64  `tfsdk:"secret_revision"`
+	PasswordVersion                 types.Int64  `tfsdk:"password_version"`
 	Port                            types.Int64  `tfsdk:"port"`
 	PrivateNetworkView              types.String `tfsdk:"private_network_view"`
 	PrivateNetworkViewMappingPolicy types.String `tfsdk:"private_network_view_mapping_policy"`
@@ -103,7 +104,7 @@ var VdiscoverytaskAttrTypes = map[string]attr.Type{
 	"network_filter":                      types.StringType,
 	"network_list":                        types.ListType{ElemType: types.StringType},
 	"password":                            types.StringType,
-	"secret_revision":                     types.Int64Type,
+	"password_version":                    types.Int64Type,
 	"port":                                types.Int64Type,
 	"private_network_view":                types.StringType,
 	"private_network_view_mapping_policy": types.StringType,
@@ -306,7 +307,7 @@ var VdiscoverytaskResourceSchemaAttributes = map[string]schema.Attribute{
 		WriteOnly:           true,
 		MarkdownDescription: "Password used for connecting to the cloud management platform.",
 	},
-	"secret_revision": schema.Int64Attribute{
+	"password_version": schema.Int64Attribute{
 		Computed:            true,
 		MarkdownDescription: "Internal revision incremented when secret field changes.",
 		PlanModifiers: []planmodifier.Int64{

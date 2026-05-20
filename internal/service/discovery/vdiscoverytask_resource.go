@@ -287,67 +287,76 @@ func (r *VdiscoverytaskResource) ModifyPlan(ctx context.Context, req resource.Mo
 	}
 
 	var stateRev types.Int64
-	resp.Diagnostics.Append(req.State.GetAttribute(ctx, path.Root("secret_revision"), &stateRev)...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
+	var planPassword types.String
 
 	curRev := int64(0)
-	if !stateRev.IsNull() && !stateRev.IsUnknown() {
-		curRev = stateRev.ValueInt64()
-	}
-
-	var planSecret types.String
-	resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("password"), &planSecret)...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-
-	var prev struct {
-		Algo string `json:"algo"`
-		Hash string `json:"hash"`
-	}
-	if b, diags := req.Private.GetKey(ctx, "password_hash"); diags != nil {
-		resp.Diagnostics.Append(diags...)
+	if !req.State.Raw.IsNull() && req.State.Raw.IsKnown() {
+		resp.Diagnostics.Append(req.State.GetAttribute(ctx, path.Root("secret_revision"), &stateRev)...)
 		if resp.Diagnostics.HasError() {
 			return
 		}
-	} else if b != nil {
-		if err := json.Unmarshal(b, &prev); err != nil {
-			prev.Hash = ""
+		if !stateRev.IsNull() && !stateRev.IsUnknown() {
+			curRev = stateRev.ValueInt64()
 		}
 	}
 
-	prevHashes := secretsHashState{}
-	if prev.Hash != "" {
-		_ = json.Unmarshal([]byte(prev.Hash), &prevHashes)
-	}
-	plannedHashes := prevHashes
-	computeNewHash := !planSecret.IsNull() && !planSecret.IsUnknown()
-	plannedHash := prev.Hash
-
-	if computeNewHash {
-		h := sha256.New()
-		h.Write([]byte(planSecret.ValueString()))
-		plannedHashes.Password = hex.EncodeToString(h.Sum(nil))
-		if data, err := json.Marshal(plannedHashes); err == nil {
-			plannedHash = string(data)
-		}
-	}
-
-	if computeNewHash && plannedHash != prev.Hash {
-		resp.Diagnostics.Append(resp.Plan.SetAttribute(ctx, path.Root("secret_revision"), types.Int64Value(curRev+1))...)
-		val := map[string]string{"algo": "sha256", "hash": plannedHash}
-		b, err := json.Marshal(val)
-		if err != nil {
-			resp.Diagnostics.AddError("Private State Marshal Error", err.Error())
-			return
-		}
-		resp.Diagnostics.Append(resp.Private.SetKey(ctx, "password_hash", b)...)
+	resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("password"), &planPassword)...)
+	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	resp.Diagnostics.Append(resp.Plan.SetAttribute(ctx, path.Root("secret_revision"), types.Int64Value(curRev))...)
+	computeNewHash := !planPassword.IsNull() && !planPassword.IsUnknown()
+	prevHashes := secretsHashState{}
+	plannedHashes := secretsHashState{}
+
+	if computeNewHash {
+		var prev struct {
+			Algo string `json:"algo"`
+			Hash string `json:"hash"`
+		}
+
+		if b, diags := req.Private.GetKey(ctx, "password_hash"); diags != nil {
+			resp.Diagnostics.Append(diags...)
+		} else if b != nil {
+			if err := json.Unmarshal(b, &prev); err != nil {
+				prev.Hash = ""
+			}
+		}
+
+		var plannedHash string
+		if prev.Hash != "" {
+			_ = json.Unmarshal([]byte(prev.Hash), &prevHashes)
+		}
+
+		if !planPassword.IsUnknown() {
+			if planPassword.IsNull() {
+				plannedHashes.Password = ""
+			} else {
+				h := sha256.New()
+				h.Write([]byte(planPassword.ValueString()))
+				plannedHashes.Password = hex.EncodeToString(h.Sum(nil))
+			}
+		}
+
+		if data, err := json.Marshal(plannedHashes); err == nil {
+			plannedHash = string(data)
+		}
+
+		if plannedHashes.Password != "" && plannedHashes.Password != prevHashes.Password {
+			newRev := types.Int64Value(curRev + 1)
+			resp.Diagnostics.Append(resp.Plan.SetAttribute(ctx, path.Root("secret_revision"), newRev)...)
+
+			val := map[string]string{"algo": "sha256", "hash": plannedHash}
+			b, err := json.Marshal(val)
+			if err != nil {
+				resp.Diagnostics.AddError("Private State Marshal Error", err.Error())
+				return
+			}
+			resp.Diagnostics.Append(resp.Private.SetKey(ctx, "password_hash", b)...)
+		} else {
+			resp.Diagnostics.Append(resp.Plan.SetAttribute(ctx, path.Root("secret_revision"), curRev)...)
+		}
+	}
 }
 
 func (r *VdiscoverytaskResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
@@ -378,19 +387,13 @@ func (r *VdiscoverytaskResource) Create(ctx context.Context, req resource.Create
 		return
 	}
 
-	secret_revisionValue := types.Int64Value(0)
+	passwordVersion := types.Int64Value(0)
 	var password types.String
 	resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("password"), &password)...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-
+	secretData := secretsHashState{}
 	if !password.IsNull() && !password.IsUnknown() {
-		secretVal := password.ValueString()
-		payload.Password = &secretVal
-		secret_revisionValue = types.Int64Value(1)
-
-		secretData := secretsHashState{}
+		payload.Password = password.ValueStringPointer()
+		passwordVersion = types.Int64Value(1)
 		h := sha256.New()
 		h.Write([]byte(password.ValueString()))
 		secretData.Password = hex.EncodeToString(h.Sum(nil))
@@ -440,7 +443,7 @@ func (r *VdiscoverytaskResource) Create(ctx context.Context, req resource.Create
 
 	res := apiRes.CreateVdiscoverytaskResponseAsObject.GetResult()
 
-	data.SecretRevision = secret_revisionValue
+	data.PasswordVersion = passwordVersion
 	data.Flatten(ctx, &res, &resp.Diagnostics)
 
 	// Save data into Terraform state
@@ -530,19 +533,19 @@ func (r *VdiscoverytaskResource) Update(ctx context.Context, req resource.Update
 		}
 	}
 
-	payload := data.Expand(ctx, &resp.Diagnostics)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-
 	var password types.String
 	resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("password"), &password)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
+
+	payload := data.Expand(ctx, &resp.Diagnostics)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
 	if !password.IsNull() && !password.IsUnknown() {
-		secretVal := password.ValueString()
-		payload.Password = &secretVal
+		payload.Password = password.ValueStringPointer()
 	}
 
 	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())

@@ -2,6 +2,8 @@ package rir
 
 import (
 	"context"
+	"regexp"
+
 	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
@@ -15,31 +17,30 @@ import (
 	"github.com/infobloxopen/infoblox-nios-go-client/rir"
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
-	"regexp"
 )
 
 type RirOrganizationModel struct {
-	Ref            types.String `tfsdk:"ref"`
-	ExtAttrs       types.Map    `tfsdk:"extattrs"`
-	Id             types.String `tfsdk:"id"`
-	Maintainer     types.String `tfsdk:"maintainer"`
-	Name           types.String `tfsdk:"name"`
-	Password       types.String `tfsdk:"password"`
-	SecretRevision types.Int64  `tfsdk:"secret_revision"`
-	Rir            types.String `tfsdk:"rir"`
-	SenderEmail    types.String `tfsdk:"sender_email"`
+	Ref             types.String `tfsdk:"ref"`
+	ExtAttrs        types.Map    `tfsdk:"extattrs"`
+	Id              types.String `tfsdk:"id"`
+	Maintainer      types.String `tfsdk:"maintainer"`
+	Name            types.String `tfsdk:"name"`
+	Password        types.String `tfsdk:"password"`
+	PasswordVersion types.Int64  `tfsdk:"password_version"`
+	Rir             types.String `tfsdk:"rir"`
+	SenderEmail     types.String `tfsdk:"sender_email"`
 }
 
 var RirOrganizationAttrTypes = map[string]attr.Type{
-	"ref":             types.StringType,
-	"extattrs":        types.MapType{ElemType: types.StringType},
-	"id":              types.StringType,
-	"maintainer":      types.StringType,
-	"name":            types.StringType,
-	"password":        types.StringType,
-	"secret_revision": types.Int64Type,
-	"rir":             types.StringType,
-	"sender_email":    types.StringType,
+	"ref":              types.StringType,
+	"extattrs":         types.MapType{ElemType: types.StringType},
+	"id":               types.StringType,
+	"maintainer":       types.StringType,
+	"name":             types.StringType,
+	"password":         types.StringType,
+	"password_version": types.Int64Type,
+	"rir":              types.StringType,
+	"sender_email":     types.StringType,
 }
 
 var RirOrganizationResourceSchemaAttributes = map[string]schema.Attribute{
@@ -92,9 +93,9 @@ var RirOrganizationResourceSchemaAttributes = map[string]schema.Attribute{
 		},
 		MarkdownDescription: "The password for the maintainer of RIR organization.",
 	},
-	"secret_revision": schema.Int64Attribute{
+	"password_version": schema.Int64Attribute{
 		Computed:            true,
-		MarkdownDescription: "Internal revision incremented when secret field changes.",
+		MarkdownDescription: "Internal version incremented when secret field changes.",
 		PlanModifiers: []planmodifier.Int64{
 			int64planmodifier.UseStateForUnknown(),
 		},

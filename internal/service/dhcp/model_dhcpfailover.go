@@ -2,6 +2,7 @@ package dhcp
 
 import (
 	"context"
+
 	"github.com/hashicorp/terraform-plugin-framework-validators/boolvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
@@ -19,6 +20,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
+
 	"github.com/infobloxopen/infoblox-nios-go-client/dhcp"
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 	importmod "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/import"
@@ -47,6 +49,7 @@ type DhcpfailoverModel struct {
 	MsServer                   types.String `tfsdk:"ms_server"`
 	MsSharedSecret             types.String `tfsdk:"ms_shared_secret"`
 	SecretRevision             types.Int64  `tfsdk:"secret_revision"`
+	MsSharedSecretVersion      types.Int64  `tfsdk:"ms_shared_secret_version"`
 	MsState                    types.String `tfsdk:"ms_state"`
 	MsSwitchoverInterval       types.Int64  `tfsdk:"ms_switchover_interval"`
 	Name                       types.String `tfsdk:"name"`
@@ -85,6 +88,7 @@ var DhcpfailoverAttrTypes = map[string]attr.Type{
 	"ms_server":                     types.StringType,
 	"ms_shared_secret":              types.StringType,
 	"secret_revision":               types.Int64Type,
+	"ms_shared_secret_version":      types.Int64Type,
 	"ms_state":                      types.StringType,
 	"ms_switchover_interval":        types.Int64Type,
 	"name":                          types.StringType,
@@ -251,6 +255,13 @@ var DhcpfailoverResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The failover association authentication. This is a write-only attribute.",
 	},
 	"secret_revision": schema.Int64Attribute{
+		Computed:            true,
+		MarkdownDescription: "Internal revision incremented when secret field changes.",
+		PlanModifiers: []planmodifier.Int64{
+			int64planmodifier.UseStateForUnknown(),
+		},
+	},
+	"ms_shared_secret_version": schema.Int64Attribute{
 		Computed:            true,
 		MarkdownDescription: "Internal revision incremented when secret field changes.",
 		PlanModifiers: []planmodifier.Int64{

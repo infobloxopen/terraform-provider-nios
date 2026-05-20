@@ -2,6 +2,7 @@ package misc
 
 import (
 	"context"
+
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
@@ -21,7 +22,7 @@ import (
 type BfdtemplateModel struct {
 	Ref                 types.String `tfsdk:"ref"`
 	AuthenticationKey   types.String `tfsdk:"authentication_key"`
-	SecretRevision      types.Int64  `tfsdk:"secret_revision"`
+	SecretVersion       types.Int64  `tfsdk:"secret_version"`
 	AuthenticationKeyId types.Int64  `tfsdk:"authentication_key_id"`
 	AuthenticationType  types.String `tfsdk:"authentication_type"`
 	DetectionMultiplier types.Int64  `tfsdk:"detection_multiplier"`
@@ -33,7 +34,7 @@ type BfdtemplateModel struct {
 var BfdtemplateAttrTypes = map[string]attr.Type{
 	"ref":                   types.StringType,
 	"authentication_key":    types.StringType,
-	"secret_revision":       types.Int64Type,
+	"secret_version":        types.Int64Type,
 	"authentication_key_id": types.Int64Type,
 	"authentication_type":   types.StringType,
 	"detection_multiplier":  types.Int64Type,
@@ -54,7 +55,7 @@ var BfdtemplateResourceSchemaAttributes = map[string]schema.Attribute{
 		Default:             stringdefault.StaticString(""),
 		MarkdownDescription: "The authentication key for BFD protocol message-digest authentication.",
 	},
-	"secret_revision": schema.Int64Attribute{
+	"secret_version": schema.Int64Attribute{
 		Computed:            true,
 		MarkdownDescription: "Internal revision incremented when secret field changes.",
 		PlanModifiers: []planmodifier.Int64{

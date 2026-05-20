@@ -2,21 +2,19 @@ package security
 
 import (
 	"context"
-
 	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-
 	"github.com/infobloxopen/infoblox-nios-go-client/security"
-
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 	planmodifiers "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/immutable"
 	importmod "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/import"
@@ -30,6 +28,7 @@ type FtpuserModel struct {
 	ExtAttrsAll   types.Map    `tfsdk:"extattrs_all"`
 	HomeDir       types.String `tfsdk:"home_dir"`
 	Password      types.String `tfsdk:"password"`
+	SecretVersion types.Int64  `tfsdk:"secret_version"`
 	Permission    types.String `tfsdk:"permission"`
 	Username      types.String `tfsdk:"username"`
 }
@@ -41,6 +40,7 @@ var FtpuserAttrTypes = map[string]attr.Type{
 	"extattrs_all":    types.MapType{ElemType: types.StringType},
 	"home_dir":        types.StringType,
 	"password":        types.StringType,
+	"secret_version":  types.Int64Type,
 	"permission":      types.StringType,
 	"username":        types.StringType,
 }
@@ -87,8 +87,15 @@ var FtpuserResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"password": schema.StringAttribute{
 		Required:            true,
-		Sensitive:           true,
+		WriteOnly:           true,
 		MarkdownDescription: "The FTP user password.",
+	},
+	"secret_version": schema.Int64Attribute{
+		Computed:            true,
+		MarkdownDescription: "Internal revision incremented when secret field changes.",
+		PlanModifiers: []planmodifier.Int64{
+			int64planmodifier.UseStateForUnknown(),
+		},
 	},
 	"permission": schema.StringAttribute{
 		Optional: true,

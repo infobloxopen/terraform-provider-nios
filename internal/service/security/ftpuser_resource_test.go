@@ -34,7 +34,7 @@ func TestAccFtpuserResource_basic(t *testing.T) {
 					testAccCheckFtpuserExists(context.Background(), resourceName, &v),
 					// Test fields with required value
 					resource.TestCheckResourceAttr(resourceName, "username", username),
-					resource.TestCheckResourceAttr(resourceName, "password", password),
+					resource.TestCheckResourceAttr(resourceName, "secret_version", "1"),
 					resource.TestCheckResourceAttr(resourceName, "permission", "RO"),
 					resource.TestCheckResourceAttr(resourceName, "create_home_dir", "true"),
 				),

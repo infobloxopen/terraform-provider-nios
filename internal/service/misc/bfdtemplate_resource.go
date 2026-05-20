@@ -77,67 +77,76 @@ func (r *BfdtemplateResource) ModifyPlan(ctx context.Context, req resource.Modif
 	}
 
 	var stateRev types.Int64
-	resp.Diagnostics.Append(req.State.GetAttribute(ctx, path.Root("secret_revision"), &stateRev)...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
+	var planAuthenticationKey types.String
 
 	curRev := int64(0)
-	if !stateRev.IsNull() && !stateRev.IsUnknown() {
-		curRev = stateRev.ValueInt64()
-	}
-
-	var planSecret types.String
-	resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("authentication_key"), &planSecret)...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-
-	var prev struct {
-		Algo string `json:"algo"`
-		Hash string `json:"hash"`
-	}
-	if b, diags := req.Private.GetKey(ctx, "authentication_key_hash"); diags != nil {
-		resp.Diagnostics.Append(diags...)
+	if !req.State.Raw.IsNull() && req.State.Raw.IsKnown() {
+		resp.Diagnostics.Append(req.State.GetAttribute(ctx, path.Root("secret_version"), &stateRev)...)
 		if resp.Diagnostics.HasError() {
 			return
 		}
-	} else if b != nil {
-		if err := json.Unmarshal(b, &prev); err != nil {
-			prev.Hash = ""
+		if !stateRev.IsNull() && !stateRev.IsUnknown() {
+			curRev = stateRev.ValueInt64()
 		}
 	}
 
-	prevHashes := secretsHashState{}
-	if prev.Hash != "" {
-		_ = json.Unmarshal([]byte(prev.Hash), &prevHashes)
-	}
-	plannedHashes := prevHashes
-	computeNewHash := !planSecret.IsNull() && !planSecret.IsUnknown()
-	plannedHash := prev.Hash
-
-	if computeNewHash {
-		h := sha256.New()
-		h.Write([]byte(planSecret.ValueString()))
-		plannedHashes.AuthenticationKey = hex.EncodeToString(h.Sum(nil))
-		if data, err := json.Marshal(plannedHashes); err == nil {
-			plannedHash = string(data)
-		}
-	}
-
-	if computeNewHash && plannedHash != prev.Hash {
-		resp.Diagnostics.Append(resp.Plan.SetAttribute(ctx, path.Root("secret_revision"), types.Int64Value(curRev+1))...)
-		val := map[string]string{"algo": "sha256", "hash": plannedHash}
-		b, err := json.Marshal(val)
-		if err != nil {
-			resp.Diagnostics.AddError("Private State Marshal Error", err.Error())
-			return
-		}
-		resp.Diagnostics.Append(resp.Private.SetKey(ctx, "authentication_key_hash", b)...)
+	resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("authentication_key"), &planAuthenticationKey)...)
+	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	resp.Diagnostics.Append(resp.Plan.SetAttribute(ctx, path.Root("secret_revision"), types.Int64Value(curRev))...)
+	computeNewHash := !planAuthenticationKey.IsNull() && !planAuthenticationKey.IsUnknown()
+	prevHashes := secretsHashState{}
+	plannedHashes := secretsHashState{}
+
+	if computeNewHash {
+		var prev struct {
+			Algo string `json:"algo"`
+			Hash string `json:"hash"`
+		}
+
+		if b, diags := req.Private.GetKey(ctx, "authentication_key_hash"); diags != nil {
+			resp.Diagnostics.Append(diags...)
+		} else if b != nil {
+			if err := json.Unmarshal(b, &prev); err != nil {
+				prev.Hash = ""
+			}
+		}
+
+		var plannedHash string
+		if prev.Hash != "" {
+			_ = json.Unmarshal([]byte(prev.Hash), &prevHashes)
+		}
+
+		if !planAuthenticationKey.IsUnknown() {
+			if planAuthenticationKey.IsNull() {
+				plannedHashes.AuthenticationKey = ""
+			} else {
+				h := sha256.New()
+				h.Write([]byte(planAuthenticationKey.ValueString()))
+				plannedHashes.AuthenticationKey = hex.EncodeToString(h.Sum(nil))
+			}
+		}
+
+		if data, err := json.Marshal(plannedHashes); err == nil {
+			plannedHash = string(data)
+		}
+
+		if plannedHashes.AuthenticationKey != "" && plannedHashes.AuthenticationKey != prevHashes.AuthenticationKey {
+			newRev := types.Int64Value(curRev + 1)
+			resp.Diagnostics.Append(resp.Plan.SetAttribute(ctx, path.Root("secret_version"), newRev)...)
+
+			val := map[string]string{"algo": "sha256", "hash": plannedHash}
+			b, err := json.Marshal(val)
+			if err != nil {
+				resp.Diagnostics.AddError("Private State Marshal Error", err.Error())
+				return
+			}
+			resp.Diagnostics.Append(resp.Private.SetKey(ctx, "authentication_key_hash", b)...)
+		} else {
+			resp.Diagnostics.Append(resp.Plan.SetAttribute(ctx, path.Root("secret_version"), curRev)...)
+		}
+	}
 }
 
 func (r *BfdtemplateResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
@@ -155,19 +164,13 @@ func (r *BfdtemplateResource) Create(ctx context.Context, req resource.CreateReq
 		return
 	}
 
-	secret_revisionValue := types.Int64Value(0)
+	secretVersion := types.Int64Value(0)
 	var authenticationKey types.String
 	resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("authentication_key"), &authenticationKey)...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-
+	secretData := secretsHashState{}
 	if !authenticationKey.IsNull() && !authenticationKey.IsUnknown() {
-		secretVal := authenticationKey.ValueString()
-		payload.AuthenticationKey = &secretVal
-		secret_revisionValue = types.Int64Value(1)
-
-		secretData := secretsHashState{}
+		payload.AuthenticationKey = authenticationKey.ValueStringPointer()
+		secretVersion = types.Int64Value(1)
 		h := sha256.New()
 		h.Write([]byte(authenticationKey.ValueString()))
 		secretData.AuthenticationKey = hex.EncodeToString(h.Sum(nil))
@@ -217,7 +220,7 @@ func (r *BfdtemplateResource) Create(ctx context.Context, req resource.CreateReq
 
 	res := apiRes.CreateBfdtemplateResponseAsObject.GetResult()
 
-	data.SecretRevision = secret_revisionValue
+	data.SecretVersion = secretVersion
 	data.Flatten(ctx, &res, &resp.Diagnostics)
 
 	// Save data into Terraform state
@@ -293,19 +296,19 @@ func (r *BfdtemplateResource) Update(ctx context.Context, req resource.UpdateReq
 		return
 	}
 
-	payload := data.Expand(ctx, &resp.Diagnostics)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-
 	var authenticationKey types.String
 	resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("authentication_key"), &authenticationKey)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
+
+	payload := data.Expand(ctx, &resp.Diagnostics)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
 	if !authenticationKey.IsNull() && !authenticationKey.IsUnknown() {
-		secretVal := authenticationKey.ValueString()
-		payload.AuthenticationKey = &secretVal
+		payload.AuthenticationKey = authenticationKey.ValueStringPointer()
 	}
 
 	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
