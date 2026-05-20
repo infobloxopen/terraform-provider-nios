@@ -298,6 +298,25 @@ resource "nios_grid_join" "ha_member_join" {
 }
 ```
 
+#### Best Practices for HA Deployment
+
+> **Recommended Workflow:** Use a **separate Terraform workspace** for HA configuration. The NIOS HA setup is a one-time provisioning task — once the HA pair is formed and the passive node has joined the grid, the configuration is complete and does not require ongoing Terraform management.
+
+After successfully deploying the HA pair:
+
+1. **Verify HA formation** is complete through the NIOS UI or API
+2. **Remove the grid master from Terraform state** to prevent accidental modifications:
+   ```bash
+   terraform state rm nios_grid_member.ha_pair
+   terraform state rm nios_grid_join.ha_member_join
+   ```
+3. Optionally, you can delete the entire Terraform state for this workspace if no further infrastructure management is needed.
+
+This approach ensures that:
+- Your HA infrastructure is provisioned correctly
+- Subsequent Terraform operations don't interfere with the running HA pair
+- The grid master configuration remains stable and is managed through NIOS directly
+
 ### Example 3: Join a Member to a Master with Dual Stack Config
 
 #### Deploy GCP infrastructure for Master and Member
