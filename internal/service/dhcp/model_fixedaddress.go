@@ -415,16 +415,9 @@ var FixedaddressResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "This field contains the logic filters to be applied on the this fixed address. This list corresponds to the match rules that are written to the dhcpd configuration file.",
 	},
 	"mac": schema.StringAttribute{
-		CustomType: hwtypes.MACAddressType{},
-		Optional:   true,
-		Computed:   true,
-		Validators: []validator.String{
-			stringvalidator.ExactlyOneOf(
-				path.MatchRoot("mac"),
-				path.MatchRoot("agent_circuit_id"),
-				path.MatchRoot("agent_remote_id"),
-				path.MatchRoot("dhcp_client_identifier")),
-		},
+		CustomType:          hwtypes.MACAddressType{},
+		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The MAC address value for this fixed address.",
 	},
 	"match_client": schema.StringAttribute{
