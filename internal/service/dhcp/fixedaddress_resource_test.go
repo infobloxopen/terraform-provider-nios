@@ -749,7 +749,6 @@ func TestAccFixedaddressResource_EnableDdns(t *testing.T) {
 }
 
 func TestAccFixedaddressResource_EnableImmediateDiscovery(t *testing.T) {
-	t.Skip("Skipping test as Discovery is not supported")
 	var resourceName = "nios_dhcp_fixed_address.test_enable_immediate_discovery"
 	var v dhcp.Fixedaddress
 	ip := "15.0.0.23"
@@ -1340,7 +1339,6 @@ func TestAccFixedaddressResource_ReservedInterface(t *testing.T) {
 }
 
 func TestAccFixedaddressResource_RestartIfNeeded(t *testing.T) {
-	t.Skip("Skipping test as it requires a CP member to be configured")
 	var resourceName = "nios_dhcp_fixed_address.test_restart_if_needed"
 	var v dhcp.Fixedaddress
 	ip := "15.0.0.40"

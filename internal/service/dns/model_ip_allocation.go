@@ -144,7 +144,7 @@ var IPAllocationResourceSchemaAttributes = map[string]schema.Attribute{
 		Default:             listdefault.StaticValue(types.ListNull(types.ObjectType{AttrTypes: RecordHostCliCredentialsAttrTypes})),
 		Validators: []validator.List{
 			listvalidator.SizeAtLeast(1),
-			listvalidator.AlsoRequires(path.MatchRoot("use_snmp3_credential")),
+			listvalidator.AlsoRequires(path.MatchRoot("use_cli_credentials")),
 		},
 	},
 	"cloud_info": schema.SingleNestedAttribute{
@@ -459,7 +459,9 @@ func (m *IPAllocationModel) Flatten(ctx context.Context, from *dns.RecordHost, d
 	m.Ref = flex.FlattenStringPointer(from.Ref)
 	m.Aliases = flex.FlattenFrameworkUnorderedList(ctx, types.StringType, from.Aliases, diags)
 	m.AllowTelnet = types.BoolPointerValue(from.AllowTelnet)
+	savedCliCredentials := m.CliCredentials
 	m.CliCredentials = flex.FlattenFrameworkListNestedBlock(ctx, from.CliCredentials, RecordHostCliCredentialsAttrTypes, diags, FlattenRecordHostCliCredentials)
+	m.CliCredentials = preserveCliCredentialPasswords(ctx, savedCliCredentials, m.CliCredentials, diags)
 	m.CloudInfo = FlattenRecordHostCloudInfo(ctx, from.CloudInfo, diags)
 	m.Comment = flex.FlattenStringPointer(from.Comment)
 	m.ConfigureForDns = types.BoolPointerValue(from.ConfigureForDns)

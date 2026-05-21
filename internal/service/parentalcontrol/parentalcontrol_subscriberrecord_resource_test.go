@@ -735,7 +735,6 @@ func TestAccParentalcontrolSubscriberrecordResource_ProxyAll(t *testing.T) {
 }
 
 func TestAccParentalcontrolSubscriberrecordResource_Site(t *testing.T) {
-	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_parentalcontrol_subscriberrecord.test_site"
 	var v parentalcontrol.ParentalcontrolSubscriberrecord
 	ipAddr := acctest.RandomIP()
