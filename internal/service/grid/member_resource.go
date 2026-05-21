@@ -628,8 +628,13 @@ func (r *MemberResource) ValidateConfig(ctx context.Context, req resource.Valida
 	}
 
 	if !data.Ipv6Setting.IsNull() && !data.Ipv6Setting.IsUnknown() {
-		if data.ConfigAddrType.IsNull() || data.ConfigAddrType.IsUnknown() ||
-			(data.ConfigAddrType.ValueString() != "IPV6" && data.ConfigAddrType.ValueString() != "BOTH") {
+		ipv6Attrs := data.Ipv6Setting.Attributes()
+		hasVirtualIP := !ipv6Attrs["virtual_ip"].IsNull() && !ipv6Attrs["virtual_ip"].IsUnknown()
+		hasCidrPrefix := !ipv6Attrs["cidr_prefix"].IsNull() && !ipv6Attrs["cidr_prefix"].IsUnknown()
+		hasGateway := !ipv6Attrs["gateway"].IsNull() && !ipv6Attrs["gateway"].IsUnknown()
+		if (hasVirtualIP && hasCidrPrefix && hasGateway) &&
+			(data.ConfigAddrType.IsNull() || data.ConfigAddrType.IsUnknown() ||
+				(data.ConfigAddrType.ValueString() != "IPV6" && data.ConfigAddrType.ValueString() != "BOTH")) {
 			resp.Diagnostics.AddError("Validation Error", "config_addr_type must be set to IPV6 or BOTH when ipv6_setting is provided")
 		}
 	}
