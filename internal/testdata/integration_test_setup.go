@@ -1287,34 +1287,6 @@ func PreConfig(clients PreConfigClients, hostnames GridHostnames) error {
 		fmt.Printf("Member %q created successfully\n", member.hostName)
 	}
 
-	// Cleanup orphaned upgrade groups from previous test runs (best-effort).
-	// This prevents "Missing upgrade groups" errors when tests try to update
-	// singleton schedule resources on grids with leftover state.
-	// Must run BEFORE schedule deactivation so the deactivation code naturally
-	// sees only the remaining groups (Default) after cascade removal.
-	cleanupGroupsResp, _, cleanupErr := clients.GRID.UpgradegroupAPI.List(context.Background()).
-		ReturnAsObject(1).
-		ReturnFieldsPlus("name").
-		Execute()
-	if cleanupErr != nil {
-		fmt.Printf("Warning: failed to list upgrade groups for cleanup: %s\n", cleanupErr)
-	} else if cleanupGroupsResp.ListUpgradegroupResponseObject != nil {
-		for _, group := range cleanupGroupsResp.ListUpgradegroupResponseObject.GetResult() {
-			name := group.GetName()
-			if name == "Default" || name == "Grid Master" {
-				continue
-			}
-			_, delErr := clients.GRID.UpgradegroupAPI.
-				Delete(context.Background(), utils.ExtractResourceRef(group.GetRef())).
-				Execute()
-			if delErr != nil {
-				fmt.Printf("Warning: failed to delete orphaned upgrade group %q: %s\n", name, delErr)
-			} else {
-				fmt.Printf("Cleaned up orphaned upgrade group: %s\n", name)
-			}
-		}
-	}
-
 	// Ensure upgrade schedule has required start time and group upgrade times.
 	upgradeScheduleResp, _, err := clients.GRID.UpgradescheduleAPI.List(context.Background()).
 		ReturnAsObject(1).
