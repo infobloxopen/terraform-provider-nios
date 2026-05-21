@@ -635,7 +635,7 @@ func (r *MemberResource) ValidateConfig(ctx context.Context, req resource.Valida
 		if (hasVirtualIP && hasCidrPrefix && hasGateway) &&
 			(data.ConfigAddrType.IsNull() || data.ConfigAddrType.IsUnknown() ||
 				(data.ConfigAddrType.ValueString() != "IPV6" && data.ConfigAddrType.ValueString() != "BOTH")) {
-			resp.Diagnostics.AddError("Validation Error", "config_addr_type must be set to IPV6 or BOTH when ipv6_setting is provided")
+			resp.Diagnostics.AddError("Validation Error", "config_addr_type must be set to IPV6 or BOTH when ipv6_setting.virtual_ip, ipv6_setting.cidr_prefix, and ipv6_setting.gateway are provided")
 		}
 	}
 
