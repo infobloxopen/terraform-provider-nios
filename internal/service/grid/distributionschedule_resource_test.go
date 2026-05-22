@@ -14,6 +14,9 @@ import (
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
+// TODO : OBJECTS TO BE PRESENT IN GRID FOR TESTS
+// Upgrade Groups: example_upgrade_dependent_group1, example_upgrade_dependent_group2
+
 var readableAttributesForDistributionschedule = "active,start_time,time_zone,upgrade_groups"
 
 func TestAccDistributionscheduleResource_basic(t *testing.T) {
@@ -114,27 +117,19 @@ func TestAccDistributionscheduleResource_UpgradeGroups(t *testing.T) {
 	distributionTime := now.Add(20 * time.Hour).Format(utils.NaiveDatetimeLayout)
 
 	upgradeGroups := []map[string]any{
-		{
-			"distribution_time": distributionTime,
-			"name":              "Default",
-		},
-		{
-			"distribution_time": distributionTime,
-			"name":              groupName,
-		},
+		{"distribution_time": distributionTime, "name": "Default"},
+		{"distribution_time": distributionTime, "name": "example_upgrade_dependent_group1"},
+		{"distribution_time": distributionTime, "name": "example_upgrade_dependent_group2"},
+		{"distribution_time": distributionTime, "name": groupName},
 	}
 
 	updatedDistributionTime := now.Add(23 * time.Hour).Format(utils.NaiveDatetimeLayout)
 
 	updatedUpgradeGroups := []map[string]any{
-		{
-			"distribution_time": updatedDistributionTime,
-			"name":              "Default",
-		},
-		{
-			"distribution_time": updatedDistributionTime,
-			"name":              groupName,
-		},
+		{"distribution_time": updatedDistributionTime, "name": "Default"},
+		{"distribution_time": updatedDistributionTime, "name": "example_upgrade_dependent_group1"},
+		{"distribution_time": updatedDistributionTime, "name": "example_upgrade_dependent_group2"},
+		{"distribution_time": updatedDistributionTime, "name": groupName},
 	}
 
 	resource.Test(t, resource.TestCase{
@@ -143,23 +138,20 @@ func TestAccDistributionscheduleResource_UpgradeGroups(t *testing.T) {
 		},
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
-			// Deactivate schedule for Integration Testing
-			{
-				Config: testAccDistributionscheduleDeactivate(),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("nios_grid_distributionschedule.deactivate_schedule", "active", "false"),
-				),
-			},
 			// Create and Read
 			{
 				Config: testAccDistributionscheduleUpgradeGroups(groupName, startTime, upgradeGroups),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDistributionscheduleExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "upgrade_groups.#", "2"),
+					resource.TestCheckResourceAttr(resourceName, "upgrade_groups.#", "4"),
 					resource.TestCheckResourceAttr(resourceName, "upgrade_groups.0.name", "Default"),
 					resource.TestCheckResourceAttr(resourceName, "upgrade_groups.0.distribution_time", distributionTime),
-					resource.TestCheckResourceAttr(resourceName, "upgrade_groups.1.name", groupName),
+					resource.TestCheckResourceAttr(resourceName, "upgrade_groups.1.name", "example_upgrade_dependent_group1"),
 					resource.TestCheckResourceAttr(resourceName, "upgrade_groups.1.distribution_time", distributionTime),
+					resource.TestCheckResourceAttr(resourceName, "upgrade_groups.2.name", "example_upgrade_dependent_group2"),
+					resource.TestCheckResourceAttr(resourceName, "upgrade_groups.2.distribution_time", distributionTime),
+					resource.TestCheckResourceAttr(resourceName, "upgrade_groups.3.name", groupName),
+					resource.TestCheckResourceAttr(resourceName, "upgrade_groups.3.distribution_time", distributionTime),
 				),
 			},
 			// Update and Read
@@ -167,11 +159,15 @@ func TestAccDistributionscheduleResource_UpgradeGroups(t *testing.T) {
 				Config: testAccDistributionscheduleUpgradeGroups(groupName, startTime, updatedUpgradeGroups),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDistributionscheduleExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "upgrade_groups.#", "2"),
+					resource.TestCheckResourceAttr(resourceName, "upgrade_groups.#", "4"),
 					resource.TestCheckResourceAttr(resourceName, "upgrade_groups.0.name", "Default"),
 					resource.TestCheckResourceAttr(resourceName, "upgrade_groups.0.distribution_time", updatedDistributionTime),
-					resource.TestCheckResourceAttr(resourceName, "upgrade_groups.1.name", groupName),
+					resource.TestCheckResourceAttr(resourceName, "upgrade_groups.1.name", "example_upgrade_dependent_group1"),
 					resource.TestCheckResourceAttr(resourceName, "upgrade_groups.1.distribution_time", updatedDistributionTime),
+					resource.TestCheckResourceAttr(resourceName, "upgrade_groups.2.name", "example_upgrade_dependent_group2"),
+					resource.TestCheckResourceAttr(resourceName, "upgrade_groups.2.distribution_time", updatedDistributionTime),
+					resource.TestCheckResourceAttr(resourceName, "upgrade_groups.3.name", groupName),
+					resource.TestCheckResourceAttr(resourceName, "upgrade_groups.3.distribution_time", updatedDistributionTime),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -241,6 +237,7 @@ resource "nios_grid_upgradegroup" "test" {
 resource "nios_grid_distributionschedule" "test_upgrade_groups" {
   start_time = %q
   upgrade_groups = %s
+  depends_on = [nios_grid_upgradegroup.test]
 }
 `, groupName, startTime, upgradeGroupsHCL)
 }
@@ -248,17 +245,10 @@ resource "nios_grid_distributionschedule" "test_upgrade_groups" {
 func testAccDistributionscheduleDeactivate() string {
 	now := time.Now()
 	startTime := now.Add(12 * time.Hour).Format(utils.NaiveDatetimeLayout)
-	distributionTime := now.Add(20 * time.Hour).Format(utils.NaiveDatetimeLayout)
 	return fmt.Sprintf(`
 resource "nios_grid_distributionschedule" "deactivate_schedule" {
     active = false
     start_time = %q
-    upgrade_groups = [
-        {
-            name = "Default"
-            distribution_time = %q
-        }
-    ]
 }
-`, startTime, distributionTime)
+`, startTime)
 }

@@ -585,28 +585,33 @@ func TestAccParentalcontrolSubscribersiteResource_Members(t *testing.T) {
 	var v parentalcontrol.ParentalcontrolSubscribersite
 	name := acctest.RandomNameWithPrefix("subscriber-site")
 	memberName := utils.GetNIOSGridMasterHostName()
+	member2Name := utils.GetNIOSGridMemberHostName()
 	members1 := []map[string]any{
 		{"name": memberName},
+	}
+	members2 := []map[string]any{
+		{"name": member2Name},
 	}
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
-			// Create with no members
-			{
-				Config: testAccParentalcontrolSubscribersiteMembersBasic(name),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckParentalcontrolSubscribersiteExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "members.#", "0"),
-				),
-			},
-			// Update and Read - add grid master as member
+			// Create and Read
 			{
 				Config: testAccParentalcontrolSubscribersiteMembers(name, members1),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckParentalcontrolSubscribersiteExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "members.#", "1"),
 					resource.TestCheckResourceAttr(resourceName, "members.0.name", memberName),
+				),
+			},
+			// Update and Read
+			{
+				Config: testAccParentalcontrolSubscribersiteMembers(name, members2),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckParentalcontrolSubscribersiteExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "members.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "members.0.name", member2Name),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -1071,14 +1076,6 @@ resource "nios_parentalcontrol_subscribersite" "test_maximum_subscribers" {
     maximum_subscribers = %q
 }
 `, name, maximumSubscribers)
-}
-
-func testAccParentalcontrolSubscribersiteMembersBasic(name string) string {
-	return fmt.Sprintf(`
-resource "nios_parentalcontrol_subscribersite" "test_members" {
-    name = %q
-}
-`, name)
 }
 
 func testAccParentalcontrolSubscribersiteMembers(name string, members []map[string]any) string {
