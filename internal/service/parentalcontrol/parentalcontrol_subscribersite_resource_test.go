@@ -588,29 +588,25 @@ func TestAccParentalcontrolSubscribersiteResource_Members(t *testing.T) {
 	members1 := []map[string]any{
 		{"name": memberName},
 	}
-	members2 := []map[string]any{
-		{"name": "infoblox.member2"},
-	}
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
-			// Create and Read
+			// Create with no members
+			{
+				Config: testAccParentalcontrolSubscribersiteMembersBasic(name),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckParentalcontrolSubscribersiteExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "members.#", "0"),
+				),
+			},
+			// Update and Read - add grid master as member
 			{
 				Config: testAccParentalcontrolSubscribersiteMembers(name, members1),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckParentalcontrolSubscribersiteExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "members.#", "1"),
 					resource.TestCheckResourceAttr(resourceName, "members.0.name", memberName),
-				),
-			},
-			// Update and Read
-			{
-				Config: testAccParentalcontrolSubscribersiteMembers(name, members2),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckParentalcontrolSubscribersiteExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "members.#", "1"),
-					resource.TestCheckResourceAttr(resourceName, "members.0.name", "infoblox.member2"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -1075,6 +1071,14 @@ resource "nios_parentalcontrol_subscribersite" "test_maximum_subscribers" {
     maximum_subscribers = %q
 }
 `, name, maximumSubscribers)
+}
+
+func testAccParentalcontrolSubscribersiteMembersBasic(name string) string {
+	return fmt.Sprintf(`
+resource "nios_parentalcontrol_subscribersite" "test_members" {
+    name = %q
+}
+`, name)
 }
 
 func testAccParentalcontrolSubscribersiteMembers(name string, members []map[string]any) string {
