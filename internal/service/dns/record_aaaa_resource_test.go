@@ -427,7 +427,7 @@ func TestAccRecordAaaaResource_UseTtl(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRecordAaaaUseTtl(name, "2002:1111::1401", "default", 10, "false"),
+				Config: testAccRecordAaaaUseTtlOnly(name, "2002:1111::1401", "default", "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordAaaaExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_ttl", "false"),
@@ -660,4 +660,15 @@ resource "nios_dns_record_aaaa" "test_use_ttl" {
     use_ttl  = %q
 }
 `, name, ipV6Addr, view, ttl, useTtl)
+}
+
+func testAccRecordAaaaUseTtlOnly(name, ipV6Addr, view, useTtl string) string {
+	return fmt.Sprintf(`
+resource "nios_dns_record_aaaa" "test_use_ttl" {
+    name     = %q
+    ipv6addr = %q
+    view     = %q
+    use_ttl  = %q
+}
+`, name, ipV6Addr, view, useTtl)
 }
