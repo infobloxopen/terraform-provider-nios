@@ -585,11 +585,12 @@ func TestAccParentalcontrolSubscribersiteResource_Members(t *testing.T) {
 	var v parentalcontrol.ParentalcontrolSubscribersite
 	name := acctest.RandomNameWithPrefix("subscriber-site")
 	memberName := utils.GetNIOSGridMasterHostName()
+	member2Name := utils.GetNIOSGridMemberHostName()
 	members1 := []map[string]any{
 		{"name": memberName},
 	}
 	members2 := []map[string]any{
-		{"name": "infoblox.member2"},
+		{"name": member2Name},
 	}
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -610,7 +611,7 @@ func TestAccParentalcontrolSubscribersiteResource_Members(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckParentalcontrolSubscribersiteExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "members.#", "1"),
-					resource.TestCheckResourceAttr(resourceName, "members.0.name", "infoblox.member2"),
+					resource.TestCheckResourceAttr(resourceName, "members.0.name", member2Name),
 				),
 			},
 			// Delete testing automatically occurs in TestCase

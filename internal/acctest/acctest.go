@@ -39,11 +39,11 @@ func RandomNameWithPrefix(prefix string) string {
 }
 
 func RandomIP() string {
-	return fmt.Sprintf("%d.%d.%d.%d", rand.Intn(255), rand.Intn(255), rand.Intn(255), rand.Intn(255))
+	return fmt.Sprintf("%d.%d.%d.%d", rand.Intn(254)+1, rand.Intn(254)+1, rand.Intn(254)+1, rand.Intn(254)+1)
 }
 
 func RandomIPWithSpecificOctetsSet(prefix string) string {
-	return fmt.Sprintf("%s.%d", prefix, rand.Intn(255))
+    return fmt.Sprintf("%s.%d", prefix, rand.Intn(254)+1)
 }
 
 func RandomNumber(maxLimit int) int {

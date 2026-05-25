@@ -14,6 +14,9 @@ import (
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
+// TODO : OBJECTS TO BE PRESENT IN GRID FOR TESTS
+// Upgrade Groups: example_upgrade_dependent_group1, example_upgrade_dependent_group2
+
 var readableAttributesForUpgradeschedule = "active,start_time,time_zone,upgrade_groups"
 
 func TestAccUpgradescheduleResource_basic(t *testing.T) {
@@ -114,27 +117,19 @@ func TestAccUpgradescheduleResource_UpgradeGroups(t *testing.T) {
 	upgradeTime := now.Add(36 * time.Hour).Format(utils.NaiveDatetimeLayout)
 
 	upgradeGroups := []map[string]any{
-		{
-			"upgrade_time": upgradeTime,
-			"name":         "Default",
-		},
-		{
-			"upgrade_time": upgradeTime,
-			"name":         groupName,
-		},
+		{"upgrade_time": upgradeTime, "name": "Default"},
+		{"upgrade_time": upgradeTime, "name": "example_upgrade_dependent_group1"},
+		{"upgrade_time": upgradeTime, "name": "example_upgrade_dependent_group2"},
+		{"upgrade_time": upgradeTime, "name": groupName},
 	}
 
 	updatedUpgradeTime := now.Add(48 * time.Hour).Format(utils.NaiveDatetimeLayout)
 
 	updatedUpgradeGroups := []map[string]any{
-		{
-			"upgrade_time": updatedUpgradeTime,
-			"name":         "Default",
-		},
-		{
-			"upgrade_time": updatedUpgradeTime,
-			"name":         groupName,
-		},
+		{"upgrade_time": updatedUpgradeTime, "name": "Default"},
+		{"upgrade_time": updatedUpgradeTime, "name": "example_upgrade_dependent_group1"},
+		{"upgrade_time": updatedUpgradeTime, "name": "example_upgrade_dependent_group2"},
+		{"upgrade_time": updatedUpgradeTime, "name": groupName},
 	}
 
 	resource.Test(t, resource.TestCase{
@@ -148,11 +143,15 @@ func TestAccUpgradescheduleResource_UpgradeGroups(t *testing.T) {
 				Config: testAccUpgradescheduleUpgradeGroups(groupName, startTime, upgradeGroups),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckUpgradescheduleExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "upgrade_groups.#", "2"),
+					resource.TestCheckResourceAttr(resourceName, "upgrade_groups.#", "4"),
 					resource.TestCheckResourceAttr(resourceName, "upgrade_groups.0.name", "Default"),
 					resource.TestCheckResourceAttr(resourceName, "upgrade_groups.0.upgrade_time", upgradeTime),
-					resource.TestCheckResourceAttr(resourceName, "upgrade_groups.1.name", groupName),
+					resource.TestCheckResourceAttr(resourceName, "upgrade_groups.1.name", "example_upgrade_dependent_group1"),
 					resource.TestCheckResourceAttr(resourceName, "upgrade_groups.1.upgrade_time", upgradeTime),
+					resource.TestCheckResourceAttr(resourceName, "upgrade_groups.2.name", "example_upgrade_dependent_group2"),
+					resource.TestCheckResourceAttr(resourceName, "upgrade_groups.2.upgrade_time", upgradeTime),
+					resource.TestCheckResourceAttr(resourceName, "upgrade_groups.3.name", groupName),
+					resource.TestCheckResourceAttr(resourceName, "upgrade_groups.3.upgrade_time", upgradeTime),
 				),
 			},
 			// Update and Read
@@ -160,11 +159,15 @@ func TestAccUpgradescheduleResource_UpgradeGroups(t *testing.T) {
 				Config: testAccUpgradescheduleUpgradeGroups(groupName, startTime, updatedUpgradeGroups),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckUpgradescheduleExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "upgrade_groups.#", "2"),
+					resource.TestCheckResourceAttr(resourceName, "upgrade_groups.#", "4"),
 					resource.TestCheckResourceAttr(resourceName, "upgrade_groups.0.name", "Default"),
 					resource.TestCheckResourceAttr(resourceName, "upgrade_groups.0.upgrade_time", updatedUpgradeTime),
-					resource.TestCheckResourceAttr(resourceName, "upgrade_groups.1.name", groupName),
+					resource.TestCheckResourceAttr(resourceName, "upgrade_groups.1.name", "example_upgrade_dependent_group1"),
 					resource.TestCheckResourceAttr(resourceName, "upgrade_groups.1.upgrade_time", updatedUpgradeTime),
+					resource.TestCheckResourceAttr(resourceName, "upgrade_groups.2.name", "example_upgrade_dependent_group2"),
+					resource.TestCheckResourceAttr(resourceName, "upgrade_groups.2.upgrade_time", updatedUpgradeTime),
+					resource.TestCheckResourceAttr(resourceName, "upgrade_groups.3.name", groupName),
+					resource.TestCheckResourceAttr(resourceName, "upgrade_groups.3.upgrade_time", updatedUpgradeTime),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -232,6 +235,7 @@ resource "nios_grid_upgradegroup" "test" {
 resource "nios_grid_upgradeschedule" "test_upgrade_groups" {
   	start_time = %q
     upgrade_groups = %s
+    depends_on = [nios_grid_upgradegroup.test]
 }
 `, groupName, startTime, upgradeGroupsHCL)
 }
