@@ -36,7 +36,9 @@ resource "nios_security_ftpuser" "ftpusers_with_additional_fields" {
 
 ### Required
 
-- `password` (String, Sensitive) The FTP user password.
+> **NOTE**: [Write-only arguments](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments) are supported in Terraform 1.11 and later.
+
+- `password` (String, [Write-only](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments)) The FTP user password.
 - `username` (String) The FTP user name.
 
 ### Optional
@@ -50,3 +52,4 @@ resource "nios_security_ftpuser" "ftpusers_with_additional_fields" {
 
 - `extattrs_all` (Map of String) Extensible attributes associated with the object, including default attributes.
 - `ref` (String) The reference to the object.
+- `secret_version` (Number) Internal revision incremented when secret field changes.

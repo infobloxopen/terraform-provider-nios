@@ -57,13 +57,14 @@ Optional:
 Read-Only:
 
 - `ref` (String) The reference to the object.
+- `secret_version` (Number) Internal revision incremented when secret field changes.
 
 <a id="nestedatt--result--servers"></a>
 ### Nested Schema for `result.servers`
 
 Required:
 
-- `shared_secret` (String, Sensitive) The secret key with which to connect to the TACACS+ server.
+- `shared_secret` (String) The secret key with which to connect to the TACACS+ server.
 
 Optional:
 

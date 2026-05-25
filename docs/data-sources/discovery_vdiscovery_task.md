@@ -73,7 +73,7 @@ Optional:
 - `multiple_accounts_sync_policy` (String) Discover all child accounts or Upload child account ids to discover..
 - `network_filter` (String) Options to filter the networks in cdiscovery task.
 - `network_list` (List of String) List of networks to filter in cdiscovery task.
-- `password` (String, Sensitive) Password used for connecting to the cloud management platform.
+- `password` (String) Password used for connecting to the cloud management platform.
 - `port` (Number) Connection port used for connecting to the cloud management platform.
 - `private_network_view` (String) Network view for private IPs.
 - `protocol` (String) Connection protocol used for connecting to the cloud management platform.
@@ -94,6 +94,7 @@ Read-Only:
 - `accounts_list` (List of String) The AWS Account IDs or GCP Project IDs list associated with this task.
 - `cdiscovery_file_token` (String) The AWS account IDs or GCP Project IDs file's token.
 - `last_run` (Number) Timestamp of last run.
+- `password_version` (Number) Internal revision incremented when secret field changes.
 - `ref` (String) The reference to the object.
 - `state` (String) Current state of this task.
 - `state_msg` (String) State message of the complete discovery process.

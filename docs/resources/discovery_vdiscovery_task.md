@@ -142,6 +142,8 @@ resource "nios_discovery_vdiscovery_task" "gcp_vdiscoverytask" {
 
 ### Optional
 
+> **NOTE**: [Write-only arguments](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments) are supported in Terraform 1.11 and later.
+
 - `allow_unsecured_connection` (Boolean) Allow unsecured connection over HTTPS and bypass validation of the remote SSL certificate.
 - `auto_create_dns_hostname_template` (String) Template string used to generate host name.
 - `auto_create_dns_record` (Boolean) Control whether to create or update DNS record using discovered data.
@@ -160,7 +162,7 @@ resource "nios_discovery_vdiscovery_task" "gcp_vdiscoverytask" {
 - `multiple_accounts_sync_policy` (String) Discover all child accounts or Upload child account ids to discover..
 - `network_filter` (String) Options to filter the networks in cdiscovery task.
 - `network_list` (List of String) List of networks to filter in cdiscovery task.
-- `password` (String, Sensitive) Password used for connecting to the cloud management platform.
+- `password` (String, [Write-only](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments)) Password used for connecting to the cloud management platform.
 - `port` (Number) Connection port used for connecting to the cloud management platform.
 - `private_network_view` (String) Network view for private IPs.
 - `protocol` (String) Connection protocol used for connecting to the cloud management platform.
@@ -181,6 +183,7 @@ resource "nios_discovery_vdiscovery_task" "gcp_vdiscoverytask" {
 - `accounts_list` (List of String) The AWS Account IDs or GCP Project IDs list associated with this task.
 - `cdiscovery_file_token` (String) The AWS account IDs or GCP Project IDs file's token.
 - `last_run` (Number) Timestamp of last run.
+- `password_version` (Number) Internal revision incremented when secret field changes.
 - `ref` (String) The reference to the object.
 - `state` (String) Current state of this task.
 - `state_msg` (String) State message of the complete discovery process.
