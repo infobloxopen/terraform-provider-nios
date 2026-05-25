@@ -2,7 +2,6 @@ package security
 
 import (
 	"context"
-
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
@@ -10,40 +9,42 @@ import (
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
-	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-
+	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	"github.com/infobloxopen/infoblox-nios-go-client/security"
-
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
 type TacacsplusAuthserviceModel struct {
-	Ref         types.String `tfsdk:"ref"`
-	AcctRetries types.Int64  `tfsdk:"acct_retries"`
-	AcctTimeout types.Int64  `tfsdk:"acct_timeout"`
-	AuthRetries types.Int64  `tfsdk:"auth_retries"`
-	AuthTimeout types.Int64  `tfsdk:"auth_timeout"`
-	Comment     types.String `tfsdk:"comment"`
-	Disable     types.Bool   `tfsdk:"disable"`
-	Name        types.String `tfsdk:"name"`
-	Servers     types.List   `tfsdk:"servers"`
+	Ref           types.String `tfsdk:"ref"`
+	AcctRetries   types.Int64  `tfsdk:"acct_retries"`
+	AcctTimeout   types.Int64  `tfsdk:"acct_timeout"`
+	AuthRetries   types.Int64  `tfsdk:"auth_retries"`
+	AuthTimeout   types.Int64  `tfsdk:"auth_timeout"`
+	Comment       types.String `tfsdk:"comment"`
+	Disable       types.Bool   `tfsdk:"disable"`
+	Name          types.String `tfsdk:"name"`
+	Servers       types.List   `tfsdk:"servers"`
+	SecretVersion types.Int64  `tfsdk:"secret_version"`
 }
 
 var TacacsplusAuthserviceAttrTypes = map[string]attr.Type{
-	"ref":          types.StringType,
-	"acct_retries": types.Int64Type,
-	"acct_timeout": types.Int64Type,
-	"auth_retries": types.Int64Type,
-	"auth_timeout": types.Int64Type,
-	"comment":      types.StringType,
-	"disable":      types.BoolType,
-	"name":         types.StringType,
-	"servers":      types.ListType{ElemType: types.ObjectType{AttrTypes: TacacsplusAuthserviceServersAttrTypes}},
+	"ref":            types.StringType,
+	"acct_retries":   types.Int64Type,
+	"acct_timeout":   types.Int64Type,
+	"auth_retries":   types.Int64Type,
+	"auth_timeout":   types.Int64Type,
+	"comment":        types.StringType,
+	"disable":        types.BoolType,
+	"name":           types.StringType,
+	"servers":        types.ListType{ElemType: types.ObjectType{AttrTypes: TacacsplusAuthserviceServersAttrTypes}},
+	"secret_version": types.Int64Type,
 }
 
 var TacacsplusAuthserviceResourceSchemaAttributes = map[string]schema.Attribute{
@@ -61,9 +62,9 @@ var TacacsplusAuthserviceResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The number of the accounting retries before giving up and moving on to the next server.",
 	},
 	"acct_timeout": schema.Int64Attribute{
-		Optional:            true,
-		Computed:            true,
-		Default:             int64default.StaticInt64(1000),
+		Optional: true,
+		Computed: true,
+		Default:  int64default.StaticInt64(1000),
 		Validators: []validator.Int64{
 			int64validator.Between(1, 4294967295),
 		},
@@ -118,6 +119,13 @@ var TacacsplusAuthserviceResourceSchemaAttributes = map[string]schema.Attribute{
 		},
 		Required:            true,
 		MarkdownDescription: "The list of the TACACS+ servers used for authentication.",
+	},
+	"secret_version": schema.Int64Attribute{
+		Computed:            true,
+		MarkdownDescription: "Internal revision incremented when secret field changes.",
+		PlanModifiers: []planmodifier.Int64{
+			int64planmodifier.UseStateForUnknown(),
+		},
 	},
 }
 

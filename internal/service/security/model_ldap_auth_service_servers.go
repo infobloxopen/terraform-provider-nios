@@ -2,6 +2,9 @@ package security
 
 import (
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
+	"encoding/json"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
@@ -68,7 +71,7 @@ var LdapAuthServiceServersResourceSchemaAttributes = map[string]schema.Attribute
 	},
 	"bind_password": schema.StringAttribute{
 		Optional:            true,
-		Sensitive:           true,
+		WriteOnly:           true,
 		MarkdownDescription: "The user password for authentication.",
 	},
 	"bind_user_dn": schema.StringAttribute{
@@ -182,4 +185,38 @@ func (m *LdapAuthServiceServersModel) Flatten(ctx context.Context, from *securit
 	m.Port = flex.FlattenInt64Pointer(from.Port)
 	m.UseMgmtPort = types.BoolPointerValue(from.UseMgmtPort)
 	m.Version = flex.FlattenStringPointer(from.Version)
+}
+
+type ldapServerSnapshot struct {
+	BindPassword string `json:"bind_password_hash,omitempty"`
+}
+
+func extractLdapServers(ctx context.Context, list types.List) ([]LdapAuthServiceServersModel, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	if list.IsNull() || list.IsUnknown() {
+		return nil, diags
+	}
+
+	var servers []LdapAuthServiceServersModel
+	diags.Append(list.ElementsAs(ctx, &servers, false)...)
+	return servers, diags
+}
+
+func hashLdapServers(servers []LdapAuthServiceServersModel) (string, error) {
+	snapshots := make([]ldapServerSnapshot, 0, len(servers))
+	for _, s := range servers {
+		snapshots = append(snapshots, ldapServerSnapshot{
+			BindPassword: s.BindPassword.ValueString(),
+		})
+	}
+
+	raw, err := json.Marshal(snapshots)
+	if err != nil {
+		return "", err
+	}
+
+	h := sha256.New()
+	h.Write(raw)
+	return hex.EncodeToString(h.Sum(nil)), nil
 }

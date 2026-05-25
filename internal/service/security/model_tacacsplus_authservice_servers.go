@@ -2,6 +2,9 @@ package security
 
 import (
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
+	"encoding/json"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
@@ -156,4 +159,38 @@ func (m *TacacsplusAuthserviceServersModel) Flatten(ctx context.Context, from *s
 	m.Disable = types.BoolPointerValue(from.Disable)
 	m.UseMgmtPort = types.BoolPointerValue(from.UseMgmtPort)
 	m.UseAccounting = types.BoolPointerValue(from.UseAccounting)
+}
+
+type tacacsServerSnapshot struct {
+	SharedSecret string `json:"shared_secret,omitempty"`
+}
+
+func extractTacacsServers(ctx context.Context, list types.List) ([]TacacsplusAuthserviceServersModel, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	if list.IsNull() || list.IsUnknown() {
+		return nil, diags
+	}
+
+	var servers []TacacsplusAuthserviceServersModel
+	diags.Append(list.ElementsAs(ctx, &servers, false)...)
+	return servers, diags
+}
+
+func hashTacacsServers(servers []TacacsplusAuthserviceServersModel) (string, error) {
+	snapshots := make([]tacacsServerSnapshot, 0, len(servers))
+	for _, s := range servers {
+		snapshots = append(snapshots, tacacsServerSnapshot{
+			SharedSecret: s.SharedSecret.ValueString(),
+		})
+	}
+
+	raw, err := json.Marshal(snapshots)
+	if err != nil {
+		return "", err
+	}
+
+	h := sha256.New()
+	h.Write(raw)
+	return hex.EncodeToString(h.Sum(nil)), nil
 }
