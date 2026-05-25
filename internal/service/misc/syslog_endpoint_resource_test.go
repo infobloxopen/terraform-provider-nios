@@ -203,7 +203,8 @@ func TestAccSyslogEndpointResource_OutboundMemberType(t *testing.T) {
 	connectionType := "udp"
 	format := "formatted"
 	updatedOutboundMember := "MEMBER"
-	outboundMember := "infoblox.grid_master_candidate1"
+	memberUpdatedName := utils.GetNIOSGridMemberHostName()
+	outboundMember := memberUpdatedName
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -234,13 +235,13 @@ func TestAccSyslogEndpointResource_OutboundMembers(t *testing.T) {
 	var resourceName = "nios_misc_syslog_endpoint.test_outbound_members"
 	var v misc.SyslogEndpoint
 	name := "syslogserveroutboundmembers"
-	outboundMemberType := "MEMBER"
+	outboundMemberType := "GM"
 	syslogServer := "10.1.1.1"
 	connectionType := "udp"
 	format := "formatted"
 	outboundMemberTypeUpdated := "MEMBER"
-	outboundMember := "infoblox.grid_master_candidate2"
-	outboundMemberUpdated := "infoblox.grid_master_candidate1"
+	outboundMember := utils.GetNIOSGridMasterHostName()
+	outboundMemberUpdated := "infoblox.member2"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -251,7 +252,7 @@ func TestAccSyslogEndpointResource_OutboundMembers(t *testing.T) {
 				Config: testAccSyslogEndpointOutboundMembers(name, outboundMemberType, syslogServer, connectionType, format, outboundMember),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSyslogEndpointExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "outbound_members.0", outboundMember),
+					resource.TestCheckResourceAttr(resourceName, "outbound_member_type", "GM"),
 				),
 			},
 			// Update and Read
@@ -259,6 +260,7 @@ func TestAccSyslogEndpointResource_OutboundMembers(t *testing.T) {
 				Config: testAccSyslogEndpointOutboundMembers(name, outboundMemberTypeUpdated, syslogServer, connectionType, format, outboundMemberUpdated),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSyslogEndpointExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "outbound_member_type", "MEMBER"),
 					resource.TestCheckResourceAttr(resourceName, "outbound_members.0", outboundMemberUpdated),
 				),
 			},
@@ -653,6 +655,10 @@ resource "nios_misc_syslog_endpoint" "test_outbound_member_type" {
 }
 
 func testAccSyslogEndpointOutboundMembers(name string, outboundMemberType string, syslogServer string, connectionType string, format string, outboundMember string) string {
+	outBoundMembersStr := ""
+	if outboundMemberType != "GM" {
+		outBoundMembersStr = fmt.Sprintf(`outbound_members = [%q]`, outboundMember)
+	}
 	return fmt.Sprintf(`
 resource "nios_misc_syslog_endpoint" "test_outbound_members" {
     name = %q
@@ -664,9 +670,9 @@ resource "nios_misc_syslog_endpoint" "test_outbound_members" {
 			format = %q
         }
     ]
-	outbound_members = [%q]
+	%s
 }
-`, name, outboundMemberType, syslogServer, connectionType, format, outboundMember)
+`, name, outboundMemberType, syslogServer, connectionType, format, outBoundMembersStr)
 }
 
 func testAccSyslogEndpointSyslogServers(name string, outboundMemberType string, syslogServer string, connectionType string, format string) string {

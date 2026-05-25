@@ -3,16 +3,19 @@ package dhcp_test
 import (
 	"context"
 	"fmt"
+	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/knownvalue"
 	"github.com/hashicorp/terraform-plugin-testing/querycheck"
+	"github.com/hashicorp/terraform-plugin-testing/querycheck/queryfilter"
+	"github.com/hashicorp/terraform-plugin-testing/tfjsonpath"
 	"github.com/hashicorp/terraform-plugin-testing/tfversion"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/dhcp"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/acctest"
-	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
 func TestAccFixedaddressList_basic(t *testing.T) {
@@ -22,27 +25,24 @@ func TestAccFixedaddressList_basic(t *testing.T) {
 	agentCircuitID := acctest.RandomNumber(1000)
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.PreCheck(t) },
-		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		PreCheck: func() { acctest.PreCheck(t) },
 		TerraformVersionChecks: []tfversion.TerraformVersionCheck{
-			tfversion.SkipBelow(tfversion.Version0_14_0),
+			tfversion.SkipBelow(tfversion.Version1_14_0),
 		},
 		Steps: []resource.TestStep{
-			// Provider Setup
-			{
-				Config: utils.ProviderSetup(),
-			},
 			// Create and Read
 			{
-				Config: testAccFixedaddressBasicConfig(ip, "CIRCUIT_ID", agentCircuitID),
+				ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+				Config:                   testAccFixedaddressBasicConfig(ip, "CIRCUIT_ID", agentCircuitID),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
 				),
 			},
 			// Query the object
 			{
-				Query:  true,
-				Config: testAccFixedaddressListBasicConfig(),
+				ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+				Query:                    true,
+				Config:                   testAccFixedaddressListBasicConfig(),
 				QueryResultChecks: []querycheck.QueryResultCheck{
 					querycheck.ExpectLengthAtLeast("nios_dhcp_fixed_address.test", 1),
 				},
@@ -58,19 +58,15 @@ func TestAccFixedaddressList_Filters(t *testing.T) {
 	agentCircuitID := acctest.RandomNumber(1000)
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.PreCheck(t) },
-		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		PreCheck: func() { acctest.PreCheck(t) },
 		TerraformVersionChecks: []tfversion.TerraformVersionCheck{
-			tfversion.SkipBelow(tfversion.Version0_14_0),
+			tfversion.SkipBelow(tfversion.Version1_14_0),
 		},
 		Steps: []resource.TestStep{
-			// Provider Setup
-			{
-				Config: utils.ProviderSetup(),
-			},
 			// Create and Read
 			{
-				Config: testAccFixedaddressBasicConfig(ip, "CIRCUIT_ID", agentCircuitID),
+				ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+				Config:                   testAccFixedaddressBasicConfig(ip, "CIRCUIT_ID", agentCircuitID),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "ipv4addr", ip),
@@ -78,10 +74,31 @@ func TestAccFixedaddressList_Filters(t *testing.T) {
 			},
 			// Query the object
 			{
-				Query:  true,
-				Config: testAccFixedaddressListConfigFilters(ip),
+				ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+				Query:                    true,
+				Config:                   testAccFixedaddressListConfigFilters(ip),
 				QueryResultChecks: []querycheck.QueryResultCheck{
 					querycheck.ExpectLength("nios_dhcp_fixed_address.test", 1),
+					querycheck.ExpectResourceKnownValues(
+						resourceName,
+						queryfilter.ByResourceIdentity(map[string]knownvalue.Check{
+							"ref": knownvalue.StringRegexp(regexp.MustCompile("fixedaddress/")),
+						}),
+						[]querycheck.KnownValueCheck{
+							{
+								Path:       tfjsonpath.New("ipv4addr"),
+								KnownValue: knownvalue.StringExact(ip),
+							},
+							{
+								Path:       tfjsonpath.New("match_client"),
+								KnownValue: knownvalue.StringExact("CIRCUIT_ID"),
+							},
+							{
+								Path:       tfjsonpath.New("agent_circuit_id"),
+								KnownValue: knownvalue.StringExact(fmt.Sprintf("%d", agentCircuitID)),
+							},
+						},
+					),
 				},
 			},
 			// Delete testing automatically occurs in TestCase
@@ -98,18 +115,14 @@ func TestAccFixedaddressList_ExtAttrFilters(t *testing.T) {
 	extAttrValue := acctest.RandomName()
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.PreCheck(t) },
-		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		PreCheck: func() { acctest.PreCheck(t) },
 		TerraformVersionChecks: []tfversion.TerraformVersionCheck{
-			tfversion.SkipBelow(tfversion.Version0_14_0),
+			tfversion.SkipBelow(tfversion.Version1_14_0),
 		},
 		Steps: []resource.TestStep{
-			// Provider Setup
-			{
-				Config: utils.ProviderSetup(),
-			},
 			// Create and Read
 			{
+				ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 				Config: testAccFixedaddressExtAttrs(ip, "CIRCUIT_ID", agentCircuitID, map[string]string{
 					"Site": extAttrValue,
 				}),
@@ -120,8 +133,9 @@ func TestAccFixedaddressList_ExtAttrFilters(t *testing.T) {
 			},
 			// Query the object
 			{
-				Query:  true,
-				Config: testAccFixedaddressListConfigExtAttrFilters(extAttrValue),
+				ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+				Query:                    true,
+				Config:                   testAccFixedaddressListConfigExtAttrFilters(extAttrValue),
 				QueryResultChecks: []querycheck.QueryResultCheck{
 					querycheck.ExpectLength("nios_dhcp_fixed_address.test", 1),
 				},
@@ -144,6 +158,7 @@ func testAccFixedaddressListConfigFilters(ip4addr string) string {
 	return fmt.Sprintf(`
 list "nios_dhcp_fixed_address" "test" {
 	provider = nios
+	include_resource = true
 	config {
 		filters = {
 			ipv4addr =  %q

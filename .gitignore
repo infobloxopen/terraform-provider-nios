@@ -43,3 +43,8 @@ internal/service/*/.openapi-generator-ignore
 # Ignore the metadata files
 **/.DS_Store
 .vscode/
+
+pipeline.env
+.env
+
+Jenkinsfile
