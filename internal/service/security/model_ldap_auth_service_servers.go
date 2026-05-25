@@ -188,7 +188,7 @@ func (m *LdapAuthServiceServersModel) Flatten(ctx context.Context, from *securit
 }
 
 type ldapServerSnapshot struct {
-	BindPassword string `json:"bind_password_hash,omitempty"`
+	BindPassword string `json:"bind_password,omitempty"`
 }
 
 func extractLdapServers(ctx context.Context, list types.List) ([]LdapAuthServiceServersModel, diag.Diagnostics) {
