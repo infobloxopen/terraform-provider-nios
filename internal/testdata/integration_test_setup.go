@@ -707,6 +707,52 @@ func PreConfig(clients PreConfigClients, hostnames GridHostnames) error {
 		fmt.Printf("Parental control already enabled for subscriber %q, skipping update\n", *parentalSubscriber.Ref)
 	}
 
+	// Check if ip_space_discriminator is available as a readable field.
+	ipDiscResp, _, err := clients.PARENTAL.ParentalcontrolSubscriberAPI.List(context.Background()).
+		ReturnAsObject(1).
+		ReturnFieldsPlus("ip_space_discriminator").
+		Execute()
+	if err != nil {
+		return fmt.Errorf("failed to list parentalcontrol subscribers for ip_space_discriminator check: %w", err)
+	}
+	if ipDiscResp.ListParentalcontrolSubscriberResponseObject == nil || len(ipDiscResp.ListParentalcontrolSubscriberResponseObject.Result) == 0 {
+		return fmt.Errorf("parentalcontrol subscriber list returned no results for ip_space_discriminator check")
+	}
+
+	ipDiscSubscriber := ipDiscResp.ListParentalcontrolSubscriberResponseObject.Result[0]
+	if ipDiscSubscriber.IpSpaceDiscriminator != nil && *ipDiscSubscriber.IpSpaceDiscriminator != "" {
+		// ip_space_discriminator already present — field is readable/editable
+		fmt.Printf("ip_space_discriminator already present (%q) for subscriber %q, marking editable\n",
+			*ipDiscSubscriber.IpSpaceDiscriminator, *ipDiscSubscriber.Ref)
+		if err := writePipelineEnvVar("SUBSCRIBER_BLOCK_SIZE_EDITABLE", "true"); err != nil {
+			return fmt.Errorf("failed to write SUBSCRIBER_BLOCK_SIZE_EDITABLE: %w", err)
+		}
+	} else {
+		// ip_space_discriminator absent — attempt an Update to probe editability
+		if ipDiscSubscriber.Ref == nil || *ipDiscSubscriber.Ref == "" {
+			return fmt.Errorf("parentalcontrol subscriber ref is empty for ip_space_discriminator update")
+		}
+		ipDiscRef := utils.ExtractResourceRef(*ipDiscSubscriber.Ref)
+		_, _, updateErr := clients.PARENTAL.ParentalcontrolSubscriberAPI.Update(context.Background(), ipDiscRef).
+			ParentalcontrolSubscriber(parentalcontrol.ParentalcontrolSubscriber{
+				IpSpaceDiscriminator: parentalcontrol.PtrString("Deterministic-NAT-Port"),
+			}).
+			Execute()
+		if updateErr != nil {
+			fmt.Printf("ip_space_discriminator update failed for subscriber %q (API error: %v), marking not editable\n",
+				*ipDiscSubscriber.Ref, updateErr)
+			if err := writePipelineEnvVar("SUBSCRIBER_BLOCK_SIZE_EDITABLE", "false"); err != nil {
+				return fmt.Errorf("failed to write SUBSCRIBER_BLOCK_SIZE_EDITABLE: %w", err)
+			}
+		} else {
+			fmt.Printf("ip_space_discriminator updated to \"Deterministic-NAT-Port\" for subscriber %q, marking editable\n",
+				*ipDiscSubscriber.Ref)
+			if err := writePipelineEnvVar("SUBSCRIBER_BLOCK_SIZE_EDITABLE", "true"); err != nil {
+				return fmt.Errorf("failed to write SUBSCRIBER_BLOCK_SIZE_EDITABLE: %w", err)
+			}
+		}
+	}
+
 	networkViews := []string{"test_network_view", "custom_view", "test_network_view2", "ms_server", "ms_server2"}
 
 	for _, viewName := range networkViews {
@@ -2020,6 +2066,22 @@ func main() {
 		fmt.Printf("Ecosystem template 11 not found at %s, skipping upload\n", ecosystemTemplatePath11)
 	} else {
 		fmt.Printf("Error checking ecosystem template 11 path %s: %v\n", ecosystemTemplatePath11, statErr)
+		return
+	}
+
+	ecosystemTemplatePath12 := filepath.Join(cwd, "internal/testdata/nios_ecosystem_templates", "Version5_REST_API_Session_Template1.json")
+
+	if _, statErr := os.Stat(ecosystemTemplatePath12); statErr == nil {
+		err = ConfigureEcoSystemTemplates(host, wapiVer, username, password, ecosystemTemplatePath12)
+		if err != nil {
+			fmt.Printf("Error uploading ecosystem templates: %v\n", err)
+			return
+		}
+		fmt.Println("Ecosystem template 12 uploaded successfully")
+	} else if os.IsNotExist(statErr) {
+		fmt.Printf("Ecosystem template 12 not found at %s, skipping upload\n", ecosystemTemplatePath12)
+	} else {
+		fmt.Printf("Error checking ecosystem template 12 path %s: %v\n", ecosystemTemplatePath12, statErr)
 		return
 	}
 
