@@ -136,7 +136,7 @@ Optional:
 - `comment` (String) The commment for the credential.
 - `credential_group` (String) Group for the CLI credential.
 - `credential_type` (String) The type of the credential.
-- `password` (String) The CLI password.
+- `password` (String, Sensitive) The CLI password.
 - `user` (String) The CLI user name.
 
 Read-Only:
