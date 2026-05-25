@@ -242,7 +242,7 @@ func TestAccNotificationRestEndpointResource_OutboundMemberType(t *testing.T) {
 	var resourceName = "nios_notification_rest_endpoint.test_outbound_member_type"
 	var v notification.NotificationRestEndpoint
 	name := acctest.RandomNameWithPrefix("notification-rest-endpoint")
-	memberUpdatedName := utils.GetNIOSGridMemberHostName()
+	memberUpdatedName := "infoblox.member2"
 	outboundMembers := []string{memberUpdatedName}
 
 	resource.ParallelTest(t, resource.TestCase{

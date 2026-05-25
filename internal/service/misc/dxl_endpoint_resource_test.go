@@ -432,7 +432,7 @@ func TestAccDxlEndpointResource_TemplateInstance(t *testing.T) {
 		"template": "Version5_DXL_Session_Template",
 	}
 	templateInstanceValUpdated := map[string]any{
-		"template": "Version5_DXL_Session_Template2",
+		"template": "Version5_DXL_Session_Template1",
 	}
 
 	resource.ParallelTest(t, resource.TestCase{
