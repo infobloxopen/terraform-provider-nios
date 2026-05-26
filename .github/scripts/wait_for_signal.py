@@ -5,7 +5,7 @@ wait_for_signal.py
 Polls a GitHub Gist every POLL_INTERVAL seconds, waiting for Jenkins to write
 a signal for the expected stage.  Exits 0 on success, 1 on error or timeout.
 
-Environment variables (all required unless noted):
+Environment variables (required from the user):
   GH_TOKEN          – GitHub PAT with gist scope
   GIST_ID           – ID of the signal Gist
 """

@@ -184,14 +184,18 @@ def emit_annotations(suites: List[Suite]) -> None:
                 continue
             full_name = f"{tc.classname}/{tc.name}" if tc.classname else tc.name
             body = (tc.message or tc.stdout or "(no message)")[:500]
-            # Encode special characters required by the workflow command format
+            def _encode_prop(s: str) -> str:
+                return (s.replace("%", "%25").replace("\r", "%0D")
+                         .replace("\n", "%0A").replace(":", "%3A")
+                         .replace(",", "%2C"))
+            encoded_title = _encode_prop(full_name)
             encoded = (
                 body
                 .replace("%", "%25")
                 .replace("\r", "")
                 .replace("\n", "%0A")
             )
-            print(f"::error title={full_name}::{encoded}")
+            print(f"::error title={encoded_title}::{encoded}")
 
 
 def main():
@@ -211,7 +215,7 @@ def main():
                     "Jenkins returned no JUnit XML artifacts.\n")
         with open(args.output_file, "w") as f:
             json.dump({"total": 0, "passed": 0, "failures": 0,
-                       "errors": 0, "skipped": 0, "ok": True}, f)
+                       "errors": 0, "skipped": 0, "ok": False}, f)
         sys.exit(0)
 
     suites: List[Suite] = []

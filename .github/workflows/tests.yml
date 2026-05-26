@@ -25,12 +25,12 @@ jobs:
       # 0.  Checkout repository (needed for accessing .github/scripts)
       # ------------------------------------------------------------------ #
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5.0.0
 
       # ------------------------------------------------------------------ #
       # 1.  Prepare the Gist signal channel
       #     Extracts Gist ID from the pre-created Gist URL stored in secrets.
-      #     The file is keyed by run-id so parallel runs don't collide.
+      #     The signal file is keyed by commit SHA.
       # ------------------------------------------------------------------ #
       - name: Extract signal Gist ID
         id: gist
@@ -55,9 +55,9 @@ jobs:
           echo "Signal Gist ID extracted successfully."
 
       # ------------------------------------------------------------------ #
-      # 1b. Clear and initialise signal Gist for this commit
-      #     Deletes any stale files from previous runs, then writes a fresh
-      #     ci-signal-{sha}.json keyed to the current commit.
+      # 1b. Initialise signal Gist for this run
+      #     Writes only this run's ci-signal-{sha}.json. Includes a created_at
+      #     timestamp used by the cleanup step for age-based pruning.
       # ------------------------------------------------------------------ #
       - name: Initialise signal Gist
         env:
@@ -65,41 +65,25 @@ jobs:
           GIST_ID:  ${{ steps.gist.outputs.gist_id }}
         run: |
           python3 - <<'EOF' > /tmp/gist-payload.json
-          import json, os, urllib.request, sys
+          import json
+          from datetime import datetime, timezone
 
-          gist_id  = os.environ['GIST_ID']
-          token    = os.environ['GH_TOKEN']
-          current  = 'ci-signal-${{ github.sha }}.json'
-
-          # Fetch existing files so we can delete stale ones
-          req = urllib.request.Request(
-              f'https://api.github.com/gists/{gist_id}',
-              headers={
-                  'Authorization': f'token {token}',
-                  'Accept': 'application/vnd.github+json',
-              },
-          )
-          try:
-              with urllib.request.urlopen(req) as r:
-                  gist = json.load(r)
-          except Exception as e:
-              print(f'Failed to fetch Gist: {e}', file=sys.stderr)
-              sys.exit(1)
-
-          # null-value = delete; write the current commit file fresh
-          files = {name: None for name in gist.get('files', {})}
-          files[current] = {
-              'content': json.dumps({
-                  'sha':       '${{ github.sha }}',
-                  'ref':       '${{ github.ref_name }}',
-                  'status':    'waiting',
-                  'stage':     '',
-                  'message':   '',
-                  'artifacts': [],
-              })
-          }
-
-          print(json.dumps({'files': files}))
+          sha = '${{ github.sha }}'
+          print(json.dumps({
+              'files': {
+                  f'ci-signal-{sha}.json': {
+                      'content': json.dumps({
+                          'sha':        sha,
+                          'ref':        '${{ github.ref_name }}',
+                          'status':     'waiting',
+                          'stage':      '',
+                          'message':    '',
+                          'artifacts':  [],
+                          'created_at': datetime.now(timezone.utc).isoformat(),
+                      })
+                  }
+              }
+          }))
           EOF
 
           http_code=$(curl -sS -o /tmp/gist-response.json -w "%{http_code}" -X PATCH \
@@ -119,7 +103,7 @@ jobs:
           fi
 
           rm -f /tmp/gist-response.json
-          echo "Signal Gist cleared and initialised for commit ${{ github.sha }}."
+          echo "Signal Gist initialised for commit ${{ github.sha }}."
 
       # ------------------------------------------------------------------ #
       # 2.  Wait for Jenkins to pick up the commit (Poll SCM delay + startup)
@@ -188,8 +172,11 @@ jobs:
           for fname, fdata in gist["files"].items():
               if not fname.startswith(prefix):
                   continue
-              local_name = fname[len(prefix):]
-              dest       = f"test-results/{local_name}"
+              local_name = os.path.basename(fname[len(prefix):])
+              if not local_name or os.sep in local_name or local_name.startswith("."):
+                  print(f"::warning::Skipping unsafe filename '{fname}' — rejected after sanitization.")
+                  continue
+              dest = os.path.join("test-results", local_name)
               print(f"Fetching {fname} → {dest} ...")
               # Use raw_url for files >1 MB (Gist API truncates them)
               if fdata.get("truncated"):
@@ -250,5 +237,82 @@ jobs:
               sys.exit(1)
 
           print(f"All {d['total']} tests passed.")
+          EOF
+
+      # ------------------------------------------------------------------ #
+      # 9.  Cleanup Gist
+      #     Deletes this run's files (ci-signal-{sha} + ci-junit-{sha}-*),
+      #     then prunes any signal files older than 24 h and their JUnit
+      #     files
+      # ------------------------------------------------------------------ #
+      - name: Cleanup Gist
+        if: always()
+        env:
+          GH_TOKEN: ${{ secrets.GH_SIGNAL_TOKEN }}
+          GIST_ID:  ${{ steps.gist.outputs.gist_id }}
+          GIT_SHA:  ${{ github.sha }}
+        run: |
+          python3 - <<'EOF'
+          import json, os, sys, urllib.request
+          from datetime import datetime, timezone, timedelta
+
+          gist_id = os.environ["GIST_ID"]
+          git_sha = os.environ["GIT_SHA"]
+          token   = os.environ["GH_TOKEN"]
+
+          req = urllib.request.Request(
+              f"https://api.github.com/gists/{gist_id}",
+              headers={"Authorization": f"token {token}",
+                       "Accept": "application/vnd.github+json"})
+          try:
+              with urllib.request.urlopen(req) as r:
+                  gist = json.load(r)
+          except Exception as exc:
+              print(f"::warning::Could not fetch Gist for cleanup: {exc}")
+              sys.exit(0)
+
+          files   = gist.get("files", {})
+          cutoff  = datetime.now(timezone.utc) - timedelta(hours=24)
+          to_delete = {}
+
+          # Always delete this run's signal and JUnit files
+          for fname in files:
+              if fname == f"ci-signal-{git_sha}.json" or fname.startswith(f"ci-junit-{git_sha}-"):
+                  to_delete[fname] = None
+
+          # Age-prune: any signal file with created_at older than 24 h
+          for fname, fdata in files.items():
+              if not fname.startswith("ci-signal-") or fname in to_delete:
+                  continue
+              try:
+                  content    = json.loads(fdata.get("content") or "{}")
+                  created_at = datetime.fromisoformat(content["created_at"])
+                  if created_at >= cutoff:
+                      continue
+                  stale_sha = content.get("sha", "")
+                  to_delete[fname] = None
+                  for jf in files:
+                      if jf.startswith(f"ci-junit-{stale_sha}-"):
+                          to_delete[jf] = None
+              except (KeyError, ValueError):
+                  continue
+
+          if not to_delete:
+              print("Nothing to clean up.")
+              sys.exit(0)
+
+          patch_req = urllib.request.Request(
+              f"https://api.github.com/gists/{gist_id}",
+              data=json.dumps({"files": to_delete}).encode(),
+              headers={"Authorization": f"token {token}",
+                       "Accept": "application/vnd.github+json",
+                       "Content-Type": "application/json"},
+              method="PATCH")
+          try:
+              with urllib.request.urlopen(patch_req) as r:
+                  r.read()
+              print(f"Deleted {len(to_delete)} file(s): {', '.join(to_delete)}")
+          except Exception as exc:
+              print(f"::warning::Gist cleanup PATCH failed: {exc}")
           EOF
 
