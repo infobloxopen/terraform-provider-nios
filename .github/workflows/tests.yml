@@ -1,0 +1,254 @@
+name: Integration Tests
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+      - nios_v9.1.0
+
+# Only one pipeline per branch at a time
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  pipeline:
+    name: Integration Test Pipeline
+    runs-on: ubuntu-latest
+
+    # Timeout on the entire job
+    timeout-minutes: 10800    # 3 hours
+
+    steps:
+      # ------------------------------------------------------------------ #
+      # 0.  Checkout repository (needed for accessing .github/scripts)
+      # ------------------------------------------------------------------ #
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # ------------------------------------------------------------------ #
+      # 1.  Prepare the Gist signal channel
+      #     Extracts Gist ID from the pre-created Gist URL stored in secrets.
+      #     The file is keyed by run-id so parallel runs don't collide.
+      # ------------------------------------------------------------------ #
+      - name: Extract signal Gist ID
+        id: gist
+        env:
+          GH_SIGNAL_GIST_URL: ${{ secrets.GH_SIGNAL_GIST_URL }}   # URL of pre-created Gist
+        run: |
+          if [ -z "$GH_SIGNAL_GIST_URL" ]; then
+            echo "::error::GH_SIGNAL_GIST_URL secret not set. Expected format: https://gist.github.com/{user}/{gist_id}"
+            exit 1
+          fi
+          
+          # Extract gist_id from URL (last part after final /)
+          GIST_ID="${GH_SIGNAL_GIST_URL##*/}"
+          
+          if [ -z "$GIST_ID" ]; then
+            echo "::error::Could not extract GIST_ID from URL: $GH_SIGNAL_GIST_URL"
+            exit 1
+          fi
+          
+          echo "::add-mask::$GIST_ID"
+          echo "gist_id=$GIST_ID" >> "$GITHUB_OUTPUT"
+          echo "Signal Gist ID extracted successfully."
+
+      # ------------------------------------------------------------------ #
+      # 1b. Clear and initialise signal Gist for this commit
+      #     Deletes any stale files from previous runs, then writes a fresh
+      #     ci-signal-{sha}.json keyed to the current commit.
+      # ------------------------------------------------------------------ #
+      - name: Initialise signal Gist
+        env:
+          GH_TOKEN: ${{ secrets.GH_SIGNAL_TOKEN }}
+          GIST_ID:  ${{ steps.gist.outputs.gist_id }}
+        run: |
+          python3 - <<'EOF' > /tmp/gist-payload.json
+          import json, os, urllib.request, sys
+
+          gist_id  = os.environ['GIST_ID']
+          token    = os.environ['GH_TOKEN']
+          current  = 'ci-signal-${{ github.sha }}.json'
+
+          # Fetch existing files so we can delete stale ones
+          req = urllib.request.Request(
+              f'https://api.github.com/gists/{gist_id}',
+              headers={
+                  'Authorization': f'token {token}',
+                  'Accept': 'application/vnd.github+json',
+              },
+          )
+          try:
+              with urllib.request.urlopen(req) as r:
+                  gist = json.load(r)
+          except Exception as e:
+              print(f'Failed to fetch Gist: {e}', file=sys.stderr)
+              sys.exit(1)
+
+          # null-value = delete; write the current commit file fresh
+          files = {name: None for name in gist.get('files', {})}
+          files[current] = {
+              'content': json.dumps({
+                  'sha':       '${{ github.sha }}',
+                  'ref':       '${{ github.ref_name }}',
+                  'status':    'waiting',
+                  'stage':     '',
+                  'message':   '',
+                  'artifacts': [],
+              })
+          }
+
+          print(json.dumps({'files': files}))
+          EOF
+
+          http_code=$(curl -sS -o /tmp/gist-response.json -w "%{http_code}" -X PATCH \
+            -H "Authorization: token $GH_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            -H "Content-Type: application/json" \
+            --data @/tmp/gist-payload.json \
+            "https://api.github.com/gists/$GIST_ID")
+
+          rm -f /tmp/gist-payload.json
+
+          if [ "$http_code" != "200" ]; then
+            echo "::error::Failed to initialise signal Gist $GIST_ID (HTTP $http_code)."
+            cat /tmp/gist-response.json
+            rm -f /tmp/gist-response.json
+            exit 1
+          fi
+
+          rm -f /tmp/gist-response.json
+          echo "Signal Gist cleared and initialised for commit ${{ github.sha }}."
+
+      # ------------------------------------------------------------------ #
+      # 2.  Wait for Jenkins to pick up the commit (Poll SCM delay + startup)
+      # ------------------------------------------------------------------ #
+      - name: Wait for Job to Start
+        env:
+          GH_TOKEN:        ${{ secrets.GH_SIGNAL_TOKEN }}
+          GIST_ID:         ${{ steps.gist.outputs.gist_id }}
+          GIT_SHA:         ${{ github.sha }}
+          STAGE_NAME:      job-started
+          TIMEOUT_SECONDS: "720"    # 12 min: up to 12 min Poll SCM + startup
+        run: python3 .github/scripts/wait_for_signal.py
+
+      # ------------------------------------------------------------------ #
+      # 3.  Wait for env-setup stage signal
+      # ------------------------------------------------------------------ #
+      - name: Environment Setup
+        env:
+          GH_TOKEN:        ${{ secrets.GH_SIGNAL_TOKEN }}
+          GIST_ID:         ${{ steps.gist.outputs.gist_id }}
+          GIT_SHA:         ${{ github.sha }}
+          STAGE_NAME:      env-setup
+          TIMEOUT_SECONDS: "300"     # 5 min for env setup
+        run: python3 .github/scripts/wait_for_signal.py
+
+      # ------------------------------------------------------------------ #
+      # 4.  Wait for tests-complete signal (Jenkins sends artifact URLs here)
+      # ------------------------------------------------------------------ #
+      - name: Run tests and wait for completion
+        env:
+          GH_TOKEN:        ${{ secrets.GH_SIGNAL_TOKEN }}
+          GIST_ID:         ${{ steps.gist.outputs.gist_id }}
+          GIT_SHA:         ${{ github.sha }}
+          STAGE_NAME:      tests-complete
+          TIMEOUT_SECONDS: "9000"    # 2 and half hours for tests
+        run: python3 .github/scripts/wait_for_signal.py
+
+      # ------------------------------------------------------------------ #
+      # 5.  Fetch JUnit XML files uploaded to the signal Gist by Jenkins
+      # ------------------------------------------------------------------ #
+      - name: Download test artifacts
+        env:
+          GH_TOKEN: ${{ secrets.GH_SIGNAL_TOKEN }}
+          GIST_ID:  ${{ steps.gist.outputs.gist_id }}
+          GIT_SHA:  ${{ github.sha }}
+        run: |
+          mkdir -p test-results
+
+          python3 - <<'EOF'
+          import os, json, urllib.request, sys
+
+          gist_id = os.environ["GIST_ID"]
+          git_sha = os.environ["GIT_SHA"]
+          token   = os.environ["GH_TOKEN"]
+
+          # Fetch the Gist to find JUnit files written by Jenkins
+          req = urllib.request.Request(
+              f"https://api.github.com/gists/{gist_id}",
+              headers={"Authorization": f"token {token}",
+                       "Accept": "application/vnd.github+json"})
+          with urllib.request.urlopen(req) as r:
+              gist = json.load(r)
+
+          prefix = f"ci-junit-{git_sha}-"
+          count  = 0
+          for fname, fdata in gist["files"].items():
+              if not fname.startswith(prefix):
+                  continue
+              local_name = fname[len(prefix):]
+              dest       = f"test-results/{local_name}"
+              print(f"Fetching {fname} → {dest} ...")
+              # Use raw_url for files >1 MB (Gist API truncates them)
+              if fdata.get("truncated"):
+                  dl_req = urllib.request.Request(
+                      fdata["raw_url"],
+                      headers={"Authorization": f"token {token}"})
+                  with urllib.request.urlopen(dl_req) as r:
+                      content = r.read().decode()
+              else:
+                  content = fdata.get("content") or ""
+              with open(dest, "w") as f:
+                  f.write(content)
+              count += 1
+
+          if count == 0:
+              print("::warning::No JUnit XML files found in Gist for this commit.")
+          else:
+              print(f"Fetched {count} JUnit file(s) from Gist.")
+          EOF
+
+      # ------------------------------------------------------------------ #
+      # 6.  Parse JUnit XML → job summary
+      # ------------------------------------------------------------------ #
+      - name: Parse results and write summary
+        run: |
+          python3 .github/scripts/parse_junit.py \
+            --results-dir  test-results \
+            --summary-file "$GITHUB_STEP_SUMMARY" \
+            --output-file  test-results/summary.json
+
+      # ------------------------------------------------------------------ #
+      # 7.  Upload artifacts
+      # ------------------------------------------------------------------ #
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results-${{ github.sha }}
+          path: test-results/
+          retention-days: 15
+
+      # ------------------------------------------------------------------ #
+      # 8.  Evaluate results
+      # ------------------------------------------------------------------ #
+      - name: Evaluate result
+        run: |
+          python3 - <<'EOF'
+          import json, sys
+          try:
+              with open("test-results/summary.json") as f:
+                  d = json.load(f)
+          except FileNotFoundError:
+              print("::error::summary.json not found — artifact download may have failed.")
+              sys.exit(1)
+
+          if d["failures"] > 0 or d["errors"] > 0:
+              print(f"::error::{d['failures']} test failure(s), {d['errors']} error(s). See job summary for details.")
+              sys.exit(1)
+
+          print(f"All {d['total']} tests passed.")
+          EOF
+
