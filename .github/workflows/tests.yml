@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
 
     # Timeout on the entire job
-    timeout-minutes: 10800    # 3 hours
+    timeout-minutes: 180    # 3 hours
 
     steps:
       # ------------------------------------------------------------------ #
@@ -230,6 +230,10 @@ jobs:
                   d = json.load(f)
           except FileNotFoundError:
               print("::error::summary.json not found — artifact download may have failed.")
+              sys.exit(1)
+
+          if d.get("total", 0) == 0:
+              print("::error::No tests were recorded. JUnit XML artifacts may be missing or empty.")
               sys.exit(1)
 
           if d["failures"] > 0 or d["errors"] > 0:
