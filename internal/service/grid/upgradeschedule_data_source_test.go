@@ -18,17 +18,17 @@ func TestAccUpgradescheduleDataSource_Read(t *testing.T) {
 	resourceName := "nios_grid_upgradeschedule.test"
 	var v grid.Upgradeschedule
 
-	active := true
-
 	now := time.Now()
 	start_time := now.Add(24 * time.Hour).Format(utils.NaiveDatetimeLayout)
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:                 func() { acctest.PreCheck(t) },
+		PreCheck: func() {
+			acctest.PreCheck(t)
+		},
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccUpgradescheduleDataSourceConfig(active, start_time),
+				Config: testAccUpgradescheduleDataSourceConfig(false, start_time),
 				Check: resource.ComposeTestCheckFunc(
 					append([]resource.TestCheckFunc{
 						testAccCheckUpgradescheduleExists(context.Background(), resourceName, &v),

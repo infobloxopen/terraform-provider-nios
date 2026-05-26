@@ -30,6 +30,7 @@ var readableAttributesForNotificationRule = "all_members,comment,disable,enable_
 
 var (
 	notificationTarget = utils.GetNIOSNotificationRestEndpointRef()
+	syslogEndpoint     = utils.GetNIOSSyslogEndpointRef()
 	eventType          = "DHCP_LEASES"
 	expressionList     = []map[string]any{
 		{
@@ -249,8 +250,8 @@ func TestAccNotificationRuleResource_EnableEventDeduplication(t *testing.T) {
 }
 
 func TestAccNotificationRuleResource_EnableEventDeduplicationLog(t *testing.T) {
-	if notificationTarget == "" {
-		t.Skip("NIOS_NOTIFICATION_REST_ENDPOINT_REF environment variable must be set for this test to run")
+	if notificationTarget == "" || syslogEndpoint == "" {
+		t.Skip("NIOS_NOTIFICATION_REST_ENDPOINT_REF and NIOS_SYSLOG_ENDPOINT_REF environment variables must be set for this test to run")
 	}
 	var resourceName = "nios_notification_rule.test_enable_event_deduplication_log"
 	var v notification.NotificationRule
@@ -272,7 +273,7 @@ func TestAccNotificationRuleResource_EnableEventDeduplicationLog(t *testing.T) {
 			"op": "ENDLIST",
 		},
 	}
-	notificationTarget := "syslog:endpoint/b25lLmVuZHBvaW50JDEzNg:syslogendpoint1"
+	notificationTarget := syslogEndpoint
 	templateInstance := map[string]any{
 		"template": "Version5_Syslog_Action_Template",
 	}
@@ -307,8 +308,8 @@ func TestAccNotificationRuleResource_EnableEventDeduplicationLog(t *testing.T) {
 }
 
 func TestAccNotificationRuleResource_EventDeduplicationFields(t *testing.T) {
-	if notificationTarget == "" {
-		t.Skip("NIOS_NOTIFICATION_REST_ENDPOINT_REF environment variable must be set for this test to run")
+	if notificationTarget == "" || syslogEndpoint == "" {
+		t.Skip("NIOS_NOTIFICATION_REST_ENDPOINT_REF and NIOS_SYSLOG_ENDPOINT_REF environment variables must be set for this test to run")
 	}
 	var resourceName = "nios_notification_rule.test_event_deduplication_fields"
 	var v notification.NotificationRule
@@ -330,7 +331,7 @@ func TestAccNotificationRuleResource_EventDeduplicationFields(t *testing.T) {
 			"op": "ENDLIST",
 		},
 	}
-	notificationTarget := "syslog:endpoint/b25lLmVuZHBvaW50JDEzNg:syslogendpoint1"
+	notificationTarget := syslogEndpoint
 	templateInstance := map[string]any{
 		"template": "Version5_Syslog_Action_Template",
 	}
@@ -371,8 +372,8 @@ func TestAccNotificationRuleResource_EventDeduplicationFields(t *testing.T) {
 }
 
 func TestAccNotificationRuleResource_EventDeduplicationLookbackPeriod(t *testing.T) {
-	if notificationTarget == "" {
-		t.Skip("NIOS_NOTIFICATION_REST_ENDPOINT_REF environment variable must be set for this test to run")
+	if notificationTarget == "" || syslogEndpoint == "" {
+		t.Skip("NIOS_NOTIFICATION_REST_ENDPOINT_REF and NIOS_SYSLOG_ENDPOINT_REF environment variables must be set for this test to run")
 	}
 	var resourceName = "nios_notification_rule.test_event_deduplication_lookback_period"
 	var v notification.NotificationRule
@@ -394,7 +395,7 @@ func TestAccNotificationRuleResource_EventDeduplicationLookbackPeriod(t *testing
 			"op": "ENDLIST",
 		},
 	}
-	notificationTarget := "syslog:endpoint/b25lLmVuZHBvaW50JDEzNg:syslogendpoint1"
+	notificationTarget := syslogEndpoint
 	templateInstance := map[string]any{
 		"template": "Version5_Syslog_Action_Template",
 	}
@@ -487,7 +488,7 @@ func TestAccNotificationRuleResource_EventType(t *testing.T) {
 			"op": "ENDLIST",
 		},
 	}
-	updatedNotificationTarget := "syslog:endpoint/b25lLmVuZHBvaW50JDEzNg:syslogendpoint1"
+	updatedNotificationTarget := syslogEndpoint
 	updatedTemplateInstance := map[string]any{
 		"template": "Version5_Syslog_Action_Template",
 	}
@@ -518,8 +519,8 @@ func TestAccNotificationRuleResource_EventType(t *testing.T) {
 }
 
 func TestAccNotificationRuleResource_ExpressionList(t *testing.T) {
-	if notificationTarget == "" {
-		t.Skip("NIOS_NOTIFICATION_REST_ENDPOINT_REF environment variable must be set for this test to run")
+	if notificationTarget == "" || syslogEndpoint == "" {
+		t.Skip("NIOS_NOTIFICATION_REST_ENDPOINT_REF and NIOS_SYSLOG_ENDPOINT_REF environment variables must be set for this test to run")
 	}
 	var resourceName = "nios_notification_rule.test_expression_list"
 	var v notification.NotificationRule
@@ -541,7 +542,7 @@ func TestAccNotificationRuleResource_ExpressionList(t *testing.T) {
 			"op": "ENDLIST",
 		},
 	}
-	updatedNotificationTarget := "syslog:endpoint/b25lLmVuZHBvaW50JDEzNg:syslogendpoint1"
+	updatedNotificationTarget := syslogEndpoint
 	updatedTemplateInstance := map[string]any{
 		"template": "Version5_Syslog_Action_Template",
 	}
@@ -655,8 +656,8 @@ func TestAccNotificationRuleResource_NotificationAction(t *testing.T) {
 }
 
 func TestAccNotificationRuleResource_NotificationTarget(t *testing.T) {
-	if notificationTarget == "" {
-		t.Skip("NIOS_NOTIFICATION_REST_ENDPOINT_REF environment variable must be set for this test to run")
+	if notificationTarget == "" || syslogEndpoint == "" {
+		t.Skip("NIOS_NOTIFICATION_REST_ENDPOINT_REF and NIOS_SYSLOG_ENDPOINT_REF environment variables must be set for this test to run")
 	}
 	var resourceName = "nios_notification_rule.test_notification_target"
 	var v notification.NotificationRule
@@ -678,7 +679,7 @@ func TestAccNotificationRuleResource_NotificationTarget(t *testing.T) {
 			"op": "ENDLIST",
 		},
 	}
-	updatedNotificationTarget := "syslog:endpoint/b25lLmVuZHBvaW50JDEzNg:syslogendpoint1"
+	updatedNotificationTarget := syslogEndpoint
 	updatedTemplateInstance := map[string]any{
 		"template": "Version5_Syslog_Action_Template",
 	}
@@ -809,7 +810,7 @@ func TestAccNotificationRuleResource_ScheduledEvent(t *testing.T) {
 }
 
 func TestAccNotificationRuleResource_TemplateInstance(t *testing.T) {
-	if notificationTarget == "" {
+	if notificationTarget == "" || syslogEndpoint == "" {
 		t.Skip("NIOS_NOTIFICATION_REST_ENDPOINT_REF environment variable must be set for this test to run")
 	}
 	var resourceName = "nios_notification_rule.test_template_instance"
@@ -832,7 +833,7 @@ func TestAccNotificationRuleResource_TemplateInstance(t *testing.T) {
 			"op": "ENDLIST",
 		},
 	}
-	updatedNotificationTarget := "syslog:endpoint/b25lLmVuZHBvaW50JDEzNg:syslogendpoint1"
+	updatedNotificationTarget := syslogEndpoint
 	updatedTemplateInstance := map[string]any{
 		"template": "Version5_Syslog_Action_Template",
 	}
