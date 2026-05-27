@@ -242,7 +242,7 @@ func TestAccNotificationRestEndpointResource_OutboundMemberType(t *testing.T) {
 	var resourceName = "nios_notification_rest_endpoint.test_outbound_member_type"
 	var v notification.NotificationRestEndpoint
 	name := acctest.RandomNameWithPrefix("notification-rest-endpoint")
-	memberUpdatedName := utils.GetNIOSGridMemberHostName()
+	memberUpdatedName := "infoblox.member2"
 	outboundMembers := []string{memberUpdatedName}
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -373,7 +373,7 @@ func TestAccNotificationRestEndpointResource_TemplateInstance(t *testing.T) {
 	}
 
 	updatedTemplateInstance := map[string]any{
-		"template": "DHCP_Lease",
+		"template": "Version5_REST_API_Session_Template1",
 	}
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -393,7 +393,7 @@ func TestAccNotificationRestEndpointResource_TemplateInstance(t *testing.T) {
 				Config: testAccNotificationRestEndpointTemplateInstance(name, outboundMemberType, uri, updatedTemplateInstance),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNotificationRestEndpointExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "template_instance.template", "DHCP_Lease"),
+					resource.TestCheckResourceAttr(resourceName, "template_instance.template", "Version5_REST_API_Session_Template1"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -511,10 +511,10 @@ func TestAccNotificationRestEndpointResource_VendorIdentifier(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccNotificationRestEndpointVendorIdentifier(name, outboundMemberType, uri, "testing123"),
+				Config: testAccNotificationRestEndpointVendorIdentifier(name, outboundMemberType, uri, "extattrsgg WAPI"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNotificationRestEndpointExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "vendor_identifier", "testing123"),
+					resource.TestCheckResourceAttr(resourceName, "vendor_identifier", "extattrsgg WAPI"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
