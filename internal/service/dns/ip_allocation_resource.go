@@ -127,6 +127,9 @@ func (r *IPAllocationResource) ModifyPlan(
 		}
 		if b, diags := req.Private.GetKey(ctx, "snmp3_secrets_hash"); diags != nil {
 			resp.Diagnostics.Append(diags...)
+			if resp.Diagnostics.HasError() {
+				return
+			}
 		} else if b != nil {
 			if err := json.Unmarshal(b, &prev); err != nil {
 				// Older buggy format: ignore and treat as different
@@ -152,7 +155,9 @@ func (r *IPAllocationResource) ModifyPlan(
 		if prev.Hash != "" {
 			// Best-effort parse; if this fails, treat prev.Hash as a legacy value and
 			// leave prevHashes at its zero value so that we will recompute as needed.
-			_ = json.Unmarshal([]byte(prev.Hash), &prevHashes)
+			if err := json.Unmarshal([]byte(prev.Hash), &prevHashes); err != nil {
+				prevHashes = secretsHashState{}
+			}
 		}
 		plannedHashes := prevHashes
 
@@ -181,6 +186,9 @@ func (r *IPAllocationResource) ModifyPlan(
 			}
 			if data, err := json.Marshal(plannedHashes); err == nil {
 				plannedHash = string(data)
+			} else {
+				resp.Diagnostics.AddError("error marshalling hashes", err.Error())
+				return
 			}
 		}
 		// 5) Decide whether to bump revision and what to store in PRIVATE STATE
