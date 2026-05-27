@@ -931,9 +931,6 @@ func TestAccIPAllocationResource_Snmp3Credential(t *testing.T) {
 				Config: testAccIPAllocationSnmp3Credential(resourceName3, name3, ipv4addr, nil),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIPAllocationExists(context.Background(), resourceName3, &v),
-					// resource.TestCheckResourceAttr(resourceName, "snmp3_credential.user", "user1"),
-					// resource.TestCheckResourceAttr(resourceName, "snmp3_credential.authentication_protocol", "SHA"),
-					// resource.TestCheckResourceAttr(resourceName, "snmp3_credential.privacy_protocol", "AES"),
 					resource.TestCheckResourceAttr(resourceName3, "snmp3_secret_revision", "0"),
 				),
 			},
@@ -965,9 +962,6 @@ func TestAccIPAllocationResource_Snmp3Credential(t *testing.T) {
 				Config: testAccIPAllocationSnmp3Credential(resourceName4, name4, ipv4addr, nil),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIPAllocationExists(context.Background(), resourceName4, &v),
-					// resource.TestCheckResourceAttr(resourceName4, "snmp3_credential.user", "user1"),
-					// resource.TestCheckResourceAttr(resourceName4, "snmp3_credential.authentication_protocol", "SHA"),
-					// resource.TestCheckResourceAttr(resourceName4, "snmp3_credential.privacy_protocol", "AES"),
 					resource.TestCheckResourceAttr(resourceName4, "snmp3_secret_revision", "2"),
 				),
 			},
