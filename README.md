@@ -85,6 +85,7 @@ The object groups available in this provider are categorized as follows:
   - [MISC](guides/resources_datasources.md#misc)
   - [SMARTFOLDER](guides/resources_datasources.md#smartfolder)
   - [ACL](guides/resources_datasources.md#acl)
+  - [GRID](guides/resources_datasources.md#grid)
   - [DISCOVERY](guides/resources_datasources.md#discovery)
   - [NOTIFICATION](guides/resources_datasources.md#notification)
 
