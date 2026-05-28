@@ -410,7 +410,7 @@ func (r *IPAllocationResource) Create(ctx context.Context, req resource.CreateRe
 	savedIPv6FuncCalls := r.saveNestedFuncCallAttrs(data.Ipv6addrs)
 
 	// var planSnmp3 types.Object
-	snmp3SecretRevision := types.Int64Value(0)
+	var snmp3SecretRevision types.Int64
 	var (
 		planSnmp3 types.Object
 		authPwd   types.String
