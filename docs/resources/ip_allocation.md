@@ -132,12 +132,15 @@ resource "nios_ip_allocation" "allocation3" {
 <a id="nestedatt--cli_credentials"></a>
 ### Nested Schema for `cli_credentials`
 
+Required:
+
+- `credential_type` (String) The type of the credential.
+
 Optional:
 
 - `comment` (String) The commment for the credential.
 - `credential_group` (String) Group for the CLI credential.
-- `credential_type` (String) The type of the credential.
-- `password` (String) The CLI password.
+- `password` (String, [Write-only](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments)) The CLI password.
 - `user` (String) The CLI user name.
 
 Read-Only:
