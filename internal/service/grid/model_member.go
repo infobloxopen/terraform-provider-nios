@@ -476,6 +476,7 @@ var MemberResourceSchemaAttributes = map[string]schema.Attribute{
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: MemberMemberServiceCommunicationResourceSchemaAttributes,
 		},
+		Optional:            true,
 		Computed:            true,
 		MarkdownDescription: "Configure communication type for various services.",
 	},
@@ -898,7 +899,6 @@ func (m *MemberModel) Expand(ctx context.Context, diags *diag.Diagnostics, isCre
 		LomNetworkConfig:                flex.ExpandFrameworkListNestedBlock(ctx, m.LomNetworkConfig, diags, ExpandMemberLomNetworkConfig),
 		LomUsers:                        flex.ExpandFrameworkListNestedBlock(ctx, m.LomUsers, diags, ExpandMemberLomUsers),
 		MasterCandidate:                 flex.ExpandBoolPointer(m.MasterCandidate),
-		MemberServiceCommunication:      flex.ExpandFrameworkListNestedBlockEmptyAsNil(ctx, m.MemberServiceCommunication, diags, ExpandMemberMemberServiceCommunication),
 		MgmtPortSetting:                 ExpandMemberMgmtPortSetting(ctx, m.MgmtPortSetting, diags),
 		NatSetting:                      ExpandMemberNatSetting(ctx, m.NatSetting, diags),
 		NodeInfo:                        flex.ExpandFrameworkListNestedBlock(ctx, m.NodeInfo, diags, ExpandMemberNodeInfo),
@@ -951,6 +951,7 @@ func (m *MemberModel) Expand(ctx context.Context, diags *diag.Diagnostics, isCre
 
 	if !isCreate {
 		to.PreProvisioning = ExpandMemberPreProvisioning(ctx, m.PreProvisioning, diags)
+		to.MemberServiceCommunication = flex.ExpandFrameworkListNestedBlockEmptyAsNil(ctx, m.MemberServiceCommunication, diags, ExpandMemberMemberServiceCommunication)
 	}
 
 	if m.ConfigureCspMemberSetting.ValueBool() {

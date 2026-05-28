@@ -28,10 +28,12 @@ var MemberMemberServiceCommunicationAttrTypes = map[string]attr.Type{
 
 var MemberMemberServiceCommunicationResourceSchemaAttributes = map[string]schema.Attribute{
 	"service": schema.StringAttribute{
+		Optional:            true,
 		Computed:            true,
 		MarkdownDescription: "The service for a Grid member.",
 	},
 	"type": schema.StringAttribute{
+		Optional:            true,
 		Computed:            true,
 		MarkdownDescription: "Communication type.",
 	},
