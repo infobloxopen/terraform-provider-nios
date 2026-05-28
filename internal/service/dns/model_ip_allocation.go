@@ -142,9 +142,7 @@ var IPAllocationResourceSchemaAttributes = map[string]schema.Attribute{
 			Attributes: RecordHostCliCredentialsResourceSchemaAttributes,
 		},
 		Optional:            true,
-		Computed:            true,
 		MarkdownDescription: "The CLI credentials for the host record.",
-		Default:             listdefault.StaticValue(types.ListNull(types.ObjectType{AttrTypes: RecordHostCliCredentialsAttrTypes})),
 		Validators: []validator.List{
 			listvalidator.SizeAtLeast(1),
 			listvalidator.AlsoRequires(path.MatchRoot("use_snmp3_credential")),

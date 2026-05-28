@@ -14,6 +14,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
@@ -44,6 +45,7 @@ type IPAllocationResource struct {
 type secretsHashState struct {
 	AuthHash string `json:"auth_hash"`
 	PrivHash string `json:"priv_hash"`
+	CliHash  string `json:"cli_hash"`
 }
 
 func (r *IPAllocationResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -77,170 +79,195 @@ func (r *IPAllocationResource) Configure(ctx context.Context, req resource.Confi
 	r.client = client
 }
 
+func hasSecretHashes(state secretsHashState) bool {
+	return state.AuthHash != "" || state.PrivHash != "" || state.CliHash != ""
+}
+
+func hashStringValue(value types.String) string {
+	if value.IsNull() || value.IsUnknown() {
+		return ""
+	}
+
+	sum := sha256.Sum256([]byte(value.ValueString()))
+	return hex.EncodeToString(sum[:])
+}
+
+func hashCliPasswords(ctx context.Context, cliCreds types.List, diags *diag.Diagnostics) string {
+	if cliCreds.IsNull() || cliCreds.IsUnknown() {
+		return ""
+	}
+
+	var cliModels []RecordHostCliCredentialsModel
+	diags.Append(cliCreds.ElementsAs(ctx, &cliModels, false)...)
+	if diags.HasError() {
+		return ""
+	}
+
+	passwordHashes := make([]string, 0, len(cliModels))
+	hasAnyPassword := false
+
+	for _, cred := range cliModels {
+		switch {
+		case cred.Password.IsUnknown():
+			passwordHashes = append(passwordHashes, "")
+		case cred.Password.IsNull():
+			passwordHashes = append(passwordHashes, "")
+		default:
+			hasAnyPassword = true
+			passwordHashes = append(passwordHashes, hashStringValue(cred.Password))
+		}
+	}
+
+	if !hasAnyPassword {
+		return ""
+	}
+
+	// Uses config order. If reorder-only changes should not bump revision,
+	// normalize/sort the slice before marshalling.
+	data, err := json.Marshal(passwordHashes)
+	if err != nil {
+		diags.AddError("CLI Secrets Hash Error", err.Error())
+		return ""
+	}
+
+	sum := sha256.Sum256(data)
+	return hex.EncodeToString(sum[:])
+}
+
+func marshalSecretsHashState(state secretsHashState, diags *diag.Diagnostics) string {
+	data, err := json.Marshal(state)
+	if err != nil {
+		diags.AddError("Secrets Hash Marshal Error", err.Error())
+		return ""
+	}
+	return string(data)
+}
+
 func (r *IPAllocationResource) ModifyPlan(
 	ctx context.Context,
 	req resource.ModifyPlanRequest,
 	resp *resource.ModifyPlanResponse,
 ) {
-	// If the whole resource is being destroyed, do nothing with revision.
 	if req.Plan.Raw.IsNull() {
 		return
 	}
 
-	// 1) Read plan/state objects and current revision from STATE
-	var planSnmp3, stateSnmp3 types.Object
-	var stateRev types.Int64
+	var (
+		planSnmp3 types.Object
+		stateRev  types.Int64
+		cliCreds  types.List
+		authPwd   types.String
+		privPwd   types.String
+	)
 
 	resp.Diagnostics.Append(req.Plan.GetAttribute(ctx, path.Root("snmp3_credential"), &planSnmp3)...)
-	resp.Diagnostics.Append(req.State.GetAttribute(ctx, path.Root("snmp3_credential"), &stateSnmp3)...)
 	resp.Diagnostics.Append(req.State.GetAttribute(ctx, path.Root("snmp3_secret_revision"), &stateRev)...)
+	resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("cli_credentials"), &cliCreds)...)
+	resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("snmp3_credential").AtName("authentication_password"), &authPwd)...)
+	resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("snmp3_credential").AtName("privacy_password"), &privPwd)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	// 2) Read write-only values from CONFIG (never from plan/state)
-	if !planSnmp3.IsNull() || !stateSnmp3.IsNull() {
-		var authPwd, privPwd types.String
-		resp.Diagnostics.Append(req.Config.GetAttribute(
-			ctx, path.Root("snmp3_credential").AtName("authentication_password"), &authPwd,
-		)...)
-		resp.Diagnostics.Append(req.Config.GetAttribute(
-			ctx, path.Root("snmp3_credential").AtName("privacy_password"), &privPwd,
-		)...)
+	curRev := int64(0)
+	if !stateRev.IsNull() && !stateRev.IsUnknown() {
+		curRev = stateRev.ValueInt64()
+	}
+
+	var prevEnvelope struct {
+		Algo string `json:"algo"`
+		Hash string `json:"hash"`
+	}
+	if b, diags := req.Private.GetKey(ctx, "snmp3_secrets_hash"); diags != nil {
+		resp.Diagnostics.Append(diags...)
 		if resp.Diagnostics.HasError() {
 			return
 		}
-
-		// Normalize stateRev if null (e.g., first apply)
-		curRev := int64(0)
-		if !stateRev.IsNull() && !stateRev.IsUnknown() {
-			curRev = stateRev.ValueInt64()
-		}
-
-		planHas := !planSnmp3.IsNull()
-		stateHas := !stateSnmp3.IsNull()
-
-		// 3) Read previous secrets hash from PRIVATE STATE
-		var prev struct {
-			Algo string `json:"algo"`
-			Hash string `json:"hash"`
-		}
-		if b, diags := req.Private.GetKey(ctx, "snmp3_secrets_hash"); diags != nil {
-			resp.Diagnostics.Append(diags...)
-			if resp.Diagnostics.HasError() {
-				return
-			}
-		} else if b != nil {
-			if err := json.Unmarshal(b, &prev); err != nil {
-				// Older buggy format: ignore and treat as different
-				prev.Hash = ""
-			}
-		}
-
-		// 4) Compute planned secrets hash WHEN we have actual values
-		// We only compute a new hash when at least one secret is explicitly set in config
-		// and is not unknown. If neither secret is supplied, we treat the planned hash
-		// as "same as previous" (prev.Hash) to avoid false bumps.
-		computeNewHash := (!authPwd.IsNull() && !authPwd.IsUnknown()) ||
-			(!privPwd.IsNull() && !privPwd.IsUnknown())
-
-		// plannedHash is set to prev.Hash by default and only recomputed if secrets are explicitly provided
-		plannedHash := prev.Hash
-
-		// Track independent hashes for each secret in private state.
-		// This allows rotating one secret without overwriting the other's hash
-		// with an empty-string-derived value when it is not provided in config.
-		// Start from any previously stored hashes, if present.
-		prevHashes := secretsHashState{}
-		if prev.Hash != "" {
-			// Best-effort parse; if this fails, treat prev.Hash as a legacy value and
-			// leave prevHashes at its zero value so that we will recompute as needed.
-			if err := json.Unmarshal([]byte(prev.Hash), &prevHashes); err != nil {
-				prevHashes = secretsHashState{}
-			}
-		}
-		plannedHashes := prevHashes
-
-		if computeNewHash {
-			// Update authentication password hash only when the value is known in the plan.
-			if !authPwd.IsUnknown() {
-				if authPwd.IsNull() {
-					// Explicitly cleared.
-					plannedHashes.AuthHash = ""
-				} else {
-					h := sha256.New()
-					h.Write([]byte(authPwd.ValueString()))
-					plannedHashes.AuthHash = hex.EncodeToString(h.Sum(nil))
-				}
-			}
-			// Update privacy password hash only when the value is known in the plan.
-			if !privPwd.IsUnknown() {
-				if privPwd.IsNull() {
-					// Explicitly cleared.
-					plannedHashes.PrivHash = ""
-				} else {
-					h := sha256.New()
-					h.Write([]byte(privPwd.ValueString()))
-					plannedHashes.PrivHash = hex.EncodeToString(h.Sum(nil))
-				}
-			}
-			if data, err := json.Marshal(plannedHashes); err == nil {
-				plannedHash = string(data)
-			} else {
-				resp.Diagnostics.AddError("error marshalling hashes", err.Error())
-				return
-			}
-		}
-		// 5) Decide whether to bump revision and what to store in PRIVATE STATE
-		// Cases:
-		//  A) Added (stateHas=false, planHas=true)      -> bump
-		//  B) Removed (stateHas=true, planHas=false)    -> bump
-		//  C) Both present and secrets changed          -> bump
-		//  D) Both absent                               -> retain
-		//  E) Both present and secrets unchanged        -> retain
-		bump := false
-		newHashToStore := prev.Hash // default retain
-
-		switch {
-		case planHas && !stateHas:
-			// Added
-			bump = true
-			newHashToStore = plannedHash // if user didn't supply secrets, equals prev.Hash (empty on first)
-
-		case !planHas && stateHas:
-			// Removed
-			bump = true
-			newHashToStore = "" // clear private marker on removal
-
-		case planHas && stateHas:
-			// Compare only if we know the planned hash (i.e., user supplied at least one secret)
-			if computeNewHash && plannedHash != prev.Hash {
-				bump = true
-				newHashToStore = plannedHash
-			}
-			// If computeNewHash=false, we retain (no bump) since secrets are unknown/unspecified
-
-		default:
-			// Both absent -> retain
-		}
-
-		// 6) Apply the decision to the PLAN and PRIVATE STATE
-		if bump {
-			newRev := types.Int64Value(curRev + 1)
-			resp.Diagnostics.Append(resp.Plan.SetAttribute(ctx, path.Root("snmp3_secret_revision"), newRev)...)
-
-			val := map[string]string{"algo": "sha256", "hash": newHashToStore}
-			b, err := json.Marshal(val)
-			if err != nil {
-				resp.Diagnostics.AddError("Private State Marshal Error", err.Error())
-				return
-			}
-			resp.Diagnostics.Append(resp.Private.SetKey(ctx, "snmp3_secrets_hash", b)...)
-		} else {
-			// Retain current revision
-			resp.Diagnostics.Append(resp.Plan.SetAttribute(ctx, path.Root("snmp3_secret_revision"), types.Int64Value(curRev))...)
+	} else if b != nil {
+		if err := json.Unmarshal(b, &prevEnvelope); err != nil {
+			prevEnvelope.Hash = ""
 		}
 	}
+
+	prevHashes := secretsHashState{}
+	if prevEnvelope.Hash != "" {
+		if err := json.Unmarshal([]byte(prevEnvelope.Hash), &prevHashes); err != nil {
+			prevHashes = secretsHashState{}
+		}
+	}
+
+	plannedHashes := prevHashes
+
+	// SNMP3 block removed: clear both SNMP3 secret hashes.
+	if planSnmp3.IsNull() {
+		plannedHashes.AuthHash = ""
+		plannedHashes.PrivHash = ""
+	} else {
+		// Update only when config value is known.
+		if !authPwd.IsUnknown() {
+			plannedHashes.AuthHash = hashStringValue(authPwd)
+		}
+		if !privPwd.IsUnknown() {
+			plannedHashes.PrivHash = hashStringValue(privPwd)
+		}
+	}
+
+	// cli_credentials removed: clear CLI hash.
+	// If cli_credentials is known, compute a canonical hash for the full list.
+	if cliCreds.IsNull() {
+		plannedHashes.CliHash = ""
+	} else if !cliCreds.IsUnknown() {
+		plannedHashes.CliHash = hashCliPasswords(ctx, cliCreds, &resp.Diagnostics)
+		if resp.Diagnostics.HasError() {
+			return
+		}
+	}
+
+	prevHasSecrets := hasSecretHashes(prevHashes)
+	plannedHasSecrets := hasSecretHashes(plannedHashes)
+	secretsChanged := plannedHashes != prevHashes
+
+	bump := false
+	newHashToStore := prevEnvelope.Hash
+
+	switch {
+	case plannedHasSecrets && !prevHasSecrets:
+		bump = true
+		newHashToStore = marshalSecretsHashState(plannedHashes, &resp.Diagnostics)
+
+	case !plannedHasSecrets && prevHasSecrets:
+		bump = true
+		newHashToStore = ""
+
+	case plannedHasSecrets && prevHasSecrets && secretsChanged:
+		bump = true
+		newHashToStore = marshalSecretsHashState(plannedHashes, &resp.Diagnostics)
+	}
+
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	if bump {
+		newRev := types.Int64Value(curRev + 1)
+		resp.Diagnostics.Append(resp.Plan.SetAttribute(ctx, path.Root("snmp3_secret_revision"), newRev)...)
+
+		val := map[string]string{
+			"algo": "sha256",
+			"hash": newHashToStore,
+		}
+		b, err := json.Marshal(val)
+		if err != nil {
+			resp.Diagnostics.AddError("error marshalling secrets hash", err.Error())
+			return
+		}
+		resp.Diagnostics.Append(resp.Private.SetKey(ctx, "snmp3_secrets_hash", b)...)
+		return
+	}
+
+	resp.Diagnostics.Append(
+		resp.Plan.SetAttribute(ctx, path.Root("snmp3_secret_revision"), types.Int64Value(curRev))...,
+	)
 }
 
 func (r *IPAllocationResource) ValidateConfig(ctx context.Context, req resource.ValidateConfigRequest, resp *resource.ValidateConfigResponse) {
@@ -277,6 +304,72 @@ func (r *IPAllocationResource) ValidateConfig(ctx context.Context, req resource.
 			"'ipv6addrs' can contain at most one element.",
 		)
 	}
+}
+
+func loadCliCredentialModelsFromConfig(
+	ctx context.Context,
+	config tfsdk.Config,
+	diags *diag.Diagnostics,
+) ([]RecordHostCliCredentialsModel, types.List) {
+	var cliCreds types.List
+	diags.Append(config.GetAttribute(ctx, path.Root("cli_credentials"), &cliCreds)...)
+	if diags.HasError() {
+		return nil, cliCreds
+	}
+
+	if cliCreds.IsNull() || cliCreds.IsUnknown() {
+		return nil, cliCreds
+	}
+
+	var cliModels []RecordHostCliCredentialsModel
+	diags.Append(cliCreds.ElementsAs(ctx, &cliModels, false)...)
+	if diags.HasError() {
+		return nil, cliCreds
+	}
+
+	return cliModels, cliCreds
+}
+
+func applyCliCredentialPasswords(
+	payloadCreds []dns.RecordHostCliCredentials,
+	cliModels []RecordHostCliCredentialsModel,
+) {
+	for i := range cliModels {
+		if i >= len(payloadCreds) {
+			break
+		}
+
+		if !cliModels[i].Password.IsNull() && !cliModels[i].Password.IsUnknown() {
+			password := cliModels[i].Password.ValueString()
+			payloadCreds[i].Password = &password
+		}
+	}
+}
+
+func buildSecretsHashState(
+	ctx context.Context,
+	authPwd types.String,
+	privPwd types.String,
+	cliCreds types.List,
+	diags *diag.Diagnostics,
+) secretsHashState {
+	return secretsHashState{
+		AuthHash: hashStringValue(authPwd),
+		PrivHash: hashStringValue(privPwd),
+		CliHash:  hashCliPasswords(ctx, cliCreds, diags),
+	}
+}
+
+func marshalSecretsEnvelope(state secretsHashState) ([]byte, error) {
+	hashJSON, err := json.Marshal(state)
+	if err != nil {
+		return nil, err
+	}
+
+	return json.Marshal(map[string]string{
+		"algo": "sha256",
+		"hash": string(hashJSON),
+	})
 }
 
 func (r *IPAllocationResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
@@ -316,66 +409,44 @@ func (r *IPAllocationResource) Create(ctx context.Context, req resource.CreateRe
 	// Save original IPv6 function call attributes
 	savedIPv6FuncCalls := r.saveNestedFuncCallAttrs(data.Ipv6addrs)
 
-	var planSnmp3 types.Object
+	// var planSnmp3 types.Object
 	snmp3SecretRevision := types.Int64Value(0)
+	var (
+		planSnmp3 types.Object
+		authPwd   types.String
+		privPwd   types.String
+		cliCreds  types.List
+		cliModels []RecordHostCliCredentialsModel
+	)
 
 	resp.Diagnostics.Append(req.Plan.GetAttribute(ctx, path.Root("snmp3_credential"), &planSnmp3)...)
+	resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("snmp3_credential").AtName("authentication_password"), &authPwd)...)
+	resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("snmp3_credential").AtName("privacy_password"), &privPwd)...)
+
+	cliModels, cliCreds = loadCliCredentialModelsFromConfig(ctx, req.Config, &resp.Diagnostics)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	// resp.Diagnostics.Append(req.Plan.GetAttribute(ctx, path.Root("snmp3_credential"), &planSnmp3)...)
 
 	payload := data.Expand(ctx, &resp.Diagnostics)
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	if !planSnmp3.IsNull() {
-		// Read write-only from CONFIG
-		var authPwd, privPwd types.String
-		snmp3SecretRevision = types.Int64Value(1) // new resource with secrets -> start at revision 1
-		resp.Diagnostics.Append(req.Config.GetAttribute(ctx,
-			path.Root("snmp3_credential").AtName("authentication_password"), &authPwd)...)
-		resp.Diagnostics.Append(req.Config.GetAttribute(ctx,
-			path.Root("snmp3_credential").AtName("privacy_password"), &privPwd)...)
 
-		// Persist private hash so future plans can read it
-		var ap, pp string
-		if !authPwd.IsNull() || !privPwd.IsNull() {
-			if !authPwd.IsNull() && !authPwd.IsUnknown() {
-				ap = authPwd.ValueString()
-				payload.Snmp3Credential.AuthenticationPassword = &ap
-			}
-			if !privPwd.IsNull() && !privPwd.IsUnknown() {
-				pp = privPwd.ValueString()
-				payload.Snmp3Credential.PrivacyPassword = &pp
-			}
-			secretData := secretsHashState{}
-			if !authPwd.IsUnknown() {
-				if authPwd.IsNull() {
-					// Explicitly cleared.
-					secretData.AuthHash = ""
-				} else {
-					h := sha256.New()
-					h.Write([]byte(authPwd.ValueString()))
-					secretData.AuthHash = hex.EncodeToString(h.Sum(nil))
-				}
-			}
-			if !privPwd.IsUnknown() {
-				if privPwd.IsNull() {
-					// Explicitly cleared.
-					secretData.PrivHash = ""
-				} else {
-					h := sha256.New()
-					h.Write([]byte(privPwd.ValueString()))
-					secretData.PrivHash = hex.EncodeToString(h.Sum(nil))
-				}
-			}
-			secretDataJSON, _ := json.Marshal(secretData)
-			val := map[string]string{"algo": "sha256", "hash": string(secretDataJSON)}
-			hashSecrets, err := json.Marshal(val)
-			if err != nil {
-				resp.Diagnostics.AddError("Private State Marshal Error", err.Error())
-				return
-			}
-			resp.Diagnostics.Append(resp.Private.SetKey(ctx, "snmp3_secrets_hash", hashSecrets)...)
+	if !planSnmp3.IsNull() && payload.Snmp3Credential != nil {
+		if !authPwd.IsNull() && !authPwd.IsUnknown() {
+			ap := authPwd.ValueString()
+			payload.Snmp3Credential.AuthenticationPassword = &ap
+		}
+		if !privPwd.IsNull() && !privPwd.IsUnknown() {
+			pp := privPwd.ValueString()
+			payload.Snmp3Credential.PrivacyPassword = &pp
 		}
 	}
+
+	applyCliCredentialPasswords(payload.CliCredentials, cliModels)
 
 	var apiRes *dns.CreateRecordHostResponse
 
@@ -416,6 +487,25 @@ func (r *IPAllocationResource) Create(ctx context.Context, req resource.CreateRe
 	if diags.HasError() {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while create RecordHost due inherited Extensible attributes, got error: %s", err))
 		return
+	}
+
+	secretData := buildSecretsHashState(ctx, authPwd, privPwd, cliCreds, &resp.Diagnostics)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	if hasSecretHashes(secretData) {
+		snmp3SecretRevision = types.Int64Value(1)
+
+		hashSecrets, err := marshalSecretsEnvelope(secretData)
+		if err != nil {
+			resp.Diagnostics.AddError("error marshalling secrets hash", err.Error())
+			return
+		}
+		resp.Diagnostics.Append(resp.Private.SetKey(ctx, "snmp3_secrets_hash", hashSecrets)...)
+	} else {
+		snmp3SecretRevision = types.Int64Value(0)
+		resp.Diagnostics.Append(resp.Private.SetKey(ctx, "snmp3_secrets_hash", nil)...)
 	}
 
 	data.Snmp3SecretRevision = snmp3SecretRevision
@@ -697,21 +787,32 @@ func (r *IPAllocationResource) Update(ctx context.Context, req resource.UpdateRe
 	// Preserve other settings
 	preserveDHCPSettings(updateReq, &currentHost)
 
-	var authPwd, privPwd types.String
-	resp.Diagnostics.Append(req.Config.GetAttribute(ctx,
-		path.Root("snmp3_credential").AtName("authentication_password"), &authPwd)...)
-	resp.Diagnostics.Append(req.Config.GetAttribute(ctx,
-		path.Root("snmp3_credential").AtName("privacy_password"), &privPwd)...)
+	var (
+		authPwd   types.String
+		privPwd   types.String
+		cliCreds  types.List
+		cliModels []RecordHostCliCredentialsModel
+	)
 
-	// Set the API fields only when provided
-	if !authPwd.IsNull() && !authPwd.IsUnknown() {
-		ap := authPwd.ValueString()
-		updateReq.Snmp3Credential.AuthenticationPassword = &ap
+	resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("snmp3_credential").AtName("authentication_password"), &authPwd)...)
+	resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("snmp3_credential").AtName("privacy_password"), &privPwd)...)
+
+	cliModels, cliCreds = loadCliCredentialModelsFromConfig(ctx, req.Config, &resp.Diagnostics)
+	if resp.Diagnostics.HasError() {
+		return
 	}
-	if !privPwd.IsNull() && !privPwd.IsUnknown() {
-		pp := privPwd.ValueString()
-		updateReq.Snmp3Credential.PrivacyPassword = &pp
+	if updateReq.Snmp3Credential != nil {
+		if !authPwd.IsNull() && !authPwd.IsUnknown() {
+			ap := authPwd.ValueString()
+			updateReq.Snmp3Credential.AuthenticationPassword = &ap
+		}
+		if !privPwd.IsNull() && !privPwd.IsUnknown() {
+			pp := privPwd.ValueString()
+			updateReq.Snmp3Credential.PrivacyPassword = &pp
+		}
 	}
+
+	applyCliCredentialPasswords(updateReq.CliCredentials, cliModels)
 
 	// Clear fields not allowed in update call
 	updateReq.NetworkView = nil
@@ -748,6 +849,22 @@ func (r *IPAllocationResource) Update(ctx context.Context, req resource.UpdateRe
 	if diags.HasError() {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while update RecordHost due inherited Extensible attributes, got error: %s", diags))
 		return
+	}
+
+	secretData := buildSecretsHashState(ctx, authPwd, privPwd, cliCreds, &resp.Diagnostics)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	if hasSecretHashes(secretData) {
+		hashSecrets, err := marshalSecretsEnvelope(secretData)
+		if err != nil {
+			resp.Diagnostics.AddError("error marshalling secrets hash", err.Error())
+			return
+		}
+		resp.Diagnostics.Append(resp.Private.SetKey(ctx, "snmp3_secrets_hash", hashSecrets)...)
+	} else {
+		resp.Diagnostics.Append(resp.Private.SetKey(ctx, "snmp3_secrets_hash", nil)...)
 	}
 
 	data.Flatten(ctx, &res, &resp.Diagnostics)
