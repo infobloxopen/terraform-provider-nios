@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
@@ -40,6 +41,7 @@ type SyslogEndpointModel struct {
 	WapiUserName       types.String `tfsdk:"wapi_user_name"`
 	WapiUserPassword   types.String `tfsdk:"wapi_user_password"`
 	ExtAttrsAll        types.Map    `tfsdk:"extattrs_all"`
+	PasswordVersion    types.Int64  `tfsdk:password_version`
 }
 
 var SyslogEndpointAttrTypes = map[string]attr.Type{
@@ -55,6 +57,7 @@ var SyslogEndpointAttrTypes = map[string]attr.Type{
 	"vendor_identifier":    types.StringType,
 	"wapi_user_name":       types.StringType,
 	"wapi_user_password":   types.StringType,
+	"password_version":     types.StringType,
 	"extattrs_all":         types.MapType{ElemType: types.StringType},
 }
 
@@ -146,9 +149,7 @@ var SyslogEndpointResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"wapi_user_password": schema.StringAttribute{
 		Optional:  true,
-		Computed:  true,
-		Sensitive: true,
-		Default:   stringdefault.StaticString(""),
+		WriteOnly: true,
 		Validators: []validator.String{
 			customvalidator.ValidateTrimmedString(),
 		},
@@ -160,6 +161,13 @@ var SyslogEndpointResourceSchemaAttributes = map[string]schema.Attribute{
 		ElementType:         types.StringType,
 		PlanModifiers: []planmodifier.Map{
 			importmod.AssociateInternalId(),
+		},
+	},
+	"password_version": schema.Int64Attribute{
+		Computed:            true,
+		MarkdownDescription: "Internal revision incremented when admin user password changes.",
+		PlanModifiers: []planmodifier.Int64{
+			int64planmodifier.UseStateForUnknown(),
 		},
 	},
 }

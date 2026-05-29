@@ -11,6 +11,8 @@ import (
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -33,6 +35,7 @@ type CertificateAuthserviceModel struct {
 	Name                  types.String `tfsdk:"name"`
 	OcspCheck             types.String `tfsdk:"ocsp_check"`
 	OcspResponders        types.List   `tfsdk:"ocsp_responders"`
+	PasswordVersion       types.Int64  `tfsdk:"password_version"`
 	RecoveryInterval      types.Int64  `tfsdk:"recovery_interval"`
 	RemoteLookupPassword  types.String `tfsdk:"remote_lookup_password"`
 	RemoteLookupService   types.String `tfsdk:"remote_lookup_service"`
@@ -54,6 +57,7 @@ var CertificateAuthserviceAttrTypes = map[string]attr.Type{
 	"name":                    types.StringType,
 	"ocsp_check":              types.StringType,
 	"ocsp_responders":         types.ListType{ElemType: types.ObjectType{AttrTypes: CertificateAuthserviceOcspRespondersAttrTypes}},
+	"password_version":        types.Int64Type,
 	"recovery_interval":       types.Int64Type,
 	"remote_lookup_password":  types.StringType,
 	"remote_lookup_service":   types.StringType,
@@ -147,6 +151,13 @@ var CertificateAuthserviceResourceSchemaAttributes = map[string]schema.Attribute
 		},
 		MarkdownDescription: "An ordered list of OCSP responders that are part of the certificate authentication service.",
 	},
+	"password_version": schema.Int64Attribute{
+		Computed:            true,
+		MarkdownDescription: "Internal version incremented when admin user password changes.",
+		PlanModifiers: []planmodifier.Int64{
+			int64planmodifier.UseStateForUnknown(),
+		},
+	},
 	"recovery_interval": schema.Int64Attribute{
 		Optional: true,
 		Computed: true,
@@ -158,7 +169,7 @@ var CertificateAuthserviceResourceSchemaAttributes = map[string]schema.Attribute
 	},
 	"remote_lookup_password": schema.StringAttribute{
 		Optional:            true,
-		Sensitive:           true,
+		WriteOnly:           true,
 		MarkdownDescription: "The password for the service account.",
 	},
 	"remote_lookup_service": schema.StringAttribute{
