@@ -2085,6 +2085,22 @@ func main() {
 		return
 	}
 
+	ecosystemTemplatePath13 := filepath.Join(cwd, "internal/testdata/nios_ecosystem_templates", "event_template_schema_default.json")
+
+	if _, statErr := os.Stat(ecosystemTemplatePath13); statErr == nil {
+		err = ConfigureEcoSystemTemplates(host, wapiVer, username, password, ecosystemTemplatePath13)
+		if err != nil {
+			fmt.Printf("Error uploading ecosystem templates: %v\n", err)
+			return
+		}
+		fmt.Println("Ecosystem template 13 uploaded successfully")
+	} else if os.IsNotExist(statErr) {
+		fmt.Printf("Ecosystem template 13 not found at %s, skipping upload\n", ecosystemTemplatePath13)
+	} else {
+		fmt.Printf("Error checking ecosystem template 13 path %s: %v\n", ecosystemTemplatePath13, statErr)
+		return
+	}
+
 	clients := PreConfigClients{
 		IPAM:         apiClient.IPAMAPI,
 		DHCP:         apiClient.DHCPAPI,
