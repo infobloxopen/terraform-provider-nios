@@ -95,16 +95,20 @@ Read-Only:
 - `ms_ad_user_data` (Attributes) The Microsoft Active Directory user related information. (see [below for nested schema](#nestedatt--result--ms_ad_user_data))
 - `ref` (String) The reference to the object.
 - `uuid` (String) Universally Unique ID assigned for this object.
+- `secrets_version` (Number) Internal version incremented when secrets (snmp3_credential and cli_credentials) change.
 - `zone` (String) The name of the zone in which the record resides. Example: "zone.com". If a view is not specified when searching by zone, the default view is used.
 
 <a id="nestedatt--result--cli_credentials"></a>
 ### Nested Schema for `result.cli_credentials`
 
+Required:
+
+- `credential_type` (String) The type of the credential.
+
 Optional:
 
 - `comment` (String) The commment for the credential.
 - `credential_group` (String) Group for the CLI credential.
-- `credential_type` (String) The type of the credential.
 - `password` (String) The CLI password.
 - `user` (String) The CLI user name.
 
@@ -498,15 +502,18 @@ Read-Only:
 <a id="nestedatt--result--snmp3_credential"></a>
 ### Nested Schema for `result.snmp3_credential`
 
-Optional:
+Required:
 
 - `authentication_password` (String) Authentication password for the SNMPv3 user.
 - `authentication_protocol` (String) Authentication protocol for the SNMPv3 user.
-- `comment` (String) Comments for the SNMPv3 user.
-- `credential_group` (String) Group for the SNMPv3 credential.
 - `privacy_password` (String) Privacy password for the SNMPv3 user.
 - `privacy_protocol` (String) Privacy protocol for the SNMPv3 user.
 - `user` (String) The SNMPv3 user name.
+
+Optional:
+
+- `comment` (String) Comments for the SNMPv3 user.
+- `credential_group` (String) Group for the SNMPv3 credential.
 
 
 <a id="nestedatt--result--snmp_credential"></a>
