@@ -907,7 +907,7 @@ func (m *MemberModel) Expand(ctx context.Context, diags *diag.Diagnostics, isCre
 		MemberServiceCommunication:      flex.ExpandFrameworkListNestedBlockEmptyAsNil(ctx, m.MemberServiceCommunication, diags, ExpandMemberMemberServiceCommunication),
 		MgmtPortSetting:                 ExpandMemberMgmtPortSetting(ctx, m.MgmtPortSetting, diags),
 		NatSetting:                      ExpandMemberNatSetting(ctx, m.NatSetting, diags),
-		NodeInfo:                        flex.ExpandFrameworkListNestedBlock(ctx, m.NodeInfo, diags, ExpandMemberNodeInfo),
+		NodeInfo:                        flex.ExpandFrameworkListNestedBlockEmptyAsNil(ctx, m.NodeInfo, diags, ExpandMemberNodeInfo),
 		NtpSetting:                      ExpandMemberNtpSetting(ctx, m.NtpSetting, diags),
 		OspfList:                        flex.ExpandFrameworkListNestedBlock(ctx, m.OspfList, diags, ExpandMemberOspfList),
 		PassiveHaArpEnabled:             flex.ExpandBoolPointer(m.PassiveHaArpEnabled),

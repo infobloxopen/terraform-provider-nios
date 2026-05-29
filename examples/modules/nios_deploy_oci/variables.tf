@@ -182,3 +182,40 @@ variable "default_admin_password" {
   type        = string
   sensitive   = true
 }
+
+variable "ha_subnet_id" {
+  description = "OCID of the subnet for the HA interface."
+  type        = string
+}
+
+variable "image_id" {
+  description = "OCID of the custom image imported from the QCOW2. Overrides image_name if set."
+  type        = string
+}
+
+variable "idcs_endpoint" {
+  description = "IDCS endpoint URL for OCI IAM operations"
+  type        = string
+}
+
+variable "identity_domain_name" {
+  description = "Name of the Identity Domain (used in policy statements). Add your custom domain name."
+  type        = string
+  default     = "Default"
+}
+
+variable "dynamic_group_name" {
+  description = "Name for the IAM dynamic group to create for HA instances."
+  type        = string
+  default     = "nios-ha-dynamic-group"
+}
+
+variable "freeform_tags" {
+  description = "A map of key/value freeform tags to assign to the instance."
+  type        = map(string)
+  default = {
+    product       = "nios"
+    dontstop      = "yes"
+    dontterminate = "yes"
+  }
+}

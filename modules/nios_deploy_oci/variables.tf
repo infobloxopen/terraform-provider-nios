@@ -4,36 +4,79 @@ variable "compartment_id" {
   type        = string
 }
 
-// Object Storage — Bucket
+// Image source selection
+// By default the module expects an existing custom image OCID (var.image_id).
+// Set create_image = true to upload the QCOW2 to Object Storage and import
+// it as a custom image inside this module.
+variable "create_image" {
+  description = "If true, the module uploads the NIOS QCOW2 to Object Storage and imports it as a custom image. If false (default), the module uses an existing image via var.image_id."
+  type        = bool
+  default     = false
+}
+
+// Object Storage — Bucket (used only when create_image = true)
 variable "create_bucket" {
-  description = "Set to true to create a new bucket; false to reuse an existing one."
+  description = "Set to true to create a new bucket; false to reuse an existing one. Only used when create_image = true."
   type        = bool
   default     = true
 }
 
 variable "bucket_name" {
-  description = "Name of the Object Storage bucket for the NIOS QCOW2 image."
+  description = "Name of the Object Storage bucket for the NIOS QCOW2 image. Required when create_image = true."
   type        = string
+  default     = null
+
+  validation {
+    condition     = !var.create_image || (var.bucket_name != null && var.bucket_name != "")
+    error_message = "bucket_name is required when create_image = true."
+  }
 }
 
-// Object Storage — QCOW2 Upload
+// Object Storage — QCOW2 Upload (used only when create_image = true)
 variable "nios_qcow2_local_path" {
-  description = "Absolute local path to the NIOS QCOW2 image file."
+  description = "Absolute local path to the NIOS QCOW2 image file. Required when create_image = true."
   type        = string
+  default     = null
+
+  validation {
+    condition     = !var.create_image || (var.nios_qcow2_local_path != null && var.nios_qcow2_local_path != "")
+    error_message = "nios_qcow2_local_path is required when create_image = true."
+  }
 }
 
 variable "nios_object_name" {
-  description = "Object name to store the QCOW2 as in the bucket."
+  description = "Object name to store the QCOW2 as in the bucket. Required when create_image = true."
   type        = string
+  default     = null
+
+  validation {
+    condition     = !var.create_image || (var.nios_object_name != null && var.nios_object_name != "")
+    error_message = "nios_object_name is required when create_image = true."
+  }
 }
 
 // Custom Image
 variable "image_name" {
-  description = "Display name for the custom OCI image imported from the QCOW2."
+  description = "Display name for the custom OCI image imported from the QCOW2. Only used when create_image = true."
   type        = string
   default     = "nios-custom-image"
 }
 
+variable "image_id" {
+  description = "OCID of an existing NIOS custom image to use for instance creation. Required when create_image = false; must not be set when create_image = true."
+  type        = string
+  default     = null
+
+  validation {
+    condition     = var.create_image || (var.image_id != null && var.image_id != "")
+    error_message = "image_id is required when create_image = false. Either provide an existing image OCID via image_id, or set create_image = true and provide bucket_name, nios_qcow2_local_path, and nios_object_name so the module can upload the QCOW2 and import it as a custom image."
+  }
+
+  validation {
+    condition     = !var.create_image || var.image_id == null || var.image_id == ""
+    error_message = "image_id must not be set when create_image = true. The module will create and use its own image; remove image_id (or set create_image = false to use an existing image OCID)."
+  }
+}
 // Compute Instances
 variable "instance_name" {
   description = "Display name for the OCI instance."
@@ -155,4 +198,45 @@ variable "default_admin_password" {
   description = "Default admin password for NIOS."
   type        = string
   sensitive   = true
+}
+
+variable "freeform_tags" {
+  description = "A map of key/value freeform tags to assign to the instance."
+  type        = map(string)
+  default = {
+    product       = "nios"
+    dontstop      = "yes"
+    dontterminate = "yes"
+  }
+}
+
+// HA Configuration
+variable "ha_subnet_id" {
+  description = "OCID of the subnet for the HA interface."
+  type        = string
+  default     = null
+}
+
+variable "enable_ha" {
+  description = "Enable High Availability configuration (adds HA VNIC)."
+  type        = bool
+  default     = false
+}
+
+variable "is_primary" {
+  description = "True for the primary node in an HA pair. It has the VIP assigned to its HA VNIC. Set to false for the secondary node."
+  type        = bool
+  default     = false
+}
+
+variable "ha_vnic_name" {
+  description = "Display name for the HA VNIC."
+  type        = string
+  default     = "nios-ha-vnic"
+}
+
+variable "ha_assign_public_ip" {
+  description = "Assign a public IP to the HA VNIC."
+  type        = bool
+  default     = false
 }
