@@ -41,7 +41,7 @@ type SyslogEndpointModel struct {
 	WapiUserName       types.String `tfsdk:"wapi_user_name"`
 	WapiUserPassword   types.String `tfsdk:"wapi_user_password"`
 	ExtAttrsAll        types.Map    `tfsdk:"extattrs_all"`
-	PasswordVersion    types.Int64  `tfsdk:password_version`
+	PasswordVersion    types.Int64  `tfsdk:"password_version"`
 }
 
 var SyslogEndpointAttrTypes = map[string]attr.Type{
