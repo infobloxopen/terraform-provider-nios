@@ -200,7 +200,7 @@ func TestAccIPAllocationResource_CliCredentials(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIPAllocationExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "cli_credentials.#", "0"),
-					resource.TestCheckResourceAttr(resourceName, "snmp3_secret_revision", "0"),
+					resource.TestCheckResourceAttr(resourceName, "secrets_version", "0"),
 				),
 			},
 			// Add cli_credentials and Read
@@ -212,7 +212,7 @@ func TestAccIPAllocationResource_CliCredentials(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "cli_credentials.0.user", "user1"),
 					resource.TestCheckResourceAttr(resourceName, "cli_credentials.0.credential_type", "SSH"),
 					resource.TestCheckResourceAttr(resourceName, "cli_credentials.0.comment", "cli credential comment"),
-					resource.TestCheckResourceAttr(resourceName, "snmp3_secret_revision", "1"),
+					resource.TestCheckResourceAttr(resourceName, "secrets_version", "1"),
 				),
 			},
 			// Update password (write-only)field of cli_credentials and Read
@@ -224,7 +224,7 @@ func TestAccIPAllocationResource_CliCredentials(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "cli_credentials.0.user", "user1"),
 					resource.TestCheckResourceAttr(resourceName, "cli_credentials.0.credential_type", "SSH"),
 					resource.TestCheckResourceAttr(resourceName, "cli_credentials.0.comment", "cli credential comment"),
-					resource.TestCheckResourceAttr(resourceName, "snmp3_secret_revision", "2"),
+					resource.TestCheckResourceAttr(resourceName, "secrets_version", "2"),
 				),
 			},
 			// Update non write-only field of cli_credentials and Read
@@ -236,7 +236,7 @@ func TestAccIPAllocationResource_CliCredentials(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "cli_credentials.0.user", "user2"),
 					resource.TestCheckResourceAttr(resourceName, "cli_credentials.0.credential_type", "SSH"),
 					resource.TestCheckResourceAttr(resourceName, "cli_credentials.0.comment", "cli credential comment update"),
-					resource.TestCheckResourceAttr(resourceName, "snmp3_secret_revision", "2"),
+					resource.TestCheckResourceAttr(resourceName, "secrets_version", "2"),
 				),
 			},
 			// Update write-only field of cli_credentials and Read
@@ -248,7 +248,7 @@ func TestAccIPAllocationResource_CliCredentials(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "cli_credentials.0.user", "user1"),
 					resource.TestCheckResourceAttr(resourceName, "cli_credentials.0.credential_type", "SSH"),
 					resource.TestCheckResourceAttr(resourceName, "cli_credentials.0.comment", "cli credential comment"),
-					resource.TestCheckResourceAttr(resourceName, "snmp3_secret_revision", "3"),
+					resource.TestCheckResourceAttr(resourceName, "secrets_version", "3"),
 				),
 			},
 			// Remove cli_credentials and Read
@@ -257,10 +257,19 @@ func TestAccIPAllocationResource_CliCredentials(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIPAllocationExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "cli_credentials.#", "0"),
-					// resource.TestCheckResourceAttr(resourceName, "cli_credentials.0.user", "user2"),
-					// resource.TestCheckResourceAttr(resourceName, "cli_credentials.0.credential_type", "SSH"),
-					// resource.TestCheckResourceAttr(resourceName, "cli_credentials.0.comment", "cli credential comment update"),
-					resource.TestCheckResourceAttr(resourceName, "snmp3_secret_revision", "4"),
+					resource.TestCheckResourceAttr(resourceName, "secrets_version", "4"),
+				),
+			},
+			// Add cli_credentials again and Read
+			{
+				Config: testAccIPAllocationCliCredentials(name, ipv4addr, cliCred2),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckIPAllocationExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "cli_credentials.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "cli_credentials.0.user", "user2"),
+					resource.TestCheckResourceAttr(resourceName, "cli_credentials.0.credential_type", "SSH"),
+					resource.TestCheckResourceAttr(resourceName, "cli_credentials.0.comment", "cli credential comment update"),
+					resource.TestCheckResourceAttr(resourceName, "secrets_version", "5"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -934,7 +943,7 @@ func TestAccIPAllocationResource_Snmp3Credential(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "snmp3_credential.user", "user1"),
 					resource.TestCheckResourceAttr(resourceName, "snmp3_credential.authentication_protocol", "SHA"),
 					resource.TestCheckResourceAttr(resourceName, "snmp3_credential.privacy_protocol", "AES"),
-					resource.TestCheckResourceAttr(resourceName, "snmp3_secret_revision", "1"),
+					resource.TestCheckResourceAttr(resourceName, "secrets_version", "1"),
 				),
 			},
 			// Update both the secrets and Read
@@ -945,7 +954,7 @@ func TestAccIPAllocationResource_Snmp3Credential(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "snmp3_credential.user", "user1"),
 					resource.TestCheckResourceAttr(resourceName, "snmp3_credential.authentication_protocol", "SHA"),
 					resource.TestCheckResourceAttr(resourceName, "snmp3_credential.privacy_protocol", "AES"),
-					resource.TestCheckResourceAttr(resourceName, "snmp3_secret_revision", "2"),
+					resource.TestCheckResourceAttr(resourceName, "secrets_version", "2"),
 				),
 			},
 			// Update both the secrets and Read
@@ -956,7 +965,7 @@ func TestAccIPAllocationResource_Snmp3Credential(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "snmp3_credential.user", "user1"),
 					resource.TestCheckResourceAttr(resourceName, "snmp3_credential.authentication_protocol", "SHA"),
 					resource.TestCheckResourceAttr(resourceName, "snmp3_credential.privacy_protocol", "AES"),
-					resource.TestCheckResourceAttr(resourceName, "snmp3_secret_revision", "3"),
+					resource.TestCheckResourceAttr(resourceName, "secrets_version", "3"),
 				),
 			},
 			// Case2: Create a new resource with both the secrets , update only authentication password and Read
@@ -968,7 +977,7 @@ func TestAccIPAllocationResource_Snmp3Credential(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName1, "snmp3_credential.user", "user1"),
 					resource.TestCheckResourceAttr(resourceName1, "snmp3_credential.authentication_protocol", "SHA"),
 					resource.TestCheckResourceAttr(resourceName1, "snmp3_credential.privacy_protocol", "AES"),
-					resource.TestCheckResourceAttr(resourceName1, "snmp3_secret_revision", "1"),
+					resource.TestCheckResourceAttr(resourceName1, "secrets_version", "1"),
 				),
 			},
 			// Update only authentication password and Read
@@ -979,7 +988,7 @@ func TestAccIPAllocationResource_Snmp3Credential(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName1, "snmp3_credential.user", "user1"),
 					resource.TestCheckResourceAttr(resourceName1, "snmp3_credential.authentication_protocol", "SHA"),
 					resource.TestCheckResourceAttr(resourceName1, "snmp3_credential.privacy_protocol", "AES"),
-					resource.TestCheckResourceAttr(resourceName1, "snmp3_secret_revision", "2"),
+					resource.TestCheckResourceAttr(resourceName1, "secrets_version", "2"),
 				),
 			},
 			// Case3: Create a new resource with both the secrets , update only the privacy password and Read
@@ -991,7 +1000,7 @@ func TestAccIPAllocationResource_Snmp3Credential(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName2, "snmp3_credential.user", "user1"),
 					resource.TestCheckResourceAttr(resourceName2, "snmp3_credential.authentication_protocol", "SHA"),
 					resource.TestCheckResourceAttr(resourceName2, "snmp3_credential.privacy_protocol", "AES"),
-					resource.TestCheckResourceAttr(resourceName2, "snmp3_secret_revision", "1"),
+					resource.TestCheckResourceAttr(resourceName2, "secrets_version", "1"),
 				),
 			},
 			// Update only privacy password and Read
@@ -1002,7 +1011,7 @@ func TestAccIPAllocationResource_Snmp3Credential(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName2, "snmp3_credential.user", "user1"),
 					resource.TestCheckResourceAttr(resourceName2, "snmp3_credential.authentication_protocol", "SHA"),
 					resource.TestCheckResourceAttr(resourceName2, "snmp3_credential.privacy_protocol", "AES"),
-					resource.TestCheckResourceAttr(resourceName2, "snmp3_secret_revision", "2"),
+					resource.TestCheckResourceAttr(resourceName2, "secrets_version", "2"),
 				),
 			},
 			// Case4: Create a new resource without any secrets , add snmp3_credential block and Read
@@ -1011,7 +1020,7 @@ func TestAccIPAllocationResource_Snmp3Credential(t *testing.T) {
 				Config: testAccIPAllocationSnmp3Credential(resourceName3, name3, ipv4addr, nil),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIPAllocationExists(context.Background(), resourceName3, &v),
-					resource.TestCheckResourceAttr(resourceName3, "snmp3_secret_revision", "0"),
+					resource.TestCheckResourceAttr(resourceName3, "secrets_version", "0"),
 				),
 			},
 			// Add snmp3_credential block and Read
@@ -1022,7 +1031,7 @@ func TestAccIPAllocationResource_Snmp3Credential(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName3, "snmp3_credential.user", "user1"),
 					resource.TestCheckResourceAttr(resourceName3, "snmp3_credential.authentication_protocol", "SHA"),
 					resource.TestCheckResourceAttr(resourceName3, "snmp3_credential.privacy_protocol", "AES"),
-					resource.TestCheckResourceAttr(resourceName3, "snmp3_secret_revision", "1"),
+					resource.TestCheckResourceAttr(resourceName3, "secrets_version", "1"),
 				),
 			},
 			// Case5: Create a new resource with both the secrets and delete the snmp3_credential block and Read
@@ -1034,7 +1043,7 @@ func TestAccIPAllocationResource_Snmp3Credential(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName4, "snmp3_credential.user", "user1"),
 					resource.TestCheckResourceAttr(resourceName4, "snmp3_credential.authentication_protocol", "SHA"),
 					resource.TestCheckResourceAttr(resourceName4, "snmp3_credential.privacy_protocol", "AES"),
-					resource.TestCheckResourceAttr(resourceName4, "snmp3_secret_revision", "1"),
+					resource.TestCheckResourceAttr(resourceName4, "secrets_version", "1"),
 				),
 			},
 			// Delete snmp3_credential block and Read
@@ -1042,7 +1051,7 @@ func TestAccIPAllocationResource_Snmp3Credential(t *testing.T) {
 				Config: testAccIPAllocationSnmp3Credential(resourceName4, name4, ipv4addr, nil),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIPAllocationExists(context.Background(), resourceName4, &v),
-					resource.TestCheckResourceAttr(resourceName4, "snmp3_secret_revision", "2"),
+					resource.TestCheckResourceAttr(resourceName4, "secrets_version", "2"),
 				),
 			},
 			// Case6: Create a new resource with both the secrets and update non secret field of snmp3_credential block and Read
@@ -1054,7 +1063,7 @@ func TestAccIPAllocationResource_Snmp3Credential(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName5, "snmp3_credential.user", "user1"),
 					resource.TestCheckResourceAttr(resourceName5, "snmp3_credential.authentication_protocol", "SHA"),
 					resource.TestCheckResourceAttr(resourceName5, "snmp3_credential.privacy_protocol", "AES"),
-					resource.TestCheckResourceAttr(resourceName5, "snmp3_secret_revision", "1"),
+					resource.TestCheckResourceAttr(resourceName5, "secrets_version", "1"),
 				),
 			},
 			// Update non secret field of snmp3_credential block and Read
@@ -1065,7 +1074,7 @@ func TestAccIPAllocationResource_Snmp3Credential(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName5, "snmp3_credential.user", "user2"),
 					resource.TestCheckResourceAttr(resourceName5, "snmp3_credential.authentication_protocol", "SHA"),
 					resource.TestCheckResourceAttr(resourceName5, "snmp3_credential.privacy_protocol", "AES"),
-					resource.TestCheckResourceAttr(resourceName5, "snmp3_secret_revision", "1"),
+					resource.TestCheckResourceAttr(resourceName5, "secrets_version", "1"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -1219,7 +1228,7 @@ func TestAccIPAllocationResource_UseDnsEaInheritance(t *testing.T) {
 }
 
 func TestAccIPAllocationResource_UseSnmp3Credential(t *testing.T) {
-	t.Skip("Skipping test as SNMP3 Credential is not supported yet")
+	// t.Skip("Skipping test as SNMP3 Credential is not supported yet")
 	var resourceName = "nios_ip_allocation.test_use_snmp3_credential"
 	var v dns.RecordHost
 
@@ -1250,7 +1259,7 @@ func TestAccIPAllocationResource_UseSnmp3Credential(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "snmp3_credential.user", "user1"),
 					resource.TestCheckResourceAttr(resourceName, "snmp3_credential.authentication_protocol", "SHA"),
 					resource.TestCheckResourceAttr(resourceName, "snmp3_credential.privacy_protocol", "AES"),
-					resource.TestCheckResourceAttr(resourceName, "snmp3_secret_revision", "1"),
+					resource.TestCheckResourceAttr(resourceName, "secrets_version", "1"),
 				),
 			},
 			// Update and Read
@@ -1262,7 +1271,7 @@ func TestAccIPAllocationResource_UseSnmp3Credential(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "snmp3_credential.user", "user1"),
 					resource.TestCheckResourceAttr(resourceName, "snmp3_credential.authentication_protocol", "SHA"),
 					resource.TestCheckResourceAttr(resourceName, "snmp3_credential.privacy_protocol", "AES"),
-					resource.TestCheckResourceAttr(resourceName, "snmp3_secret_revision", "1"),
+					resource.TestCheckResourceAttr(resourceName, "secrets_version", "1"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase

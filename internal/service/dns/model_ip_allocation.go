@@ -62,7 +62,7 @@ type IPAllocationModel struct {
 	RestartIfNeeded          types.Bool                       `tfsdk:"restart_if_needed"`
 	RrsetOrder               types.String                     `tfsdk:"rrset_order"`
 	Snmp3Credential          types.Object                     `tfsdk:"snmp3_credential"`
-	Snmp3SecretRevision      types.Int64                      `tfsdk:"snmp3_secret_revision"`
+	SecretsVersion           types.Int64                      `tfsdk:"secrets_version"`
 	SnmpCredential           types.Object                     `tfsdk:"snmp_credential"`
 	Ttl                      types.Int64                      `tfsdk:"ttl"`
 	UseCliCredentials        types.Bool                       `tfsdk:"use_cli_credentials"`
@@ -105,7 +105,7 @@ var IPAllocationAttrTypes = map[string]attr.Type{
 	"restart_if_needed":          types.BoolType,
 	"rrset_order":                types.StringType,
 	"snmp3_credential":           types.ObjectType{AttrTypes: RecordHostSnmp3CredentialAttrTypes},
-	"snmp3_secret_revision":      types.Int64Type,
+	"secrets_version":            types.Int64Type,
 	"snmp_credential":            types.ObjectType{AttrTypes: RecordHostSnmpCredentialAttrTypes},
 	"ttl":                        types.Int64Type,
 	"use_cli_credentials":        types.BoolType,
@@ -326,9 +326,9 @@ var IPAllocationResourceSchemaAttributes = map[string]schema.Attribute{
 		},
 	},
 	// A computed trigger to cause an in-place Update when secrets change.
-	"snmp3_secret_revision": schema.Int64Attribute{
+	"secrets_version": schema.Int64Attribute{
 		Computed:            true,
-		MarkdownDescription: "Internal revision incremented when SNMPv3 secrets change.",
+		MarkdownDescription: "Internal version incremented when secrets (snmp3_credential and cli_credentials) change.",
 		PlanModifiers: []planmodifier.Int64{
 			int64planmodifier.UseStateForUnknown(),
 		},
