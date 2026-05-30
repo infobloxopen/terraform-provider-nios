@@ -23,11 +23,8 @@ import (
 
 //TODO : add tests
 // The following require additional resource/data source objects to be supported.
-// - Logic Filter Rules
-// - Reserved Interface
-// - Discovery
-// - Fixed Address Template
-// - Network - To randomize the test IPs
+// - Reserved Interface  (skipped: requires discovery:deviceinterface objects present on the grid)
+// - Network             (not done: test IPs are hardcoded to 15.0.0.x / 16.0.0.x; a nios_ipam_network resource should be used to allocate IPs dynamically)
 
 //TODO : OBJECTS TO BE PRESENT IN GRID FOR TESTS
 // - Network View - default , test_fixed_address
@@ -767,7 +764,6 @@ func TestAccFixedaddressResource_EnableDdns(t *testing.T) {
 }
 
 func TestAccFixedaddressResource_EnableImmediateDiscovery(t *testing.T) {
-	t.Skip("Skipping test as Discovery is not supported")
 	var resourceName = "nios_dhcp_fixed_address.test_enable_immediate_discovery"
 	var v dhcp.Fixedaddress
 	ip := "15.0.0.23"
@@ -1326,7 +1322,7 @@ func TestAccFixedaddressResource_PxeLeaseTime(t *testing.T) {
 }
 
 func TestAccFixedaddressResource_ReservedInterface(t *testing.T) {
-	t.Skip("Skipping test as reserved_interface is not implemented yet")
+	t.Skip("Requires discovered device interfaces on the grid (discovery:deviceinterface objects)")
 	var resourceName = "nios_dhcp_fixed_address.test_reserved_interface"
 	var v dhcp.Fixedaddress
 	ip := "15.0.0.39"

@@ -431,10 +431,12 @@ func TestAccNotificationRuleResource_EventDeduplicationLookbackPeriod(t *testing
 
 // The event priority can be configured only for outbound notification rules that contain the scheduled event type
 func TestAccNotificationRuleResource_EventPriority(t *testing.T) {
+	// event_priority requires event_type=SCHEDULE, which needs a notification template supporting
+	// the SCHEDULE event type. No such template exists on the test grids (templates are read-only in NIOS).
+	t.Skip("Skipped: no notification template supporting SCHEDULE event_type exists on the test grid")
 	if notificationTarget == "" {
 		t.Skip("NIOS_NOTIFICATION_REST_ENDPOINT_REF environment variable must be set for this test to run")
 	}
-	t.Skip("Additional config is required for test")
 	var resourceName = "nios_notification_rule.test_event_priority"
 	var v notification.NotificationRule
 	name := acctest.RandomNameWithPrefix("example-notification-rule")
@@ -625,7 +627,6 @@ func TestAccNotificationRuleResource_NotificationAction(t *testing.T) {
 	if notificationTarget == "" {
 		t.Skip("NIOS_NOTIFICATION_REST_ENDPOINT_REF environment variable must be set for this test to run")
 	}
-	t.Skip("Additional config is required for test")
 	var resourceName = "nios_notification_rule.test_notification_action"
 	var v notification.NotificationRule
 	name := acctest.RandomNameWithPrefix("example-notification-rule")
@@ -636,18 +637,20 @@ func TestAccNotificationRuleResource_NotificationAction(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccNotificationRuleNotificationAction(eventType, expressionList, name, notificationAction, notificationTarget, templateInstance),
+				Config: testAccNotificationRuleNotificationAction(eventType, expressionList, name, "RESTAPI_TEMPLATE_INSTANCE", notificationTarget, templateInstance),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNotificationRuleExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "notification_action", "RESTAPI_TEMPLATE_INSTANCE"),
 				),
 			},
-			// Update and Read
+			// notification_action cannot be updated to a different value without also changing notification_target
+			// (e.g. CISCOISE_PUBLISH requires a pxgrid endpoint, CISCOISE_QUARANTINE requires a cisco endpoint)
+			// So we verify the value persists on re-apply
 			{
-				Config: testAccNotificationRuleNotificationAction(eventType, expressionList, name, notificationAction, notificationTarget, templateInstance),
+				Config: testAccNotificationRuleNotificationAction(eventType, expressionList, name, "RESTAPI_TEMPLATE_INSTANCE", notificationTarget, templateInstance),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNotificationRuleExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "notification_action", "NOTIFICATION_ACTION_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "notification_action", "RESTAPI_TEMPLATE_INSTANCE"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -758,10 +761,12 @@ func TestAccNotificationRuleResource_PublishSettings(t *testing.T) {
 }
 
 func TestAccNotificationRuleResource_ScheduledEvent(t *testing.T) {
+	// event_type=SCHEDULE requires a notification template supporting the SCHEDULE event type.
+	// No such template exists on the test grids (templates are read-only in NIOS).
+	t.Skip("Skipped: no notification template supporting SCHEDULE event_type exists on the test grid")
 	if notificationTarget == "" {
 		t.Skip("NIOS_NOTIFICATION_REST_ENDPOINT_REF environment variable must be set for this test to run")
 	}
-	t.Skip("Additional config is required for test")
 	var resourceName = "nios_notification_rule.test_scheduled_event"
 	var v notification.NotificationRule
 	name := acctest.RandomNameWithPrefix("example-notification-rule")
@@ -776,12 +781,13 @@ func TestAccNotificationRuleResource_ScheduledEvent(t *testing.T) {
 		"hour_of_day":       20,
 	}
 	scheduleEventUpdated := map[string]any{
-		"minutes_past_hour": 6,
-		"repeat":            "ONCE",
-		"day_of_month":      30,
-		"month":             1,
-		"year":              2026,
-		"hour_of_day":       20,
+		"weekdays":          []string{"MONDAY", "FRIDAY"},
+		"frequency":         "WEEKLY",
+		"every":             1,
+		"minutes_past_hour": 30,
+		"disable":           false,
+		"repeat":            "RECUR",
+		"hour_of_day":       14,
 	}
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -793,7 +799,14 @@ func TestAccNotificationRuleResource_ScheduledEvent(t *testing.T) {
 				Config: testAccNotificationRuleScheduledEvent("SCHEDULE", expressionList, name, notificationAction, notificationTarget, templateInstance, scheduleEvent),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNotificationRuleExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "scheduled_event", "SCHEDULED_EVENT_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "event_type", "SCHEDULE"),
+					resource.TestCheckResourceAttr(resourceName, "scheduled_event.repeat", "RECUR"),
+					resource.TestCheckResourceAttr(resourceName, "scheduled_event.frequency", "WEEKLY"),
+					resource.TestCheckResourceAttr(resourceName, "scheduled_event.every", "15"),
+					resource.TestCheckResourceAttr(resourceName, "scheduled_event.minutes_past_hour", "6"),
+					resource.TestCheckResourceAttr(resourceName, "scheduled_event.hour_of_day", "20"),
+					resource.TestCheckResourceAttr(resourceName, "scheduled_event.disable", "false"),
+					resource.TestCheckResourceAttr(resourceName, "scheduled_event.weekdays.#", "3"),
 				),
 			},
 			// Update and Read
@@ -801,7 +814,12 @@ func TestAccNotificationRuleResource_ScheduledEvent(t *testing.T) {
 				Config: testAccNotificationRuleScheduledEvent("SCHEDULE", expressionList, name, notificationAction, notificationTarget, templateInstance, scheduleEventUpdated),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNotificationRuleExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "scheduled_event", "SCHEDULED_EVENT_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "scheduled_event.repeat", "RECUR"),
+					resource.TestCheckResourceAttr(resourceName, "scheduled_event.frequency", "WEEKLY"),
+					resource.TestCheckResourceAttr(resourceName, "scheduled_event.every", "1"),
+					resource.TestCheckResourceAttr(resourceName, "scheduled_event.minutes_past_hour", "30"),
+					resource.TestCheckResourceAttr(resourceName, "scheduled_event.hour_of_day", "14"),
+					resource.TestCheckResourceAttr(resourceName, "scheduled_event.weekdays.#", "2"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase

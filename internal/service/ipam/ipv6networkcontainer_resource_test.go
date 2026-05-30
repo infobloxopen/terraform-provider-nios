@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"math/rand"
 	"net/http"
 	"testing"
 
@@ -16,17 +17,7 @@ import (
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
-// TODO: DiscoveryMember requires discovering to be enabled.
-// TODO: EnableDiscovery requires a valid discovery member.
-// TODO: EnableImmediateDiscovery requires a valid discovery member.
-// TODO: Federated realms serve need to enabled.
-// TODO: LogicFilterRules Logic filter rule required.
-// TODO: RirOrganization rir organization configuration required.
-// TODO: RirOrganizationAction rir organization configuration required.
-// TODO: ZoneAssociations need dns zone to test associations.
-// TODO: MappedEAAttributes need ISE server to test mapped_ea_attributes.
 // TODO: Members need a valid member to test members and GO client does not support it yet.
-// TODO: SubscribeSettings need a valid subscribe settings to test subscribe settings.
 // TODO: send rir request need rir organization configuration required
 var readableAttributesForIpv6networkcontainer = "cloud_info,comment,ddns_domainname,ddns_enable_option_fqdn,ddns_generate_hostname,ddns_server_always_updates,ddns_ttl,discover_now_status,discovery_basic_poll_settings,discovery_blackout_setting,discovery_engine_type,discovery_member,domain_name_servers,enable_ddns,enable_discovery,endpoint_sources,extattrs,last_rir_registration_update_sent,last_rir_registration_update_status,logic_filter_rules,mgm_private,mgm_private_overridable,ms_ad_user_data,network,network_container,network_view,options,port_control_blackout_setting,preferred_lifetime,rir,rir_organization,rir_registration_status,same_port_control_discovery_blackout,subscribe_settings,unmanaged,update_dns_on_lease_renewal,use_blackout_setting,use_ddns_domainname,use_ddns_enable_option_fqdn,use_ddns_generate_hostname,use_ddns_ttl,use_discovery_basic_polling_settings,use_domain_name_servers,use_enable_ddns,use_enable_discovery,use_logic_filter_rules,use_mgm_private,use_options,use_preferred_lifetime,use_subscribe_settings,use_update_dns_on_lease_renewal,use_valid_lifetime,use_zone_associations,utilization,valid_lifetime,zone_associations"
 
@@ -1486,6 +1477,259 @@ func TestAccIpv6networkcontainerResource_ValidLifetime(t *testing.T) {
 	})
 }
 
+func TestAccIpv6networkcontainerResource_DiscoveryMember(t *testing.T) {
+	var resourceName = "nios_ipam_ipv6network_container.test_discovery_member"
+	var v ipam.Ipv6networkcontainer
+	network := acctest.RandomIPv6Network()
+	discoveryMember := utils.GetNIOSGridMemberHostName()
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// Create and Read
+			{
+				Config: testAccIpv6networkcontainerDiscoveryMember(network, discoveryMember),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckIpv6networkcontainerExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "discovery_member", discoveryMember),
+				),
+			},
+			// Delete testing automatically occurs in TestCase
+		},
+	})
+}
+
+func TestAccIpv6networkcontainerResource_EnableDiscovery(t *testing.T) {
+	var resourceName = "nios_ipam_ipv6network_container.test_enable_discovery"
+	var v ipam.Ipv6networkcontainer
+	network := acctest.RandomIPv6Network()
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// Create and Read
+			{
+				Config: testAccIpv6networkcontainerEnableDiscovery(network, true),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckIpv6networkcontainerExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "enable_discovery", "true"),
+				),
+			},
+			// Update and Read
+			{
+				Config: testAccIpv6networkcontainerEnableDiscovery(network, false),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckIpv6networkcontainerExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "enable_discovery", "false"),
+				),
+			},
+			// Delete testing automatically occurs in TestCase
+		},
+	})
+}
+
+func TestAccIpv6networkcontainerResource_EnableImmediateDiscovery(t *testing.T) {
+	var resourceName = "nios_ipam_ipv6network_container.test_enable_immediate_discovery"
+	var v ipam.Ipv6networkcontainer
+	network := acctest.RandomIPv6Network()
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// Create and Read
+			{
+				Config: testAccIpv6networkcontainerEnableImmediateDiscovery(network, true),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckIpv6networkcontainerExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "enable_immediate_discovery", "true"),
+				),
+			},
+			// Update and Read
+			{
+				Config: testAccIpv6networkcontainerEnableImmediateDiscovery(network, false),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckIpv6networkcontainerExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "enable_immediate_discovery", "false"),
+				),
+			},
+			// Delete testing automatically occurs in TestCase
+		},
+	})
+}
+
+func TestAccIpv6networkcontainerResource_FederatedRealms(t *testing.T) {
+	t.Skip("Requires federated realms server to be enabled")
+	var resourceName = "nios_ipam_ipv6network_container.test_federated_realms"
+	var v ipam.Ipv6networkcontainer
+	network := acctest.RandomIPv6Network()
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// Create and Read
+			{
+				Config: testAccIpv6networkcontainerFederatedRealms(network, "test_realm", "test_realm_id"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckIpv6networkcontainerExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "federated_realms.0.name", "test_realm"),
+					resource.TestCheckResourceAttr(resourceName, "federated_realms.0.id", "test_realm_id"),
+				),
+			},
+			// Delete testing automatically occurs in TestCase
+		},
+	})
+}
+
+func TestAccIpv6networkcontainerResource_LogicFilterRules(t *testing.T) {
+	var resourceName = "nios_ipam_ipv6network_container.test_logic_filter_rules"
+	var v ipam.Ipv6networkcontainer
+	network := acctest.RandomIPv6Network()
+	logicFilterRulesVal := []map[string]any{
+		{
+			"filter": "ipv6_option_filter",
+			"type":   "Option",
+		},
+	}
+	logicFilterRulesValUpdated := []map[string]any{
+		{
+			"filter": "ipv6_option_filter1",
+			"type":   "Option",
+		},
+	}
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// Create and Read
+			{
+				Config: testAccIpv6networkcontainerLogicFilterRules(network, logicFilterRulesVal),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckIpv6networkcontainerExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "logic_filter_rules.0.filter", "ipv6_option_filter"),
+					resource.TestCheckResourceAttr(resourceName, "logic_filter_rules.0.type", "Option"),
+				),
+			},
+			// Update and Read
+			{
+				Config: testAccIpv6networkcontainerLogicFilterRules(network, logicFilterRulesValUpdated),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckIpv6networkcontainerExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "logic_filter_rules.0.filter", "ipv6_option_filter1"),
+					resource.TestCheckResourceAttr(resourceName, "logic_filter_rules.0.type", "Option"),
+				),
+			},
+			// Delete testing automatically occurs in TestCase
+		},
+	})
+}
+
+func TestAccIpv6networkcontainerResource_RemoveSubnets(t *testing.T) {
+	t.Skip("remove_subnets field is not writable in WAPI on create or update")
+}
+
+func TestAccIpv6networkcontainerResource_RirOrganization(t *testing.T) {
+	var resourceName = "nios_ipam_ipv6network_container.test_rir_organization"
+	var v ipam.Ipv6networkcontainer
+	network := acctest.RandomIPv6Network()
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// Create and Read
+			{
+				Config: testAccIpv6networkcontainerRirOrganization(network, "test"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckIpv6networkcontainerExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "rir_organization", "test"),
+					resource.TestCheckResourceAttr(resourceName, "rir", "RIPE"),
+				),
+			},
+			// Delete testing automatically occurs in TestCase
+		},
+	})
+}
+
+func TestAccIpv6networkcontainerResource_RirOrganizationAction(t *testing.T) {
+	var resourceName = "nios_ipam_ipv6network_container.test_rir_registration_action"
+	var v ipam.Ipv6networkcontainer
+	// Parent needs a larger prefix, child is a subnet within it
+	third := rand.Intn(65536)
+	fourth := rand.Intn(65536)
+	parentNetwork := fmt.Sprintf("2001:db8:%x::/48", third)
+	childNetwork := fmt.Sprintf("2001:db8:%x:%x::/64", third, fourth)
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// Create and Read
+			{
+				Config: testAccIpv6networkcontainerRirRegistrationAction(parentNetwork, childNetwork, "CREATE"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckIpv6networkcontainerExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "rir_registration_action", "CREATE"),
+				),
+			},
+			// Update and Read
+			{
+				Config: testAccIpv6networkcontainerRirRegistrationAction(parentNetwork, childNetwork, "NONE"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckIpv6networkcontainerExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "rir_registration_action", "NONE"),
+				),
+			},
+			// Delete testing automatically occurs in TestCase
+		},
+	})
+}
+
+func TestAccIpv6networkcontainerResource_ZoneAssociations(t *testing.T) {
+	t.Skip("Provider bug: nios_dns_zone_auth Read fails with 'data failed to match schemas in oneOf(GetZoneAuthResponse)'")
+}
+
+func TestAccIpv6networkcontainerResource_MappedEAAttributes(t *testing.T) {
+	if utils.GetNIOSPxgridEndpointRef() == "" {
+		t.Skip("Skipping: NIOS_PXGRID_ENDPOINT_REF not set. A configured pxGrid/ISE endpoint is required.")
+	}
+	var resourceName = "nios_ipam_ipv6network_container.test_mapped_ea_attributes"
+	var v ipam.Ipv6networkcontainer
+	network := acctest.RandomIPv6Network()
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// Create and Read
+			{
+				Config: testAccIpv6networkcontainerMappedEAAttributes(network, "IP_ADDRESS", "Site"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckIpv6networkcontainerExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "use_subscribe_settings", "true"),
+					resource.TestCheckResourceAttr(resourceName, "subscribe_settings.mapped_ea_attributes.0.name", "IP_ADDRESS"),
+					resource.TestCheckResourceAttr(resourceName, "subscribe_settings.mapped_ea_attributes.0.mapped_ea", "Site"),
+				),
+			},
+			// Update and Read
+			{
+				Config: testAccIpv6networkcontainerMappedEAAttributes(network, "MAC", "Site"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckIpv6networkcontainerExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "use_subscribe_settings", "true"),
+					resource.TestCheckResourceAttr(resourceName, "subscribe_settings.mapped_ea_attributes.0.name", "MAC"),
+					resource.TestCheckResourceAttr(resourceName, "subscribe_settings.mapped_ea_attributes.0.mapped_ea", "Site"),
+				),
+			},
+			// Delete testing automatically occurs in TestCase
+		},
+	})
+}
+
 func testAccCheckIpv6networkcontainerExists(ctx context.Context, resourceName string, v *ipam.Ipv6networkcontainer) resource.TestCheckFunc {
 	// Verify the resource exists in the cloud
 	return func(state *terraform.State) error {
@@ -1976,4 +2220,185 @@ resource "nios_ipam_ipv6network_container" "test_valid_lifetime" {
     use_valid_lifetime = %q
 }
 `, network, validLifetime, useValidLifetime)
+}
+
+func testAccIpv6networkcontainerDiscoveryMember(network, discoveryMember string) string {
+	return fmt.Sprintf(`
+resource "nios_ipam_ipv6network_container" "test_discovery_member" {
+    network = %q
+    discovery_member = %q
+    use_enable_discovery = true
+}
+`, network, discoveryMember)
+}
+
+func testAccIpv6networkcontainerEnableDiscovery(network string, enableDiscovery bool) string {
+	discoveryMember := utils.GetNIOSGridMemberHostName()
+	return fmt.Sprintf(`
+resource "nios_ipam_ipv6network_container" "test_enable_discovery" {
+    network = %q
+    discovery_member = %q
+    enable_discovery = %t
+    use_enable_discovery = true
+}
+`, network, discoveryMember, enableDiscovery)
+}
+
+func testAccIpv6networkcontainerEnableImmediateDiscovery(network string, enableImmediateDiscovery bool) string {
+	discoveryMember := utils.GetNIOSGridMemberHostName()
+	return fmt.Sprintf(`
+resource "nios_ipam_ipv6network_container" "test_enable_immediate_discovery" {
+    network = %q
+    discovery_member = %q
+    enable_immediate_discovery = %t
+    use_enable_discovery = true
+}
+`, network, discoveryMember, enableImmediateDiscovery)
+}
+
+func testAccIpv6networkcontainerFederatedRealms(network, realmName, realmId string) string {
+	return fmt.Sprintf(`
+resource "nios_ipam_ipv6network_container" "test_federated_realms" {
+    network = %q
+    federated_realms = [
+      {
+        name = %q
+        id   = %q
+      }
+    ]
+}
+`, network, realmName, realmId)
+}
+
+func testAccIpv6networkcontainerLogicFilterRules(network string, logicFilterRules []map[string]any) string {
+	logicFilterRulesStr := utils.ConvertSliceOfMapsToHCL(logicFilterRules)
+	return fmt.Sprintf(`
+resource "nios_ipam_ipv6network_container" "test_logic_filter_rules" {
+    network = %q
+    logic_filter_rules = %s
+    use_logic_filter_rules = true
+}
+`, network, logicFilterRulesStr)
+}
+
+func testAccIpv6networkcontainerRemoveSubnetsBase(network string) string {
+	return fmt.Sprintf(`
+resource "nios_ipam_ipv6network_container" "test_remove_subnets" {
+    network = %q
+}
+`, network)
+}
+
+func testAccIpv6networkcontainerRemoveSubnets(network string, removeSubnets bool) string {
+	return fmt.Sprintf(`
+resource "nios_ipam_ipv6network_container" "test_remove_subnets" {
+    network = %q
+    remove_subnets = %t
+}
+`, network, removeSubnets)
+}
+
+func testAccIpv6networkcontainerRirOrganization(network, rirOrganization string) string {
+	return fmt.Sprintf(`
+resource "nios_ipam_ipv6network_container" "test_rir_organization" {
+    network = %q
+    rir_organization = %q
+    extattrs = {
+        "RIPE Network Name" = "TEST-NET-V6"
+        "RIPE Description" = "Test IPv6 network"
+        "RIPE Country" = "United States (US)"
+        "RIPE Admin Contact" = "TEST-RIPE"
+        "RIPE Technical Contact" = "TEST-RIPE"
+        "RIPE Registry Source" = "RIPE"
+        "RIPE IPv6 Status" = "ASSIGNED"
+    }
+}
+`, network, rirOrganization)
+}
+
+func testAccIpv6networkcontainerRirRegistrationAction(parentNetwork, childNetwork, rirRegistrationAction string) string {
+	return fmt.Sprintf(`
+resource "nios_ipam_ipv6network_container" "test_rir_parent" {
+    network = %q
+    rir_organization = "test"
+    extattrs = {
+        "RIPE Network Name" = "TEST-NET-V6"
+        "RIPE Description" = "Test IPv6 network"
+        "RIPE Country" = "United States (US)"
+        "RIPE Admin Contact" = "TEST-RIPE"
+        "RIPE Technical Contact" = "TEST-RIPE"
+        "RIPE Registry Source" = "RIPE"
+        "RIPE IPv6 Status" = "ASSIGNED"
+    }
+}
+
+resource "nios_ipam_ipv6network_container" "test_rir_registration_action" {
+    depends_on = [nios_ipam_ipv6network_container.test_rir_parent]
+    network = %q
+    rir_registration_action = %q
+    rir_organization = "test"
+    extattrs = {
+        "RIPE Network Name" = "TEST-NET-V6-CHILD"
+        "RIPE Description" = "Test IPv6 child network"
+        "RIPE Country" = "United States (US)"
+        "RIPE Admin Contact" = "TEST-RIPE"
+        "RIPE Technical Contact" = "TEST-RIPE"
+        "RIPE Registry Source" = "RIPE"
+        "RIPE IPv6 Status" = "ASSIGNED"
+    }
+}
+`, parentNetwork, childNetwork, rirRegistrationAction)
+}
+
+func testAccIpv6networkcontainerMappedEAAttributes(network, name, mappedEa string) string {
+	return fmt.Sprintf(`
+resource "nios_ipam_ipv6network_container" "test_mapped_ea_attributes" {
+    network = %q
+    use_subscribe_settings = true
+    subscribe_settings = {
+        enabled_attributes = ["USERNAME"]
+        mapped_ea_attributes = [
+            {
+                name = %q
+                mapped_ea = %q
+            }
+        ]
+    }
+}
+`, network, name, mappedEa)
+}
+
+func testAccIpv6networkcontainerZoneAssociations(network, zone, view, parentZoneAuthResource string) string {
+	var zoneAssociationsConfig, parentZoneAuthConfig string
+
+	if zone != "" && view != "" && parentZoneAuthResource != "" {
+		zoneAssociationsConfig = fmt.Sprintf(`[
+            {
+                fqdn = nios_dns_zone_auth.%s.fqdn
+                view = nios_dns_zone_auth.%s.view
+                is_default = false
+            }
+        ]`, parentZoneAuthResource, parentZoneAuthResource)
+		parentZoneAuthConfig = testAccIpv6networkcontainerParentZoneAuth(zone, view, parentZoneAuthResource)
+	} else {
+		zoneAssociationsConfig = "null"
+	}
+
+	return fmt.Sprintf(`
+%s
+resource "nios_ipam_ipv6network_container" "test_zone_associations" {
+    network = %q
+    zone_associations = %s
+    use_zone_associations = true
+}
+`, parentZoneAuthConfig, network, zoneAssociationsConfig)
+}
+
+func testAccIpv6networkcontainerParentZoneAuth(zone, view, testZone string) string {
+	return fmt.Sprintf(`
+resource "nios_dns_zone_auth" %q {
+  fqdn = %q
+  view = %q
+}
+`, testZone, zone, view)
 }

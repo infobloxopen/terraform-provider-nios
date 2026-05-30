@@ -91,6 +91,9 @@ func (r *Ipv6networkResource) Create(ctx context.Context, req resource.CreateReq
 		data.FuncCall = r.UpdateFuncCallAttributeName(ctx, data, &resp.Diagnostics)
 	}
 
+	// Save rir_registration_action before expand/flatten (server doesn't persist this)
+	planRirRegAction := data.RirRegistrationAction
+
 	payload := data.Expand(ctx, &resp.Diagnostics, true)
 	if resp.Diagnostics.HasError() {
 		return
@@ -155,6 +158,11 @@ func (r *Ipv6networkResource) Create(ctx context.Context, req resource.CreateReq
 	// Retain the original function call attributes
 	if len(origFunCallAttrs) > 0 {
 		data.FuncCall = types.ObjectValueMust(FuncCallAttrTypes, origFunCallAttrs)
+	}
+
+	// Retain the planned rir_registration_action (server doesn't persist this action field)
+	if !planRirRegAction.IsNull() && !planRirRegAction.IsUnknown() {
+		data.RirRegistrationAction = planRirRegAction
 	}
 
 	// Save data into Terraform state
@@ -241,7 +249,15 @@ func (r *Ipv6networkResource) Read(ctx context.Context, req resource.ReadRequest
 		return
 	}
 
+	// Save rir_registration_action from state (server doesn't persist this action field)
+	stateRirRegAction := data.RirRegistrationAction
+
 	data.Flatten(ctx, &res, &resp.Diagnostics)
+
+	// Restore rir_registration_action from state
+	if !stateRirRegAction.IsNull() && !stateRirRegAction.IsUnknown() {
+		data.RirRegistrationAction = stateRirRegAction
+	}
 
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
@@ -386,7 +402,15 @@ func (r *Ipv6networkResource) Update(ctx context.Context, req resource.UpdateReq
 		return
 	}
 
+	// Save rir_registration_action from plan (server doesn't persist this action field)
+	planRirRegAction := data.RirRegistrationAction
+
 	data.Flatten(ctx, &res, &resp.Diagnostics)
+
+	// Restore rir_registration_action from plan
+	if !planRirRegAction.IsNull() && !planRirRegAction.IsUnknown() {
+		data.RirRegistrationAction = planRirRegAction
+	}
 
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
