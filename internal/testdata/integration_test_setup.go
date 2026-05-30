@@ -1296,8 +1296,8 @@ func PreConfig(clients PreConfigClients, hostnames GridHostnames) error {
 		ipv6SettingVal  grid.MemberIpv6Setting
 		masterCandidate bool
 	}{
-		{hostName: "infoblox.member2", vipAddress: "172.28.32.251", configAddrType: "BOTH", ipv6SettingVal: ipv6SettingVal2, masterCandidate: true},
-		{hostName: "infoblox.member3", vipAddress: "172.28.32.252", configAddrType: "IPV4", ipv6SettingVal: ipv6SettingVal3, masterCandidate: false},
+		{hostName: "infoblox.member2", vipAddress: "172.28.38.251", configAddrType: "BOTH", ipv6SettingVal: ipv6SettingVal2, masterCandidate: true},
+		{hostName: "infoblox.member3", vipAddress: "172.28.38.252", configAddrType: "IPV4", ipv6SettingVal: ipv6SettingVal3, masterCandidate: false},
 	}
 
 	for _, member := range members {

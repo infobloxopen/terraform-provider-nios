@@ -22,7 +22,7 @@
 //	  - Authoritative Zone "example.com" in the default view
 //
 //	Grid Members
-//	  - Members whose hostname matches 172.28.38.* that are NOT running
+//	  - Members whose vip_setting.address matches 172.28.38.* that are NOT running
 //
 //	Parental Control
 //	  - Parental Control AVPs whose name starts with "parentalcontrol-avp"
@@ -35,6 +35,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"regexp"
 	"strings"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/client"
@@ -279,23 +280,30 @@ func cleanupDNSZone(ctx context.Context, apiClient *client.APIClient) {
 }
 
 func cleanupMembers(ctx context.Context, apiClient *client.APIClient) {
-	filters := map[string]interface{}{"host_name~": `172.28.38.*`}
 	resp, _, err := apiClient.GridAPI.MemberAPI.List(ctx).
 		ReturnAsObject(1).
-		ReturnFieldsPlus("service_status").
-		Filters(filters).
+		ReturnFieldsPlus("service_status,vip_setting").
 		Execute()
 	if err != nil {
 		fmt.Printf("cleanup: failed to list members: %v\n", err)
 		return
 	}
 	if resp == nil || resp.ListMemberResponseObject == nil || len(resp.ListMemberResponseObject.Result) == 0 {
-		fmt.Println("cleanup: no members matching '172.28.38.*' found")
+		fmt.Println("cleanup: no members found")
 		return
 	}
+
+	vipRegex := regexp.MustCompile(`^172\.28\.38\.`)
+
 	for _, member := range resp.ListMemberResponseObject.Result {
 		fullRef := member.GetRef()
 		if fullRef == "" {
+			continue
+		}
+
+		vipSetting := member.GetVipSetting()
+		vipAddr := vipSetting.GetAddress()
+		if !vipRegex.MatchString(vipAddr) {
 			continue
 		}
 
@@ -310,7 +318,7 @@ func cleanupMembers(ctx context.Context, apiClient *client.APIClient) {
 		}
 
 		if cloudDNSSyncWorking {
-			fmt.Printf("cleanup: skipping member %q — CLOUD_DNS_SYNC is WORKING\n", fullRef)
+			fmt.Printf("cleanup: skipping member %q (vip=%s) — CLOUD_DNS_SYNC is WORKING\n", fullRef, vipAddr)
 			continue
 		}
 
@@ -319,7 +327,7 @@ func cleanupMembers(ctx context.Context, apiClient *client.APIClient) {
 		if err != nil {
 			fmt.Printf("cleanup: failed to delete member %q (ref=%q): %v\n", fullRef, ref, err)
 		} else {
-			fmt.Printf("cleanup: deleted member %q (ref=%q)\n", fullRef, ref)
+			fmt.Printf("cleanup: deleted member %q (vip=%s, ref=%q)\n", fullRef, vipAddr, ref)
 		}
 	}
 }
