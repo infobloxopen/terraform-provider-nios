@@ -22,8 +22,40 @@ private void _push(Map payload, Map extraFiles = [:]) {
     payload.run_id = runId
     payload.sha    = sha
 
+    // Preserve created_at written by the GitHub Action initialisation step.
+    // Each Jenkins PATCH replaces the file content entirely, so without this
+    // the field disappears after the first signal and age-based Gist pruning
+    // silently stops working.
+    def signalFileName = "ci-signal-${sha}.json"
+    try {
+        def getOutput = sh(
+            script: """
+                curl -sS -f \\
+                    -H "Authorization: token ${token}" \\
+                    -H "Accept: application/vnd.github+json" \\
+                    "https://api.github.com/gists/${gistId}"
+            """,
+            returnStdout: true
+        ).trim()
+        def existingContent = new groovy.json.JsonSlurper()
+            .parseText(getOutput)?.files?.get(signalFileName)?.content
+        if (existingContent) {
+            def existingCreatedAt = new groovy.json.JsonSlurper()
+                .parseText(existingContent)?.created_at
+            if (existingCreatedAt) {
+                payload.created_at = existingCreatedAt
+            }
+        }
+    } catch (Exception ignored) {
+        // Non-fatal — fall through to the default below
+    }
+    // Fallback: use current UTC time so created_at is always present
+    if (!payload.containsKey('created_at')) {
+        payload.created_at = new Date().format("yyyy-MM-dd'T'HH:mm:ss'+00:00'", TimeZone.getTimeZone('UTC'))
+    }
+
     def files = [:]
-    files[("ci-signal-${sha}.json").toString()] = [content: groovy.json.JsonOutput.toJson(payload)]
+    files[signalFileName] = [content: groovy.json.JsonOutput.toJson(payload)]
     extraFiles.each { fname, content ->
         files[fname.toString()] = [content: content]
     }

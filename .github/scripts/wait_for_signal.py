@@ -45,8 +45,21 @@ def fetch_signal() -> dict | None:
         with urllib.request.urlopen(req, timeout=15) as resp:
             gist = json.load(resp)
     except urllib.error.HTTPError as exc:
-        print(f"[{ts()}] ⚠  GitHub API HTTP {exc.code} — will retry")
-        return None
+        # Fail fast on auth/config errors; only retry on rate limits and 5xx
+        if exc.code in (401, 403, 404):
+            die(
+                f"GitHub API HTTP {exc.code} — {exc.reason}. "
+                f"Check GH_TOKEN and GIST_ID configuration.",
+            )
+        elif exc.code == 429:
+            print(f"[{ts()}] ⚠  GitHub API rate limited — will retry")
+            return None
+        elif 500 <= exc.code < 600:
+            print(f"[{ts()}] ⚠  GitHub API HTTP {exc.code} — will retry")
+            return None
+        else:
+            print(f"[{ts()}] ⚠  GitHub API HTTP {exc.code} — will retry")
+            return None
     except Exception as exc:
         print(f"[{ts()}] ⚠  Network error ({exc}) — will retry")
         return None
