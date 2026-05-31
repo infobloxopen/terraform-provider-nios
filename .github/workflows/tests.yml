@@ -3,7 +3,7 @@ name: Integration Tests
 on:
   schedule:
     - cron: '30 3 * * 1-5'
-    - cron: '0 18 * * 1-7'
+    - cron: '30 12 * * 1-5'
 
 # Only one pipeline per branch at a time
 concurrency:
