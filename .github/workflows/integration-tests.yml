@@ -20,7 +20,7 @@ jobs:
 
     steps:
       # ------------------------------------------------------------------ #
-      # 0.  Checkout repository (needed for accessing .github/scripts)
+      # 0.  Checkout repository
       # ------------------------------------------------------------------ #
       - name: Checkout repository
         uses: actions/checkout@v5.0.0
@@ -113,7 +113,7 @@ jobs:
           GIT_SHA:         ${{ github.sha }}
           STAGE_NAME:      job-started
           TIMEOUT_SECONDS: "720"    # 12 min: up to 12 min Poll SCM + startup
-        run: python3 .github/scripts/wait_for_signal.py
+        run: python3 .github/actions/integration-tests/wait_for_signal.py
 
       # ------------------------------------------------------------------ #
       # 3.  Wait for env-setup stage signal
@@ -125,7 +125,7 @@ jobs:
           GIT_SHA:         ${{ github.sha }}
           STAGE_NAME:      env-setup
           TIMEOUT_SECONDS: "300"     # 5 min for env setup
-        run: python3 .github/scripts/wait_for_signal.py
+        run: python3 .github/actions/integration-tests/wait_for_signal.py
 
       # ------------------------------------------------------------------ #
       # 4.  Wait for tests-complete signal (Jenkins sends artifact URLs here)
@@ -137,7 +137,7 @@ jobs:
           GIT_SHA:         ${{ github.sha }}
           STAGE_NAME:      tests-complete
           TIMEOUT_SECONDS: "9000"    # 2 and half hours for tests
-        run: python3 .github/scripts/wait_for_signal.py
+        run: python3 .github/actions/integration-tests/wait_for_signal.py
 
       # ------------------------------------------------------------------ #
       # 5.  Fetch JUnit XML files uploaded to the signal Gist by Jenkins
@@ -200,7 +200,7 @@ jobs:
       # ------------------------------------------------------------------ #
       - name: Parse results and write summary
         run: |
-          python3 .github/scripts/parse_junit.py \
+          python3 .github/actions/integration-tests/parse_junit.py \
             --results-dir  test-results \
             --summary-file "$GITHUB_STEP_SUMMARY" \
             --output-file  test-results/summary.json
