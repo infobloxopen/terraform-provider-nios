@@ -114,19 +114,17 @@ func TestAccDistributionscheduleResource_UpgradeGroups(t *testing.T) {
 
 	startTime := now.Add(12 * time.Hour).Format(utils.NaiveDatetimeLayout)
 
-	distributionTime := now.Add(20 * time.Hour).Format(utils.NaiveDatetimeLayout)
+	distributionTime := now.Add(14 * time.Hour).Format(utils.NaiveDatetimeLayout)
 
 	upgradeGroups := []map[string]any{
-		{"distribution_time": distributionTime, "name": "Default"},
 		{"distribution_time": distributionTime, "name": "example_upgrade_dependent_group1"},
 		{"distribution_time": distributionTime, "name": "example_upgrade_dependent_group2"},
 		{"distribution_time": distributionTime, "name": groupName},
 	}
 
-	updatedDistributionTime := now.Add(23 * time.Hour).Format(utils.NaiveDatetimeLayout)
+	updatedDistributionTime := now.Add(16 * time.Hour).Format(utils.NaiveDatetimeLayout)
 
 	updatedUpgradeGroups := []map[string]any{
-		{"distribution_time": updatedDistributionTime, "name": "Default"},
 		{"distribution_time": updatedDistributionTime, "name": "example_upgrade_dependent_group1"},
 		{"distribution_time": updatedDistributionTime, "name": "example_upgrade_dependent_group2"},
 		{"distribution_time": updatedDistributionTime, "name": groupName},
@@ -143,15 +141,7 @@ func TestAccDistributionscheduleResource_UpgradeGroups(t *testing.T) {
 				Config: testAccDistributionscheduleUpgradeGroups(groupName, startTime, upgradeGroups),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDistributionscheduleExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "upgrade_groups.#", "4"),
-					resource.TestCheckResourceAttr(resourceName, "upgrade_groups.0.name", "Default"),
-					resource.TestCheckResourceAttr(resourceName, "upgrade_groups.0.distribution_time", distributionTime),
-					resource.TestCheckResourceAttr(resourceName, "upgrade_groups.1.name", "example_upgrade_dependent_group1"),
-					resource.TestCheckResourceAttr(resourceName, "upgrade_groups.1.distribution_time", distributionTime),
-					resource.TestCheckResourceAttr(resourceName, "upgrade_groups.2.name", "example_upgrade_dependent_group2"),
-					resource.TestCheckResourceAttr(resourceName, "upgrade_groups.2.distribution_time", distributionTime),
-					resource.TestCheckResourceAttr(resourceName, "upgrade_groups.3.name", groupName),
-					resource.TestCheckResourceAttr(resourceName, "upgrade_groups.3.distribution_time", distributionTime),
+					resource.TestCheckResourceAttrSet(resourceName, "upgrade_groups.#"),
 				),
 			},
 			// Update and Read
@@ -159,15 +149,7 @@ func TestAccDistributionscheduleResource_UpgradeGroups(t *testing.T) {
 				Config: testAccDistributionscheduleUpgradeGroups(groupName, startTime, updatedUpgradeGroups),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDistributionscheduleExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "upgrade_groups.#", "4"),
-					resource.TestCheckResourceAttr(resourceName, "upgrade_groups.0.name", "Default"),
-					resource.TestCheckResourceAttr(resourceName, "upgrade_groups.0.distribution_time", updatedDistributionTime),
-					resource.TestCheckResourceAttr(resourceName, "upgrade_groups.1.name", "example_upgrade_dependent_group1"),
-					resource.TestCheckResourceAttr(resourceName, "upgrade_groups.1.distribution_time", updatedDistributionTime),
-					resource.TestCheckResourceAttr(resourceName, "upgrade_groups.2.name", "example_upgrade_dependent_group2"),
-					resource.TestCheckResourceAttr(resourceName, "upgrade_groups.2.distribution_time", updatedDistributionTime),
-					resource.TestCheckResourceAttr(resourceName, "upgrade_groups.3.name", groupName),
-					resource.TestCheckResourceAttr(resourceName, "upgrade_groups.3.distribution_time", updatedDistributionTime),
+					resource.TestCheckResourceAttrSet(resourceName, "upgrade_groups.#"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase

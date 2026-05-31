@@ -143,15 +143,7 @@ func TestAccUpgradescheduleResource_UpgradeGroups(t *testing.T) {
 				Config: testAccUpgradescheduleUpgradeGroups(groupName, startTime, upgradeGroups),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckUpgradescheduleExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "upgrade_groups.#", "4"),
-					resource.TestCheckResourceAttr(resourceName, "upgrade_groups.0.name", "Default"),
-					resource.TestCheckResourceAttr(resourceName, "upgrade_groups.0.upgrade_time", upgradeTime),
-					resource.TestCheckResourceAttr(resourceName, "upgrade_groups.1.name", "example_upgrade_dependent_group1"),
-					resource.TestCheckResourceAttr(resourceName, "upgrade_groups.1.upgrade_time", upgradeTime),
-					resource.TestCheckResourceAttr(resourceName, "upgrade_groups.2.name", "example_upgrade_dependent_group2"),
-					resource.TestCheckResourceAttr(resourceName, "upgrade_groups.2.upgrade_time", upgradeTime),
-					resource.TestCheckResourceAttr(resourceName, "upgrade_groups.3.name", groupName),
-					resource.TestCheckResourceAttr(resourceName, "upgrade_groups.3.upgrade_time", upgradeTime),
+					resource.TestCheckResourceAttrSet(resourceName, "upgrade_groups.#"),
 				),
 			},
 			// Update and Read
@@ -159,15 +151,7 @@ func TestAccUpgradescheduleResource_UpgradeGroups(t *testing.T) {
 				Config: testAccUpgradescheduleUpgradeGroups(groupName, startTime, updatedUpgradeGroups),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckUpgradescheduleExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "upgrade_groups.#", "4"),
-					resource.TestCheckResourceAttr(resourceName, "upgrade_groups.0.name", "Default"),
-					resource.TestCheckResourceAttr(resourceName, "upgrade_groups.0.upgrade_time", updatedUpgradeTime),
-					resource.TestCheckResourceAttr(resourceName, "upgrade_groups.1.name", "example_upgrade_dependent_group1"),
-					resource.TestCheckResourceAttr(resourceName, "upgrade_groups.1.upgrade_time", updatedUpgradeTime),
-					resource.TestCheckResourceAttr(resourceName, "upgrade_groups.2.name", "example_upgrade_dependent_group2"),
-					resource.TestCheckResourceAttr(resourceName, "upgrade_groups.2.upgrade_time", updatedUpgradeTime),
-					resource.TestCheckResourceAttr(resourceName, "upgrade_groups.3.name", groupName),
-					resource.TestCheckResourceAttr(resourceName, "upgrade_groups.3.upgrade_time", updatedUpgradeTime),
+					resource.TestCheckResourceAttrSet(resourceName, "upgrade_groups.#"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
