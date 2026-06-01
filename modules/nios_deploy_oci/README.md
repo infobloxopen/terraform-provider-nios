@@ -42,8 +42,6 @@ the infrastructure is deployed and NIOS is fully booted (~30 minutes).
 | [oci_core_subnet.mgmt_subnet](https://registry.terraform.io/providers/oracle/oci/latest/docs/data-sources/core_subnet) | data source |
 | [oci_core_vnic.ha_vnic](https://registry.terraform.io/providers/oracle/oci/latest/docs/data-sources/core_vnic) | data source |
 | [oci_core_vnic.lan1_vnic](https://registry.terraform.io/providers/oracle/oci/latest/docs/data-sources/core_vnic) | data source |
-| [oci_core_vnic.mgmt_vnic](https://registry.terraform.io/providers/oracle/oci/latest/docs/data-sources/core_vnic) | data source |
-| [oci_core_vnic_attachments.mgmt_vnic_attachments](https://registry.terraform.io/providers/oracle/oci/latest/docs/data-sources/core_vnic_attachments) | data source |
 | [oci_objectstorage_namespace.ns](https://registry.terraform.io/providers/oracle/oci/latest/docs/data-sources/objectstorage_namespace) | data source |
 
 ## Inputs
@@ -484,6 +482,24 @@ resource "nios_grid_join" "ha_member_join" {
 }
 ```
 
+#### Best Practices for HA Deployment
+
+> **Recommended Workflow:** Use a **separate Terraform workspace** for HA configuration. The NIOS HA setup is a one-time provisioning task — once the HA pair is formed and the passive node has joined the grid, the configuration is complete and does not require ongoing Terraform management.
+
+After successfully deploying the HA pair:
+
+1. **Verify HA formation** is complete through the NIOS UI or API.
+2. **Remove the HA grid member and join resources from Terraform state** to prevent accidental modifications:
+   ```bash
+   terraform state rm nios_grid_member.ha_pair
+   terraform state rm nios_grid_join.ha_member_join
+   ```
+3. Optionally, you can delete the entire Terraform state for this workspace if no further infrastructure management is needed.
+
+This approach ensures that:
+- Your HA infrastructure is provisioned correctly.
+- Subsequent Terraform operations don't interfere with the running HA pair.
+- The grid master configuration remains stable and is managed through NIOS directly.
 
 ### Boot Time
 - NIOS takes around **30 minutes** to fully boot after instance creation, make sure the grid is up and running before triggering grid join.
