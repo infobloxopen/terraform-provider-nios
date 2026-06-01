@@ -892,7 +892,6 @@ func (m *MemberModel) Expand(ctx context.Context, diags *diag.Diagnostics, isCre
 		HaOnCloud:                       flex.ExpandBoolPointer(m.HaOnCloud),
 		HostName:                        flex.ExpandStringPointer(m.HostName),
 		Ipv6Setting:                     ExpandMemberIpv6Setting(ctx, m.Ipv6Setting, diags),
-		Ipv6StaticRoutes:                flex.ExpandFrameworkListNestedBlock(ctx, m.Ipv6StaticRoutes, diags, ExpandMemberIpv6StaticRoutes),
 		Lan2Enabled:                     flex.ExpandBoolPointer(m.Lan2Enabled),
 		Lan2PortSetting:                 ExpandMemberLan2PortSetting(ctx, m.Lan2PortSetting, diags),
 		LomNetworkConfig:                flex.ExpandFrameworkListNestedBlock(ctx, m.LomNetworkConfig, diags, ExpandMemberLomNetworkConfig),
@@ -911,7 +910,6 @@ func (m *MemberModel) Expand(ctx context.Context, diags *diag.Diagnostics, isCre
 		RouterId:                        flex.ExpandInt64Pointer(m.RouterId),
 		ServiceTypeConfiguration:        flex.ExpandStringPointer(m.ServiceTypeConfiguration),
 		SnmpSetting:                     ExpandMemberSnmpSetting(ctx, m.SnmpSetting, diags),
-		StaticRoutes:                    flex.ExpandFrameworkListNestedBlock(ctx, m.StaticRoutes, diags, ExpandMemberStaticRoutes),
 		SupportAccessEnable:             flex.ExpandBoolPointer(m.SupportAccessEnable),
 		SyslogProxySetting:              ExpandMemberSyslogProxySetting(ctx, m.SyslogProxySetting, diags),
 		SyslogServers:                   flex.ExpandFrameworkListNestedBlock(ctx, m.SyslogServers, diags, ExpandMemberSyslogServers),
@@ -951,6 +949,8 @@ func (m *MemberModel) Expand(ctx context.Context, diags *diag.Diagnostics, isCre
 
 	if !isCreate {
 		to.PreProvisioning = ExpandMemberPreProvisioning(ctx, m.PreProvisioning, diags)
+		to.StaticRoutes = flex.ExpandFrameworkListNestedBlock(ctx, m.StaticRoutes, diags, ExpandMemberStaticRoutes)
+		to.Ipv6StaticRoutes = flex.ExpandFrameworkListNestedBlock(ctx, m.Ipv6StaticRoutes, diags, ExpandMemberIpv6StaticRoutes)
 	}
 
 	if m.ConfigureCspMemberSetting.ValueBool() {
@@ -1052,7 +1052,7 @@ func (m *MemberModel) Flatten(ctx context.Context, from *grid.Member, diags *dia
 	m.RemoteConsoleAccessEnable = types.BoolPointerValue(from.RemoteConsoleAccessEnable)
 	m.RouterId = flex.FlattenInt64Pointer(from.RouterId)
 	m.ServiceStatus = flex.FlattenFrameworkListNestedBlock(ctx, from.ServiceStatus, MemberServiceStatusAttrTypes, diags, FlattenMemberServiceStatus)
-	m.ServiceTypeConfiguration = flex.FlattenStringPointer(from.ServiceTypeConfiguration)
+	m.ServiceTypeConfiguration = FlattenServiceTypeConfiguration(m.ServiceTypeConfiguration, from.ServiceTypeConfiguration)
 	m.SnmpSetting = FlattenMemberSnmpSetting(ctx, from.SnmpSetting, diags)
 	m.StaticRoutes = flex.FlattenFrameworkListNestedBlock(ctx, from.StaticRoutes, MemberStaticRoutesAttrTypes, diags, FlattenMemberStaticRoutes)
 	m.SupportAccessEnable = types.BoolPointerValue(from.SupportAccessEnable)
@@ -1135,4 +1135,11 @@ func FlattenHACloudPlatform(s *string) types.String {
 		return types.StringNull()
 	}
 	return types.StringValue(*s)
+}
+
+func FlattenServiceTypeConfiguration(planValue types.String, apiValue *string) types.String {
+	if !planValue.IsNull() && !planValue.IsUnknown() && planValue.ValueString() == "CUSTOM" {
+		return planValue
+	}
+	return flex.FlattenStringPointer(apiValue)
 }

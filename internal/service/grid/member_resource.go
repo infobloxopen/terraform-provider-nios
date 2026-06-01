@@ -15,6 +15,7 @@ import (
 	"github.com/infobloxopen/infoblox-nios-go-client/grid"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/config"
+	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 	"github.com/infobloxopen/terraform-provider-nios/internal/retry"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
@@ -92,7 +93,6 @@ func (r *MemberResource) Create(ctx context.Context, req resource.CreateRequest,
 		data.SyslogServers = processedList
 	}
 
-
 	if !data.GridLevelDnsResolverSetting.IsNull() && !data.GridLevelDnsResolverSetting.IsUnknown() {
 		dnsResolverSetting := ExpandMemberDnsResolverSetting(ctx, data.GridLevelDnsResolverSetting, &resp.Diagnostics)
 		if resp.Diagnostics.HasError() {
@@ -147,6 +147,34 @@ func (r *MemberResource) Create(ctx context.Context, req resource.CreateRequest,
 
 	res := apiRes.CreateMemberResponseAsObject.GetResult()
 
+	// Static routes cannot be set during member creation - they must be added via a separate update
+	hasStaticRoutes := (!data.StaticRoutes.IsUnknown() && !data.StaticRoutes.IsNull()) ||
+		(!data.Ipv6StaticRoutes.IsUnknown() && !data.Ipv6StaticRoutes.IsNull())
+	if hasStaticRoutes {
+		staticRoutesPayload := &grid.Member{}
+		if !data.StaticRoutes.IsUnknown() && !data.StaticRoutes.IsNull() {
+			staticRoutesPayload.StaticRoutes = flex.ExpandFrameworkListNestedBlock(ctx, data.StaticRoutes, &resp.Diagnostics, ExpandMemberStaticRoutes)
+		}
+		if !data.Ipv6StaticRoutes.IsUnknown() && !data.Ipv6StaticRoutes.IsNull() {
+			staticRoutesPayload.Ipv6StaticRoutes = flex.ExpandFrameworkListNestedBlock(ctx, data.Ipv6StaticRoutes, &resp.Diagnostics, ExpandMemberIpv6StaticRoutes)
+		}
+		if resp.Diagnostics.HasError() {
+			return
+		}
+		apiRes2, _, err2 := r.client.GridAPI.
+			MemberAPI.
+			Update(ctx, utils.ExtractResourceRef(*res.Ref)).
+			Member(*staticRoutesPayload).
+			ReturnFieldsPlus(readableAttributesForMember).
+			ReturnAsObject(1).
+			Execute()
+		if err2 != nil {
+			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update Member with static routes, got error: %s", err2))
+			return
+		}
+		res = apiRes2.UpdateMemberResponseAsObject.GetResult()
+	}
+
 	if !data.PreProvisioning.IsUnknown() && !data.PreProvisioning.IsNull() {
 		apiRes2, _, err2 := r.client.GridAPI.
 			MemberAPI.
@@ -156,7 +184,7 @@ func (r *MemberResource) Create(ctx context.Context, req resource.CreateRequest,
 			ReturnAsObject(1).
 			Execute()
 		if err2 != nil {
-			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to Create Member with pre-provisioning or syslog proxy settings, got error: %s", err2))
+			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to Create Member with pre-provisioning settings, got error: %s", err2))
 			return
 		}
 		res = apiRes2.UpdateMemberResponseAsObject.GetResult()
@@ -628,6 +656,18 @@ func (r *MemberResource) ValidateConfig(ctx context.Context, req resource.Valida
 		}
 	}
 
+	if !data.Ipv6Setting.IsNull() && !data.Ipv6Setting.IsUnknown() {
+		ipv6Attrs := data.Ipv6Setting.Attributes()
+		hasVirtualIP := !ipv6Attrs["virtual_ip"].IsNull() && !ipv6Attrs["virtual_ip"].IsUnknown()
+		hasCidrPrefix := !ipv6Attrs["cidr_prefix"].IsNull() && !ipv6Attrs["cidr_prefix"].IsUnknown()
+		hasGateway := !ipv6Attrs["gateway"].IsNull() && !ipv6Attrs["gateway"].IsUnknown()
+		if (hasVirtualIP && hasCidrPrefix && hasGateway) &&
+			(data.ConfigAddrType.IsNull() || data.ConfigAddrType.IsUnknown() ||
+				(data.ConfigAddrType.ValueString() != "IPV6" && data.ConfigAddrType.ValueString() != "BOTH")) {
+			resp.Diagnostics.AddError("Validation Error", "config_addr_type must be set to IPV6 or BOTH when ipv6_setting.virtual_ip, ipv6_setting.cidr_prefix, and ipv6_setting.gateway are provided")
+		}
+	}
+
 	if !data.ConfigAddrType.IsNull() && !data.ConfigAddrType.IsUnknown() && data.ConfigAddrType.ValueString() == "IPV4" {
 		if !data.Ipv6Setting.IsNull() && !data.Ipv6Setting.IsUnknown() {
 			if !data.Ipv6Setting.Attributes()["virtual_ip"].IsNull() && !data.Ipv6Setting.Attributes()["virtual_ip"].IsUnknown() {
@@ -657,8 +697,8 @@ func (r *MemberResource) ValidateConfig(ctx context.Context, req resource.Valida
 				resp.Diagnostics.AddError("Validation Error", "vip_setting.address cannot be set when config_addr_type is set to IPV6")
 			}
 		}
-		if !data.ServiceTypeConfiguration.IsNull() && !data.ServiceTypeConfiguration.IsUnknown() && data.ServiceTypeConfiguration.ValueString() == "ALL_V4" {
-			resp.Diagnostics.AddError("Validation Error", "service_type_configuration cannot be set to ALL_V4 when config_addr_type is set to IPV6")
+		if !data.ServiceTypeConfiguration.IsUnknown() && (data.ServiceTypeConfiguration.IsNull() || data.ServiceTypeConfiguration.ValueString() == "ALL_V4") {
+			resp.Diagnostics.AddError("Validation Error", "service_type_configuration must be ALL_V6 when the config_addr_type is IPV6")
 		}
 	}
 

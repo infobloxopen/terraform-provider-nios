@@ -61,3 +61,7 @@ func GetNIOSGridMasterConfigAddrType() string {
 func GetNIOSSyslogEndpointRef() string {
 	return os.Getenv("NIOS_SYSLOG_ENDPOINT_REF")
 }
+
+func GetSubscriberBlockSizeEditable() string {
+	return os.Getenv("SUBSCRIBER_BLOCK_SIZE_EDITABLE")
+}

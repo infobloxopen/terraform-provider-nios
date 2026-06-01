@@ -169,6 +169,9 @@ func TestAccParentalcontrolSubscribersiteResource_ApiMembers(t *testing.T) {
 }
 
 func TestAccParentalcontrolSubscribersiteResource_BlockSize(t *testing.T) {
+	if utils.GetSubscriberBlockSizeEditable() == "false" {
+		t.Skip("Deterministic NAT Port needs to be enabled to edit block size")
+	}
 	var resourceName = "nios_parentalcontrol_subscribersite.test_block_size"
 	var v parentalcontrol.ParentalcontrolSubscribersite
 	name := acctest.RandomNameWithPrefix("subscriber-site")

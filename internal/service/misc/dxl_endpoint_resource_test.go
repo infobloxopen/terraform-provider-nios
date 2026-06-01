@@ -452,7 +452,7 @@ func TestAccDxlEndpointResource_TemplateInstance(t *testing.T) {
 				Config: testAccDxlEndpointTemplateInstance(clientCertificateFile, broker, name, "GM", templateInstanceValUpdated),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDxlEndpointExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "template_instance.template", "Version5_DXL_Session_Template2"),
+					resource.TestCheckResourceAttr(resourceName, "template_instance.template", "Version5_DXL_Session_Template1"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase

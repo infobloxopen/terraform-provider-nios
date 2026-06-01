@@ -1354,12 +1354,15 @@ func TestAccMemberResource_Ipv6Setting(t *testing.T) {
 }
 
 func TestAccMemberResource_Ipv6StaticRoutes(t *testing.T) {
-	t.Skip("IPv6 Static Routes cannot be created if other routes exist.")
+	if utils.GetNIOSGridMasterConfigAddrType() != "BOTH" {
+		t.Skip("Skipping test since grid master config addr type is not set to BOTH")
+	}
 	var resourceName = "nios_grid_member.test_ipv6_static_routes"
 	var v grid.Member
 	hostName := fmt.Sprintf("infoblox-%s.localdomain", acctest.RandomName())
-	vipAddress := "172.28.38.122"
-	networkSettingAddress := fmt.Sprintf("2001:db8:%x:%x::%x", acctest.RandomNumber(65535), acctest.RandomNumber(65535), acctest.RandomNumber(65535))
+	vipAddress := "172.28.39.122"
+	vipAddress6 := fmt.Sprintf("2001::%x", acctest.RandomNumber(65535))
+	networkSettingAddress := fmt.Sprintf("2001:db8:%x:%x::", acctest.RandomNumber(65535), acctest.RandomNumber(65535))
 	ipv6StaticRoutesVal := []map[string]any{
 		{
 			"address": networkSettingAddress,
@@ -1378,10 +1381,13 @@ func TestAccMemberResource_Ipv6StaticRoutes(t *testing.T) {
 					ipv6StaticRoutesVal,
 					vipAddress,
 					"172.28.38.1",
-					"255.255.254.0"),
+					"255.255.254.0",
+					vipAddress6),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ipv6_static_routes", "IPV6_STATIC_ROUTES_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "ipv6_static_routes.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "ipv6_static_routes.0.cidr", "64"),
+					resource.TestCheckResourceAttr(resourceName, "ipv6_static_routes.0.gateway", "2001::1"),
 				),
 			},
 			// Cannot change or remove IP address configuration due to existing static routes.
@@ -2442,18 +2448,17 @@ func TestAccMemberResource_SnmpSetting(t *testing.T) {
 }
 
 func TestAccMemberResource_StaticRoutes(t *testing.T) {
-	t.Skip("Cannot create Static Routes if Static Routes already exist")
 	var resourceName = "nios_grid_member.test_static_routes"
 	var v grid.Member
 
 	hostName := fmt.Sprintf("infoblox-%s.localdomain", acctest.RandomName())
-	vipAddress := "172.28.38.141"
+	vipAddress := "172.28.39.55"
 
 	staticRoutesVal := []map[string]any{
 		{
-			"address":     "172.28.90.10",
-			"gateway":     "172.28.90.1",
-			"subnet_mask": "255.255.254.0",
+			"address":     "172.28.90.0",
+			"gateway":     "172.28.38.1",
+			"subnet_mask": "255.255.255.0",
 		},
 	}
 
@@ -5253,12 +5258,25 @@ resource "nios_grid_member" "test_ipv6_setting" {
 `, hostName, configAddrType, platform, serviceTypeConfig, ipv6SettingStr, vipAddress, vipGateway, vipSubnetMask)
 }
 
-func testAccMemberIpv6StaticRoutes(hostName string, ipv6StaticRoutes []map[string]any, vipAddress, vipGateway, vipSubnetMask string) string {
+func testAccMemberIpv6StaticRoutes(hostName string, ipv6StaticRoutes []map[string]any, vipAddress, vipGateway, vipSubnetMask, vipAddress6 string) string {
 	ipv6StaticRoutesStr := utils.ConvertSliceOfMapsToHCL(ipv6StaticRoutes)
 	return fmt.Sprintf(`
 resource "nios_grid_member" "test_ipv6_static_routes" {
     host_name = %q
+    config_addr_type = "BOTH"
+    platform = "VNIOS"
+    service_type_configuration = "ALL_V4"
     ipv6_static_routes = %s
+    ipv6_setting = {
+        auto_router_config_enabled = false
+        dscp = 0
+        enabled = true
+        virtual_ip = %q
+        cidr_prefix = 64
+        gateway = "2001::1"
+        primary = true
+        use_dscp = false
+    }
 	vip_setting = {
         address = %q
         dscp = 0
@@ -5268,7 +5286,7 @@ resource "nios_grid_member" "test_ipv6_static_routes" {
         use_dscp = false
     }
 }
-`, hostName, ipv6StaticRoutesStr, vipAddress, vipGateway, vipSubnetMask)
+`, hostName, ipv6StaticRoutesStr, vipAddress6, vipAddress, vipGateway, vipSubnetMask)
 }
 
 func testAccMemberLan2Enabled(hostName string, lan2Enabled string, vipAddress, vipGateway, vipSubnetMask string) string {
@@ -5948,7 +5966,6 @@ resource "nios_grid_member" "test_static_routes" {
     }
 
     static_routes = %s
-	use_dscp = true
 }
 `, hostName, configAddrType, platform, serviceTypeConfig, vipAddress, vipGateway, vipSubnetMask, staticRoutesStr)
 }
