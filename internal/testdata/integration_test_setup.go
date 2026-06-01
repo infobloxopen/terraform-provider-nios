@@ -26,6 +26,7 @@ import (
 	"github.com/infobloxopen/infoblox-nios-go-client/notification"
 	"github.com/infobloxopen/infoblox-nios-go-client/option"
 	"github.com/infobloxopen/infoblox-nios-go-client/parentalcontrol"
+	"github.com/infobloxopen/infoblox-nios-go-client/rir"
 	"github.com/infobloxopen/infoblox-nios-go-client/security"
 	"github.com/infobloxopen/terraform-provider-nios/internal/acctest"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
@@ -558,6 +559,7 @@ type PreConfigClients struct {
 	NOTIFICATION *notification.APIClient
 	PARENTAL     *parentalcontrol.APIClient
 	SECURITY     *security.APIClient
+	RIR          *rir.APIClient
 }
 
 // PreConfig creates the network views required for integration testing.
@@ -590,6 +592,9 @@ func PreConfig(clients PreConfigClients, hostnames GridHostnames) error {
 	}
 	if clients.SECURITY == nil {
 		return fmt.Errorf("preconfig: SECURITY client is required")
+	}
+	if clients.RIR == nil {
+		return fmt.Errorf("preconfig: RIR client is required")
 	}
 
 	// Ensure roaming hosts support is enabled at grid DHCP properties level.
@@ -1468,6 +1473,47 @@ func PreConfig(clients PreConfigClients, hostnames GridHostnames) error {
 		fmt.Printf("Upgrade dependent group %q created successfully\n", groupName)
 	}
 
+	// Create RIR organizations
+	rirExtAttrs := map[string]rir.ExtAttrs{
+		"RIPE Admin Contact":     {Value: "ib-contact"},
+		"RIPE Country":           {Value: "United Kingdom (GB)"},
+		"RIPE Technical Contact": {Value: "TEST123-IB"},
+		"RIPE Email":             {Value: "support@infoblox.com"},
+	}
+
+	rirOrgs := []struct {
+		id   string
+		name string
+	}{
+		{id: "ORG-CB11-INTEST", name: "rir-org-test1"},
+		{id: "ORG-CB12-INTEST", name: "rir-org-test2"},
+	}
+
+	for _, org := range rirOrgs {
+		rirOrgBody := rir.RirOrganization{
+			Id:          rir.PtrString(org.id),
+			Name:        rir.PtrString(org.name),
+			Maintainer:  rir.PtrString("infoblox"),
+			Password:    rir.PtrString("test-pass"),
+			SenderEmail: rir.PtrString("support@infoblox.com"),
+			Rir:         rir.PtrString("RIPE"),
+			ExtAttrs:    &rirExtAttrs,
+		}
+
+		_, _, err := clients.RIR.RirOrganizationAPI.Create(context.Background()).
+			RirOrganization(rirOrgBody).
+			Execute()
+		if err != nil {
+			if strings.Contains(err.Error(), "already exists") {
+				fmt.Printf("RIR organization %q already exists, skipping creation\n", org.id)
+				continue
+			}
+			return fmt.Errorf("failed to create RIR organization %q: %w", org.id, err)
+		}
+
+		fmt.Printf("RIR organization %q created successfully\n", org.id)
+	}
+
 	// Create Active Directory auth services
 	adAuthServices := []struct {
 		name      string
@@ -2111,6 +2157,7 @@ func main() {
 		NOTIFICATION: apiClient.NotificationAPI,
 		PARENTAL:     apiClient.ParentalControlAPI,
 		SECURITY:     apiClient.SecurityAPI,
+		RIR:          apiClient.RIRAPI,
 	}
 
 	err = PreConfig(clients, hostnames)
