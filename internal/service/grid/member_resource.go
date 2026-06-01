@@ -146,7 +146,7 @@ func (r *MemberResource) Create(ctx context.Context, req resource.CreateRequest,
 
 	res := apiRes.CreateMemberResponseAsObject.GetResult()
 
-	if !data.PreProvisioning.IsUnknown() && !data.PreProvisioning.IsNull() {
+	if !data.PreProvisioning.IsUnknown() && !data.PreProvisioning.IsNull() ||(!data.TrafficCaptureAuthDnsSetting.IsUnknown() && !data.TrafficCaptureAuthDnsSetting.IsNull()) {
 		apiRes2, _, err2 := r.client.GridAPI.
 			MemberAPI.
 			Update(ctx, utils.ExtractResourceRef(*res.Ref)).
