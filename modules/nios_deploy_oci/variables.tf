@@ -19,10 +19,15 @@ variable "create_bucket" {
   description = "Set to true to create a new bucket; false to reuse an existing one. Only used when create_image = true."
   type        = bool
   default     = true
+
+  validation {
+    condition     = var.create_image || var.create_bucket == true
+    error_message = "create_bucket only applies when create_image = true. Remove it (or set create_image = true) instead of setting create_bucket = false."
+  }
 }
 
 variable "bucket_name" {
-  description = "Name of the Object Storage bucket for the NIOS QCOW2 image. Required when create_image = true."
+  description = "Name of the Object Storage bucket for the NIOS QCOW2 image. Required when create_image = true; must not be set when create_image = false."
   type        = string
   default     = null
 
@@ -30,11 +35,16 @@ variable "bucket_name" {
     condition     = !var.create_image || (var.bucket_name != null && var.bucket_name != "")
     error_message = "bucket_name is required when create_image = true."
   }
+
+  validation {
+    condition     = var.create_image || var.bucket_name == null || var.bucket_name == ""
+    error_message = "bucket_name must not be set when create_image = false."
+  }
 }
 
 // Object Storage — QCOW2 Upload (used only when create_image = true)
 variable "nios_qcow2_local_path" {
-  description = "Absolute local path to the NIOS QCOW2 image file. Required when create_image = true."
+  description = "Absolute local path to the NIOS QCOW2 image file. Required when create_image = true; must not be set when create_image = false."
   type        = string
   default     = null
 
@@ -42,10 +52,15 @@ variable "nios_qcow2_local_path" {
     condition     = !var.create_image || (var.nios_qcow2_local_path != null && var.nios_qcow2_local_path != "")
     error_message = "nios_qcow2_local_path is required when create_image = true."
   }
+
+  validation {
+    condition     = var.create_image || var.nios_qcow2_local_path == null || var.nios_qcow2_local_path == ""
+    error_message = "nios_qcow2_local_path must not be set when create_image = false."
+  }
 }
 
 variable "nios_object_name" {
-  description = "Object name to store the QCOW2 as in the bucket. Required when create_image = true."
+  description = "Object name to store the QCOW2 as in the bucket. Required when create_image = true; must not be set when create_image = false."
   type        = string
   default     = null
 
@@ -53,13 +68,28 @@ variable "nios_object_name" {
     condition     = !var.create_image || (var.nios_object_name != null && var.nios_object_name != "")
     error_message = "nios_object_name is required when create_image = true."
   }
+
+  validation {
+    condition     = var.create_image || var.nios_object_name == null || var.nios_object_name == ""
+    error_message = "nios_object_name must not be set when create_image = false."
+  }
 }
 
 // Custom Image
 variable "image_name" {
-  description = "Display name for the custom OCI image imported from the QCOW2. Only used when create_image = true."
+  description = "Display name for the custom OCI image imported from the QCOW2. Required when create_image = true; must not be set when create_image = false."
   type        = string
-  default     = "nios-custom-image"
+  default     = null
+
+  validation {
+    condition     = !var.create_image || (var.image_name != null && var.image_name != "")
+    error_message = "image_name is required when create_image = true."
+  }
+
+  validation {
+    condition     = var.create_image || var.image_name == null || var.image_name == ""
+    error_message = "image_name must not be set when create_image = false."
+  }
 }
 
 variable "image_id" {
@@ -212,9 +242,14 @@ variable "freeform_tags" {
 
 // HA Configuration
 variable "ha_subnet_id" {
-  description = "OCID of the subnet for the HA interface."
+  description = "OCID of the subnet for the HA interface. Required when enable_ha = true."
   type        = string
   default     = null
+
+  validation {
+    condition     = !var.enable_ha || (var.ha_subnet_id != null && var.ha_subnet_id != "")
+    error_message = "ha_subnet_id is required when enable_ha = true."
+  }
 }
 
 variable "enable_ha" {

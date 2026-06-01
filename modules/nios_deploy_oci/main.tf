@@ -50,12 +50,10 @@ resource "oci_objectstorage_object" "nios_qcow2" {
   count = var.create_image ? 1 : 0
 
   namespace    = data.oci_objectstorage_namespace.ns[0].namespace
-  bucket       = var.bucket_name
+  bucket       = local.bucket_name
   object       = var.nios_object_name
   source       = var.nios_qcow2_local_path
   content_type = "application/octet-stream"
-
-  depends_on = [oci_objectstorage_bucket.nios_bucket]
 }
 
 // Custom Image — Import from Object Storage
@@ -69,7 +67,7 @@ resource "oci_core_image" "nios_image" {
   image_source_details {
     source_type       = "objectStorageTuple"
     namespace_name    = data.oci_objectstorage_namespace.ns[0].namespace
-    bucket_name       = var.bucket_name
+    bucket_name       = local.bucket_name
     object_name       = var.nios_object_name
     operating_system  = "Linux"
     source_image_type = "QCOW2"
