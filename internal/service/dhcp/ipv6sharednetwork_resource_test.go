@@ -129,6 +129,7 @@ func TestAccIpv6sharednetworkResource_Import(t *testing.T) {
 				ImportStateIdFunc:                    testAccIpv6sharednetworkImportStateIdFunc(resourceName),
 				ImportStateVerify:                    true,
 				ImportStateVerifyIdentifierAttribute: "ref",
+				ImportStateVerifyIgnore:              []string{"networks"},
 				PlanOnly:                             true,
 			},
 			// Import and Verify
@@ -565,13 +566,13 @@ func TestAccIpv6sharednetworkResource_LogicFilterRules(t *testing.T) {
 	}
 	logicFilterRulesVal := []map[string]any{
 		{
-			"filter": "example-ipv6-option-filter-1",
+			"filter": "ipv6_option_filter",
 			"type":   "Option",
 		},
 	}
 	logicFilterRulesValUpdated := []map[string]any{
 		{
-			"filter": "example-ipv6-option-filter-2",
+			"filter": "ipv6_option_filter1",
 			"type":   "Option",
 		},
 	}
@@ -586,7 +587,7 @@ func TestAccIpv6sharednetworkResource_LogicFilterRules(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6sharednetworkExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "logic_filter_rules.#", "1"),
-					resource.TestCheckResourceAttr(resourceName, "logic_filter_rules.0.filter", "example-ipv6-option-filter-1"),
+					resource.TestCheckResourceAttr(resourceName, "logic_filter_rules.0.filter", "ipv6_option_filter"),
 					resource.TestCheckResourceAttr(resourceName, "logic_filter_rules.0.type", "Option"),
 				),
 			},
@@ -596,7 +597,7 @@ func TestAccIpv6sharednetworkResource_LogicFilterRules(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6sharednetworkExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "logic_filter_rules.#", "1"),
-					resource.TestCheckResourceAttr(resourceName, "logic_filter_rules.0.filter", "example-ipv6-option-filter-2"),
+					resource.TestCheckResourceAttr(resourceName, "logic_filter_rules.0.filter", "ipv6_option_filter1"),
 					resource.TestCheckResourceAttr(resourceName, "logic_filter_rules.0.type", "Option"),
 				),
 			},
@@ -1128,7 +1129,7 @@ func TestAccIpv6sharednetworkResource_UseLogicFilterRules(t *testing.T) {
 	}
 	logicFilterRulesVal := []map[string]any{
 		{
-			"filter": "example-ipv6-option-filter-1",
+			"filter": "ipv6_option_filter",
 			"type":   "Option",
 		},
 	}

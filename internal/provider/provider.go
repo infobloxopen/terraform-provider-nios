@@ -3,21 +3,23 @@ package provider
 import (
 	"context"
 	"fmt"
+	"net/http"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
+	"github.com/hashicorp/terraform-plugin-framework/list"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
 	"github.com/hashicorp/terraform-plugin-framework/provider/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/infobloxopen/terraform-provider-nios/internal/service/rir"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
 	gridclient "github.com/infobloxopen/infoblox-nios-go-client/grid"
 	"github.com/infobloxopen/infoblox-nios-go-client/option"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/config"
+	"github.com/infobloxopen/terraform-provider-nios/internal/retry"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/acl"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/cloud"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/dhcp"
@@ -30,6 +32,7 @@ import (
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/misc"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/notification"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/parentalcontrol"
+	"github.com/infobloxopen/terraform-provider-nios/internal/service/rir"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/rpz"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/security"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/smartfolder"
@@ -37,6 +40,8 @@ import (
 
 // Ensure NIOSProvider satisfies various provider interfaces.
 var _ provider.Provider = &NIOSProvider{}
+
+var _ provider.ProviderWithListResources = &NIOSProvider{}
 
 const terraformInternalIDEA = "Terraform Internal ID"
 
@@ -53,6 +58,7 @@ type NIOSProviderModel struct {
 	NIOSPassword types.String `tfsdk:"nios_password"`
 	ProxyURL     types.String `tfsdk:"proxy_url"`
 	ProxySearch  types.String `tfsdk:"proxy_search"`
+	RetryTimeout types.Int64  `tfsdk:"retry_timeout"`
 }
 
 func (p *NIOSProvider) Metadata(_ context.Context, _ provider.MetadataRequest, resp *provider.MetadataResponse) {
@@ -84,6 +90,10 @@ func (p *NIOSProvider) Schema(_ context.Context, _ provider.SchemaRequest, resp 
 					stringvalidator.OneOf("LOCAL", "GM"),
 				},
 			},
+			"retry_timeout": schema.Int64Attribute{
+				Optional:    true,
+				Description: "Specifies the timeout duration (in seconds) for retrying operations that fail due to transient errors.",
+			},
 		},
 	}
 }
@@ -109,6 +119,11 @@ func (p *NIOSProvider) Configure(ctx context.Context, req provider.ConfigureRequ
 	// Set ProxySearch configuration
 	config.SetProxySearch(data.ProxySearch.ValueString())
 
+	// Set global retry timeout if specified
+	if !data.RetryTimeout.IsNull() && !data.RetryTimeout.IsUnknown() {
+		retry.SetRetryTimeout(data.RetryTimeout.ValueInt64())
+	}
+
 	err := checkAndCreatePreRequisites(ctx, client)
 	if err != nil {
 		resp.Diagnostics.AddError(
@@ -118,6 +133,7 @@ func (p *NIOSProvider) Configure(ctx context.Context, req provider.ConfigureRequ
 	}
 	resp.DataSourceData = client
 	resp.ResourceData = client
+	resp.ListResourceData = client
 }
 
 func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
@@ -245,6 +261,7 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 		grid.NewDistributionscheduleResource,
 		grid.NewMemberResource,
 		grid.NewUpgradescheduleResource,
+		grid.NewGridJoinResource,
 
 		discovery.NewDiscoveryCredentialgroupResource,
 		discovery.NewVdiscoverytaskResource,
@@ -440,6 +457,16 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 	}
 }
 
+func (p *NIOSProvider) ListResources(ctx context.Context) []func() list.ListResource {
+	return []func() list.ListResource{
+		dns.NewRecordAList,
+
+		dhcp.NewFixedaddressList,
+
+		ipam.NewNetworkviewList,
+	}
+}
+
 func New(version, commit string) func() provider.Provider {
 	return func() provider.Provider {
 		return &NIOSProvider{
@@ -457,35 +484,53 @@ func checkAndCreatePreRequisites(ctx context.Context, client *niosclient.APIClie
 		"name": terraformInternalIDEA,
 	}
 
-	apiRes, _, err := client.GridAPI.ExtensibleattributedefAPI.
-		List(ctx).
-		Filters(filters).
-		ReturnFieldsPlus(readableAttributesForEADefinition).
-		ReturnAsObject(1).
-		Execute()
-	if err != nil {
-		return fmt.Errorf("error checking for existing extensible attribute: %w", err)
-	}
+	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		var (
+			httpRes *http.Response
+			callErr error
+		)
 
-	// If EA already exists, creation is not required
-	if len(apiRes.ListExtensibleattributedefResponseObject.GetResult()) > 0 {
-		return nil
-	}
+		// Check if EA already exists
+		apiRes, httpRes, callErr := client.GridAPI.ExtensibleattributedefAPI.
+			List(ctx).
+			Filters(filters).
+			ReturnFieldsPlus(readableAttributesForEADefinition).
+			ReturnAsObject(1).
+			Execute()
 
-	// Create EA if it doesn't exist
-	data := gridclient.Extensibleattributedef{
-		Name:    gridclient.PtrString(terraformInternalIDEA),
-		Type:    gridclient.PtrString("STRING"),
-		Comment: gridclient.PtrString("Internal ID for Terraform Resource"),
-		Flags:   gridclient.PtrString("CR"),
-	}
+		if callErr != nil {
+			if httpRes != nil {
+				return httpRes.StatusCode, callErr
+			}
+			return 0, callErr
+		}
 
-	_, _, err = client.GridAPI.ExtensibleattributedefAPI.
-		Create(ctx).
-		Extensibleattributedef(data).
-		ReturnFieldsPlus(readableAttributesForEADefinition).
-		ReturnAsObject(1).
-		Execute()
+		// If EA already exists, creation is not required
+		if len(apiRes.ListExtensibleattributedefResponseObject.GetResult()) > 0 {
+			return http.StatusOK, nil
+		}
+
+		// Create EA if it doesn't exist
+		data := gridclient.Extensibleattributedef{
+			Name:    gridclient.PtrString(terraformInternalIDEA),
+			Type:    gridclient.PtrString("STRING"),
+			Comment: gridclient.PtrString("Internal ID for Terraform Resource"),
+			Flags:   gridclient.PtrString("CR"),
+		}
+
+		_, httpRes, callErr = client.GridAPI.ExtensibleattributedefAPI.
+			Create(ctx).
+			Extensibleattributedef(data).
+			ReturnFieldsPlus(readableAttributesForEADefinition).
+			ReturnAsObject(1).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
+
 	if err != nil {
 		return fmt.Errorf("error creating Terraform extensible attribute: %w", err)
 	}

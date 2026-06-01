@@ -9,10 +9,13 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
+	"github.com/infobloxopen/infoblox-nios-go-client/grid"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/config"
+	"github.com/infobloxopen/terraform-provider-nios/internal/retry"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
@@ -89,14 +92,54 @@ func (r *MemberResource) Create(ctx context.Context, req resource.CreateRequest,
 		data.SyslogServers = processedList
 	}
 
-	apiRes, _, err := r.client.GridAPI.
-		MemberAPI.
-		Create(ctx).
-		Member(*data.Expand(ctx, &resp.Diagnostics, true)).
-		ReturnFieldsPlus(readableAttributesForMember).
-		ReturnAsObject(1).
-		Execute()
+	if !data.GridLevelDnsResolverSetting.IsNull() && !data.GridLevelDnsResolverSetting.IsUnknown() {
+		dnsResolverSetting := ExpandMemberDnsResolverSetting(ctx, data.GridLevelDnsResolverSetting, &resp.Diagnostics)
+		if resp.Diagnostics.HasError() {
+			return
+		}
+
+		err := utils.ConfigureGridDNSResolver(ctx, r.client.GridAPI, dnsResolverSetting)
+		if err != nil {
+			resp.Diagnostics.AddError("Grid DNS Resolver Configuration Error", fmt.Sprintf("Unable to configure grid-level DNS resolver: %s", err))
+			return
+		}
+	}
+
+	payload := data.Expand(ctx, &resp.Diagnostics, true)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	var apiRes *grid.CreateMemberResponse
+
+	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		var (
+			httpRes *http.Response
+			callErr error
+		)
+		apiRes, httpRes, callErr = r.client.GridAPI.
+			MemberAPI.
+			Create(ctx).
+			Member(*payload).
+			ReturnFieldsPlus(readableAttributesForMember).
+			ReturnAsObject(1).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
+
 	if err != nil {
+		if retry.IsAlreadyExistsErr(err) {
+			// Resource already exists, import required
+			resp.Diagnostics.AddError(
+				"Resource Already Exists",
+				fmt.Sprintf("Resource already exists, error: %s.\nPlease import the existing resource into terraform state.", err.Error()),
+			)
+			return
+		}
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create Member, got error: %s", err))
 		return
 	}
@@ -148,13 +191,28 @@ func (r *MemberResource) Read(ctx context.Context, req resource.ReadRequest, res
 		return
 	}
 
-	apiRes, httpRes, err := r.client.GridAPI.
-		MemberAPI.
-		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
-		ReturnFieldsPlus(readableAttributesForMember).
-		ReturnAsObject(1).
-		ProxySearch(config.GetProxySearch()).
-		Execute()
+	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
+
+	var (
+		httpRes *http.Response
+		apiRes  *grid.GetMemberResponse
+	)
+
+	err := retry.Do(ctx, nil, func(ctx context.Context) (int, error) {
+		var callErr error
+		apiRes, httpRes, callErr = r.client.GridAPI.
+			MemberAPI.
+			Read(ctx, resourceRef).
+			ReturnFieldsPlus(readableAttributesForMember).
+			ReturnAsObject(1).
+			ProxySearch(config.GetProxySearch()).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
 
 	// If the resource is not found, try searching using Extensible Attributes
 	if err != nil {
@@ -311,13 +369,56 @@ func (r *MemberResource) Update(ctx context.Context, req resource.UpdateRequest,
 		return
 	}
 
-	apiRes, _, err := r.client.GridAPI.
-		MemberAPI.
-		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
-		Member(*data.Expand(ctx, &resp.Diagnostics, false)).
-		ReturnFieldsPlus(readableAttributesForMember).
-		ReturnAsObject(1).
-		Execute()
+	if !data.GridLevelDnsResolverSetting.IsNull() && !data.GridLevelDnsResolverSetting.IsUnknown() {
+		var stateGridLevelDnsResolverSetting types.Object
+		// Check if grid-level DNS resolver setting has changed.
+		diags = req.State.GetAttribute(ctx, path.Root("grid_level_dns_resolver_setting"), &stateGridLevelDnsResolverSetting)
+		if diags.HasError() {
+			resp.Diagnostics.Append(diags...)
+			return
+		}
+		if !data.GridLevelDnsResolverSetting.Equal(stateGridLevelDnsResolverSetting) {
+			dnsResolverSetting := ExpandMemberDnsResolverSetting(ctx, data.GridLevelDnsResolverSetting, &resp.Diagnostics)
+			if resp.Diagnostics.HasError() {
+				return
+			}
+
+			err := utils.ConfigureGridDNSResolver(ctx, r.client.GridAPI, dnsResolverSetting)
+			if err != nil {
+				resp.Diagnostics.AddError("Grid DNS Resolver Configuration Error", fmt.Sprintf("Unable to configure grid-level DNS resolver: %s", err))
+				return
+			}
+		}
+	}
+
+	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
+
+	payload := data.Expand(ctx, &resp.Diagnostics, false)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	var apiRes *grid.UpdateMemberResponse
+
+	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		var (
+			httpRes *http.Response
+			callErr error
+		)
+		apiRes, httpRes, callErr = r.client.GridAPI.
+			MemberAPI.
+			Update(ctx, resourceRef).
+			Member(*payload).
+			ReturnFieldsPlus(readableAttributesForMember).
+			ReturnAsObject(1).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
+
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update Member, got error: %s", err))
 		return
@@ -351,14 +452,24 @@ func (r *MemberResource) Delete(ctx context.Context, req resource.DeleteRequest,
 		return
 	}
 
-	httpRes, err := r.client.GridAPI.
-		MemberAPI.
-		Delete(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
-		Execute()
-	if err != nil {
-		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
-			return
+	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
+
+	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		httpRes, callErr := r.client.GridAPI.
+			MemberAPI.
+			Delete(ctx, resourceRef).
+			Execute()
+
+		if httpRes != nil {
+			if httpRes.StatusCode == http.StatusNotFound {
+				return 0, nil
+			}
+			return httpRes.StatusCode, callErr
 		}
+		return 0, callErr
+	})
+
+	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete Member, got error: %s", err))
 		return
 	}
@@ -516,6 +627,18 @@ func (r *MemberResource) ValidateConfig(ctx context.Context, req resource.Valida
 		}
 	}
 
+	if !data.Ipv6Setting.IsNull() && !data.Ipv6Setting.IsUnknown() {
+		ipv6Attrs := data.Ipv6Setting.Attributes()
+		hasVirtualIP := !ipv6Attrs["virtual_ip"].IsNull() && !ipv6Attrs["virtual_ip"].IsUnknown()
+		hasCidrPrefix := !ipv6Attrs["cidr_prefix"].IsNull() && !ipv6Attrs["cidr_prefix"].IsUnknown()
+		hasGateway := !ipv6Attrs["gateway"].IsNull() && !ipv6Attrs["gateway"].IsUnknown()
+		if (hasVirtualIP && hasCidrPrefix && hasGateway) &&
+			(data.ConfigAddrType.IsNull() || data.ConfigAddrType.IsUnknown() ||
+				(data.ConfigAddrType.ValueString() != "IPV6" && data.ConfigAddrType.ValueString() != "BOTH")) {
+			resp.Diagnostics.AddError("Validation Error", "config_addr_type must be set to IPV6 or BOTH when ipv6_setting.virtual_ip, ipv6_setting.cidr_prefix, and ipv6_setting.gateway are provided")
+		}
+	}
+
 	if !data.ConfigAddrType.IsNull() && !data.ConfigAddrType.IsUnknown() && data.ConfigAddrType.ValueString() == "IPV4" {
 		if !data.Ipv6Setting.IsNull() && !data.Ipv6Setting.IsUnknown() {
 			if !data.Ipv6Setting.Attributes()["virtual_ip"].IsNull() && !data.Ipv6Setting.Attributes()["virtual_ip"].IsUnknown() {
@@ -545,8 +668,8 @@ func (r *MemberResource) ValidateConfig(ctx context.Context, req resource.Valida
 				resp.Diagnostics.AddError("Validation Error", "vip_setting.address cannot be set when config_addr_type is set to IPV6")
 			}
 		}
-		if !data.ServiceTypeConfiguration.IsNull() && !data.ServiceTypeConfiguration.IsUnknown() && data.ServiceTypeConfiguration.ValueString() == "ALL_V4" {
-			resp.Diagnostics.AddError("Validation Error", "service_type_configuration cannot be set to ALL_V4 when config_addr_type is set to IPV6")
+		if !data.ServiceTypeConfiguration.IsUnknown() && (data.ServiceTypeConfiguration.IsNull() || data.ServiceTypeConfiguration.ValueString() == "ALL_V4") {
+			resp.Diagnostics.AddError("Validation Error", "service_type_configuration must be ALL_V6 when the config_addr_type is IPV6")
 		}
 	}
 

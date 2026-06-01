@@ -2,6 +2,9 @@ package dns
 
 import (
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
+	"encoding/json"
 	"fmt"
 	"maps"
 	"net/http"
@@ -11,12 +14,14 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
 	"github.com/infobloxopen/infoblox-nios-go-client/dns"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/config"
+	"github.com/infobloxopen/terraform-provider-nios/internal/retry"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
@@ -26,6 +31,7 @@ var readableAttributesForIPAllocation = "aliases,allow_telnet,cli_credentials,cl
 var _ resource.Resource = &IPAllocationResource{}
 var _ resource.ResourceWithImportState = &IPAllocationResource{}
 var _ resource.ResourceWithValidateConfig = &IPAllocationResource{}
+var _ resource.ResourceWithModifyPlan = &IPAllocationResource{}
 
 func NewIPAllocationResource() resource.Resource {
 	return &IPAllocationResource{}
@@ -34,6 +40,12 @@ func NewIPAllocationResource() resource.Resource {
 // IPAllocationResource defines the resource implementation.
 type IPAllocationResource struct {
 	client *niosclient.APIClient
+}
+
+type secretsHashState struct {
+	AuthHash string `json:"auth_hash"`
+	PrivHash string `json:"priv_hash"`
+	CliHash  string `json:"cli_hash"`
 }
 
 func (r *IPAllocationResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -65,6 +77,190 @@ func (r *IPAllocationResource) Configure(ctx context.Context, req resource.Confi
 	}
 
 	r.client = client
+}
+
+func hasSecretHashes(state secretsHashState) bool {
+	return state.AuthHash != "" || state.PrivHash != "" || state.CliHash != ""
+}
+
+func hashStringValue(value types.String) string {
+	if value.IsNull() || value.IsUnknown() {
+		return ""
+	}
+
+	sum := sha256.Sum256([]byte(value.ValueString()))
+	return hex.EncodeToString(sum[:])
+}
+
+func hashCliPasswords(ctx context.Context, cliCreds types.List, diags *diag.Diagnostics) string {
+	if cliCreds.IsNull() || cliCreds.IsUnknown() {
+		return ""
+	}
+
+	var cliModels []RecordHostCliCredentialsModel
+	diags.Append(cliCreds.ElementsAs(ctx, &cliModels, false)...)
+	if diags.HasError() {
+		return ""
+	}
+
+	passwordHashes := make([]string, 0, len(cliModels))
+	hasAnyPassword := false
+
+	for _, cred := range cliModels {
+		switch {
+		case cred.Password.IsUnknown():
+			passwordHashes = append(passwordHashes, "")
+		case cred.Password.IsNull():
+			passwordHashes = append(passwordHashes, "")
+		default:
+			hasAnyPassword = true
+			passwordHashes = append(passwordHashes, hashStringValue(cred.Password))
+		}
+	}
+
+	if !hasAnyPassword {
+		return ""
+	}
+
+	// Uses config order. If reorder-only changes should not bump version,
+	// normalize/sort the slice before marshalling.
+	data, err := json.Marshal(passwordHashes)
+	if err != nil {
+		diags.AddError("CLI Secrets Hash Error", err.Error())
+		return ""
+	}
+
+	sum := sha256.Sum256(data)
+	return hex.EncodeToString(sum[:])
+}
+
+func marshalSecretsHashState(state secretsHashState, diags *diag.Diagnostics) string {
+	data, err := json.Marshal(state)
+	if err != nil {
+		diags.AddError("Secrets Hash Marshal Error", err.Error())
+		return ""
+	}
+	return string(data)
+}
+
+func (r *IPAllocationResource) ModifyPlan(ctx context.Context, req resource.ModifyPlanRequest, resp *resource.ModifyPlanResponse) {
+	if req.Plan.Raw.IsNull() {
+		return
+	}
+
+	var (
+		planSnmp3 types.Object
+		stateRev  types.Int64
+		cliCreds  types.List
+		authPwd   types.String
+		privPwd   types.String
+	)
+
+	resp.Diagnostics.Append(req.Plan.GetAttribute(ctx, path.Root("snmp3_credential"), &planSnmp3)...)
+	resp.Diagnostics.Append(req.State.GetAttribute(ctx, path.Root("secrets_version"), &stateRev)...)
+	resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("cli_credentials"), &cliCreds)...)
+	resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("snmp3_credential").AtName("authentication_password"), &authPwd)...)
+	resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("snmp3_credential").AtName("privacy_password"), &privPwd)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	curRev := int64(0)
+	if !stateRev.IsNull() && !stateRev.IsUnknown() {
+		curRev = stateRev.ValueInt64()
+	}
+
+	var prevEnvelope struct {
+		Algo string `json:"algo"`
+		Hash string `json:"hash"`
+	}
+	if b, diags := req.Private.GetKey(ctx, "secrets_hash"); diags != nil {
+		resp.Diagnostics.Append(diags...)
+		if resp.Diagnostics.HasError() {
+			return
+		}
+	} else if b != nil {
+		if err := json.Unmarshal(b, &prevEnvelope); err != nil {
+			prevEnvelope.Hash = ""
+		}
+	}
+
+	prevHashes := secretsHashState{}
+	if prevEnvelope.Hash != "" {
+		if err := json.Unmarshal([]byte(prevEnvelope.Hash), &prevHashes); err != nil {
+			prevHashes = secretsHashState{}
+		}
+	}
+
+	plannedHashes := prevHashes
+
+	// SNMP3 block removed: clear both SNMP3 secret hashes.
+	if planSnmp3.IsNull() {
+		plannedHashes.AuthHash = ""
+		plannedHashes.PrivHash = ""
+	} else {
+		// Update only when config value is known.
+		if !authPwd.IsUnknown() {
+			plannedHashes.AuthHash = hashStringValue(authPwd)
+		}
+		if !privPwd.IsUnknown() {
+			plannedHashes.PrivHash = hashStringValue(privPwd)
+		}
+	}
+
+	// cli_credentials removed: clear CLI hash.
+	// If cli_credentials is known, compute a canonical hash for the full list.
+	if cliCreds.IsNull() {
+		plannedHashes.CliHash = ""
+	} else if !cliCreds.IsUnknown() {
+		plannedHashes.CliHash = hashCliPasswords(ctx, cliCreds, &resp.Diagnostics)
+		if resp.Diagnostics.HasError() {
+			return
+		}
+	}
+
+	prevHasSecrets := hasSecretHashes(prevHashes)
+	plannedHasSecrets := hasSecretHashes(plannedHashes)
+	secretsChanged := plannedHashes != prevHashes
+
+	bump := false
+	newHashToStore := prevEnvelope.Hash
+
+	switch {
+
+	case !plannedHasSecrets && prevHasSecrets:
+		bump = true
+		newHashToStore = ""
+
+	case plannedHasSecrets && (prevHashes == secretsHashState{} || secretsChanged):
+		bump = true
+		newHashToStore = marshalSecretsHashState(plannedHashes, &resp.Diagnostics)
+	}
+
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	if bump {
+		newRev := types.Int64Value(curRev + 1)
+		resp.Diagnostics.Append(resp.Plan.SetAttribute(ctx, path.Root("secrets_version"), newRev)...)
+
+		val := map[string]string{
+			"algo": "sha256",
+			"hash": newHashToStore,
+		}
+		b, err := json.Marshal(val)
+		if err != nil {
+			resp.Diagnostics.AddError("error marshalling secrets hash", err.Error())
+			return
+		}
+		resp.Diagnostics.Append(resp.Private.SetKey(ctx, "secrets_hash", b)...)
+		return
+	}
+
+	resp.Diagnostics.Append(
+		resp.Plan.SetAttribute(ctx, path.Root("secrets_version"), types.Int64Value(curRev))...,
+	)
 }
 
 func (r *IPAllocationResource) ValidateConfig(ctx context.Context, req resource.ValidateConfigRequest, resp *resource.ValidateConfigResponse) {
@@ -101,6 +297,59 @@ func (r *IPAllocationResource) ValidateConfig(ctx context.Context, req resource.
 			"'ipv6addrs' can contain at most one element.",
 		)
 	}
+}
+
+func loadCliCredentialModelsFromConfig(ctx context.Context, config tfsdk.Config, diags *diag.Diagnostics) ([]RecordHostCliCredentialsModel, types.List) {
+	var cliCreds types.List
+	diags.Append(config.GetAttribute(ctx, path.Root("cli_credentials"), &cliCreds)...)
+	if diags.HasError() {
+		return nil, cliCreds
+	}
+
+	if cliCreds.IsNull() || cliCreds.IsUnknown() {
+		return nil, cliCreds
+	}
+
+	var cliModels []RecordHostCliCredentialsModel
+	diags.Append(cliCreds.ElementsAs(ctx, &cliModels, false)...)
+	if diags.HasError() {
+		return nil, cliCreds
+	}
+
+	return cliModels, cliCreds
+}
+
+func applyCliCredentialPasswords(payloadCreds []dns.RecordHostCliCredentials, cliModels []RecordHostCliCredentialsModel) {
+	for i := range cliModels {
+		if i >= len(payloadCreds) {
+			break
+		}
+
+		if !cliModels[i].Password.IsNull() && !cliModels[i].Password.IsUnknown() {
+			password := cliModels[i].Password.ValueString()
+			payloadCreds[i].Password = &password
+		}
+	}
+}
+
+func buildSecretsHashState(ctx context.Context, authPwd types.String, privPwd types.String, cliCreds types.List, diags *diag.Diagnostics) secretsHashState {
+	return secretsHashState{
+		AuthHash: hashStringValue(authPwd),
+		PrivHash: hashStringValue(privPwd),
+		CliHash:  hashCliPasswords(ctx, cliCreds, diags),
+	}
+}
+
+func marshalSecretsEnvelope(state secretsHashState) ([]byte, error) {
+	hashJSON, err := json.Marshal(state)
+	if err != nil {
+		return nil, err
+	}
+
+	return json.Marshal(map[string]string{
+		"algo": "sha256",
+		"hash": string(hashJSON),
+	})
 }
 
 func (r *IPAllocationResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
@@ -140,14 +389,72 @@ func (r *IPAllocationResource) Create(ctx context.Context, req resource.CreateRe
 	// Save original IPv6 function call attributes
 	savedIPv6FuncCalls := r.saveNestedFuncCallAttrs(data.Ipv6addrs)
 
-	apiRes, _, err := r.client.DNSAPI.
-		RecordHostAPI.
-		Create(ctx).
-		RecordHost(*data.Expand(ctx, &resp.Diagnostics)).
-		ReturnFieldsPlus(readableAttributesForIPAllocation).
-		ReturnAsObject(1).
-		Execute()
+	var secretsVersion types.Int64
+	var (
+		planSnmp3 types.Object
+		authPwd   types.String
+		privPwd   types.String
+		cliCreds  types.List
+		cliModels []RecordHostCliCredentialsModel
+	)
+
+	resp.Diagnostics.Append(req.Plan.GetAttribute(ctx, path.Root("snmp3_credential"), &planSnmp3)...)
+	resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("snmp3_credential").AtName("authentication_password"), &authPwd)...)
+	resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("snmp3_credential").AtName("privacy_password"), &privPwd)...)
+
+	cliModels, cliCreds = loadCliCredentialModelsFromConfig(ctx, req.Config, &resp.Diagnostics)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	payload := data.Expand(ctx, &resp.Diagnostics)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	if !planSnmp3.IsNull() && payload.Snmp3Credential != nil {
+		if !authPwd.IsNull() && !authPwd.IsUnknown() {
+			ap := authPwd.ValueString()
+			payload.Snmp3Credential.AuthenticationPassword = &ap
+		}
+		if !privPwd.IsNull() && !privPwd.IsUnknown() {
+			pp := privPwd.ValueString()
+			payload.Snmp3Credential.PrivacyPassword = &pp
+		}
+	}
+
+	applyCliCredentialPasswords(payload.CliCredentials, cliModels)
+
+	var apiRes *dns.CreateRecordHostResponse
+
+	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		var (
+			httpRes *http.Response
+			callErr error
+		)
+		apiRes, httpRes, callErr = r.client.DNSAPI.
+			RecordHostAPI.
+			Create(ctx).
+			RecordHost(*payload).
+			ReturnFieldsPlus(readableAttributesForIPAllocation).
+			ReturnAsObject(1).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
+
 	if err != nil {
+		if retry.IsAlreadyExistsErr(err) {
+			// Resource already exists, import required
+			resp.Diagnostics.AddError(
+				"Resource Already Exists",
+				fmt.Sprintf("Resource already exists, error: %s.\nPlease import the existing resource into terraform state.", err.Error()),
+			)
+			return
+		}
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create RecordHost, got error: %s", err))
 		return
 	}
@@ -159,6 +466,26 @@ func (r *IPAllocationResource) Create(ctx context.Context, req resource.CreateRe
 		return
 	}
 
+	secretData := buildSecretsHashState(ctx, authPwd, privPwd, cliCreds, &resp.Diagnostics)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	if hasSecretHashes(secretData) {
+		secretsVersion = types.Int64Value(1)
+
+		hashSecrets, err := marshalSecretsEnvelope(secretData)
+		if err != nil {
+			resp.Diagnostics.AddError("error marshalling secrets hash", err.Error())
+			return
+		}
+		resp.Diagnostics.Append(resp.Private.SetKey(ctx, "secrets_hash", hashSecrets)...)
+	} else {
+		secretsVersion = types.Int64Value(0)
+		resp.Diagnostics.Append(resp.Private.SetKey(ctx, "secrets_hash", nil)...)
+	}
+
+	data.SecretsVersion = secretsVersion
 	data.Flatten(ctx, &res, &resp.Diagnostics)
 
 	// Restore original IPv4 function call attributes
@@ -198,13 +525,28 @@ func (r *IPAllocationResource) Read(ctx context.Context, req resource.ReadReques
 	// Save original IPv6 function call attributes
 	savedIPv6FuncCalls := r.saveNestedFuncCallAttrs(data.Ipv6addrs)
 
-	apiRes, httpRes, err := r.client.DNSAPI.
-		RecordHostAPI.
-		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
-		ReturnFieldsPlus(readableAttributesForIPAllocation).
-		ReturnAsObject(1).
-		ProxySearch(config.GetProxySearch()).
-		Execute()
+	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
+
+	var (
+		httpRes *http.Response
+		apiRes  *dns.GetRecordHostResponse
+	)
+
+	err := retry.Do(ctx, nil, func(ctx context.Context) (int, error) {
+		var callErr error
+		apiRes, httpRes, callErr = r.client.DNSAPI.
+			RecordHostAPI.
+			Read(ctx, resourceRef).
+			ReturnFieldsPlus(readableAttributesForIPAllocation).
+			ReturnAsObject(1).
+			ProxySearch(config.GetProxySearch()).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
 
 	// If the resource is not found, try searching using Extensible Attributes
 	if err != nil {
@@ -367,13 +709,29 @@ func (r *IPAllocationResource) Update(ctx context.Context, req resource.UpdateRe
 		return
 	}
 
+	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
+
+	var (
+		currentApiRes *dns.GetRecordHostResponse
+		httpRes       *http.Response
+	)
+
 	// Read current state from backend to preserve DHCP settings
-	currentApiRes, httpRes, err := r.client.DNSAPI.
-		RecordHostAPI.
-		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
-		ReturnFieldsPlus(readableAttributesForIPAllocation).
-		ReturnAsObject(1).
-		Execute()
+	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		var callErr error
+
+		currentApiRes, httpRes, callErr = r.client.DNSAPI.
+			RecordHostAPI.
+			Read(ctx, resourceRef).
+			ReturnFieldsPlus(readableAttributesForIPAllocation).
+			ReturnAsObject(1).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
 
 	var currentHost dns.RecordHost
 	if err != nil {
@@ -402,18 +760,61 @@ func (r *IPAllocationResource) Update(ctx context.Context, req resource.UpdateRe
 		currentHost = currentApiRes.GetRecordHostResponseObjectAsResult.GetResult()
 	}
 
-	// Prepare the update request while preserving DHCP settings
 	updateReq := data.Expand(ctx, &resp.Diagnostics)
+	// Preserve other settings
 	preserveDHCPSettings(updateReq, &currentHost)
+
+	var (
+		authPwd   types.String
+		privPwd   types.String
+		cliCreds  types.List
+		cliModels []RecordHostCliCredentialsModel
+	)
+
+	resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("snmp3_credential").AtName("authentication_password"), &authPwd)...)
+	resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("snmp3_credential").AtName("privacy_password"), &privPwd)...)
+
+	cliModels, cliCreds = loadCliCredentialModelsFromConfig(ctx, req.Config, &resp.Diagnostics)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+	if updateReq.Snmp3Credential != nil {
+		if !authPwd.IsNull() && !authPwd.IsUnknown() {
+			ap := authPwd.ValueString()
+			updateReq.Snmp3Credential.AuthenticationPassword = &ap
+		}
+		if !privPwd.IsNull() && !privPwd.IsUnknown() {
+			pp := privPwd.ValueString()
+			updateReq.Snmp3Credential.PrivacyPassword = &pp
+		}
+	}
+
+	applyCliCredentialPasswords(updateReq.CliCredentials, cliModels)
+
+	// Clear fields not allowed in update call
 	updateReq.NetworkView = nil
 
-	apiRes, _, err := r.client.DNSAPI.
-		RecordHostAPI.
-		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
-		RecordHost(*updateReq).
-		ReturnFieldsPlus(readableAttributesForIPAllocation).
-		ReturnAsObject(1).
-		Execute()
+	var apiRes *dns.UpdateRecordHostResponse
+
+	err = retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		var (
+			httpRes *http.Response
+			callErr error
+		)
+		apiRes, httpRes, callErr = r.client.DNSAPI.
+			RecordHostAPI.
+			Update(ctx, resourceRef).
+			RecordHost(*updateReq).
+			ReturnFieldsPlus(readableAttributesForIPAllocation).
+			ReturnAsObject(1).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
+
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update RecordHost, got error: %s", err))
 		return
@@ -425,6 +826,22 @@ func (r *IPAllocationResource) Update(ctx context.Context, req resource.UpdateRe
 	if diags.HasError() {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while update RecordHost due inherited Extensible attributes, got error: %s", diags))
 		return
+	}
+
+	secretData := buildSecretsHashState(ctx, authPwd, privPwd, cliCreds, &resp.Diagnostics)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	if hasSecretHashes(secretData) {
+		hashSecrets, err := marshalSecretsEnvelope(secretData)
+		if err != nil {
+			resp.Diagnostics.AddError("error marshalling secrets hash", err.Error())
+			return
+		}
+		resp.Diagnostics.Append(resp.Private.SetKey(ctx, "secrets_hash", hashSecrets)...)
+	} else {
+		resp.Diagnostics.Append(resp.Private.SetKey(ctx, "secrets_hash", nil)...)
 	}
 
 	data.Flatten(ctx, &res, &resp.Diagnostics)
@@ -487,10 +904,23 @@ func (r *IPAllocationResource) Delete(ctx context.Context, req resource.DeleteRe
 		return
 	}
 
-	httpRes, err := r.client.DNSAPI.
-		RecordHostAPI.
-		Delete(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
-		Execute()
+	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
+
+	var httpRes *http.Response
+
+	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		var callErr error
+		httpRes, callErr = r.client.DNSAPI.
+			RecordHostAPI.
+			Delete(ctx, resourceRef).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
+
 	if err != nil {
 		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
 			// If ref not found, try to locate by internal id and delete using the found ref
@@ -504,15 +934,24 @@ func (r *IPAllocationResource) Delete(ctx context.Context, req resource.DeleteRe
 				return
 			}
 
+			resourceRef := utils.ExtractResourceRef(foundRef)
 			// Attempt delete using the foundRef
-			httpResDel, errDel := r.client.DNSAPI.
-				RecordHostAPI.
-				Delete(ctx, utils.ExtractResourceRef(foundRef)).
-				Execute()
-			if errDel != nil {
-				if httpResDel != nil && httpResDel.StatusCode == http.StatusNotFound {
-					return
+			errDel := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+				httpResDel, callErr := r.client.DNSAPI.
+					RecordHostAPI.
+					Delete(ctx, resourceRef).
+					Execute()
+
+				if httpResDel != nil {
+					if httpResDel.StatusCode == http.StatusNotFound {
+						return 0, nil
+					}
+					return httpResDel.StatusCode, callErr
 				}
+				return 0, callErr
+			})
+
+			if errDel != nil {
 				resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete RecordHost (found by internal id), got error: %s", errDel))
 				return
 			}
@@ -550,13 +989,27 @@ func (r *IPAllocationResource) findHostByInternalID(ctx context.Context, data *I
 		terraformInternalIDEA: internalAttr.Value,
 	}
 
-	apiRes, httpRes, err := r.client.DNSAPI.
-		RecordHostAPI.
-		List(ctx).
-		Extattrfilter(idMap).
-		ReturnAsObject(1).
-		ReturnFieldsPlus(readableAttributesForIPAllocation).
-		Execute()
+	var (
+		httpRes *http.Response
+		apiRes  *dns.ListRecordHostResponse
+	)
+
+	err := retry.Do(ctx, nil, func(ctx context.Context) (int, error) {
+		var callErr error
+		apiRes, httpRes, callErr = r.client.DNSAPI.
+			RecordHostAPI.
+			List(ctx).
+			Extattrfilter(idMap).
+			ReturnAsObject(1).
+			ReturnFieldsPlus(readableAttributesForIPAllocation).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
+
 	if err != nil {
 		return nil, "", httpRes, err
 	}
