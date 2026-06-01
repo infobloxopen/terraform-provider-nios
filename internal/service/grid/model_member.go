@@ -950,7 +950,7 @@ func (m *MemberModel) Expand(ctx context.Context, diags *diag.Diagnostics, isCre
 
 	if !isCreate {
 		to.PreProvisioning = ExpandMemberPreProvisioning(ctx, m.PreProvisioning, diags)
-		to.TrafficCaptureAuthDnsSetting =   ExpandMemberTrafficCaptureAuthDnsSetting(ctx, m.TrafficCaptureAuthDnsSetting, diags)
+		to.TrafficCaptureAuthDnsSetting = ExpandMemberTrafficCaptureAuthDnsSetting(ctx, m.TrafficCaptureAuthDnsSetting, diags)
 	}
 
 	if m.ConfigureCspMemberSetting.ValueBool() {
