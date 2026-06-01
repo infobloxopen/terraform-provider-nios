@@ -92,7 +92,6 @@ func (r *MemberResource) Create(ctx context.Context, req resource.CreateRequest,
 		data.SyslogServers = processedList
 	}
 
-
 	if !data.GridLevelDnsResolverSetting.IsNull() && !data.GridLevelDnsResolverSetting.IsUnknown() {
 		dnsResolverSetting := ExpandMemberDnsResolverSetting(ctx, data.GridLevelDnsResolverSetting, &resp.Diagnostics)
 		if resp.Diagnostics.HasError() {
@@ -628,6 +627,18 @@ func (r *MemberResource) ValidateConfig(ctx context.Context, req resource.Valida
 		}
 	}
 
+	if !data.Ipv6Setting.IsNull() && !data.Ipv6Setting.IsUnknown() {
+		ipv6Attrs := data.Ipv6Setting.Attributes()
+		hasVirtualIP := !ipv6Attrs["virtual_ip"].IsNull() && !ipv6Attrs["virtual_ip"].IsUnknown()
+		hasCidrPrefix := !ipv6Attrs["cidr_prefix"].IsNull() && !ipv6Attrs["cidr_prefix"].IsUnknown()
+		hasGateway := !ipv6Attrs["gateway"].IsNull() && !ipv6Attrs["gateway"].IsUnknown()
+		if (hasVirtualIP && hasCidrPrefix && hasGateway) &&
+			(data.ConfigAddrType.IsNull() || data.ConfigAddrType.IsUnknown() ||
+				(data.ConfigAddrType.ValueString() != "IPV6" && data.ConfigAddrType.ValueString() != "BOTH")) {
+			resp.Diagnostics.AddError("Validation Error", "config_addr_type must be set to IPV6 or BOTH when ipv6_setting.virtual_ip, ipv6_setting.cidr_prefix, and ipv6_setting.gateway are provided")
+		}
+	}
+
 	if !data.ConfigAddrType.IsNull() && !data.ConfigAddrType.IsUnknown() && data.ConfigAddrType.ValueString() == "IPV4" {
 		if !data.Ipv6Setting.IsNull() && !data.Ipv6Setting.IsUnknown() {
 			if !data.Ipv6Setting.Attributes()["virtual_ip"].IsNull() && !data.Ipv6Setting.Attributes()["virtual_ip"].IsUnknown() {
@@ -657,8 +668,8 @@ func (r *MemberResource) ValidateConfig(ctx context.Context, req resource.Valida
 				resp.Diagnostics.AddError("Validation Error", "vip_setting.address cannot be set when config_addr_type is set to IPV6")
 			}
 		}
-		if !data.ServiceTypeConfiguration.IsNull() && !data.ServiceTypeConfiguration.IsUnknown() && data.ServiceTypeConfiguration.ValueString() == "ALL_V4" {
-			resp.Diagnostics.AddError("Validation Error", "service_type_configuration cannot be set to ALL_V4 when config_addr_type is set to IPV6")
+		if !data.ServiceTypeConfiguration.IsUnknown() && (data.ServiceTypeConfiguration.IsNull() || data.ServiceTypeConfiguration.ValueString() == "ALL_V4") {
+			resp.Diagnostics.AddError("Validation Error", "service_type_configuration must be ALL_V6 when the config_addr_type is IPV6")
 		}
 	}
 

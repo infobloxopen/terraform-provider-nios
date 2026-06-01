@@ -203,7 +203,7 @@ func TestAccSyslogEndpointResource_OutboundMemberType(t *testing.T) {
 	connectionType := "udp"
 	format := "formatted"
 	updatedOutboundMember := "MEMBER"
-	memberUpdatedName := utils.GetNIOSGridMemberHostName()
+	memberUpdatedName := "infoblox.member2"
 	outboundMember := memberUpdatedName
 
 	resource.ParallelTest(t, resource.TestCase{

@@ -409,7 +409,7 @@ func TestAccRecordCnameResource_UseTtl(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRecordCnameUseTtl(canonical, name, "default", false, 20),
+				Config: testAccRecordCnameUseTtlOnly(canonical, name, "default", false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordCnameExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_ttl", "false"),
@@ -616,4 +616,15 @@ resource "nios_dns_record_cname" "test_use_ttl" {
 	ttl 	  = %d
 }
 `, canonical, name, view, useTtl, ttl)
+}
+
+func testAccRecordCnameUseTtlOnly(canonical, name, view string, useTtl bool) string {
+	return fmt.Sprintf(`
+resource "nios_dns_record_cname" "test_use_ttl" {
+	canonical = %q
+	name      = %q
+	view      = %q
+	use_ttl   = %t
+}
+`, canonical, name, view, useTtl)
 }
