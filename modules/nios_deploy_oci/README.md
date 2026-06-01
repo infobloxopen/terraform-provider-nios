@@ -277,7 +277,7 @@ module "node1" {
 }
 
 // Deploy OCI instance for Node 2 (Passive Node)
-module "node1" {
+module "node2" {
   // ... (same config as Step 1)
   enable_ha    = true
   ha_subnet_id = var.ha_subnet_id

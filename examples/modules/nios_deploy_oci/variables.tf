@@ -30,39 +30,42 @@ variable "compartment_id" {
   type        = string
 }
 
-// Object Storage — Bucket
+// Object Storage — Bucket (used only when create_image = true)
 variable "create_bucket" {
-  description = "Set to true to create a new bucket; false to reuse an existing one."
+  description = "Set to true to create a new bucket; false to reuse an existing one. Only used when create_image = true."
   type        = bool
   default     = true
 }
 
 variable "bucket_name" {
-  description = "Name of the Object Storage bucket for the NIOS QCOW2 image."
+  description = "Name of the Object Storage bucket for the NIOS QCOW2 image. Required when create_image = true; must not be set when create_image = false."
   type        = string
+  default     = null
 }
 
-// Object Storage — QCOW2 Upload
+// Object Storage — QCOW2 Upload (used only when create_image = true)
 variable "nios_qcow2_local_path" {
-  description = "Absolute local path to the NIOS QCOW2 image file."
+  description = "Absolute local path to the NIOS QCOW2 image file. Required when create_image = true; must not be set when create_image = false."
   type        = string
+  default     = null
 }
 
 variable "nios_object_name" {
-  description = "Object name to store the QCOW2 as in the bucket."
+  description = "Object name to store the QCOW2 as in the bucket. Required when create_image = true; must not be set when create_image = false."
   type        = string
+  default     = null
 }
 
 // Custom Image
 variable "image_name" {
-  description = "Display name for the custom OCI image imported from the QCOW2."
+  description = "Display name for the custom OCI image imported from the QCOW2. Required when create_image = true; must not be set when create_image = false."
   type        = string
-  default     = "nios-custom-image"
+  default     = null
 }
 
 // Compute Instances
 variable "instance_name" {
-  description = "Base display name. Instances will be named <name>-gm and <name>-member."
+  description = "Display name for the OCI instance."
   type        = string
   default     = "nios"
 }
@@ -184,13 +187,15 @@ variable "default_admin_password" {
 }
 
 variable "ha_subnet_id" {
-  description = "OCID of the subnet for the HA interface."
+  description = "OCID of the subnet for the HA interface. Required when enable_ha = true."
   type        = string
+  default     = null
 }
 
 variable "image_id" {
-  description = "OCID of the custom image imported from the QCOW2. Overrides image_name if set."
+  description = "OCID of an existing NIOS custom image to use for instance creation. Required when create_image = false; must not be set when create_image = true."
   type        = string
+  default     = null
 }
 
 variable "idcs_endpoint" {
