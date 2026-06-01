@@ -490,6 +490,8 @@ func TestAccRecordCaaResource_View(t *testing.T) {
 	var v dns.RecordCaa
 	zoneFqdn := acctest.RandomNameWithPrefix("test-zone") + ".com"
 	name := acctest.RandomNameWithPrefix("record-caa")
+	view1 := acctest.RandomNameWithPrefix("view")
+	view2 := acctest.RandomNameWithPrefix("view")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -497,18 +499,18 @@ func TestAccRecordCaaResource_View(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRecordCaaView(zoneFqdn, name, 0, "issue", "digicert.com", "custom_view_1"),
+				Config: testAccRecordCaaView(zoneFqdn, name, 0, "issue", "digicert.com", view1),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordCaaExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "view", "custom_view_1"),
+					resource.TestCheckResourceAttr(resourceName, "view", view1),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccRecordCaaView(zoneFqdn, name, 0, "issue", "digicert.com", "custom_view_2"),
+				Config: testAccRecordCaaView(zoneFqdn, name, 0, "issue", "digicert.com", view2),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordCaaExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "view", "custom_view_2"),
+					resource.TestCheckResourceAttr(resourceName, "view", view2),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
