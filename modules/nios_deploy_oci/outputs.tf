@@ -35,21 +35,6 @@ data "oci_core_subnet" "mgmt_subnet" {
   subnet_id = var.mgmt_subnet_id
 }
 
-data "oci_core_vnic_attachments" "mgmt_vnic_attachments" {
-  compartment_id = var.compartment_id
-  instance_id    = oci_core_instance.nios_instance.id
-
-  filter {
-    name   = "nic_index"
-    values = ["0"]
-  }
-}
-
-data "oci_core_vnic" "mgmt_vnic" {
-  vnic_id = data.oci_core_vnic_attachments.mgmt_vnic_attachments.vnic_attachments[0].vnic_id
-}
-
-
 output "mgmt_ip" {
   description = "Private IP of the primary (MGMT) VNIC."
   value       = oci_core_instance.nios_instance.private_ip
