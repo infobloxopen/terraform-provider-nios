@@ -2892,7 +2892,7 @@ func TestAccMemberResource_TrafficCaptureAuthDnsSetting(t *testing.T) {
 	var v grid.Member
 
 	hostName := fmt.Sprintf("infoblox-%s.localdomain", acctest.RandomName())
-	vipAddress := "172.28.38.141"
+	vipAddress := "172.28.38.148"
 
 	trafficCaptureAuthDnsSettingVal := map[string]any{
 		"auth_dns_latency_listen_on_source": "VIP_V4",
