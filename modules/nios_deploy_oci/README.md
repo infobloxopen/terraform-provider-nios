@@ -28,12 +28,15 @@ the infrastructure is deployed and NIOS is fully booted (~30 minutes).
 
 | Name | Type |
 |------|------|
+| [oci_core_image.nios_image](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/core_image) | resource |
 | [oci_core_instance.nios_instance](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/core_instance) | resource |
 | [oci_core_private_ip.ha_vip](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/core_private_ip) | resource |
 | [oci_core_vnic_attachment.ha_vnic_attachment](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/core_vnic_attachment) | resource |
 | [oci_core_vnic_attachment.lan1_vnic_attachment](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/core_vnic_attachment) | resource |
 | [oci_core_volume.reporting_volume](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/core_volume) | resource |
 | [oci_core_volume_attachment.reporting_volume_attachment](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/core_volume_attachment) | resource |
+| [oci_objectstorage_bucket.nios_bucket](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/objectstorage_bucket) | resource |
+| [oci_objectstorage_object.nios_qcow2](https://registry.terraform.io/providers/oracle/oci/latest/docs/resources/objectstorage_object) | resource |
 | [oci_core_subnet.ha_subnet](https://registry.terraform.io/providers/oracle/oci/latest/docs/data-sources/core_subnet) | data source |
 | [oci_core_subnet.lan1_subnet](https://registry.terraform.io/providers/oracle/oci/latest/docs/data-sources/core_subnet) | data source |
 | [oci_core_subnet.mgmt_subnet](https://registry.terraform.io/providers/oracle/oci/latest/docs/data-sources/core_subnet) | data source |
@@ -41,21 +44,26 @@ the infrastructure is deployed and NIOS is fully booted (~30 minutes).
 | [oci_core_vnic.lan1_vnic](https://registry.terraform.io/providers/oracle/oci/latest/docs/data-sources/core_vnic) | data source |
 | [oci_core_vnic.mgmt_vnic](https://registry.terraform.io/providers/oracle/oci/latest/docs/data-sources/core_vnic) | data source |
 | [oci_core_vnic_attachments.mgmt_vnic_attachments](https://registry.terraform.io/providers/oracle/oci/latest/docs/data-sources/core_vnic_attachments) | data source |
+| [oci_objectstorage_namespace.ns](https://registry.terraform.io/providers/oracle/oci/latest/docs/data-sources/objectstorage_namespace) | data source |
 
 ## Inputs
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
 | <a name="input_availability_domain"></a> [availability\_domain](#input\_availability\_domain) | Full availability domain name (e.g. Uocm:US-ASHBURN-AD-1). | `string` | n/a | yes |
+| <a name="input_bucket_name"></a> [bucket\_name](#input\_bucket\_name) | Name of the Object Storage bucket for the NIOS QCOW2 image. Required when create\_image = true; must not be set when create\_image = false. | `string` | `null` | no |
 | <a name="input_compartment_id"></a> [compartment\_id](#input\_compartment\_id) | OCID of the compartment in which all resources will be created. | `string` | n/a | yes |
+| <a name="input_create_bucket"></a> [create\_bucket](#input\_create\_bucket) | Set to true to create a new bucket; false to reuse an existing one. Only used when create\_image = true. | `bool` | `true` | no |
+| <a name="input_create_image"></a> [create\_image](#input\_create\_image) | If true, the module uploads the NIOS QCOW2 to Object Storage and imports it as a custom image. If false (default), the module uses an existing image via var.image\_id. | `bool` | `false` | no |
 | <a name="input_default_admin_password"></a> [default\_admin\_password](#input\_default\_admin\_password) | Default admin password for NIOS. | `string` | n/a | yes |
 | <a name="input_enable_ha"></a> [enable\_ha](#input\_enable\_ha) | Enable High Availability configuration (adds HA VNIC). | `bool` | `false` | no |
 | <a name="input_enable_reporting_volume"></a> [enable\_reporting\_volume](#input\_enable\_reporting\_volume) | Create and attach a reporting block volume to the Grid Member. | `bool` | `false` | no |
 | <a name="input_freeform_tags"></a> [freeform\_tags](#input\_freeform\_tags) | A map of key/value freeform tags to assign to the instance. | `map(string)` | <pre>{<br/>  "dontstop": "yes",<br/>  "dontterminate": "yes",<br/>  "product": "nios"<br/>}</pre> | no |
 | <a name="input_ha_assign_public_ip"></a> [ha\_assign\_public\_ip](#input\_ha\_assign\_public\_ip) | Assign a public IP to the HA VNIC. | `bool` | `false` | no |
-| <a name="input_ha_subnet_id"></a> [ha\_subnet\_id](#input\_ha\_subnet\_id) | OCID of the subnet for the HA interface. | `string` | `null` | no |
+| <a name="input_ha_subnet_id"></a> [ha\_subnet\_id](#input\_ha\_subnet\_id) | OCID of the subnet for the HA interface. Required when enable\_ha = true. | `string` | `null` | no |
 | <a name="input_ha_vnic_name"></a> [ha\_vnic\_name](#input\_ha\_vnic\_name) | Display name for the HA VNIC. | `string` | `"nios-ha-vnic"` | no |
-| <a name="input_image_id"></a> [image\_id](#input\_image\_id) | OCID of the NIOS custom image to use for instance creation. | `string` | n/a | yes |
+| <a name="input_image_id"></a> [image\_id](#input\_image\_id) | OCID of an existing NIOS custom image to use for instance creation. Required when create\_image = false; must not be set when create\_image = true. | `string` | `null` | no |
+| <a name="input_image_name"></a> [image\_name](#input\_image\_name) | Display name for the custom OCI image imported from the QCOW2. Required when create\_image = true; must not be set when create\_image = false. | `string` | `null` | no |
 | <a name="input_instance_memory_in_gbs"></a> [instance\_memory\_in\_gbs](#input\_instance\_memory\_in\_gbs) | Memory in GB — used only for IB-V5005. | `number` | `32` | no |
 | <a name="input_instance_name"></a> [instance\_name](#input\_instance\_name) | Display name for the OCI instance. | `string` | `"nios"` | no |
 | <a name="input_instance_ocpus"></a> [instance\_ocpus](#input\_instance\_ocpus) | OCPUs — used only for IB-V5005. | `number` | `4` | no |
@@ -69,6 +77,8 @@ the infrastructure is deployed and NIOS is fully booted (~30 minutes).
 | <a name="input_mgmt_vnic_name"></a> [mgmt\_vnic\_name](#input\_mgmt\_vnic\_name) | Display name for the primary (MGMT) VNIC. | `string` | `"nios-mgmt-vnic"` | no |
 | <a name="input_nios_license"></a> [nios\_license](#input\_nios\_license) | NIOS temporary license string. | `string` | `"nios IB-V825 enterprise dns dhcp cloud"` | no |
 | <a name="input_nios_model"></a> [nios\_model](#input\_nios\_model) | NIOS appliance model — sets OCPUs and memory for Flex shape.<br/>One of: IB-V926, IB-V1516, IB-V1526, IB-V2326, IB-V4126, IB-V5005. | `string` | `"IB-V926"` | no |
+| <a name="input_nios_object_name"></a> [nios\_object\_name](#input\_nios\_object\_name) | Object name to store the QCOW2 as in the bucket. Required when create\_image = true; must not be set when create\_image = false. | `string` | `null` | no |
+| <a name="input_nios_qcow2_local_path"></a> [nios\_qcow2\_local\_path](#input\_nios\_qcow2\_local\_path) | Absolute local path to the NIOS QCOW2 image file. Required when create\_image = true; must not be set when create\_image = false. | `string` | `null` | no |
 | <a name="input_nios_version_gte_9xx"></a> [nios\_version\_gte\_9xx](#input\_nios\_version\_gte\_9xx) | true → VM.Standard3.Flex (NIOS >= 9.x.x). false → legacy\_shape. | `bool` | `true` | no |
 | <a name="input_remote_console_enabled"></a> [remote\_console\_enabled](#input\_remote\_console\_enabled) | Enable remote console access. | `bool` | `true` | no |
 | <a name="input_reporting_volume_name"></a> [reporting\_volume\_name](#input\_reporting\_volume\_name) | Display name for the reporting block volume. | `string` | `"nios-reporting-volume"` | no |
@@ -99,16 +109,28 @@ the infrastructure is deployed and NIOS is fully booted (~30 minutes).
 
 | Step | Resource | Notes |
 |---|---|---|
-| 1 | Object Storage Bucket | Skipped when `create_bucket = false` |
-| 2 | NIOS QCOW2 Upload | Streamed to bucket; use OCI CLI for files > 5 GB |
-| 3 | Custom Image import | Takes 30–60 min; timeout set to 60 min |
-| 4 | Compute Instance | Primary VNIC = MGMT (eth0) |
+| 1 | Object Storage Bucket | Created only when `create_image = true` and `create_bucket = true` |
+| 2 | NIOS QCOW2 Upload | Created only when `create_image = true`; use OCI CLI for files > 5 GB |
+| 3 | Custom Image import | Created only when `create_image = true`; takes 30–60 min; timeout set to 60 min |
+| 4 | Compute Instance | Primary VNIC = MGMT (eth0). Uses `image_id` when `create_image = false`, else the imported image |
 | 5 | Secondary VNIC (LAN1) | Attached after instance reaches running state |
-| 6 | Reporting Block Volume | Skipped when `enable_reporting_volume = false` |
+| 6 | HA VNIC + VIP | Created only when `enable_ha = true`; VIP only on primary (`is_primary = true`) |
+| 7 | Reporting Block Volume | Skipped when `enable_reporting_volume = false` |
 
 ## Usage
 
 ### Step 1: Deploy OCI Infrastructure
+
+The module supports two mutually exclusive image-source modes, controlled by `create_image`:
+
+| Mode | `create_image` | Required inputs | Forbidden inputs |
+|---|---|---|---|
+| **Use existing image** (default) | `false` | `image_id` | `bucket_name`, `nios_qcow2_local_path`, `nios_object_name`, `image_name` |
+| **Create image from QCOW2** | `true` | `bucket_name`, `nios_qcow2_local_path`, `nios_object_name`, `image_name` | `image_id` |
+
+When `create_image = true`, the module uploads the QCOW2 to Object Storage and imports it as a custom image. Set `create_bucket = false` to reuse a pre-existing bucket (only valid when`create_image = true`).
+
+#### Option A — Use an existing custom image (default, `create_image = false`)
 
 ```hcl
 provider "oci" {
@@ -125,34 +147,61 @@ module "node1" {
   default_admin_password = var.default_admin_password
   remote_console_enabled = var.remote_console_enabled
   nios_license           = var.nios_license
+
   # Compartment
-  compartment_id           = var.compartment_id
+  compartment_id = var.compartment_id
 
-
-   # Image
-  bucket_name              = var.bucket_name
-  create_bucket            = var.create_bucket
-  nios_qcow2_local_path    = var.nios_qcow2_local_path
-  nios_object_name         = var.nios_object_name
-  image_name               = var.image_name
+  # Image (existing custom image)
+  image_id = var.image_id
 
   # Instance
-  instance_name            = var.instance_name
-  availability_domain      = var.availability_domain
-  nios_model               = var.nios_model
-  nios_version_gte_9xx     = var.nios_version_gte_9xx
-  legacy_shape             = var.legacy_shape
-  instance_ocpus           = var.instance_ocpus
-  instance_memory_in_gbs   = var.instance_memory_in_gbs
+  instance_name          = var.instance_name
+  availability_domain    = var.availability_domain
+  nios_model             = var.nios_model
+  nios_version_gte_9xx   = var.nios_version_gte_9xx
+  legacy_shape           = var.legacy_shape
+  instance_ocpus         = var.instance_ocpus
+  instance_memory_in_gbs = var.instance_memory_in_gbs
+
   # Networking
-  mgmt_subnet_id           = var.mgmt_subnet_id
-  mgmt_assign_public_ip    = var.mgmt_assign_public_ip
-  lan1_subnet_id           = var.lan1_subnet_id
-  lan1_assign_public_ip    = var.lan1_assign_public_ip
-   # Reporting volume (optional)
+  mgmt_subnet_id        = var.mgmt_subnet_id
+  mgmt_assign_public_ip = var.mgmt_assign_public_ip
+  lan1_subnet_id        = var.lan1_subnet_id
+  lan1_assign_public_ip = var.lan1_assign_public_ip
+
+  # Reporting volume (optional)
   enable_reporting_volume  = var.enable_reporting_volume
   reporting_volume_name    = var.reporting_volume_name
   reporting_volume_size_gb = var.reporting_volume_size_gb
+}
+```
+
+#### Option B — Upload QCOW2 and import as custom image (`create_image = true`)
+
+```hcl
+module "node1" {
+  source = "github.com/infobloxopen/terraform-provider-nios//modules/nios_deploy_oci?ref=nios_v9.1.0"
+
+  default_admin_password = var.default_admin_password
+  remote_console_enabled = var.remote_console_enabled
+  nios_license           = var.nios_license
+
+  # Compartment
+  compartment_id = var.compartment_id
+
+  # Image (upload QCOW2)
+  create_image          = true
+  create_bucket         = true # set false to reuse an existing bucket
+  bucket_name           = var.bucket_name
+  nios_qcow2_local_path = var.nios_qcow2_local_path
+  nios_object_name      = var.nios_object_name
+  image_name            = var.image_name
+
+  instance_name          = var.instance_name
+  availability_domain    = var.availability_domain
+  nios_model             = var.nios_model
+  mgmt_subnet_id         = var.mgmt_subnet_id
+  lan1_subnet_id         = var.lan1_subnet_id
 }
 ```
 
