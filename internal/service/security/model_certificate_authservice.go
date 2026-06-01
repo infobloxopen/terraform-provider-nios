@@ -153,7 +153,7 @@ var CertificateAuthserviceResourceSchemaAttributes = map[string]schema.Attribute
 	},
 	"password_version": schema.Int64Attribute{
 		Computed:            true,
-		MarkdownDescription: "Internal version incremented when admin user password changes.",
+		MarkdownDescription: "Internal version incremented when remote_lookup_password changes.",
 		PlanModifiers: []planmodifier.Int64{
 			int64planmodifier.UseStateForUnknown(),
 		},
@@ -169,13 +169,15 @@ var CertificateAuthserviceResourceSchemaAttributes = map[string]schema.Attribute
 	},
 	"remote_lookup_password": schema.StringAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             stringdefault.StaticString(""),
 		WriteOnly:           true,
 		MarkdownDescription: "The password for the service account.",
 	},
 	"remote_lookup_service": schema.StringAttribute{
 		Optional:            true,
 		Computed:            true,
-		MarkdownDescription: "The password for the service account.",
+		MarkdownDescription: "The service that will be used for remote lookup.",
 	},
 	"remote_lookup_username": schema.StringAttribute{
 		Optional:            true,

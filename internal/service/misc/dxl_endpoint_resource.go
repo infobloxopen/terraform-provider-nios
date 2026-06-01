@@ -2,6 +2,9 @@ package misc
 
 import (
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
+	"encoding/json"
 	"fmt"
 	"net/http"
 
@@ -24,6 +27,8 @@ var readableAttributesForDxlEndpoint = "brokers,client_certificate_subject,clien
 var _ resource.Resource = &DxlEndpointResource{}
 var _ resource.ResourceWithImportState = &DxlEndpointResource{}
 var _ resource.ResourceWithValidateConfig = &DxlEndpointResource{}
+
+var _ resource.ResourceWithModifyPlan = &DxlEndpointResource{}
 
 func NewDxlEndpointResource() resource.Resource {
 	return &DxlEndpointResource{}
@@ -65,6 +70,95 @@ func (r *DxlEndpointResource) Configure(ctx context.Context, req resource.Config
 	r.client = client
 }
 
+type dxlEndpointSecretsHashState struct {
+	Password string `json:"password_hash"`
+}
+
+func (r *DxlEndpointResource) ModifyPlan(ctx context.Context, req resource.ModifyPlanRequest, resp *resource.ModifyPlanResponse) {
+	if req.Plan.Raw.IsNull() {
+		return
+	}
+
+	var statePwdVersion types.Int64
+	var planPassword types.String
+
+	// Normalize stateRev if null (e.g., first apply)
+	curRev := int64(0)
+
+	if !req.State.Raw.IsNull() && !req.State.Raw.IsKnown() {
+		resp.Diagnostics.Append(req.State.GetAttribute(ctx, path.Root("password_version"), &statePwdVersion)...)
+		if resp.Diagnostics.HasError() {
+			return
+		}
+		if !statePwdVersion.IsNull() && !statePwdVersion.IsUnknown() {
+			curRev = statePwdVersion.ValueInt64()
+		}
+	}
+	resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("wapi_user_password"), &planPassword)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	computeNewHash := !planPassword.IsNull() && !planPassword.IsUnknown()
+
+	prevHashes := dxlEndpointSecretsHashState{}
+	plannedHashes := dxlEndpointSecretsHashState{}
+
+	if computeNewHash {
+
+		var prev struct {
+			Algo string `json:"algo"`
+			Hash string `json:"hash"`
+		}
+
+		if b, diags := req.Private.GetKey(ctx, "password_hash"); diags != nil {
+			resp.Diagnostics.Append(diags...)
+		} else if b != nil {
+			if err := json.Unmarshal(b, &prev); err != nil {
+				// Older buggy format: ignore and treat as different
+				prev.Hash = ""
+			}
+		}
+		var plannedHash string
+
+		if prev.Hash != "" {
+			// Best-effort parse; if this fails, treat prev.Hash as a legacy value and
+			// leave prevHashes at its zero value so that we will recompute as needed.
+			_ = json.Unmarshal([]byte(prev.Hash), &prevHashes)
+		}
+
+		if !planPassword.IsUnknown() {
+			if planPassword.IsNull() {
+				plannedHashes.Password = ""
+			} else {
+				h := sha256.New()
+				h.Write([]byte(planPassword.ValueString()))
+				plannedHashes.Password = hex.EncodeToString(h.Sum(nil))
+			}
+		}
+		if data, err := json.Marshal(plannedHashes); err == nil {
+			plannedHash = string(data)
+		}
+
+		if plannedHashes.Password != "" && plannedHashes.Password != prevHashes.Password {
+			// Increment version and store new hash if password modified
+			newRev := types.Int64Value(curRev + 1)
+			resp.Diagnostics.Append(resp.Plan.SetAttribute(ctx, path.Root("password_version"), newRev)...)
+
+			val := map[string]string{"algo": "sha256", "hash": plannedHash}
+			b, err := json.Marshal(val)
+			if err != nil {
+				resp.Diagnostics.AddError("Private State Marshal Error", err.Error())
+				return
+			}
+			resp.Diagnostics.Append(resp.Private.SetKey(ctx, "password_hash", b)...)
+		} else {
+			resp.Diagnostics.Append(resp.Plan.SetAttribute(ctx, path.Root("password_version"), curRev)...)
+		}
+	}
+
+}
+
 func (r *DxlEndpointResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var diags diag.Diagnostics
 	var data DxlEndpointModel
@@ -97,6 +191,30 @@ func (r *DxlEndpointResource) Create(ctx context.Context, req resource.CreateReq
 	}
 
 	var apiRes *misc.CreateDxlEndpointResponse
+
+	passwordVersion := types.Int64Value(0)
+	var password types.String
+	resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("wapi_user_password"), &password)...)
+
+	secretData := dxlEndpointSecretsHashState{}
+
+	if !password.IsNull() && !password.IsUnknown() {
+
+		payload.WapiUserPassword = password.ValueStringPointer()
+		passwordVersion = types.Int64Value(1)
+		h := sha256.New()
+		h.Write([]byte(password.ValueString()))
+		secretData.Password = hex.EncodeToString(h.Sum(nil))
+
+		secretDataJSON, _ := json.Marshal(secretData)
+		val := map[string]string{"algo": "sha256", "hash": string(secretDataJSON)}
+		hashedPassword, err := json.Marshal(val)
+		if err != nil {
+			resp.Diagnostics.AddError("Private State Marshal Error", err.Error())
+			return
+		}
+		resp.Diagnostics.Append(resp.Private.SetKey(ctx, "password_hash", hashedPassword)...)
+	}
 
 	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
 		var (
@@ -137,6 +255,7 @@ func (r *DxlEndpointResource) Create(ctx context.Context, req resource.CreateReq
 		resp.Diagnostics.AddError("Client Error", "Error while creating DxlEndpoint due to inherited Extensible attributes")
 		return
 	}
+	data.PasswordVersion = passwordVersion
 
 	data.Flatten(ctx, &res, &resp.Diagnostics)
 
@@ -338,9 +457,19 @@ func (r *DxlEndpointResource) Update(ctx context.Context, req resource.UpdateReq
 		return
 	}
 
+	var password types.String
+	resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("wapi_user_password"), &password)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
 	payload := data.Expand(ctx, &resp.Diagnostics)
 	if resp.Diagnostics.HasError() {
 		return
+	}
+
+	if !password.IsNull() && !password.IsUnknown() {
+		payload.WapiUserPassword = password.ValueStringPointer()
 	}
 
 	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())

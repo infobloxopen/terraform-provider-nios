@@ -309,7 +309,7 @@ var VdiscoverytaskResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"password_version": schema.Int64Attribute{
 		Computed:            true,
-		MarkdownDescription: "Internal revision incremented when secret field changes.",
+		MarkdownDescription: "Internal version incremented when password field changes.",
 		PlanModifiers: []planmodifier.Int64{
 			int64planmodifier.UseStateForUnknown(),
 		},

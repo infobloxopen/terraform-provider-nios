@@ -2,6 +2,7 @@ package security
 
 import (
 	"context"
+
 	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
@@ -22,27 +23,27 @@ import (
 )
 
 type FtpuserModel struct {
-	Ref           types.String `tfsdk:"ref"`
-	CreateHomeDir types.Bool   `tfsdk:"create_home_dir"`
-	ExtAttrs      types.Map    `tfsdk:"extattrs"`
-	ExtAttrsAll   types.Map    `tfsdk:"extattrs_all"`
-	HomeDir       types.String `tfsdk:"home_dir"`
-	Password      types.String `tfsdk:"password"`
-	SecretVersion types.Int64  `tfsdk:"secret_version"`
-	Permission    types.String `tfsdk:"permission"`
-	Username      types.String `tfsdk:"username"`
+	Ref             types.String `tfsdk:"ref"`
+	CreateHomeDir   types.Bool   `tfsdk:"create_home_dir"`
+	ExtAttrs        types.Map    `tfsdk:"extattrs"`
+	ExtAttrsAll     types.Map    `tfsdk:"extattrs_all"`
+	HomeDir         types.String `tfsdk:"home_dir"`
+	Password        types.String `tfsdk:"password"`
+	PasswordVersion types.Int64  `tfsdk:"password_version"`
+	Permission      types.String `tfsdk:"permission"`
+	Username        types.String `tfsdk:"username"`
 }
 
 var FtpuserAttrTypes = map[string]attr.Type{
-	"ref":             types.StringType,
-	"create_home_dir": types.BoolType,
-	"extattrs":        types.MapType{ElemType: types.StringType},
-	"extattrs_all":    types.MapType{ElemType: types.StringType},
-	"home_dir":        types.StringType,
-	"password":        types.StringType,
-	"secret_version":  types.Int64Type,
-	"permission":      types.StringType,
-	"username":        types.StringType,
+	"ref":              types.StringType,
+	"create_home_dir":  types.BoolType,
+	"extattrs":         types.MapType{ElemType: types.StringType},
+	"extattrs_all":     types.MapType{ElemType: types.StringType},
+	"home_dir":         types.StringType,
+	"password":         types.StringType,
+	"password_version": types.Int64Type,
+	"permission":       types.StringType,
+	"username":         types.StringType,
 }
 
 var FtpuserResourceSchemaAttributes = map[string]schema.Attribute{
@@ -90,9 +91,9 @@ var FtpuserResourceSchemaAttributes = map[string]schema.Attribute{
 		WriteOnly:           true,
 		MarkdownDescription: "The FTP user password.",
 	},
-	"secret_version": schema.Int64Attribute{
+	"password_version": schema.Int64Attribute{
 		Computed:            true,
-		MarkdownDescription: "Internal revision incremented when secret field changes.",
+		MarkdownDescription: "Internal revision incremented when password field changes.",
 		PlanModifiers: []planmodifier.Int64{
 			int64planmodifier.UseStateForUnknown(),
 		},

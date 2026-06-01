@@ -48,7 +48,6 @@ type DhcpfailoverModel struct {
 	MsPreviousState            types.String `tfsdk:"ms_previous_state"`
 	MsServer                   types.String `tfsdk:"ms_server"`
 	MsSharedSecret             types.String `tfsdk:"ms_shared_secret"`
-	SecretRevision             types.Int64  `tfsdk:"secret_revision"`
 	MsSharedSecretVersion      types.Int64  `tfsdk:"ms_shared_secret_version"`
 	MsState                    types.String `tfsdk:"ms_state"`
 	MsSwitchoverInterval       types.Int64  `tfsdk:"ms_switchover_interval"`
@@ -87,7 +86,6 @@ var DhcpfailoverAttrTypes = map[string]attr.Type{
 	"ms_previous_state":             types.StringType,
 	"ms_server":                     types.StringType,
 	"ms_shared_secret":              types.StringType,
-	"secret_revision":               types.Int64Type,
 	"ms_shared_secret_version":      types.Int64Type,
 	"ms_state":                      types.StringType,
 	"ms_switchover_interval":        types.Int64Type,
@@ -254,16 +252,9 @@ var DhcpfailoverResourceSchemaAttributes = map[string]schema.Attribute{
 		WriteOnly:           true,
 		MarkdownDescription: "The failover association authentication. This is a write-only attribute.",
 	},
-	"secret_revision": schema.Int64Attribute{
-		Computed:            true,
-		MarkdownDescription: "Internal revision incremented when secret field changes.",
-		PlanModifiers: []planmodifier.Int64{
-			int64planmodifier.UseStateForUnknown(),
-		},
-	},
 	"ms_shared_secret_version": schema.Int64Attribute{
 		Computed:            true,
-		MarkdownDescription: "Internal revision incremented when secret field changes.",
+		MarkdownDescription: "Internal version incremented when ms_shared_secret field changes.",
 		PlanModifiers: []planmodifier.Int64{
 			int64planmodifier.UseStateForUnknown(),
 		},

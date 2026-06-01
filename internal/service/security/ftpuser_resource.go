@@ -77,7 +77,7 @@ func (r *FtpuserResource) ModifyPlan(ctx context.Context, req resource.ModifyPla
 
 	curRev := int64(0)
 	if !req.State.Raw.IsNull() && req.State.Raw.IsKnown() {
-		resp.Diagnostics.Append(req.State.GetAttribute(ctx, path.Root("secret_version"), &stateRev)...)
+		resp.Diagnostics.Append(req.State.GetAttribute(ctx, path.Root("password_version"), &stateRev)...)
 		if resp.Diagnostics.HasError() {
 			return
 		}
@@ -130,7 +130,7 @@ func (r *FtpuserResource) ModifyPlan(ctx context.Context, req resource.ModifyPla
 
 		if plannedHashes.Password != "" && plannedHashes.Password != prevHashes.Password {
 			newRev := types.Int64Value(curRev + 1)
-			resp.Diagnostics.Append(resp.Plan.SetAttribute(ctx, path.Root("secret_version"), newRev)...)
+			resp.Diagnostics.Append(resp.Plan.SetAttribute(ctx, path.Root("password_version"), newRev)...)
 
 			val := map[string]string{"algo": "sha256", "hash": plannedHash}
 			b, err := json.Marshal(val)
@@ -140,7 +140,7 @@ func (r *FtpuserResource) ModifyPlan(ctx context.Context, req resource.ModifyPla
 			}
 			resp.Diagnostics.Append(resp.Private.SetKey(ctx, "password_hash", b)...)
 		} else {
-			resp.Diagnostics.Append(resp.Plan.SetAttribute(ctx, path.Root("secret_version"), curRev)...)
+			resp.Diagnostics.Append(resp.Plan.SetAttribute(ctx, path.Root("password_version"), curRev)...)
 		}
 	}
 }
@@ -228,7 +228,7 @@ func (r *FtpuserResource) Create(ctx context.Context, req resource.CreateRequest
 		return
 	}
 
-	data.SecretVersion = passwordVersion
+	data.PasswordVersion = passwordVersion
 	data.Flatten(ctx, &res, &resp.Diagnostics)
 
 	// Save data into Terraform state

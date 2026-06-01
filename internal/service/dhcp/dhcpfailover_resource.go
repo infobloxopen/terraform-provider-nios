@@ -83,7 +83,7 @@ func (r *DhcpfailoverResource) ModifyPlan(ctx context.Context, req resource.Modi
 
 	curRev := int64(0)
 	if !req.State.Raw.IsNull() && req.State.Raw.IsKnown() {
-		resp.Diagnostics.Append(req.State.GetAttribute(ctx, path.Root("secret_revision"), &stateRev)...)
+		resp.Diagnostics.Append(req.State.GetAttribute(ctx, path.Root("ms_shared_secret_version"), &stateRev)...)
 		if resp.Diagnostics.HasError() {
 			return
 		}
@@ -136,7 +136,7 @@ func (r *DhcpfailoverResource) ModifyPlan(ctx context.Context, req resource.Modi
 
 		if plannedHashes.MsSharedSecret != "" && plannedHashes.MsSharedSecret != prevHashes.MsSharedSecret {
 			newRev := types.Int64Value(curRev + 1)
-			resp.Diagnostics.Append(resp.Plan.SetAttribute(ctx, path.Root("secret_revision"), newRev)...)
+			resp.Diagnostics.Append(resp.Plan.SetAttribute(ctx, path.Root("ms_shared_secret_version"), newRev)...)
 
 			val := map[string]string{"algo": "sha256", "hash": plannedHash}
 			b, err := json.Marshal(val)
@@ -146,7 +146,7 @@ func (r *DhcpfailoverResource) ModifyPlan(ctx context.Context, req resource.Modi
 			}
 			resp.Diagnostics.Append(resp.Private.SetKey(ctx, "ms_shared_secret_hash", b)...)
 		} else {
-			resp.Diagnostics.Append(resp.Plan.SetAttribute(ctx, path.Root("secret_revision"), curRev)...)
+			resp.Diagnostics.Append(resp.Plan.SetAttribute(ctx, path.Root("ms_shared_secret_version"), curRev)...)
 		}
 	}
 }
@@ -173,13 +173,13 @@ func (r *DhcpfailoverResource) Create(ctx context.Context, req resource.CreateRe
 		return
 	}
 
-	secreteVersion := types.Int64Value(0)
+	msSharedSecretVersion := types.Int64Value(0)
 	var msSharedSecret types.String
 	resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("ms_shared_secret"), &msSharedSecret)...)
 	secretData := secretsHashState{}
 	if !msSharedSecret.IsNull() && !msSharedSecret.IsUnknown() {
 		payload.MsSharedSecret = msSharedSecret.ValueStringPointer()
-		secreteVersion = types.Int64Value(1)
+		msSharedSecretVersion = types.Int64Value(1)
 		h := sha256.New()
 		h.Write([]byte(msSharedSecret.ValueString()))
 		secretData.MsSharedSecret = hex.EncodeToString(h.Sum(nil))
@@ -234,7 +234,7 @@ func (r *DhcpfailoverResource) Create(ctx context.Context, req resource.CreateRe
 		return
 	}
 
-	data.SecretRevision = secreteVersion
+	data.MsSharedSecretVersion = msSharedSecretVersion
 	data.Flatten(ctx, &res, &resp.Diagnostics)
 
 	// Save data into Terraform state

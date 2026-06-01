@@ -20,27 +20,27 @@ import (
 )
 
 type BfdtemplateModel struct {
-	Ref                 types.String `tfsdk:"ref"`
-	AuthenticationKey   types.String `tfsdk:"authentication_key"`
-	SecretVersion       types.Int64  `tfsdk:"secret_version"`
-	AuthenticationKeyId types.Int64  `tfsdk:"authentication_key_id"`
-	AuthenticationType  types.String `tfsdk:"authentication_type"`
-	DetectionMultiplier types.Int64  `tfsdk:"detection_multiplier"`
-	MinRxInterval       types.Int64  `tfsdk:"min_rx_interval"`
-	MinTxInterval       types.Int64  `tfsdk:"min_tx_interval"`
-	Name                types.String `tfsdk:"name"`
+	Ref                      types.String `tfsdk:"ref"`
+	AuthenticationKey        types.String `tfsdk:"authentication_key"`
+	AuthenticationKeyVersion types.Int64  `tfsdk:"authentication_key_version"`
+	AuthenticationKeyId      types.Int64  `tfsdk:"authentication_key_id"`
+	AuthenticationType       types.String `tfsdk:"authentication_type"`
+	DetectionMultiplier      types.Int64  `tfsdk:"detection_multiplier"`
+	MinRxInterval            types.Int64  `tfsdk:"min_rx_interval"`
+	MinTxInterval            types.Int64  `tfsdk:"min_tx_interval"`
+	Name                     types.String `tfsdk:"name"`
 }
 
 var BfdtemplateAttrTypes = map[string]attr.Type{
-	"ref":                   types.StringType,
-	"authentication_key":    types.StringType,
-	"secret_version":        types.Int64Type,
-	"authentication_key_id": types.Int64Type,
-	"authentication_type":   types.StringType,
-	"detection_multiplier":  types.Int64Type,
-	"min_rx_interval":       types.Int64Type,
-	"min_tx_interval":       types.Int64Type,
-	"name":                  types.StringType,
+	"ref":                        types.StringType,
+	"authentication_key":         types.StringType,
+	"authentication_key_version": types.Int64Type,
+	"authentication_key_id":      types.Int64Type,
+	"authentication_type":        types.StringType,
+	"detection_multiplier":       types.Int64Type,
+	"min_rx_interval":            types.Int64Type,
+	"min_tx_interval":            types.Int64Type,
+	"name":                       types.StringType,
 }
 
 var BfdtemplateResourceSchemaAttributes = map[string]schema.Attribute{
@@ -55,9 +55,9 @@ var BfdtemplateResourceSchemaAttributes = map[string]schema.Attribute{
 		Default:             stringdefault.StaticString(""),
 		MarkdownDescription: "The authentication key for BFD protocol message-digest authentication.",
 	},
-	"secret_version": schema.Int64Attribute{
+	"authentication_key_version": schema.Int64Attribute{
 		Computed:            true,
-		MarkdownDescription: "Internal revision incremented when secret field changes.",
+		MarkdownDescription: "Internal version incremented when authentication_key field changes.",
 		PlanModifiers: []planmodifier.Int64{
 			int64planmodifier.UseStateForUnknown(),
 		},

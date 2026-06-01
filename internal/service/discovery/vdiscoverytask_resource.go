@@ -291,7 +291,7 @@ func (r *VdiscoverytaskResource) ModifyPlan(ctx context.Context, req resource.Mo
 
 	curRev := int64(0)
 	if !req.State.Raw.IsNull() && req.State.Raw.IsKnown() {
-		resp.Diagnostics.Append(req.State.GetAttribute(ctx, path.Root("secret_revision"), &stateRev)...)
+		resp.Diagnostics.Append(req.State.GetAttribute(ctx, path.Root("password_version"), &stateRev)...)
 		if resp.Diagnostics.HasError() {
 			return
 		}
@@ -344,7 +344,7 @@ func (r *VdiscoverytaskResource) ModifyPlan(ctx context.Context, req resource.Mo
 
 		if plannedHashes.Password != "" && plannedHashes.Password != prevHashes.Password {
 			newRev := types.Int64Value(curRev + 1)
-			resp.Diagnostics.Append(resp.Plan.SetAttribute(ctx, path.Root("secret_revision"), newRev)...)
+			resp.Diagnostics.Append(resp.Plan.SetAttribute(ctx, path.Root("password_version"), newRev)...)
 
 			val := map[string]string{"algo": "sha256", "hash": plannedHash}
 			b, err := json.Marshal(val)
@@ -354,7 +354,7 @@ func (r *VdiscoverytaskResource) ModifyPlan(ctx context.Context, req resource.Mo
 			}
 			resp.Diagnostics.Append(resp.Private.SetKey(ctx, "password_hash", b)...)
 		} else {
-			resp.Diagnostics.Append(resp.Plan.SetAttribute(ctx, path.Root("secret_revision"), curRev)...)
+			resp.Diagnostics.Append(resp.Plan.SetAttribute(ctx, path.Root("password_version"), curRev)...)
 		}
 	}
 }

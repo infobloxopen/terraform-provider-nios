@@ -81,7 +81,7 @@ func (r *BfdtemplateResource) ModifyPlan(ctx context.Context, req resource.Modif
 
 	curRev := int64(0)
 	if !req.State.Raw.IsNull() && req.State.Raw.IsKnown() {
-		resp.Diagnostics.Append(req.State.GetAttribute(ctx, path.Root("secret_version"), &stateRev)...)
+		resp.Diagnostics.Append(req.State.GetAttribute(ctx, path.Root("authentication_key_version"), &stateRev)...)
 		if resp.Diagnostics.HasError() {
 			return
 		}
@@ -134,7 +134,7 @@ func (r *BfdtemplateResource) ModifyPlan(ctx context.Context, req resource.Modif
 
 		if plannedHashes.AuthenticationKey != "" && plannedHashes.AuthenticationKey != prevHashes.AuthenticationKey {
 			newRev := types.Int64Value(curRev + 1)
-			resp.Diagnostics.Append(resp.Plan.SetAttribute(ctx, path.Root("secret_version"), newRev)...)
+			resp.Diagnostics.Append(resp.Plan.SetAttribute(ctx, path.Root("authentication_key_version"), newRev)...)
 
 			val := map[string]string{"algo": "sha256", "hash": plannedHash}
 			b, err := json.Marshal(val)
@@ -144,7 +144,7 @@ func (r *BfdtemplateResource) ModifyPlan(ctx context.Context, req resource.Modif
 			}
 			resp.Diagnostics.Append(resp.Private.SetKey(ctx, "authentication_key_hash", b)...)
 		} else {
-			resp.Diagnostics.Append(resp.Plan.SetAttribute(ctx, path.Root("secret_version"), curRev)...)
+			resp.Diagnostics.Append(resp.Plan.SetAttribute(ctx, path.Root("authentication_key_version"), curRev)...)
 		}
 	}
 }
@@ -164,13 +164,13 @@ func (r *BfdtemplateResource) Create(ctx context.Context, req resource.CreateReq
 		return
 	}
 
-	secretVersion := types.Int64Value(0)
+	authenticationKeyVersion := types.Int64Value(0)
 	var authenticationKey types.String
 	resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("authentication_key"), &authenticationKey)...)
 	secretData := secretsHashState{}
 	if !authenticationKey.IsNull() && !authenticationKey.IsUnknown() {
 		payload.AuthenticationKey = authenticationKey.ValueStringPointer()
-		secretVersion = types.Int64Value(1)
+		authenticationKeyVersion = types.Int64Value(1)
 		h := sha256.New()
 		h.Write([]byte(authenticationKey.ValueString()))
 		secretData.AuthenticationKey = hex.EncodeToString(h.Sum(nil))
@@ -220,7 +220,7 @@ func (r *BfdtemplateResource) Create(ctx context.Context, req resource.CreateReq
 
 	res := apiRes.CreateBfdtemplateResponseAsObject.GetResult()
 
-	data.SecretVersion = secretVersion
+	data.AuthenticationKeyVersion = authenticationKeyVersion
 	data.Flatten(ctx, &res, &resp.Diagnostics)
 
 	// Save data into Terraform state
