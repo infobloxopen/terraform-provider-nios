@@ -15,6 +15,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
@@ -67,6 +68,7 @@ type Ipv6fixedaddressModel struct {
 	PreferredLifetime        types.Int64                              `tfsdk:"preferred_lifetime"`
 	ReservedInterface        types.String                             `tfsdk:"reserved_interface"`
 	RestartIfNeeded          types.Bool                               `tfsdk:"restart_if_needed"`
+	SecretsVersion           types.Int64                              `tfsdk:"secrets_version"`
 	Snmp3Credential          types.Object                             `tfsdk:"snmp3_credential"`
 	SnmpCredential           types.Object                             `tfsdk:"snmp_credential"`
 	Template                 types.String                             `tfsdk:"template"`
@@ -118,6 +120,7 @@ var Ipv6fixedaddressAttrTypes = map[string]attr.Type{
 	"preferred_lifetime":         types.Int64Type,
 	"reserved_interface":         types.StringType,
 	"restart_if_needed":          types.BoolType,
+	"secrets_version":            types.Int64Type,
 	"snmp3_credential":           types.ObjectType{AttrTypes: Ipv6fixedaddressSnmp3CredentialAttrTypes},
 	"snmp_credential":            types.ObjectType{AttrTypes: Ipv6fixedaddressSnmpCredentialAttrTypes},
 	"template":                   types.StringType,
@@ -402,6 +405,14 @@ var Ipv6fixedaddressResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed:            true,
 		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Restarts the member service. The restart_if_needed flag can trigger a restart on DHCP services only when it is enabled on CP member.",
+	},
+	// A computed trigger to cause an in-place Update when secrets change.
+	"secrets_version": schema.Int64Attribute{
+		Computed:            true,
+		MarkdownDescription: "Internal version incremented when secrets (snmp3_credential and cli_credentials) change.",
+		PlanModifiers: []planmodifier.Int64{
+			int64planmodifier.UseStateForUnknown(),
+		},
 	},
 	"snmp3_credential": schema.SingleNestedAttribute{
 		Attributes: Ipv6fixedaddressSnmp3CredentialResourceSchemaAttributes,

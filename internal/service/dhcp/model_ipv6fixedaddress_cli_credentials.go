@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
@@ -46,14 +47,14 @@ var Ipv6fixedaddressCliCredentialsResourceSchemaAttributes = map[string]schema.A
 	"password": schema.StringAttribute{
 		Optional:  true,
 		Computed:  true,
-		Sensitive: true,
+		WriteOnly: true,
 		Validators: []validator.String{
 			customvalidator.ValidateTrimmedString(),
 		},
 		MarkdownDescription: "The CLI password.",
 	},
 	"credential_type": schema.StringAttribute{
-		Optional: true,
+		Required: true,
 		Computed: true,
 		Validators: []validator.String{
 			stringvalidator.OneOf("ENABLE_SSH", "ENABLE_TELNET", "SSH", "TELNET"),
@@ -63,6 +64,7 @@ var Ipv6fixedaddressCliCredentialsResourceSchemaAttributes = map[string]schema.A
 	"comment": schema.StringAttribute{
 		Optional: true,
 		Computed: true,
+		Default:  stringdefault.StaticString(""),
 		Validators: []validator.String{
 			customvalidator.ValidateTrimmedString(),
 		},
@@ -75,6 +77,7 @@ var Ipv6fixedaddressCliCredentialsResourceSchemaAttributes = map[string]schema.A
 	"credential_group": schema.StringAttribute{
 		Optional:            true,
 		Computed:            true,
+		Default:             stringdefault.StaticString("default"),
 		MarkdownDescription: "Group for the CLI credential.",
 	},
 }

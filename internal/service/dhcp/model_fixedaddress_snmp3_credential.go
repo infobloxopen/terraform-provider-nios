@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
@@ -55,7 +56,8 @@ var FixedaddressSnmp3CredentialResourceSchemaAttributes = map[string]schema.Attr
 	"authentication_password": schema.StringAttribute{
 		Optional:  true,
 		Computed:  true,
-		Sensitive: true,
+		WriteOnly: true,
+		Default:   stringdefault.StaticString(""),
 		Validators: []validator.String{
 			customvalidator.ValidateTrimmedString(),
 		},
@@ -71,20 +73,26 @@ var FixedaddressSnmp3CredentialResourceSchemaAttributes = map[string]schema.Attr
 	"privacy_password": schema.StringAttribute{
 		Optional:  true,
 		Computed:  true,
-		Sensitive: true,
+		WriteOnly: true,
+		Default:   stringdefault.StaticString(""),
 		Validators: []validator.String{
 			customvalidator.ValidateTrimmedString(),
 		},
 		MarkdownDescription: "Privacy password for the SNMPv3 user.",
 	},
 	"comment": schema.StringAttribute{
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
+		Default:  stringdefault.StaticString(""),
+		Validators: []validator.String{
+			customvalidator.ValidateTrimmedString(),
+		},
 		MarkdownDescription: "Comments for the SNMPv3 user.",
 	},
 	"credential_group": schema.StringAttribute{
 		Optional:            true,
 		Computed:            true,
+		Default:             stringdefault.StaticString("default"),
 		MarkdownDescription: "Group for the SNMPv3 credential.",
 	},
 }
@@ -137,9 +145,7 @@ func (m *FixedaddressSnmp3CredentialModel) Flatten(ctx context.Context, from *dh
 	}
 	m.User = flex.FlattenStringPointer(from.User)
 	m.AuthenticationProtocol = flex.FlattenStringPointer(from.AuthenticationProtocol)
-	m.AuthenticationPassword = flex.FlattenStringPointer(from.AuthenticationPassword)
 	m.PrivacyProtocol = flex.FlattenStringPointer(from.PrivacyProtocol)
-	m.PrivacyPassword = flex.FlattenStringPointer(from.PrivacyPassword)
 	m.Comment = flex.FlattenStringPointer(from.Comment)
 	m.CredentialGroup = flex.FlattenStringPointer(from.CredentialGroup)
 }
