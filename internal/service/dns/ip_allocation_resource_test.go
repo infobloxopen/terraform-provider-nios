@@ -798,7 +798,6 @@ func TestAccIPAllocationResource_RrsetOrder(t *testing.T) {
 }
 
 func TestAccIPAllocationResource_Snmp3Credential(t *testing.T) {
-	// t.Skip("Skipping: grid does not support SNMPv3 - NIOS resets use_snmp3_credential to false and returns snmp3_credential as null")
 	var resourceName = "nios_ip_allocation.test_snmp3_credential"
 	var resourceName1 = "nios_ip_allocation.test_snmp3_credential1"
 	var resourceName2 = "nios_ip_allocation.test_snmp3_credential2"
