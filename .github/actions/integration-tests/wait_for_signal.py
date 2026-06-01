@@ -45,21 +45,45 @@ def fetch_signal() -> dict | None:
         with urllib.request.urlopen(req, timeout=15) as resp:
             gist = json.load(resp)
     except urllib.error.HTTPError as exc:
-        # Fail fast on auth/config errors; only retry on rate limits and 5xx
-        if exc.code in (401, 403, 404):
+        # Fail fast on hard auth/config errors only
+        if exc.code == 401:
             die(
-                f"GitHub API HTTP {exc.code} — {exc.reason}. "
-                f"Check GH_TOKEN and GIST_ID configuration.",
+                f"GitHub API HTTP 401 — {exc.reason}. "
+                f"Check GH_TOKEN configuration.",
             )
-        elif exc.code == 429:
-            print(f"[{ts()}] ⚠  GitHub API rate limited — will retry")
+        if exc.code == 404:
+            die(
+                f"GitHub API HTTP 404 — Gist not found. "
+                f"Check GIST_ID configuration.",
+            )
+        # 403 can mean either "forbidden" (bad token/permissions) or
+        # rate-limiting (X-RateLimit-Remaining: 0). Distinguish by header.
+        if exc.code == 403:
+            remaining_header = exc.headers.get("X-RateLimit-Remaining", "")
+            retry_after = exc.headers.get("Retry-After", "")
+            if remaining_header == "0" or retry_after:
+                wait = int(retry_after) if retry_after else POLL_INTERVAL
+                print(f"[{ts()}] ⚠  GitHub API rate limited (HTTP 403) — "
+                      f"retrying in {wait}s")
+                time.sleep(wait)
+                return None
+            # Permissions error — fail fast
+            die(
+                f"GitHub API HTTP 403 — {exc.reason}. "
+                f"Check GH_TOKEN permissions and GIST_ID configuration.",
+            )
+        if exc.code == 429:
+            retry_after = exc.headers.get("Retry-After", "")
+            wait = int(retry_after) if retry_after else POLL_INTERVAL
+            print(f"[{ts()}] ⚠  GitHub API rate limited (HTTP 429) — "
+                  f"retrying in {wait}s")
+            time.sleep(wait)
             return None
-        elif 500 <= exc.code < 600:
+        if 500 <= exc.code < 600:
             print(f"[{ts()}] ⚠  GitHub API HTTP {exc.code} — will retry")
             return None
-        else:
-            print(f"[{ts()}] ⚠  GitHub API HTTP {exc.code} — will retry")
-            return None
+        print(f"[{ts()}] ⚠  GitHub API HTTP {exc.code} — will retry")
+        return None
     except Exception as exc:
         print(f"[{ts()}] ⚠  Network error ({exc}) — will retry")
         return None
