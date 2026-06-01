@@ -262,6 +262,7 @@ func (r *DistributionscheduleResource) Update(ctx context.Context, req resource.
 		Read(ctx, resourceRef).
 		ReturnAsObject(1).
 		ReturnFieldsPlus("upgrade_groups").
+		ProxySearch(config.GetProxySearch()).
 		Execute()
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read current Distributionschedule for merge, got error: %s", err))
@@ -315,7 +316,6 @@ func (r *DistributionscheduleResource) ImportState(ctx context.Context, req reso
 
 // mergeDistributionUpgradeGroups merges currentGroups (from the grid) with userGroups (from the plan).
 // userGroups take precedence on name match; grid-only groups are retained.
-// time_zone is stripped from every group to avoid "not writable" errors on update.
 func mergeDistributionUpgradeGroups(currentGroups, userGroups []grid.DistributionscheduleUpgradeGroups) []grid.DistributionscheduleUpgradeGroups {
 	userByName := make(map[string]grid.DistributionscheduleUpgradeGroups, len(userGroups))
 	for _, g := range userGroups {

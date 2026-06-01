@@ -263,6 +263,7 @@ func (r *UpgradescheduleResource) Update(ctx context.Context, req resource.Updat
 		Read(ctx, resourceRef).
 		ReturnAsObject(1).
 		ReturnFieldsPlus("upgrade_groups").
+		ProxySearch(config.GetProxySearch()).
 		Execute()
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read current Upgradeschedule for merge, got error: %s", err))

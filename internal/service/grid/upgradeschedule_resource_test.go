@@ -3,6 +3,7 @@ package grid_test
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"testing"
 	"time"
 
@@ -144,6 +145,7 @@ func TestAccUpgradescheduleResource_UpgradeGroups(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckUpgradescheduleExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttrSet(resourceName, "upgrade_groups.#"),
+					testAccCheckUpgradeGroups(resourceName, "upgrade_time", upgradeGroups),
 				),
 			},
 			// Update and Read
@@ -152,11 +154,53 @@ func TestAccUpgradescheduleResource_UpgradeGroups(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckUpgradescheduleExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttrSet(resourceName, "upgrade_groups.#"),
+					testAccCheckUpgradeGroups(resourceName, "upgrade_time", updatedUpgradeGroups),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
 		},
 	})
+}
+
+// testAccCheckUpgradeGroups verifies that every entry in expectedGroups
+// is present in the resource's upgrade_groups list (by name) and has the correct
+// value for timeField (e.g. "upgrade_time" or "distribution_time").
+func testAccCheckUpgradeGroups(resourceName, timeField string, expectedGroups []map[string]any) resource.TestCheckFunc {
+	return func(state *terraform.State) error {
+		rs, ok := state.RootModule().Resources[resourceName]
+		if !ok {
+			return fmt.Errorf("resource not found: %s", resourceName)
+		}
+
+		countStr := rs.Primary.Attributes["upgrade_groups.#"]
+		count, err := strconv.Atoi(countStr)
+		if err != nil || count == 0 {
+			return fmt.Errorf("upgrade_groups.# is %q, expected a positive integer", countStr)
+		}
+
+		// Build a map of name -> timeField value from state (order-independent).
+		actual := make(map[string]string, count)
+		for i := range count {
+			prefix := fmt.Sprintf("upgrade_groups.%d.", i)
+			name := rs.Primary.Attributes[prefix+"name"]
+			if name != "" {
+				actual[name] = rs.Primary.Attributes[prefix+timeField]
+			}
+		}
+
+		for _, eg := range expectedGroups {
+			name, _ := eg["name"].(string)
+			wantTime, _ := eg[timeField].(string)
+			gotTime, found := actual[name]
+			if !found {
+				return fmt.Errorf("upgrade group %q not found in state (state has %d groups)", name, count)
+			}
+			if gotTime != wantTime {
+				return fmt.Errorf("upgrade group %q: expected %s=%q, got %q", name, timeField, wantTime, gotTime)
+			}
+		}
+		return nil
+	}
 }
 
 func testAccCheckUpgradescheduleExists(ctx context.Context, resourceName string, v *grid.Upgradeschedule) resource.TestCheckFunc {

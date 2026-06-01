@@ -142,6 +142,7 @@ func TestAccDistributionscheduleResource_UpgradeGroups(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDistributionscheduleExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttrSet(resourceName, "upgrade_groups.#"),
+					testAccCheckUpgradeGroups(resourceName, "distribution_time", upgradeGroups),
 				),
 			},
 			// Update and Read
@@ -150,6 +151,7 @@ func TestAccDistributionscheduleResource_UpgradeGroups(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDistributionscheduleExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttrSet(resourceName, "upgrade_groups.#"),
+					testAccCheckUpgradeGroups(resourceName, "distribution_time", updatedUpgradeGroups),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
