@@ -50,13 +50,13 @@ type NIOSProvider struct {
 
 // NIOSProviderModel describes the provider data model.
 type NIOSProviderModel struct {
-	NIOSHostURL  types.String `tfsdk:"nios_host_url"`
-	NIOSUsername types.String `tfsdk:"nios_username"`
-	NIOSPassword types.String `tfsdk:"nios_password"`
-	ProxyURL     types.String `tfsdk:"proxy_url"`
-	ProxySearch  types.String `tfsdk:"proxy_search"`
-	RetryTimeout types.Int64  `tfsdk:"retry_timeout"`
-	Sandbox      types.Bool   `tfsdk:"sandbox"`
+	NIOSHostURL        types.String `tfsdk:"nios_host_url"`
+	NIOSUsername       types.String `tfsdk:"nios_username"`
+	NIOSPassword       types.String `tfsdk:"nios_password"`
+	ProxyURL           types.String `tfsdk:"proxy_url"`
+	ProxySearch        types.String `tfsdk:"proxy_search"`
+	RetryTimeout       types.Int64  `tfsdk:"retry_timeout"`
+	ManageInternalIdEA types.Bool   `tfsdk:"manage_internal_id_ea"`
 }
 
 func (p *NIOSProvider) Metadata(_ context.Context, _ provider.MetadataRequest, resp *provider.MetadataResponse) {
@@ -92,9 +92,9 @@ func (p *NIOSProvider) Schema(_ context.Context, _ provider.SchemaRequest, resp 
 				Optional:    true,
 				Description: "Specifies the timeout duration (in seconds) for retrying operations that fail due to transient errors.",
 			},
-			"sandbox": schema.BoolAttribute{
+			"manage_internal_id_ea": schema.BoolAttribute{
 				Optional:    true,
-				Description: "Whether to use sandbox environment. Default is false.",
+				Description: "If true , Terraform Configuration Manages the existence of the Terraform Internal ID Extensible Attribute in NIOS. This extensible attribute is used by the provider to store the Terraform resource ID corresponding to NIOS objects. If false, the provider does not check for or manage the existence of this extensible attribute. Default value is true.",
 			},
 		},
 	}
@@ -126,31 +126,26 @@ func (p *NIOSProvider) Configure(ctx context.Context, req provider.ConfigureRequ
 		retry.SetRetryTimeout(data.RetryTimeout.ValueInt64())
 	}
 
-	if data.Sandbox.IsUnknown() || data.Sandbox.IsNull() {
-		data.Sandbox = types.BoolValue(false)
+	if data.ManageInternalIdEA.IsUnknown() || data.ManageInternalIdEA.IsNull() {
+		data.ManageInternalIdEA = types.BoolValue(true)
 	}
 
-	err := checkAndCreatePreRequisites(ctx, client)
-	if data.Sandbox.ValueBool() {
-		// Sandbox environment allows provider to be configured even if pre-requisites check fails, as it is intended for testing and development purposes. Hence, only a warning is added to diagnostics in case of error.
-		if err != nil {
-			resp.Diagnostics.AddWarning(
-				"Terraform Extensible Attribute Verification Failed",
-				fmt.Sprintf("Unable to verify that the %q extensible attribute exists in NIOS. "+
-					"The provider is running in sandbox mode and will continue, but operations on NIOS-managed resources may fail.\n "+
-					"Error: %s\n\n"+
-					"To resolve this issue, ensure your NIOS credentials have sufficient permissions to create extensible attributes, "+
-					"or manually create the %q extensible attribute in NIOS with type STRING and flags CR.",
-					terraformInternalIDEA, err, terraformInternalIDEA),
-			)
-		}
-	} else {
+	if data.ManageInternalIdEA.ValueBool() {
+		err := checkAndCreatePreRequisites(ctx, client)
 		if err != nil {
 			resp.Diagnostics.AddError(
 				"Failed to ensure Terraform extensible attribute exists",
 				err.Error(),
 			)
 		}
+	} else {
+		// Raise a warning if the provider is not managing the Terraform Internal ID EA, as this may lead to issues with resource management
+		resp.Diagnostics.AddWarning(
+			"Terraform Internal ID Check Disabled",
+			fmt.Sprintf("The %q extensible attribute check is disabled (manage_internal_id_ea=false). "+
+				"Operations on NIOS-managed resources may fail if the extensible attribute does not exist in NIOS.",
+				terraformInternalIDEA),
+		)
 	}
 
 	resp.DataSourceData = client
