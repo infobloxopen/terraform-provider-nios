@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
+	"github.com/hashicorp/terraform-plugin-framework/resource/identityschema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
@@ -24,6 +25,7 @@ var readableAttributesForNetworktemplate = "allow_any_netmask,authority,auto_cre
 var _ resource.Resource = &NetworktemplateResource{}
 var _ resource.ResourceWithImportState = &NetworktemplateResource{}
 var _ resource.ResourceWithValidateConfig = &NetworktemplateResource{}
+var _ resource.ResourceWithIdentity = &NetworktemplateResource{}
 
 func NewNetworktemplateResource() resource.Resource {
 	return &NetworktemplateResource{}
@@ -42,6 +44,16 @@ func (r *NetworktemplateResource) Schema(ctx context.Context, req resource.Schem
 	resp.Schema = schema.Schema{
 		MarkdownDescription: "Manages a Network Template.",
 		Attributes:          NetworktemplateResourceSchemaAttributes,
+	}
+}
+
+func (r *NetworktemplateResource) IdentitySchema(ctx context.Context, req resource.IdentitySchemaRequest, resp *resource.IdentitySchemaResponse) {
+	resp.IdentitySchema = identityschema.Schema{
+		Attributes: map[string]identityschema.Attribute{
+			"ref": identityschema.StringAttribute{
+				RequiredForImport: true,
+			},
+		},
 	}
 }
 
@@ -132,6 +144,9 @@ func (r *NetworktemplateResource) Create(ctx context.Context, req resource.Creat
 
 	data.Flatten(ctx, &res, &resp.Diagnostics)
 
+	// Save the Identity of the Resource
+	resp.Diagnostics.Append(resp.Identity.SetAttribute(ctx, path.Root("ref"), &data.Ref)...)
+
 	// Save data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
@@ -219,6 +234,9 @@ func (r *NetworktemplateResource) Read(ctx context.Context, req resource.ReadReq
 
 	data.Flatten(ctx, &res, &resp.Diagnostics)
 
+	// Save the Identity of the Resource
+	resp.Diagnostics.Append(resp.Identity.SetAttribute(ctx, path.Root("ref"), &data.Ref)...)
+
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
@@ -274,6 +292,10 @@ func (r *NetworktemplateResource) ReadByExtAttrs(ctx context.Context, data *Netw
 	}
 
 	data.Flatten(ctx, &res, &resp.Diagnostics)
+
+	// Save the Identity of the Resource
+	resp.Diagnostics.Append(resp.Identity.SetAttribute(ctx, path.Root("ref"), &data.Ref)...)
+
 	resp.Diagnostics.Append(resp.State.Set(ctx, data)...)
 
 	return true
@@ -366,6 +388,9 @@ func (r *NetworktemplateResource) Update(ctx context.Context, req resource.Updat
 	}
 
 	data.Flatten(ctx, &res, &resp.Diagnostics)
+
+	// Save the Identity of the Resource
+	resp.Diagnostics.Append(resp.Identity.SetAttribute(ctx, path.Root("ref"), &data.Ref)...)
 
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
@@ -550,9 +575,30 @@ func (r *NetworktemplateResource) ValidateConfig(ctx context.Context, req resour
 			)
 		}
 	}
+
+	// Validate lease_scavenge_time
+	if !data.LeaseScavengeTime.IsNull() && !data.LeaseScavengeTime.IsUnknown() {
+		leaseScavengeTime := data.LeaseScavengeTime.ValueInt64()
+
+		// Must be -1 OR between 86400 and 2147472000
+		if leaseScavengeTime != -1 && (leaseScavengeTime < 86400 || leaseScavengeTime > 2147472000) {
+			resp.Diagnostics.AddAttributeError(
+				path.Root("lease_scavenge_time"),
+				"Invalid Configuration",
+				fmt.Sprintf("lease_scavenge_time must be -1 (to disable lease scavenging) or between 86400 (1 day) and 2147472000 seconds. Got: %d", leaseScavengeTime),
+			)
+		}
+	}
 }
 
 func (r *NetworktemplateResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+	if req.Identity.Raw.IsKnown() {
+		diags := req.Identity.GetAttribute(ctx, path.Root("ref"), &req.ID)
+		if diags.HasError() {
+			resp.Diagnostics.Append(diags...)
+			return
+		}
+	}
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("ref"), req.ID)...)
 	resp.Diagnostics.Append(resp.Private.SetKey(ctx, "associate_internal_id", []byte("true"))...)
 }
