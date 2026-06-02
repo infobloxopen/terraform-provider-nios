@@ -6,8 +6,7 @@ variable "compartment_id" {
 
 // Image source selection
 // By default the module expects an existing custom image OCID (var.image_id).
-// Set create_image = true to upload the QCOW2 to Object Storage and import
-// it as a custom image inside this module.
+// Set create_image = true to upload the QCOW2 to Object Storage and use the created image instead.
 variable "create_image" {
   description = "If true, the module uploads the NIOS QCOW2 to Object Storage and imports it as a custom image. If false (default), the module uses an existing image via var.image_id."
   type        = bool
@@ -19,27 +18,22 @@ variable "create_bucket" {
   description = "Set to true to create a new bucket; false to reuse an existing one. Only used when create_image = true."
   type        = bool
   default     = true
-
-  validation {
-    condition     = var.create_image || var.create_bucket == true
-    error_message = "create_bucket only applies when create_image = true. Remove it (or set create_image = true) instead of setting create_bucket = false."
-  }
 }
 
 variable "bucket_name" {
   description = "Name of the Object Storage bucket for the NIOS QCOW2 image. Required when create_image = true; must not be set when create_image = false."
   type        = string
   default     = null
-
   validation {
     condition     = !var.create_image || (var.bucket_name != null && var.bucket_name != "")
-    error_message = "bucket_name is required when create_image = true."
+    error_message = "When create_image = true, bucket_name must be set (it is used as the name of the new bucket when create_bucket = true, or as the existing bucket to reuse when create_bucket = false)."
   }
 
   validation {
-    condition     = var.create_image || var.bucket_name == null || var.bucket_name == ""
-    error_message = "bucket_name must not be set when create_image = false."
+    condition     = var.create_image || var.bucket_name == null
+    error_message = "bucket_name should only be set when create_image = true."
   }
+
 }
 
 // Object Storage — QCOW2 Upload (used only when create_image = true)
