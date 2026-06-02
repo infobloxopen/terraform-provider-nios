@@ -2888,7 +2888,9 @@ func TestAccMemberResource_TrafficCaptureAuthDnsSetting(t *testing.T) {
 
 	trafficCaptureAuthDnsSettingVal := map[string]any{
 		"auth_dns_latency_listen_on_source": "VIP_V4",
-		"auth_dns_latency_trigger_enable":   false,
+		"auth_dns_latency_trigger_enable":   true,
+		"auth_dns_latency_threshold":        45,
+		"auth_dns_latency_reset":            35,
 	}
 	trafficCaptureAuthDnsSettingValUpdated := map[string]any{
 		"auth_dns_latency_listen_on_source": "VIP_V4",
@@ -2910,8 +2912,10 @@ func TestAccMemberResource_TrafficCaptureAuthDnsSetting(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "traffic_capture_auth_dns_setting.auth_dns_latency_listen_on_source", "VIP_V4"),
-					resource.TestCheckResourceAttr(resourceName, "traffic_capture_auth_dns_setting.auth_dns_latency_trigger_enable", "false"),
+					resource.TestCheckResourceAttr(resourceName, "traffic_capture_auth_dns_setting.auth_dns_latency_trigger_enable", "true"),
 					resource.TestCheckResourceAttr(resourceName, "use_traffic_capture_auth_dns", "true"),
+					resource.TestCheckResourceAttr(resourceName, "traffic_capture_auth_dns_setting.auth_dns_latency_threshold", "45"),
+					resource.TestCheckResourceAttr(resourceName, "traffic_capture_auth_dns_setting.auth_dns_latency_reset", "35"),
 				),
 			},
 			{

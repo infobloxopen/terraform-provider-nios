@@ -924,7 +924,6 @@ func (m *MemberModel) Expand(ctx context.Context, diags *diag.Diagnostics, isCre
 		SyslogSize:                      flex.ExpandInt64Pointer(m.SyslogSize),
 		ThresholdTraps:                  flex.ExpandFrameworkListNestedBlock(ctx, m.ThresholdTraps, diags, ExpandMemberThresholdTraps),
 		TimeZone:                        flex.ExpandStringPointer(m.TimeZone),
-		TrafficCaptureAuthDnsSetting:    ExpandMemberTrafficCaptureAuthDnsSetting(ctx, m.TrafficCaptureAuthDnsSetting, diags),
 		TrafficCaptureChrSetting:        ExpandMemberTrafficCaptureChrSetting(ctx, m.TrafficCaptureChrSetting, diags),
 		TrafficCaptureQpsSetting:        ExpandMemberTrafficCaptureQpsSetting(ctx, m.TrafficCaptureQpsSetting, diags),
 		TrafficCaptureRecDnsSetting:     ExpandMemberTrafficCaptureRecDnsSetting(ctx, m.TrafficCaptureRecDnsSetting, diags),
@@ -957,6 +956,7 @@ func (m *MemberModel) Expand(ctx context.Context, diags *diag.Diagnostics, isCre
 
 	if !isCreate {
 		to.PreProvisioning = ExpandMemberPreProvisioning(ctx, m.PreProvisioning, diags)
+		to.TrafficCaptureAuthDnsSetting = ExpandMemberTrafficCaptureAuthDnsSetting(ctx, m.TrafficCaptureAuthDnsSetting, diags)
 	}
 
 	if m.ConfigureCspMemberSetting.ValueBool() {
