@@ -80,9 +80,8 @@ resource "nios_dhcp_failover" "dhcpfailover_2" {
 - `ms_is_conflict` (Boolean) Determines if the matching Microsoft failover association (if any) is in synchronization (False) or not (True). If there is no matching failover association the returned values is False. This is a read-only attribute.
 - `ms_previous_state` (String) The previous failover association state. This is a read-only attribute.
 - `ms_server` (String) The primary Microsoft Server.
-- `ms_shared_secret_version` (Number) Internal revision incremented when secret field changes.
+- `ms_shared_secret_version` (Number) Internal version incremented when ms_shared_secret field changes.
 - `ms_state` (String) The failover association state. This is a read-only attribute.
 - `primary_state` (String) The primary server status of a DHCP failover object.
 - `ref` (String) The reference to the object.
 - `secondary_state` (String) The secondary server status of a DHCP failover object.
-- `secret_revision` (Number) Internal revision incremented when secret field changes.

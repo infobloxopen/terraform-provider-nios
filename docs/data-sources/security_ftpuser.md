@@ -61,5 +61,5 @@ Optional:
 Read-Only:
 
 - `extattrs_all` (Map of String) Extensible attributes associated with the object, including default attributes.
+- `password_version` (Number) Internal revision incremented when password field changes.
 - `ref` (String) The reference to the object.
-- `secret_version` (Number) Internal revision incremented when secret field changes.

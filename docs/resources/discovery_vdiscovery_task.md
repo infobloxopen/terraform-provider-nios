@@ -183,7 +183,7 @@ resource "nios_discovery_vdiscovery_task" "gcp_vdiscoverytask" {
 - `accounts_list` (List of String) The AWS Account IDs or GCP Project IDs list associated with this task.
 - `cdiscovery_file_token` (String) The AWS account IDs or GCP Project IDs file's token.
 - `last_run` (Number) Timestamp of last run.
-- `password_version` (Number) Internal revision incremented when secret field changes.
+- `password_version` (Number) Internal version incremented when password field changes.
 - `ref` (String) The reference to the object.
 - `state` (String) Current state of this task.
 - `state_msg` (String) State message of the complete discovery process.

@@ -55,5 +55,5 @@ Optional:
 
 Read-Only:
 
+- `authentication_key_version` (Number) Internal version incremented when authentication_key field changes.
 - `ref` (String) The reference to the object.
-- `secret_version` (Number) Internal revision incremented when secret field changes.
