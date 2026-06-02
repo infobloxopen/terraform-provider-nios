@@ -1802,7 +1802,7 @@ func TestAccMemberResource_NodeInfo(t *testing.T) {
 		{
 			"lan_ha_port_setting": map[string]any{
 				"ha_cloud_attribute": "UNK",
-				"ha_ip_address":      "172.28.38.161",
+				"ha_ip_address":      "172.28.38.200",
 				"ha_port_setting": map[string]any{
 					"auto_port_setting_enabled": true,
 					"speed":                     "10",
@@ -1810,13 +1810,13 @@ func TestAccMemberResource_NodeInfo(t *testing.T) {
 				"lan_port_setting": map[string]any{
 					"auto_port_setting_enabled": true,
 				},
-				"mgmt_lan": "172.28.38.162",
+				"mgmt_lan": "172.28.38.201",
 			},
 		},
 		{
 			"lan_ha_port_setting": map[string]any{
 				"ha_cloud_attribute": "UNK",
-				"ha_ip_address":      "172.28.38.163",
+				"ha_ip_address":      "172.28.38.202",
 				"ha_port_setting": map[string]any{
 					"auto_port_setting_enabled": true,
 					"speed":                     "10",
@@ -1824,7 +1824,7 @@ func TestAccMemberResource_NodeInfo(t *testing.T) {
 				"lan_port_setting": map[string]any{
 					"auto_port_setting_enabled": true,
 				},
-				"mgmt_lan": "172.28.38.164",
+				"mgmt_lan": "172.28.38.203",
 			},
 		},
 	}
@@ -1833,7 +1833,7 @@ func TestAccMemberResource_NodeInfo(t *testing.T) {
 		{
 			"lan_ha_port_setting": map[string]any{
 				"ha_cloud_attribute": "UNK",
-				"ha_ip_address":      "172.28.38.165",
+				"ha_ip_address":      "172.28.38.204",
 				"ha_port_setting": map[string]any{
 					"auto_port_setting_enabled": true,
 					"speed":                     "10",
@@ -1841,13 +1841,13 @@ func TestAccMemberResource_NodeInfo(t *testing.T) {
 				"lan_port_setting": map[string]any{
 					"auto_port_setting_enabled": true,
 				},
-				"mgmt_lan": "172.28.38.166",
+				"mgmt_lan": "172.28.38.205",
 			},
 		},
 		{
 			"lan_ha_port_setting": map[string]any{
 				"ha_cloud_attribute": "UNK",
-				"ha_ip_address":      "172.28.38.167",
+				"ha_ip_address":      "172.28.38.206",
 				"ha_port_setting": map[string]any{
 					"auto_port_setting_enabled": true,
 					"speed":                     "10",
@@ -1855,7 +1855,7 @@ func TestAccMemberResource_NodeInfo(t *testing.T) {
 				"lan_port_setting": map[string]any{
 					"auto_port_setting_enabled": true,
 				},
-				"mgmt_lan": "172.28.38.168",
+				"mgmt_lan": "172.28.38.207",
 			},
 		},
 	}
@@ -1863,7 +1863,7 @@ func TestAccMemberResource_NodeInfo(t *testing.T) {
 	nodeInfoMGMTIPv4 := []map[string]any{
 		{
 			"mgmt_network_setting": map[string]any{
-				"address":     "172.28.38.169",
+				"address":     "172.28.38.208",
 				"gateway":     "172.28.38.1",
 				"subnet_mask": "255.255.255.0",
 			},
@@ -1902,10 +1902,10 @@ func TestAccMemberResource_NodeInfo(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "node_info.#", "2"),
-					resource.TestCheckResourceAttr(resourceName, "node_info.0.lan_ha_port_setting.ha_ip_address", "172.28.38.161"),
-					resource.TestCheckResourceAttr(resourceName, "node_info.0.lan_ha_port_setting.mgmt_lan", "172.28.38.162"),
-					resource.TestCheckResourceAttr(resourceName, "node_info.1.lan_ha_port_setting.ha_ip_address", "172.28.38.163"),
-					resource.TestCheckResourceAttr(resourceName, "node_info.1.lan_ha_port_setting.mgmt_lan", "172.28.38.164"),
+					resource.TestCheckResourceAttr(resourceName, "node_info.0.lan_ha_port_setting.ha_ip_address", "172.28.38.200"),
+					resource.TestCheckResourceAttr(resourceName, "node_info.0.lan_ha_port_setting.mgmt_lan", "172.28.38.201"),
+					resource.TestCheckResourceAttr(resourceName, "node_info.1.lan_ha_port_setting.ha_ip_address", "172.28.38.202"),
+					resource.TestCheckResourceAttr(resourceName, "node_info.1.lan_ha_port_setting.mgmt_lan", "172.28.38.203"),
 				),
 			},
 			// Update and Read
@@ -1916,7 +1916,7 @@ func TestAccMemberResource_NodeInfo(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "node_info.#", "1"),
-					resource.TestCheckResourceAttr(resourceName, "node_info.0.mgmt_network_setting.address", "172.28.38.169"),
+					resource.TestCheckResourceAttr(resourceName, "node_info.0.mgmt_network_setting.address", "172.28.38.208"),
 					resource.TestCheckResourceAttr(resourceName, "node_info.0.mgmt_network_setting.gateway", "172.28.38.1"),
 					resource.TestCheckResourceAttr(resourceName, "node_info.0.mgmt_network_setting.subnet_mask", "255.255.255.0"),
 					resource.TestCheckResourceAttr(resourceName, "node_info.0.mgmt_physical_setting.auto_port_setting_enabled", "false"),
@@ -1949,10 +1949,10 @@ func TestAccMemberResource_NodeInfo(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "node_info.#", "2"),
-					resource.TestCheckResourceAttr(resourceName, "node_info.0.lan_ha_port_setting.ha_ip_address", "172.28.38.165"),
-					resource.TestCheckResourceAttr(resourceName, "node_info.0.lan_ha_port_setting.mgmt_lan", "172.28.38.166"),
-					resource.TestCheckResourceAttr(resourceName, "node_info.1.lan_ha_port_setting.ha_ip_address", "172.28.38.167"),
-					resource.TestCheckResourceAttr(resourceName, "node_info.1.lan_ha_port_setting.mgmt_lan", "172.28.38.168"),
+					resource.TestCheckResourceAttr(resourceName, "node_info.0.lan_ha_port_setting.ha_ip_address", "172.28.38.204"),
+					resource.TestCheckResourceAttr(resourceName, "node_info.0.lan_ha_port_setting.mgmt_lan", "172.28.38.205"),
+					resource.TestCheckResourceAttr(resourceName, "node_info.1.lan_ha_port_setting.ha_ip_address", "172.28.38.206"),
+					resource.TestCheckResourceAttr(resourceName, "node_info.1.lan_ha_port_setting.mgmt_lan", "172.28.38.207"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase

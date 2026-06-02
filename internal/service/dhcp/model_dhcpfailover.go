@@ -413,6 +413,7 @@ func (m *DhcpfailoverModel) Flatten(ctx context.Context, from *dhcp.Dhcpfailover
 	m.MsIsConflict = types.BoolPointerValue(from.MsIsConflict)
 	m.MsPreviousState = flex.FlattenStringPointer(from.MsPreviousState)
 	m.MsServer = flex.FlattenStringPointer(from.MsServer)
+	m.MsSharedSecret = flex.FlattenStringPointer(from.MsSharedSecret)
 	m.MsState = flex.FlattenStringPointer(from.MsState)
 	m.MsSwitchoverInterval = flex.FlattenInt64Pointer(from.MsSwitchoverInterval)
 	m.Name = flex.FlattenStringPointer(from.Name)
