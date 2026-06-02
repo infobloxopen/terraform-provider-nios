@@ -42,6 +42,7 @@ type MemberModel struct {
 	CspMemberSetting                types.Object `tfsdk:"csp_member_setting"`
 	ConfigureCspMemberSetting       types.Bool   `tfsdk:"configure_csp_member_setting"`
 	DnsResolverSetting              types.Object `tfsdk:"dns_resolver_setting"`
+	GridLevelDnsResolverSetting     types.Object `tfsdk:"grid_level_dns_resolver_setting"`
 	Dscp                            types.Int64  `tfsdk:"dscp"`
 	EmailSetting                    types.Object `tfsdk:"email_setting"`
 	EnableHa                        types.Bool   `tfsdk:"enable_ha"`
@@ -131,6 +132,7 @@ var MemberAttrTypes = map[string]attr.Type{
 	"csp_member_setting":                  types.ObjectType{AttrTypes: MemberCspMemberSettingAttrTypes},
 	"configure_csp_member_setting":        types.BoolType,
 	"dns_resolver_setting":                types.ObjectType{AttrTypes: MemberDnsResolverSettingAttrTypes},
+	"grid_level_dns_resolver_setting":     types.ObjectType{AttrTypes: MemberDnsResolverSettingAttrTypes},
 	"dscp":                                types.Int64Type,
 	"email_setting":                       types.ObjectType{AttrTypes: MemberEmailSettingAttrTypes},
 	"enable_ha":                           types.BoolType,
@@ -286,6 +288,11 @@ var MemberResourceSchemaAttributes = map[string]schema.Attribute{
 			objectvalidator.AlsoRequires(path.MatchRoot("use_dns_resolver_setting")),
 		},
 		MarkdownDescription: "DNS resolver setting for member.",
+	},
+	"grid_level_dns_resolver_setting": schema.SingleNestedAttribute{
+		Attributes:          MemberDnsResolverSettingResourceSchemaAttributes,
+		Optional:            true,
+		MarkdownDescription: "Grid-level DNS resolver setting. When configured, this will update the grid DNS resolver settings and restart grid services. To unset resolvers, set resolvers to null in this block.",
 	},
 	"configure_csp_member_setting": schema.BoolAttribute{
 		Optional:            true,
@@ -911,7 +918,6 @@ func (m *MemberModel) Expand(ctx context.Context, diags *diag.Diagnostics, isCre
 		SyslogSize:                      flex.ExpandInt64Pointer(m.SyslogSize),
 		ThresholdTraps:                  flex.ExpandFrameworkListNestedBlock(ctx, m.ThresholdTraps, diags, ExpandMemberThresholdTraps),
 		TimeZone:                        flex.ExpandStringPointer(m.TimeZone),
-		TrafficCaptureAuthDnsSetting:    ExpandMemberTrafficCaptureAuthDnsSetting(ctx, m.TrafficCaptureAuthDnsSetting, diags),
 		TrafficCaptureChrSetting:        ExpandMemberTrafficCaptureChrSetting(ctx, m.TrafficCaptureChrSetting, diags),
 		TrafficCaptureQpsSetting:        ExpandMemberTrafficCaptureQpsSetting(ctx, m.TrafficCaptureQpsSetting, diags),
 		TrafficCaptureRecDnsSetting:     ExpandMemberTrafficCaptureRecDnsSetting(ctx, m.TrafficCaptureRecDnsSetting, diags),
@@ -944,6 +950,7 @@ func (m *MemberModel) Expand(ctx context.Context, diags *diag.Diagnostics, isCre
 
 	if !isCreate {
 		to.PreProvisioning = ExpandMemberPreProvisioning(ctx, m.PreProvisioning, diags)
+		to.TrafficCaptureAuthDnsSetting = ExpandMemberTrafficCaptureAuthDnsSetting(ctx, m.TrafficCaptureAuthDnsSetting, diags)
 	}
 
 	if m.ConfigureCspMemberSetting.ValueBool() {
@@ -1045,7 +1052,7 @@ func (m *MemberModel) Flatten(ctx context.Context, from *grid.Member, diags *dia
 	m.RemoteConsoleAccessEnable = types.BoolPointerValue(from.RemoteConsoleAccessEnable)
 	m.RouterId = flex.FlattenInt64Pointer(from.RouterId)
 	m.ServiceStatus = flex.FlattenFrameworkListNestedBlock(ctx, from.ServiceStatus, MemberServiceStatusAttrTypes, diags, FlattenMemberServiceStatus)
-	m.ServiceTypeConfiguration = flex.FlattenStringPointer(from.ServiceTypeConfiguration)
+	m.ServiceTypeConfiguration = FlattenServiceTypeConfiguration(m.ServiceTypeConfiguration, from.ServiceTypeConfiguration)
 	m.SnmpSetting = FlattenMemberSnmpSetting(ctx, from.SnmpSetting, diags)
 	m.StaticRoutes = flex.FlattenFrameworkListNestedBlock(ctx, from.StaticRoutes, MemberStaticRoutesAttrTypes, diags, FlattenMemberStaticRoutes)
 	m.SupportAccessEnable = types.BoolPointerValue(from.SupportAccessEnable)
@@ -1105,6 +1112,12 @@ func (m *MemberModel) Flatten(ctx context.Context, from *grid.Member, diags *dia
 	m.UseV4Vrrp = types.BoolPointerValue(from.UseV4Vrrp)
 	m.VipSetting = FlattenMemberVipSetting(ctx, from.VipSetting, diags)
 	m.VpnMtu = flex.FlattenInt64Pointer(from.VpnMtu)
+	planGridLevelDnsResolverSetting := m.GridLevelDnsResolverSetting
+	if planGridLevelDnsResolverSetting.IsNull() || planGridLevelDnsResolverSetting.IsUnknown() {
+		m.GridLevelDnsResolverSetting = types.ObjectNull(MemberDnsResolverSettingAttrTypes)
+	} else {
+		m.GridLevelDnsResolverSetting = planGridLevelDnsResolverSetting
+	}
 }
 
 func ExpandHACloudPlatform(v types.String) *string {
@@ -1122,4 +1135,11 @@ func FlattenHACloudPlatform(s *string) types.String {
 		return types.StringNull()
 	}
 	return types.StringValue(*s)
+}
+
+func FlattenServiceTypeConfiguration(planValue types.String, apiValue *string) types.String {
+	if !planValue.IsNull() && !planValue.IsUnknown() && planValue.ValueString() == "CUSTOM" {
+		return planValue
+	}
+	return flex.FlattenStringPointer(apiValue)
 }

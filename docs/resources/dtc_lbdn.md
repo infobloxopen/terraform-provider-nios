@@ -51,6 +51,10 @@ resource "nios_dns_zone_auth" "parent_zone2" {
 resource "nios_dtc_pool" "dtc_pool1" {
   name                = "pool2"
   lb_preferred_method = "ROUND_ROBIN"
+  servers = [{
+    server = nios_dtc_server.create_dtc_server.ref
+    ratio  = 1
+  }]
 }
 
 resource "nios_dtc_pool" "dtc_pool2" {
@@ -61,6 +65,21 @@ resource "nios_dtc_pool" "dtc_pool2" {
 resource "nios_dtc_pool" "dtc_pool3" {
   name                = "pool6"
   lb_preferred_method = "ROUND_ROBIN"
+}
+
+resource "nios_dtc_server" "create_dtc_server" {
+  name = "example-server"
+  host = "2.3.3.4"
+}
+
+resource "nios_dtc_topology" "create_dtc_topology" {
+  name = "example_dtc_topology"
+  rules = [
+    {
+      dest_type        = "POOL"
+      destination_link = nios_dtc_pool.dtc_pool1.ref
+    }
+  ]
 }
 
 // Create DTC LBDN with Additional Fields
@@ -75,7 +94,7 @@ resource "nios_dtc_lbdn" "lbdn_additional_fields" {
   }
   lb_method = "TOPOLOGY"
   //The topology used here must have any one of the pools configured in its topology members
-  topology = "dtc:topology/ZG5zLmlkbnNfdG9wb2xvZ3kkdG9wbzE:topo1"
+  topology = nios_dtc_topology.create_dtc_topology.ref
   patterns = ["*wapi.com", "info.com*"]
   pools = [
     {

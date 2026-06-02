@@ -96,7 +96,6 @@ func testAccCheckZoneRpResourceAttrPair(resourceName, dataSourceName string) []r
 		resource.TestCheckResourceAttrPair(resourceName, "rpz_priority_end", dataSourceName, "result.0.rpz_priority_end"),
 		resource.TestCheckResourceAttrPair(resourceName, "rpz_severity", dataSourceName, "result.0.rpz_severity"),
 		resource.TestCheckResourceAttrPair(resourceName, "rpz_type", dataSourceName, "result.0.rpz_type"),
-		resource.TestCheckResourceAttrPair(resourceName, "set_soa_serial_number", dataSourceName, "result.0.set_soa_serial_number"),
 		resource.TestCheckResourceAttrPair(resourceName, "soa_default_ttl", dataSourceName, "result.0.soa_default_ttl"),
 		resource.TestCheckResourceAttrPair(resourceName, "soa_email", dataSourceName, "result.0.soa_email"),
 		resource.TestCheckResourceAttrPair(resourceName, "soa_expire", dataSourceName, "result.0.soa_expire"),

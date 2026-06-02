@@ -415,16 +415,9 @@ var FixedaddressResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "This field contains the logic filters to be applied on the this fixed address. This list corresponds to the match rules that are written to the dhcpd configuration file.",
 	},
 	"mac": schema.StringAttribute{
-		CustomType: hwtypes.MACAddressType{},
-		Optional:   true,
-		Computed:   true,
-		Validators: []validator.String{
-			stringvalidator.ExactlyOneOf(
-				path.MatchRoot("mac"),
-				path.MatchRoot("agent_circuit_id"),
-				path.MatchRoot("agent_remote_id"),
-				path.MatchRoot("dhcp_client_identifier")),
-		},
+		CustomType:          hwtypes.MACAddressType{},
+		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The MAC address value for this fixed address.",
 	},
 	"match_client": schema.StringAttribute{
@@ -672,7 +665,6 @@ func (m *FixedaddressModel) Expand(ctx context.Context, diags *diag.Diagnostics,
 		LogicFilterRules:               flex.ExpandFrameworkListNestedBlock(ctx, m.LogicFilterRules, diags, ExpandFixedaddressLogicFilterRules),
 		Mac:                            flex.ExpandMACAddress(m.Mac),
 		MatchClient:                    flex.ExpandStringPointer(m.MatchClient),
-		MsAdUserData:                   ExpandFixedaddressMsAdUserData(ctx, m.MsAdUserData, diags),
 		MsOptions:                      flex.ExpandFrameworkListNestedBlock(ctx, m.MsOptions, diags, ExpandFixedaddressMsOptions),
 		MsServer:                       ExpandFixedaddressMsServer(ctx, m.MsServer, diags),
 		Name:                           flex.ExpandStringPointer(m.Name),
@@ -799,7 +791,9 @@ func (m *FixedaddressModel) Flatten(ctx context.Context, from *dhcp.Fixedaddress
 		}
 	}
 	m.SnmpCredential = FlattenFixedaddressSnmpCredential(ctx, from.SnmpCredential, diags)
-	m.Template = flex.FlattenStringPointer(from.Template)
+	if m.Template.IsUnknown() || m.Template.IsNull() {
+		m.Template = flex.FlattenStringPointer(from.Template)
+	}
 	m.UseBootfile = types.BoolPointerValue(from.UseBootfile)
 	m.UseBootserver = types.BoolPointerValue(from.UseBootserver)
 	m.UseCliCredentials = types.BoolPointerValue(from.UseCliCredentials)

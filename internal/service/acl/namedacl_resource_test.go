@@ -73,6 +73,11 @@ func TestAccNamedaclResource_AccessList(t *testing.T) {
 			"address":    "10.0.0.5",
 			"permission": "DENY",
 		},
+		{
+			"struct":     "addressac",
+			"address":    "10.0.2.1/32",
+			"permission": "DENY",
+		},
 	}
 
 	acl2 := []map[string]any{
@@ -93,9 +98,11 @@ func TestAccNamedaclResource_AccessList(t *testing.T) {
 				Config: testAccNamedaclAccessList(name, acl1),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNamedaclExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "access_list.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "access_list.#", "2"),
 					resource.TestCheckResourceAttr(resourceName, "access_list.0.address", "10.0.0.5"),
+					resource.TestCheckResourceAttr(resourceName, "access_list.1.address", "10.0.2.1/32"),
 					resource.TestCheckResourceAttr(resourceName, "access_list.0.permission", "DENY"),
+					resource.TestCheckResourceAttr(resourceName, "access_list.1.permission", "DENY"),
 				),
 			},
 			// Update and Read
