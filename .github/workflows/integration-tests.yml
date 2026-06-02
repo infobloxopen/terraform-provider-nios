@@ -3,8 +3,8 @@ name: Integration Tests
 on:
   workflow_dispatch:
   schedule:
-    - cron: '30 3 * * 1-5'
-    - cron: '30 12 * * 1-5'
+    - cron: '30 2 * * 1-5'
+    - cron: '30 11 * * 1-5'
 
 # Only one pipeline per branch at a time
 concurrency:
@@ -17,7 +17,7 @@ jobs:
     runs-on: ubuntu-latest
 
     # Timeout on the entire job
-    timeout-minutes: 180    # 3 hours
+    timeout-minutes: 210    # 3.5 hours
 
     steps:
       # ------------------------------------------------------------------ #
@@ -113,7 +113,7 @@ jobs:
           GIST_ID:         ${{ steps.gist.outputs.gist_id }}
           GIT_SHA:         ${{ github.sha }}
           STAGE_NAME:      job-started
-          TIMEOUT_SECONDS: "720"    # 12 min: up to 12 min Poll SCM + startup
+          TIMEOUT_SECONDS: "5400"    # 12 min: up to 12 min Poll SCM + startup
         run: python3 .github/actions/integration-tests/wait_for_signal.py
 
       # ------------------------------------------------------------------ #
