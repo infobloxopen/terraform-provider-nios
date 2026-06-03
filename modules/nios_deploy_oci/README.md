@@ -461,7 +461,7 @@ resource "nios_grid_member" "ha_pair" {
 
   grid_level_dns_resolver_setting = {
     resolvers = [
-      "10.103.3.10"
+      "10.10.10.10"
   ] }
 }
 
