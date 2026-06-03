@@ -9,9 +9,9 @@ provider "oci" {
 module "node1" {
   source = "github.com/infobloxopen/terraform-provider-nios//modules/nios_deploy_oci?ref=nios_v9.1.0"
 
-  default_admin_password = var.default_admin_password
-  remote_console_enabled = var.remote_console_enabled
-  nios_license           = var.nios_license
+  default_admin_password   = var.default_admin_password
+  remote_console_enabled   = var.remote_console_enabled
+  nios_license             = var.nios_license
   compartment_id           = var.compartment_id
   availability_domain      = var.availability_domain
   bucket_name              = var.bucket_name
