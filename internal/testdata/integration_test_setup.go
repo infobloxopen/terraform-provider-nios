@@ -1314,7 +1314,7 @@ func PreConfig(clients PreConfigClients, hostnames GridHostnames) error {
 			MasterCandidate:          grid.PtrBool(member.masterCandidate),
 			VipSetting: &grid.MemberVipSetting{
 				Address:    grid.PtrString(member.vipAddress),
-				Gateway:    grid.PtrString("172.28.32.1"),
+				Gateway:    grid.PtrString("172.28.38.1"),
 				SubnetMask: grid.PtrString("255.255.254.0"),
 				Primary:    grid.PtrBool(true),
 				Dscp:       grid.PtrInt64(0),
