@@ -234,7 +234,7 @@ module "node2" {
 // After NIOS is ready (~30 mins), configure grid member
 provider "nios" {
   nios_host_url = "https://${module.nios_grid_member.mgmt_private_ip}"
-  nios_username = "admin"
+  nios_username = "<username>"
   nios_password = var.nios_password
 }
 
@@ -252,7 +252,7 @@ resource "nios_grid_member" "member" {
 
 resource "nios_grid_join" "member_join" {
   member_url      = "https://${module.nios_grid_member.lan1_private_ip}"
-  member_username = "admin"
+  member_username = "<username>"
   member_password = var.nios_password
   grid_name       = "Infoblox"
   master          = "<master_ip>"
@@ -350,8 +350,8 @@ For the full background and the complete list of policy statements, see:
 ```
 provider "nios" {
   nios_host_url = "https://${module.node1.lan1_private_ip}"
-  nios_username = "admin"
-  nios_password = "infoblox"
+  nios_username = "<username>"
+  nios_password = "<password>"
 }
 
 import {
@@ -403,8 +403,8 @@ modified to enable mgmt settings
 ```
 provider "nios" {
   nios_host_url = "https://${module.node1.mgmt_ip}"
-  nios_username = "admin"
-  nios_password = "infoblox"
+  nios_username = "<username>"
+  nios_password = "<password>"
 }
 
 resource "nios_grid_member" "ha_pair" {
@@ -474,8 +474,8 @@ Run terraform apply to update the resource
 ```
 resource "nios_grid_join" "ha_member_join" {
   member_url      = "https://${module.node2.lan1_private_ip}"
-  member_username = "admin"
-  member_password = "infoblox"
+  member_username = "<username>"
+  member_password = "<password>"
   grid_name       = "Infoblox"
   master          = module.node1.vip
   shared_secret   = "test"
