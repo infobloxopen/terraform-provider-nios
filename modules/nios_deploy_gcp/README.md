@@ -215,7 +215,7 @@ module "node2" {
 
 ```hcl 
 provider "nios" {
-  nios_host_url = "https://${module.node1.lan1_vip}"
+  nios_host_url = "https://${module.node1.lan1_ip}"
   nios_username = "username"
   nios_password = "password"
 }
@@ -300,7 +300,7 @@ resource "nios_grid_join" "ha_member_join" {
 
 #### Best Practices for HA Deployment
 
-> **Recommended Workflow:** Use a **separate Terraform workspace** for HA configuration. The NIOS HA setup is a one-time provisioning task — once the HA pair is formed and the passive node has joined the grid, the configuration is complete and does not require ongoing Terraform management.
+> **Recommended Workflow:** Use a **separate Terraform workspace** for HA configuration. The NIOS HA setup is a one-time provisioning task — once the HA pair is formed and the passive node has joined the grid, the configuration is complete and does not require ongoing Terraform management. Re-applying Terraform after HA formation may attempt to modify NIOS-managed HA attributes.
 
 After successfully deploying the HA pair:
 
