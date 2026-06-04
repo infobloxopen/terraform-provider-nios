@@ -97,7 +97,7 @@ func (p *NIOSProvider) Schema(_ context.Context, _ provider.SchemaRequest, resp 
 			},
 			"manage_internal_id_ea": schema.BoolAttribute{
 				Optional:    true,
-				Description: "If true , Terraform Configuration Manages the existence of the Terraform Internal ID Extensible Attribute in NIOS. This extensible attribute is used by the provider to store the Terraform resource ID corresponding to NIOS objects. If false, the provider does not check for or manage the existence of this extensible attribute. Default value is true.",
+				Description: "Determines whether the provider manages the Terraform Internal ID extensible attribute in NIOS. This attribute is required by the provider to store the Terraform resource ID corresponding to NIOS objects. When true, the provider ensures the attribute exists and manages its lifecycle. When false, the provider does not validate, create, update, or otherwise manage the attribute. Default value: true",
 			},
 		},
 	}
