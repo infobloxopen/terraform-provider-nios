@@ -37,10 +37,10 @@ provider "nios" {
 
 ### Optional
 
+- `manage_internal_id_ea` (Boolean) If true , Terraform Configuration Manages the existence of the Terraform Internal ID Extensible Attribute in NIOS. This extensible attribute is used by the provider to store the Terraform resource ID corresponding to NIOS objects. If false, the provider does not check for or manage the existence of this extensible attribute. Default value is true.
 - `nios_host_url` (String)
 - `nios_password` (String)
 - `nios_username` (String)
 - `proxy_search` (String) Proxy search mode. Allowed values: LOCAL (default), GM.
 - `proxy_url` (String) Proxy URL to connect to Infoblox NIOS.
 - `retry_timeout` (Number) Specifies the timeout duration (in seconds) for retrying operations that fail due to transient errors.
-- `sandbox` (Boolean) Whether to use sandbox environment. Default is false.
