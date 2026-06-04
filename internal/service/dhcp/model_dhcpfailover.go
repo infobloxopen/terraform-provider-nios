@@ -250,7 +250,6 @@ var DhcpfailoverResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The primary Microsoft Server.",
 	},
 	"ms_shared_secret": schema.StringAttribute{
-		Computed:            true,
 		Optional:            true,
 		Sensitive:           true,
 		MarkdownDescription: "The failover association authentication. This is a write-only attribute.",
