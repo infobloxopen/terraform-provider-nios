@@ -461,8 +461,7 @@ func (r *DhcpfailoverResource) ValidateConfig(ctx context.Context, req resource.
 
 	// Only validate when both values are explicitly known
 	if !data.UseMsSwitchoverInterval.IsNull() && !data.UseMsSwitchoverInterval.IsUnknown() &&
-		data.UseMsSwitchoverInterval.ValueBool() &&
-		!data.MsEnableSwitchoverInterval.IsNull() && !data.MsEnableSwitchoverInterval.IsUnknown() &&
+		data.UseMsSwitchoverInterval.ValueBool() && !data.MsEnableSwitchoverInterval.IsUnknown() &&
 		!data.MsEnableSwitchoverInterval.ValueBool() {
 		resp.Diagnostics.AddError(
 			"Invalid Configuration",
