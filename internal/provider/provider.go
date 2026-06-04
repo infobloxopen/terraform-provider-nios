@@ -7,12 +7,12 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
+	"github.com/hashicorp/terraform-plugin-framework/list"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
 	"github.com/hashicorp/terraform-plugin-framework/provider/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/infobloxopen/terraform-provider-nios/internal/service/rir"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
 	gridclient "github.com/infobloxopen/infoblox-nios-go-client/grid"
@@ -32,6 +32,7 @@ import (
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/misc"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/notification"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/parentalcontrol"
+	"github.com/infobloxopen/terraform-provider-nios/internal/service/rir"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/rpz"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/security"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/smartfolder"
@@ -39,6 +40,8 @@ import (
 
 // Ensure NIOSProvider satisfies various provider interfaces.
 var _ provider.Provider = &NIOSProvider{}
+
+var _ provider.ProviderWithListResources = &NIOSProvider{}
 
 const terraformInternalIDEA = "Terraform Internal ID"
 
@@ -150,6 +153,7 @@ func (p *NIOSProvider) Configure(ctx context.Context, req provider.ConfigureRequ
 
 	resp.DataSourceData = client
 	resp.ResourceData = client
+	resp.ListResourceData = client
 }
 
 func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
@@ -277,6 +281,7 @@ func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
 		grid.NewDistributionscheduleResource,
 		grid.NewMemberResource,
 		grid.NewUpgradescheduleResource,
+		grid.NewGridJoinResource,
 
 		discovery.NewDiscoveryCredentialgroupResource,
 		discovery.NewVdiscoverytaskResource,
@@ -469,6 +474,16 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 		microsoft.NewMsserverDataSource,
 		microsoft.NewMsserverAdsitesSiteDataSource,
 		microsoft.NewMssuperscopeDataSource,
+	}
+}
+
+func (p *NIOSProvider) ListResources(ctx context.Context) []func() list.ListResource {
+	return []func() list.ListResource{
+		dns.NewRecordAList,
+
+		dhcp.NewFixedaddressList,
+
+		ipam.NewNetworkviewList,
 	}
 }
 

@@ -118,7 +118,10 @@ var LdapAuthServiceResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The LDAP authentication service name.",
 	},
 	"recovery_interval": schema.Int64Attribute{
-		Required:            true,
+		Required: true,
+		Validators: []validator.Int64{
+			int64validator.Between(1, 600),
+		},
 		MarkdownDescription: "The period of time in seconds to wait before trying to contact a LDAP server that has been marked as 'DOWN'.",
 	},
 	"retries": schema.Int64Attribute{
@@ -150,7 +153,7 @@ var LdapAuthServiceResourceSchemaAttributes = map[string]schema.Attribute{
 	"timeout": schema.Int64Attribute{
 		Required: true,
 		Validators: []validator.Int64{
-			int64validator.Between(0, 4294967295),
+			int64validator.Between(1, 600),
 		},
 		MarkdownDescription: "The LDAP authentication timeout in seconds.",
 	},

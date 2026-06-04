@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
 	"github.com/infobloxopen/infoblox-nios-go-client/grid"
@@ -91,6 +92,19 @@ func (r *MemberResource) Create(ctx context.Context, req resource.CreateRequest,
 		data.SyslogServers = processedList
 	}
 
+	if !data.GridLevelDnsResolverSetting.IsNull() && !data.GridLevelDnsResolverSetting.IsUnknown() {
+		dnsResolverSetting := ExpandMemberDnsResolverSetting(ctx, data.GridLevelDnsResolverSetting, &resp.Diagnostics)
+		if resp.Diagnostics.HasError() {
+			return
+		}
+
+		err := utils.ConfigureGridDNSResolver(ctx, r.client.GridAPI, dnsResolverSetting)
+		if err != nil {
+			resp.Diagnostics.AddError("Grid DNS Resolver Configuration Error", fmt.Sprintf("Unable to configure grid-level DNS resolver: %s", err))
+			return
+		}
+	}
+
 	payload := data.Expand(ctx, &resp.Diagnostics, true)
 	if resp.Diagnostics.HasError() {
 		return
@@ -132,7 +146,7 @@ func (r *MemberResource) Create(ctx context.Context, req resource.CreateRequest,
 
 	res := apiRes.CreateMemberResponseAsObject.GetResult()
 
-	if !data.PreProvisioning.IsUnknown() && !data.PreProvisioning.IsNull() {
+	if !data.PreProvisioning.IsUnknown() && !data.PreProvisioning.IsNull() || (!data.TrafficCaptureAuthDnsSetting.IsUnknown() && !data.TrafficCaptureAuthDnsSetting.IsNull()) {
 		apiRes2, _, err2 := r.client.GridAPI.
 			MemberAPI.
 			Update(ctx, utils.ExtractResourceRef(*res.Ref)).
@@ -353,6 +367,28 @@ func (r *MemberResource) Update(ctx context.Context, req resource.UpdateRequest,
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
+	}
+
+	if !data.GridLevelDnsResolverSetting.IsNull() && !data.GridLevelDnsResolverSetting.IsUnknown() {
+		var stateGridLevelDnsResolverSetting types.Object
+		// Check if grid-level DNS resolver setting has changed.
+		diags = req.State.GetAttribute(ctx, path.Root("grid_level_dns_resolver_setting"), &stateGridLevelDnsResolverSetting)
+		if diags.HasError() {
+			resp.Diagnostics.Append(diags...)
+			return
+		}
+		if !data.GridLevelDnsResolverSetting.Equal(stateGridLevelDnsResolverSetting) {
+			dnsResolverSetting := ExpandMemberDnsResolverSetting(ctx, data.GridLevelDnsResolverSetting, &resp.Diagnostics)
+			if resp.Diagnostics.HasError() {
+				return
+			}
+
+			err := utils.ConfigureGridDNSResolver(ctx, r.client.GridAPI, dnsResolverSetting)
+			if err != nil {
+				resp.Diagnostics.AddError("Grid DNS Resolver Configuration Error", fmt.Sprintf("Unable to configure grid-level DNS resolver: %s", err))
+				return
+			}
+		}
 	}
 
 	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
@@ -591,6 +627,18 @@ func (r *MemberResource) ValidateConfig(ctx context.Context, req resource.Valida
 		}
 	}
 
+	if !data.Ipv6Setting.IsNull() && !data.Ipv6Setting.IsUnknown() {
+		ipv6Attrs := data.Ipv6Setting.Attributes()
+		hasVirtualIP := !ipv6Attrs["virtual_ip"].IsNull() && !ipv6Attrs["virtual_ip"].IsUnknown()
+		hasCidrPrefix := !ipv6Attrs["cidr_prefix"].IsNull() && !ipv6Attrs["cidr_prefix"].IsUnknown()
+		hasGateway := !ipv6Attrs["gateway"].IsNull() && !ipv6Attrs["gateway"].IsUnknown()
+		if (hasVirtualIP && hasCidrPrefix && hasGateway) &&
+			(data.ConfigAddrType.IsNull() || data.ConfigAddrType.IsUnknown() ||
+				(data.ConfigAddrType.ValueString() != "IPV6" && data.ConfigAddrType.ValueString() != "BOTH")) {
+			resp.Diagnostics.AddError("Validation Error", "config_addr_type must be set to IPV6 or BOTH when ipv6_setting.virtual_ip, ipv6_setting.cidr_prefix, and ipv6_setting.gateway are provided")
+		}
+	}
+
 	if !data.ConfigAddrType.IsNull() && !data.ConfigAddrType.IsUnknown() && data.ConfigAddrType.ValueString() == "IPV4" {
 		if !data.Ipv6Setting.IsNull() && !data.Ipv6Setting.IsUnknown() {
 			if !data.Ipv6Setting.Attributes()["virtual_ip"].IsNull() && !data.Ipv6Setting.Attributes()["virtual_ip"].IsUnknown() {
@@ -620,8 +668,8 @@ func (r *MemberResource) ValidateConfig(ctx context.Context, req resource.Valida
 				resp.Diagnostics.AddError("Validation Error", "vip_setting.address cannot be set when config_addr_type is set to IPV6")
 			}
 		}
-		if !data.ServiceTypeConfiguration.IsNull() && !data.ServiceTypeConfiguration.IsUnknown() && data.ServiceTypeConfiguration.ValueString() == "ALL_V4" {
-			resp.Diagnostics.AddError("Validation Error", "service_type_configuration cannot be set to ALL_V4 when config_addr_type is set to IPV6")
+		if !data.ServiceTypeConfiguration.IsUnknown() && (data.ServiceTypeConfiguration.IsNull() || data.ServiceTypeConfiguration.ValueString() == "ALL_V4") {
+			resp.Diagnostics.AddError("Validation Error", "service_type_configuration must be ALL_V6 when the config_addr_type is IPV6")
 		}
 	}
 

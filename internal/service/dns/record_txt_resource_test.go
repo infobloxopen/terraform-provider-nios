@@ -394,7 +394,7 @@ func TestAccRecordTxtResource_UseTtl(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRecordTxtUseTtl(name, "Record Text", "false", 20),
+				Config: testAccRecordTxtUseTtlOnly(name, "Record Text", "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordTxtExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_ttl", "false"),
@@ -589,4 +589,14 @@ resource "nios_dns_record_txt" "test_use_ttl" {
 	ttl = %d
 }
 `, name, text, useTtl, ttl)
+}
+
+func testAccRecordTxtUseTtlOnly(name, text, useTtl string) string {
+	return fmt.Sprintf(`
+resource "nios_dns_record_txt" "test_use_ttl" {
+	name = %q
+	text = %q
+    use_ttl = %q
+}
+`, name, text, useTtl)
 }

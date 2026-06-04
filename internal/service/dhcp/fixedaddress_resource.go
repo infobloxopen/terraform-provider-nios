@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
+	"github.com/hashicorp/terraform-plugin-framework/resource/identityschema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
@@ -24,6 +25,7 @@ var readableAttributesForFixedaddress = "agent_circuit_id,agent_remote_id,allow_
 // Ensure provider defined types fully satisfy framework interfaces.
 var _ resource.Resource = &FixedaddressResource{}
 var _ resource.ResourceWithImportState = &FixedaddressResource{}
+var _ resource.ResourceWithIdentity = &FixedaddressResource{}
 
 func NewFixedaddressResource() resource.Resource {
 	return &FixedaddressResource{}
@@ -36,12 +38,25 @@ type FixedaddressResource struct {
 
 func (r *FixedaddressResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_" + "dhcp_fixed_address"
+	resp.ResourceBehavior = resource.ResourceBehavior{
+		MutableIdentity: true,
+	}
 }
 
 func (r *FixedaddressResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		MarkdownDescription: "Manages a Fixed Address.",
 		Attributes:          FixedaddressResourceSchemaAttributes,
+	}
+}
+
+func (r *FixedaddressResource) IdentitySchema(ctx context.Context, req resource.IdentitySchemaRequest, resp *resource.IdentitySchemaResponse) {
+	resp.IdentitySchema = identityschema.Schema{
+		Attributes: map[string]identityschema.Attribute{
+			"ref": identityschema.StringAttribute{
+				RequiredForImport: true,
+			},
+		},
 	}
 }
 
@@ -79,6 +94,7 @@ func (r *FixedaddressResource) Create(ctx context.Context, req resource.CreateRe
 	// Add internal ID exists in the Extensible Attributes if not already present
 	data.ExtAttrs, diags = AddInternalIDToExtAttrs(ctx, data.ExtAttrs, diags)
 	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
 		return
 	}
 
@@ -130,7 +146,8 @@ func (r *FixedaddressResource) Create(ctx context.Context, req resource.CreateRe
 	res := apiRes.CreateFixedaddressResponseAsObject.GetResult()
 	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.ExtAttrs)
 	if diags.HasError() {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while create Fixedaddress due inherited Extensible attributes, got error: %s", err))
+		resp.Diagnostics.Append(diags...)
+		resp.Diagnostics.AddError("Client Error", "Error while creating Fixedaddress due to inherited Extensible attributes")
 		return
 	}
 
@@ -140,6 +157,9 @@ func (r *FixedaddressResource) Create(ctx context.Context, req resource.CreateRe
 	if len(origFunCallAttrs) > 0 {
 		data.FuncCall = types.ObjectValueMust(FuncCallAttrTypes, origFunCallAttrs)
 	}
+
+	// Save the Identity of the Resource
+	resp.Diagnostics.Append(resp.Identity.SetAttribute(ctx, path.Root("ref"), &data.Ref)...)
 
 	// Save data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
@@ -221,11 +241,15 @@ func (r *FixedaddressResource) Read(ctx context.Context, req resource.ReadReques
 
 	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.ExtAttrs)
 	if diags.HasError() {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while reading Fixedaddress due inherited Extensible attributes, got error: %s", diags))
+		resp.Diagnostics.Append(diags...)
+		resp.Diagnostics.AddError("Client Error", "Error while reading Fixedaddress due to inherited Extensible attributes")
 		return
 	}
 
 	data.Flatten(ctx, &res, &resp.Diagnostics)
+
+	// Save the Identity of the Resource
+	resp.Diagnostics.Append(resp.Identity.SetAttribute(ctx, path.Root("ref"), &data.Ref)...)
 
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
@@ -282,6 +306,10 @@ func (r *FixedaddressResource) ReadByExtAttrs(ctx context.Context, data *Fixedad
 	}
 
 	data.Flatten(ctx, &res, &resp.Diagnostics)
+
+	// Save the Identity of the Resource
+	resp.Diagnostics.Append(resp.Identity.SetAttribute(ctx, path.Root("ref"), &data.Ref)...)
+
 	resp.Diagnostics.Append(resp.State.Set(ctx, data)...)
 
 	return true
@@ -310,14 +338,16 @@ func (r *FixedaddressResource) Update(ctx context.Context, req resource.UpdateRe
 		resp.Diagnostics.Append(diags...)
 		return
 	}
+
 	associateInternalId, diags := req.Private.GetKey(ctx, "associate_internal_id")
-	resp.Diagnostics.Append(diags...)
 	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
 		return
 	}
 	if associateInternalId != nil {
 		data.ExtAttrs, diags = AddInternalIDToExtAttrs(ctx, data.ExtAttrs, diags)
 		if diags.HasError() {
+			resp.Diagnostics.Append(diags...)
 			return
 		}
 	}
@@ -366,15 +396,18 @@ func (r *FixedaddressResource) Update(ctx context.Context, req resource.UpdateRe
 
 	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, planExtAttrs, *res.ExtAttrs)
 	if diags.HasError() {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while update Fixedaddress due inherited Extensible attributes, got error: %s", diags))
+		resp.Diagnostics.Append(diags...)
+		resp.Diagnostics.AddError("Client Error", "Error while updating Fixedaddress due to inherited Extensible attributes")
 		return
 	}
 
 	data.Flatten(ctx, &res, &resp.Diagnostics)
 
+	// Save the Identity of the Resource
+	resp.Diagnostics.Append(resp.Identity.SetAttribute(ctx, path.Root("ref"), &data.Ref)...)
+
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
-
 	if associateInternalId != nil {
 		resp.Diagnostics.Append(resp.Private.SetKey(ctx, "associate_internal_id", nil)...)
 	}
@@ -428,6 +461,13 @@ func (r *FixedaddressResource) UpdateFuncCallAttributeName(ctx context.Context, 
 }
 
 func (r *FixedaddressResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+	if req.Identity.Raw.IsKnown() {
+		diags := req.Identity.GetAttribute(ctx, path.Root("ref"), &req.ID)
+		if diags.HasError() {
+			resp.Diagnostics.Append(diags...)
+			return
+		}
+	}
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("ref"), req.ID)...)
 	resp.Diagnostics.Append(resp.Private.SetKey(ctx, "associate_internal_id", []byte("true"))...)
 }
@@ -437,6 +477,84 @@ func (r *FixedaddressResource) ValidateConfig(ctx context.Context, req resource.
 	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
 		return
+	}
+
+	if data.MatchClient.ValueString() == "MAC_ADDRESS" {
+		if data.Mac.IsNull() {
+			resp.Diagnostics.AddAttributeError(
+				path.Root("mac"),
+				"Invalid configuration",
+				"The 'mac' attribute must be set when 'match_client' is set to 'MAC_ADDRESS'.",
+			)
+		}
+		if !data.AgentCircuitId.IsNull() || !data.AgentRemoteId.IsNull() || !data.DhcpClientIdentifier.IsNull() {
+			resp.Diagnostics.AddAttributeError(
+				path.Root("match_client"),
+				"Invalid configuration",
+				"When 'match_client' is set to 'MAC_ADDRESS', the 'agent_circuit_id', 'agent_remote_id', and 'dhcp_client_identifier' attributes must not be set.",
+			)
+		}
+
+	} else if data.MatchClient.ValueString() == "CLIENT_ID" {
+		if data.DhcpClientIdentifier.IsNull() || data.DhcpClientIdentifier.IsUnknown() || data.DhcpClientIdentifier.ValueString() == "" {
+			resp.Diagnostics.AddAttributeError(
+				path.Root("dhcp_client_identifier"),
+				"Invalid configuration",
+				"The 'dhcp_client_identifier' attribute must be set and cannot be empty when 'match_client' is set to 'CLIENT_ID'.",
+			)
+		}
+		if !data.AgentCircuitId.IsNull() || !data.AgentRemoteId.IsNull() || !data.Mac.IsNull() {
+			resp.Diagnostics.AddAttributeError(
+				path.Root("match_client"),
+				"Invalid configuration",
+				"When 'match_client' is set to 'CLIENT_ID', the 'agent_circuit_id', 'agent_remote_id', and 'mac' attributes must not be set.",
+			)
+		}
+	} else if data.MatchClient.ValueString() == "CIRCUIT_ID" {
+		if data.AgentCircuitId.IsNull() || data.AgentCircuitId.IsUnknown() {
+			resp.Diagnostics.AddAttributeError(
+				path.Root("agent_circuit_id"),
+				"Invalid configuration",
+				"The 'agent_circuit_id' attribute must be set when 'match_client' is set to 'CIRCUIT_ID'.",
+			)
+		}
+		if !data.Mac.IsNull() || !data.DhcpClientIdentifier.IsNull() {
+			resp.Diagnostics.AddAttributeError(
+				path.Root("match_client"),
+				"Invalid configuration",
+				"When 'match_client' is set to 'CIRCUIT_ID', the 'mac' and 'dhcp_client_identifier' attributes must not be set.",
+			)
+		}
+	} else if data.MatchClient.ValueString() == "REMOTE_ID" {
+		if data.AgentRemoteId.IsNull() || data.AgentRemoteId.IsUnknown() {
+			resp.Diagnostics.AddAttributeError(
+				path.Root("agent_remote_id"),
+				"Invalid configuration",
+				"The 'agent_remote_id' attribute must be set when 'match_client' is set to 'REMOTE_ID'.",
+			)
+		}
+		if !data.Mac.IsNull() || !data.DhcpClientIdentifier.IsNull() {
+			resp.Diagnostics.AddAttributeError(
+				path.Root("match_client"),
+				"Invalid configuration",
+				"When 'match_client' is set to 'REMOTE_ID', the 'mac' and 'dhcp_client_identifier' attributes must not be set.",
+			)
+		}
+	} else if data.MatchClient.ValueString() == "RESERVED" {
+		if !data.Mac.IsNull() && data.Mac.ValueString() != "00:00:00:00:00:00" {
+			resp.Diagnostics.AddAttributeError(
+				path.Root("mac"),
+				"Invalid configuration",
+				"When 'match_client' is set to 'RESERVED', the 'mac' attribute must be set to '00:00:00:00:00:00' or left unset.",
+			)
+		}
+		if !data.AgentCircuitId.IsNull() || !data.AgentRemoteId.IsNull() || !data.DhcpClientIdentifier.IsNull() {
+			resp.Diagnostics.AddAttributeError(
+				path.Root("match_client"),
+				"Invalid configuration",
+				"When 'match_client' is set to 'RESERVED', the 'agent_circuit_id', 'agent_remote_id', and 'dhcp_client_identifier' attributes must not be set.",
+			)
+		}
 	}
 
 	// Check if options are defined

@@ -138,7 +138,6 @@ Optional:
 - `use_recycle_leases` (Boolean) Use flag for: recycle_leases
 - `use_subscribe_settings` (Boolean) Use flag for: subscribe_settings
 - `use_update_dns_on_lease_renewal` (Boolean) Use flag for: update_dns_on_lease_renewal
-- `use_zone_associations` (Boolean) Use flag for: zone_associations
 - `zone_associations` (Attributes List) The list of zones associated with this network. (see [below for nested schema](#nestedatt--result--zone_associations))
 
 Read-Only:
@@ -153,6 +152,7 @@ Read-Only:
 - `network_container` (String) The network container to which this network belongs, if any.
 - `ref` (String) The reference to the object.
 - `rir` (String) The registry (RIR) that allocated the network container address space.
+- `use_zone_associations` (Boolean) Use flag for: zone_associations
 - `utilization` (Number) The network container utilization in percentage.
 
 <a id="nestedatt--result--cloud_info"></a>

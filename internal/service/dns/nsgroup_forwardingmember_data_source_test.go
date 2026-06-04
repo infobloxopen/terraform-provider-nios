@@ -19,7 +19,7 @@ func TestAccNsgroupForwardingmemberDataSource_Filters(t *testing.T) {
 	name := acctest.RandomNameWithPrefix("ns-group-forwardingMember")
 	forwardingServers := []map[string]any{
 		{
-			"name": "infoblox.localdomain",
+			"name": utils.GetNIOSGridMasterHostName(),
 		},
 	}
 
@@ -47,7 +47,7 @@ func TestAccNsgroupForwardingmemberDataSource_ExtAttrFilters(t *testing.T) {
 	name := acctest.RandomNameWithPrefix("ns-group-forwardingMember")
 	forwardingServers := []map[string]any{
 		{
-			"name": "infoblox.localdomain",
+			"name": utils.GetNIOSGridMasterHostName(),
 		},
 	}
 	extAttrValue := acctest.RandomName()
