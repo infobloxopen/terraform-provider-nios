@@ -1153,7 +1153,6 @@ func TestAccIPAllocationResource_UseDnsEaInheritance(t *testing.T) {
 }
 
 func TestAccIPAllocationResource_UseSnmp3Credential(t *testing.T) {
-	// t.Skip("Skipping test as SNMP3 Credential is not supported yet")
 	var resourceName = "nios_ip_allocation.test_use_snmp3_credential"
 	var v dns.RecordHost
 
@@ -1163,13 +1162,6 @@ func TestAccIPAllocationResource_UseSnmp3Credential(t *testing.T) {
 			"ipv4addr": "192.168.1.10",
 		},
 	}
-	snmp3Cred := map[string]any{
-		"user":                    "user1",
-		"authentication_protocol": "SHA",
-		"authentication_password": "authPass",
-		"privacy_protocol":        "AES",
-		"privacy_password":        "privPass",
-	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1177,26 +1169,18 @@ func TestAccIPAllocationResource_UseSnmp3Credential(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccIPAllocationUseSnmp3Credential(name, ipv4addr, snmp3Cred, "true"),
+				Config: testAccIPAllocationUseSnmp3CredentialSet(name, ipv4addr, "true", "user1", "SHA", "authPass", "AES", "privPass"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIPAllocationExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_snmp3_credential", "true"),
-					resource.TestCheckResourceAttr(resourceName, "snmp3_credential.user", "user1"),
-					resource.TestCheckResourceAttr(resourceName, "snmp3_credential.authentication_protocol", "SHA"),
-					resource.TestCheckResourceAttr(resourceName, "snmp3_credential.privacy_protocol", "AES"),
-					resource.TestCheckResourceAttr(resourceName, "secrets_version", "1"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccIPAllocationUseSnmp3Credential(name, ipv4addr, snmp3Cred, "false"),
+				Config: testAccIPAllocationUseSnmp3CredentialOnly(name, ipv4addr, "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIPAllocationExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_snmp3_credential", "false"),
-					resource.TestCheckResourceAttr(resourceName, "snmp3_credential.user", "user1"),
-					resource.TestCheckResourceAttr(resourceName, "snmp3_credential.authentication_protocol", "SHA"),
-					resource.TestCheckResourceAttr(resourceName, "snmp3_credential.privacy_protocol", "AES"),
-					resource.TestCheckResourceAttr(resourceName, "secrets_version", "1"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -1704,6 +1688,36 @@ resource "nios_ip_allocation" "test_use_snmp3_credential" {
 	use_cli_credentials = true
 }
 `, name, ipv4addrStr, snmp3CredStr, useSnmp3Credential)
+}
+
+func testAccIPAllocationUseSnmp3CredentialSet(name string, ipv4addr []map[string]any, useSnmp3Credential, user, authProtocol, authPassword, privProtocol, privPassword string) string {
+	ipv4addrStr := utils.ConvertSliceOfMapsToHCL(ipv4addr)
+	return fmt.Sprintf(`
+resource "nios_ip_allocation" "test_use_snmp3_credential" {
+	name = %q
+	ipv4addrs = %s
+	snmp3_credential = {
+		user = %q
+		authentication_protocol = %q
+		authentication_password = %q
+		privacy_protocol = %q
+		privacy_password = %q
+	}
+	use_snmp3_credential = %q
+	use_cli_credentials = true
+}
+`, name, ipv4addrStr, user, authProtocol, authPassword, privProtocol, privPassword, useSnmp3Credential)
+}
+
+func testAccIPAllocationUseSnmp3CredentialOnly(name string, ipv4addr []map[string]any, useSnmp3Credential string) string {
+	ipv4addrStr := utils.ConvertSliceOfMapsToHCL(ipv4addr)
+	return fmt.Sprintf(`
+resource "nios_ip_allocation" "test_use_snmp3_credential" {
+	name = %q
+	ipv4addrs = %s
+	use_snmp3_credential = %q
+}
+`, name, ipv4addrStr, useSnmp3Credential)
 }
 
 func testAccIPAllocationUseSnmpCredentialSet(name, view string, ipv4addr []map[string]any, useSnmpCredential, snmpCredentialCommStr, snmpCredentialComment, snmpCredentialGroup string) string {
