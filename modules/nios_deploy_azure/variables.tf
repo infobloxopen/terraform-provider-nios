@@ -122,3 +122,70 @@ variable "delete_os_disk_on_termination" {
   type        = bool
   default     = false
 }
+
+variable "subnet3_name" {
+  description = "Name of subnet 3 (used by NIC 3). Required when enable_ha = true."
+  type        = string
+  default     = null
+
+  validation {
+    condition     = !var.enable_ha || (var.subnet3_name != null && length(var.subnet3_name) > 0)
+    error_message = "subnet3_name must be set when enable_ha = true."
+  }
+}
+
+variable "ip_configuration_name_nic3" {
+  description = "The name of the IP Configuration for NIC 3."
+  type        = string
+  default     = "internal3"
+}
+
+variable "nic3_name" {
+  description = "The name of the Network Interface 3 on subnet 3. Required when enable_ha = true."
+  type        = string
+  default     = null
+
+  validation {
+    condition     = !var.enable_ha || (var.nic3_name != null && length(var.nic3_name) > 0)
+    error_message = "nic3_name must be set when enable_ha = true."
+  }
+}
+
+variable "enable_ha" {
+  description = "Enable High Availability for the Azure VM."
+  type        = bool
+  default     = false
+}
+
+variable "is_primary" {
+  description = "Indicates if this node is the primary node in a HA setup."
+  type        = bool
+  default     = false
+}
+
+variable "identity_id" {
+  description = <<-EOT
+    Resource ID of the User-Assigned Managed Identity to attach to the VM for HA
+    operations.Required when enable_ha = true.
+    Example: /subscriptions/<sub>/resourceGroups/<rg>/providers/Microsoft.ManagedIdentity/userAssignedIdentities/<name>
+  EOT
+  type        = string
+  default     = null
+
+  validation {
+    condition     = !var.enable_ha || (var.identity_id != null && length(var.identity_id) > 0)
+    error_message = "identity_id must be set when enable_ha = true."
+  }
+}
+
+variable "tags" {
+  description = "A map of tags to apply to all resources created by this module (managed disk, NICs, VM)."
+  type        = map(string)
+  default     = {}
+}
+
+# variable "enable_ipv6" {
+#   description = "Whether to create an additional IPv6 IP Configuration."
+#   type        = bool
+#   default     = false
+# }

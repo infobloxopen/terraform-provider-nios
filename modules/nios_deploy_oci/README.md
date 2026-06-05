@@ -478,7 +478,7 @@ resource "nios_grid_join" "ha_member_join" {
   member_password = "<password>"
   grid_name       = "Infoblox"
   master          = module.node1.vip
-  shared_secret   = "test"
+  shared_secret   = "<secret>"
 }
 ```
 

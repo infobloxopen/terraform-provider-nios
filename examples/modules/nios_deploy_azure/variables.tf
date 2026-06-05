@@ -143,3 +143,51 @@ variable "tenant_id" {
   description = "Azure Tenant ID for authentication."
   type        = string
 }
+
+variable "subnet3_name" {
+  description = "Name of subnet 3 (used by NIC 3)."
+  type        = string
+  default     = null
+}
+
+variable "ip_configuration_name_nic3" {
+  description = "The name of the IP Configuration for NIC 3."
+  type        = string
+  default     = "internal3"
+}
+
+variable "nic3_name" {
+  description = "The name of the Network Interface 3 on subnet 3."
+  type        = string
+  default     = null
+}
+
+variable "enable_ha" {
+  description = "Enable High Availability for the Azure VM."
+  type        = bool
+  default     = false
+}
+
+variable "is_primary" {
+  description = "Indicates if this node is the primary node in a HA setup."
+  type        = bool
+  default     = false
+}
+
+variable "identity_id" {
+  description = "Resource ID of the User-Assigned Managed Identity used for HA. Required if enable_ha is true."
+  type        = string
+  default     = null
+}
+
+variable "tags" {
+  description = "A map of tags to apply to all Azure resources created by this example."
+  type        = map(string)
+  default     = {}
+}
+
+# variable "enable_ipv6" {
+#   description = "Whether to create an additional IPv6 IP Configuration."
+#   type        = bool
+#   default     = false
+# }
