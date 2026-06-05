@@ -51,8 +51,6 @@ var BfdtemplateResourceSchemaAttributes = map[string]schema.Attribute{
 	"authentication_key": schema.StringAttribute{
 		Optional:            true,
 		WriteOnly:           true,
-		Computed:            true,
-		Default:             stringdefault.StaticString(""),
 		MarkdownDescription: "The authentication key for BFD protocol message-digest authentication.",
 	},
 	"authentication_key_version": schema.Int64Attribute{

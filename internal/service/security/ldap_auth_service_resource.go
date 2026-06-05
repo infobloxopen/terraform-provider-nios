@@ -177,7 +177,7 @@ func (r *LdapAuthServiceResource) Create(ctx context.Context, req resource.Creat
 		return
 	}
 
-	passwordVersionValue := types.Int64Value(0)
+	passwordVersion := types.Int64Value(0)
 	secretData := serversBindPasswordHashState{}
 
 	servers, diags := extractLdapServers(ctx, data.Servers)
@@ -208,7 +208,7 @@ func (r *LdapAuthServiceResource) Create(ctx context.Context, req resource.Creat
 			return
 		}
 		resp.Diagnostics.Append(resp.Private.SetKey(ctx, "servers_bind_password_hash", hashedSecret)...)
-		passwordVersionValue = types.Int64Value(1)
+		passwordVersion = types.Int64Value(1)
 	}
 
 	var apiRes *security.CreateLdapAuthServiceResponse
@@ -246,7 +246,7 @@ func (r *LdapAuthServiceResource) Create(ctx context.Context, req resource.Creat
 	}
 
 	res := apiRes.CreateLdapAuthServiceResponseAsObject.GetResult()
-	data.PasswordVersion = passwordVersionValue
+	data.PasswordVersion = passwordVersion
 
 	data.Flatten(ctx, &res, &resp.Diagnostics)
 
@@ -309,11 +309,11 @@ func (r *LdapAuthServiceResource) Read(ctx context.Context, req resource.ReadReq
 func (r *LdapAuthServiceResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	var diags diag.Diagnostics
 	var data LdapAuthServiceModel
-	var plannedPasswordVersion types.Int64
+	var passwordVersion types.Int64
 
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
-	resp.Diagnostics.Append(req.Plan.GetAttribute(ctx, path.Root("password_version"), &plannedPasswordVersion)...)
+	resp.Diagnostics.Append(req.Plan.GetAttribute(ctx, path.Root("password_version"), &passwordVersion)...)
 
 	if resp.Diagnostics.HasError() {
 		return
@@ -375,7 +375,7 @@ func (r *LdapAuthServiceResource) Update(ctx context.Context, req resource.Updat
 	res := apiRes.UpdateLdapAuthServiceResponseAsObject.GetResult()
 
 	data.Flatten(ctx, &res, &resp.Diagnostics)
-	data.PasswordVersion = plannedPasswordVersion
+	data.PasswordVersion = passwordVersion
 
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)

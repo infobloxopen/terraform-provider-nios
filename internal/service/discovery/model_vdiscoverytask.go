@@ -450,15 +450,15 @@ func (m *VdiscoverytaskModel) Expand(ctx context.Context, diags *diag.Diagnostic
 		CdiscoveryFileToken:             flex.ExpandStringPointer(m.CdiscoveryFileToken),
 		Comment:                         flex.ExpandStringPointer(m.Comment),
 		CredentialsType:                 flex.ExpandStringPointer(m.CredentialsType),
-		DnsViewPrivateIp:                flex.ExpandStringPointer(m.DnsViewPrivateIp),
-		DnsViewPublicIp:                 flex.ExpandStringPointer(m.DnsViewPublicIp),
+		DnsViewPrivateIp:                flex.ExpandStringPointerEmptyAsNil(m.DnsViewPrivateIp),
+		DnsViewPublicIp:                 flex.ExpandStringPointerEmptyAsNil(m.DnsViewPublicIp),
 		DomainName:                      flex.ExpandStringPointer(m.DomainName),
 		DriverType:                      flex.ExpandStringPointer(m.DriverType),
 		EnableFilter:                    flex.ExpandBoolPointer(m.EnableFilter),
 		Enabled:                         flex.ExpandBoolPointer(m.Enabled),
 		FqdnOrIp:                        flex.ExpandStringPointer(m.FqdnOrIp),
 		GovcloudEnabled:                 flex.ExpandBoolPointer(m.GovcloudEnabled),
-		IdentityVersion:                 flex.ExpandStringPointer(m.IdentityVersion),
+		IdentityVersion:                 flex.ExpandStringPointerEmptyAsNil(m.IdentityVersion),
 		Member:                          flex.ExpandStringPointer(m.Member),
 		MergeData:                       flex.ExpandBoolPointer(m.MergeData),
 		MultipleAccountsSyncPolicy:      flex.ExpandStringPointer(m.MultipleAccountsSyncPolicy),
@@ -467,10 +467,10 @@ func (m *VdiscoverytaskModel) Expand(ctx context.Context, diags *diag.Diagnostic
 		NetworkList:                     flex.ExpandFrameworkListString(ctx, m.NetworkList, diags),
 		Password:                        flex.ExpandStringPointer(m.Password),
 		Port:                            flex.ExpandInt64Pointer(m.Port),
-		PrivateNetworkView:              flex.ExpandStringPointer(m.PrivateNetworkView),
+		PrivateNetworkView:              flex.ExpandStringPointerEmptyAsNil(m.PrivateNetworkView),
 		PrivateNetworkViewMappingPolicy: flex.ExpandStringPointer(m.PrivateNetworkViewMappingPolicy),
 		Protocol:                        flex.ExpandStringPointer(m.Protocol),
-		PublicNetworkView:               flex.ExpandStringPointer(m.PublicNetworkView),
+		PublicNetworkView:               flex.ExpandStringPointerEmptyAsNil(m.PublicNetworkView),
 		PublicNetworkViewMappingPolicy:  flex.ExpandStringPointer(m.PublicNetworkViewMappingPolicy),
 		RoleArn:                         flex.ExpandStringPointer(m.RoleArn),
 		ScheduledRun:                    ExpandVdiscoverytaskScheduledRun(ctx, m.ScheduledRun, diags),
@@ -517,15 +517,15 @@ func (m *VdiscoverytaskModel) Flatten(ctx context.Context, from *discovery.Vdisc
 	m.CdiscoveryFileToken = flex.FlattenStringPointer(from.CdiscoveryFileToken)
 	m.Comment = flex.FlattenStringPointer(from.Comment)
 	m.CredentialsType = flex.FlattenStringPointer(from.CredentialsType)
-	m.DnsViewPrivateIp = flex.FlattenStringPointer(from.DnsViewPrivateIp)
-	m.DnsViewPublicIp = flex.FlattenStringPointer(from.DnsViewPublicIp)
+	m.DnsViewPrivateIp = flex.FlattenStringPointerNilAsNotEmpty(from.DnsViewPrivateIp)
+	m.DnsViewPublicIp = flex.FlattenStringPointerNilAsNotEmpty(from.DnsViewPublicIp)
 	m.DomainName = flex.FlattenStringPointer(from.DomainName)
 	m.DriverType = flex.FlattenStringPointer(from.DriverType)
 	m.EnableFilter = types.BoolPointerValue(from.EnableFilter)
 	m.Enabled = types.BoolPointerValue(from.Enabled)
 	m.FqdnOrIp = flex.FlattenStringPointer(from.FqdnOrIp)
 	m.GovcloudEnabled = types.BoolPointerValue(from.GovcloudEnabled)
-	m.IdentityVersion = flex.FlattenStringPointer(from.IdentityVersion)
+	m.IdentityVersion = flex.FlattenStringPointerNilAsNotEmpty(from.IdentityVersion)
 	m.LastRun = flex.FlattenInt64Pointer(from.LastRun)
 	m.Member = flex.FlattenStringPointer(from.Member)
 	m.MergeData = types.BoolPointerValue(from.MergeData)
@@ -534,10 +534,10 @@ func (m *VdiscoverytaskModel) Flatten(ctx context.Context, from *discovery.Vdisc
 	m.NetworkFilter = flex.FlattenStringPointer(from.NetworkFilter)
 	m.NetworkList = flex.FlattenFrameworkListString(ctx, from.NetworkList, diags)
 	m.Port = flex.FlattenInt64Pointer(from.Port)
-	m.PrivateNetworkView = flex.FlattenStringPointer(from.PrivateNetworkView)
+	m.PrivateNetworkView = flex.FlattenStringPointerNilAsNotEmpty(from.PrivateNetworkView)
 	m.PrivateNetworkViewMappingPolicy = flex.FlattenStringPointer(from.PrivateNetworkViewMappingPolicy)
 	m.Protocol = flex.FlattenStringPointer(from.Protocol)
-	m.PublicNetworkView = flex.FlattenStringPointer(from.PublicNetworkView)
+	m.PublicNetworkView = flex.FlattenStringPointerNilAsNotEmpty(from.PublicNetworkView)
 	m.PublicNetworkViewMappingPolicy = flex.FlattenStringPointer(from.PublicNetworkViewMappingPolicy)
 	m.RoleArn = flex.FlattenStringPointer(from.RoleArn)
 	m.ScheduledRun = FlattenVdiscoverytaskScheduledRun(ctx, from.ScheduledRun, diags)

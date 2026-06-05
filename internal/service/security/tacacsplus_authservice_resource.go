@@ -176,7 +176,7 @@ func (r *TacacsplusAuthserviceResource) Create(ctx context.Context, req resource
 		return
 	}
 
-	secretVersionValue := types.Int64Value(0)
+	secretVersion := types.Int64Value(0)
 	secretData := serversSecretsHashState{}
 
 	servers, diags := extractTacacsServers(ctx, data.Servers)
@@ -207,7 +207,7 @@ func (r *TacacsplusAuthserviceResource) Create(ctx context.Context, req resource
 			return
 		}
 		resp.Diagnostics.Append(resp.Private.SetKey(ctx, "servers_secrets_hash", hashedSecret)...)
-		secretVersionValue = types.Int64Value(1)
+		secretVersion = types.Int64Value(1)
 	}
 
 	var apiRes *security.CreateTacacsplusAuthserviceResponse
@@ -246,7 +246,7 @@ func (r *TacacsplusAuthserviceResource) Create(ctx context.Context, req resource
 
 	res := apiRes.CreateTacacsplusAuthserviceResponseAsObject.GetResult()
 
-	data.SecretVersion = secretVersionValue
+	data.SecretVersion = secretVersion
 	data.Flatten(ctx, &res, &resp.Diagnostics)
 
 	// Save data into Terraform state

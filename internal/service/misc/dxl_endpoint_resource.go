@@ -85,7 +85,7 @@ func (r *DxlEndpointResource) ModifyPlan(ctx context.Context, req resource.Modif
 	// Normalize stateRev if null (e.g., first apply)
 	curRev := int64(0)
 
-	if !req.State.Raw.IsNull() && !req.State.Raw.IsKnown() {
+	if !req.State.Raw.IsNull() && req.State.Raw.IsKnown() {
 		resp.Diagnostics.Append(req.State.GetAttribute(ctx, path.Root("password_version"), &statePwdVersion)...)
 		if resp.Diagnostics.HasError() {
 			return

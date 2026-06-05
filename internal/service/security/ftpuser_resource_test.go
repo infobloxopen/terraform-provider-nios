@@ -34,7 +34,7 @@ func TestAccFtpuserResource_basic(t *testing.T) {
 					testAccCheckFtpuserExists(context.Background(), resourceName, &v),
 					// Test fields with required value
 					resource.TestCheckResourceAttr(resourceName, "username", username),
-					resource.TestCheckResourceAttr(resourceName, "secret_version", "1"),
+					resource.TestCheckResourceAttr(resourceName, "password_version", "1"),
 					resource.TestCheckResourceAttr(resourceName, "permission", "RO"),
 					resource.TestCheckResourceAttr(resourceName, "create_home_dir", "true"),
 				),
@@ -146,6 +146,38 @@ func TestAccFtpuserResource_HomeDir(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFtpuserExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "home_dir", homeDir),
+				),
+			},
+			// Delete testing automatically occurs in TestCase
+		},
+	})
+}
+
+func TestAccFtpuserResource_Password(t *testing.T) {
+	var resourceName = "nios_security_ftpuser.test_password"
+	var v security.Ftpuser
+	username := acctest.RandomNameWithPrefix("ftf-test-user-")
+	password := acctest.RandomAlphaNumeric(12)
+	password1 := acctest.RandomAlphaNumeric(12)
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// Create and Read
+			{
+				Config: testAccFtpuserPassword(username, password),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckFtpuserExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "password_version", "1"),
+				),
+			},
+			// Update and Read
+			{
+				Config: testAccFtpuserPassword(username, password1),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckFtpuserExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "password_version", "2"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -312,6 +344,16 @@ resource "nios_security_ftpuser" "test_home_dir" {
     create_home_dir = %t
 }
 `, username, password, homeDir, createHomeDir)
+}
+
+func testAccFtpuserPassword(username, password string) string {
+
+	return fmt.Sprintf(`
+resource "nios_security_ftpuser" "test_password" {
+    username = %q
+    password = %q
+}
+`, username, password)
 }
 
 func testAccFtpuserPermission(username, password, permission string) string {

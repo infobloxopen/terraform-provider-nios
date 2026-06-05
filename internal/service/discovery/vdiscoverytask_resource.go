@@ -12,9 +12,12 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/types"
+
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
 	"github.com/infobloxopen/infoblox-nios-go-client/discovery"
+
+	"github.com/hashicorp/terraform-plugin-framework/types"
+
 	"github.com/infobloxopen/terraform-provider-nios/internal/config"
 	"github.com/infobloxopen/terraform-provider-nios/internal/retry"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
@@ -25,8 +28,9 @@ var readableAttributesForVdiscoverytask = "accounts_list,allow_unsecured_connect
 // Ensure provider defined types fully satisfy framework interfaces.
 var _ resource.Resource = &VdiscoverytaskResource{}
 var _ resource.ResourceWithImportState = &VdiscoverytaskResource{}
-var _ resource.ResourceWithModifyPlan = &VdiscoverytaskResource{}
 var _ resource.ResourceWithValidateConfig = &VdiscoverytaskResource{}
+
+var _ resource.ResourceWithModifyPlan = &VdiscoverytaskResource{}
 
 func NewVdiscoverytaskResource() resource.Resource {
 	return &VdiscoverytaskResource{}
@@ -35,10 +39,6 @@ func NewVdiscoverytaskResource() resource.Resource {
 // VdiscoverytaskResource defines the resource implementation.
 type VdiscoverytaskResource struct {
 	client *niosclient.APIClient
-}
-
-type secretsHashState struct {
-	Password string `json:"password_hash"`
 }
 
 func (r *VdiscoverytaskResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -281,35 +281,42 @@ func (r *VdiscoverytaskResource) ValidateConfig(ctx context.Context, req resourc
 	}
 }
 
+type secretsHashState struct {
+	Password string `json:"password_hash"`
+}
+
 func (r *VdiscoverytaskResource) ModifyPlan(ctx context.Context, req resource.ModifyPlanRequest, resp *resource.ModifyPlanResponse) {
 	if req.Plan.Raw.IsNull() {
 		return
 	}
 
-	var stateRev types.Int64
+	var statePwdVersion types.Int64
 	var planPassword types.String
 
+	// Normalize stateRev if null (e.g., first apply)
 	curRev := int64(0)
+
 	if !req.State.Raw.IsNull() && req.State.Raw.IsKnown() {
-		resp.Diagnostics.Append(req.State.GetAttribute(ctx, path.Root("password_version"), &stateRev)...)
+		resp.Diagnostics.Append(req.State.GetAttribute(ctx, path.Root("password_version"), &statePwdVersion)...)
 		if resp.Diagnostics.HasError() {
 			return
 		}
-		if !stateRev.IsNull() && !stateRev.IsUnknown() {
-			curRev = stateRev.ValueInt64()
+		if !statePwdVersion.IsNull() && !statePwdVersion.IsUnknown() {
+			curRev = statePwdVersion.ValueInt64()
 		}
 	}
-
 	resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("password"), &planPassword)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
 	computeNewHash := !planPassword.IsNull() && !planPassword.IsUnknown()
+
 	prevHashes := secretsHashState{}
 	plannedHashes := secretsHashState{}
 
 	if computeNewHash {
+
 		var prev struct {
 			Algo string `json:"algo"`
 			Hash string `json:"hash"`
@@ -319,12 +326,15 @@ func (r *VdiscoverytaskResource) ModifyPlan(ctx context.Context, req resource.Mo
 			resp.Diagnostics.Append(diags...)
 		} else if b != nil {
 			if err := json.Unmarshal(b, &prev); err != nil {
+				// Older buggy format: ignore and treat as different
 				prev.Hash = ""
 			}
 		}
-
 		var plannedHash string
+
 		if prev.Hash != "" {
+			// Best-effort parse; if this fails, treat prev.Hash as a legacy value and
+			// leave prevHashes at its zero value so that we will recompute as needed.
 			_ = json.Unmarshal([]byte(prev.Hash), &prevHashes)
 		}
 
@@ -337,12 +347,12 @@ func (r *VdiscoverytaskResource) ModifyPlan(ctx context.Context, req resource.Mo
 				plannedHashes.Password = hex.EncodeToString(h.Sum(nil))
 			}
 		}
-
 		if data, err := json.Marshal(plannedHashes); err == nil {
 			plannedHash = string(data)
 		}
 
 		if plannedHashes.Password != "" && plannedHashes.Password != prevHashes.Password {
+			// Increment version and store new hash if password modified
 			newRev := types.Int64Value(curRev + 1)
 			resp.Diagnostics.Append(resp.Plan.SetAttribute(ctx, path.Root("password_version"), newRev)...)
 
@@ -357,6 +367,7 @@ func (r *VdiscoverytaskResource) ModifyPlan(ctx context.Context, req resource.Mo
 			resp.Diagnostics.Append(resp.Plan.SetAttribute(ctx, path.Root("password_version"), curRev)...)
 		}
 	}
+
 }
 
 func (r *VdiscoverytaskResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
@@ -387,27 +398,31 @@ func (r *VdiscoverytaskResource) Create(ctx context.Context, req resource.Create
 		return
 	}
 
+	var apiRes *discovery.CreateVdiscoverytaskResponse
+
 	passwordVersion := types.Int64Value(0)
 	var password types.String
 	resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("password"), &password)...)
+
 	secretData := secretsHashState{}
+
 	if !password.IsNull() && !password.IsUnknown() {
+
 		payload.Password = password.ValueStringPointer()
 		passwordVersion = types.Int64Value(1)
 		h := sha256.New()
 		h.Write([]byte(password.ValueString()))
 		secretData.Password = hex.EncodeToString(h.Sum(nil))
+
 		secretDataJSON, _ := json.Marshal(secretData)
 		val := map[string]string{"algo": "sha256", "hash": string(secretDataJSON)}
-		hashedSecret, err := json.Marshal(val)
+		hashedPassword, err := json.Marshal(val)
 		if err != nil {
 			resp.Diagnostics.AddError("Private State Marshal Error", err.Error())
 			return
 		}
-		resp.Diagnostics.Append(resp.Private.SetKey(ctx, "password_hash", hashedSecret)...)
+		resp.Diagnostics.Append(resp.Private.SetKey(ctx, "password_hash", hashedPassword)...)
 	}
-
-	var apiRes *discovery.CreateVdiscoverytaskResponse
 
 	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
 		var (
@@ -444,6 +459,7 @@ func (r *VdiscoverytaskResource) Create(ctx context.Context, req resource.Create
 	res := apiRes.CreateVdiscoverytaskResponseAsObject.GetResult()
 
 	data.PasswordVersion = passwordVersion
+
 	data.Flatten(ctx, &res, &resp.Diagnostics)
 
 	// Save data into Terraform state
