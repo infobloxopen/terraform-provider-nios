@@ -169,8 +169,6 @@ var CertificateAuthserviceResourceSchemaAttributes = map[string]schema.Attribute
 	},
 	"remote_lookup_password": schema.StringAttribute{
 		Optional:            true,
-		Computed:            true,
-		Default:             stringdefault.StaticString(""),
 		WriteOnly:           true,
 		MarkdownDescription: "The password for the service account.",
 	},

@@ -72,7 +72,7 @@ resource "nios_security_tacacsplus_authservice" "tacacsplus_authservice_with_add
 ### Read-Only
 
 - `ref` (String) The reference to the object.
-- `secret_version` (Number) Internal revision incremented when secret field changes.
+- `secret_version` (Number) Internal version incremented when shared_secret sub field of servers changes.
 
 <a id="nestedatt--servers"></a>
 ### Nested Schema for `servers`

@@ -61,7 +61,7 @@ Optional:
 
 Read-Only:
 
-- `password_version` (Number) Internal revision incremented when admin user password changes.
+- `password_version` (Number) Internal version incremented when bind_password sub field of servers changes.
 - `ref` (String) The reference to the object.
 
 <a id="nestedatt--result--servers"></a>

@@ -65,7 +65,7 @@ func (r *TacacsplusAuthserviceResource) Configure(ctx context.Context, req resou
 	r.client = client
 }
 
-type serversSecretsHashState struct {
+type tacacsplusAuthserviceSecretsHashState struct {
 	ServersHash string `json:"servers_secret_hash"`
 }
 
@@ -108,9 +108,9 @@ func (r *TacacsplusAuthserviceResource) ModifyPlan(ctx context.Context, req reso
 		Hash string `json:"hash"`
 	}
 
-	prevHashes := serversSecretsHashState{}
+	prevHashes := tacacsplusAuthserviceSecretsHashState{}
 
-	if b, diags := req.Private.GetKey(ctx, "servers_secrets_hash"); diags != nil {
+	if b, diags := req.Private.GetKey(ctx, "servers_secret_hash"); diags != nil {
 		resp.Diagnostics.Append(diags...)
 		if resp.Diagnostics.HasError() {
 			return
@@ -121,7 +121,7 @@ func (r *TacacsplusAuthserviceResource) ModifyPlan(ctx context.Context, req reso
 		}
 		if prev.Hash != "" {
 			if err := json.Unmarshal([]byte(prev.Hash), &prevHashes); err != nil {
-				prevHashes = serversSecretsHashState{}
+				prevHashes = tacacsplusAuthserviceSecretsHashState{}
 			}
 		}
 	}
@@ -132,7 +132,7 @@ func (r *TacacsplusAuthserviceResource) ModifyPlan(ctx context.Context, req reso
 		return
 	}
 
-	plannedHashes := serversSecretsHashState{ServersHash: newHash}
+	plannedHashes := tacacsplusAuthserviceSecretsHashState{ServersHash: newHash}
 	plannedHashJSON, err := json.Marshal(plannedHashes)
 	if err != nil {
 		resp.Diagnostics.AddError("Private State Marshal Error", err.Error())
@@ -153,7 +153,7 @@ func (r *TacacsplusAuthserviceResource) ModifyPlan(ctx context.Context, req reso
 			resp.Diagnostics.AddError("Private State Marshal Error", err.Error())
 			return
 		}
-		resp.Diagnostics.Append(resp.Private.SetKey(ctx, "servers_secrets_hash", b)...)
+		resp.Diagnostics.Append(resp.Private.SetKey(ctx, "servers_secret_hash", b)...)
 	} else {
 		resp.Diagnostics.Append(
 			resp.Plan.SetAttribute(ctx, path.Root("secret_version"), types.Int64Value(curRev))...,
@@ -177,7 +177,7 @@ func (r *TacacsplusAuthserviceResource) Create(ctx context.Context, req resource
 	}
 
 	secretVersion := types.Int64Value(0)
-	secretData := serversSecretsHashState{}
+	secretData := tacacsplusAuthserviceSecretsHashState{}
 
 	servers, diags := extractTacacsServers(ctx, data.Servers)
 	resp.Diagnostics.Append(diags...)
@@ -206,7 +206,7 @@ func (r *TacacsplusAuthserviceResource) Create(ctx context.Context, req resource
 			resp.Diagnostics.AddError("Private State Marshal Error", err.Error())
 			return
 		}
-		resp.Diagnostics.Append(resp.Private.SetKey(ctx, "servers_secrets_hash", hashedSecret)...)
+		resp.Diagnostics.Append(resp.Private.SetKey(ctx, "servers_secret_hash", hashedSecret)...)
 		secretVersion = types.Int64Value(1)
 	}
 
@@ -310,6 +310,7 @@ func (r *TacacsplusAuthserviceResource) Update(ctx context.Context, req resource
 	var data TacacsplusAuthserviceModel
 	var plannedSecretVersion types.Int64
 
+	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
 	resp.Diagnostics.Append(req.Plan.GetAttribute(ctx, path.Root("secret_version"), &plannedSecretVersion)...)
 	if resp.Diagnostics.HasError() {

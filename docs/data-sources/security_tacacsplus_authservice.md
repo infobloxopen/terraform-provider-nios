@@ -57,7 +57,7 @@ Optional:
 Read-Only:
 
 - `ref` (String) The reference to the object.
-- `secret_version` (Number) Internal revision incremented when secret field changes.
+- `secret_version` (Number) Internal version incremented when shared_secret sub field of servers changes.
 
 <a id="nestedatt--result--servers"></a>
 ### Nested Schema for `result.servers`

@@ -123,7 +123,7 @@ var LdapAuthServiceResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"password_version": schema.Int64Attribute{
 		Computed:            true,
-		MarkdownDescription: "Internal revision incremented when admin user password changes.",
+		MarkdownDescription: "Internal version incremented when bind_password sub field of servers changes.",
 		PlanModifiers: []planmodifier.Int64{
 			int64planmodifier.UseStateForUnknown(),
 		},

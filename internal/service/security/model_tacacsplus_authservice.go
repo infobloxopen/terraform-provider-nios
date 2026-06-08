@@ -2,6 +2,7 @@ package security
 
 import (
 	"context"
+
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
@@ -122,7 +123,7 @@ var TacacsplusAuthserviceResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"secret_version": schema.Int64Attribute{
 		Computed:            true,
-		MarkdownDescription: "Internal revision incremented when secret field changes.",
+		MarkdownDescription: "Internal version incremented when shared_secret sub field of servers changes.",
 		PlanModifiers: []planmodifier.Int64{
 			int64planmodifier.UseStateForUnknown(),
 		},
