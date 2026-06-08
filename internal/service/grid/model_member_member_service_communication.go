@@ -3,9 +3,11 @@ package grid
 import (
 	"context"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
@@ -28,13 +30,31 @@ var MemberMemberServiceCommunicationAttrTypes = map[string]attr.Type{
 
 var MemberMemberServiceCommunicationResourceSchemaAttributes = map[string]schema.Attribute{
 	"service": schema.StringAttribute{
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
+		Validators: []validator.String{
+			stringvalidator.OneOf(
+				"AD",
+				"GRID",
+				"GRID_BACKUP",
+				"MAIL",
+				"NTP",
+				"OCSP",
+				"REPORTING",
+				"REPORTING_BACKUP",
+			),
+		},
 		MarkdownDescription: "The service for a Grid member.",
 	},
 	"type": schema.StringAttribute{
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
+		Validators: []validator.String{
+			stringvalidator.OneOf(
+				"IPV4",
+				"IPV6",
+			),
+		},
 		MarkdownDescription: "Communication type.",
 	},
 	"option": schema.StringAttribute{
