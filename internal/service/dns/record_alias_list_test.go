@@ -1,4 +1,3 @@
-
 package dns_test
 
 import (
@@ -12,7 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/querycheck"
 	"github.com/hashicorp/terraform-plugin-testing/querycheck/queryfilter"
 	"github.com/hashicorp/terraform-plugin-testing/tfjsonpath"
-    "github.com/hashicorp/terraform-plugin-testing/tfversion"
+	"github.com/hashicorp/terraform-plugin-testing/tfversion"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/dns"
 
@@ -25,7 +24,7 @@ func TestAccRecordAliasList_basic(t *testing.T) {
 	name := acctest.RandomName() + ".example.com"
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.PreCheck(t) },
+		PreCheck: func() { acctest.PreCheck(t) },
 		TerraformVersionChecks: []tfversion.TerraformVersionCheck{
 			tfversion.SkipBelow(tfversion.Version1_14_0),
 		},
@@ -41,8 +40,8 @@ func TestAccRecordAliasList_basic(t *testing.T) {
 			// Query the object
 			{
 				ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-				Query:  true,
-				Config: testAccRecordAliasListBasicConfig(),
+				Query:                    true,
+				Config:                   testAccRecordAliasListBasicConfig(),
 				QueryResultChecks: []querycheck.QueryResultCheck{
 					querycheck.ExpectLengthAtLeast("nios_dns_record_alias.test", 1),
 				},
@@ -57,7 +56,7 @@ func TestAccRecordAliasList_Filters(t *testing.T) {
 	name := acctest.RandomName() + ".example.com"
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.PreCheck(t) },
+		PreCheck: func() { acctest.PreCheck(t) },
 		TerraformVersionChecks: []tfversion.TerraformVersionCheck{
 			tfversion.SkipBelow(tfversion.Version1_14_0),
 		},
@@ -74,8 +73,8 @@ func TestAccRecordAliasList_Filters(t *testing.T) {
 			// Query the object
 			{
 				ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-				Query:  true,
-				Config: testAccRecordAliasListConfigFilters(name),
+				Query:                    true,
+				Config:                   testAccRecordAliasListConfigFilters(name),
 				QueryResultChecks: []querycheck.QueryResultCheck{
 					querycheck.ExpectLength("nios_dns_record_alias.test", 1),
 					querycheck.ExpectResourceKnownValues(
@@ -115,7 +114,7 @@ func TestAccRecordAliasList_ExtAttrFilters(t *testing.T) {
 	extAttrValue := acctest.RandomName()
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.PreCheck(t) },
+		PreCheck: func() { acctest.PreCheck(t) },
 		TerraformVersionChecks: []tfversion.TerraformVersionCheck{
 			tfversion.SkipBelow(tfversion.Version1_14_0),
 		},
@@ -134,8 +133,8 @@ func TestAccRecordAliasList_ExtAttrFilters(t *testing.T) {
 			// Query the object
 			{
 				ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-				Query: true,
-				Config: testAccRecordAliasListConfigExtAttrFilters(extAttrValue),
+				Query:                    true,
+				Config:                   testAccRecordAliasListConfigExtAttrFilters(extAttrValue),
 				QueryResultChecks: []querycheck.QueryResultCheck{
 					querycheck.ExpectLength("nios_dns_record_alias.test", 1),
 				},
@@ -179,4 +178,3 @@ list "nios_dns_record_alias" "test" {
 }
 `, extAttrsValue)
 }
-

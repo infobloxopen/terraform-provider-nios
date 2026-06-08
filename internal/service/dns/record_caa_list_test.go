@@ -1,4 +1,3 @@
-
 package dns_test
 
 import (
@@ -12,7 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/querycheck"
 	"github.com/hashicorp/terraform-plugin-testing/querycheck/queryfilter"
 	"github.com/hashicorp/terraform-plugin-testing/tfjsonpath"
-    "github.com/hashicorp/terraform-plugin-testing/tfversion"
+	"github.com/hashicorp/terraform-plugin-testing/tfversion"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/dns"
 
@@ -26,7 +25,7 @@ func TestAccRecordCaaList_basic(t *testing.T) {
 	name := acctest.RandomNameWithPrefix("record-caa")
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.PreCheck(t) },
+		PreCheck: func() { acctest.PreCheck(t) },
 		TerraformVersionChecks: []tfversion.TerraformVersionCheck{
 			tfversion.SkipBelow(tfversion.Version1_14_0),
 		},
@@ -42,8 +41,8 @@ func TestAccRecordCaaList_basic(t *testing.T) {
 			// Query the object
 			{
 				ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-				Query:  true,
-				Config: testAccRecordCaaListBasicConfig(),
+				Query:                    true,
+				Config:                   testAccRecordCaaListBasicConfig(),
 				QueryResultChecks: []querycheck.QueryResultCheck{
 					querycheck.ExpectLengthAtLeast("nios_dns_record_caa.test", 1),
 				},
@@ -59,7 +58,7 @@ func TestAccRecordCaaList_Filters(t *testing.T) {
 	name := acctest.RandomNameWithPrefix("record-caa")
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.PreCheck(t) },
+		PreCheck: func() { acctest.PreCheck(t) },
 		TerraformVersionChecks: []tfversion.TerraformVersionCheck{
 			tfversion.SkipBelow(tfversion.Version1_14_0),
 		},
@@ -76,8 +75,8 @@ func TestAccRecordCaaList_Filters(t *testing.T) {
 			// Query the object
 			{
 				ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-				Query:  true,
-				Config: testAccRecordCaaListConfigFilters(fmt.Sprintf("%s.%s", name, zoneFqdn)),
+				Query:                    true,
+				Config:                   testAccRecordCaaListConfigFilters(fmt.Sprintf("%s.%s", name, zoneFqdn)),
 				QueryResultChecks: []querycheck.QueryResultCheck{
 					querycheck.ExpectLength("nios_dns_record_caa.test", 1),
 					querycheck.ExpectResourceKnownValues(
@@ -114,7 +113,7 @@ func TestAccRecordCaaList_ExtAttrFilters(t *testing.T) {
 	extAttrValue := acctest.RandomName()
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.PreCheck(t) },
+		PreCheck: func() { acctest.PreCheck(t) },
 		TerraformVersionChecks: []tfversion.TerraformVersionCheck{
 			tfversion.SkipBelow(tfversion.Version1_14_0),
 		},
@@ -133,8 +132,8 @@ func TestAccRecordCaaList_ExtAttrFilters(t *testing.T) {
 			// Query the object
 			{
 				ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-				Query: true,
-				Config: testAccRecordCaaListConfigExtAttrFilters(extAttrValue),
+				Query:                    true,
+				Config:                   testAccRecordCaaListConfigExtAttrFilters(extAttrValue),
 				QueryResultChecks: []querycheck.QueryResultCheck{
 					querycheck.ExpectLength("nios_dns_record_caa.test", 1),
 				},
@@ -178,4 +177,3 @@ list "nios_dns_record_caa" "test" {
 }
 `, extAttrsValue)
 }
-
