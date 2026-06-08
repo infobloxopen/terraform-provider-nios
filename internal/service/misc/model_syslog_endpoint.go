@@ -57,7 +57,7 @@ var SyslogEndpointAttrTypes = map[string]attr.Type{
 	"vendor_identifier":    types.StringType,
 	"wapi_user_name":       types.StringType,
 	"wapi_user_password":   types.StringType,
-	"password_version":     types.StringType,
+	"password_version":     types.Int64Type,
 	"extattrs_all":         types.MapType{ElemType: types.StringType},
 }
 
