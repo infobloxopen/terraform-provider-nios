@@ -61,7 +61,7 @@ type RecordNaptrListModel struct {
 
 func (l *RecordNaptrList) ListResourceConfigSchema(ctx context.Context, req list.ListResourceSchemaRequest, resp *list.ListResourceSchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Query existing DNS NAPTR Records.",
+		MarkdownDescription: "Query existing dns RecordNaptr.",
 		Attributes: map[string]schema.Attribute{
 			"filters": schema.MapAttribute{
 				MarkdownDescription: "Filters are used to return a more specific list of results. Filters can be used to match resources by specific attributes, e.g. name. If you specify multiple filters, the results returned will have only resources that match all the specified filters.",
@@ -80,6 +80,7 @@ func (l *RecordNaptrList) ListResourceConfigSchema(ctx context.Context, req list
 func (l *RecordNaptrList) List(ctx context.Context, req list.ListRequest, stream *list.ListResultsStream) {
 	var data RecordNaptrListModel
 	pageCount := 0
+	// Default Limit is 100
 	limit := int32(req.Limit)
 
 	diags := req.Config.Get(ctx, &data)
@@ -93,8 +94,7 @@ func (l *RecordNaptrList) List(ctx context.Context, req list.ListRequest, stream
 
 			var paging int32 = 1
 
-			// If total limit is set by user and is less than maxResultsPerPage, use it as maxResultsPerPage for API call to optimize the number of results.
-			// If limit > maxResultsPerPage, terraform automatically breaks connection to the provider after limit is reached.
+			// If limit > maxResultsPerPage, break connection to the provider after limit is reached.
 			if limit < maxResultsPerPage {
 				maxResultsPerPage = limit
 			}
@@ -130,7 +130,7 @@ func (l *RecordNaptrList) List(ctx context.Context, req list.ListRequest, stream
 			additionalProperties := apiRes.ListRecordNaptrResponseObject.AdditionalProperties
 			var nextPageID string
 
-			// If limit is reached , we do not need to continue to make API calls, we can return the results and empty nextPageID to stop pagination.
+			// If limit is reached , return the results and empty nextPageID to stop pagination.
 			if len(res) >= int(limit) {
 				nextPageID = ""
 				tflog.Info(ctx, "Limit reached, stopped fetching more pages.")

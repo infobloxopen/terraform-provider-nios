@@ -74,6 +74,7 @@ func (l *RecordNsList) ListResourceConfigSchema(ctx context.Context, req list.Li
 func (l *RecordNsList) List(ctx context.Context, req list.ListRequest, stream *list.ListResultsStream) {
 	var data RecordNsListModel
 	pageCount := 0
+	// Default Limit is 100
 	limit := int32(req.Limit)
 
 	diags := req.Config.Get(ctx, &data)
@@ -87,8 +88,7 @@ func (l *RecordNsList) List(ctx context.Context, req list.ListRequest, stream *l
 
 			var paging int32 = 1
 
-			// If total limit is set by user and is less than maxResultsPerPage, use it as maxResultsPerPage for API call to optimize the number of results.
-			// If limit > maxResultsPerPage, terraform automatically breaks connection to the provider after limit is reached.
+			// If limit > maxResultsPerPage, break connection to the provider after limit is reached.
 			if limit < maxResultsPerPage {
 				maxResultsPerPage = limit
 			}
@@ -123,7 +123,7 @@ func (l *RecordNsList) List(ctx context.Context, req list.ListRequest, stream *l
 			additionalProperties := apiRes.ListRecordNsResponseObject.AdditionalProperties
 			var nextPageID string
 
-			// If limit is reached , we do not need to continue to make API calls, we can return the results and empty nextPageID to stop pagination.
+			// If limit is reached , return the results and empty nextPageID to stop pagination.
 			if len(res) >= int(limit) {
 				nextPageID = ""
 				tflog.Info(ctx, "Limit reached, stopped fetching more pages.")
