@@ -1042,7 +1042,7 @@ func (m *MemberModel) Flatten(ctx context.Context, from *grid.Member, diags *dia
 	m.MasterCandidate = types.BoolPointerValue(from.MasterCandidate)
 	planMsc := m.MemberServiceCommunication
 	listVal := flex.FlattenFrameworkListNestedBlock(ctx, from.MemberServiceCommunication, MemberMemberServiceCommunicationAttrTypes, diags, FlattenMemberMemberServiceCommunication)
-	if !planMsc.ListValue.IsUnknown() && !planMsc.ListValue.IsNull() {
+	if !planMsc.IsUnknown() && !planMsc.IsNull() {
 		reOrderedList, reorderDiags := utils.ReorderAndFilterNestedListResponse(ctx, planMsc.ListValue, listVal, "service")
 		if !reorderDiags.HasError() {
 			listVal = reOrderedList.(basetypes.ListValue)
