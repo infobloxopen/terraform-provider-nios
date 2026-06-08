@@ -918,7 +918,6 @@ func (m *MemberModel) Expand(ctx context.Context, diags *diag.Diagnostics, isCre
 		SyslogSize:                      flex.ExpandInt64Pointer(m.SyslogSize),
 		ThresholdTraps:                  flex.ExpandFrameworkListNestedBlock(ctx, m.ThresholdTraps, diags, ExpandMemberThresholdTraps),
 		TimeZone:                        flex.ExpandStringPointer(m.TimeZone),
-		TrafficCaptureAuthDnsSetting:    ExpandMemberTrafficCaptureAuthDnsSetting(ctx, m.TrafficCaptureAuthDnsSetting, diags),
 		TrafficCaptureChrSetting:        ExpandMemberTrafficCaptureChrSetting(ctx, m.TrafficCaptureChrSetting, diags),
 		TrafficCaptureQpsSetting:        ExpandMemberTrafficCaptureQpsSetting(ctx, m.TrafficCaptureQpsSetting, diags),
 		TrafficCaptureRecDnsSetting:     ExpandMemberTrafficCaptureRecDnsSetting(ctx, m.TrafficCaptureRecDnsSetting, diags),
@@ -951,6 +950,7 @@ func (m *MemberModel) Expand(ctx context.Context, diags *diag.Diagnostics, isCre
 
 	if !isCreate {
 		to.PreProvisioning = ExpandMemberPreProvisioning(ctx, m.PreProvisioning, diags)
+		to.TrafficCaptureAuthDnsSetting = ExpandMemberTrafficCaptureAuthDnsSetting(ctx, m.TrafficCaptureAuthDnsSetting, diags)
 		to.MemberServiceCommunication = flex.ExpandFrameworkListNestedBlockEmptyAsNil(ctx, m.MemberServiceCommunication, diags, ExpandMemberMemberServiceCommunication)
 	}
 
@@ -1053,7 +1053,7 @@ func (m *MemberModel) Flatten(ctx context.Context, from *grid.Member, diags *dia
 	m.RemoteConsoleAccessEnable = types.BoolPointerValue(from.RemoteConsoleAccessEnable)
 	m.RouterId = flex.FlattenInt64Pointer(from.RouterId)
 	m.ServiceStatus = flex.FlattenFrameworkListNestedBlock(ctx, from.ServiceStatus, MemberServiceStatusAttrTypes, diags, FlattenMemberServiceStatus)
-	m.ServiceTypeConfiguration = flex.FlattenStringPointer(from.ServiceTypeConfiguration)
+	m.ServiceTypeConfiguration = FlattenServiceTypeConfiguration(m.ServiceTypeConfiguration, from.ServiceTypeConfiguration)
 	m.SnmpSetting = FlattenMemberSnmpSetting(ctx, from.SnmpSetting, diags)
 	m.StaticRoutes = flex.FlattenFrameworkListNestedBlock(ctx, from.StaticRoutes, MemberStaticRoutesAttrTypes, diags, FlattenMemberStaticRoutes)
 	m.SupportAccessEnable = types.BoolPointerValue(from.SupportAccessEnable)
@@ -1136,4 +1136,11 @@ func FlattenHACloudPlatform(s *string) types.String {
 		return types.StringNull()
 	}
 	return types.StringValue(*s)
+}
+
+func FlattenServiceTypeConfiguration(planValue types.String, apiValue *string) types.String {
+	if !planValue.IsNull() && !planValue.IsUnknown() && planValue.ValueString() == "CUSTOM" {
+		return planValue
+	}
+	return flex.FlattenStringPointer(apiValue)
 }

@@ -3,6 +3,7 @@ package grid_test
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"testing"
 	"time"
 
@@ -13,6 +14,9 @@ import (
 	"github.com/infobloxopen/terraform-provider-nios/internal/acctest"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
+
+// TODO : OBJECTS TO BE PRESENT IN GRID FOR TESTS
+// Upgrade Groups: example_upgrade_dependent_group1, example_upgrade_dependent_group2
 
 var readableAttributesForUpgradeschedule = "active,start_time,time_zone,upgrade_groups"
 
@@ -114,31 +118,25 @@ func TestAccUpgradescheduleResource_UpgradeGroups(t *testing.T) {
 	upgradeTime := now.Add(36 * time.Hour).Format(utils.NaiveDatetimeLayout)
 
 	upgradeGroups := []map[string]any{
-		{
-			"upgrade_time": upgradeTime,
-			"name":         "Default",
-		},
-		{
-			"upgrade_time": upgradeTime,
-			"name":         groupName,
-		},
+		{"upgrade_time": upgradeTime, "name": "Default"},
+		{"upgrade_time": upgradeTime, "name": "example_upgrade_dependent_group1"},
+		{"upgrade_time": upgradeTime, "name": "example_upgrade_dependent_group2"},
+		{"upgrade_time": upgradeTime, "name": groupName},
 	}
 
 	updatedUpgradeTime := now.Add(48 * time.Hour).Format(utils.NaiveDatetimeLayout)
 
 	updatedUpgradeGroups := []map[string]any{
-		{
-			"upgrade_time": updatedUpgradeTime,
-			"name":         "Default",
-		},
-		{
-			"upgrade_time": updatedUpgradeTime,
-			"name":         groupName,
-		},
+		{"upgrade_time": updatedUpgradeTime, "name": "Default"},
+		{"upgrade_time": updatedUpgradeTime, "name": "example_upgrade_dependent_group1"},
+		{"upgrade_time": updatedUpgradeTime, "name": "example_upgrade_dependent_group2"},
+		{"upgrade_time": updatedUpgradeTime, "name": groupName},
 	}
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:                 func() { acctest.PreCheck(t) },
+		PreCheck: func() {
+			acctest.PreCheck(t)
+		},
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			// Create and Read
@@ -146,11 +144,8 @@ func TestAccUpgradescheduleResource_UpgradeGroups(t *testing.T) {
 				Config: testAccUpgradescheduleUpgradeGroups(groupName, startTime, upgradeGroups),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckUpgradescheduleExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "upgrade_groups.#", "2"),
-					resource.TestCheckResourceAttr(resourceName, "upgrade_groups.0.name", "Default"),
-					resource.TestCheckResourceAttr(resourceName, "upgrade_groups.0.upgrade_time", upgradeTime),
-					resource.TestCheckResourceAttr(resourceName, "upgrade_groups.1.name", groupName),
-					resource.TestCheckResourceAttr(resourceName, "upgrade_groups.1.upgrade_time", upgradeTime),
+					resource.TestCheckResourceAttrSet(resourceName, "upgrade_groups.#"),
+					testAccCheckUpgradeGroups(resourceName, "upgrade_time", upgradeGroups),
 				),
 			},
 			// Update and Read
@@ -158,16 +153,54 @@ func TestAccUpgradescheduleResource_UpgradeGroups(t *testing.T) {
 				Config: testAccUpgradescheduleUpgradeGroups(groupName, startTime, updatedUpgradeGroups),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckUpgradescheduleExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "upgrade_groups.#", "2"),
-					resource.TestCheckResourceAttr(resourceName, "upgrade_groups.0.name", "Default"),
-					resource.TestCheckResourceAttr(resourceName, "upgrade_groups.0.upgrade_time", updatedUpgradeTime),
-					resource.TestCheckResourceAttr(resourceName, "upgrade_groups.1.name", groupName),
-					resource.TestCheckResourceAttr(resourceName, "upgrade_groups.1.upgrade_time", updatedUpgradeTime),
+					resource.TestCheckResourceAttrSet(resourceName, "upgrade_groups.#"),
+					testAccCheckUpgradeGroups(resourceName, "upgrade_time", updatedUpgradeGroups),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
 		},
 	})
+}
+
+// testAccCheckUpgradeGroups verifies that every entry in expectedGroups
+// is present in the resource's upgrade_groups list (by name) and has the correct
+// value for timeField (e.g. "upgrade_time" or "distribution_time").
+func testAccCheckUpgradeGroups(resourceName, timeField string, expectedGroups []map[string]any) resource.TestCheckFunc {
+	return func(state *terraform.State) error {
+		rs, ok := state.RootModule().Resources[resourceName]
+		if !ok {
+			return fmt.Errorf("resource not found: %s", resourceName)
+		}
+
+		countStr := rs.Primary.Attributes["upgrade_groups.#"]
+		count, err := strconv.Atoi(countStr)
+		if err != nil || count == 0 {
+			return fmt.Errorf("upgrade_groups.# is %q, expected a positive integer", countStr)
+		}
+
+		// Build a map of name -> timeField value from state (order-independent).
+		actual := make(map[string]string, count)
+		for i := range count {
+			prefix := fmt.Sprintf("upgrade_groups.%d.", i)
+			name := rs.Primary.Attributes[prefix+"name"]
+			if name != "" {
+				actual[name] = rs.Primary.Attributes[prefix+timeField]
+			}
+		}
+
+		for _, eg := range expectedGroups {
+			name, _ := eg["name"].(string)
+			wantTime, _ := eg[timeField].(string)
+			gotTime, found := actual[name]
+			if !found {
+				return fmt.Errorf("upgrade group %q not found in state (state has %d groups)", name, count)
+			}
+			if gotTime != wantTime {
+				return fmt.Errorf("upgrade group %q: expected %s=%q, got %q", name, timeField, wantTime, gotTime)
+			}
+		}
+		return nil
+	}
 }
 
 func testAccCheckUpgradescheduleExists(ctx context.Context, resourceName string, v *grid.Upgradeschedule) resource.TestCheckFunc {
@@ -230,6 +263,7 @@ resource "nios_grid_upgradegroup" "test" {
 resource "nios_grid_upgradeschedule" "test_upgrade_groups" {
   	start_time = %q
     upgrade_groups = %s
+    depends_on = [nios_grid_upgradegroup.test]
 }
 `, groupName, startTime, upgradeGroupsHCL)
 }
