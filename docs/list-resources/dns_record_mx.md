@@ -18,7 +18,7 @@ list "nios_dns_record_mx" "list_mx_records_using_filters" {
   provider = nios
   config {
     filters = {
-      name = "example.com"
+      name = "mx-record.example.com"
     }
   }
 }
