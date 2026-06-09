@@ -3,12 +3,12 @@
 page_title: "nios_dns_record_txt List Resource - nios"
 subcategory: "DNS"
 description: |-
-  Query existing DNS TXT records.
+  Query existing DNS TXT Records.
 ---
 
 # nios_dns_record_txt (List Resource)
 
-Query existing DNS TXT records.
+Query existing DNS TXT Records.
 
 ## Example Usage
 

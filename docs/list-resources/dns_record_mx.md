@@ -3,12 +3,12 @@
 page_title: "nios_dns_record_mx List Resource - nios"
 subcategory: "DNS"
 description: |-
-  Query existing dns RecordMx.
+  Query existing DNS MX Records.
 ---
 
 # nios_dns_record_mx (List Resource)
 
-Query existing dns RecordMx.
+Query existing DNS MX Records.
 
 ## Example Usage
 
