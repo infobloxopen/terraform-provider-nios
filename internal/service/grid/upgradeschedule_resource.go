@@ -137,6 +137,9 @@ func (r *UpgradescheduleResource) Create(ctx context.Context, req resource.Creat
 		return
 	}
 
+	// Merge: grid groups + user groups (user wins on name conflict).
+	payload.UpgradeGroups = mergeUpgradeGroups(listObj.GetUpgradeGroups(), payload.UpgradeGroups)
+
 	var apiRes *grid.UpdateUpgradescheduleResponse
 
 	err = retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
@@ -254,9 +257,24 @@ func (r *UpgradescheduleResource) Update(ctx context.Context, req resource.Updat
 
 	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
 
+	// Fetch the current upgrade groups from the grid and merge with the plan.
+	currentRes, _, err := r.client.GridAPI.
+		UpgradescheduleAPI.
+		Read(ctx, resourceRef).
+		ReturnAsObject(1).
+		ReturnFieldsPlus("upgrade_groups").
+		ProxySearch(config.GetProxySearch()).
+		Execute()
+	if err != nil {
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read current Upgradeschedule for merge, got error: %s", err))
+		return
+	}
+	currentObj := currentRes.GetUpgradescheduleResponseObjectAsResult.GetResult()
+	payload.UpgradeGroups = mergeUpgradeGroups(currentObj.GetUpgradeGroups(), payload.UpgradeGroups)
+
 	var apiRes *grid.UpdateUpgradescheduleResponse
 
-	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+	err = retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
 		var (
 			httpRes *http.Response
 			callErr error
@@ -295,4 +313,49 @@ func (r *UpgradescheduleResource) Delete(ctx context.Context, req resource.Delet
 
 func (r *UpgradescheduleResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("ref"), req, resp)
+}
+
+// mergeUpgradeGroups merges currentGroups (from the grid) with userGroups (from the plan).
+// userGroups take precedence: if a group with the same name exists in both, the user's
+// version is kept. Groups present only in the grid are retained as-is.
+// time_zone is stripped from every group to avoid "not writable" errors on update.
+func mergeUpgradeGroups(currentGroups, userGroups []grid.UpgradescheduleUpgradeGroups) []grid.UpgradescheduleUpgradeGroups {
+	userByName := make(map[string]grid.UpgradescheduleUpgradeGroups, len(userGroups))
+	for _, g := range userGroups {
+		if g.Name != nil {
+			userByName[*g.Name] = g
+		}
+	}
+
+	seen := make(map[string]bool, len(currentGroups))
+	merged := make([]grid.UpgradescheduleUpgradeGroups, 0, len(currentGroups))
+
+	for _, cg := range currentGroups {
+		name := ""
+		if cg.Name != nil {
+			name = *cg.Name
+		}
+		if ug, ok := userByName[name]; ok {
+			ug.TimeZone = nil
+			merged = append(merged, ug)
+		} else {
+			cg.TimeZone = nil
+			merged = append(merged, cg)
+		}
+		seen[name] = true
+	}
+
+	// Append any user groups not already present in the current list.
+	for _, ug := range userGroups {
+		name := ""
+		if ug.Name != nil {
+			name = *ug.Name
+		}
+		if !seen[name] {
+			ug.TimeZone = nil
+			merged = append(merged, ug)
+		}
+	}
+
+	return merged
 }
