@@ -3,12 +3,12 @@
 page_title: "nios_dns_record_alias List Resource - nios"
 subcategory: "DNS"
 description: |-
-  Query existing dns RecordAlias.
+  Query existing DNS Alias records.
 ---
 
 # nios_dns_record_alias (List Resource)
 
-Query existing dns RecordAlias.
+Query existing DNS Alias records.
 
 ## Example Usage
 

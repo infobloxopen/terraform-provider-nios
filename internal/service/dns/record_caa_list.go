@@ -61,7 +61,7 @@ type RecordCaaListModel struct {
 
 func (l *RecordCaaList) ListResourceConfigSchema(ctx context.Context, req list.ListResourceSchemaRequest, resp *list.ListResourceSchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Query existing dns RecordCaa.",
+		MarkdownDescription: "Query existing DNS CAA records.",
 		Attributes: map[string]schema.Attribute{
 			"filters": schema.MapAttribute{
 				MarkdownDescription: "Filters are used to return a more specific list of results. Filters can be used to match resources by specific attributes, e.g. name. If you specify multiple filters, the results returned will have only resources that match all the specified filters.",

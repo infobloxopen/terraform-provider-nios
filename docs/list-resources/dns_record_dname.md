@@ -3,12 +3,12 @@
 page_title: "nios_dns_record_dname List Resource - nios"
 subcategory: "DNS"
 description: |-
-  Query existing dns RecordDname.
+  Query existing DNS DNAME Records.
 ---
 
 # nios_dns_record_dname (List Resource)
 
-Query existing dns RecordDname.
+Query existing DNS DNAME Records.
 
 ## Example Usage
 

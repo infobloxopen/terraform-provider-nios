@@ -3,12 +3,12 @@
 page_title: "nios_dns_record_caa List Resource - nios"
 subcategory: "DNS"
 description: |-
-  Query existing dns RecordCaa.
+  Query existing DNS CAA records.
 ---
 
 # nios_dns_record_caa (List Resource)
 
-Query existing dns RecordCaa.
+Query existing DNS CAA records.
 
 ## Example Usage
 
