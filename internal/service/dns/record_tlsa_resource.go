@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
+	"github.com/hashicorp/terraform-plugin-framework/resource/identityschema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
@@ -23,6 +24,7 @@ var readableAttributesForRecordTlsa = "certificate_data,certificate_usage,cloud_
 // Ensure provider defined types fully satisfy framework interfaces.
 var _ resource.Resource = &RecordTlsaResource{}
 var _ resource.ResourceWithImportState = &RecordTlsaResource{}
+var _ resource.ResourceWithIdentity = &RecordTlsaResource{}
 
 func NewRecordTlsaResource() resource.Resource {
 	return &RecordTlsaResource{}
@@ -35,12 +37,25 @@ type RecordTlsaResource struct {
 
 func (r *RecordTlsaResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_" + "dns_record_tlsa"
+	resp.ResourceBehavior = resource.ResourceBehavior{
+		MutableIdentity: true,
+	}
 }
 
 func (r *RecordTlsaResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		MarkdownDescription: "Manages a TLSA Record.",
 		Attributes:          RecordTlsaResourceSchemaAttributes,
+	}
+}
+
+func (r *RecordTlsaResource) IdentitySchema(ctx context.Context, req resource.IdentitySchemaRequest, resp *resource.IdentitySchemaResponse) {
+	resp.IdentitySchema = identityschema.Schema{
+		Attributes: map[string]identityschema.Attribute{
+			"ref": identityschema.StringAttribute{
+				RequiredForImport: true,
+			},
+		},
 	}
 }
 
@@ -78,6 +93,7 @@ func (r *RecordTlsaResource) Create(ctx context.Context, req resource.CreateRequ
 	// Add internal ID exists in the Extensible Attributes if not already present
 	data.ExtAttrs, diags = AddInternalIDToExtAttrs(ctx, data.ExtAttrs, diags)
 	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
 		return
 	}
 
@@ -123,11 +139,15 @@ func (r *RecordTlsaResource) Create(ctx context.Context, req resource.CreateRequ
 	res := apiRes.CreateRecordTlsaResponseAsObject.GetResult()
 	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.ExtAttrs)
 	if diags.HasError() {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while create RecordTlsa due inherited Extensible attributes, got error: %s", err))
+		resp.Diagnostics.Append(diags...)
+		resp.Diagnostics.AddError("Client Error", "Error while creating RecordTlsa due to inherited Extensible attributes")
 		return
 	}
 
 	data.Flatten(ctx, &res, &resp.Diagnostics)
+
+	// Save the Identity of the Resource
+	resp.Diagnostics.Append(resp.Identity.SetAttribute(ctx, path.Root("ref"), &data.Ref)...)
 
 	// Save data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
@@ -209,11 +229,15 @@ func (r *RecordTlsaResource) Read(ctx context.Context, req resource.ReadRequest,
 
 	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.ExtAttrs)
 	if diags.HasError() {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while reading RecordTlsa due inherited Extensible attributes, got error: %s", diags))
+		resp.Diagnostics.Append(diags...)
+		resp.Diagnostics.AddError("Client Error", "Error while reading RecordTlsa due to inherited Extensible attributes")
 		return
 	}
 
 	data.Flatten(ctx, &res, &resp.Diagnostics)
+
+	// Save the Identity of the Resource
+	resp.Diagnostics.Append(resp.Identity.SetAttribute(ctx, path.Root("ref"), &data.Ref)...)
 
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
@@ -270,6 +294,10 @@ func (r *RecordTlsaResource) ReadByExtAttrs(ctx context.Context, data *RecordTls
 	}
 
 	data.Flatten(ctx, &res, &resp.Diagnostics)
+
+	// Save the Identity of the Resource
+	resp.Diagnostics.Append(resp.Identity.SetAttribute(ctx, path.Root("ref"), &data.Ref)...)
+
 	resp.Diagnostics.Append(resp.State.Set(ctx, data)...)
 
 	return true
@@ -298,14 +326,16 @@ func (r *RecordTlsaResource) Update(ctx context.Context, req resource.UpdateRequ
 		resp.Diagnostics.Append(diags...)
 		return
 	}
+
 	associateInternalId, diags := req.Private.GetKey(ctx, "associate_internal_id")
-	resp.Diagnostics.Append(diags...)
 	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
 		return
 	}
 	if associateInternalId != nil {
 		data.ExtAttrs, diags = AddInternalIDToExtAttrs(ctx, data.ExtAttrs, diags)
 		if diags.HasError() {
+			resp.Diagnostics.Append(diags...)
 			return
 		}
 	}
@@ -317,12 +347,12 @@ func (r *RecordTlsaResource) Update(ctx context.Context, req resource.UpdateRequ
 		return
 	}
 
+	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
+
 	payload := data.Expand(ctx, &resp.Diagnostics)
 	if resp.Diagnostics.HasError() {
 		return
 	}
-
-	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
 
 	var apiRes *dns.UpdateRecordTlsaResponse
 
@@ -354,15 +384,18 @@ func (r *RecordTlsaResource) Update(ctx context.Context, req resource.UpdateRequ
 
 	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, planExtAttrs, *res.ExtAttrs)
 	if diags.HasError() {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while update RecordTlsa due inherited Extensible attributes, got error: %s", diags))
+		resp.Diagnostics.Append(diags...)
+		resp.Diagnostics.AddError("Client Error", "Error while updating RecordTlsa due to inherited Extensible attributes")
 		return
 	}
 
 	data.Flatten(ctx, &res, &resp.Diagnostics)
 
+	// Save the Identity of the Resource
+	resp.Diagnostics.Append(resp.Identity.SetAttribute(ctx, path.Root("ref"), &data.Ref)...)
+
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
-
 	if associateInternalId != nil {
 		resp.Diagnostics.Append(resp.Private.SetKey(ctx, "associate_internal_id", nil)...)
 	}
@@ -402,6 +435,13 @@ func (r *RecordTlsaResource) Delete(ctx context.Context, req resource.DeleteRequ
 }
 
 func (r *RecordTlsaResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+	if req.Identity.Raw.IsKnown() {
+		diags := req.Identity.GetAttribute(ctx, path.Root("ref"), &req.ID)
+		if diags.HasError() {
+			resp.Diagnostics.Append(diags...)
+			return
+		}
+	}
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("ref"), req.ID)...)
 	resp.Diagnostics.Append(resp.Private.SetKey(ctx, "associate_internal_id", []byte("true"))...)
 }
