@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -1937,6 +1938,11 @@ func TestAccMemberResource_NodeInfo(t *testing.T) {
 				),
 			},
 			// Update and Read
+			{
+				Config: testAccMemberNodeInfo(hostName, "IPV4", "VNIOS", "ALL_V4",
+					vipAddress, "172.28.38.1", "255.255.254.0", "false", 113, nodeInfoValUpdated, mgmtPortSettingVal),
+				ExpectError: regexp.MustCompile("enable_ha must be true when node_info contains 2 nodes"),
+			},
 			{
 				Config: testAccMemberNodeInfo(hostName, "IPV4", "VNIOS", "ALL_V4",
 					vipAddress, "172.28.38.1", "255.255.254.0", "true", 113, nodeInfoValUpdated, mgmtPortSettingVal),
