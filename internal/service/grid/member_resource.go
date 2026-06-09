@@ -556,6 +556,12 @@ func (r *MemberResource) ValidateConfig(ctx context.Context, req resource.Valida
 				mgmtCheckComplete = true
 			}
 		}
+		
+		if len(nodeInfo) == 2 {
+            if data.EnableHa.IsNull() || data.EnableHa.IsUnknown() || !data.EnableHa.ValueBool() {
+                resp.Diagnostics.AddError("Validation Error", "enable_ha must be true when node_info contains 2 nodes")
+            }
+        }
 	}
 
 	if !data.MgmtPortSetting.IsNull() && !data.MgmtPortSetting.IsUnknown() {
