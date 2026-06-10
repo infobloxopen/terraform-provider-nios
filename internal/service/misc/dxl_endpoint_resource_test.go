@@ -585,6 +585,36 @@ func TestAccDxlEndpointResource_WapiUserName(t *testing.T) {
 	})
 }
 
+func TestAccDxlEndpointResource_WapiUserPassword(t *testing.T) {
+	var resourceName = "nios_misc_dxl_endpoint.test_wapi_user_password"
+	var v misc.DxlEndpoint
+	name := acctest.RandomNameWithPrefix("dxl-endpoint")
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// Create and Read
+			{
+				Config: testAccDxlEndpointWapiUserPassword(clientCertificateFile, broker, name, "GM", "admin", "password123"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckDxlEndpointExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "wapi_user_name", "admin"),
+				),
+			},
+			// Update and Read
+			{
+				Config: testAccDxlEndpointWapiUserPassword(clientCertificateFile, broker, name, "GM", "admin", "password456"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckDxlEndpointExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "wapi_user_name", "admin"),
+				),
+			},
+			// Delete testing automatically occurs in TestCase
+		},
+	})
+}
+
 func testAccCheckDxlEndpointExists(ctx context.Context, resourceName string, v *misc.DxlEndpoint) resource.TestCheckFunc {
 	// Verify the resource exists in the cloud
 	return func(state *terraform.State) error {
@@ -889,4 +919,18 @@ func getTestDataPath() string {
 		return "../../testdata/nios_misc_dxl_endpoint"
 	}
 	return filepath.Join(wd, "../../testdata/nios_misc_dxl_endpoint")
+}
+
+func testAccDxlEndpointWapiUserPassword(clientCertificateToken string, broker []map[string]any, name string, outboundMemberType string, wapiUserName, wapiUserPassword string) string {
+	brokerStr := utils.ConvertSliceOfMapsToHCL(broker)
+	return fmt.Sprintf(`
+resource "nios_misc_dxl_endpoint" "test_wapi_user_password" {
+    client_certificate_file = %q
+    name = %q
+    outbound_member_type = %q
+    wapi_user_name = %q
+    wapi_user_password = %q
+	brokers = %s
+}
+`, clientCertificateToken, name, outboundMemberType, wapiUserName, wapiUserPassword, brokerStr)
 }

@@ -1304,6 +1304,48 @@ func TestAccVdiscoverytaskResource_ServiceAccountFile(t *testing.T) {
 		},
 	})
 }
+
+func TestAccVdiscoverytaskResource_ServiceAccountFileToken(t *testing.T) {
+	var resourceName = "nios_discovery_vdiscovery_task.test_gcp_service_account_file_token"
+	var v discovery.Vdiscoverytask
+
+	name := acctest.RandomNameWithPrefix("example-vDiscovery-task-")
+
+	// Get test data path
+	testDataPath := getTestDataPath()
+	serviceAccountFile := filepath.Join(testDataPath, "service_account_file1_example.json")
+	serviceAccountFile2 := filepath.Join(testDataPath, "service_account_file2_example.json")
+	cdiscoveryFile := filepath.Join(testDataPath, "cdiscoveryfile_gcp.csv")
+	memberUpdatedName := utils.GetNIOSGridMemberHostName()
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// Create: verify the resource is created successfully with a service
+			// account file. service_account_file_token is Computed from file upload
+			// but NIOS does not echo it back on subsequent reads, so only resource
+			// existence is checked.
+			{
+				Config: testAccVdiscoverytaskServiceAccountFileToken(name, "GCP", memberUpdatedName, serviceAccountFile, cdiscoveryFile, "DISCOVER", true, true, true, true, false, "AUTO_CREATE", "AUTO_CREATE", true),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckVdiscoverytaskExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "service_account_file", serviceAccountFile),
+				),
+			},
+			// Update: change service account file and verify resource still exists
+			{
+				Config: testAccVdiscoverytaskServiceAccountFileToken(name, "GCP", memberUpdatedName, serviceAccountFile2, cdiscoveryFile, "DISCOVER", true, true, true, true, false, "AUTO_CREATE", "AUTO_CREATE", true),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckVdiscoverytaskExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "service_account_file", serviceAccountFile2),
+				),
+			},
+			// Delete testing automatically occurs in TestCase
+		},
+	})
+}
+
 func TestAccVdiscoverytaskResource_SyncChildAccounts(t *testing.T) {
 	var resourceName = "nios_discovery_vdiscovery_task.test_sync_child_accounts"
 	var v discovery.Vdiscoverytask
@@ -2674,6 +2716,27 @@ resource "nios_discovery_vdiscovery_task" "test_username" {
     selected_regions                    = %q
 }
 `, name, username, password, member, autoConsolidateCloudEa, autoConsolidateManagedTenant, autoConsolidateManagedVm, driverType, mergeData, updateMetadata, privateNetworkViewMappingPolicy, publicNetworkViewMappingPolicy, selectedRegions)
+}
+
+func testAccVdiscoverytaskServiceAccountFileToken(name, driverType, member, serviceAccountFile, cdiscoveryFile, multipleAccountsSyncPolicy string, mergeData, updateMetadata, autoConsolidateCloudEa, autoConsolidateManagedTenant, autoConsolidateManagedVm bool, privateNetworkViewMappingPolicy, publicNetworkViewMappingPolicy string, enabled bool) string {
+	return fmt.Sprintf(`
+resource "nios_discovery_vdiscovery_task" "test_gcp_service_account_file_token" {
+    name                                = %q
+    driver_type                         = %q
+    member                              = %q
+    service_account_file                = %q
+    cdiscovery_file                     = %q
+    multiple_accounts_sync_policy       = %q
+    merge_data                          = %t
+    update_metadata                     = %t
+    auto_consolidate_cloud_ea           = %t
+    auto_consolidate_managed_tenant     = %t
+    auto_consolidate_managed_vm         = %t
+    private_network_view_mapping_policy = %q
+    public_network_view_mapping_policy  = %q
+    enabled                             = %t
+}
+`, name, driverType, member, serviceAccountFile, cdiscoveryFile, multipleAccountsSyncPolicy, mergeData, updateMetadata, autoConsolidateCloudEa, autoConsolidateManagedTenant, autoConsolidateManagedVm, privateNetworkViewMappingPolicy, publicNetworkViewMappingPolicy, enabled)
 }
 
 // Helper function to get test data path

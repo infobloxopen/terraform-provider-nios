@@ -540,6 +540,75 @@ func TestAccZoneForwardResource_Prefix(t *testing.T) {
 	})
 }
 
+func TestAccZoneForwardResource_Fqdn(t *testing.T) {
+	var resourceName = "nios_dns_zone_forward.test_fqdn"
+	var v dns.ZoneForward
+	fqdn := acctest.RandomNameWithPrefix("zone-forward") + ".example.com"
+	externalNsGroup := "ensg1"
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// Create and Read
+			{
+				Config: testAccZoneForwardFqdn(fqdn, externalNsGroup),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckZoneForwardExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "fqdn", fqdn),
+				),
+			},
+			// Delete testing automatically occurs in TestCase
+		},
+	})
+}
+
+func TestAccZoneForwardResource_View(t *testing.T) {
+	var resourceName = "nios_dns_zone_forward.test_view"
+	var v dns.ZoneForward
+	fqdn := acctest.RandomNameWithPrefix("zone-forward") + ".example.com"
+	externalNsGroup := "ensg1"
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// Create and Read
+			{
+				Config: testAccZoneForwardView(fqdn, externalNsGroup, "default"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckZoneForwardExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "view", "default"),
+				),
+			},
+			// Delete testing automatically occurs in TestCase
+		},
+	})
+}
+
+func TestAccZoneForwardResource_ZoneFormat(t *testing.T) {
+	var resourceName = "nios_dns_zone_forward.test_zone_format"
+	var v dns.ZoneForward
+	fqdn := acctest.RandomNameWithPrefix("zone-forward") + ".example.com"
+	externalNsGroup := "ensg1"
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// Create and Read
+			{
+				Config: testAccZoneForwardZoneFormat(fqdn, externalNsGroup, "FORWARD"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckZoneForwardExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "zone_format", "FORWARD"),
+				),
+			},
+			// Delete testing automatically occurs in TestCase
+		},
+	})
+}
+
 func testAccCheckZoneForwardExists(ctx context.Context, resourceName string, v *dns.ZoneForward) resource.TestCheckFunc {
 	// Verify the resource exists in the cloud
 	return func(state *terraform.State) error {
@@ -779,4 +848,33 @@ resource "nios_dns_zone_forward" "test_prefix" {
    prefix = %q
 }
 `, fqdn, externalNsGroup, prefix)
+}
+
+func testAccZoneForwardFqdn(fqdn, externalNsGroup string) string {
+	return fmt.Sprintf(`
+resource "nios_dns_zone_forward" "test_fqdn" {
+   fqdn = %q
+   external_ns_group = %q
+}
+`, fqdn, externalNsGroup)
+}
+
+func testAccZoneForwardView(fqdn, externalNsGroup, view string) string {
+	return fmt.Sprintf(`
+resource "nios_dns_zone_forward" "test_view" {
+   fqdn = %q
+   external_ns_group = %q
+   view = %q
+}
+`, fqdn, externalNsGroup, view)
+}
+
+func testAccZoneForwardZoneFormat(fqdn, externalNsGroup, zoneFormat string) string {
+	return fmt.Sprintf(`
+resource "nios_dns_zone_forward" "test_zone_format" {
+   fqdn = %q
+   external_ns_group = %q
+   zone_format = %q
+}
+`, fqdn, externalNsGroup, zoneFormat)
 }

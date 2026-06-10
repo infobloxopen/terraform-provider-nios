@@ -325,6 +325,36 @@ func TestAccRecordUnknownResource_Name(t *testing.T) {
 	})
 }
 
+func TestAccRecordUnknownResource_RecordType(t *testing.T) {
+	var resourceName = "nios_dns_record_unknown.test_record_type"
+	var v dns.RecordUnknown
+	zoneFqdn := acctest.RandomNameWithPrefix("test-zone") + ".com"
+	name := acctest.RandomNameWithPrefix("record-unknown")
+	subfieldValues1 := []map[string]any{
+		{
+			"field_type":     "T",
+			"field_value":    "example-text",
+			"include_length": "8_BIT",
+		},
+	}
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// Create and Read
+			{
+				Config: testAccRecordUnknownRecordType(zoneFqdn, name, "SPF", subfieldValues1),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckRecordUnknownExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "record_type", "SPF"),
+				),
+			},
+			// Delete testing automatically occurs in TestCase
+		},
+	})
+}
+
 func TestAccRecordUnknownResource_RecordTypeSPF(t *testing.T) {
 	var resourceName = "nios_dns_record_unknown.test_record_type"
 	var v dns.RecordUnknown

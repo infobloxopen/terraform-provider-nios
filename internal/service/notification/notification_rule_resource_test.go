@@ -903,6 +903,56 @@ func TestAccNotificationRuleResource_UsePublishSettings(t *testing.T) {
 	})
 }
 
+func TestAccNotificationRuleResource_AllMembers(t *testing.T) {
+	if notificationTarget == "" {
+		t.Skip("NIOS_NOTIFICATION_REST_ENDPOINT_REF environment variable must be set for this test to run")
+	}
+	var resourceName = "nios_notification_rule.test_all_members"
+	var v notification.NotificationRule
+	name := acctest.RandomNameWithPrefix("example-notification-rule")
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// Create and Read
+			{
+				Config: testAccNotificationRuleAllMembers(eventType, expressionList, name, notificationAction, notificationTarget, templateInstance),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNotificationRuleExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "all_members", "true"),
+				),
+			},
+			// Delete testing automatically occurs in TestCase
+		},
+	})
+}
+
+func TestAccNotificationRuleResource_SelectedMembers(t *testing.T) {
+	if notificationTarget == "" {
+		t.Skip("NIOS_NOTIFICATION_REST_ENDPOINT_REF environment variable must be set for this test to run")
+	}
+	var resourceName = "nios_notification_rule.test_selected_members"
+	var v notification.NotificationRule
+	name := acctest.RandomNameWithPrefix("example-notification-rule")
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// Create and Read
+			{
+				Config: testAccNotificationRuleSelectedMembers(eventType, expressionList, name, notificationAction, notificationTarget, templateInstance),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNotificationRuleExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttrSet(resourceName, "selected_members.#"),
+				),
+			},
+			// Delete testing automatically occurs in TestCase
+		},
+	})
+}
+
 func testAccCheckNotificationRuleExists(ctx context.Context, resourceName string, v *notification.NotificationRule) resource.TestCheckFunc {
 	// Verify the resource exists in the cloud
 	return func(state *terraform.State) error {
@@ -1278,4 +1328,34 @@ resource "nios_notification_rule" "test_use_publish_settings" {
     use_publish_settings = %q
 }
 `, eventType, expressionListHCL, name, notificationAction, notificationTarget, templateInstanceHCL, publishSettingsHCL, usePublishSettings)
+}
+
+func testAccNotificationRuleAllMembers(eventType string, expressionList []map[string]any, name, notificationAction, notificationTarget string, templateInstance map[string]any) string {
+	expressionListHCL := utils.ConvertSliceOfMapsToHCL(expressionList)
+	templateInstanceHCL := utils.ConvertMapToHCL(templateInstance)
+	return fmt.Sprintf(`
+resource "nios_notification_rule" "test_all_members" {
+    event_type = %q
+    expression_list = %s
+    name = %q
+    notification_action = %q
+    notification_target = %q
+    template_instance = %s
+}
+`, eventType, expressionListHCL, name, notificationAction, notificationTarget, templateInstanceHCL)
+}
+
+func testAccNotificationRuleSelectedMembers(eventType string, expressionList []map[string]any, name, notificationAction, notificationTarget string, templateInstance map[string]any) string {
+	expressionListHCL := utils.ConvertSliceOfMapsToHCL(expressionList)
+	templateInstanceHCL := utils.ConvertMapToHCL(templateInstance)
+	return fmt.Sprintf(`
+resource "nios_notification_rule" "test_selected_members" {
+    event_type = %q
+    expression_list = %s
+    name = %q
+    notification_action = %q
+    notification_target = %q
+    template_instance = %s
+}
+`, eventType, expressionListHCL, name, notificationAction, notificationTarget, templateInstanceHCL)
 }

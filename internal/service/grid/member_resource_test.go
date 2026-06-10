@@ -4405,6 +4405,87 @@ func TestAccMemberResource_Import(t *testing.T) {
 	})
 }
 
+func TestAccMemberResource_ExternalSyslogServerEnable(t *testing.T) {
+	var resourceName = "nios_grid_member.test_external_syslog_server_enable"
+	var v grid.Member
+
+	hostName := fmt.Sprintf("infoblox-%s.localdomain", acctest.RandomName())
+	vipAddress := "172.28.38.179"
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccMemberExternalSyslogServerEnable(
+					hostName,
+					"IPV4",
+					"VNIOS",
+					"ALL_V4",
+					vipAddress,
+					"172.28.38.1",
+					"255.255.254.0",
+					true,
+				),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckMemberExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "external_syslog_server_enable", "true"),
+					resource.TestCheckResourceAttr(resourceName, "use_syslog_proxy_setting", "true"),
+				),
+			},
+			{
+				Config: testAccMemberExternalSyslogServerEnable(
+					hostName,
+					"IPV4",
+					"VNIOS",
+					"ALL_V4",
+					vipAddress,
+					"172.28.38.1",
+					"255.255.254.0",
+					false,
+				),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckMemberExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "external_syslog_server_enable", "false"),
+				),
+			},
+			// Delete testing automatically occurs in TestCase
+		},
+	})
+}
+
+func TestAccMemberResource_MemberServiceCommunication(t *testing.T) {
+	var resourceName = "nios_grid_member.test_member_service_communication"
+	var v grid.Member
+
+	hostName := fmt.Sprintf("infoblox-%s.localdomain", acctest.RandomName())
+	vipAddress := "172.28.38.180"
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// Create and verify member_service_communication is populated by NIOS
+			{
+				Config: testAccMemberMemberServiceCommunication(
+					hostName,
+					"IPV4",
+					"VNIOS",
+					"ALL_V4",
+					vipAddress,
+					"172.28.38.1",
+					"255.255.254.0",
+				),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckMemberExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttrSet(resourceName, "member_service_communication.#"),
+				),
+			},
+			// Delete testing automatically occurs in TestCase
+		},
+	})
+}
+
 func testAccCheckMemberExists(ctx context.Context, resourceName string, v *grid.Member) resource.TestCheckFunc {
 	// Verify the resource exists in the cloud
 	return func(state *terraform.State) error {
@@ -7202,4 +7283,87 @@ func getTestDataPath() string {
 		return "../../testdata/nios_grid_member"
 	}
 	return filepath.Join(wd, "../../testdata/nios_grid_member")
+}
+
+func testAccMemberExternalSyslogServerEnable(
+	hostName, configAddrType, platform, serviceTypeConfig,
+	vipAddress, vipGateway, vipSubnetMask string,
+	externalSyslogServerEnable bool,
+) string {
+	useSyslogProxySetting := externalSyslogServerEnable
+	syslogServersBlock := ""
+	if externalSyslogServerEnable {
+		syslogServersBlock = `
+    syslog_servers = [
+        {
+            address_or_fqdn  = "192.0.2.50"
+            port             = 514
+            connection_type  = "UDP"
+            local_interface  = "ANY"
+            message_node_id  = "LAN"
+            message_source   = "ANY"
+            severity         = "DEBUG"
+            only_category_list = false
+        }
+    ]`
+	}
+	return fmt.Sprintf(`
+resource "nios_grid_member" "test_external_syslog_server_enable" {
+    host_name = %q
+    config_addr_type = %q
+    platform = %q
+    service_type_configuration = %q
+
+    ipv6_setting = {
+        auto_router_config_enabled = false
+        dscp = 0
+        enabled = false
+        primary = true
+        use_dscp = false
+    }
+
+    vip_setting = {
+        address = %q
+        dscp = 0
+        gateway = %q
+        primary = true
+        subnet_mask = %q
+        use_dscp = false
+    }
+
+    external_syslog_server_enable = %t
+    use_syslog_proxy_setting = %t%s
+}
+`, hostName, configAddrType, platform, serviceTypeConfig, vipAddress, vipGateway, vipSubnetMask, externalSyslogServerEnable, useSyslogProxySetting, syslogServersBlock)
+}
+
+func testAccMemberMemberServiceCommunication(
+	hostName, configAddrType, platform, serviceTypeConfig,
+	vipAddress, vipGateway, vipSubnetMask string,
+) string {
+	return fmt.Sprintf(`
+resource "nios_grid_member" "test_member_service_communication" {
+    host_name = %q
+    config_addr_type = %q
+    platform = %q
+    service_type_configuration = %q
+
+    ipv6_setting = {
+        auto_router_config_enabled = false
+        dscp = 0
+        enabled = false
+        primary = true
+        use_dscp = false
+    }
+
+    vip_setting = {
+        address = %q
+        dscp = 0
+        gateway = %q
+        primary = true
+        subnet_mask = %q
+        use_dscp = false
+    }
+}
+`, hostName, configAddrType, platform, serviceTypeConfig, vipAddress, vipGateway, vipSubnetMask)
 }

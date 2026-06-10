@@ -1447,6 +1447,28 @@ func TestAccZoneRpResource_View(t *testing.T) {
 	})
 }
 
+func TestAccZoneRpResource_Fqdn(t *testing.T) {
+	var resourceName = "nios_dns_zone_rp.test_fqdn"
+	var v dns.ZoneRp
+	zoneFqdn := acctest.RandomNameWithPrefix("zone-rp") + ".com"
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// Create and Read
+			{
+				Config: testAccZoneRpFqdn(zoneFqdn, "default"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckZoneRpExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "fqdn", zoneFqdn),
+				),
+			},
+			// Delete testing automatically occurs in TestCase
+		},
+	})
+}
+
 func testAccCheckZoneRpExists(ctx context.Context, resourceName string, v *dns.ZoneRp) resource.TestCheckFunc {
 	// Verify the resource exists in the cloud
 	return func(state *terraform.State) error {
@@ -2003,6 +2025,15 @@ resource "nios_dns_zone_rp" "test_view" {
 	fqdn = %q
 	view = %q
 	depends_on = [nios_dns_view.test_view]
+}
+`, zoneFqdn, view)
+}
+
+func testAccZoneRpFqdn(zoneFqdn, view string) string {
+	return fmt.Sprintf(`
+resource "nios_dns_zone_rp" "test_fqdn" {
+	fqdn = %q
+	view = %q
 }
 `, zoneFqdn, view)
 }

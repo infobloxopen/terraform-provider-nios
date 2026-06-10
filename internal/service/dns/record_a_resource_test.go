@@ -435,6 +435,29 @@ func TestAccRecordAResource_UseTtl(t *testing.T) {
 	})
 }
 
+func TestAccRecordAResource_View(t *testing.T) {
+	var resourceName = "nios_dns_record_a.test_view"
+	var v dns.RecordA
+	name := acctest.RandomName() + ".example.com"
+	viewName := acctest.RandomNameWithPrefix("view")
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// Create and Read
+			{
+				Config: testAccRecordAViewUpdate(name, "10.0.0.20", viewName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckRecordAExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "view", viewName),
+				),
+			},
+			// Delete testing automatically occurs in TestCase
+		},
+	})
+}
+
 func testAccCheckRecordAExists(ctx context.Context, resourceName string, v *dns.RecordA) resource.TestCheckFunc {
 	// Verify the resource exists in the cloud
 	var readableAttributes = "aws_rte53_record_info,cloud_info,comment,creation_time,creator,ddns_principal,ddns_protected,disable,discovered_data,dns_name,extattrs,forbid_reclamation,ipv4addr,last_queried,ms_ad_user_data,name,reclaimable,shared_record_group,ttl,use_ttl,view,zone"
@@ -670,4 +693,33 @@ resource "nios_dns_record_a" "test_use_ttl" {
 	use_ttl = %q
 }
 `, name, ipV4Addr, view, useTtl)
+}
+
+func testAccRecordAView(name, ipV4Addr, view string) string {
+	return fmt.Sprintf(`
+resource "nios_dns_record_a" "test_view" {
+	name = %q
+	ipv4addr = %q
+	view = %q
+}
+`, name, ipV4Addr, view)
+}
+
+func testAccRecordAViewUpdate(name, ipV4Addr, view string) string {
+	return fmt.Sprintf(`
+resource "nios_dns_view" "test_dns_view" {
+	name = %q
+}
+
+resource "nios_dns_zone_auth" "test_dns_zone" {
+	fqdn = "example.com"
+	view = nios_dns_view.test_dns_view.name
+}
+
+resource "nios_dns_record_a" "test_view" {
+	name = %q
+	ipv4addr = %q
+	view = nios_dns_zone_auth.test_dns_zone.view
+}
+`, view, name, ipV4Addr)
 }

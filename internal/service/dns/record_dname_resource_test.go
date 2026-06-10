@@ -433,6 +433,30 @@ func TestAccRecordDnameResource_UseTtl(t *testing.T) {
 	})
 }
 
+func TestAccRecordDnameResource_View(t *testing.T) {
+	var resourceName = "nios_dns_record_dname.test_view"
+	var v dns.RecordDname
+	zoneFqdn := acctest.RandomNameWithPrefix("test-zone") + ".com"
+	target := acctest.RandomName() + ".target.com"
+	viewName := acctest.RandomNameWithPrefix("view")
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// Create and Read
+			{
+				Config: testAccRecordDnameViewUpdate(target, zoneFqdn, viewName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckRecordDnameExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "view", viewName),
+				),
+			},
+			// Delete testing automatically occurs in TestCase
+		},
+	})
+}
+
 func testAccCheckRecordDnameExists(ctx context.Context, resourceName string, v *dns.RecordDname) resource.TestCheckFunc {
 	// Verify the resource exists in the cloud
 	return func(state *terraform.State) error {
@@ -664,4 +688,26 @@ resource "nios_dns_zone_auth" "updated_zone" {
     fqdn = %q
 }
 `, zoneFqdn1, zoneFqdn2)
+}
+
+func testAccRecordDnameView(target, zoneFqdn string) string {
+	config := fmt.Sprintf(`
+resource "nios_dns_record_dname" "test_view" {
+    name   = nios_dns_zone_auth.test.fqdn
+    target = %q
+	view   = nios_dns_zone_auth.test.view
+}
+`, target)
+	return strings.Join([]string{testAccBaseWithZone(zoneFqdn), config}, "")
+}
+
+func testAccRecordDnameViewUpdate(target, zoneFqdn, view string) string {
+	config := fmt.Sprintf(`
+resource "nios_dns_record_dname" "test_view" {
+    name   = nios_dns_zone_auth.test.fqdn
+    target = %q
+	view   = nios_dns_zone_auth.test.view
+}
+`, target)
+	return strings.Join([]string{testAccBaseWithZoneandView(zoneFqdn, view), config}, "")
 }

@@ -515,6 +515,30 @@ func TestAccRecordSrvResource_Weight(t *testing.T) {
 	})
 }
 
+func TestAccRecordSrvResource_View(t *testing.T) {
+	var resourceName = "nios_dns_record_srv.test_view"
+	var v dns.RecordSrv
+	name := acctest.RandomNameWithPrefix("record-srv") + ".example.com"
+	target := acctest.RandomName() + ".target.com"
+	viewName := acctest.RandomNameWithPrefix("view")
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// Create and Read
+			{
+				Config: testAccRecordSrvViewUpdate(name, target, 80, 10, 360, viewName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckRecordSrvExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "view", viewName),
+				),
+			},
+			// Delete testing automatically occurs in TestCase
+		},
+	})
+}
+
 func testAccCheckRecordSrvExists(ctx context.Context, resourceName string, v *dns.RecordSrv) resource.TestCheckFunc {
 	// Verify the resource exists in the cloud
 	return func(state *terraform.State) error {
@@ -770,4 +794,39 @@ resource "nios_dns_record_srv" "test_weight" {
 	weight = %d
 }
 `, name, target, port, priority, weight)
+}
+
+func testAccRecordSrvView(name, target string, port, priority, weight int, view string) string {
+	return fmt.Sprintf(`
+resource "nios_dns_record_srv" "test_view" {
+	name = %q
+	target = %q
+	port = %d
+	priority = %d
+	weight = %d
+	view = %q
+}
+`, name, target, port, priority, weight, view)
+}
+
+func testAccRecordSrvViewUpdate(name, target string, port, priority, weight int, view string) string {
+	return fmt.Sprintf(`
+resource "nios_dns_view" "test_dns_view" {
+	name = %q
+}
+
+resource "nios_dns_zone_auth" "test_dns_zone" {
+	fqdn = "example.com"
+	view = nios_dns_view.test_dns_view.name
+}
+
+resource "nios_dns_record_srv" "test_view" {
+	name = %q
+	target = %q
+	port = %d
+	priority = %d
+	weight = %d
+	view = nios_dns_zone_auth.test_dns_zone.view
+}
+`, view, name, target, port, priority, weight)
 }

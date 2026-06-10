@@ -606,6 +606,30 @@ func TestAccRecordNaptrResource_UseTtl(t *testing.T) {
 	})
 }
 
+func TestAccRecordNaptrResource_View(t *testing.T) {
+	var resourceName = "nios_dns_record_naptr.test_view"
+	var v dns.RecordNaptr
+	zoneFqdn := acctest.RandomNameWithPrefix("test-zone") + ".com"
+	name := acctest.RandomNameWithPrefix("test-naptr")
+	viewName := acctest.RandomNameWithPrefix("view")
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// Create and Read
+			{
+				Config: testAccRecordNaptrViewUpdate(zoneFqdn, name, 10, 10, ".", viewName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckRecordNaptrExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "view", viewName),
+				),
+			},
+			// Delete testing automatically occurs in TestCase
+		},
+	})
+}
+
 func testAccCheckRecordNaptrExists(ctx context.Context, resourceName string, v *dns.RecordNaptr) resource.TestCheckFunc {
 	// Verify the resource exists in the cloud
 	return func(state *terraform.State) error {
@@ -896,4 +920,29 @@ resource "nios_dns_zone_auth" "test" {
     fqdn = %q
 }
 `, zoneFqdn)
+}
+
+func testAccRecordNaptrView(zoneFqdn, name string, order, preference int, replacement string) string {
+	config := fmt.Sprintf(`
+resource "nios_dns_record_naptr" "test_view" {
+    name = "${%q}.${nios_dns_zone_auth.test.fqdn}"
+    order = %d
+    preference = %d
+    replacement = %q
+}
+`, name, order, preference, replacement)
+	return strings.Join([]string{testAccBaseWithZone(zoneFqdn), config}, "")
+}
+
+func testAccRecordNaptrViewUpdate(zoneFqdn, name string, order, preference int, replacement, view string) string {
+	config := fmt.Sprintf(`
+resource "nios_dns_record_naptr" "test_view" {
+    name = "${%q}.${nios_dns_zone_auth.test.fqdn}"
+    order = %d
+    preference = %d
+    replacement = %q
+    view = nios_dns_zone_auth.test.view
+}
+`, name, order, preference, replacement)
+	return strings.Join([]string{testAccBaseWithZoneandView(zoneFqdn, view), config}, "")
 }

@@ -508,6 +508,29 @@ func TestAccRecordPtrResource_UseTtl(t *testing.T) {
 	})
 }
 
+func TestAccRecordPtrResource_View(t *testing.T) {
+	var resourceName = "nios_dns_record_ptr.test_view"
+	var v dns.RecordPtr
+	ptrDName := acctest.RandomNameWithPrefix("ptr") + ".example.com"
+	viewName := acctest.RandomNameWithPrefix("view")
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// Create and Read
+			{
+				Config: testAccRecordPtrViewUpdate("192.168.10.30", ptrDName, viewName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckRecordPtrExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "view", viewName),
+				),
+			},
+			// Delete testing automatically occurs in TestCase
+		},
+	})
+}
+
 func testAccCheckRecordPtrExists(ctx context.Context, resourceName string, v *dns.RecordPtr) resource.TestCheckFunc {
 	// Verify the resource exists in the cloud
 	return func(state *terraform.State) error {
@@ -748,4 +771,34 @@ resource "nios_dns_record_ptr" "test_use_ttl" {
 	ttl = %d
 }
 `, ipv6addr, ptrdname, view, useTtl, ttl)
+}
+
+func testAccRecordPtrView(ipv4addr, ptrdname, view string) string {
+	return fmt.Sprintf(`
+resource "nios_dns_record_ptr" "test_view" {
+	ipv4addr = %q
+	ptrdname = %q
+	view     = %q
+}
+`, ipv4addr, ptrdname, view)
+}
+
+func testAccRecordPtrViewUpdate(ipv4addr, ptrdname, view string) string {
+	return fmt.Sprintf(`
+resource "nios_dns_view" "test_dns_view" {
+	name = %q
+}
+
+resource "nios_dns_zone_auth" "test_dns_zone" {
+	fqdn = "192.168.10.0/24"
+	zone_format = "IPV4"
+	view = nios_dns_view.test_dns_view.name
+}
+
+resource "nios_dns_record_ptr" "test_view" {
+	ipv4addr = %q
+	ptrdname = %q
+	view     = nios_dns_zone_auth.test_dns_zone.view
+}
+`, view, ipv4addr, ptrdname)
 }

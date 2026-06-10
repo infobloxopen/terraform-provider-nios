@@ -238,6 +238,99 @@ func TestAccNotificationRestEndpointResource_ClientCertificateFile(t *testing.T)
 	})
 }
 
+func TestAccNotificationRestEndpointResource_ClientCertificateToken(t *testing.T) {
+	var resourceName = "nios_notification_rest_endpoint.test_client_certificate_token"
+	var v notification.NotificationRestEndpoint
+	name := acctest.RandomNameWithPrefix("notification-rest-endpoint")
+	testDataPath := getTestDataPath()
+	clientCertificateFile := filepath.Join(testDataPath, "dummy-bundle.pem")
+	updatedClientCertificateFile := filepath.Join(testDataPath, "dummy-bundle2.pem")
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// client_certificate_token is computed from the file upload;
+			// it is not returned on subsequent reads (not in readable attrs).
+			// Verify the resource is created and updated without errors.
+			{
+				Config: testAccNotificationRestEndpointClientCertificateToken(name, outboundMemberType, uri, clientCertificateFile),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNotificationRestEndpointExists(context.Background(), resourceName, &v),
+				),
+			},
+			// Update and Read
+			{
+				Config: testAccNotificationRestEndpointClientCertificateToken(name, outboundMemberType, uri, updatedClientCertificateFile),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNotificationRestEndpointExists(context.Background(), resourceName, &v),
+				),
+			},
+			// Delete testing automatically occurs in TestCase
+		},
+	})
+}
+
+func TestAccNotificationRestEndpointResource_Password(t *testing.T) {
+	var resourceName = "nios_notification_rest_endpoint.test_password"
+	var v notification.NotificationRestEndpoint
+	name := acctest.RandomNameWithPrefix("notification-rest-endpoint")
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// Create and Read - password is write-only/sensitive, only verify resource exists
+			{
+				Config: testAccNotificationRestEndpointPassword(name, outboundMemberType, uri, "example_username", "example_password"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNotificationRestEndpointExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "username", "example_username"),
+				),
+			},
+			// Update and Read
+			{
+				Config: testAccNotificationRestEndpointPassword(name, outboundMemberType, uri, "example_username", "example_password_updated"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNotificationRestEndpointExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "username", "example_username"),
+				),
+			},
+			// Delete testing automatically occurs in TestCase
+		},
+	})
+}
+
+func TestAccNotificationRestEndpointResource_WapiUserPassword(t *testing.T) {
+	var resourceName = "nios_notification_rest_endpoint.test_wapi_user_password"
+	var v notification.NotificationRestEndpoint
+	name := acctest.RandomNameWithPrefix("notification-rest-endpoint")
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// Create and Read - wapi_user_password is write-only/sensitive, only verify resource exists
+			{
+				Config: testAccNotificationRestEndpointWapiUserPassword(name, outboundMemberType, uri, "example_wapi_username", "example_wapi_password"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNotificationRestEndpointExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "wapi_user_name", "example_wapi_username"),
+				),
+			},
+			// Update and Read
+			{
+				Config: testAccNotificationRestEndpointWapiUserPassword(name, outboundMemberType, uri, "example_wapi_username", "example_wapi_password_updated"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNotificationRestEndpointExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "wapi_user_name", "example_wapi_username"),
+				),
+			},
+			// Delete testing automatically occurs in TestCase
+		},
+	})
+}
+
 func TestAccNotificationRestEndpointResource_OutboundMemberType(t *testing.T) {
 	var resourceName = "nios_notification_rest_endpoint.test_outbound_member_type"
 	var v notification.NotificationRestEndpoint
@@ -680,6 +773,49 @@ resource "nios_notification_rest_endpoint" "test_client_certificate_file" {
 }
 `, name, outboundMemberType, uri, clientCertificateFile)
 }
+
+func testAccNotificationRestEndpointClientCertificateToken(name string, outboundMemberType string, uri string, clientCertificateFile string) string {
+	return fmt.Sprintf(`
+resource "nios_notification_rest_endpoint" "test_client_certificate_token" {
+    name = %q
+    outbound_member_type = %q
+    uri = %q
+    client_certificate_file = %q
+}
+`, name, outboundMemberType, uri, clientCertificateFile)
+}
+func testAccNotificationRestEndpointPassword(name string, outboundMemberType string, uri string, username string, password string) string {
+	return fmt.Sprintf(`
+resource "nios_notification_rest_endpoint" "test_password" {
+    name = %q
+    outbound_member_type = %q
+    uri = %q
+    username = %q
+    password = %q
+}
+`, name, outboundMemberType, uri, username, password)
+}
+
+func testAccNotificationRestEndpointWapiUserPassword(name string, outboundMemberType string, uri string, wapiUserName string, wapiUserPassword string) string {
+	return fmt.Sprintf(`
+resource "nios_notification_rest_endpoint" "test_wapi_user_password" {
+    name = %q
+    outbound_member_type = %q
+    uri = %q
+    wapi_user_name = %q
+    wapi_user_password = %q
+}
+`, name, outboundMemberType, uri, wapiUserName, wapiUserPassword)
+}
+
+func getTestDataPath() string {
+	wd, err := os.Getwd()
+	if err != nil {
+		return "../../testdata/nios_notification_rest_endpoint"
+	}
+	return filepath.Join(wd, "../../testdata/nios_notification_rest_endpoint")
+}
+
 func testAccNotificationRestEndpointOutboundMemberType(name string, outboundMemberType string, uri string) string {
 	return fmt.Sprintf(`
 resource "nios_notification_rest_endpoint" "test_outbound_member_type" {
@@ -806,12 +942,4 @@ resource "nios_notification_rest_endpoint" "test_wapi_user_name" {
 	wapi_user_password = %q
 }
 `, name, outboundMemberType, uri, wapiUserName, wapiUserPassword)
-}
-
-func getTestDataPath() string {
-	wd, err := os.Getwd()
-	if err != nil {
-		return "../../testdata/nios_notification_rest_endpoint"
-	}
-	return filepath.Join(wd, "../../testdata/nios_notification_rest_endpoint")
 }

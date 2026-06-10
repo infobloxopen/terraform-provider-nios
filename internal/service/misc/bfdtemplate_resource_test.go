@@ -259,6 +259,36 @@ func TestAccBfdtemplateResource_Name(t *testing.T) {
 	})
 }
 
+func TestAccBfdtemplateResource_AuthenticationKey(t *testing.T) {
+	var resourceName = "nios_misc_bfdtemplate.test_authentication_key"
+	var v misc.Bfdtemplate
+	name := acctest.RandomNameWithPrefix("tf_test_bfd_")
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// Create and Read
+			{
+				Config: testAccBfdtemplateAuthenticationKey(name, "MD5", "1234", 1000, 1000),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckBfdtemplateExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "authentication_type", "MD5"),
+				),
+			},
+			// Update and Read
+			{
+				Config: testAccBfdtemplateAuthenticationKey(name, "MD5", "5678", 1000, 1000),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckBfdtemplateExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "authentication_type", "MD5"),
+				),
+			},
+			// Delete testing automatically occurs in TestCase
+		},
+	})
+}
+
 func testAccCheckBfdtemplateExists(ctx context.Context, resourceName string, v *misc.Bfdtemplate) resource.TestCheckFunc {
 	// Verify the resource exists in the cloud
 	return func(state *terraform.State) error {
@@ -381,4 +411,16 @@ resource "nios_misc_bfdtemplate" "test_name" {
     name = %q
 }
 `, name)
+}
+
+func testAccBfdtemplateAuthenticationKey(name, authenticationType, authenticationKey string, minRxInterval, minTxInterval int) string {
+	return fmt.Sprintf(`
+resource "nios_misc_bfdtemplate" "test_authentication_key" {
+    name = %q
+    authentication_type = %q
+    authentication_key = %q
+    min_rx_interval = %d
+    min_tx_interval = %d
+}
+`, name, authenticationType, authenticationKey, minRxInterval, minTxInterval)
 }
