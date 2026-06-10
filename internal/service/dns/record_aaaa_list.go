@@ -80,6 +80,7 @@ func (l *RecordAaaaList) ListResourceConfigSchema(ctx context.Context, req list.
 func (l *RecordAaaaList) List(ctx context.Context, req list.ListRequest, stream *list.ListResultsStream) {
 	var data RecordAaaaListModel
 	pageCount := 0
+	// Default Limit is 100
 	limit := int32(req.Limit)
 	var totalFetched int32
 

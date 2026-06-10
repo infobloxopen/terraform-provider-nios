@@ -80,6 +80,7 @@ func (l *RecordDnameList) ListResourceConfigSchema(ctx context.Context, req list
 func (l *RecordDnameList) List(ctx context.Context, req list.ListRequest, stream *list.ListResultsStream) {
 	var data RecordDnameListModel
 	pageCount := 0
+	// Default Limit is 100
 	limit := int32(req.Limit)
 	var totalFetched int32
 
