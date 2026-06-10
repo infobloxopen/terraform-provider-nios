@@ -76,6 +76,7 @@ func (l *RecordNsList) List(ctx context.Context, req list.ListRequest, stream *l
 	pageCount := 0
 	// Default Limit is 100
 	limit := int32(req.Limit)
+	var totalFetched int32
 
 	diags := req.Config.Get(ctx, &data)
 	if diags.HasError() {
@@ -88,9 +89,9 @@ func (l *RecordNsList) List(ctx context.Context, req list.ListRequest, stream *l
 
 			var paging int32 = 1
 
-			// If limit > maxResultsPerPage, break connection to the provider after limit is reached.
-			if limit < maxResultsPerPage {
-				maxResultsPerPage = limit
+			// Adjust page size to not fetch more than the remaining needed results.
+			if remaining := limit - totalFetched; remaining < maxResultsPerPage {
+				maxResultsPerPage = remaining
 			}
 
 			//Increment the page count
@@ -119,15 +120,16 @@ func (l *RecordNsList) List(ctx context.Context, req list.ListRequest, stream *l
 			res := apiRes.ListRecordNsResponseObject.GetResult()
 			tflog.Info(ctx, fmt.Sprintf("Page %d : Retrieved %d results", pageCount, len(res)))
 
+			totalFetched += int32(len(res))
+
 			// Check for next page ID in additional properties
 			additionalProperties := apiRes.ListRecordNsResponseObject.AdditionalProperties
 			var nextPageID string
 
-			// If limit is reached , return the results and empty nextPageID to stop pagination.
-			if len(res) >= int(limit) {
-				nextPageID = ""
+			// If the cumulative limit is reached, stop pagination.
+			if totalFetched >= limit {
 				tflog.Info(ctx, "Limit reached, stopped fetching more pages.")
-				return res, nextPageID, nil
+				return res, "", nil
 			}
 
 			npId, ok := additionalProperties["next_page_id"]
@@ -172,7 +174,6 @@ func (l *RecordNsList) List(ctx context.Context, req list.ListRequest, stream *l
 					}
 					continue
 				}
-
 			}
 
 			// Push the result to the stream
@@ -181,5 +182,4 @@ func (l *RecordNsList) List(ctx context.Context, req list.ListRequest, stream *l
 			}
 		}
 	}
-
 }
