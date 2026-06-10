@@ -37,7 +37,7 @@ output "nic3_ip" {
   value       = var.enable_ha ? azurerm_network_interface.nic3[0].private_ip_address : null
 }
 
-// VIP — secondary IP on NIC3, only present on the primary HA node.
+// VIP — secondary IP on NIC3, only present on the primary HA node. May move between nodes during HA failover.
 output "vip" {
   description = "HA VIP (secondary IP on NIC3). Null when HA disabled or node is not primary."
   value = var.enable_ha ? try(

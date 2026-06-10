@@ -93,7 +93,7 @@ module "node3" {
 }
 
 // Dual-stack Configuration 
-// Set enable_ipv6 = true to create an additional IPv6 configuration on each NIC.
+// Set enable_ipv6 = true to create an additional IPv6 configuration on Primary NIC.
 module "node4" {
   source = "github.com/infobloxopen/terraform-provider-nios//modules/nios_deploy_azure?ref=nios_v9.1.0"
 
