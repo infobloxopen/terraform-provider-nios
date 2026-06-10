@@ -25,10 +25,12 @@ This module provisions vNIOS on Azure. The NIOS configuration (`nios_grid_member
 | [azurerm_managed_disk.disk](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/managed_disk) | resource |
 | [azurerm_network_interface.nic1](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/network_interface) | resource |
 | [azurerm_network_interface.nic2](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/network_interface) | resource |
+| [azurerm_network_interface.nic3](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/network_interface) | resource |
 | [azurerm_virtual_machine.vm](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/virtual_machine) | resource |
 | [azurerm_resource_group.rg](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/resource_group) | data source |
 | [azurerm_subnet.subnet1](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/subnet) | data source |
 | [azurerm_subnet.subnet2](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/subnet) | data source |
+| [azurerm_subnet.subnet3](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/subnet) | data source |
 | [azurerm_virtual_network.vnet](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/virtual_network) | data source |
 
 ## Inputs
@@ -42,11 +44,17 @@ This module provisions vNIOS on Azure. The NIOS configuration (`nios_grid_member
 | <a name="input_disk_name"></a> [disk\_name](#input\_disk\_name) | The name of the Managed Disk. | `string` | n/a | yes |
 | <a name="input_disk_size"></a> [disk\_size](#input\_disk\_size) | The size of the managed disk in gigabytes. | `number` | n/a | yes |
 | <a name="input_disk_url"></a> [disk\_url](#input\_disk\_url) | URI to a valid VHD file to be used for the managed disk. | `string` | n/a | yes |
+| <a name="input_enable_ha"></a> [enable\_ha](#input\_enable\_ha) | Enable High Availability for the Azure VM. | `bool` | `false` | no |
+| <a name="input_enable_ipv6"></a> [enable\_ipv6](#input\_enable\_ipv6) | Whether to create an additional IPv6 IP Configuration. | `bool` | `false` | no |
+| <a name="input_identity_id"></a> [identity\_id](#input\_identity\_id) | Resource ID of the User-Assigned Managed Identity to attach to the VM for HA<br/>operations.Required when enable\_ha = true.<br/>Example: /subscriptions/<sub>/resourceGroups/<rg>/providers/Microsoft.ManagedIdentity/userAssignedIdentities/<name> | `string` | `null` | no |
 | <a name="input_ip_configuration_name_nic1"></a> [ip\_configuration\_name\_nic1](#input\_ip\_configuration\_name\_nic1) | A name used for the IP Configuration of NIC 1. | `string` | `"internal1"` | no |
 | <a name="input_ip_configuration_name_nic2"></a> [ip\_configuration\_name\_nic2](#input\_ip\_configuration\_name\_nic2) | A name used for the IP Configuration of NIC 2. | `string` | `"internal2"` | no |
+| <a name="input_ip_configuration_name_nic3"></a> [ip\_configuration\_name\_nic3](#input\_ip\_configuration\_name\_nic3) | The name of the IP Configuration for NIC 3. | `string` | `"internal3"` | no |
+| <a name="input_is_primary"></a> [is\_primary](#input\_is\_primary) | Indicates if this node is the primary node in a HA setup. | `bool` | `false` | no |
 | <a name="input_location"></a> [location](#input\_location) | The Azure location where the resource exists. | `string` | n/a | yes |
 | <a name="input_nic1_name"></a> [nic1\_name](#input\_nic1\_name) | The name of the Network Interface 1 on subnet 1. | `string` | n/a | yes |
 | <a name="input_nic2_name"></a> [nic2\_name](#input\_nic2\_name) | The name of the Network Interface 2 on subnet 2. | `string` | n/a | yes |
+| <a name="input_nic3_name"></a> [nic3\_name](#input\_nic3\_name) | The name of the Network Interface 3 on subnet 3. Required when enable\_ha = true. | `string` | `null` | no |
 | <a name="input_os_type"></a> [os\_type](#input\_os\_type) | The operating system type of the managed disk. | `string` | `"Linux"` | no |
 | <a name="input_os_type_on_storage_os_disk"></a> [os\_type\_on\_storage\_os\_disk](#input\_os\_type\_on\_storage\_os\_disk) | Specifies the Operating System on the OS Disk. | `string` | `"Linux"` | no |
 | <a name="input_private_ip_address_allocation"></a> [private\_ip\_address\_allocation](#input\_private\_ip\_address\_allocation) | The allocation method used for the Private IP Address. | `string` | `"Dynamic"` | no |
@@ -55,6 +63,8 @@ This module provisions vNIOS on Azure. The NIOS configuration (`nios_grid_member
 | <a name="input_storage_account_type"></a> [storage\_account\_type](#input\_storage\_account\_type) | The type of storage to use for the managed disk. | `string` | `"Standard_LRS"` | no |
 | <a name="input_subnet1_name"></a> [subnet1\_name](#input\_subnet1\_name) | Name of subnet 1 (used by NIC 1). | `string` | n/a | yes |
 | <a name="input_subnet2_name"></a> [subnet2\_name](#input\_subnet2\_name) | Name of subnet 2 (used by NIC 2). | `string` | n/a | yes |
+| <a name="input_subnet3_name"></a> [subnet3\_name](#input\_subnet3\_name) | Name of subnet 3 (used by NIC 3). Required when enable\_ha = true. | `string` | `null` | no |
+| <a name="input_tags"></a> [tags](#input\_tags) | A map of tags to apply to all resources created by this module (managed disk, NICs, VM). | `map(string)` | `{}` | no |
 | <a name="input_vm_name"></a> [vm\_name](#input\_vm\_name) | Name for the Azure Virtual Machine. | `string` | n/a | yes |
 | <a name="input_vm_size"></a> [vm\_size](#input\_vm\_size) | Azure VM size (e.g. Standard\_E4s\_v5). | `string` | n/a | yes |
 | <a name="input_vnet_name"></a> [vnet\_name](#input\_vnet\_name) | The name of the Virtual Network. | `string` | n/a | yes |
@@ -65,11 +75,17 @@ This module provisions vNIOS on Azure. The NIOS configuration (`nios_grid_member
 |------|-------------|
 | <a name="output_instance_id"></a> [instance\_id](#output\_instance\_id) | ID of the NIOS Grid Member instance. |
 | <a name="output_nic1_ip"></a> [nic1\_ip](#output\_nic1\_ip) | Private IP address of NIC1 (Subnet 1) |
+| <a name="output_nic1_ipv6"></a> [nic1\_ipv6](#output\_nic1\_ipv6) | IPv6 address of NIC1 (Subnet 1). Null when enable\_ipv6 is false. |
 | <a name="output_nic2_ip"></a> [nic2\_ip](#output\_nic2\_ip) | Private IP address of NIC2 (Subnet 2) |
+| <a name="output_nic3_ip"></a> [nic3\_ip](#output\_nic3\_ip) | Private IP address of NIC3 (HA interface). Null when HA is disabled. |
+| <a name="output_nic3_name"></a> [nic3\_name](#output\_nic3\_name) | Name of the HA NIC (NIC3). Null when HA is disabled. |
 | <a name="output_subnet1_gateway"></a> [subnet1\_gateway](#output\_subnet1\_gateway) | Gateway IP for Subnet 1 (first usable IP) |
 | <a name="output_subnet1_mask"></a> [subnet1\_mask](#output\_subnet1\_mask) | Subnet mask of Subnet 1 |
 | <a name="output_subnet2_gateway"></a> [subnet2\_gateway](#output\_subnet2\_gateway) | Gateway IP for Subnet 2 (first usable IP) |
 | <a name="output_subnet2_mask"></a> [subnet2\_mask](#output\_subnet2\_mask) | Subnet mask of Subnet 2 |
+| <a name="output_subnet3_gateway"></a> [subnet3\_gateway](#output\_subnet3\_gateway) | Gateway IP for Subnet 3 (first usable IP). Null when HA is disabled. |
+| <a name="output_subnet3_mask"></a> [subnet3\_mask](#output\_subnet3\_mask) | Subnet mask of Subnet 3 (HA subnet). Null when HA is disabled. |
+| <a name="output_vip"></a> [vip](#output\_vip) | HA VIP (secondary IP on NIC3). Null when HA disabled or node is not primary. |
 <!-- END_TF_DOCS -->
 
 ---
