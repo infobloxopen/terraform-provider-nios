@@ -174,6 +174,13 @@ func (l *RecordAList) List(ctx context.Context, req list.ListRequest, stream *li
 			if req.IncludeResource {
 				var extAttrsAll types.Map
 				item.ExtAttrs, extAttrsAll, diags = RemoveInheritedExtAttrs(ctx, extAttrsAll, *item.ExtAttrs)
+				result.Diagnostics.Append(diags...)
+				if result.Diagnostics.HasError() {
+					if !push(result) {
+						return
+					}
+					continue
+				}
 				result1 := FlattenRecordA(ctx, &item, &result.Diagnostics)
 				result.Diagnostics.Append(result.Resource.Set(ctx, &result1)...)
 				if result.Diagnostics.HasError() {
