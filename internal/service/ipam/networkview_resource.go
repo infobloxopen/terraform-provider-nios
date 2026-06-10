@@ -139,7 +139,8 @@ func (r *NetworkviewResource) Create(ctx context.Context, req resource.CreateReq
 	res := apiRes.CreateNetworkviewResponseAsObject.GetResult()
 	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.ExtAttrs)
 	if diags.HasError() {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while create Networkview due inherited Extensible attributes, got error: %s", err))
+		resp.Diagnostics.Append(diags...)
+		resp.Diagnostics.AddError("Client Error", "Error while creating Networkview due to inherited Extensible attributes")
 		return
 	}
 
@@ -346,12 +347,12 @@ func (r *NetworkviewResource) Update(ctx context.Context, req resource.UpdateReq
 		return
 	}
 
+	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
+
 	payload := data.Expand(ctx, &resp.Diagnostics)
 	if resp.Diagnostics.HasError() {
 		return
 	}
-
-	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
 
 	var apiRes *ipam.UpdateNetworkviewResponse
 
@@ -434,7 +435,7 @@ func (r *NetworkviewResource) Delete(ctx context.Context, req resource.DeleteReq
 }
 
 func (r *NetworkviewResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	if req.Identity.Raw.IsKnown() {
+	if req.Identity != nil && req.Identity.Raw.IsKnown() && !req.Identity.Raw.IsNull() {
 		diags := req.Identity.GetAttribute(ctx, path.Root("ref"), &req.ID)
 		if diags.HasError() {
 			resp.Diagnostics.Append(diags...)
