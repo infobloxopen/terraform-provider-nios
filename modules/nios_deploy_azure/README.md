@@ -201,9 +201,8 @@ resource "nios_grid_join" "member_join" {
 
 #### Example 2: Join a Member with Dual Stack Config
 
-To configure IPv6 on the grid member, set `enable_ipv6 = true`. The member's
-IPv6 address is then exposed through the `nic1_ipv6` output and consumed by the
-`ipv6_setting` block on the `nios_grid_member` resource.
+To provision an IPv6 address on the NIC, set `enable_ipv6 = true`. The
+member's IPv6 address is then exposed through the `nic1_ipv6` output.
 
 ##### Deploy Azure infrastructure for Master and Member
 
@@ -224,6 +223,9 @@ module "node2" {
 ```
 
 ##### After NIOS is ready (~30 min), configure grid member
+
+> **Note:** On Azure, IPv6 addresses are available in the Terraform state (the
+> `nic1_ipv6` output), but you must manually configure the IPv6 settings on the NIOS grid through the UI or API. Unlike AWS, Azure does not automatically configure IPv6 on the NIOS instance. This is a known limitation that will be addressed in a future NIOS release.
 
 ```hcl
 provider "nios" {
