@@ -45,7 +45,7 @@ This module provisions vNIOS on Azure. The NIOS configuration (`nios_grid_member
 | <a name="input_disk_size"></a> [disk\_size](#input\_disk\_size) | The size of the managed disk in gigabytes. | `number` | n/a | yes |
 | <a name="input_disk_url"></a> [disk\_url](#input\_disk\_url) | URI to a valid VHD file to be used for the managed disk. | `string` | n/a | yes |
 | <a name="input_enable_ha"></a> [enable\_ha](#input\_enable\_ha) | Enable High Availability for the Azure VM. | `bool` | `false` | no |
-| <a name="input_enable_ipv6"></a> [enable\_ipv6](#input\_enable\_ipv6) | Whether to create an additional IPv6 IP Configuration. | `bool` | `false` | no |
+| <a name="input_enable_ipv6"></a> [enable\_ipv6](#input\_enable\_ipv6) | Enable IPv6 configuration. | `bool` | `false` | no |
 | <a name="input_identity_id"></a> [identity\_id](#input\_identity\_id) | Resource ID of the User-Assigned Managed Identity to attach to the VM for HA<br/>operations. Required when enable\_ha = true.<br/>Example: /subscriptions/<sub>/resourceGroups/<rg>/providers/Microsoft.ManagedIdentity/userAssignedIdentities/<name> | `string` | `null` | no |
 | <a name="input_ip_configuration_name_nic1"></a> [ip\_configuration\_name\_nic1](#input\_ip\_configuration\_name\_nic1) | A name used for the IP Configuration of NIC 1. | `string` | `"internal1"` | no |
 | <a name="input_ip_configuration_name_nic2"></a> [ip\_configuration\_name\_nic2](#input\_ip\_configuration\_name\_nic2) | A name used for the IP Configuration of NIC 2. | `string` | `"internal2"` | no |
