@@ -1031,7 +1031,6 @@ func (m *NetworkcontainerModel) Expand(ctx context.Context, diags *diag.Diagnost
 		PortControlBlackoutSetting:       ExpandNetworkcontainerPortControlBlackoutSetting(ctx, m.PortControlBlackoutSetting, diags),
 		PxeLeaseTime:                     flex.ExpandInt64Pointer(m.PxeLeaseTime),
 		RecycleLeases:                    flex.ExpandBoolPointer(m.RecycleLeases),
-		RemoveSubnets:                    flex.ExpandBoolPointer(m.RemoveSubnets),
 		RestartIfNeeded:                  flex.ExpandBoolPointer(m.RestartIfNeeded),
 		RirOrganization:                  flex.ExpandStringPointer(m.RirOrganization),
 		RirRegistrationAction:            flex.ExpandStringPointer(m.RirRegistrationAction),
@@ -1163,7 +1162,8 @@ func (m *NetworkcontainerModel) Flatten(ctx context.Context, from *ipam.Networkc
 	m.PortControlBlackoutSetting = FlattenNetworkcontainerPortControlBlackoutSetting(ctx, from.PortControlBlackoutSetting, diags)
 	m.PxeLeaseTime = flex.FlattenInt64Pointer(from.PxeLeaseTime)
 	m.RecycleLeases = types.BoolPointerValue(from.RecycleLeases)
-	m.RemoveSubnets = types.BoolPointerValue(from.RemoveSubnets)
+	// remove_subnets is a delete-only argument; preserve the user's configured value in state
+	// and do not overwrite it from the API response (WAPI does not return this field on read).
 	m.Rir = flex.FlattenStringPointer(from.Rir)
 	m.RirOrganization = flex.FlattenStringPointer(from.RirOrganization)
 	m.RirRegistrationAction = flex.FlattenStringPointer(from.RirRegistrationAction)
