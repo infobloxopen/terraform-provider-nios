@@ -10,6 +10,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -34,6 +36,7 @@ type LdapAuthServiceModel struct {
 	Retries                     types.Int64  `tfsdk:"retries"`
 	SearchScope                 types.String `tfsdk:"search_scope"`
 	Servers                     types.List   `tfsdk:"servers"`
+	PasswordVersion             types.Int64  `tfsdk:"password_version"`
 	Timeout                     types.Int64  `tfsdk:"timeout"`
 }
 
@@ -52,6 +55,7 @@ var LdapAuthServiceAttrTypes = map[string]attr.Type{
 	"search_scope":                   types.StringType,
 	"servers":                        types.ListType{ElemType: types.ObjectType{AttrTypes: LdapAuthServiceServersAttrTypes}},
 	"timeout":                        types.Int64Type,
+	"password_version":               types.Int64Type,
 }
 
 var LdapAuthServiceResourceSchemaAttributes = map[string]schema.Attribute{
@@ -116,6 +120,13 @@ var LdapAuthServiceResourceSchemaAttributes = map[string]schema.Attribute{
 	"name": schema.StringAttribute{
 		Required:            true,
 		MarkdownDescription: "The LDAP authentication service name.",
+	},
+	"password_version": schema.Int64Attribute{
+		Computed:            true,
+		MarkdownDescription: "Internal version incremented when bind_password sub field of servers changes.",
+		PlanModifiers: []planmodifier.Int64{
+			int64planmodifier.UseStateForUnknown(),
+		},
 	},
 	"recovery_interval": schema.Int64Attribute{
 		Required: true,
