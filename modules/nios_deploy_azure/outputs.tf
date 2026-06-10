@@ -64,18 +64,10 @@ output "nic3_name" {
   value       = var.enable_ha ? azurerm_network_interface.nic3[0].name : null
 }
 
-# output "nic1_ipv6" {
-#   description = "IPv6 address of NIC1 (Subnet 1). Null when enable_ipv6 is false."
-#   value = var.enable_ipv6 ? one([
-#     for cfg in azurerm_network_interface.nic1.ip_configuration :
-#     cfg.private_ip_address if cfg.name == "${var.ip_configuration_name_nic1}-v6"
-#   ]) : null
-# }
-
-# output "nic2_ipv6" {
-#   description = "IPv6 address of NIC2 (Subnet 2). Null when enable_ipv6 is false."
-#   value = var.enable_ipv6 ? one([
-#     for cfg in azurerm_network_interface.nic2.ip_configuration :
-#     cfg.private_ip_address if cfg.name == "${var.ip_configuration_name_nic2}-v6"
-#   ]) : null
-# }
+output "nic1_ipv6" {
+  description = "IPv6 address of NIC1 (Subnet 1). Null when enable_ipv6 is false."
+  value = var.enable_ipv6 ? one([
+    for cfg in azurerm_network_interface.nic1.ip_configuration :
+    cfg.private_ip_address if cfg.name == "${var.ip_configuration_name_nic1}-v6"
+  ]) : null
+}

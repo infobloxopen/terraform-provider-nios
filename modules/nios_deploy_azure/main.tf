@@ -58,16 +58,16 @@ resource "azurerm_network_interface" "nic1" {
     primary                       = true
   }
 
-  # dynamic "ip_configuration" {
-  #   for_each = var.enable_ipv6 ? [1] : []
-  #   content {
-  #     name                          = "${var.ip_configuration_name_nic1}-v6"
-  #     subnet_id                     = data.azurerm_subnet.subnet1.id
-  #     private_ip_address_allocation = "Dynamic"
-  #     private_ip_address_version    = "IPv6"
-  #     primary                       = false
-  #   }
-  # }
+  dynamic "ip_configuration" {
+    for_each = var.enable_ipv6 ? [1] : []
+    content {
+      name                          = "${var.ip_configuration_name_nic1}-v6"
+      subnet_id                     = data.azurerm_subnet.subnet1.id
+      private_ip_address_allocation = "Dynamic"
+      private_ip_address_version    = "IPv6"
+      primary                       = false
+    }
+  }
 
   tags = var.tags
 }
@@ -84,16 +84,6 @@ resource "azurerm_network_interface" "nic2" {
     private_ip_address_allocation = var.private_ip_address_allocation
     primary                       = true
   }
-  # dynamic "ip_configuration" {
-  #   for_each = var.enable_ipv6 ? [1] : []
-  #   content {
-  #     name                          = "${var.ip_configuration_name_nic2}-v6"
-  #     subnet_id                     = data.azurerm_subnet.subnet2.id
-  #     private_ip_address_allocation = "Dynamic"
-  #     private_ip_address_version    = "IPv6"
-  #     primary                       = false
-  #   }
-  # }
 
   tags = var.tags
 }

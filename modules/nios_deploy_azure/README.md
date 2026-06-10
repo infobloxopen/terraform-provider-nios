@@ -183,7 +183,71 @@ resource "nios_grid_join" "member_join" {
 }
 ```
 
-#### Example 2: HA Grid Configuration
+#### Example 2: Join a Member with Dual Stack Config
+
+To configure IPv6 on the grid member, set `enable_ipv6 = true`. The member's
+IPv6 address is then exposed through the `nic1_ipv6` output and consumed by the
+`ipv6_setting` block on the `nios_grid_member` resource.
+
+##### Deploy Azure infrastructure for Master and Member
+
+```hcl
+module "node1" {
+  source = "github.com/infobloxopen/terraform-provider-nios//modules/nios_deploy_azure?ref=nios_v9.1.0"
+  // ... (same config as Step 1)
+
+  enable_ipv6 = true // enable IPv6 on the member NIC
+}
+
+module "node2" {
+  source = "github.com/infobloxopen/terraform-provider-nios//modules/nios_deploy_azure?ref=nios_v9.1.0"
+  // ... (same config as Step 1)
+
+  enable_ipv6 = true // enable IPv6 on the member NIC
+}
+```
+
+##### After NIOS is ready (~30 min), configure grid member
+
+```hcl
+provider "nios" {
+  nios_host_url = "https://${module.node1.nic1_ip}"
+  nios_username = "username"
+  nios_password = "password"
+}
+
+resource "nios_grid_member" "member" {
+  host_name        = "infoblox.member"
+  config_addr_type = "BOTH"
+  platform         = "VNIOS"
+
+  vip_setting = {
+    address     = module.node2.nic1_ip
+    gateway     = module.node2.subnet1_gateway
+    subnet_mask = module.node2.subnet1_mask
+  }
+
+  ipv6_setting = {
+    virtual_ip  = module.node2.nic1_ipv6
+    cidr_prefix = 64
+    gateway     = "<member_ipv6_gateway_ip>"
+    enabled     = true
+  }
+}
+
+// Join member to existing grid master
+resource "nios_grid_join" "member_join" {
+  member_url      = "https://${module.node2.nic1_ip}"
+  member_username = "Username"
+  member_password = "Password"
+  grid_name       = "Infoblox"
+  master          = module.node1.nic1_ip
+  shared_secret   = "<secret>"
+  depends_on      = [nios_grid_member.member]
+}
+```
+
+#### Example 3: HA Grid Configuration
 
 Deploy two Azure VMs for SA-HA configuration. HA on Azure requires a third NIC
 (`nic3`) on a dedicated HA subnet (`subnet3`) and a User-Assigned Managed

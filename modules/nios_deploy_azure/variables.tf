@@ -184,8 +184,8 @@ variable "tags" {
   default     = {}
 }
 
-# variable "enable_ipv6" {
-#   description = "Whether to create an additional IPv6 IP Configuration."
-#   type        = bool
-#   default     = false
-# }
+variable "enable_ipv6" {
+  description = "Whether to create an additional IPv6 IP Configuration."
+  type        = bool
+  default     = false
+}
