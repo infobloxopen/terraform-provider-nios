@@ -558,10 +558,16 @@ func (r *MemberResource) ValidateConfig(ctx context.Context, req resource.Valida
 		}
 
 		if len(nodeInfo) == 2 {
-			if data.EnableHa.IsNull() || data.EnableHa.IsUnknown() || !data.EnableHa.ValueBool() {
-				resp.Diagnostics.AddError("Validation Error", "enable_ha must be true when node_info contains 2 nodes")
-			}
-		}
+            if data.EnableHa.IsNull() || data.EnableHa.IsUnknown() || !data.EnableHa.ValueBool() {
+                resp.Diagnostics.AddError("Validation Error", "node_info contains 2 nodes but enable_ha is not set to true. Either set enable_ha = true to enable HA mode, or configure only a single node in node_info when enable_ha is false")
+            }
+        } else if len(nodeInfo) > 2 {
+            if !data.EnableHa.IsNull() && !data.EnableHa.IsUnknown() && data.EnableHa.ValueBool() {
+                resp.Diagnostics.AddError("Validation Error", "node_info must contain exactly 2 nodes when enable_ha is true")
+            } else {
+                resp.Diagnostics.AddError("Validation Error", "node_info must contain 1 node when enable_ha is false")
+            }
+        }
 	}
 
 	if !data.MgmtPortSetting.IsNull() && !data.MgmtPortSetting.IsUnknown() {
