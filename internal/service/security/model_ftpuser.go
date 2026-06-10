@@ -9,14 +9,13 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-
 	"github.com/infobloxopen/infoblox-nios-go-client/security"
-
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 	planmodifiers "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/immutable"
 	importmod "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/import"
@@ -24,27 +23,29 @@ import (
 )
 
 type FtpuserModel struct {
-	Ref           types.String `tfsdk:"ref"`
-	Uuid          types.String `tfsdk:"uuid"`
-	CreateHomeDir types.Bool   `tfsdk:"create_home_dir"`
-	ExtAttrs      types.Map    `tfsdk:"extattrs"`
-	ExtAttrsAll   types.Map    `tfsdk:"extattrs_all"`
-	HomeDir       types.String `tfsdk:"home_dir"`
-	Password      types.String `tfsdk:"password"`
-	Permission    types.String `tfsdk:"permission"`
-	Username      types.String `tfsdk:"username"`
+	Ref             types.String `tfsdk:"ref"`
+	Uuid            types.String `tfsdk:"uuid"`
+	CreateHomeDir   types.Bool   `tfsdk:"create_home_dir"`
+	ExtAttrs        types.Map    `tfsdk:"extattrs"`
+	ExtAttrsAll     types.Map    `tfsdk:"extattrs_all"`
+	HomeDir         types.String `tfsdk:"home_dir"`
+	Password        types.String `tfsdk:"password"`
+	PasswordVersion types.Int64  `tfsdk:"password_version"`
+	Permission      types.String `tfsdk:"permission"`
+	Username        types.String `tfsdk:"username"`
 }
 
 var FtpuserAttrTypes = map[string]attr.Type{
-	"ref":             types.StringType,
-	"uuid":            types.StringType,
-	"create_home_dir": types.BoolType,
-	"extattrs":        types.MapType{ElemType: types.StringType},
-	"extattrs_all":    types.MapType{ElemType: types.StringType},
-	"home_dir":        types.StringType,
-	"password":        types.StringType,
-	"permission":      types.StringType,
-	"username":        types.StringType,
+	"ref":              types.StringType,
+	"uuid":             types.StringType,
+	"create_home_dir":  types.BoolType,
+	"extattrs":         types.MapType{ElemType: types.StringType},
+	"extattrs_all":     types.MapType{ElemType: types.StringType},
+	"home_dir":         types.StringType,
+	"password":         types.StringType,
+	"password_version": types.Int64Type,
+	"permission":       types.StringType,
+	"username":         types.StringType,
 }
 
 var FtpuserResourceSchemaAttributes = map[string]schema.Attribute{
@@ -93,8 +94,15 @@ var FtpuserResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"password": schema.StringAttribute{
 		Required:            true,
-		Sensitive:           true,
+		WriteOnly:           true,
 		MarkdownDescription: "The FTP user password.",
+	},
+	"password_version": schema.Int64Attribute{
+		Computed:            true,
+		MarkdownDescription: "Internal revision incremented when password field changes.",
+		PlanModifiers: []planmodifier.Int64{
+			int64planmodifier.UseStateForUnknown(),
+		},
 	},
 	"permission": schema.StringAttribute{
 		Optional: true,

@@ -61,6 +61,7 @@ Optional:
 
 Read-Only:
 
+- `password_version` (Number) Internal version incremented when bind_password sub field of servers changes.
 - `ref` (String) The reference to the object.
 - `uuid` (String) Universally Unique ID assigned for this object.
 
@@ -75,7 +76,7 @@ Required:
 Optional:
 
 - `authentication_type` (String) The authentication type for the LDAP server.
-- `bind_password` (String, Sensitive) The user password for authentication.
+- `bind_password` (String) The user password for authentication.
 - `bind_user_dn` (String) The user DN for authentication.
 - `comment` (String) The LDAP descriptive comment.
 - `disable` (Boolean) Determines if the LDAP server is disabled.

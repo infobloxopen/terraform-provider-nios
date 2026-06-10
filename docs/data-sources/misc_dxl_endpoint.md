@@ -70,7 +70,7 @@ Optional:
 - `topics` (List of String) DXL topics
 - `vendor_identifier` (String) The vendor identifier.
 - `wapi_user_name` (String) The user name for WAPI integration.
-- `wapi_user_password` (String, Sensitive) The user password for WAPI integration.
+- `wapi_user_password` (String) The user password for WAPI integration.
 
 Read-Only:
 
@@ -79,6 +79,7 @@ Read-Only:
 - `client_certificate_valid_from` (Number) The timestamp when client certificate for a DXL endpoint was created.
 - `client_certificate_valid_to` (Number) The timestamp when the client certificate for a DXL endpoint expires.
 - `extattrs_all` (Map of String) Extensible attributes associated with the object, including default and internal attributes.
+- `password_version` (Number) Internal version incremented when wapi_user_password changes.
 - `ref` (String) The reference to the object.
 - `uuid` (String) Universally Unique ID assigned for this object.
 

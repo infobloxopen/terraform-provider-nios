@@ -9,9 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
-
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
-
 	"github.com/infobloxopen/terraform-provider-nios/internal/config"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
@@ -29,6 +27,10 @@ func NewBfdtemplateResource() resource.Resource {
 // BfdtemplateResource defines the resource implementation.
 type BfdtemplateResource struct {
 	client *niosclient.APIClient
+}
+
+type secretsHashState struct {
+	AuthenticationKey string `json:"authentication_key_hash"`
 }
 
 func (r *BfdtemplateResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {

@@ -83,6 +83,7 @@ resource "nios_security_radius_authservice" "radius_authservice_with_additional_
 
 - `ref` (String) The reference to the object.
 - `uuid` (String) Universally Unique ID assigned for this object.
+- `secret_version` (Number) Internal version incremented when shared_secret sub field of servers changes.
 
 <a id="nestedatt--servers"></a>
 ### Nested Schema for `servers`
@@ -90,7 +91,7 @@ resource "nios_security_radius_authservice" "radius_authservice_with_additional_
 Required:
 
 - `address` (String) The FQDN or the IP address of the RADIUS server that is used for authentication.
-- `shared_secret` (String) The shared secret that the NIOS appliance and the RADIUS server use to encrypt and decrypt their messages.
+- `shared_secret` (String, [Write-only](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments)) The shared secret that the NIOS appliance and the RADIUS server use to encrypt and decrypt their messages.
 
 Optional:
 

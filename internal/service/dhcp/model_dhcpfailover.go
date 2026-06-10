@@ -13,6 +13,7 @@ import (
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
@@ -48,6 +49,7 @@ type DhcpfailoverModel struct {
 	MsPreviousState            types.String `tfsdk:"ms_previous_state"`
 	MsServer                   types.String `tfsdk:"ms_server"`
 	MsSharedSecret             types.String `tfsdk:"ms_shared_secret"`
+	MsSharedSecretVersion      types.Int64  `tfsdk:"ms_shared_secret_version"`
 	MsState                    types.String `tfsdk:"ms_state"`
 	MsSwitchoverInterval       types.Int64  `tfsdk:"ms_switchover_interval"`
 	Name                       types.String `tfsdk:"name"`
@@ -86,6 +88,7 @@ var DhcpfailoverAttrTypes = map[string]attr.Type{
 	"ms_previous_state":             types.StringType,
 	"ms_server":                     types.StringType,
 	"ms_shared_secret":              types.StringType,
+	"ms_shared_secret_version":      types.Int64Type,
 	"ms_state":                      types.StringType,
 	"ms_switchover_interval":        types.Int64Type,
 	"name":                          types.StringType,
@@ -252,8 +255,15 @@ var DhcpfailoverResourceSchemaAttributes = map[string]schema.Attribute{
 	"ms_shared_secret": schema.StringAttribute{
 		Computed:            true,
 		Optional:            true,
-		Sensitive:           true,
+		WriteOnly:           true,
 		MarkdownDescription: "The failover association authentication. This is a write-only attribute.",
+	},
+	"ms_shared_secret_version": schema.Int64Attribute{
+		Computed:            true,
+		MarkdownDescription: "Internal version incremented when ms_shared_secret field changes.",
+		PlanModifiers: []planmodifier.Int64{
+			int64planmodifier.UseStateForUnknown(),
+		},
 	},
 	"ms_state": schema.StringAttribute{
 		Computed:            true,

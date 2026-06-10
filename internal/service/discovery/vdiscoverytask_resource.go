@@ -2,6 +2,9 @@ package discovery
 
 import (
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
+	"encoding/json"
 	"fmt"
 	"net/http"
 
@@ -24,6 +27,8 @@ var readableAttributesForVdiscoverytask = "accounts_list,allow_unsecured_connect
 var _ resource.Resource = &VdiscoverytaskResource{}
 var _ resource.ResourceWithImportState = &VdiscoverytaskResource{}
 var _ resource.ResourceWithValidateConfig = &VdiscoverytaskResource{}
+
+var _ resource.ResourceWithModifyPlan = &VdiscoverytaskResource{}
 
 func NewVdiscoverytaskResource() resource.Resource {
 	return &VdiscoverytaskResource{}
@@ -274,6 +279,95 @@ func (r *VdiscoverytaskResource) ValidateConfig(ctx context.Context, req resourc
 	}
 }
 
+type secretsHashState struct {
+	Password string `json:"password_hash"`
+}
+
+func (r *VdiscoverytaskResource) ModifyPlan(ctx context.Context, req resource.ModifyPlanRequest, resp *resource.ModifyPlanResponse) {
+	if req.Plan.Raw.IsNull() {
+		return
+	}
+
+	var statePwdVersion types.Int64
+	var planPassword types.String
+
+	// Normalize stateRev if null (e.g., first apply)
+	curRev := int64(0)
+
+	if !req.State.Raw.IsNull() && req.State.Raw.IsKnown() {
+		resp.Diagnostics.Append(req.State.GetAttribute(ctx, path.Root("password_version"), &statePwdVersion)...)
+		if resp.Diagnostics.HasError() {
+			return
+		}
+		if !statePwdVersion.IsNull() && !statePwdVersion.IsUnknown() {
+			curRev = statePwdVersion.ValueInt64()
+		}
+	}
+	resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("password"), &planPassword)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	computeNewHash := !planPassword.IsNull() && !planPassword.IsUnknown()
+
+	prevHashes := secretsHashState{}
+	plannedHashes := secretsHashState{}
+
+	if computeNewHash {
+
+		var prev struct {
+			Algo string `json:"algo"`
+			Hash string `json:"hash"`
+		}
+
+		if b, diags := req.Private.GetKey(ctx, "password_hash"); diags != nil {
+			resp.Diagnostics.Append(diags...)
+		} else if b != nil {
+			if err := json.Unmarshal(b, &prev); err != nil {
+				// Older buggy format: ignore and treat as different
+				prev.Hash = ""
+			}
+		}
+		var plannedHash string
+
+		if prev.Hash != "" {
+			// Best-effort parse; if this fails, treat prev.Hash as a legacy value and
+			// leave prevHashes at its zero value so that we will recompute as needed.
+			_ = json.Unmarshal([]byte(prev.Hash), &prevHashes)
+		}
+
+		if !planPassword.IsUnknown() {
+			if planPassword.IsNull() {
+				plannedHashes.Password = ""
+			} else {
+				h := sha256.New()
+				h.Write([]byte(planPassword.ValueString()))
+				plannedHashes.Password = hex.EncodeToString(h.Sum(nil))
+			}
+		}
+		if data, err := json.Marshal(plannedHashes); err == nil {
+			plannedHash = string(data)
+		}
+
+		if plannedHashes.Password != "" && plannedHashes.Password != prevHashes.Password {
+			// Increment version and store new hash if password modified
+			newRev := types.Int64Value(curRev + 1)
+			resp.Diagnostics.Append(resp.Plan.SetAttribute(ctx, path.Root("password_version"), newRev)...)
+
+			val := map[string]string{"algo": "sha256", "hash": plannedHash}
+			b, err := json.Marshal(val)
+			if err != nil {
+				resp.Diagnostics.AddError("Private State Marshal Error", err.Error())
+				return
+			}
+			resp.Diagnostics.Append(resp.Private.SetKey(ctx, "password_hash", b)...)
+		} else {
+			resp.Diagnostics.Append(resp.Plan.SetAttribute(ctx, path.Root("password_version"), curRev)...)
+		}
+	}
+
+}
+
 func (r *VdiscoverytaskResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var data VdiscoverytaskModel
 
@@ -297,19 +391,51 @@ func (r *VdiscoverytaskResource) Create(ctx context.Context, req resource.Create
 			return
 		}
 	}
+	payload := data.Expand(ctx, &resp.Diagnostics)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	passwordVersion := types.Int64Value(0)
+	var password types.String
+	resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("password"), &password)...)
+
+	secretData := secretsHashState{}
+
+	if !password.IsNull() && !password.IsUnknown() {
+
+		payload.Password = password.ValueStringPointer()
+		passwordVersion = types.Int64Value(1)
+		h := sha256.New()
+		h.Write([]byte(password.ValueString()))
+		secretData.Password = hex.EncodeToString(h.Sum(nil))
+
+		secretDataJSON, _ := json.Marshal(secretData)
+		val := map[string]string{"algo": "sha256", "hash": string(secretDataJSON)}
+		hashedPassword, err := json.Marshal(val)
+		if err != nil {
+			resp.Diagnostics.AddError("Private State Marshal Error", err.Error())
+			return
+		}
+		resp.Diagnostics.Append(resp.Private.SetKey(ctx, "password_hash", hashedPassword)...)
+	}
+
 	apiRes, _, err := r.client.DiscoveryAPI.
 		VdiscoverytaskAPI.
 		Create(ctx).
-		Vdiscoverytask(*data.Expand(ctx, &resp.Diagnostics)).
+		Vdiscoverytask(*payload).
 		ReturnFieldsPlus(readableAttributesForVdiscoverytask).
 		ReturnAsObject(1).
 		Execute()
+
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create Vdiscoverytask, got error: %s", err))
 		return
 	}
 
 	res := apiRes.CreateVdiscoverytaskResponseAsObject.GetResult()
+
+	data.PasswordVersion = passwordVersion
 
 	data.Flatten(ctx, &res, &resp.Diagnostics)
 
@@ -391,13 +517,31 @@ func (r *VdiscoverytaskResource) Update(ctx context.Context, req resource.Update
 		}
 	}
 
+	var password types.String
+	resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("password"), &password)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	payload := data.Expand(ctx, &resp.Diagnostics)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	if !password.IsNull() && !password.IsUnknown() {
+		payload.Password = password.ValueStringPointer()
+	}
+
+	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
+
 	apiRes, _, err := r.client.DiscoveryAPI.
 		VdiscoverytaskAPI.
-		Update(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
-		Vdiscoverytask(*data.Expand(ctx, &resp.Diagnostics)).
+		Update(ctx, resourceRef).
+		Vdiscoverytask(*payload).
 		ReturnFieldsPlus(readableAttributesForVdiscoverytask).
 		ReturnAsObject(1).
 		Execute()
+
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update Vdiscoverytask, got error: %s", err))
 		return
