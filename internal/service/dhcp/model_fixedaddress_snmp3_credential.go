@@ -55,9 +55,7 @@ var FixedaddressSnmp3CredentialResourceSchemaAttributes = map[string]schema.Attr
 	},
 	"authentication_password": schema.StringAttribute{
 		Optional:  true,
-		Computed:  true,
 		WriteOnly: true,
-		Default:   stringdefault.StaticString(""),
 		Validators: []validator.String{
 			customvalidator.ValidateTrimmedString(),
 		},
@@ -72,9 +70,7 @@ var FixedaddressSnmp3CredentialResourceSchemaAttributes = map[string]schema.Attr
 	},
 	"privacy_password": schema.StringAttribute{
 		Optional:  true,
-		Computed:  true,
 		WriteOnly: true,
-		Default:   stringdefault.StaticString(""),
 		Validators: []validator.String{
 			customvalidator.ValidateTrimmedString(),
 		},

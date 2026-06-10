@@ -180,11 +180,34 @@ func TestAccIpv6fixedaddressResource_AllowTelnet(t *testing.T) {
 
 func TestAccIpv6fixedaddressResource_CliCredentials(t *testing.T) {
 	var resourceName = "nios_dhcp_ipv6fixedaddress.test_cli_credentials"
+	var resourceName1 = "nios_dhcp_ipv6fixedaddress.test_cli_credentials1"
 	var v dhcp.Ipv6fixedaddress
 	ipv6Network := "2001:db8:abcd:1231::/64"
 	ipv6addr := "2001:db8:abcd:1231::1"
+	ipv6addr1 := "2001:db8:abcd:1231::2"
 	networkView := acctest.RandomNameWithPrefix("network-view")
 	duid := "00:01:00:01:1d:2b:3c:4d:00:0c:29:ab:cd:ef"
+	cliCred := []map[string]any{{
+		"user":             "user1",
+		"credential_type":  "SSH",
+		"comment":          "cli credential comment",
+		"password":         "password1",
+		"credential_group": "default",
+	}}
+	cliCred1 := []map[string]any{{
+		"user":             "user1",
+		"credential_type":  "SSH",
+		"comment":          "cli credential comment",
+		"password":         "password12",
+		"credential_group": "default",
+	}}
+	cliCred2 := []map[string]any{{
+		"user":             "user2",
+		"credential_type":  "SSH",
+		"comment":          "cli credential comment update",
+		"password":         "password12",
+		"credential_group": "default",
+	}}
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
@@ -196,9 +219,9 @@ func TestAccIpv6fixedaddressResource_CliCredentials(t *testing.T) {
 					testAccCheckIpv6fixedaddressExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "cli_credentials.0.comment", "Comment for CLI Credentials"),
 					resource.TestCheckResourceAttr(resourceName, "cli_credentials.0.user", "NIOS_USER"),
-					resource.TestCheckResourceAttr(resourceName, "cli_credentials.0.password", "NIOS_PASSWORD"),
 					resource.TestCheckResourceAttr(resourceName, "cli_credentials.0.credential_type", "SSH"),
 					resource.TestCheckResourceAttr(resourceName, "cli_credentials.0.credential_group", "default"),
+					resource.TestCheckResourceAttr(resourceName, "secrets_version", "1"),
 				),
 			},
 			// Update and Read
@@ -208,9 +231,9 @@ func TestAccIpv6fixedaddressResource_CliCredentials(t *testing.T) {
 					testAccCheckIpv6fixedaddressExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "cli_credentials.1.comment", "Updated Comment for CLI Credentials"),
 					resource.TestCheckResourceAttr(resourceName, "cli_credentials.1.user", "NIOS_USER"),
-					resource.TestCheckResourceAttr(resourceName, "cli_credentials.1.password", "NIOS_PASSWORD"),
 					resource.TestCheckResourceAttr(resourceName, "cli_credentials.1.credential_type", "TELNET"),
 					resource.TestCheckResourceAttr(resourceName, "cli_credentials.1.credential_group", "default"),
+					resource.TestCheckResourceAttr(resourceName, "secrets_version", "2"),
 				),
 			},
 			// Update and Read
@@ -220,21 +243,65 @@ func TestAccIpv6fixedaddressResource_CliCredentials(t *testing.T) {
 					testAccCheckIpv6fixedaddressExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "cli_credentials.1.comment", "Updated Comment for CLI Credentials"),
 					resource.TestCheckResourceAttr(resourceName, "cli_credentials.1.user", "NIOS_USER"),
-					resource.TestCheckResourceAttr(resourceName, "cli_credentials.1.password", "NIOS_PASSWORD"),
 					resource.TestCheckResourceAttr(resourceName, "cli_credentials.1.credential_type", "ENABLE_SSH"),
 					resource.TestCheckResourceAttr(resourceName, "cli_credentials.1.credential_group", "default"),
+					resource.TestCheckResourceAttr(resourceName, "secrets_version", "2"),
 				),
 			},
-			//// Update and Read
+			// Update and Read
 			{
 				Config: testAccIpv6fixedaddressCliCredentials(ipv6addr, duid, networkView, ipv6Network, "Updated Comment for CLI Credentials", "NIOS_USER", "NIOS_PASSWORD", "ENABLE_TELNET", "default", "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6fixedaddressExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "cli_credentials.1.comment", "Updated Comment for CLI Credentials"),
 					resource.TestCheckResourceAttr(resourceName, "cli_credentials.1.user", "NIOS_USER"),
-					resource.TestCheckResourceAttr(resourceName, "cli_credentials.1.password", "NIOS_PASSWORD"),
 					resource.TestCheckResourceAttr(resourceName, "cli_credentials.1.credential_type", "ENABLE_TELNET"),
 					resource.TestCheckResourceAttr(resourceName, "cli_credentials.1.credential_group", "default"),
+					resource.TestCheckResourceAttr(resourceName, "secrets_version", "2"),
+				),
+			},
+			// Create an IPv6 FA without cli_credentials and Read
+			{
+				Config: testAccIpv6fixedaddressCliCredentialsSecrets(resourceName1, ipv6addr1, duid, networkView, ipv6Network, nil),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckIpv6fixedaddressExists(context.Background(), resourceName1, &v),
+					resource.TestCheckResourceAttr(resourceName1, "cli_credentials.#", "0"),
+					resource.TestCheckResourceAttr(resourceName1, "secrets_version", "0"),
+				),
+			},
+			// Add cli_credentials and Read
+			{
+				Config: testAccIpv6fixedaddressCliCredentialsSecrets(resourceName1, ipv6addr1, duid, networkView, ipv6Network, cliCred),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckIpv6fixedaddressExists(context.Background(), resourceName1, &v),
+					resource.TestCheckResourceAttr(resourceName1, "cli_credentials.0.credential_type", "SSH"),
+					resource.TestCheckResourceAttr(resourceName1, "cli_credentials.0.user", "user1"),
+					resource.TestCheckResourceAttr(resourceName1, "cli_credentials.0.credential_group", "default"),
+					resource.TestCheckResourceAttr(resourceName1, "secrets_version", "1"),
+				),
+			},
+			// Update write-only field of cli_credentials and Read
+			{
+				Config: testAccIpv6fixedaddressCliCredentialsSecrets(resourceName1, ipv6addr1, duid, networkView, ipv6Network, cliCred1),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckIpv6fixedaddressExists(context.Background(), resourceName1, &v),
+					resource.TestCheckResourceAttr(resourceName1, "cli_credentials.0.comment", "cli credential comment"),
+					resource.TestCheckResourceAttr(resourceName1, "cli_credentials.0.user", "user1"),
+					resource.TestCheckResourceAttr(resourceName1, "cli_credentials.0.credential_type", "SSH"),
+					resource.TestCheckResourceAttr(resourceName1, "cli_credentials.0.credential_group", "default"),
+					resource.TestCheckResourceAttr(resourceName1, "secrets_version", "2"),
+				),
+			},
+			// Update non write-only field of cli_credentials and Read
+			{
+				Config: testAccIpv6fixedaddressCliCredentialsSecrets(resourceName1, ipv6addr1, duid, networkView, ipv6Network, cliCred2),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckIpv6fixedaddressExists(context.Background(), resourceName1, &v),
+					resource.TestCheckResourceAttr(resourceName1, "cli_credentials.0.comment", "cli credential comment update"),
+					resource.TestCheckResourceAttr(resourceName1, "cli_credentials.0.user", "user2"),
+					resource.TestCheckResourceAttr(resourceName1, "cli_credentials.0.credential_type", "SSH"),
+					resource.TestCheckResourceAttr(resourceName1, "cli_credentials.0.credential_group", "default"),
+					resource.TestCheckResourceAttr(resourceName1, "secrets_version", "2"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -1056,8 +1123,53 @@ func TestAccIpv6fixedaddressResource_Snmp3Credential(t *testing.T) {
 	var v dhcp.Ipv6fixedaddress
 	ipv6Network := "2001:db8:abcd:1231::/64"
 	ipv6addr := "2001:db8:abcd:1231::1"
+	ipv6addr1 := "2001:db8:abcd:1231::2"
 	networkView := acctest.RandomNameWithPrefix("network-view")
 	duid := "00:01:00:01:1d:2b:3c:4d:00:0c:29:ab:cd:ef"
+	duid1 := "00:01:00:01:1d:2b:3c:4d:01:1c:29:ab:cd:ef"
+	var resourceName1 = "nios_dhcp_ipv6fixedaddress.test_snmp3_credential1"
+
+	snmp3Cred := map[string]any{
+		"user":                    "user1",
+		"authentication_protocol": "SHA",
+		"authentication_password": "authPass",
+		"privacy_protocol":        "AES",
+		"privacy_password":        "privPass",
+		"comment":                 "SNMP3 Credential Comment",
+	}
+	snmp3Cred1 := map[string]any{
+		"user":                    "user1",
+		"authentication_protocol": "SHA",
+		"authentication_password": "authPass123",
+		"privacy_protocol":        "AES",
+		"privacy_password":        "privPass",
+		"comment":                 "SNMP3 Credential Comment",
+	}
+	snmp3Cred2 := map[string]any{
+		"user":                    "user1",
+		"authentication_protocol": "SHA",
+		"authentication_password": "authPass123",
+		"privacy_protocol":        "AES",
+		"privacy_password":        "privPass123",
+		"comment":                 "SNMP3 Credential Comment",
+	}
+	snmp3Cred3 := map[string]any{
+		"user":                    "user1",
+		"authentication_protocol": "SHA",
+		"authentication_password": "authPass345",
+		"privacy_protocol":        "AES",
+		"privacy_password":        "privPass345",
+		"comment":                 "SNMP3 Credential Comment",
+	}
+	snmp3Cred4 := map[string]any{
+		"user":                    "user2",
+		"authentication_protocol": "SHA",
+		"authentication_password": "authPass",
+		"privacy_protocol":        "AES",
+		"privacy_password":        "privPass",
+		"comment":                 "SNMP3 Credential Comment",
+	}
+
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
@@ -1069,11 +1181,10 @@ func TestAccIpv6fixedaddressResource_Snmp3Credential(t *testing.T) {
 					testAccCheckIpv6fixedaddressExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "snmp3_credential.user", "snmp"),
 					resource.TestCheckResourceAttr(resourceName, "snmp3_credential.authentication_protocol", "MD5"),
-					resource.TestCheckResourceAttr(resourceName, "snmp3_credential.authentication_password", "snmp1234"),
 					resource.TestCheckResourceAttr(resourceName, "snmp3_credential.privacy_protocol", "3DES"),
-					resource.TestCheckResourceAttr(resourceName, "snmp3_credential.privacy_password", "snmp1234"),
 					resource.TestCheckResourceAttr(resourceName, "snmp3_credential.comment", "SNMP3 Credential Comment"),
 					resource.TestCheckResourceAttr(resourceName, "snmp3_credential.credential_group", "default"),
+					resource.TestCheckResourceAttr(resourceName, "secrets_version", "1"),
 				),
 			},
 			// Update and Read
@@ -1083,11 +1194,95 @@ func TestAccIpv6fixedaddressResource_Snmp3Credential(t *testing.T) {
 					testAccCheckIpv6fixedaddressExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "snmp3_credential.user", "SNMP3_USER_UPDATE"),
 					resource.TestCheckResourceAttr(resourceName, "snmp3_credential.authentication_protocol", "SHA-224"),
-					resource.TestCheckResourceAttr(resourceName, "snmp3_credential.authentication_password", "AUTH_PASSWORD"),
 					resource.TestCheckResourceAttr(resourceName, "snmp3_credential.privacy_protocol", "AES-256"),
-					resource.TestCheckResourceAttr(resourceName, "snmp3_credential.privacy_password", "PRIVACY_PASSWORD"),
 					resource.TestCheckResourceAttr(resourceName, "snmp3_credential.comment", "SNMP3 Credential Comment Updated"),
 					resource.TestCheckResourceAttr(resourceName, "snmp3_credential.credential_group", "default"),
+					resource.TestCheckResourceAttr(resourceName, "secrets_version", "2"),
+				),
+			},
+			// Create an IPV6 FA without SNMP3 credentials and read
+			{
+				Config: testAccIpv6fixedaddressSnmp3CredentialSecretVersion(resourceName1, ipv6addr1, duid1, networkView, ipv6Network, nil, "false"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckIpv6fixedaddressExists(context.Background(), resourceName1, &v),
+					resource.TestCheckResourceAttr(resourceName1, "secrets_version", "0"),
+				),
+			},
+			// Add SNMP3 credentials field and read
+			{
+				Config: testAccIpv6fixedaddressSnmp3CredentialSecretVersion(resourceName1, ipv6addr1, duid1, networkView, ipv6Network, snmp3Cred, "true"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckIpv6fixedaddressExists(context.Background(), resourceName1, &v),
+					resource.TestCheckResourceAttr(resourceName1, "snmp3_credential.user", "user1"),
+					resource.TestCheckResourceAttr(resourceName1, "snmp3_credential.authentication_protocol", "SHA"),
+					resource.TestCheckResourceAttr(resourceName1, "snmp3_credential.privacy_protocol", "AES"),
+					resource.TestCheckResourceAttr(resourceName1, "snmp3_credential.comment", "SNMP3 Credential Comment"),
+					resource.TestCheckResourceAttr(resourceName1, "snmp3_credential.credential_group", "default"),
+					resource.TestCheckResourceAttr(resourceName1, "secrets_version", "1"),
+				),
+			},
+			// Update (write-only) authentication_password field in SNMP3 credentials and read
+			{
+				Config: testAccIpv6fixedaddressSnmp3CredentialSecretVersion(resourceName1, ipv6addr1, duid1, networkView, ipv6Network, snmp3Cred1, "true"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckIpv6fixedaddressExists(context.Background(), resourceName1, &v),
+					resource.TestCheckResourceAttr(resourceName1, "snmp3_credential.user", "user1"),
+					resource.TestCheckResourceAttr(resourceName1, "snmp3_credential.authentication_protocol", "SHA"),
+					resource.TestCheckResourceAttr(resourceName1, "snmp3_credential.privacy_protocol", "AES"),
+					resource.TestCheckResourceAttr(resourceName1, "snmp3_credential.comment", "SNMP3 Credential Comment"),
+					resource.TestCheckResourceAttr(resourceName1, "snmp3_credential.credential_group", "default"),
+					resource.TestCheckResourceAttr(resourceName1, "secrets_version", "2"),
+				),
+			},
+			// Update (write-only) privacy_password field in SNMP3 credentials and read
+			{
+				Config: testAccIpv6fixedaddressSnmp3CredentialSecretVersion(resourceName1, ipv6addr1, duid1, networkView, ipv6Network, snmp3Cred2, "true"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckIpv6fixedaddressExists(context.Background(), resourceName1, &v),
+					resource.TestCheckResourceAttr(resourceName1, "snmp3_credential.user", "user1"),
+					resource.TestCheckResourceAttr(resourceName1, "snmp3_credential.authentication_protocol", "SHA"),
+					resource.TestCheckResourceAttr(resourceName1, "snmp3_credential.privacy_protocol", "AES"),
+					resource.TestCheckResourceAttr(resourceName1, "snmp3_credential.comment", "SNMP3 Credential Comment"),
+					resource.TestCheckResourceAttr(resourceName1, "snmp3_credential.credential_group", "default"),
+					resource.TestCheckResourceAttr(resourceName1, "secrets_version", "3"),
+				),
+			},
+			// Update both the write-only fields of SNMP3 credentials (authentication_password and privacy_password) and read
+			{
+				Config: testAccIpv6fixedaddressSnmp3CredentialSecretVersion(resourceName1, ipv6addr1, duid1, networkView, ipv6Network, snmp3Cred3, "true"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckIpv6fixedaddressExists(context.Background(), resourceName1, &v),
+					resource.TestCheckResourceAttr(resourceName1, "snmp3_credential.user", "user1"),
+					resource.TestCheckResourceAttr(resourceName1, "snmp3_credential.authentication_protocol", "SHA"),
+					resource.TestCheckResourceAttr(resourceName1, "snmp3_credential.privacy_protocol", "AES"),
+					resource.TestCheckResourceAttr(resourceName1, "snmp3_credential.comment", "SNMP3 Credential Comment"),
+					resource.TestCheckResourceAttr(resourceName1, "snmp3_credential.credential_group", "default"),
+					resource.TestCheckResourceAttr(resourceName1, "secrets_version", "4"),
+				),
+			},
+			// Update (non write-only) user field in SNMP3 credentials and read
+			{
+				Config: testAccIpv6fixedaddressSnmp3CredentialSecretVersion(resourceName1, ipv6addr1, duid1, networkView, ipv6Network, snmp3Cred, "true"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckIpv6fixedaddressExists(context.Background(), resourceName1, &v),
+					resource.TestCheckResourceAttr(resourceName1, "snmp3_credential.user", "user1"),
+					resource.TestCheckResourceAttr(resourceName1, "snmp3_credential.authentication_protocol", "SHA"),
+					resource.TestCheckResourceAttr(resourceName1, "snmp3_credential.privacy_protocol", "AES"),
+					resource.TestCheckResourceAttr(resourceName1, "snmp3_credential.comment", "SNMP3 Credential Comment"),
+					resource.TestCheckResourceAttr(resourceName1, "snmp3_credential.credential_group", "default"),
+					resource.TestCheckResourceAttr(resourceName1, "secrets_version", "5"),
+				),
+			},
+			{
+				Config: testAccIpv6fixedaddressSnmp3CredentialSecretVersion(resourceName1, ipv6addr1, duid1, networkView, ipv6Network, snmp3Cred4, "true"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckIpv6fixedaddressExists(context.Background(), resourceName1, &v),
+					resource.TestCheckResourceAttr(resourceName1, "snmp3_credential.user", "user2"),
+					resource.TestCheckResourceAttr(resourceName1, "snmp3_credential.authentication_protocol", "SHA"),
+					resource.TestCheckResourceAttr(resourceName1, "snmp3_credential.privacy_protocol", "AES"),
+					resource.TestCheckResourceAttr(resourceName1, "snmp3_credential.comment", "SNMP3 Credential Comment"),
+					resource.TestCheckResourceAttr(resourceName1, "snmp3_credential.credential_group", "default"),
+					resource.TestCheckResourceAttr(resourceName1, "secrets_version", "5"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -1325,7 +1520,7 @@ func TestAccIpv6fixedaddressResource_UsePreferredLifetime(t *testing.T) {
 }
 
 func TestAccIpv6fixedaddressResource_UseSnmp3Credential(t *testing.T) {
-	t.Skip("Skipping test as SNMP3 Credential are not set up in the GRID")
+	// t.Skip("Skipping test as SNMP3 Credential are not set up in the GRID")
 	var resourceName = "nios_dhcp_ipv6fixedaddress.test_use_snmp3_credential"
 	var v dhcp.Ipv6fixedaddress
 	ipv6Network := "2001:db8:abcd:1231::/64"
@@ -1338,18 +1533,19 @@ func TestAccIpv6fixedaddressResource_UseSnmp3Credential(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccIpv6fixedaddressUseSnmp3Credential(ipv6addr, duid, networkView, ipv6Network, true, true, "SNMP3_USER", "MD5", "AUTH_PASSWORD", "3DES", "PRIVACY_PASSWORD", "SNMP3 Credential Comment", "default"),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckIpv6fixedaddressExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_snmp3_credential", "true"),
-				),
-			},
-			// Update and Read
-			{
 				Config: testAccIpv6fixedaddressUseSnmp3Credential(ipv6addr, duid, networkView, ipv6Network, false, true, "", "", "", "", "", "", ""),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6fixedaddressExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_snmp3_credential", "false"),
+				),
+			},
+			// Update and Read
+			{
+				Config: testAccIpv6fixedaddressUseSnmp3Credential(ipv6addr, duid, networkView, ipv6Network, true, true, "SNMP3_USER", "MD5", "AUTH_PASSWORD", "3DES", "PRIVACY_PASSWORD", "SNMP3 Credential Comment", "default"),
+
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckIpv6fixedaddressExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "use_snmp3_credential", "true"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -1975,6 +2171,26 @@ resource "nios_dhcp_ipv6fixedaddress" "test_snmp3_credential" {
 	return strings.Join([]string{testAccBaseNetworkWithView(networkView, ipv6Network), config}, "")
 }
 
+func testAccIpv6fixedaddressSnmp3CredentialSecretVersion(resourceName, ipv6addr, duid, networkView, ipv6Network string, snmp3Cred map[string]any, useSnmp3Cred string) string {
+	resourceLabel := strings.TrimPrefix(resourceName, "nios_dhcp_ipv6fixedaddress.")
+	snmp3CredentialBlock := ""
+	if snmp3Cred != nil {
+		snmp3CredentialBlock = fmt.Sprintf("    snmp3_credential = %s", utils.ConvertMapToHCL(snmp3Cred))
+	}
+	config := fmt.Sprintf(`
+resource "nios_dhcp_ipv6fixedaddress" %q {
+    ipv6addr = %q
+    duid = %q
+    %s
+	use_snmp3_credential = %q
+	use_cli_credentials = true
+    network = nios_ipam_ipv6network.test_ipv6_network.network
+    network_view = nios_ipam_network_view.parent_network_view.name
+}
+`, resourceLabel, ipv6addr, duid, snmp3CredentialBlock, useSnmp3Cred)
+	return strings.Join([]string{testAccBaseNetworkWithView(networkView, ipv6Network), config}, "")
+}
+
 func testAccIpv6fixedaddressSnmpCredential(ipv6addr, duid, networkView, ipv6Network, snmpCredentialCommStr, snmpCredentialComment, snmpCredentialGroup, useSnmpCredentials string) string {
 	config := fmt.Sprintf(`
 resource "nios_dhcp_ipv6fixedaddress" "test_snmp_credential" {
@@ -2167,4 +2383,24 @@ resource "nios_ipam_network_view" "parent_network_view" {
   name = %q
 }
 `, ipv6Network1, ipv6Network2, networkView)
+}
+
+func testAccIpv6fixedaddressCliCredentialsSecrets(resourceName, ipv6addr, duid, networkView, ipv6Network string, cliCred []map[string]any) string {
+	cliCredentialsBlock := ""
+	if cliCred != nil {
+		cliCredentialsBlock = fmt.Sprintf("    cli_credentials = %s", utils.ConvertSliceOfMapsToHCL(cliCred))
+	}
+	resourceLabel := strings.TrimPrefix(resourceName, "nios_dhcp_ipv6fixedaddress.")
+	config := fmt.Sprintf(`
+resource "nios_dhcp_ipv6fixedaddress" %q {
+	ipv6addr = %q
+    duid = %q
+    network = nios_ipam_ipv6network.test_ipv6_network.network
+    network_view = nios_ipam_network_view.parent_network_view.name
+    %s
+	use_cli_credentials = true
+	use_snmp3_credential = true
+}
+`, resourceLabel, ipv6addr, duid, cliCredentialsBlock)
+	return strings.Join([]string{testAccBaseNetworkWithView(networkView, ipv6Network), config}, "")
 }

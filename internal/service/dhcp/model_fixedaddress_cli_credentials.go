@@ -125,7 +125,6 @@ func (m *FixedaddressCliCredentialsModel) Flatten(ctx context.Context, from *dhc
 		*m = FixedaddressCliCredentialsModel{}
 	}
 	m.User = flex.FlattenStringPointer(from.User)
-	m.Password = flex.FlattenStringPointer(from.Password)
 	m.CredentialType = flex.FlattenStringPointer(from.CredentialType)
 	m.Comment = flex.FlattenStringPointer(from.Comment)
 	m.Id = flex.FlattenInt64Pointer(from.Id)

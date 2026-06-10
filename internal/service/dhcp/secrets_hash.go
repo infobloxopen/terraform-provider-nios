@@ -31,12 +31,13 @@ func hashStringValue(value types.String) string {
 	return hex.EncodeToString(sum[:])
 }
 
-func hashCliPasswords(ctx context.Context, cliCreds types.List, diags *diag.Diagnostics) string {
+func hashCliPasswords[T any](ctx context.Context, cliCreds types.List,
+	diags *diag.Diagnostics, passwordOf func(T) types.String) string {
 	if cliCreds.IsNull() || cliCreds.IsUnknown() {
 		return ""
 	}
 
-	var cliModels []Ipv6fixedaddressCliCredentialsModel
+	var cliModels []T
 	diags.Append(cliCreds.ElementsAs(ctx, &cliModels, false)...)
 	if diags.HasError() {
 		return ""
@@ -46,14 +47,15 @@ func hashCliPasswords(ctx context.Context, cliCreds types.List, diags *diag.Diag
 	hasAnyPassword := false
 
 	for _, cred := range cliModels {
+		password := passwordOf(cred)
 		switch {
-		case cred.Password.IsUnknown():
+		case password.IsUnknown():
 			passwordHashes = append(passwordHashes, "")
-		case cred.Password.IsNull():
+		case password.IsNull():
 			passwordHashes = append(passwordHashes, "")
 		default:
 			hasAnyPassword = true
-			passwordHashes = append(passwordHashes, hashStringValue(cred.Password))
+			passwordHashes = append(passwordHashes, hashStringValue(password))
 		}
 	}
 
@@ -120,11 +122,13 @@ func applyCliCredentialPasswords[payloadT any, modelT any](payloadCreds []payloa
 	}
 }
 
-func buildSecretsHashState(ctx context.Context, authPwd types.String, privPwd types.String, cliCreds types.List, diags *diag.Diagnostics) secretsHashState {
+func buildSecretsHashState[T any](ctx context.Context, authPwd types.String, privPwd types.String,
+	cliCreds types.List, diags *diag.Diagnostics,
+	passwordOf func(T) types.String) secretsHashState {
 	return secretsHashState{
 		AuthHash: hashStringValue(authPwd),
 		PrivHash: hashStringValue(privPwd),
-		CliHash:  hashCliPasswords(ctx, cliCreds, diags),
+		CliHash:  hashCliPasswords(ctx, cliCreds, diags, passwordOf),
 	}
 }
 

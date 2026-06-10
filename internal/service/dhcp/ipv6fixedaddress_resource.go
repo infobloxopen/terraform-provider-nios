@@ -139,7 +139,10 @@ func (r *Ipv6fixedaddressResource) ModifyPlan(ctx context.Context, req resource.
 	if cliCreds.IsNull() {
 		plannedHashes.CliHash = ""
 	} else if !cliCreds.IsUnknown() {
-		plannedHashes.CliHash = hashCliPasswords(ctx, cliCreds, &resp.Diagnostics)
+		plannedHashes.CliHash = hashCliPasswords(ctx, cliCreds,
+			&resp.Diagnostics,
+			func(m FixedaddressCliCredentialsModel) types.String { return m.Password },
+		)
 		if resp.Diagnostics.HasError() {
 			return
 		}
@@ -294,7 +297,10 @@ func (r *Ipv6fixedaddressResource) Create(ctx context.Context, req resource.Crea
 		return
 	}
 
-	secretData := buildSecretsHashState(ctx, authPwd, privPwd, cliCreds, &resp.Diagnostics)
+	secretData := buildSecretsHashState(ctx, authPwd, privPwd, cliCreds,
+		&resp.Diagnostics,
+		func(m Ipv6fixedaddressCliCredentialsModel) types.String { return m.Password },
+	)
 	if resp.Diagnostics.HasError() {
 		return
 	}
@@ -532,7 +538,11 @@ func (r *Ipv6fixedaddressResource) Update(ctx context.Context, req resource.Upda
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	if payload.Snmp3Credential != nil {
+
+	var planSnmp3 types.Object
+	resp.Diagnostics.Append(req.Plan.GetAttribute(ctx, path.Root("snmp3_credential"), &planSnmp3)...)
+
+	if !planSnmp3.IsNull() && payload.Snmp3Credential != nil {
 		if !authPwd.IsNull() && !authPwd.IsUnknown() {
 			ap := authPwd.ValueString()
 			payload.Snmp3Credential.AuthenticationPassword = &ap
@@ -584,7 +594,10 @@ func (r *Ipv6fixedaddressResource) Update(ctx context.Context, req resource.Upda
 		return
 	}
 
-	secretData := buildSecretsHashState(ctx, authPwd, privPwd, cliCreds, &resp.Diagnostics)
+	secretData := buildSecretsHashState(ctx, authPwd, privPwd, cliCreds,
+		&resp.Diagnostics,
+		func(m Ipv6fixedaddressCliCredentialsModel) types.String { return m.Password },
+	)
 	if resp.Diagnostics.HasError() {
 		return
 	}
