@@ -40,13 +40,11 @@ output "nic3_ip" {
 // VIP — secondary IP on NIC3, only present on the primary HA node.
 output "vip" {
   description = "HA VIP (secondary IP on NIC3). Null when HA disabled or node is not primary."
-  value = (var.enable_ha && var.is_primary
-    ? one([
+  value = var.enable_ha ? try(
+    one([
       for cfg in azurerm_network_interface.nic3[0].ip_configuration :
       cfg.private_ip_address if cfg.name == "${var.nic3_name}-vip"
-    ])
-    : null
-  )
+  ]), null) : null
 }
 
 output "subnet3_mask" {
@@ -66,8 +64,8 @@ output "nic3_name" {
 
 output "nic1_ipv6" {
   description = "IPv6 address of NIC1 (Subnet 1). Null when enable_ipv6 is false."
-  value = var.enable_ipv6 ? one([
+  value = var.enable_ipv6 ? try(one([
     for cfg in azurerm_network_interface.nic1.ip_configuration :
     cfg.private_ip_address if cfg.name == "${var.ip_configuration_name_nic1}-v6"
-  ]) : null
+  ]), null) : null
 }

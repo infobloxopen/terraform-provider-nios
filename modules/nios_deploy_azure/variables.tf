@@ -129,7 +129,7 @@ variable "subnet3_name" {
   default     = null
 
   validation {
-    condition     = !var.enable_ha || (var.subnet3_name != null && length(var.subnet3_name) > 0)
+    condition     = !var.enable_ha || (var.subnet3_name != null && trimspace(var.subnet3_name) != "")
     error_message = "subnet3_name must be set when enable_ha = true."
   }
 }
@@ -146,7 +146,7 @@ variable "nic3_name" {
   default     = null
 
   validation {
-    condition     = !var.enable_ha || (var.nic3_name != null && length(var.nic3_name) > 0)
+    condition     = !var.enable_ha || (var.nic3_name != null && trimspace(var.nic3_name) != "")
     error_message = "nic3_name must be set when enable_ha = true."
   }
 }
@@ -166,14 +166,14 @@ variable "is_primary" {
 variable "identity_id" {
   description = <<-EOT
     Resource ID of the User-Assigned Managed Identity to attach to the VM for HA
-    operations.Required when enable_ha = true.
+    operations. Required when enable_ha = true.
     Example: /subscriptions/<sub>/resourceGroups/<rg>/providers/Microsoft.ManagedIdentity/userAssignedIdentities/<name>
   EOT
   type        = string
   default     = null
 
   validation {
-    condition     = !var.enable_ha || (var.identity_id != null && length(var.identity_id) > 0)
+    condition     = !var.enable_ha || (var.identity_id != null && trimspace(var.identity_id) != "")
     error_message = "identity_id must be set when enable_ha = true."
   }
 }
