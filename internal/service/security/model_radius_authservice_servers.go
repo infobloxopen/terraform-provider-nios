@@ -2,6 +2,9 @@ package security
 
 import (
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
+	"encoding/json"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
@@ -87,6 +90,7 @@ var RadiusAuthserviceServersResourceSchemaAttributes = map[string]schema.Attribu
 	},
 	"shared_secret": schema.StringAttribute{
 		Required:            true,
+		WriteOnly:           true,
 		MarkdownDescription: "The shared secret that the NIOS appliance and the RADIUS server use to encrypt and decrypt their messages.",
 	},
 	"use_accounting": schema.BoolAttribute{
@@ -157,7 +161,40 @@ func (m *RadiusAuthserviceServersModel) Flatten(ctx context.Context, from *secur
 	m.Comment = flex.FlattenStringPointer(from.Comment)
 	m.Disable = types.BoolPointerValue(from.Disable)
 	m.Address = flex.FlattenStringPointer(from.Address)
-	m.SharedSecret = flex.FlattenStringPointer(from.SharedSecret)
 	m.UseAccounting = types.BoolPointerValue(from.UseAccounting)
 	m.UseMgmtPort = types.BoolPointerValue(from.UseMgmtPort)
+}
+
+type radiusServerSnapshot struct {
+	SharedSecret string `json:"shared_secret,omitempty"`
+}
+
+func extractRadiusServers(ctx context.Context, list types.List) ([]RadiusAuthserviceServersModel, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	if list.IsNull() || list.IsUnknown() {
+		return nil, diags
+	}
+
+	var servers []RadiusAuthserviceServersModel
+	diags.Append(list.ElementsAs(ctx, &servers, false)...)
+	return servers, diags
+}
+
+func hashRadiusServers(servers []RadiusAuthserviceServersModel) (string, error) {
+	snapshots := make([]radiusServerSnapshot, 0, len(servers))
+	for _, s := range servers {
+		snapshots = append(snapshots, radiusServerSnapshot{
+			SharedSecret: s.SharedSecret.ValueString(),
+		})
+	}
+
+	raw, err := json.Marshal(snapshots)
+	if err != nil {
+		return "", err
+	}
+
+	h := sha256.New()
+	h.Write(raw)
+	return hex.EncodeToString(h.Sum(nil)), nil
 }

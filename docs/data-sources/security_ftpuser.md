@@ -48,7 +48,7 @@ data "nios_security_ftpuser" "get_all_ftpusers" {}
 
 Required:
 
-- `password` (String, Sensitive) The FTP user password.
+- `password` (String) The FTP user password.
 - `username` (String) The FTP user name.
 
 Optional:
@@ -61,4 +61,5 @@ Optional:
 Read-Only:
 
 - `extattrs_all` (Map of String) Extensible attributes associated with the object, including default attributes.
+- `password_version` (Number) Internal revision incremented when password field changes.
 - `ref` (String) The reference to the object.
