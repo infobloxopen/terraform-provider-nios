@@ -328,8 +328,8 @@ func (r *RecordTlsaResource) Update(ctx context.Context, req resource.UpdateRequ
 	}
 
 	associateInternalId, diags := req.Private.GetKey(ctx, "associate_internal_id")
+	resp.Diagnostics.Append(diags...)
 	if diags.HasError() {
-		resp.Diagnostics.Append(diags...)
 		return
 	}
 	if associateInternalId != nil {
@@ -435,7 +435,7 @@ func (r *RecordTlsaResource) Delete(ctx context.Context, req resource.DeleteRequ
 }
 
 func (r *RecordTlsaResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	if req.Identity.Raw.IsKnown() {
+	if req.Identity != nil && req.Identity.Raw.IsKnown() && !req.Identity.Raw.IsNull() {
 		diags := req.Identity.GetAttribute(ctx, path.Root("ref"), &req.ID)
 		if diags.HasError() {
 			resp.Diagnostics.Append(diags...)
