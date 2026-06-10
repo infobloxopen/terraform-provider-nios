@@ -222,7 +222,7 @@ provider "nios" {
 
 import {
   to = nios_grid_member.ha_pair
-  id = "5c08e1293cf34363878d4cae5bd37636"
+  id = "member/b25lLnZpcnR1YWxfbm9kZSQw:infoblox.172_28_83_244"
 }
 ```
 
