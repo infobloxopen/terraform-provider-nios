@@ -187,7 +187,7 @@ variable "tags" {
 }
 
 variable "enable_ipv6" {
-  description = "Whether to create an additional IPv6 IP Configuration."
+  description = "Enable IPv6 configuration."
   type        = bool
   default     = false
 }
