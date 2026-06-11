@@ -146,7 +146,7 @@ func (r *MemberResource) Create(ctx context.Context, req resource.CreateRequest,
 
 	res := apiRes.CreateMemberResponseAsObject.GetResult()
 
-	if !data.PreProvisioning.IsUnknown() && !data.PreProvisioning.IsNull() || (!data.TrafficCaptureAuthDnsSetting.IsUnknown() && !data.TrafficCaptureAuthDnsSetting.IsNull()) || (!data.MemberServiceCommunication.IsUnknown() && !data.MemberServiceCommunication.IsNull()) || (!data.SyslogProxySetting.IsUnknown() && !data.SyslogProxySetting.IsNull()) {
+	if !data.PreProvisioning.IsUnknown() && !data.PreProvisioning.IsNull() || (!data.TrafficCaptureAuthDnsSetting.IsUnknown() && !data.TrafficCaptureAuthDnsSetting.IsNull()) || (!data.MemberServiceCommunication.IsUnknown() && !data.MemberServiceCommunication.IsNull()) {
 		apiRes2, _, err2 := r.client.GridAPI.
 			MemberAPI.
 			Update(ctx, utils.ExtractResourceRef(*res.Ref)).
