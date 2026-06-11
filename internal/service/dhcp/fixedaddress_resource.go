@@ -26,6 +26,7 @@ var readableAttributesForFixedaddress = "agent_circuit_id,agent_remote_id,allow_
 // Ensure provider defined types fully satisfy framework interfaces.
 var _ resource.Resource = &FixedaddressResource{}
 var _ resource.ResourceWithImportState = &FixedaddressResource{}
+var _ resource.ResourceWithValidateConfig = &FixedaddressResource{}
 var _ resource.ResourceWithIdentity = &FixedaddressResource{}
 
 var _ resource.ResourceWithModifyPlan = &FixedaddressResource{}
@@ -701,7 +702,7 @@ func (r *FixedaddressResource) UpdateFuncCallAttributeName(ctx context.Context, 
 }
 
 func (r *FixedaddressResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	if req.Identity.Raw.IsKnown() {
+	if req.Identity != nil && req.Identity.Raw.IsKnown() && !req.Identity.Raw.IsNull() {
 		diags := req.Identity.GetAttribute(ctx, path.Root("ref"), &req.ID)
 		if diags.HasError() {
 			resp.Diagnostics.Append(diags...)
