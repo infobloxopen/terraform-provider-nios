@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
@@ -34,6 +35,7 @@ type SnmpuserModel struct {
 	Name                   types.String `tfsdk:"name"`
 	PrivacyPassword        types.String `tfsdk:"privacy_password"`
 	PrivacyProtocol        types.String `tfsdk:"privacy_protocol"`
+	PasswordVersion        types.Int64  `tfsdk:"password_version"`
 }
 
 var SnmpuserAttrTypes = map[string]attr.Type{
@@ -47,6 +49,7 @@ var SnmpuserAttrTypes = map[string]attr.Type{
 	"name":                    types.StringType,
 	"privacy_password":        types.StringType,
 	"privacy_protocol":        types.StringType,
+	"password_version":        types.Int64Type,
 }
 
 var SnmpuserResourceSchemaAttributes = map[string]schema.Attribute{
@@ -56,7 +59,7 @@ var SnmpuserResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"authentication_password": schema.StringAttribute{
 		Optional:  true,
-		Sensitive: true,
+		WriteOnly: true,
 		Validators: []validator.String{
 			stringvalidator.AlsoRequires(path.MatchRoot("authentication_protocol")),
 			stringvalidator.LengthBetween(8, 256),
@@ -113,7 +116,7 @@ var SnmpuserResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"privacy_password": schema.StringAttribute{
 		Optional:  true,
-		Sensitive: true,
+		WriteOnly: true,
 		Validators: []validator.String{
 			stringvalidator.AlsoRequires(path.MatchRoot("privacy_protocol")),
 			stringvalidator.LengthBetween(8, 256),
@@ -127,6 +130,13 @@ var SnmpuserResourceSchemaAttributes = map[string]schema.Attribute{
 		},
 		MarkdownDescription: "The privacy protocol to be used for this user.",
 	},
+	"password_version": schema.Int64Attribute{
+		Computed:            true,
+		MarkdownDescription: "Internal version incremented when authentication or privacy password changes.",
+		PlanModifiers: []planmodifier.Int64{
+			int64planmodifier.UseStateForUnknown(),
+		},
+	},
 }
 
 func (m *SnmpuserModel) Expand(ctx context.Context, diags *diag.Diagnostics) *security.Snmpuser {
@@ -134,14 +144,14 @@ func (m *SnmpuserModel) Expand(ctx context.Context, diags *diag.Diagnostics) *se
 		return nil
 	}
 	to := &security.Snmpuser{
-		AuthenticationPassword: flex.ExpandStringPointer(m.AuthenticationPassword),
+		// AuthenticationPassword: flex.ExpandStringPointer(m.AuthenticationPassword),
 		AuthenticationProtocol: flex.ExpandStringPointer(m.AuthenticationProtocol),
 		Comment:                flex.ExpandStringPointer(m.Comment),
 		Disable:                flex.ExpandBoolPointer(m.Disable),
 		ExtAttrs:               ExpandExtAttrs(ctx, m.ExtAttrs, diags),
 		Name:                   flex.ExpandStringPointer(m.Name),
-		PrivacyPassword:        flex.ExpandStringPointer(m.PrivacyPassword),
-		PrivacyProtocol:        flex.ExpandStringPointer(m.PrivacyProtocol),
+		// PrivacyPassword:        flex.ExpandStringPointer(m.PrivacyPassword),
+		PrivacyProtocol: flex.ExpandStringPointer(m.PrivacyProtocol),
 	}
 	return to
 }

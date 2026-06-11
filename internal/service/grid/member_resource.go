@@ -2,6 +2,9 @@ package grid
 
 import (
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
+	"encoding/json"
 	"fmt"
 	"net/http"
 
@@ -66,6 +69,186 @@ func (r *MemberResource) Configure(ctx context.Context, req resource.ConfigureRe
 	r.client = client
 }
 
+type memberPasswordsHashState struct {
+	BkpServersPwd string `json:"bkp_servers_password_hash"`
+	LomUsersPwd   string `json:"lom_users_password_hash"`
+}
+
+func hasPasswordHashes(state memberPasswordsHashState) bool {
+	return state.BkpServersPwd != "" || state.LomUsersPwd != ""
+}
+
+func hashPasswords[T any](ctx context.Context, passwordList types.List, diags *diag.Diagnostics, passwordOf func(T) types.String) string {
+	if passwordList.IsNull() || passwordList.IsUnknown() {
+		return ""
+	}
+
+	var pwdModels []T
+	diags.Append(passwordList.ElementsAs(ctx, &pwdModels, false)...)
+	if diags.HasError() {
+		return ""
+	}
+
+	passwordHashes := make([]string, 0, len(pwdModels))
+	hasAnyPassword := false
+
+	for _, pwdModel := range pwdModels {
+		password := passwordOf(pwdModel)
+		switch {
+		case password.IsUnknown(), password.IsNull():
+			passwordHashes = append(passwordHashes, "")
+		default:
+			hasAnyPassword = true
+			sum := sha256.Sum256([]byte(password.ValueString()))
+			passwordHashes = append(passwordHashes, hex.EncodeToString(sum[:]))
+		}
+	}
+
+	if !hasAnyPassword {
+		return ""
+	}
+	// Uses config order
+	data, err := json.Marshal(passwordHashes)
+	if err != nil {
+		diags.AddError("CLI Secrets Hash Error", err.Error())
+		return ""
+	}
+
+	sum := sha256.Sum256(data)
+	return hex.EncodeToString(sum[:])
+}
+
+func marshalSecretsHashState(state memberPasswordsHashState, diags *diag.Diagnostics) string {
+	data, err := json.Marshal(state)
+	if err != nil {
+		diags.AddError("error marshalling password hash state", err.Error())
+		return ""
+	}
+	return string(data)
+}
+
+func (r *MemberResource) ModifyPlan(ctx context.Context, req resource.ModifyPlanRequest, resp *resource.ModifyPlanResponse) {
+	if req.Plan.Raw.IsNull() {
+		return
+	}
+
+	var (
+		statePwdVersion types.Int64
+		bkpServers      types.List
+		lomUsers        types.List
+	)
+
+	resp.Diagnostics.Append(req.Plan.GetAttribute(ctx, path.Root("external_syslog_backup_servers"), &bkpServers)...)
+	resp.Diagnostics.Append(req.State.GetAttribute(ctx, path.Root("password_version"), &statePwdVersion)...)
+	resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("lom_users"), &lomUsers)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	// var passwordVersion types.Int64
+	curRev := int64(0)
+
+	if !statePwdVersion.IsNull() && !statePwdVersion.IsUnknown() {
+		curRev = statePwdVersion.ValueInt64()
+	}
+
+	var prevEnvelope struct {
+		Algo string `json:"algo"`
+		Hash string `json:"hash"`
+	}
+	if b, diags := req.Private.GetKey(ctx, "secrets_hash"); diags != nil {
+		resp.Diagnostics.Append(diags...)
+		if resp.Diagnostics.HasError() {
+			return
+		}
+	} else if b != nil {
+		if err := json.Unmarshal(b, &prevEnvelope); err != nil {
+			prevEnvelope.Hash = ""
+		}
+	}
+
+	var data MemberModel
+	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	bkpServersHash := hashPasswords(ctx, data.ExternalSyslogBackupServers, &resp.Diagnostics,
+		func(m MemberExternalSyslogBackupServersModel) types.String { return m.Password })
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	lomUsersHash := hashPasswords(ctx, data.LomUsers, &resp.Diagnostics,
+		func(m MemberLomUsersModel) types.String { return m.Password })
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	plannedHashes := memberPasswordsHashState{BkpServersPwd: bkpServersHash, LomUsersPwd: lomUsersHash}
+
+	var prev struct {
+		Algo string `json:"algo"`
+		Hash string `json:"hash"`
+	}
+	prevHashes := memberPasswordsHashState{}
+
+	if b, diags := req.Private.GetKey(ctx, "password_hash"); diags != nil {
+		resp.Diagnostics.Append(diags...)
+		if resp.Diagnostics.HasError() {
+			return
+		}
+	} else if b != nil {
+		if err := json.Unmarshal(b, &prev); err != nil {
+			prev.Hash = ""
+		}
+		if prev.Hash != "" {
+			if err := json.Unmarshal([]byte(prev.Hash), &prevHashes); err != nil {
+				prevHashes = memberPasswordsHashState{}
+			}
+		}
+	}
+
+	prevHasPasswords := hasPasswordHashes(prevHashes)
+	plannedHasPasswords := hasPasswordHashes(plannedHashes)
+	passwordsChanged := plannedHashes != prevHashes
+	bump := false
+	newHashToStore := prev.Hash
+
+	switch {
+	case !plannedHasPasswords && prevHasPasswords:
+		bump = true
+		newHashToStore = ""
+	case plannedHasPasswords && (!prevHasPasswords || passwordsChanged):
+		bump = true
+		newHashToStore = marshalSecretsHashState(plannedHashes, &resp.Diagnostics)
+	}
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	if bump {
+		newRev := types.Int64Value(curRev + 1)
+		resp.Diagnostics.Append(resp.Plan.SetAttribute(ctx, path.Root("password_version"), newRev)...)
+
+		val := map[string]string{
+			"algo": "sha256",
+			"hash": newHashToStore,
+		}
+		b, err := json.Marshal(val)
+		if err != nil {
+			resp.Diagnostics.AddError("error marshalling secrets hash", err.Error())
+			return
+		}
+		resp.Diagnostics.Append(resp.Private.SetKey(ctx, "password_hash", b)...)
+		return
+	}
+
+	resp.Diagnostics.Append(
+		resp.Plan.SetAttribute(ctx, path.Root("password_version"), types.Int64Value(curRev))...,
+	)
+}
+
 func (r *MemberResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var diags diag.Diagnostics
 	var data MemberModel
@@ -108,6 +291,43 @@ func (r *MemberResource) Create(ctx context.Context, req resource.CreateRequest,
 	payload := data.Expand(ctx, &resp.Diagnostics, true)
 	if resp.Diagnostics.HasError() {
 		return
+	}
+
+	var passwordVersion types.Int64
+	var bkpServers []MemberExternalSyslogBackupServersModel
+	resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("external_syslog_backup_servers"), &bkpServers)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	for i, server := range bkpServers {
+		if i >= len(payload.ExternalSyslogBackupServers) {
+			break
+		}
+		if server.Password.IsNull() || server.Password.IsUnknown() {
+			continue
+		}
+
+		password := server.Password.ValueString()
+		payload.ExternalSyslogBackupServers[i].Password = &password
+	}
+
+	var lomUsers []MemberLomUsersModel
+	resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("lom_users"), &lomUsers)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	for i, user := range lomUsers {
+		if i >= len(payload.LomUsers) {
+			break
+		}
+		if user.Password.IsNull() || user.Password.IsUnknown() {
+			continue
+		}
+
+		password := user.Password.ValueString()
+		payload.LomUsers[i].Password = &password
 	}
 
 	var apiRes *grid.CreateMemberResponse
@@ -167,6 +387,30 @@ func (r *MemberResource) Create(ctx context.Context, req resource.CreateRequest,
 		resp.Diagnostics.AddError("Client Error", "Error while creating Member due to inherited Extensible attributes")
 		return
 	}
+	bkpServersHash := hashPasswords(ctx, data.ExternalSyslogBackupServers, &resp.Diagnostics,
+		func(m MemberExternalSyslogBackupServersModel) types.String { return m.Password })
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	lomUsersHash := hashPasswords(ctx, data.LomUsers, &resp.Diagnostics,
+		func(m MemberLomUsersModel) types.String { return m.Password })
+	if resp.Diagnostics.HasError() {
+		return
+	}
+	plannedHashes := memberPasswordsHashState{BkpServersPwd: bkpServersHash, LomUsersPwd: lomUsersHash}
+
+	if hasPasswordHashes(plannedHashes) {
+		passwordVersion = types.Int64Value(1)
+
+		hashSecretsJson, err := json.Marshal(plannedHashes)
+		if err != nil {
+			resp.Diagnostics.AddError("error marshalling password hashes", err.Error())
+			return
+		}
+		resp.Diagnostics.Append(resp.Private.SetKey(ctx, "password_hash", hashSecretsJson)...)
+	}
+	data.PasswordVersion = passwordVersion
 
 	data.Flatten(ctx, &res, &resp.Diagnostics)
 
@@ -398,6 +642,45 @@ func (r *MemberResource) Update(ctx context.Context, req resource.UpdateRequest,
 		return
 	}
 
+	var passwordVersion types.Int64
+	pwd := ""
+	resp.Diagnostics.Append(req.Plan.GetAttribute(ctx, path.Root("password_version"), &passwordVersion)...)
+	var bkpServers []MemberExternalSyslogBackupServersModel
+	resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("external_syslog_backup_servers"), &bkpServers)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	for i, server := range bkpServers {
+		if i >= len(payload.ExternalSyslogBackupServers) {
+			break
+		}
+		if server.Password.IsNull() || server.Password.IsUnknown() {
+			payload.ExternalSyslogBackupServers[i].Password = &pwd
+		} else {
+			password := server.Password.ValueString()
+			payload.ExternalSyslogBackupServers[i].Password = &password
+		}
+	}
+
+	var lomUsers []MemberLomUsersModel
+	resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("lom_users"), &lomUsers)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	for i, user := range lomUsers {
+		if i >= len(payload.LomUsers) {
+			break
+		}
+		if user.Password.IsNull() || user.Password.IsUnknown() {
+			payload.LomUsers[i].Password = &pwd
+		} else {
+			password := user.Password.ValueString()
+			payload.LomUsers[i].Password = &password
+		}
+	}
+
 	var apiRes *grid.UpdateMemberResponse
 
 	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
@@ -432,6 +715,8 @@ func (r *MemberResource) Update(ctx context.Context, req resource.UpdateRequest,
 		resp.Diagnostics.AddError("Client Error", "Error while updating Member due to inherited Extensible attributes")
 		return
 	}
+
+	data.PasswordVersion = passwordVersion
 
 	data.Flatten(ctx, &res, &resp.Diagnostics)
 

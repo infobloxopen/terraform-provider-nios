@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -303,9 +304,33 @@ func TestAccFixedaddressResource_Bootserver(t *testing.T) {
 
 func TestAccFixedaddressResource_CliCredentials(t *testing.T) {
 	var resourceName = "nios_dhcp_fixed_address.test_cli_credentials"
+	var resourceName1 = "nios_dhcp_fixed_address.test_cli_credentials1"
 	var v dhcp.Fixedaddress
 	ip := "15.0.0.9"
 	agentCircuitID := acctest.RandomNumber(1000)
+	ip1 := "16.0.0.9"
+
+	cliCred := []map[string]any{{
+		"user":             "user1",
+		"credential_type":  "SSH",
+		"comment":          "cli credential comment",
+		"password":         "password1",
+		"credential_group": "default",
+	}}
+	cliCred1 := []map[string]any{{
+		"user":             "user1",
+		"credential_type":  "SSH",
+		"comment":          "cli credential comment",
+		"password":         "password12",
+		"credential_group": "default",
+	}}
+	cliCred2 := []map[string]any{{
+		"user":             "user2",
+		"credential_type":  "SSH",
+		"comment":          "cli credential comment update",
+		"password":         "password12",
+		"credential_group": "default",
+	}}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -318,7 +343,6 @@ func TestAccFixedaddressResource_CliCredentials(t *testing.T) {
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "cli_credentials.0.comment", "Comment for CLI Credentials"),
 					resource.TestCheckResourceAttr(resourceName, "cli_credentials.0.user", "NIOS_USER"),
-					resource.TestCheckResourceAttr(resourceName, "cli_credentials.0.password", "NIOS_PASSWORD"),
 					resource.TestCheckResourceAttr(resourceName, "cli_credentials.0.credential_type", "SSH"),
 					resource.TestCheckResourceAttr(resourceName, "cli_credentials.0.credential_group", "default"),
 				),
@@ -330,7 +354,6 @@ func TestAccFixedaddressResource_CliCredentials(t *testing.T) {
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "cli_credentials.1.comment", "Updated Comment for CLI Credentials"),
 					resource.TestCheckResourceAttr(resourceName, "cli_credentials.1.user", "NIOS_USER"),
-					resource.TestCheckResourceAttr(resourceName, "cli_credentials.1.password", "NIOS_PASSWORD"),
 					resource.TestCheckResourceAttr(resourceName, "cli_credentials.1.credential_type", "TELNET"),
 					resource.TestCheckResourceAttr(resourceName, "cli_credentials.1.credential_group", "default"),
 				),
@@ -342,7 +365,6 @@ func TestAccFixedaddressResource_CliCredentials(t *testing.T) {
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "cli_credentials.1.comment", "Updated Comment for CLI Credentials"),
 					resource.TestCheckResourceAttr(resourceName, "cli_credentials.1.user", "NIOS_USER"),
-					resource.TestCheckResourceAttr(resourceName, "cli_credentials.1.password", "NIOS_PASSWORD"),
 					resource.TestCheckResourceAttr(resourceName, "cli_credentials.1.credential_type", "ENABLE_TELNET"),
 					resource.TestCheckResourceAttr(resourceName, "cli_credentials.1.credential_group", "default"),
 				),
@@ -354,9 +376,52 @@ func TestAccFixedaddressResource_CliCredentials(t *testing.T) {
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "cli_credentials.1.comment", "Updated Comment for CLI Credentials"),
 					resource.TestCheckResourceAttr(resourceName, "cli_credentials.1.user", "NIOS_USER"),
-					resource.TestCheckResourceAttr(resourceName, "cli_credentials.1.password", "NIOS_PASSWORD"),
 					resource.TestCheckResourceAttr(resourceName, "cli_credentials.1.credential_type", "ENABLE_SSH"),
 					resource.TestCheckResourceAttr(resourceName, "cli_credentials.1.credential_group", "default"),
+				),
+			},
+			// Create an IPv6 FA without cli_credentials and Read
+			{
+				Config: testAccFixedaddressCliCredentialsSecrets(resourceName1, ip1, "CIRCUIT_ID", agentCircuitID, nil),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckFixedaddressExists(context.Background(), resourceName1, &v),
+					resource.TestCheckResourceAttr(resourceName1, "cli_credentials.#", "0"),
+					resource.TestCheckResourceAttr(resourceName1, "secrets_version", "0"),
+				),
+			},
+			// Add cli_credentials and Read
+			{
+				Config: testAccFixedaddressCliCredentialsSecrets(resourceName1, ip1, "CIRCUIT_ID", agentCircuitID, cliCred),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckFixedaddressExists(context.Background(), resourceName1, &v),
+					resource.TestCheckResourceAttr(resourceName1, "cli_credentials.0.credential_type", "SSH"),
+					resource.TestCheckResourceAttr(resourceName1, "cli_credentials.0.user", "user1"),
+					resource.TestCheckResourceAttr(resourceName1, "cli_credentials.0.credential_group", "default"),
+					resource.TestCheckResourceAttr(resourceName1, "secrets_version", "1"),
+				),
+			},
+			// Update write-only field of cli_credentials and Read
+			{
+				Config: testAccFixedaddressCliCredentialsSecrets(resourceName1, ip1, "CIRCUIT_ID", agentCircuitID, cliCred1),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckFixedaddressExists(context.Background(), resourceName1, &v),
+					resource.TestCheckResourceAttr(resourceName1, "cli_credentials.0.comment", "cli credential comment"),
+					resource.TestCheckResourceAttr(resourceName1, "cli_credentials.0.user", "user1"),
+					resource.TestCheckResourceAttr(resourceName1, "cli_credentials.0.credential_type", "SSH"),
+					resource.TestCheckResourceAttr(resourceName1, "cli_credentials.0.credential_group", "default"),
+					resource.TestCheckResourceAttr(resourceName1, "secrets_version", "2"),
+				),
+			},
+			// Update non write-only field of cli_credentials and Read
+			{
+				Config: testAccFixedaddressCliCredentialsSecrets(resourceName1, ip1, "CIRCUIT_ID", agentCircuitID, cliCred2),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckFixedaddressExists(context.Background(), resourceName1, &v),
+					resource.TestCheckResourceAttr(resourceName1, "cli_credentials.0.comment", "cli credential comment update"),
+					resource.TestCheckResourceAttr(resourceName1, "cli_credentials.0.user", "user2"),
+					resource.TestCheckResourceAttr(resourceName1, "cli_credentials.0.credential_type", "SSH"),
+					resource.TestCheckResourceAttr(resourceName1, "cli_credentials.0.credential_group", "default"),
+					resource.TestCheckResourceAttr(resourceName1, "secrets_version", "2"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -1391,9 +1456,52 @@ func TestAccFixedaddressResource_RestartIfNeeded(t *testing.T) {
 
 func TestAccFixedaddressResource_Snmp3Credential(t *testing.T) {
 	var resourceName = "nios_dhcp_fixed_address.test_snmp3_credential"
+	var resourceName1 = "nios_dhcp_fixed_address.test_snmp3_credential1"
 	var v dhcp.Fixedaddress
 	ip := "16.0.0.121"
+	ip1 := "16.0.0.122"
 	agentCircuitID := acctest.RandomNumber(1000)
+	agentCircuitID1 := acctest.RandomNumber(1000)
+	snmp3Cred := map[string]any{
+		"user":                    "user1",
+		"authentication_protocol": "SHA",
+		"authentication_password": "authPass",
+		"privacy_protocol":        "AES",
+		"privacy_password":        "privPass",
+		"comment":                 "SNMP3 Credential Comment",
+	}
+	snmp3Cred1 := map[string]any{
+		"user":                    "user1",
+		"authentication_protocol": "SHA",
+		"authentication_password": "authPass123",
+		"privacy_protocol":        "AES",
+		"privacy_password":        "privPass",
+		"comment":                 "SNMP3 Credential Comment",
+	}
+	snmp3Cred2 := map[string]any{
+		"user":                    "user1",
+		"authentication_protocol": "SHA",
+		"authentication_password": "authPass123",
+		"privacy_protocol":        "AES",
+		"privacy_password":        "privPass123",
+		"comment":                 "SNMP3 Credential Comment",
+	}
+	snmp3Cred3 := map[string]any{
+		"user":                    "user1",
+		"authentication_protocol": "SHA",
+		"authentication_password": "authPass345",
+		"privacy_protocol":        "AES",
+		"privacy_password":        "privPass345",
+		"comment":                 "SNMP3 Credential Comment",
+	}
+	snmp3Cred4 := map[string]any{
+		"user":                    "user2",
+		"authentication_protocol": "SHA",
+		"authentication_password": "authPass",
+		"privacy_protocol":        "AES",
+		"privacy_password":        "privPass",
+		"comment":                 "SNMP3 Credential Comment",
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1406,9 +1514,7 @@ func TestAccFixedaddressResource_Snmp3Credential(t *testing.T) {
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "snmp3_credential.user", "snmp"),
 					resource.TestCheckResourceAttr(resourceName, "snmp3_credential.authentication_protocol", "MD5"),
-					resource.TestCheckResourceAttr(resourceName, "snmp3_credential.authentication_password", "snmp1234"),
 					resource.TestCheckResourceAttr(resourceName, "snmp3_credential.privacy_protocol", "3DES"),
-					resource.TestCheckResourceAttr(resourceName, "snmp3_credential.privacy_password", "snmp1234"),
 					resource.TestCheckResourceAttr(resourceName, "snmp3_credential.comment", "SNMP3 Credential Comment"),
 					resource.TestCheckResourceAttr(resourceName, "snmp3_credential.credential_group", "default"),
 				),
@@ -1420,11 +1526,94 @@ func TestAccFixedaddressResource_Snmp3Credential(t *testing.T) {
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "snmp3_credential.user", "SNMP3_USER_UPDATE"),
 					resource.TestCheckResourceAttr(resourceName, "snmp3_credential.authentication_protocol", "SHA-224"),
-					resource.TestCheckResourceAttr(resourceName, "snmp3_credential.authentication_password", "AUTH_PASSWORD"),
 					resource.TestCheckResourceAttr(resourceName, "snmp3_credential.privacy_protocol", "AES-256"),
-					resource.TestCheckResourceAttr(resourceName, "snmp3_credential.privacy_password", "PRIVACY_PASSWORD"),
 					resource.TestCheckResourceAttr(resourceName, "snmp3_credential.comment", "SNMP3 Credential Comment Updated"),
 					resource.TestCheckResourceAttr(resourceName, "snmp3_credential.credential_group", "default"),
+				),
+			},
+			// Create an IPV6 FA without SNMP3 credentials and read
+			{
+				Config: testAccFixedaddressSnmp3CredentialSecret(resourceName1, ip1, "CIRCUIT_ID", agentCircuitID1, nil, "false"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckFixedaddressExists(context.Background(), resourceName1, &v),
+					resource.TestCheckResourceAttr(resourceName1, "secrets_version", "0"),
+				),
+			},
+			// Add SNMP3 credentials field and read
+			{
+				Config: testAccFixedaddressSnmp3CredentialSecret(resourceName1, ip1, "CIRCUIT_ID", agentCircuitID1, snmp3Cred, "true"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckFixedaddressExists(context.Background(), resourceName1, &v),
+					resource.TestCheckResourceAttr(resourceName1, "snmp3_credential.user", "user1"),
+					resource.TestCheckResourceAttr(resourceName1, "snmp3_credential.authentication_protocol", "SHA"),
+					resource.TestCheckResourceAttr(resourceName1, "snmp3_credential.privacy_protocol", "AES"),
+					resource.TestCheckResourceAttr(resourceName1, "snmp3_credential.comment", "SNMP3 Credential Comment"),
+					resource.TestCheckResourceAttr(resourceName1, "snmp3_credential.credential_group", "default"),
+					resource.TestCheckResourceAttr(resourceName1, "secrets_version", "1"),
+				),
+			},
+			// Update (write-only) authentication_password field in SNMP3 credentials and read
+			{
+				Config: testAccFixedaddressSnmp3CredentialSecret(resourceName1, ip1, "CIRCUIT_ID", agentCircuitID1, snmp3Cred1, "true"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckFixedaddressExists(context.Background(), resourceName1, &v),
+					resource.TestCheckResourceAttr(resourceName1, "snmp3_credential.user", "user1"),
+					resource.TestCheckResourceAttr(resourceName1, "snmp3_credential.authentication_protocol", "SHA"),
+					resource.TestCheckResourceAttr(resourceName1, "snmp3_credential.privacy_protocol", "AES"),
+					resource.TestCheckResourceAttr(resourceName1, "snmp3_credential.comment", "SNMP3 Credential Comment"),
+					resource.TestCheckResourceAttr(resourceName1, "snmp3_credential.credential_group", "default"),
+					resource.TestCheckResourceAttr(resourceName1, "secrets_version", "2"),
+				),
+			},
+			// Update (write-only) privacy_password field in SNMP3 credentials and read
+			{
+				Config: testAccFixedaddressSnmp3CredentialSecret(resourceName1, ip1, "CIRCUIT_ID", agentCircuitID1, snmp3Cred2, "true"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckFixedaddressExists(context.Background(), resourceName1, &v),
+					resource.TestCheckResourceAttr(resourceName1, "snmp3_credential.user", "user1"),
+					resource.TestCheckResourceAttr(resourceName1, "snmp3_credential.authentication_protocol", "SHA"),
+					resource.TestCheckResourceAttr(resourceName1, "snmp3_credential.privacy_protocol", "AES"),
+					resource.TestCheckResourceAttr(resourceName1, "snmp3_credential.comment", "SNMP3 Credential Comment"),
+					resource.TestCheckResourceAttr(resourceName1, "snmp3_credential.credential_group", "default"),
+					resource.TestCheckResourceAttr(resourceName1, "secrets_version", "3"),
+				),
+			},
+			// Update both the write-only fields of SNMP3 credentials (authentication_password and privacy_password) and read
+			{
+				Config: testAccFixedaddressSnmp3CredentialSecret(resourceName1, ip1, "CIRCUIT_ID", agentCircuitID1, snmp3Cred3, "true"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckFixedaddressExists(context.Background(), resourceName1, &v),
+					resource.TestCheckResourceAttr(resourceName1, "snmp3_credential.user", "user1"),
+					resource.TestCheckResourceAttr(resourceName1, "snmp3_credential.authentication_protocol", "SHA"),
+					resource.TestCheckResourceAttr(resourceName1, "snmp3_credential.privacy_protocol", "AES"),
+					resource.TestCheckResourceAttr(resourceName1, "snmp3_credential.comment", "SNMP3 Credential Comment"),
+					resource.TestCheckResourceAttr(resourceName1, "snmp3_credential.credential_group", "default"),
+					resource.TestCheckResourceAttr(resourceName1, "secrets_version", "4"),
+				),
+			},
+			// Update (non write-only) user field in SNMP3 credentials and read
+			{
+				Config: testAccFixedaddressSnmp3CredentialSecret(resourceName1, ip1, "CIRCUIT_ID", agentCircuitID1, snmp3Cred, "true"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckFixedaddressExists(context.Background(), resourceName1, &v),
+					resource.TestCheckResourceAttr(resourceName1, "snmp3_credential.user", "user1"),
+					resource.TestCheckResourceAttr(resourceName1, "snmp3_credential.authentication_protocol", "SHA"),
+					resource.TestCheckResourceAttr(resourceName1, "snmp3_credential.privacy_protocol", "AES"),
+					resource.TestCheckResourceAttr(resourceName1, "snmp3_credential.comment", "SNMP3 Credential Comment"),
+					resource.TestCheckResourceAttr(resourceName1, "snmp3_credential.credential_group", "default"),
+					resource.TestCheckResourceAttr(resourceName1, "secrets_version", "5"),
+				),
+			},
+			{
+				Config: testAccFixedaddressSnmp3CredentialSecret(resourceName1, ip1, "CIRCUIT_ID", agentCircuitID1, snmp3Cred4, "true"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckFixedaddressExists(context.Background(), resourceName1, &v),
+					resource.TestCheckResourceAttr(resourceName1, "snmp3_credential.user", "user2"),
+					resource.TestCheckResourceAttr(resourceName1, "snmp3_credential.authentication_protocol", "SHA"),
+					resource.TestCheckResourceAttr(resourceName1, "snmp3_credential.privacy_protocol", "AES"),
+					resource.TestCheckResourceAttr(resourceName1, "snmp3_credential.comment", "SNMP3 Credential Comment"),
+					resource.TestCheckResourceAttr(resourceName1, "snmp3_credential.credential_group", "default"),
+					resource.TestCheckResourceAttr(resourceName1, "secrets_version", "5"),
 				),
 			},
 			//Delete testing automatically occurs in TestCase
@@ -1895,7 +2084,7 @@ func TestAccFixedaddressResource_UseSnmp3Credential(t *testing.T) {
 }
 
 func TestAccFixedaddressResource_UseSnmpCredential(t *testing.T) {
-	t.Skip("Skipping test as SNMP Credential are not set up in the GRID")
+	// t.Skip("Skipping test as SNMP Credential are not set up in the GRID")
 	var resourceName = "nios_dhcp_fixed_address.test_use_snmp_credential"
 	var v dhcp.Fixedaddress
 	ip := "15.0.0.57"
@@ -2130,6 +2319,25 @@ resource "nios_dhcp_fixed_address" "test_cli_credentials" {
 	use_cli_credentials = %q
 }
 `, ip, matchClient, agentCircuitID, cliCredComment, cliCredUser, cliCredPassword, cliCredType, cliCredGroup, useCLICredentials)
+}
+
+func testAccFixedaddressCliCredentialsSecrets(resourceName, ip, matchClient string, agentCircuitID int, cliCred []map[string]any) string {
+	cliCredentialsBlock := ""
+	if cliCred != nil {
+		cliCredentialsBlock = fmt.Sprintf("    cli_credentials = %s", utils.ConvertSliceOfMapsToHCL(cliCred))
+	}
+	resourceLabel := strings.TrimPrefix(resourceName, "nios_dhcp_fixed_address.")
+	config := fmt.Sprintf(`
+resource "nios_dhcp_fixed_address" %q {
+	ipv4addr = %q
+	match_client = %q
+	agent_circuit_id = %d
+    %s
+	use_cli_credentials = true
+	use_snmp3_credential = true
+}
+`, resourceLabel, ip, matchClient, agentCircuitID, cliCredentialsBlock)
+	return config
 }
 
 func testAccFixedaddressClientIdentifierPrependZero(ip, matchClient string, agentCircuitID int, clientIdentifierPrependZero string) string {
@@ -2572,6 +2780,25 @@ resource "nios_dhcp_fixed_address" "test_snmp3_credential" {
 	use_cli_credentials = true
 }
 `, ip, matchClient, agentCircuitID, snmp3CredentialUser, snmp3CredentialAuthProtocol, snmp3CredentialAuthPass, snmp3CredentialPrvProtocol, snmp3CredentialPrvPass, snmp3CredentialComment, snmp3CredentialGroup, useSnmp3Credentials)
+}
+
+func testAccFixedaddressSnmp3CredentialSecret(resourceName, ip, matchClient string, agentCircuitID int, snmp3Cred map[string]any, useSnmp3Cred string) string {
+	resourceLabel := strings.TrimPrefix(resourceName, "nios_dhcp_fixed_address.")
+	snmp3CredentialBlock := ""
+	if snmp3Cred != nil {
+		snmp3CredentialBlock = fmt.Sprintf("    snmp3_credential = %s", utils.ConvertMapToHCL(snmp3Cred))
+	}
+	config := fmt.Sprintf(`
+resource "nios_dhcp_fixed_address" %q {
+	ipv4addr = %q
+	match_client = %q
+	agent_circuit_id = %d
+	%s
+	use_snmp3_credential = %q
+	use_cli_credentials = true
+}
+`, resourceLabel, ip, matchClient, agentCircuitID, snmp3CredentialBlock, useSnmp3Cred)
+	return config
 }
 
 func testAccFixedaddressSnmpCredential(ip, matchClient string, agentCircuitID int, snmpCredentialCommStr, snmpCredentialComment, snmpCredentialGroup, useSnmpCredentials string) string {

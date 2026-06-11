@@ -2,6 +2,9 @@ package notification
 
 import (
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -67,6 +70,123 @@ func (r *NotificationRestEndpointResource) Configure(ctx context.Context, req re
 	}
 
 	r.client = client
+}
+
+type notificationRestEndpointHashState struct {
+	Password         string `json:"password_hash"`
+	WapiUserPassword string `json:"wapi_user_password_hash"`
+}
+
+func hashString(s string) string {
+	h := sha256.New()
+	h.Write([]byte(s))
+	return hex.EncodeToString(h.Sum(nil))
+}
+
+func (r *NotificationRestEndpointResource) ModifyPlan(ctx context.Context, req resource.ModifyPlanRequest, resp *resource.ModifyPlanResponse) {
+	if req.Plan.Raw.IsNull() {
+		return
+	}
+
+	var statePwdVersion types.Int64
+	var password, wapiUserPassword types.String
+
+	// Normalize stateRev if null (e.g., first apply)
+	curRev := int64(0)
+
+	if !req.State.Raw.IsNull() && req.State.Raw.IsKnown() {
+		resp.Diagnostics.Append(req.State.GetAttribute(ctx, path.Root("password_version"), &statePwdVersion)...)
+		if resp.Diagnostics.HasError() {
+			return
+		}
+		if !statePwdVersion.IsNull() && !statePwdVersion.IsUnknown() {
+			curRev = statePwdVersion.ValueInt64()
+		}
+	}
+	resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("password"), &password)...)
+	resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("wapi_user_password"), &wapiUserPassword)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	prevHashes := notificationRestEndpointHashState{}
+	plannedHashes := notificationRestEndpointHashState{}
+
+	var prev struct {
+		Algo string `json:"algo"`
+		Hash string `json:"hash"`
+	}
+
+	if b, diags := req.Private.GetKey(ctx, "password_hash"); diags != nil {
+		resp.Diagnostics.Append(diags...)
+	} else if b != nil {
+		if err := json.Unmarshal(b, &prev); err != nil {
+			// Older buggy format: ignore and treat as different
+			prev.Hash = ""
+		}
+	}
+	var plannedHash string
+
+	if prev.Hash != "" {
+		// Best-effort parse; if this fails, treat prev.Hash as a legacy value and
+		// leave prevHashes at its zero value so that we will recompute as needed.
+		_ = json.Unmarshal([]byte(prev.Hash), &prevHashes)
+	}
+
+	if !password.IsUnknown() {
+		if password.IsNull() {
+			plannedHashes.Password = ""
+		} else {
+			plannedHashes.Password = hashString(password.ValueString())
+		}
+	}
+
+	if !wapiUserPassword.IsUnknown() {
+		if wapiUserPassword.IsNull() {
+			plannedHashes.WapiUserPassword = ""
+		} else {
+			plannedHashes.WapiUserPassword = hashString(wapiUserPassword.ValueString())
+		}
+	}
+	if data, err := json.Marshal(plannedHashes); err != nil {
+		resp.Diagnostics.AddError("Private State Marshal Error", err.Error())
+		return
+	} else {
+		plannedHash = string(data)
+	}
+
+	if plannedHashes != prevHashes {
+		// Increment version and store new hash if password modified
+		newRev := types.Int64Value(curRev + 1)
+		resp.Diagnostics.Append(resp.Plan.SetAttribute(ctx, path.Root("password_version"), newRev)...)
+
+		val := map[string]string{"algo": "sha256", "hash": plannedHash}
+		b, err := json.Marshal(val)
+		if err != nil {
+			resp.Diagnostics.AddError("Private State Marshal Error", err.Error())
+			return
+		}
+		resp.Diagnostics.Append(resp.Private.SetKey(ctx, "password_hash", b)...)
+	} else {
+		resp.Diagnostics.Append(resp.Plan.SetAttribute(ctx, path.Root("password_version"), curRev)...)
+	}
+
+}
+
+func hasPasswords(state notificationRestEndpointHashState) bool {
+	return state.Password != "" || state.WapiUserPassword != ""
+}
+
+func marshalSecretsEnvelope(state notificationRestEndpointHashState) ([]byte, error) {
+	hashJSON, err := json.Marshal(state)
+	if err != nil {
+		return nil, err
+	}
+
+	return json.Marshal(map[string]string{
+		"algo": "sha256",
+		"hash": string(hashJSON),
+	})
 }
 
 func (r *NotificationRestEndpointResource) ValidateConfig(ctx context.Context, req resource.ValidateConfigRequest, resp *resource.ValidateConfigResponse) {
@@ -181,6 +301,28 @@ func (r *NotificationRestEndpointResource) Create(ctx context.Context, req resou
 		return
 	}
 
+	var passwordVersion types.Int64
+	var password, wapiUserPassword types.String
+
+	resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("password"), &password)...)
+	resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("wapi_user_password"), &wapiUserPassword)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	var plannedHashState notificationRestEndpointHashState
+
+	if !password.IsNull() && !password.IsUnknown() {
+		ap := password.ValueString()
+		payload.Password = &ap
+		plannedHashState.Password = hashString(ap)
+	}
+	if !wapiUserPassword.IsNull() && !wapiUserPassword.IsUnknown() {
+		pp := wapiUserPassword.ValueString()
+		payload.WapiUserPassword = &pp
+		plannedHashState.WapiUserPassword = hashString(pp)
+	}
+
 	var apiRes *notification.CreateNotificationRestEndpointResponse
 
 	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
@@ -221,6 +363,20 @@ func (r *NotificationRestEndpointResource) Create(ctx context.Context, req resou
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while create NotificationRestEndpoint due inherited Extensible attributes, got error: %s", err))
 		return
 	}
+
+	if hasPasswords(plannedHashState) {
+		passwordVersion = types.Int64Value(1)
+		hashPasswords, err := marshalSecretsEnvelope(plannedHashState)
+		if err != nil {
+			resp.Diagnostics.AddError("error marshalling passwords hash", err.Error())
+			return
+		}
+		resp.Diagnostics.Append(resp.Private.SetKey(ctx, "password_hash", hashPasswords)...)
+	} else {
+		passwordVersion = types.Int64Value(0)
+		resp.Diagnostics.Append(resp.Private.SetKey(ctx, "password_hash", nil)...)
+	}
+	data.PasswordVersion = passwordVersion
 
 	data.Flatten(ctx, &res, &resp.Diagnostics)
 
@@ -420,6 +576,26 @@ func (r *NotificationRestEndpointResource) Update(ctx context.Context, req resou
 		return
 	}
 
+	var password, wapiUserPassword types.String
+	resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("password"), &password)...)
+	resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("wapi_user_password"), &wapiUserPassword)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	var plannedHashState notificationRestEndpointHashState
+
+	if !password.IsNull() && !password.IsUnknown() {
+		ap := password.ValueString()
+		payload.Password = &ap
+		plannedHashState.Password = hashString(ap)
+	}
+	if !wapiUserPassword.IsNull() && !wapiUserPassword.IsUnknown() {
+		pp := wapiUserPassword.ValueString()
+		payload.WapiUserPassword = &pp
+		plannedHashState.WapiUserPassword = hashString(pp)
+	}
+
 	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
 
 	var apiRes *notification.UpdateNotificationRestEndpointResponse
@@ -454,6 +630,18 @@ func (r *NotificationRestEndpointResource) Update(ctx context.Context, req resou
 	if diags.HasError() {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while update NotificationRestEndpoint due inherited Extensible attributes, got error: %s", diags))
 		return
+	}
+
+	if hasPasswords(plannedHashState) {
+		hashPasswords, err := marshalSecretsEnvelope(plannedHashState)
+		if err != nil {
+			resp.Diagnostics.AddError("error marshalling passwords hash", err.Error())
+			return
+		}
+		resp.Diagnostics.Append(resp.Private.SetKey(ctx, "password_hash", hashPasswords)...)
+
+	} else {
+		resp.Diagnostics.Append(resp.Private.SetKey(ctx, "password_hash", nil)...)
 	}
 
 	data.Flatten(ctx, &res, &resp.Diagnostics)
