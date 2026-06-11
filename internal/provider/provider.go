@@ -480,6 +480,11 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 func (p *NIOSProvider) ListResources(ctx context.Context) []func() list.ListResource {
 	return []func() list.ListResource{
 		dns.NewRecordAList,
+		dns.NewRecordMxList,
+		dns.NewRecordNaptrList,
+		dns.NewRecordNsList,
+		dns.NewRecordSrvList,
+		dns.NewRecordTxtList,
 
 		dhcp.NewFixedaddressList,
 
