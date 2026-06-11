@@ -12,13 +12,13 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
-type secretsHashState struct {
+type fixedAddressHashState struct {
 	AuthHash string `json:"auth_hash"`
 	PrivHash string `json:"priv_hash"`
 	CliHash  string `json:"cli_hash"`
 }
 
-func hasSecretHashes(state secretsHashState) bool {
+func hasSecretHashes(state fixedAddressHashState) bool {
 	return state.AuthHash != "" || state.PrivHash != "" || state.CliHash != ""
 }
 
@@ -75,7 +75,7 @@ func hashCliPasswords[T any](ctx context.Context, cliCreds types.List,
 	return hex.EncodeToString(sum[:])
 }
 
-func marshalSecretsHashState(state secretsHashState, diags *diag.Diagnostics) string {
+func marshalSecretsHashState(state fixedAddressHashState, diags *diag.Diagnostics) string {
 	data, err := json.Marshal(state)
 	if err != nil {
 		diags.AddError("error marshalling secrets hash", err.Error())
@@ -124,15 +124,15 @@ func applyCliCredentialPasswords[payloadT any, modelT any](payloadCreds []payloa
 
 func buildSecretsHashState[T any](ctx context.Context, authPwd types.String, privPwd types.String,
 	cliCreds types.List, diags *diag.Diagnostics,
-	passwordOf func(T) types.String) secretsHashState {
-	return secretsHashState{
+	passwordOf func(T) types.String) fixedAddressHashState {
+	return fixedAddressHashState{
 		AuthHash: hashStringValue(authPwd),
 		PrivHash: hashStringValue(privPwd),
 		CliHash:  hashCliPasswords(ctx, cliCreds, diags, passwordOf),
 	}
 }
 
-func marshalSecretsEnvelope(state secretsHashState) ([]byte, error) {
+func marshalSecretsEnvelope(state fixedAddressHashState) ([]byte, error) {
 	hashJSON, err := json.Marshal(state)
 	if err != nil {
 		return nil, err

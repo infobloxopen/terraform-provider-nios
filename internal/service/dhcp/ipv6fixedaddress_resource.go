@@ -111,10 +111,10 @@ func (r *Ipv6fixedaddressResource) ModifyPlan(ctx context.Context, req resource.
 		}
 	}
 
-	prevHashes := secretsHashState{}
+	prevHashes := fixedAddressHashState{}
 	if prevEnvelope.Hash != "" {
 		if err := json.Unmarshal([]byte(prevEnvelope.Hash), &prevHashes); err != nil {
-			prevHashes = secretsHashState{}
+			prevHashes = fixedAddressHashState{}
 		}
 	}
 
@@ -161,7 +161,7 @@ func (r *Ipv6fixedaddressResource) ModifyPlan(ctx context.Context, req resource.
 		bump = true
 		newHashToStore = ""
 
-	case plannedHasSecrets && (prevHashes == secretsHashState{} || secretsChanged):
+	case plannedHasSecrets && (prevHashes == fixedAddressHashState{} || secretsChanged):
 		bump = true
 		newHashToStore = marshalSecretsHashState(plannedHashes, &resp.Diagnostics)
 	}

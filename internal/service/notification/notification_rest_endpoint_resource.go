@@ -103,8 +103,8 @@ func (r *NotificationRestEndpointResource) ModifyPlan(ctx context.Context, req r
 			curRev = statePwdVersion.ValueInt64()
 		}
 	}
-	resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("authentication_password"), &password)...)
-	resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("privacy_password"), &wapiUserPassword)...)
+	resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("password"), &password)...)
+	resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("wapi_user_password"), &wapiUserPassword)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
@@ -304,8 +304,8 @@ func (r *NotificationRestEndpointResource) Create(ctx context.Context, req resou
 	var passwordVersion types.Int64
 	var password, wapiUserPassword types.String
 
-	resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("authentication_password"), &password)...)
-	resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("privacy_password"), &wapiUserPassword)...)
+	resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("password"), &password)...)
+	resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("wapi_user_password"), &wapiUserPassword)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
@@ -577,8 +577,8 @@ func (r *NotificationRestEndpointResource) Update(ctx context.Context, req resou
 	}
 
 	var password, wapiUserPassword types.String
-	resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("authentication_password"), &password)...)
-	resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("privacy_password"), &wapiUserPassword)...)
+	resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("password"), &password)...)
+	resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("wapi_user_password"), &wapiUserPassword)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
