@@ -2017,13 +2017,7 @@ func TestAccMemberResource_NodeInfo(t *testing.T) {
 					vipAddress, "172.28.38.1", "255.255.254.0", "false", 0, nodeInfoThreeNodes, mgmtPortSettingVal),
 				ExpectError: regexp.MustCompile("node_info cannot have more than 2 nodes when enable_ha is false"),
 			},
-			// Condition 3b: single node with enable_ha false is not allowed
-			// {
-			// 	Config: testAccMemberNodeInfo(hostName, "IPV4", "VNIOS", "ALL_V4",
-			// 		vipAddress, "172.28.38.1", "255.255.254.0", "false", 0, nodeInfoSingleNode, mgmtPortSettingVal),
-			// 	ExpectError: regexp.MustCompile("node_info with a single node is not valid when enable_ha is false"),
-			// },
-			//Condition 3c: single node with enable_ha true is not allowed
+			//Condition 3b: single node with enable_ha true is not allowed
 			{
 				Config: testAccMemberNodeInfo(hostName, "IPV4", "VNIOS", "ALL_V4",
 					vipAddress, "172.28.38.1", "255.255.254.0", "true", 113, nodeInfoSingleNode, mgmtPortSettingVal),
