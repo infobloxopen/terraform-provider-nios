@@ -511,16 +511,13 @@ func (r *NetworkcontainerResource) ValidateConfig(ctx context.Context, req resou
 
 		for i, option := range options {
 			isSpecialOption := false
-			optionName := ""
 
 			// First, determine if this is a special option
 			if !option.Name.IsNull() && !option.Name.IsUnknown() {
-				optionName = option.Name.ValueString()
-				isSpecialOption = specialOptions[optionName]
+				isSpecialOption = specialOptions[option.Name.ValueString()]
 			} else if !option.Num.IsNull() && !option.Num.IsUnknown() {
 				optionNum := option.Num.ValueInt64()
 				isSpecialOption = specialOptionsNum[optionNum]
-				optionName = fmt.Sprintf("with num = %d", optionNum)
 			} else {
 				resp.Diagnostics.AddAttributeError(
 					path.Root("options").AtListIndex(i).AtName("name"),
