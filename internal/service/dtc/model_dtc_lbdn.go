@@ -188,11 +188,11 @@ var DtcLbdnResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional:    true,
 		Computed:    true,
 		Default: listdefault.StaticValue(
-            types.ListValueMust(types.StringType, []attr.Value{
-                types.StringValue("A"),
-                types.StringValue("AAAA"),
-            }),
-        ),
+			types.ListValueMust(types.StringType, []attr.Value{
+				types.StringValue("A"),
+				types.StringValue("AAAA"),
+			}),
+		),
 		Validators: []validator.List{
 			customvalidator.StringsInSlice([]string{"A", "AAAA", "CNAME", "NAPTR", "SRV"}),
 			listvalidator.SizeAtLeast(1),
