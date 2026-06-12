@@ -3,10 +3,14 @@ package ipam_test
 import (
 	"context"
 	"fmt"
+	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/knownvalue"
 	"github.com/hashicorp/terraform-plugin-testing/querycheck"
+	"github.com/hashicorp/terraform-plugin-testing/querycheck/queryfilter"
+	"github.com/hashicorp/terraform-plugin-testing/tfjsonpath"
 	"github.com/hashicorp/terraform-plugin-testing/tfversion"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/ipam"
@@ -35,10 +39,9 @@ func TestAccNetworktemplateList_basic(t *testing.T) {
 			},
 			// Query the object
 			{
-				ProtoV6ProviderFactories: acctest.
-					ProtoV6ProviderFactories,
-				Query:  true,
-				Config: testAccNetworktemplateListBasicConfig(),
+				ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+				Query:                    true,
+				Config:                   testAccNetworktemplateListBasicConfig(),
 				QueryResultChecks: []querycheck.QueryResultCheck{
 					querycheck.ExpectLengthAtLeast("nios_ipam_networktemplate.test", 1),
 				},
@@ -74,9 +77,22 @@ func TestAccNetworktemplateList_Filters(t *testing.T) {
 				Config:                   testAccNetworktemplateListConfigFilters(name),
 				QueryResultChecks: []querycheck.QueryResultCheck{
 					querycheck.ExpectLength("nios_ipam_networktemplate.test", 1),
+					querycheck.ExpectResourceKnownValues(
+						resourceName,
+						queryfilter.ByResourceIdentity(map[string]knownvalue.Check{
+							// TODO : Update the ref prefix with the correct identifying object for the resource
+							"ref": knownvalue.StringRegexp(regexp.MustCompile("networktemplate/")),
+						}),
+						[]querycheck.KnownValueCheck{
+							// TODO : Add checks for required fields
+							{
+								Path:       tfjsonpath.New("name"),
+								KnownValue: knownvalue.StringExact(name),
+							},
+						},
+					),
 				},
 			},
-			// Delete testing automatically occurs in TestCase
 		},
 	})
 }
@@ -114,7 +130,6 @@ func TestAccNetworktemplateList_ExtAttrFilters(t *testing.T) {
 					querycheck.ExpectLength("nios_ipam_networktemplate.test", 1),
 				},
 			},
-			// Delete testing automatically occurs in TestCase
 		},
 	})
 }
@@ -132,6 +147,7 @@ func testAccNetworktemplateListConfigFilters(name string) string {
 	return fmt.Sprintf(`
 list "nios_ipam_networktemplate" "test" {
 	provider = nios
+	include_resource = true
 	config {
 		filters = {
 			name =  %q
@@ -141,7 +157,7 @@ list "nios_ipam_networktemplate" "test" {
 `, name)
 }
 
-func testAccNetworktemplateListConfigExtAttrFilters(name string) string {
+func testAccNetworktemplateListConfigExtAttrFilters(extAttrsValue string) string {
 	return fmt.Sprintf(`
 list "nios_ipam_networktemplate" "test" {
 	provider = nios
@@ -151,5 +167,5 @@ list "nios_ipam_networktemplate" "test" {
 		}
 	}
 }
-`, name)
+`, extAttrsValue)
 }
