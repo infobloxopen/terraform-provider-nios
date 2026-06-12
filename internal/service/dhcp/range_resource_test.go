@@ -579,14 +579,14 @@ func TestAccRangeResource_DiscoveryBlackoutSetting(t *testing.T) {
 }
 
 func TestAccRangeResource_DiscoveryMember(t *testing.T) {
-	t.Skip("Requires non-grid master candidate to be in discovery polling mode")
+	discoveryMemberHostname := utils.GetNIOSDiscoveryMemberHostName()
+	if discoveryMemberHostname == "" {
+		t.Skip("Skipping test: NIOS_DISCOVERY_MEMBER_HOSTNAME must be set (requires 172.28.83.98 discovery grid)")
+	}
 	var resourceName = "nios_dhcp_range.test_discovery_member"
 	var v dhcp.Range
 	startAddr := "10.0.0.39"
 	endAddr := "10.0.0.40"
-	memberUpdatedName := utils.GetNIOSGridMemberHostName()
-	discoveryMember := memberUpdatedName
-	discoveryMemberUpdate := "infoblox.member2"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -594,18 +594,18 @@ func TestAccRangeResource_DiscoveryMember(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRangeDiscoveryMember(startAddr, endAddr, discoveryMember),
+				Config: testAccRangeDiscoveryMember(startAddr, endAddr, discoveryMemberHostname),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangeExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "discovery_member", discoveryMember),
+					resource.TestCheckResourceAttr(resourceName, "discovery_member", discoveryMemberHostname),
 				),
 			},
-			// Update and Read
+			// Update and Read - disable discovery
 			{
-				Config: testAccRangeDiscoveryMember(startAddr, endAddr, discoveryMemberUpdate),
+				Config: testAccRangeDiscoveryMemberDisabled(startAddr, endAddr),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangeExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "discovery_member", discoveryMemberUpdate),
+					resource.TestCheckResourceAttr(resourceName, "use_enable_discovery", "false"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -948,7 +948,10 @@ func TestAccRangeResource_ExtAttrs(t *testing.T) {
 }
 
 func TestAccRangeResource_EnableDiscovery(t *testing.T) {
-	t.Skip("Requires non-grid master candidate to be in discovery polling mode")
+	discoveryMemberHostname := utils.GetNIOSDiscoveryMemberHostName()
+	if discoveryMemberHostname == "" {
+		t.Skip("Skipping test: NIOS_DISCOVERY_MEMBER_HOSTNAME must be set (requires 172.28.83.98 discovery grid)")
+	}
 	var resourceName = "nios_dhcp_range.test_enable_discovery"
 	var v dhcp.Range
 	startAddr := "10.0.0.63"
@@ -960,7 +963,7 @@ func TestAccRangeResource_EnableDiscovery(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRangeEnableDiscovery(startAddr, endAddr, true),
+				Config: testAccRangeEnableDiscovery(startAddr, endAddr, true, discoveryMemberHostname),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangeExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "enable_discovery", "true"),
@@ -968,7 +971,7 @@ func TestAccRangeResource_EnableDiscovery(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRangeEnableDiscovery(startAddr, endAddr, false),
+				Config: testAccRangeEnableDiscovery(startAddr, endAddr, false, discoveryMemberHostname),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangeExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "enable_discovery", "false"),
@@ -1012,13 +1015,11 @@ func TestAccRangeResource_EnableImmediateDiscovery(t *testing.T) {
 }
 
 func TestAccRangeResource_FailoverAssociation(t *testing.T) {
-	t.Skip("Requires non-grid master candidate to be in discovery polling mode")
 	var resourceName = "nios_dhcp_range.test_failover_association"
 	var v dhcp.Range
 	startAddr := "10.0.0.67"
 	endAddr := "10.0.0.68"
-	failoverAssociation := "example_failover_association"
-	failoverAssociationUpdate := "example_failover_association_1"
+	failoverAssociation := "failover_association"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1032,12 +1033,12 @@ func TestAccRangeResource_FailoverAssociation(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "failover_association", failoverAssociation),
 				),
 			},
-			// Update and Read
+			// Update and Read (re-apply same config to verify no drift)
 			{
-				Config: testAccRangeFailoverAssociation(startAddr, endAddr, failoverAssociationUpdate),
+				Config: testAccRangeFailoverAssociation(startAddr, endAddr, failoverAssociation),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangeExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "failover_association", failoverAssociationUpdate),
+					resource.TestCheckResourceAttr(resourceName, "failover_association", failoverAssociation),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -3230,6 +3231,16 @@ resource "nios_dhcp_range" "test_discovery_member" {
 `, startAddr, endAddr, discoveryMember)
 }
 
+func testAccRangeDiscoveryMemberDisabled(startAddr, endAddr string) string {
+	return fmt.Sprintf(`
+resource "nios_dhcp_range" "test_discovery_member" {
+    start_addr = %q
+    end_addr   = %q
+	use_enable_discovery = false
+}
+`, startAddr, endAddr)
+}
+
 func testAccRangeEmailList(startAddr, endAddr string, emailList []string) string {
 	emailListHCL := utils.ConvertStringSliceToHCL(emailList)
 	return fmt.Sprintf(`
@@ -3264,15 +3275,16 @@ resource "nios_dhcp_range" "test_enable_dhcp_thresholds" {
 `, startAddr, endAddr, enableDhcpThresholds)
 }
 
-func testAccRangeEnableDiscovery(startAddr, endAddr string, enableDiscovery bool) string {
+func testAccRangeEnableDiscovery(startAddr, endAddr string, enableDiscovery bool, discoveryMember string) string {
 	return fmt.Sprintf(`
 resource "nios_dhcp_range" "test_enable_discovery" {
     start_addr = %q
     end_addr = %q
     enable_discovery = %t
+    discovery_member = %q
 	use_enable_discovery = true
 }
-`, startAddr, endAddr, enableDiscovery)
+`, startAddr, endAddr, enableDiscovery, discoveryMember)
 }
 
 func testAccRangeEnableEmailWarnings(startAddr, endAddr string, enableEmailWarnings bool) string {

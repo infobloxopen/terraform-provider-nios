@@ -177,7 +177,7 @@ func (r *ParentalcontrolSubscriberrecordResource) Read(ctx context.Context, req 
 
 	// Handle not found case
 	if err != nil {
-		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
+		if httpRes != nil && (httpRes.StatusCode == http.StatusNotFound || utils.IsObjectNotFoundErr(httpRes.StatusCode, err)) {
 			// Resource no longer exists, remove from state
 			resp.State.RemoveResource(ctx)
 			return
@@ -271,7 +271,7 @@ func (r *ParentalcontrolSubscriberrecordResource) Delete(ctx context.Context, re
 			Execute()
 
 		if httpRes != nil {
-			if httpRes.StatusCode == http.StatusNotFound {
+			if httpRes.StatusCode == http.StatusNotFound || utils.IsObjectNotFoundErr(httpRes.StatusCode, callErr) {
 				return 0, nil
 			}
 			return httpRes.StatusCode, callErr

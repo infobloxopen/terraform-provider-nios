@@ -136,7 +136,6 @@ func TestAccGridServicerestartGroupResource_ExtAttrs(t *testing.T) {
 }
 
 func TestAccGridServicerestartGroupResource_Members(t *testing.T) {
-	t.Skip("Requires members to be present in the grid to test against")
 	var resourceName = "nios_grid_servicerestart_group.test_members"
 	var v grid.GridServicerestartGroup
 	name := acctest.RandomNameWithPrefix("grid-service")
@@ -149,18 +148,18 @@ func TestAccGridServicerestartGroupResource_Members(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccGridServicerestartGroupMembers(name, "DHCP", memberUpdatedName),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckGridServicerestartGroupExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "members.0", memberUpdatedName),
-				),
-			},
-			// Update and Read
-			{
 				Config: testAccGridServicerestartGroupMembers(name, "DNS", memberName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckGridServicerestartGroupExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "members.0", memberName),
+				),
+			},
+			// Update and Read
+			{
+				Config: testAccGridServicerestartGroupMembers(name, "DNS", memberUpdatedName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckGridServicerestartGroupExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "members.0", memberUpdatedName),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
