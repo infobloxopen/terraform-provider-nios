@@ -46,6 +46,22 @@ func GetNIOSDiscoveryMemberHostName() string {
 	return os.Getenv("NIOS_DISCOVERY_MEMBER_HOSTNAME")
 }
 
+func GetNIOSFederationEnabled() string {
+	return os.Getenv("NIOS_FEDERATION_ENABLED")
+}
+
+func GetNIOSISEEnabled() string {
+	return os.Getenv("NIOS_ISE_ENABLED")
+}
+
+func GetNIOSVlanRef() string {
+	return os.Getenv("NIOS_VLAN_REF")
+}
+
+func GetNIOSDnsAuthZoneFqdn() string {
+	return os.Getenv("NIOS_DNS_AUTH_ZONE_FQDN")
+}
+
 func GetNIOSNotificationRestEndpointRef() string {
 	return os.Getenv("NIOS_NOTIFICATION_REST_ENDPOINT_REF")
 }

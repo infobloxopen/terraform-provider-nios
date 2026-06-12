@@ -20,6 +20,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
@@ -730,7 +731,9 @@ var NetworkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 	"rir": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The registry (RIR) that allocated the network container address space.",
-		Default:             stringdefault.StaticString("NONE"),
+		PlanModifiers: []planmodifier.String{
+			stringplanmodifier.UseStateForUnknown(),
+		},
 	},
 	"rir_organization": schema.StringAttribute{
 		Optional:            true,
@@ -740,7 +743,6 @@ var NetworkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 	"rir_registration_action": schema.StringAttribute{
 		Optional:            true,
 		MarkdownDescription: "The RIR registration action.",
-		Computed:            true,
 	},
 	"rir_registration_status": schema.StringAttribute{
 		Optional:            true,
@@ -959,8 +961,10 @@ var NetworkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 		Default:             booldefault.StaticBool(false),
 	},
 	"use_zone_associations": schema.BoolAttribute{
-		Computed:            true,
+		Optional:            true,
 		MarkdownDescription: "Use flag for: zone_associations",
+		Computed:            true,
+		Default:             booldefault.StaticBool(true),
 	},
 	"utilization": schema.Int64Attribute{
 		Computed:            true,
@@ -973,6 +977,7 @@ var NetworkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional:            true,
 		MarkdownDescription: "The list of zones associated with this network.",
 		Validators: []validator.List{
+			listvalidator.AlsoRequires(path.MatchRoot("use_zone_associations")),
 			listvalidator.SizeAtLeast(1),
 		},
 	},
@@ -1166,7 +1171,6 @@ func (m *NetworkcontainerModel) Flatten(ctx context.Context, from *ipam.Networkc
 	m.RemoveSubnets = types.BoolPointerValue(from.RemoveSubnets)
 	m.Rir = flex.FlattenStringPointer(from.Rir)
 	m.RirOrganization = flex.FlattenStringPointer(from.RirOrganization)
-	m.RirRegistrationAction = flex.FlattenStringPointer(from.RirRegistrationAction)
 	m.RirRegistrationStatus = flex.FlattenStringPointer(from.RirRegistrationStatus)
 	m.SamePortControlDiscoveryBlackout = types.BoolPointerValue(from.SamePortControlDiscoveryBlackout)
 	m.SubscribeSettings = FlattenNetworkcontainerSubscribeSettings(ctx, from.SubscribeSettings, diags)

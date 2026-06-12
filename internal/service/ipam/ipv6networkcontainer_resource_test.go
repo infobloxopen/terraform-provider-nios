@@ -105,6 +105,28 @@ func TestAccIpv6networkcontainerResource_disappears(t *testing.T) {
 	})
 }
 
+func TestAccIpv6networkcontainerResource_AutoCreateReversezone(t *testing.T) {
+	var resourceName = "nios_ipam_ipv6network_container.test_auto_create_reversezone"
+	var v ipam.Ipv6networkcontainer
+	network := acctest.RandomIPv6Network()
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// Create and Read (ImmutableBool: single-step only)
+			{
+				Config: testAccIpv6networkcontainerAutoCreateReversezone(network, "true"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckIpv6networkcontainerExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "auto_create_reversezone", "true"),
+				),
+			},
+			// Delete testing automatically occurs in TestCase
+		},
+	})
+}
+
 func TestAccIpv6networkcontainerResource_CloudInfo(t *testing.T) {
 	var resourceName = "nios_ipam_ipv6network_container.test_cloud_info"
 	var v ipam.Ipv6networkcontainer
@@ -155,6 +177,37 @@ func TestAccIpv6networkcontainerResource_Comment(t *testing.T) {
 					testAccCheckIpv6networkcontainerExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "comment", "updated comment"),
 					resource.TestCheckResourceAttr(resourceName, "network", network),
+				),
+			},
+			// Delete testing automatically occurs in TestCase
+		},
+	})
+}
+
+func TestAccIpv6networkcontainerResource_DeleteReason(t *testing.T) {
+	var resourceName = "nios_ipam_ipv6network_container.test_delete_reason"
+	var v ipam.Ipv6networkcontainer
+	network := acctest.RandomIPv6Network()
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// Create and Read
+			// delete_reason is write-only (not returned by NIOS on Read); state preserves configured value.
+			{
+				Config: testAccIpv6networkcontainerDeleteReason(network, "test-delete-reason"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckIpv6networkcontainerExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "delete_reason", "test-delete-reason"),
+				),
+			},
+			// Update and Read
+			{
+				Config: testAccIpv6networkcontainerDeleteReason(network, "updated-delete-reason"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckIpv6networkcontainerExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "delete_reason", "updated-delete-reason"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -824,6 +877,59 @@ func TestAccIpv6networkcontainerResource_PreferredLifetime(t *testing.T) {
 	})
 }
 
+func TestAccIpv6networkcontainerResource_RestartIfNeeded(t *testing.T) {
+	var resourceName = "nios_ipam_ipv6network_container.test_restart_if_needed"
+	var v ipam.Ipv6networkcontainer
+	network := acctest.RandomIPv6Network()
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// Create and Read
+			{
+				Config: testAccIpv6networkcontainerRestartIfNeeded(network, "false"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckIpv6networkcontainerExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "restart_if_needed", "false"),
+				),
+			},
+			// Update and Read
+			{
+				Config: testAccIpv6networkcontainerRestartIfNeeded(network, "true"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckIpv6networkcontainerExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "restart_if_needed", "true"),
+				),
+			},
+			// Delete testing automatically occurs in TestCase
+		},
+	})
+}
+
+func TestAccIpv6networkcontainerResource_RirRegistrationAction(t *testing.T) {
+	var resourceName = "nios_ipam_ipv6network_container.test_rir_registration_action"
+	var v ipam.Ipv6networkcontainer
+	network := acctest.RandomIPv6Network()
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// Create and Read
+			// rir_registration_action is write-only (not returned by NIOS on Read); state preserves configured value.
+			{
+				Config: testAccIpv6networkcontainerRirRegistrationAction(network, "NONE"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckIpv6networkcontainerExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "rir_registration_action", "NONE"),
+				),
+			},
+			// Delete testing automatically occurs in TestCase
+		},
+	})
+}
+
 func TestAccIpv6networkcontainerResource_RirRegistrationStatus(t *testing.T) {
 	var resourceName = "nios_ipam_ipv6network_container.test_rir_registration_status"
 	var v ipam.Ipv6networkcontainer
@@ -872,6 +978,72 @@ func TestAccIpv6networkcontainerResource_SamePortControlDiscoveryBlackout(t *tes
 					testAccCheckIpv6networkcontainerExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "same_port_control_discovery_blackout", "true"),
 					resource.TestCheckResourceAttr(resourceName, "network", network),
+				),
+			},
+			// Delete testing automatically occurs in TestCase
+		},
+	})
+}
+
+func TestAccIpv6networkcontainerResource_SendRirRequest(t *testing.T) {
+	var resourceName = "nios_ipam_ipv6network_container.test_send_rir_request"
+	var v ipam.Ipv6networkcontainer
+	network := acctest.RandomIPv6Network()
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// Create and Read
+			// send_rir_request is write-only (not returned by NIOS on Read); state preserves configured value.
+			{
+				Config: testAccIpv6networkcontainerSendRirRequest(network, "false"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckIpv6networkcontainerExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "send_rir_request", "false"),
+				),
+			},
+			// Update and Read
+			{
+				Config: testAccIpv6networkcontainerSendRirRequest(network, "true"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckIpv6networkcontainerExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "send_rir_request", "true"),
+				),
+			},
+			// Delete testing automatically occurs in TestCase
+		},
+	})
+}
+
+func TestAccIpv6networkcontainerResource_SubscribeSettings(t *testing.T) {
+	if utils.GetNIOSISEEnabled() == "" {
+		t.Skip("NIOS_ISE_ENABLED environment variable must be set for this test to run (requires Cisco ISE server configured in NIOS)")
+	}
+	var resourceName = "nios_ipam_ipv6network_container.test_subscribe_settings"
+	var v ipam.Ipv6networkcontainer
+	network := acctest.RandomIPv6Network()
+	enabledAttribute := "DOMAINNAME"
+	enabledAttributeUpdate := "ENDPOINT_PROFILE"
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// Create and Read
+			{
+				Config: testAccIpv6networkcontainerSubscribeSettings(network, enabledAttribute),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckIpv6networkcontainerExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "subscribe_settings.enabled_attributes.0", enabledAttribute),
+				),
+			},
+			// Update and Read
+			{
+				Config: testAccIpv6networkcontainerSubscribeSettings(network, enabledAttributeUpdate),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckIpv6networkcontainerExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "subscribe_settings.enabled_attributes.0", enabledAttributeUpdate),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -1544,6 +1716,15 @@ func testAccCheckIpv6networkcontainerDisappears(ctx context.Context, v *ipam.Ipv
 	}
 }
 
+func testAccIpv6networkcontainerAutoCreateReversezone(network, autoCreateReversezone string) string {
+	return fmt.Sprintf(`
+resource "nios_ipam_ipv6network_container" "test_auto_create_reversezone" {
+    network = %q
+    auto_create_reversezone = %s
+}
+`, network, autoCreateReversezone)
+}
+
 func testAccIpv6networkcontainerBasicConfig(network string) string {
 	return fmt.Sprintf(`
 resource "nios_ipam_ipv6network_container" "test" {
@@ -1567,6 +1748,15 @@ resource "nios_ipam_ipv6network_container" "test_comment" {
     comment = %q
 }
 `, network, comment)
+}
+
+func testAccIpv6networkcontainerDeleteReason(network, deleteReason string) string {
+	return fmt.Sprintf(`
+resource "nios_ipam_ipv6network_container" "test_delete_reason" {
+    network = %q
+    delete_reason = %q
+}
+`, network, deleteReason)
 }
 
 func testAccIpv6networkcontainerDdnsDomainname(network, ddnsDomainname, useDdnsDomainname string) string {
@@ -1773,6 +1963,24 @@ resource "nios_ipam_ipv6network_container" "test_preferred_lifetime" {
 `, network, preferredLifetime, usePreferredLifetime)
 }
 
+func testAccIpv6networkcontainerRestartIfNeeded(network, restartIfNeeded string) string {
+	return fmt.Sprintf(`
+resource "nios_ipam_ipv6network_container" "test_restart_if_needed" {
+    network = %q
+    restart_if_needed = %s
+}
+`, network, restartIfNeeded)
+}
+
+func testAccIpv6networkcontainerRirRegistrationAction(network, rirRegistrationAction string) string {
+	return fmt.Sprintf(`
+resource "nios_ipam_ipv6network_container" "test_rir_registration_action" {
+    network = %q
+    rir_registration_action = %q
+}
+`, network, rirRegistrationAction)
+}
+
 func testAccIpv6networkcontainerRirRegistrationStatus(network, rirRegistrationStatus string) string {
 	return fmt.Sprintf(`
 resource "nios_ipam_ipv6network_container" "test_rir_registration_status" {
@@ -1790,6 +1998,27 @@ resource "nios_ipam_ipv6network_container" "test_same_port_control_discovery_bla
     use_blackout_setting = %q
 }
 `, network, samePortControlDiscoveryBlackout, useBlackoutSetting)
+}
+
+func testAccIpv6networkcontainerSendRirRequest(network, sendRirRequest string) string {
+	return fmt.Sprintf(`
+resource "nios_ipam_ipv6network_container" "test_send_rir_request" {
+    network = %q
+    send_rir_request = %s
+}
+`, network, sendRirRequest)
+}
+
+func testAccIpv6networkcontainerSubscribeSettings(network, enabledAttribute string) string {
+	return fmt.Sprintf(`
+resource "nios_ipam_ipv6network_container" "test_subscribe_settings" {
+    network = %q
+    subscribe_settings = {
+        enabled_attributes = [%q]
+    }
+    use_subscribe_settings = true
+}
+`, network, enabledAttribute)
 }
 
 func testAccIpv6networkcontainerUnmanaged(network, unmanaged string) string {
