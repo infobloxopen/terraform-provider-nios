@@ -539,7 +539,7 @@ var MemberResourceSchemaAttributes = map[string]schema.Attribute{
 	"platform": schema.StringAttribute{
 		Computed: true,
 		Optional: true,
-		Default:  stringdefault.StaticString("INFOBLOX"),
+		//Default:  stringdefault.StaticString("INFOBLOX"),
 		Validators: []validator.String{
 			stringvalidator.OneOf("CISCO", "IBVM", "INFOBLOX", "RIVERBED", "VNIOS"),
 		},
