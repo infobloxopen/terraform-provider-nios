@@ -15,7 +15,6 @@ import (
 	"github.com/infobloxopen/infoblox-nios-go-client/grid"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/config"
-	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 	"github.com/infobloxopen/terraform-provider-nios/internal/retry"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
@@ -147,35 +146,7 @@ func (r *MemberResource) Create(ctx context.Context, req resource.CreateRequest,
 
 	res := apiRes.CreateMemberResponseAsObject.GetResult()
 
-	// Static routes cannot be set during member creation - they must be added via a separate update
-	hasStaticRoutes := (!data.StaticRoutes.IsUnknown() && !data.StaticRoutes.IsNull()) ||
-		(!data.Ipv6StaticRoutes.IsUnknown() && !data.Ipv6StaticRoutes.IsNull())
-	if hasStaticRoutes {
-		staticRoutesPayload := &grid.Member{}
-		if !data.StaticRoutes.IsUnknown() && !data.StaticRoutes.IsNull() {
-			staticRoutesPayload.StaticRoutes = flex.ExpandFrameworkListNestedBlock(ctx, data.StaticRoutes, &resp.Diagnostics, ExpandMemberStaticRoutes)
-		}
-		if !data.Ipv6StaticRoutes.IsUnknown() && !data.Ipv6StaticRoutes.IsNull() {
-			staticRoutesPayload.Ipv6StaticRoutes = flex.ExpandFrameworkListNestedBlock(ctx, data.Ipv6StaticRoutes, &resp.Diagnostics, ExpandMemberIpv6StaticRoutes)
-		}
-		if resp.Diagnostics.HasError() {
-			return
-		}
-		apiRes2, _, err2 := r.client.GridAPI.
-			MemberAPI.
-			Update(ctx, utils.ExtractResourceRef(*res.Ref)).
-			Member(*staticRoutesPayload).
-			ReturnFieldsPlus(readableAttributesForMember).
-			ReturnAsObject(1).
-			Execute()
-		if err2 != nil {
-			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update Member with static routes, got error: %s", err2))
-			return
-		}
-		res = apiRes2.UpdateMemberResponseAsObject.GetResult()
-	}
-
-	if !data.PreProvisioning.IsUnknown() && !data.PreProvisioning.IsNull() {
+	if !data.PreProvisioning.IsUnknown() && !data.PreProvisioning.IsNull() || (!data.TrafficCaptureAuthDnsSetting.IsUnknown() && !data.TrafficCaptureAuthDnsSetting.IsNull()) || (!data.MemberServiceCommunication.IsUnknown() && !data.MemberServiceCommunication.IsNull()) || (!data.SyslogProxySetting.IsUnknown() && !data.SyslogProxySetting.IsNull()) {
 		apiRes2, _, err2 := r.client.GridAPI.
 			MemberAPI.
 			Update(ctx, utils.ExtractResourceRef(*res.Ref)).
@@ -184,7 +155,7 @@ func (r *MemberResource) Create(ctx context.Context, req resource.CreateRequest,
 			ReturnAsObject(1).
 			Execute()
 		if err2 != nil {
-			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to Create Member with pre-provisioning settings, got error: %s", err2))
+			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to Create Member with pre-provisioning or syslog proxy settings, got error: %s", err2))
 			return
 		}
 		res = apiRes2.UpdateMemberResponseAsObject.GetResult()
@@ -197,14 +168,7 @@ func (r *MemberResource) Create(ctx context.Context, req resource.CreateRequest,
 		return
 	}
 
-	// Preserve ospf_list authentication_key values from the plan before Flatten,
-	// since the API does not return this write-only field.
-	planOspfList := data.OspfList
-
 	data.Flatten(ctx, &res, &resp.Diagnostics)
-
-	// Restore authentication_key from plan into flattened ospf_list
-	data.OspfList = preserveOspfListAuthKeys(ctx, planOspfList, data.OspfList, &resp.Diagnostics)
 
 	// Save data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
@@ -291,11 +255,7 @@ func (r *MemberResource) Read(ctx context.Context, req resource.ReadRequest, res
 		return
 	}
 
-	stateOspfList := data.OspfList
-
 	data.Flatten(ctx, &res, &resp.Diagnostics)
-
-	data.OspfList = preserveOspfListAuthKeys(ctx, stateOspfList, data.OspfList, &resp.Diagnostics)
 
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
@@ -352,12 +312,7 @@ func (r *MemberResource) ReadByExtAttrs(ctx context.Context, data *MemberModel, 
 		return true
 	}
 
-	stateOspfListExt := data.OspfList
-
 	data.Flatten(ctx, &res, &resp.Diagnostics)
-
-	data.OspfList = preserveOspfListAuthKeys(ctx, stateOspfListExt, data.OspfList, &resp.Diagnostics)
-
 	resp.Diagnostics.Append(resp.State.Set(ctx, data)...)
 
 	return true
@@ -478,11 +433,7 @@ func (r *MemberResource) Update(ctx context.Context, req resource.UpdateRequest,
 		return
 	}
 
-	planOspfListUpdate := data.OspfList
-
 	data.Flatten(ctx, &res, &resp.Diagnostics)
-
-	data.OspfList = preserveOspfListAuthKeys(ctx, planOspfListUpdate, data.OspfList, &resp.Diagnostics)
 
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
@@ -823,48 +774,4 @@ func (r *MemberResource) ValidateConfig(ctx context.Context, req resource.Valida
 func (r *MemberResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("ref"), req.ID)...)
 	resp.Diagnostics.Append(resp.Private.SetKey(ctx, "associate_internal_id", []byte("true"))...)
-}
-
-// preserveOspfListAuthKeys restores authentication_key values from the prior
-// state/plan into the flattened ospf_list, because the NIOS API does not return
-// this write-only field. Only restores when the prior value was non-empty and
-// the API returned empty, to avoid changing behavior for authentication_type=NONE.
-func preserveOspfListAuthKeys(ctx context.Context, prior, current types.List, diags *diag.Diagnostics) types.List {
-	if prior.IsNull() || prior.IsUnknown() || current.IsNull() || current.IsUnknown() {
-		return current
-	}
-
-	var priorItems []MemberOspfListModel
-	d := prior.ElementsAs(ctx, &priorItems, false)
-	diags.Append(d...)
-	if d.HasError() {
-		return current
-	}
-
-	var currentItems []MemberOspfListModel
-	d = current.ElementsAs(ctx, &currentItems, false)
-	diags.Append(d...)
-	if d.HasError() {
-		return current
-	}
-
-	changed := false
-	for i := range currentItems {
-		if i < len(priorItems) &&
-			!priorItems[i].AuthenticationKey.IsNull() &&
-			!priorItems[i].AuthenticationKey.IsUnknown() &&
-			priorItems[i].AuthenticationKey.ValueString() != "" &&
-			currentItems[i].AuthenticationKey.ValueString() == "" {
-			currentItems[i].AuthenticationKey = priorItems[i].AuthenticationKey
-			changed = true
-		}
-	}
-
-	if !changed {
-		return current
-	}
-
-	result, d := types.ListValueFrom(ctx, current.ElementType(ctx), currentItems)
-	diags.Append(d...)
-	return result
 }
