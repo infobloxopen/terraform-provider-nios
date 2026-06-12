@@ -508,6 +508,13 @@ func (r *MemberResource) ValidateConfig(ctx context.Context, req resource.Valida
 		}
 	}
 
+	// CSP Member Setting Validation
+	if !data.CspMemberSetting.IsNull() && !data.CspMemberSetting.IsUnknown() {
+		if data.ConfigureCspMemberSetting.IsNull() || data.ConfigureCspMemberSetting.IsUnknown() || !data.ConfigureCspMemberSetting.ValueBool() {
+			resp.Diagnostics.AddError("Validation Error", "configure_csp_member_setting must be set to true when csp_member_setting is provided")
+		}
+	}
+
 	if !data.HaOnCloud.IsNull() && !data.HaOnCloud.IsUnknown() && data.HaOnCloud.ValueBool() {
 		if data.EnableHa.IsNull() || data.EnableHa.IsUnknown() || !data.EnableHa.ValueBool() {
 			resp.Diagnostics.AddError("Validation Error", "enable_ha must be true when ha_on_cloud is provided")
