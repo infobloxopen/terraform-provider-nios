@@ -1676,20 +1676,6 @@ resource "nios_ip_allocation" "test_use_dns_ea_inheritance" {
 `, name, view, ipv4addrHCL, useDnsEaInheritance)
 }
 
-func testAccIPAllocationUseSnmp3Credential(name string, ipv4addr []map[string]any, snmp3Cred map[string]any, useSnmp3Credential string) string {
-	ipv4addrStr := utils.ConvertSliceOfMapsToHCL(ipv4addr)
-	snmp3CredStr := utils.ConvertMapToHCL(snmp3Cred)
-	return fmt.Sprintf(`
-resource "nios_ip_allocation" "test_use_snmp3_credential" {
-	name = %q
-	ipv4addrs = %s
-    snmp3_credential = %s
-	use_snmp3_credential = %q
-	use_cli_credentials = true
-}
-`, name, ipv4addrStr, snmp3CredStr, useSnmp3Credential)
-}
-
 func testAccIPAllocationUseSnmp3CredentialSet(name string, ipv4addr []map[string]any, useSnmp3Credential, user, authProtocol, authPassword, privProtocol, privPassword string) string {
 	ipv4addrStr := utils.ConvertSliceOfMapsToHCL(ipv4addr)
 	return fmt.Sprintf(`
