@@ -17,7 +17,6 @@ Manages DTC Load Balanced Domain Name (LBDN)
 resource "nios_dtc_lbdn" "lbdn_basic_fields" {
   name      = "example_lbdn_1"
   lb_method = "SOURCE_IP_HASH"
-  types     = ["A", "CNAME"]
 }
 
 // Authoritative DNS zone in the default view with a grid primary association
