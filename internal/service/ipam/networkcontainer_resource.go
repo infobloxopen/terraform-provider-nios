@@ -147,7 +147,7 @@ func (r *NetworkcontainerResource) Create(ctx context.Context, req resource.Crea
 	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.ExtAttrs)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while create Networkcontainer due inherited Extensible attributes, got error: %s", err))
+		resp.Diagnostics.AddError("Client Error", "Error while creating Networkcontainer due to inherited Extensible attributes")
 		return
 	}
 
@@ -242,7 +242,7 @@ func (r *NetworkcontainerResource) Read(ctx context.Context, req resource.ReadRe
 	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.ExtAttrs)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while reading Networkcontainer due inherited Extensible attributes, got error: %s", diags))
+		resp.Diagnostics.AddError("Client Error", "Error while reading Networkcontainer due to inherited Extensible attributes")
 		return
 	}
 
@@ -340,8 +340,8 @@ func (r *NetworkcontainerResource) Update(ctx context.Context, req resource.Upda
 	}
 
 	associateInternalId, diags := req.Private.GetKey(ctx, "associate_internal_id")
+	resp.Diagnostics.Append(diags...)
 	if diags.HasError() {
-		resp.Diagnostics.Append(diags...)
 		return
 	}
 	if associateInternalId != nil {
@@ -397,7 +397,7 @@ func (r *NetworkcontainerResource) Update(ctx context.Context, req resource.Upda
 	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, planExtAttrs, *res.ExtAttrs)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while update Networkcontainer due inherited Extensible attributes, got error: %s", diags))
+		resp.Diagnostics.AddError("Client Error", "Error while updating Networkcontainer due to inherited Extensible attributes")
 		return
 	}
 
@@ -461,7 +461,7 @@ func (r *NetworkcontainerResource) UpdateFuncCallAttributeName(ctx context.Conte
 }
 
 func (r *NetworkcontainerResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	if req.Identity.Raw.IsKnown() {
+	if req.Identity != nil && req.Identity.Raw.IsKnown() && !req.Identity.Raw.IsNull() {
 		diags := req.Identity.GetAttribute(ctx, path.Root("ref"), &req.ID)
 		if diags.HasError() {
 			resp.Diagnostics.Append(diags...)
