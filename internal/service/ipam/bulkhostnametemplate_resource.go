@@ -211,12 +211,12 @@ func (r *BulkhostnametemplateResource) Update(ctx context.Context, req resource.
 		return
 	}
 
+	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
+
 	payload := data.Expand(ctx, &resp.Diagnostics)
 	if resp.Diagnostics.HasError() {
 		return
 	}
-
-	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
 
 	var apiRes *ipam.UpdateBulkhostnametemplateResponse
 
@@ -289,7 +289,7 @@ func (r *BulkhostnametemplateResource) Delete(ctx context.Context, req resource.
 }
 
 func (r *BulkhostnametemplateResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	if req.Identity.Raw.IsKnown() {
+	if req.Identity != nil && req.Identity.Raw.IsKnown() && !req.Identity.Raw.IsNull() {
 		diags := req.Identity.GetAttribute(ctx, path.Root("ref"), &req.ID)
 		if diags.HasError() {
 			resp.Diagnostics.Append(diags...)

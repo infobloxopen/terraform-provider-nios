@@ -3,10 +3,14 @@ package ipam_test
 import (
 	"context"
 	"fmt"
+	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/knownvalue"
 	"github.com/hashicorp/terraform-plugin-testing/querycheck"
+	"github.com/hashicorp/terraform-plugin-testing/querycheck/queryfilter"
+	"github.com/hashicorp/terraform-plugin-testing/tfjsonpath"
 	"github.com/hashicorp/terraform-plugin-testing/tfversion"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/ipam"
@@ -37,8 +41,8 @@ func TestAccBulkhostnametemplateList_basic(t *testing.T) {
 			// Query the object
 			{
 				ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-				Query:  true,
-				Config: testAccBulkhostnametemplateListBasicConfig(),
+				Query:                    true,
+				Config:                   testAccBulkhostnametemplateListBasicConfig(),
 				QueryResultChecks: []querycheck.QueryResultCheck{
 					querycheck.ExpectLengthAtLeast("nios_ipam_bulk_hostname_template.test", 1),
 				},
@@ -70,15 +74,27 @@ func TestAccBulkhostnametemplateList_Filters(t *testing.T) {
 			},
 			// Query the object
 			{
-
 				ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 				Query:  true,
 				Config: testAccBulkhostnametemplateListConfigFilters(templateName),
 				QueryResultChecks: []querycheck.QueryResultCheck{
 					querycheck.ExpectLength("nios_ipam_bulk_hostname_template.test", 1),
+					querycheck.ExpectResourceKnownValues(
+						resourceName,
+						queryfilter.ByResourceIdentity(map[string]knownvalue.Check{
+							// TODO : Update the ref prefix with the correct identifying object for the resource
+							"ref": knownvalue.StringRegexp(regexp.MustCompile("bulkhostnametemplate/")),
+						}),
+						[]querycheck.KnownValueCheck{
+							// TODO : Add checks for required fields
+							{
+								Path:       tfjsonpath.New("template_name"),
+								KnownValue: knownvalue.StringExact(templateName),
+							},
+						},
+					),
 				},
 			},
-			// Delete testing automatically occurs in TestCase
 		},
 	})
 }
@@ -96,6 +112,7 @@ func testAccBulkhostnametemplateListConfigFilters(name string) string {
 	return fmt.Sprintf(`
 list "nios_ipam_bulk_hostname_template" "test" {
 	provider = nios
+	include_resource = true
 	config {
 		filters = {
 			template_name =  %q

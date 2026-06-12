@@ -35,5 +35,4 @@ list "nios_ipam_bulk_hostname_template" "list_bulk_hostname_templates_with_resou
 
 ### Optional
 
-- `extattrfilters` (Map of String) External Attribute Filters are used to return a more specific list of results by filtering on external attributes. If you specify multiple filters, the results returned will have only resources that match all the specified filters.
 - `filters` (Map of String) Filters are used to return a more specific list of results. Filters can be used to match resources by specific attributes, e.g. name. If you specify multiple filters, the results returned will have only resources that match all the specified filters.

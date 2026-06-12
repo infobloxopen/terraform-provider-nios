@@ -141,7 +141,7 @@ func (r *VlanviewResource) Create(ctx context.Context, req resource.CreateReques
 	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.ExtAttrs)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while create Vlanview due inherited Extensible attributes, got error: %s", err))
+		resp.Diagnostics.AddError("Client Error", "Error while creating Vlanview due to inherited Extensible attributes")
 		return
 	}
 
@@ -231,7 +231,7 @@ func (r *VlanviewResource) Read(ctx context.Context, req resource.ReadRequest, r
 	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.ExtAttrs)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while reading Vlanview due inherited Extensible attributes, got error: %s", diags))
+		resp.Diagnostics.AddError("Client Error", "Error while reading Vlanview due to inherited Extensible attributes")
 		return
 	}
 
@@ -329,8 +329,8 @@ func (r *VlanviewResource) Update(ctx context.Context, req resource.UpdateReques
 	}
 
 	associateInternalId, diags := req.Private.GetKey(ctx, "associate_internal_id")
+	resp.Diagnostics.Append(diags...)
 	if diags.HasError() {
-		resp.Diagnostics.Append(diags...)
 		return
 	}
 	if associateInternalId != nil {
@@ -386,7 +386,7 @@ func (r *VlanviewResource) Update(ctx context.Context, req resource.UpdateReques
 	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, planExtAttrs, *res.ExtAttrs)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while update Vlanview due inherited Extensible attributes, got error: %s", diags))
+		resp.Diagnostics.AddError("Client Error", "Error while updating Vlanview due to inherited Extensible attributes")
 		return
 	}
 
@@ -463,7 +463,7 @@ func (r *VlanviewResource) ValidateConfig(ctx context.Context, req resource.Vali
 }
 
 func (r *VlanviewResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	if req.Identity.Raw.IsKnown() {
+	if req.Identity != nil && req.Identity.Raw.IsKnown() && !req.Identity.Raw.IsNull() {
 		diags := req.Identity.GetAttribute(ctx, path.Root("ref"), &req.ID)
 		if diags.HasError() {
 			resp.Diagnostics.Append(diags...)
