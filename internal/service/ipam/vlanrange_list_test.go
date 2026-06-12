@@ -1,13 +1,18 @@
+
 package ipam_test
 
 import (
 	"context"
 	"fmt"
+	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/knownvalue"
 	"github.com/hashicorp/terraform-plugin-testing/querycheck"
-	"github.com/hashicorp/terraform-plugin-testing/tfversion"
+	"github.com/hashicorp/terraform-plugin-testing/querycheck/queryfilter"
+	"github.com/hashicorp/terraform-plugin-testing/tfjsonpath"
+    "github.com/hashicorp/terraform-plugin-testing/tfversion"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/ipam"
 
@@ -21,7 +26,7 @@ func TestAccVlanrangeList_basic(t *testing.T) {
 	vlanView := acctest.RandomNameWithPrefix("vlan-view")
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck: func() { acctest.PreCheck(t) },
+		PreCheck:                 func() { acctest.PreCheck(t) },
 		TerraformVersionChecks: []tfversion.TerraformVersionCheck{
 			tfversion.SkipBelow(tfversion.Version1_14_0),
 		},
@@ -34,11 +39,11 @@ func TestAccVlanrangeList_basic(t *testing.T) {
 					testAccCheckVlanrangeExists(context.Background(), resourceName, &v),
 				),
 			},
-			// Query the object
+            // Query the object
 			{
 				ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-				Query:                    true,
-				Config:                   testAccVlanrangeListBasicConfig(),
+				Query:  true,
+				Config: testAccVlanrangeListBasicConfig(),
 				QueryResultChecks: []querycheck.QueryResultCheck{
 					querycheck.ExpectLengthAtLeast("nios_ipam_vlanrange.test", 1),
 				},
@@ -54,7 +59,7 @@ func TestAccVlanrangeList_Filters(t *testing.T) {
 	vlanView := acctest.RandomNameWithPrefix("vlan-view")
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck: func() { acctest.PreCheck(t) },
+		PreCheck:                 func() { acctest.PreCheck(t) },
 		TerraformVersionChecks: []tfversion.TerraformVersionCheck{
 			tfversion.SkipBelow(tfversion.Version1_14_0),
 		},
@@ -75,9 +80,22 @@ func TestAccVlanrangeList_Filters(t *testing.T) {
 				Config:                   testAccVlanrangeListConfigFilters(vlanRange),
 				QueryResultChecks: []querycheck.QueryResultCheck{
 					querycheck.ExpectLength("nios_ipam_vlanrange.test", 1),
+					querycheck.ExpectResourceKnownValues(
+						resourceName,
+						queryfilter.ByResourceIdentity(map[string]knownvalue.Check{
+						    // TODO : Update the ref prefix with the correct identifying object for the resource
+							"ref": knownvalue.StringRegexp(regexp.MustCompile("vlanrange/")),
+						}),
+						[]querycheck.KnownValueCheck{
+						    // TODO : Add checks for required fields
+							{
+								Path:       tfjsonpath.New("name"),
+								KnownValue: knownvalue.StringExact(vlanRange),
+							},
+						},
+					),
 				},
 			},
-			// Delete testing automatically occurs in TestCase
 		},
 	})
 }
@@ -91,7 +109,7 @@ func TestAccVlanrangeList_ExtAttrFilters(t *testing.T) {
 	extAttrValue := acctest.RandomName()
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck: func() { acctest.PreCheck(t) },
+		PreCheck:                 func() { acctest.PreCheck(t) },
 		TerraformVersionChecks: []tfversion.TerraformVersionCheck{
 			tfversion.SkipBelow(tfversion.Version1_14_0),
 		},
@@ -110,13 +128,12 @@ func TestAccVlanrangeList_ExtAttrFilters(t *testing.T) {
 			// Query the object
 			{
 				ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-				Query:                    true,
-				Config:                   testAccVlanrangeListConfigExtAttrFilters(extAttrValue),
+				Query: true,
+				Config: testAccVlanrangeListConfigExtAttrFilters(extAttrValue),
 				QueryResultChecks: []querycheck.QueryResultCheck{
 					querycheck.ExpectLength("nios_ipam_vlanrange.test", 1),
 				},
 			},
-			// Delete testing automatically occurs in TestCase
 		},
 	})
 }
@@ -134,6 +151,7 @@ func testAccVlanrangeListConfigFilters(name string) string {
 	return fmt.Sprintf(`
 list "nios_ipam_vlanrange" "test" {
 	provider = nios
+	include_resource = true
 	config {
 		filters = {
 			name =  %q
@@ -143,7 +161,7 @@ list "nios_ipam_vlanrange" "test" {
 `, name)
 }
 
-func testAccVlanrangeListConfigExtAttrFilters(name string) string {
+func testAccVlanrangeListConfigExtAttrFilters(extAttrsValue string) string {
 	return fmt.Sprintf(`
 list "nios_ipam_vlanrange" "test" {
 	provider = nios
@@ -153,5 +171,6 @@ list "nios_ipam_vlanrange" "test" {
 		}
 	}
 }
-`, name)
+`, extAttrsValue)
 }
+
