@@ -330,5 +330,4 @@ func (r *SharedrecordCnameResource) ImportState(ctx context.Context, req resourc
 		}
 	}
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("ref"), req.ID)...)
-	resp.Diagnostics.Append(resp.Private.SetKey(ctx, "associate_internal_id", []byte("true"))...)
 }
