@@ -465,6 +465,7 @@ func (p *NIOSProvider) ListResources(ctx context.Context) []func() list.ListReso
 		dns.NewSharedrecordCnameList,
 		dns.NewSharedrecordMxList,
 		dns.NewSharedrecordTxtList,
+		dns.NewSharedrecordSrvList,
 
 		dhcp.NewFixedaddressList,
 
