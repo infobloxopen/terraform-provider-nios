@@ -18,7 +18,7 @@ list "nios_dns_record_ptr" "list_ptr_records_using_filters" {
   provider = nios
   config {
     filters = {
-      ptrdname = "example.host.example.com"
+      ptrdname = "example_record1.example.com"
     }
   }
 }
