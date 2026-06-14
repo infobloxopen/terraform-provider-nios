@@ -483,6 +483,7 @@ func (p *NIOSProvider) ListResources(ctx context.Context) []func() list.ListReso
 		dns.NewNsgroupForwardingmemberList,
 		dns.NewNsgroupForwardstubserverList,
 		dns.NewNsgroupList,
+		dns.NewNsgroupStubmemberList,
 		dns.NewRecordAList,
 
 		dhcp.NewFixedaddressList,
