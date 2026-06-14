@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
+	"github.com/hashicorp/terraform-plugin-framework/resource/identityschema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
@@ -27,6 +28,7 @@ var readableAttributesForRecordPtr = "aws_rte53_record_info,cloud_info,comment,c
 var _ resource.Resource = &RecordPtrResource{}
 var _ resource.ResourceWithImportState = &RecordPtrResource{}
 var _ resource.ResourceWithValidateConfig = &RecordPtrResource{}
+var _ resource.ResourceWithIdentity = &RecordPtrResource{}
 
 func NewRecordPtrResource() resource.Resource {
 	return &RecordPtrResource{}
@@ -39,12 +41,25 @@ type RecordPtrResource struct {
 
 func (r *RecordPtrResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_" + "dns_record_ptr"
+	resp.ResourceBehavior = resource.ResourceBehavior{
+		MutableIdentity: true,
+	}
 }
 
 func (r *RecordPtrResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		MarkdownDescription: "Manages a DNS PTR Record.",
 		Attributes:          RecordPtrResourceSchemaAttributes,
+	}
+}
+
+func (r *RecordPtrResource) IdentitySchema(ctx context.Context, req resource.IdentitySchemaRequest, resp *resource.IdentitySchemaResponse) {
+	resp.IdentitySchema = identityschema.Schema{
+		Attributes: map[string]identityschema.Attribute{
+			"ref": identityschema.StringAttribute{
+				RequiredForImport: true,
+			},
+		},
 	}
 }
 
@@ -105,6 +120,7 @@ func (r *RecordPtrResource) Create(ctx context.Context, req resource.CreateReque
 	// Add internal ID exists in the Extensible Attributes if not already present
 	data.ExtAttrs, diags = AddInternalIDToExtAttrs(ctx, data.ExtAttrs, diags)
 	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
 		return
 	}
 
@@ -156,7 +172,8 @@ func (r *RecordPtrResource) Create(ctx context.Context, req resource.CreateReque
 	res := apiRes.CreateRecordPtrResponseAsObject.GetResult()
 	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.ExtAttrs)
 	if diags.HasError() {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while create RecordPtr due inherited Extensible attributes, got error: %s", err))
+		resp.Diagnostics.Append(diags...)
+		resp.Diagnostics.AddError("Client Error", "Error while creating RecordPtr due to inherited Extensible attributes")
 		return
 	}
 
@@ -166,6 +183,9 @@ func (r *RecordPtrResource) Create(ctx context.Context, req resource.CreateReque
 	if len(origFunCallAttrs) > 0 {
 		data.FuncCall = types.ObjectValueMust(FuncCallAttrTypes, origFunCallAttrs)
 	}
+
+	// Save the Identity of the Resource
+	resp.Diagnostics.Append(resp.Identity.SetAttribute(ctx, path.Root("ref"), &data.Ref)...)
 
 	// Save data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
@@ -247,11 +267,15 @@ func (r *RecordPtrResource) Read(ctx context.Context, req resource.ReadRequest, 
 
 	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.ExtAttrs)
 	if diags.HasError() {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while reading RecordPtr due inherited Extensible attributes, got error: %s", diags))
+		resp.Diagnostics.Append(diags...)
+		resp.Diagnostics.AddError("Client Error", "Error while reading RecordPtr due to inherited Extensible attributes")
 		return
 	}
 
 	data.Flatten(ctx, &res, &resp.Diagnostics)
+
+	// Save the Identity of the Resource
+	resp.Diagnostics.Append(resp.Identity.SetAttribute(ctx, path.Root("ref"), &data.Ref)...)
 
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
@@ -308,6 +332,10 @@ func (r *RecordPtrResource) ReadByExtAttrs(ctx context.Context, data *RecordPtrM
 	}
 
 	data.Flatten(ctx, &res, &resp.Diagnostics)
+
+	// Save the Identity of the Resource
+	resp.Diagnostics.Append(resp.Identity.SetAttribute(ctx, path.Root("ref"), &data.Ref)...)
+
 	resp.Diagnostics.Append(resp.State.Set(ctx, data)...)
 
 	return true
@@ -336,14 +364,16 @@ func (r *RecordPtrResource) Update(ctx context.Context, req resource.UpdateReque
 		resp.Diagnostics.Append(diags...)
 		return
 	}
+
 	associateInternalId, diags := req.Private.GetKey(ctx, "associate_internal_id")
-	resp.Diagnostics.Append(diags...)
 	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
 		return
 	}
 	if associateInternalId != nil {
 		data.ExtAttrs, diags = AddInternalIDToExtAttrs(ctx, data.ExtAttrs, diags)
 		if diags.HasError() {
+			resp.Diagnostics.Append(diags...)
 			return
 		}
 	}
@@ -392,15 +422,18 @@ func (r *RecordPtrResource) Update(ctx context.Context, req resource.UpdateReque
 
 	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, planExtAttrs, *res.ExtAttrs)
 	if diags.HasError() {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while update RecordPtr due inherited Extensible attributes, got error: %s", diags))
+		resp.Diagnostics.Append(diags...)
+		resp.Diagnostics.AddError("Client Error", "Error while updating RecordPtr due to inherited Extensible attributes")
 		return
 	}
 
 	data.Flatten(ctx, &res, &resp.Diagnostics)
 
+	// Save the Identity of the Resource
+	resp.Diagnostics.Append(resp.Identity.SetAttribute(ctx, path.Root("ref"), &data.Ref)...)
+
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
-
 	if associateInternalId != nil {
 		resp.Diagnostics.Append(resp.Private.SetKey(ctx, "associate_internal_id", nil)...)
 	}
@@ -454,6 +487,13 @@ func (r *RecordPtrResource) UpdateFuncCallAttributeName(ctx context.Context, dat
 }
 
 func (r *RecordPtrResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+	if req.Identity.Raw.IsKnown() {
+		diags := req.Identity.GetAttribute(ctx, path.Root("ref"), &req.ID)
+		if diags.HasError() {
+			resp.Diagnostics.Append(diags...)
+			return
+		}
+	}
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("ref"), req.ID)...)
 	resp.Diagnostics.Append(resp.Private.SetKey(ctx, "associate_internal_id", []byte("true"))...)
 }
