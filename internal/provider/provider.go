@@ -481,6 +481,7 @@ func (p *NIOSProvider) ListResources(ctx context.Context) []func() list.ListReso
 	return []func() list.ListResource{
 		dns.NewNsgroupDelegationList,
 		dns.NewNsgroupForwardingmemberList,
+		dns.NewNsgroupForwardstubserverList,
 		dns.NewNsgroupList,
 		dns.NewRecordAList,
 
