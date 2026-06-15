@@ -1,4 +1,3 @@
-
 package dns_test
 
 import (
@@ -12,7 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/querycheck"
 	"github.com/hashicorp/terraform-plugin-testing/querycheck/queryfilter"
 	"github.com/hashicorp/terraform-plugin-testing/tfjsonpath"
-    "github.com/hashicorp/terraform-plugin-testing/tfversion"
+	"github.com/hashicorp/terraform-plugin-testing/tfversion"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/dns"
 
@@ -25,7 +24,7 @@ func TestAccSharedrecordgroupList_basic(t *testing.T) {
 	name := acctest.RandomNameWithPrefix("test-sharedrecordgroup")
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.PreCheck(t) },
+		PreCheck: func() { acctest.PreCheck(t) },
 		TerraformVersionChecks: []tfversion.TerraformVersionCheck{
 			tfversion.SkipBelow(tfversion.Version1_14_0),
 		},
@@ -33,7 +32,7 @@ func TestAccSharedrecordgroupList_basic(t *testing.T) {
 			// Create and Read
 			{
 				ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-				Config: testAccSharedrecordgroupBasicConfig(name),
+				Config:                   testAccSharedrecordgroupBasicConfig(name),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSharedrecordgroupExists(context.Background(), resourceName, &v),
 				),
@@ -41,8 +40,8 @@ func TestAccSharedrecordgroupList_basic(t *testing.T) {
 			// Query the object
 			{
 				ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-				Query:  true,
-				Config: testAccSharedrecordgroupListBasicConfig(),
+				Query:                    true,
+				Config:                   testAccSharedrecordgroupListBasicConfig(),
 				QueryResultChecks: []querycheck.QueryResultCheck{
 					querycheck.ExpectLengthAtLeast("nios_dns_sharedrecordgroup.test", 1),
 				},
@@ -57,7 +56,7 @@ func TestAccSharedrecordgroupList_Filters(t *testing.T) {
 	name := acctest.RandomNameWithPrefix("test-sharedrecordgroup")
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.PreCheck(t) },
+		PreCheck: func() { acctest.PreCheck(t) },
 		TerraformVersionChecks: []tfversion.TerraformVersionCheck{
 			tfversion.SkipBelow(tfversion.Version1_14_0),
 		},
@@ -65,7 +64,7 @@ func TestAccSharedrecordgroupList_Filters(t *testing.T) {
 			// Create and Read
 			{
 				ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-				Config: testAccSharedrecordgroupBasicConfig(name),
+				Config:                   testAccSharedrecordgroupBasicConfig(name),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSharedrecordgroupExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "name", name),
@@ -74,8 +73,8 @@ func TestAccSharedrecordgroupList_Filters(t *testing.T) {
 			// Query the object
 			{
 				ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-				Query:  true,
-				Config: testAccSharedrecordgroupListConfigFilters(name),
+				Query:                    true,
+				Config:                   testAccSharedrecordgroupListConfigFilters(name),
 				QueryResultChecks: []querycheck.QueryResultCheck{
 					querycheck.ExpectLength("nios_dns_sharedrecordgroup.test", 1),
 					querycheck.ExpectResourceKnownValues(
@@ -104,7 +103,7 @@ func TestAccSharedrecordgroupList_ExtAttrFilters(t *testing.T) {
 	extAttrValue := acctest.RandomName()
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.PreCheck(t) },
+		PreCheck: func() { acctest.PreCheck(t) },
 		TerraformVersionChecks: []tfversion.TerraformVersionCheck{
 			tfversion.SkipBelow(tfversion.Version1_14_0),
 		},
@@ -123,8 +122,8 @@ func TestAccSharedrecordgroupList_ExtAttrFilters(t *testing.T) {
 			// Query the object
 			{
 				ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-				Query: true,
-				Config: testAccSharedrecordgroupListConfigExtAttrFilters(extAttrValue),
+				Query:                    true,
+				Config:                   testAccSharedrecordgroupListConfigExtAttrFilters(extAttrValue),
 				QueryResultChecks: []querycheck.QueryResultCheck{
 					querycheck.ExpectLength("nios_dns_sharedrecordgroup.test_extattrs", 1),
 				},
@@ -168,4 +167,3 @@ list "nios_dns_sharedrecordgroup" "test" {
 }
 `, extAttrsValue)
 }
-
