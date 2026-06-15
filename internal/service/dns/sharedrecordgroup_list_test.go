@@ -125,7 +125,7 @@ func TestAccSharedrecordgroupList_ExtAttrFilters(t *testing.T) {
 				Query:                    true,
 				Config:                   testAccSharedrecordgroupListConfigExtAttrFilters(extAttrValue),
 				QueryResultChecks: []querycheck.QueryResultCheck{
-					querycheck.ExpectLength("nios_dns_sharedrecordgroup.test_extattrs", 1),
+					querycheck.ExpectLength("nios_dns_sharedrecordgroup.test", 1),
 				},
 			},
 		},
