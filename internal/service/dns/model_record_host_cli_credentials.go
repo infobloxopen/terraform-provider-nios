@@ -150,7 +150,7 @@ func preserveCliCredentialPasswords(ctx context.Context, saved types.List, curre
 
 	for i := range currentModels {
 		if i < len(savedModels) && (currentModels[i].Password.IsNull() || currentModels[i].Password.ValueString() == "") {
-			currentModels[i].Password = savedModels[i].Password
+			currentModels[i].Password = types.StringNull()
 		}
 	}
 

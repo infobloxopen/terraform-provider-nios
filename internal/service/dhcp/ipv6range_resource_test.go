@@ -1500,6 +1500,7 @@ resource "nios_dhcp_ipv6range" "test_discovery_blackout_setting" {
 }
 
 func testAccIpv6rangeDiscoveryMember(view, startAddr, endAddr string, discoveryMember string, useEnableDiscovery string) string {
+	_ = view
 	return fmt.Sprintf(`
 resource "nios_ipam_ipv6network" "test_discovery" {
     network = "14::/64"
@@ -1518,6 +1519,7 @@ resource "nios_dhcp_ipv6range" "test_discovery_member" {
 }
 
 func testAccIpv6rangeDiscoveryMemberDisabled(view, startAddr, endAddr string) string {
+	_ = view
 	return fmt.Sprintf(`
 resource "nios_ipam_ipv6network" "test_discovery" {
     network = "14::/64"
@@ -1535,6 +1537,7 @@ resource "nios_dhcp_ipv6range" "test_discovery_member" {
 }
 
 func testAccIpv6rangeEnableDiscovery(view, startAddr, endAddr string, enableDiscovery string, discoveryMember string) string {
+	_ = view
 	return fmt.Sprintf(`
 resource "nios_ipam_ipv6network" "test_enable_disc" {
     network = "15::/64"
