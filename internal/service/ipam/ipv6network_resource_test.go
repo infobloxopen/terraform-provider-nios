@@ -2712,37 +2712,3 @@ resource "nios_ipam_ipv6network" "test_mapped_ea_attributes" {
 `, network, name, mappedEa)
 }
 
-func testAccIpv6networkZoneAssociations(network, zone, view, parentZoneAuthResource string) string {
-	var zoneAssociationsConfig, parentZoneAuthConfig string
-
-	if zone != "" && view != "" && parentZoneAuthResource != "" {
-		zoneAssociationsConfig = fmt.Sprintf(`[
-            {
-                fqdn = nios_dns_zone_auth.%s.fqdn
-                view = nios_dns_zone_auth.%s.view
-                is_default = false
-            }
-        ]`, parentZoneAuthResource, parentZoneAuthResource)
-		parentZoneAuthConfig = testAccIpv6networkParentZoneAuth(zone, view, parentZoneAuthResource)
-	} else {
-		zoneAssociationsConfig = "null"
-	}
-
-	return fmt.Sprintf(`
-%s
-resource "nios_ipam_ipv6network" "test_zone_associations" {
-    network = %q
-    zone_associations = %s
-    use_zone_associations = true
-}
-`, parentZoneAuthConfig, network, zoneAssociationsConfig)
-}
-
-func testAccIpv6networkParentZoneAuth(zone, view, testZone string) string {
-	return fmt.Sprintf(`
-resource "nios_dns_zone_auth" %q {
-  fqdn = %q
-  view = %q
-}
-`, testZone, zone, view)
-}

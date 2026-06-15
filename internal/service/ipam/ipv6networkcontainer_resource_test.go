@@ -1628,10 +1628,6 @@ func TestAccIpv6networkcontainerResource_LogicFilterRules(t *testing.T) {
 	})
 }
 
-func TestAccIpv6networkcontainerResource_RemoveSubnets(t *testing.T) {
-	t.Skip("remove_subnets field is not writable in WAPI on create or update")
-}
-
 func TestAccIpv6networkcontainerResource_RirOrganization(t *testing.T) {
 	var resourceName = "nios_ipam_ipv6network_container.test_rir_organization"
 	var v ipam.Ipv6networkcontainer
@@ -2281,23 +2277,6 @@ resource "nios_ipam_ipv6network_container" "test_logic_filter_rules" {
 `, network, logicFilterRulesStr)
 }
 
-func testAccIpv6networkcontainerRemoveSubnetsBase(network string) string {
-	return fmt.Sprintf(`
-resource "nios_ipam_ipv6network_container" "test_remove_subnets" {
-    network = %q
-}
-`, network)
-}
-
-func testAccIpv6networkcontainerRemoveSubnets(network string, removeSubnets bool) string {
-	return fmt.Sprintf(`
-resource "nios_ipam_ipv6network_container" "test_remove_subnets" {
-    network = %q
-    remove_subnets = %t
-}
-`, network, removeSubnets)
-}
-
 func testAccIpv6networkcontainerRirOrganization(network, rirOrganization string) string {
 	return fmt.Sprintf(`
 resource "nios_ipam_ipv6network_container" "test_rir_organization" {
@@ -2366,39 +2345,4 @@ resource "nios_ipam_ipv6network_container" "test_mapped_ea_attributes" {
     }
 }
 `, network, name, mappedEa)
-}
-
-func testAccIpv6networkcontainerZoneAssociations(network, zone, view, parentZoneAuthResource string) string {
-	var zoneAssociationsConfig, parentZoneAuthConfig string
-
-	if zone != "" && view != "" && parentZoneAuthResource != "" {
-		zoneAssociationsConfig = fmt.Sprintf(`[
-            {
-                fqdn = nios_dns_zone_auth.%s.fqdn
-                view = nios_dns_zone_auth.%s.view
-                is_default = false
-            }
-        ]`, parentZoneAuthResource, parentZoneAuthResource)
-		parentZoneAuthConfig = testAccIpv6networkcontainerParentZoneAuth(zone, view, parentZoneAuthResource)
-	} else {
-		zoneAssociationsConfig = "null"
-	}
-
-	return fmt.Sprintf(`
-%s
-resource "nios_ipam_ipv6network_container" "test_zone_associations" {
-    network = %q
-    zone_associations = %s
-    use_zone_associations = true
-}
-`, parentZoneAuthConfig, network, zoneAssociationsConfig)
-}
-
-func testAccIpv6networkcontainerParentZoneAuth(zone, view, testZone string) string {
-	return fmt.Sprintf(`
-resource "nios_dns_zone_auth" %q {
-  fqdn = %q
-  view = %q
-}
-`, testZone, zone, view)
 }
