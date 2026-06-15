@@ -32,6 +32,8 @@ var _ resource.Resource = &NotificationRestEndpointResource{}
 var _ resource.ResourceWithImportState = &NotificationRestEndpointResource{}
 var _ resource.ResourceWithValidateConfig = &NotificationRestEndpointResource{}
 
+var _ resource.ResourceWithModifyPlan = &NotificationRestEndpointResource{}
+
 func NewNotificationRestEndpointResource() resource.Resource {
 	return &NotificationRestEndpointResource{}
 }

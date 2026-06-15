@@ -29,6 +29,8 @@ var _ resource.Resource = &MemberResource{}
 var _ resource.ResourceWithImportState = &MemberResource{}
 var _ resource.ResourceWithValidateConfig = &MemberResource{}
 
+var _ resource.ResourceWithModifyPlan = &MemberResource{}
+
 func NewMemberResource() resource.Resource {
 	return &MemberResource{}
 }

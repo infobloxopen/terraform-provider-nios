@@ -81,8 +81,7 @@ var MsserverAdSitesResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"login_password": schema.StringAttribute{
 		Optional:            true,
-		Computed:            true,
-		Sensitive:           true,
+		WriteOnly:           true,
 		MarkdownDescription: "Microsoft Server login password.",
 	},
 	"use_synchronization_min_delay": schema.BoolAttribute{
@@ -205,7 +204,6 @@ func (m *MsserverAdSitesModel) Flatten(ctx context.Context, from *microsoft.Msse
 	m.DefaultIpSiteLink = flex.FlattenStringPointer(from.DefaultIpSiteLink)
 	m.UseLogin = types.BoolPointerValue(from.UseLogin)
 	m.LoginName = flex.FlattenStringPointer(from.LoginName)
-	m.LoginPassword = flex.FlattenStringPointer(from.LoginPassword)
 	m.UseSynchronizationMinDelay = types.BoolPointerValue(from.UseSynchronizationMinDelay)
 	m.SynchronizationMinDelay = flex.FlattenInt64Pointer(from.SynchronizationMinDelay)
 	m.UseLdapTimeout = types.BoolPointerValue(from.UseLdapTimeout)

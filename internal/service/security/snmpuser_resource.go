@@ -28,6 +28,7 @@ var readableAttributesForSnmpuser = "authentication_protocol,comment,disable,ext
 var _ resource.Resource = &SnmpuserResource{}
 var _ resource.ResourceWithImportState = &SnmpuserResource{}
 var _ resource.ResourceWithValidateConfig = &SnmpuserResource{}
+var _ resource.ResourceWithModifyPlan = &SnmpuserResource{}
 
 func NewSnmpuserResource() resource.Resource {
 	return &SnmpuserResource{}

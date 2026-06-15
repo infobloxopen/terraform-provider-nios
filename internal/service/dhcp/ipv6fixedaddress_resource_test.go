@@ -186,7 +186,7 @@ func TestAccIpv6fixedaddressResource_CliCredentials(t *testing.T) {
 	ipv6addr := "2001:db8:abcd:1231::1"
 	ipv6addr1 := "2001:db8:abcd:1231::2"
 	networkView := acctest.RandomNameWithPrefix("network-view")
-	duid := "00:01:00:01:1d:2b:3c:4d:00:0c:29:ab:cd:ef"
+	duid := "00:01:00:01:1d:2b:3c:5d:40:0c:39:ab:cd:ef"
 	cliCred := []map[string]any{{
 		"user":             "user1",
 		"credential_type":  "SSH",

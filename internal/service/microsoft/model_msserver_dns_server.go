@@ -86,8 +86,7 @@ var MsserverDnsServerResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"login_password": schema.StringAttribute{
 		Optional:            true,
-		Computed:            true,
-		Sensitive:           true,
+		WriteOnly:           true,
 		MarkdownDescription: "Microsoft Server login password",
 	},
 	"managed": schema.BoolAttribute{
@@ -246,7 +245,6 @@ func (m *MsserverDnsServerModel) Flatten(ctx context.Context, from *microsoft.Ms
 	}
 	m.UseLogin = types.BoolPointerValue(from.UseLogin)
 	m.LoginName = flex.FlattenStringPointer(from.LoginName)
-	m.LoginPassword = flex.FlattenStringPointer(from.LoginPassword)
 	m.Managed = types.BoolPointerValue(from.Managed)
 	m.NextSyncControl = flex.FlattenStringPointer(from.NextSyncControl)
 	m.Status = flex.FlattenStringPointer(from.Status)

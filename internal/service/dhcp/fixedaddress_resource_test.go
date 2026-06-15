@@ -1459,7 +1459,7 @@ func TestAccFixedaddressResource_Snmp3Credential(t *testing.T) {
 	var resourceName1 = "nios_dhcp_fixed_address.test_snmp3_credential1"
 	var v dhcp.Fixedaddress
 	ip := "16.0.0.121"
-	ip1 := "16.0.0.122"
+	ip1 := "16.0.0.132"
 	agentCircuitID := acctest.RandomNumber(1000)
 	agentCircuitID1 := acctest.RandomNumber(1000)
 	snmp3Cred := map[string]any{
@@ -2084,7 +2084,7 @@ func TestAccFixedaddressResource_UseSnmp3Credential(t *testing.T) {
 }
 
 func TestAccFixedaddressResource_UseSnmpCredential(t *testing.T) {
-	// t.Skip("Skipping test as SNMP Credential are not set up in the GRID")
+	t.Skip("Skipping test as SNMP Credential are not set up in the GRID")
 	var resourceName = "nios_dhcp_fixed_address.test_use_snmp_credential"
 	var v dhcp.Fixedaddress
 	ip := "15.0.0.57"
@@ -2232,6 +2232,7 @@ resource "nios_dhcp_fixed_address" "test_allow_telnet" {
 	},
 	{
 		user             = "NIOS_USER"
+		comment          = "Comment for SSH Credentials"
 		password         = "NIOS_PASSWORD"
 		credential_type  = "TELNET"
 		credential_group = "default"
@@ -2966,13 +2967,9 @@ resource "nios_dhcp_fixed_address" "test_use_pxe_lease_time" {
 }
 
 func testAccFixedaddressUseSnmp3Credential(ip, matchClient string, agentCircuitID int, useSnmp3Credential, snmp3CredentialUser, snmp3CredentialAuthProtocol, snmp3CredentialAuthPass, snmp3CredentialPrvProtocol, snmp3CredentialPrvPass, snmp3CredentialComment, snmp3CredentialGroup string) string {
-	return fmt.Sprintf(`
-resource "nios_dhcp_fixed_address" "test_use_snmp3_credential" {
-	ipv4addr = %q
-	match_client = %q
-	agent_circuit_id = %d
-	use_snmp3_credential = %q
-	snmp3_credential = {
+	var snmp3Config string
+	if snmp3CredentialUser != "" && snmp3CredentialAuthProtocol != "" && snmp3CredentialAuthPass != "" && snmp3CredentialPrvProtocol != "" && snmp3CredentialPrvPass != "" && snmp3CredentialComment != "" && snmp3CredentialGroup != "" {
+		snmp3Config = fmt.Sprintf(`snmp3_credential = {
 		user = %q
 		authentication_protocol = %q
 		authentication_password = %q
@@ -2980,10 +2977,19 @@ resource "nios_dhcp_fixed_address" "test_use_snmp3_credential" {
 		privacy_password = %q
 		comment = %q
 		credential_group = %q
+	}`, snmp3CredentialUser, snmp3CredentialAuthProtocol, snmp3CredentialAuthPass, snmp3CredentialPrvProtocol, snmp3CredentialPrvPass, snmp3CredentialComment, snmp3CredentialGroup)
 	}
+	config := fmt.Sprintf(`
+resource "nios_dhcp_fixed_address" "test_use_snmp3_credential" {
+	ipv4addr = %q
+	match_client = %q
+	agent_circuit_id = %d
+	use_snmp3_credential = %q
+	%s
 	use_cli_credentials = true
 }
-`, ip, matchClient, agentCircuitID, useSnmp3Credential, snmp3CredentialUser, snmp3CredentialAuthProtocol, snmp3CredentialAuthPass, snmp3CredentialPrvProtocol, snmp3CredentialPrvPass, snmp3CredentialComment, snmp3CredentialGroup)
+`, ip, matchClient, agentCircuitID, useSnmp3Credential, snmp3Config)
+	return config
 }
 
 func testAccFixedaddressUseSnmp3CredentialUnset(ip, matchClient string, agentCircuitID int, useSnmp3Credential string) string {

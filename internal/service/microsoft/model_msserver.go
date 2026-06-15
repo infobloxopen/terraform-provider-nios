@@ -10,6 +10,7 @@ import (
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
@@ -59,6 +60,7 @@ type MsserverModel struct {
 	UseMsRpcTimeoutInSeconds    types.Bool   `tfsdk:"use_ms_rpc_timeout_in_seconds"`
 	Version                     types.String `tfsdk:"version"`
 	ExtAttrsAll                 types.Map    `tfsdk:"extattrs_all"`
+	PasswordVersion             types.Int64  `tfsdk:"password_version"`
 }
 
 var MsserverAttrTypes = map[string]attr.Type{
@@ -96,6 +98,7 @@ var MsserverAttrTypes = map[string]attr.Type{
 	"use_ms_rpc_timeout_in_seconds": types.BoolType,
 	"version":                       types.StringType,
 	"extattrs_all":                  types.MapType{ElemType: types.StringType},
+	"password_version":              types.Int64Type,
 }
 
 var MsserverResourceSchemaAttributes = map[string]schema.Attribute{
@@ -110,12 +113,10 @@ var MsserverResourceSchemaAttributes = map[string]schema.Attribute{
 	"ad_sites": schema.SingleNestedAttribute{
 		Attributes: MsserverAdSitesResourceSchemaAttributes,
 		Optional:   true,
-		Computed:   true,
 	},
 	"ad_user": schema.SingleNestedAttribute{
 		Attributes: MsserverAdUserResourceSchemaAttributes,
 		Optional:   true,
-		Computed:   true,
 	},
 	"address": schema.StringAttribute{
 		Required: true,
@@ -145,7 +146,6 @@ var MsserverResourceSchemaAttributes = map[string]schema.Attribute{
 	"dhcp_server": schema.SingleNestedAttribute{
 		Attributes: MsserverDhcpServerResourceSchemaAttributes,
 		Optional:   true,
-		Computed:   true,
 	},
 	"disabled": schema.BoolAttribute{
 		Optional:            true,
@@ -156,7 +156,6 @@ var MsserverResourceSchemaAttributes = map[string]schema.Attribute{
 	"dns_server": schema.SingleNestedAttribute{
 		Attributes: MsserverDnsServerResourceSchemaAttributes,
 		Optional:   true,
-		Computed:   true,
 	},
 	"dns_view": schema.StringAttribute{
 		Optional: true,
@@ -207,8 +206,7 @@ var MsserverResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"login_password": schema.StringAttribute{
 		Optional:            true,
-		Computed:            true,
-		Sensitive:           true,
+		WriteOnly:           true,
 		MarkdownDescription: "Microsoft Server login password",
 	},
 	"managing_member": schema.StringAttribute{
@@ -291,6 +289,14 @@ var MsserverResourceSchemaAttributes = map[string]schema.Attribute{
 			importmod.AssociateInternalId(),
 		},
 	},
+	// A computed trigger to cause an in-place Update when secrets change.
+	"password_version": schema.Int64Attribute{
+		Computed:            true,
+		MarkdownDescription: "Internal version incremented when any/all of the passwords (ad_sites.password, ad_user.password, dhcp_server.password, dns_server.password, loginpassword) change.",
+		PlanModifiers: []planmodifier.Int64{
+			int64planmodifier.UseStateForUnknown(),
+		},
+	},
 }
 
 func (m *MsserverModel) Expand(ctx context.Context, diags *diag.Diagnostics) *microsoft.Msserver {
@@ -361,7 +367,6 @@ func (m *MsserverModel) Flatten(ctx context.Context, from *microsoft.Msserver, d
 	m.LogDestination = flex.FlattenStringPointer(from.LogDestination)
 	m.LogLevel = flex.FlattenStringPointer(from.LogLevel)
 	m.LoginName = flex.FlattenStringPointer(from.LoginName)
-	m.LoginPassword = flex.FlattenStringPointer(from.LoginPassword)
 	m.ManagingMember = flex.FlattenStringPointer(from.ManagingMember)
 	m.MsMaxConnection = flex.FlattenInt64Pointer(from.MsMaxConnection)
 	m.MsRpcTimeoutInSeconds = flex.FlattenInt64Pointer(from.MsRpcTimeoutInSeconds)
