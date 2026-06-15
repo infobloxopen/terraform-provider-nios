@@ -26,6 +26,7 @@ import (
 	"github.com/infobloxopen/infoblox-nios-go-client/notification"
 	"github.com/infobloxopen/infoblox-nios-go-client/option"
 	"github.com/infobloxopen/infoblox-nios-go-client/parentalcontrol"
+	"github.com/infobloxopen/infoblox-nios-go-client/rir"
 	"github.com/infobloxopen/infoblox-nios-go-client/security"
 	"github.com/infobloxopen/terraform-provider-nios/internal/acctest"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
@@ -558,6 +559,7 @@ type PreConfigClients struct {
 	NOTIFICATION *notification.APIClient
 	PARENTAL     *parentalcontrol.APIClient
 	SECURITY     *security.APIClient
+	RIR          *rir.APIClient
 }
 
 // PreConfig creates the network views required for integration testing.
@@ -590,6 +592,9 @@ func PreConfig(clients PreConfigClients, hostnames GridHostnames) error {
 	}
 	if clients.SECURITY == nil {
 		return fmt.Errorf("preconfig: SECURITY client is required")
+	}
+	if clients.RIR == nil {
+		return fmt.Errorf("preconfig: RIR client is required")
 	}
 
 	// Ensure roaming hosts support is enabled at grid DHCP properties level.
@@ -705,6 +710,52 @@ func PreConfig(clients PreConfigClients, hostnames GridHostnames) error {
 		fmt.Printf("Parental control enabled for subscriber %q\n", *parentalSubscriber.Ref)
 	} else {
 		fmt.Printf("Parental control already enabled for subscriber %q, skipping update\n", *parentalSubscriber.Ref)
+	}
+
+	// Check if ip_space_discriminator is available as a readable field.
+	ipDiscResp, _, err := clients.PARENTAL.ParentalcontrolSubscriberAPI.List(context.Background()).
+		ReturnAsObject(1).
+		ReturnFieldsPlus("ip_space_discriminator").
+		Execute()
+	if err != nil {
+		return fmt.Errorf("failed to list parentalcontrol subscribers for ip_space_discriminator check: %w", err)
+	}
+	if ipDiscResp.ListParentalcontrolSubscriberResponseObject == nil || len(ipDiscResp.ListParentalcontrolSubscriberResponseObject.Result) == 0 {
+		return fmt.Errorf("parentalcontrol subscriber list returned no results for ip_space_discriminator check")
+	}
+
+	ipDiscSubscriber := ipDiscResp.ListParentalcontrolSubscriberResponseObject.Result[0]
+	if ipDiscSubscriber.IpSpaceDiscriminator != nil && *ipDiscSubscriber.IpSpaceDiscriminator != "" {
+		// ip_space_discriminator already present — field is readable/editable
+		fmt.Printf("ip_space_discriminator already present (%q) for subscriber %q, marking editable\n",
+			*ipDiscSubscriber.IpSpaceDiscriminator, *ipDiscSubscriber.Ref)
+		if err := writePipelineEnvVar("SUBSCRIBER_BLOCK_SIZE_EDITABLE", "true"); err != nil {
+			return fmt.Errorf("failed to write SUBSCRIBER_BLOCK_SIZE_EDITABLE: %w", err)
+		}
+	} else {
+		// ip_space_discriminator absent — attempt an Update to probe editability
+		if ipDiscSubscriber.Ref == nil || *ipDiscSubscriber.Ref == "" {
+			return fmt.Errorf("parentalcontrol subscriber ref is empty for ip_space_discriminator update")
+		}
+		ipDiscRef := utils.ExtractResourceRef(*ipDiscSubscriber.Ref)
+		_, _, updateErr := clients.PARENTAL.ParentalcontrolSubscriberAPI.Update(context.Background(), ipDiscRef).
+			ParentalcontrolSubscriber(parentalcontrol.ParentalcontrolSubscriber{
+				IpSpaceDiscriminator: parentalcontrol.PtrString("Deterministic-NAT-Port"),
+			}).
+			Execute()
+		if updateErr != nil {
+			fmt.Printf("ip_space_discriminator update failed for subscriber %q (API error: %v), marking not editable\n",
+				*ipDiscSubscriber.Ref, updateErr)
+			if err := writePipelineEnvVar("SUBSCRIBER_BLOCK_SIZE_EDITABLE", "false"); err != nil {
+				return fmt.Errorf("failed to write SUBSCRIBER_BLOCK_SIZE_EDITABLE: %w", err)
+			}
+		} else {
+			fmt.Printf("ip_space_discriminator updated to \"Deterministic-NAT-Port\" for subscriber %q, marking editable\n",
+				*ipDiscSubscriber.Ref)
+			if err := writePipelineEnvVar("SUBSCRIBER_BLOCK_SIZE_EDITABLE", "true"); err != nil {
+				return fmt.Errorf("failed to write SUBSCRIBER_BLOCK_SIZE_EDITABLE: %w", err)
+			}
+		}
 	}
 
 	networkViews := []string{"test_network_view", "custom_view", "test_network_view2", "ms_server", "ms_server2"}
@@ -1250,8 +1301,8 @@ func PreConfig(clients PreConfigClients, hostnames GridHostnames) error {
 		ipv6SettingVal  grid.MemberIpv6Setting
 		masterCandidate bool
 	}{
-		{hostName: "infoblox.member2", vipAddress: "172.28.32.251", configAddrType: "BOTH", ipv6SettingVal: ipv6SettingVal2, masterCandidate: true},
-		{hostName: "infoblox.member3", vipAddress: "172.28.32.252", configAddrType: "IPV4", ipv6SettingVal: ipv6SettingVal3, masterCandidate: false},
+		{hostName: "infoblox.member2", vipAddress: "172.28.38.251", configAddrType: "BOTH", ipv6SettingVal: ipv6SettingVal2, masterCandidate: true},
+		{hostName: "infoblox.member3", vipAddress: "172.28.38.252", configAddrType: "IPV4", ipv6SettingVal: ipv6SettingVal3, masterCandidate: false},
 	}
 
 	for _, member := range members {
@@ -1263,7 +1314,7 @@ func PreConfig(clients PreConfigClients, hostnames GridHostnames) error {
 			MasterCandidate:          grid.PtrBool(member.masterCandidate),
 			VipSetting: &grid.MemberVipSetting{
 				Address:    grid.PtrString(member.vipAddress),
-				Gateway:    grid.PtrString("172.28.32.1"),
+				Gateway:    grid.PtrString("172.28.38.1"),
 				SubnetMask: grid.PtrString("255.255.254.0"),
 				Primary:    grid.PtrBool(true),
 				Dscp:       grid.PtrInt64(0),
@@ -1420,6 +1471,47 @@ func PreConfig(clients PreConfigClients, hostnames GridHostnames) error {
 		}
 
 		fmt.Printf("Upgrade dependent group %q created successfully\n", groupName)
+	}
+
+	// Create RIR organizations
+	rirExtAttrs := map[string]rir.ExtAttrs{
+		"RIPE Admin Contact":     {Value: "ib-contact"},
+		"RIPE Country":           {Value: "United Kingdom (GB)"},
+		"RIPE Technical Contact": {Value: "TEST123-IB"},
+		"RIPE Email":             {Value: "support@infoblox.com"},
+	}
+
+	rirOrgs := []struct {
+		id   string
+		name string
+	}{
+		{id: "ORG-CB11-INTEST", name: "rir-org-test1"},
+		{id: "ORG-CB12-INTEST", name: "rir-org-test2"},
+	}
+
+	for _, org := range rirOrgs {
+		rirOrgBody := rir.RirOrganization{
+			Id:          rir.PtrString(org.id),
+			Name:        rir.PtrString(org.name),
+			Maintainer:  rir.PtrString("infoblox"),
+			Password:    rir.PtrString("test-pass"),
+			SenderEmail: rir.PtrString("support@infoblox.com"),
+			Rir:         rir.PtrString("RIPE"),
+			ExtAttrs:    &rirExtAttrs,
+		}
+
+		_, _, err := clients.RIR.RirOrganizationAPI.Create(context.Background()).
+			RirOrganization(rirOrgBody).
+			Execute()
+		if err != nil {
+			if strings.Contains(err.Error(), "already exists") {
+				fmt.Printf("RIR organization %q already exists, skipping creation\n", org.id)
+				continue
+			}
+			return fmt.Errorf("failed to create RIR organization %q: %w", org.id, err)
+		}
+
+		fmt.Printf("RIR organization %q created successfully\n", org.id)
 	}
 
 	// Create Active Directory auth services
@@ -1991,6 +2083,70 @@ func main() {
 		return
 	}
 
+	ecosystemTemplatePath10 := filepath.Join(cwd, "internal/testdata/nios_ecosystem_templates", "Version5_Syslog_Session_Template1.json")
+
+	if _, statErr := os.Stat(ecosystemTemplatePath10); statErr == nil {
+		err = ConfigureEcoSystemTemplates(host, wapiVer, username, password, ecosystemTemplatePath10)
+		if err != nil {
+			fmt.Printf("Error uploading ecosystem templates: %v\n", err)
+			return
+		}
+		fmt.Println("Ecosystem template 10 uploaded successfully")
+	} else if os.IsNotExist(statErr) {
+		fmt.Printf("Ecosystem template 10 not found at %s, skipping upload\n", ecosystemTemplatePath10)
+	} else {
+		fmt.Printf("Error checking ecosystem template 10 path %s: %v\n", ecosystemTemplatePath10, statErr)
+		return
+	}
+
+	ecosystemTemplatePath11 := filepath.Join(cwd, "internal/testdata/nios_ecosystem_templates", "Version5_DXL_Session_Template1.json")
+
+	if _, statErr := os.Stat(ecosystemTemplatePath11); statErr == nil {
+		err = ConfigureEcoSystemTemplates(host, wapiVer, username, password, ecosystemTemplatePath11)
+		if err != nil {
+			fmt.Printf("Error uploading ecosystem templates: %v\n", err)
+			return
+		}
+		fmt.Println("Ecosystem template 11 uploaded successfully")
+	} else if os.IsNotExist(statErr) {
+		fmt.Printf("Ecosystem template 11 not found at %s, skipping upload\n", ecosystemTemplatePath11)
+	} else {
+		fmt.Printf("Error checking ecosystem template 11 path %s: %v\n", ecosystemTemplatePath11, statErr)
+		return
+	}
+
+	ecosystemTemplatePath12 := filepath.Join(cwd, "internal/testdata/nios_ecosystem_templates", "Version5_REST_API_Session_Template1.json")
+
+	if _, statErr := os.Stat(ecosystemTemplatePath12); statErr == nil {
+		err = ConfigureEcoSystemTemplates(host, wapiVer, username, password, ecosystemTemplatePath12)
+		if err != nil {
+			fmt.Printf("Error uploading ecosystem templates: %v\n", err)
+			return
+		}
+		fmt.Println("Ecosystem template 12 uploaded successfully")
+	} else if os.IsNotExist(statErr) {
+		fmt.Printf("Ecosystem template 12 not found at %s, skipping upload\n", ecosystemTemplatePath12)
+	} else {
+		fmt.Printf("Error checking ecosystem template 12 path %s: %v\n", ecosystemTemplatePath12, statErr)
+		return
+	}
+
+	ecosystemTemplatePath13 := filepath.Join(cwd, "internal/testdata/nios_ecosystem_templates", "event_template_schema_default.json")
+
+	if _, statErr := os.Stat(ecosystemTemplatePath13); statErr == nil {
+		err = ConfigureEcoSystemTemplates(host, wapiVer, username, password, ecosystemTemplatePath13)
+		if err != nil {
+			fmt.Printf("Error uploading ecosystem templates: %v\n", err)
+			return
+		}
+		fmt.Println("Ecosystem template 13 uploaded successfully")
+	} else if os.IsNotExist(statErr) {
+		fmt.Printf("Ecosystem template 13 not found at %s, skipping upload\n", ecosystemTemplatePath13)
+	} else {
+		fmt.Printf("Error checking ecosystem template 13 path %s: %v\n", ecosystemTemplatePath13, statErr)
+		return
+	}
+
 	clients := PreConfigClients{
 		IPAM:         apiClient.IPAMAPI,
 		DHCP:         apiClient.DHCPAPI,
@@ -2001,6 +2157,7 @@ func main() {
 		NOTIFICATION: apiClient.NotificationAPI,
 		PARENTAL:     apiClient.ParentalControlAPI,
 		SECURITY:     apiClient.SecurityAPI,
+		RIR:          apiClient.RIRAPI,
 	}
 
 	err = PreConfig(clients, hostnames)

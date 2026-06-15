@@ -53,12 +53,13 @@ type NIOSProvider struct {
 
 // NIOSProviderModel describes the provider data model.
 type NIOSProviderModel struct {
-	NIOSHostURL  types.String `tfsdk:"nios_host_url"`
-	NIOSUsername types.String `tfsdk:"nios_username"`
-	NIOSPassword types.String `tfsdk:"nios_password"`
-	ProxyURL     types.String `tfsdk:"proxy_url"`
-	ProxySearch  types.String `tfsdk:"proxy_search"`
-	RetryTimeout types.Int64  `tfsdk:"retry_timeout"`
+	NIOSHostURL        types.String `tfsdk:"nios_host_url"`
+	NIOSUsername       types.String `tfsdk:"nios_username"`
+	NIOSPassword       types.String `tfsdk:"nios_password"`
+	ProxyURL           types.String `tfsdk:"proxy_url"`
+	ProxySearch        types.String `tfsdk:"proxy_search"`
+	RetryTimeout       types.Int64  `tfsdk:"retry_timeout"`
+	ManageInternalIdEA types.Bool   `tfsdk:"manage_internal_id_ea"`
 }
 
 func (p *NIOSProvider) Metadata(_ context.Context, _ provider.MetadataRequest, resp *provider.MetadataResponse) {
@@ -94,6 +95,10 @@ func (p *NIOSProvider) Schema(_ context.Context, _ provider.SchemaRequest, resp 
 				Optional:    true,
 				Description: "Specifies the timeout duration (in seconds) for retrying operations that fail due to transient errors.",
 			},
+			"manage_internal_id_ea": schema.BoolAttribute{
+				Optional:    true,
+				Description: "Determines whether the provider manages the Terraform Internal ID extensible attribute in NIOS. This attribute is required by the provider to store the Terraform resource ID corresponding to NIOS objects. When true, the provider ensures the attribute exists and manages its lifecycle. When false, the provider does not validate, create, update, or otherwise manage the attribute. Default value: true",
+			},
 		},
 	}
 }
@@ -124,13 +129,28 @@ func (p *NIOSProvider) Configure(ctx context.Context, req provider.ConfigureRequ
 		retry.SetRetryTimeout(data.RetryTimeout.ValueInt64())
 	}
 
-	err := checkAndCreatePreRequisites(ctx, client)
-	if err != nil {
-		resp.Diagnostics.AddError(
-			"Failed to ensure Terraform extensible attribute exists",
-			err.Error(),
+	if data.ManageInternalIdEA.IsUnknown() || data.ManageInternalIdEA.IsNull() {
+		data.ManageInternalIdEA = types.BoolValue(true)
+	}
+
+	if data.ManageInternalIdEA.ValueBool() {
+		err := checkAndCreatePreRequisites(ctx, client)
+		if err != nil {
+			resp.Diagnostics.AddError(
+				"Failed to ensure Terraform extensible attribute exists",
+				err.Error(),
+			)
+		}
+	} else {
+		// Raise a warning if the provider is not managing the Terraform Internal ID EA, as this may lead to issues with resource management
+		resp.Diagnostics.AddWarning(
+			"Terraform Internal ID Check Disabled",
+			fmt.Sprintf("The %q extensible attribute check is disabled (manage_internal_id_ea=false). "+
+				"Operations on NIOS-managed resources may fail if the extensible attribute does not exist in NIOS.",
+				terraformInternalIDEA),
 		)
 	}
+
 	resp.DataSourceData = client
 	resp.ResourceData = client
 	resp.ListResourceData = client

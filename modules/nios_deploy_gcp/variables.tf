@@ -48,6 +48,16 @@ variable "lan1_subnet_name" {
   type        = string
 }
 
+variable "ha_subnet_name" {
+  description = "The name of the subnetwork to attach to the high availability network interface (nic2)."
+  type        = string
+  default     = null
+  validation {
+    condition     = !var.enable_ha || (var.ha_subnet_name != null && trimspace(var.ha_subnet_name) != "")
+    error_message = "ha_subnet_name must be set to a non-empty subnet name when enable_ha is true."
+  }
+}
+
 variable "boot_disk_type" {
   description = "The type of the boot disk."
   type        = string
@@ -95,7 +105,26 @@ variable "labels" {
   type        = map(string)
   default = {
     product       = "nios"
-    dontstop      = "no"
+    dontstop      = "yes"
     dontterminate = "yes"
   }
 }
+
+variable "enable_ha" {
+  description = "Whether to enable high availability (HA) for the NIOS instance."
+  type        = bool
+  default     = false
+}
+
+variable "enable_ipv6" {
+  description = "Enable IPv6 (dual-stack) on network interfaces"
+  type        = bool
+  default     = false
+}
+
+variable "is_primary" {
+  description = "Whether this is the primary node in an HA pair. If true, an alias IP (VIP) is allocated on the HA interface."
+  type        = bool
+  default     = false
+}
+
