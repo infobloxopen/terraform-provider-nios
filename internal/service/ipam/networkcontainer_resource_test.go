@@ -2592,29 +2592,6 @@ func TestAccNetworkcontainerResource_UseUpdateDnsOnLeaseRenewal(t *testing.T) {
 	})
 }
 
-func TestAccNetworkcontainerResource_UseZoneAssociations(t *testing.T) {
-	var resourceName = "nios_ipam_network_container.test_use_zone_associations"
-	var v ipam.Networkcontainer
-	network := acctest.RandomCIDRNetwork()
-
-	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.PreCheck(t) },
-		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-		Steps: []resource.TestStep{
-			// Create and Read
-			{
-				Config: testAccNetworkcontainerUseZoneAssociations(network, "true"),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckNetworkcontainerExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_zone_associations", "true"),
-					resource.TestCheckResourceAttr(resourceName, "network", network),
-				),
-			},
-			// Delete testing automatically occurs in TestCase
-		},
-	})
-}
-
 func TestAccNetworkcontainerResource_DiscoveryMember(t *testing.T) {
 	var resourceName = "nios_ipam_network_container.test_discovery_member"
 	var v ipam.Networkcontainer
@@ -3661,15 +3638,6 @@ resource "nios_ipam_network_container" "test_use_update_dns_on_lease_renewal" {
 `, network, useUpdateDnsOnLeaseRenewal)
 }
 
-func testAccNetworkcontainerUseZoneAssociations(network, useZoneAssociations string) string {
-	return fmt.Sprintf(`
-resource "nios_ipam_network_container" "test_use_zone_associations" {
-    network = %q
-    use_zone_associations = %q
-}
-`, network, useZoneAssociations)
-}
-
 func testAccNetworkcontainerDiscoveryMember(network, discoveryMember string) string {
 	return fmt.Sprintf(`
 resource "nios_ipam_network_container" "test_discovery_member" {
@@ -3811,39 +3779,4 @@ resource "nios_ipam_network_container" "test_mapped_ea_attributes" {
     }
 }
 `, network, name, mappedEa)
-}
-
-func testAccNetworkcontainerZoneAssociations(network, zone, view, parentZoneAuthResource string) string {
-	var zoneAssociationsConfig, parentZoneAuthConfig string
-
-	if zone != "" && view != "" && parentZoneAuthResource != "" {
-		zoneAssociationsConfig = fmt.Sprintf(`[
-            {
-                fqdn = nios_dns_zone_auth.%s.fqdn
-                view = nios_dns_zone_auth.%s.view
-                is_default = false
-            }
-        ]`, parentZoneAuthResource, parentZoneAuthResource)
-		parentZoneAuthConfig = testAccNetworkcontainerParentZoneAuth(zone, view, parentZoneAuthResource)
-	} else {
-		zoneAssociationsConfig = "null"
-	}
-
-	return fmt.Sprintf(`
-%s
-resource "nios_ipam_network_container" "test_zone_associations" {
-    network = %q
-    zone_associations = %s
-    use_zone_associations = true
-}
-`, parentZoneAuthConfig, network, zoneAssociationsConfig)
-}
-
-func testAccNetworkcontainerParentZoneAuth(zone, view, testZone string) string {
-	return fmt.Sprintf(`
-resource "nios_dns_zone_auth" %q {
-  fqdn = %q
-  view = %q
-}
-`, testZone, zone, view)
 }
