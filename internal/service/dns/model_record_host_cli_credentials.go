@@ -130,31 +130,3 @@ func (m *RecordHostCliCredentialsModel) Flatten(ctx context.Context, from *dns.R
 	m.Id = flex.FlattenInt64Pointer(from.Id)
 	m.CredentialGroup = flex.FlattenStringPointer(from.CredentialGroup)
 }
-
-func preserveCliCredentialPasswords(ctx context.Context, saved types.List, current types.List, diags *diag.Diagnostics) types.List {
-	if saved.IsNull() || saved.IsUnknown() || current.IsNull() || current.IsUnknown() {
-		return current
-	}
-
-	var savedModels []RecordHostCliCredentialsModel
-	diags.Append(saved.ElementsAs(ctx, &savedModels, false)...)
-	if diags.HasError() {
-		return current
-	}
-
-	var currentModels []RecordHostCliCredentialsModel
-	diags.Append(current.ElementsAs(ctx, &currentModels, false)...)
-	if diags.HasError() {
-		return current
-	}
-
-	for i := range currentModels {
-		if i < len(savedModels) && (currentModels[i].Password.IsNull() || currentModels[i].Password.ValueString() == "") {
-			currentModels[i].Password = types.StringNull()
-		}
-	}
-
-	result, d := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: RecordHostCliCredentialsAttrTypes}, currentModels)
-	diags.Append(d...)
-	return result
-}
