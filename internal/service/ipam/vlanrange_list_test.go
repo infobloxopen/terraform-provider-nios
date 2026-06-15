@@ -1,4 +1,3 @@
-
 package ipam_test
 
 import (
@@ -12,7 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/querycheck"
 	"github.com/hashicorp/terraform-plugin-testing/querycheck/queryfilter"
 	"github.com/hashicorp/terraform-plugin-testing/tfjsonpath"
-    "github.com/hashicorp/terraform-plugin-testing/tfversion"
+	"github.com/hashicorp/terraform-plugin-testing/tfversion"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/ipam"
 
@@ -26,7 +25,7 @@ func TestAccVlanrangeList_basic(t *testing.T) {
 	vlanView := acctest.RandomNameWithPrefix("vlan-view")
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.PreCheck(t) },
+		PreCheck: func() { acctest.PreCheck(t) },
 		TerraformVersionChecks: []tfversion.TerraformVersionCheck{
 			tfversion.SkipBelow(tfversion.Version1_14_0),
 		},
@@ -39,11 +38,11 @@ func TestAccVlanrangeList_basic(t *testing.T) {
 					testAccCheckVlanrangeExists(context.Background(), resourceName, &v),
 				),
 			},
-            // Query the object
+			// Query the object
 			{
 				ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-				Query:  true,
-				Config: testAccVlanrangeListBasicConfig(),
+				Query:                    true,
+				Config:                   testAccVlanrangeListBasicConfig(),
 				QueryResultChecks: []querycheck.QueryResultCheck{
 					querycheck.ExpectLengthAtLeast("nios_ipam_vlanrange.test", 1),
 				},
@@ -59,7 +58,7 @@ func TestAccVlanrangeList_Filters(t *testing.T) {
 	vlanView := acctest.RandomNameWithPrefix("vlan-view")
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.PreCheck(t) },
+		PreCheck: func() { acctest.PreCheck(t) },
 		TerraformVersionChecks: []tfversion.TerraformVersionCheck{
 			tfversion.SkipBelow(tfversion.Version1_14_0),
 		},
@@ -83,11 +82,11 @@ func TestAccVlanrangeList_Filters(t *testing.T) {
 					querycheck.ExpectResourceKnownValues(
 						resourceName,
 						queryfilter.ByResourceIdentity(map[string]knownvalue.Check{
-						    // TODO : Update the ref prefix with the correct identifying object for the resource
+							// TODO : Update the ref prefix with the correct identifying object for the resource
 							"ref": knownvalue.StringRegexp(regexp.MustCompile("vlanrange/")),
 						}),
 						[]querycheck.KnownValueCheck{
-						    // TODO : Add checks for required fields
+							// TODO : Add checks for required fields
 							{
 								Path:       tfjsonpath.New("name"),
 								KnownValue: knownvalue.StringExact(vlanRange),
@@ -109,7 +108,7 @@ func TestAccVlanrangeList_ExtAttrFilters(t *testing.T) {
 	extAttrValue := acctest.RandomName()
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.PreCheck(t) },
+		PreCheck: func() { acctest.PreCheck(t) },
 		TerraformVersionChecks: []tfversion.TerraformVersionCheck{
 			tfversion.SkipBelow(tfversion.Version1_14_0),
 		},
@@ -128,8 +127,8 @@ func TestAccVlanrangeList_ExtAttrFilters(t *testing.T) {
 			// Query the object
 			{
 				ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-				Query: true,
-				Config: testAccVlanrangeListConfigExtAttrFilters(extAttrValue),
+				Query:                    true,
+				Config:                   testAccVlanrangeListConfigExtAttrFilters(extAttrValue),
 				QueryResultChecks: []querycheck.QueryResultCheck{
 					querycheck.ExpectLength("nios_ipam_vlanrange.test", 1),
 				},
@@ -173,4 +172,3 @@ list "nios_ipam_vlanrange" "test" {
 }
 `, extAttrsValue)
 }
-
