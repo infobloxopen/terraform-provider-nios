@@ -218,7 +218,7 @@ resource "nios_grid_member" "ha_pair"{}
 ```
 
 ```hcl 
-terraform import nios_grid_member.ha_pair <uuid>
+terraform import nios_grid_member.ha_pair <ref>
 ```
 
 2. Modify the resource to set ha_on_cloud to true and provide the cloud attributes.
