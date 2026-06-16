@@ -913,15 +913,7 @@ resource "nios_misc_dxl_endpoint" "test_wapi_user_name" {
 `, clientCertificateToken, name, outboundMemberType, wapiUserName, password, brokerStr)
 }
 
-func getTestDataPath() string {
-	wd, err := os.Getwd()
-	if err != nil {
-		return "../../testdata/nios_misc_dxl_endpoint"
-	}
-	return filepath.Join(wd, "../../testdata/nios_misc_dxl_endpoint")
-}
-
-func testAccDxlEndpointWapiUserPassword(clientCertificateToken string, broker []map[string]any, name string, outboundMemberType string, wapiUserName, wapiUserPassword string) string {
+func testAccDxlEndpointWapiUserPassword(clientCertificateToken string, broker []map[string]any, name string, outboundMemberType string, wapiUserName, password string) string {
 	brokerStr := utils.ConvertSliceOfMapsToHCL(broker)
 	return fmt.Sprintf(`
 resource "nios_misc_dxl_endpoint" "test_wapi_user_password" {
@@ -932,5 +924,13 @@ resource "nios_misc_dxl_endpoint" "test_wapi_user_password" {
     wapi_user_password = %q
 	brokers = %s
 }
-`, clientCertificateToken, name, outboundMemberType, wapiUserName, wapiUserPassword, brokerStr)
+`, clientCertificateToken, name, outboundMemberType, wapiUserName, password, brokerStr)
+}
+
+func getTestDataPath() string {
+	wd, err := os.Getwd()
+	if err != nil {
+		return "../../testdata/nios_misc_dxl_endpoint"
+	}
+	return filepath.Join(wd, "../../testdata/nios_misc_dxl_endpoint")
 }

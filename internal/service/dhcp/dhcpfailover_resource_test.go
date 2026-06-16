@@ -511,6 +511,45 @@ func TestAccDhcpfailoverResource_MsHotstandbyPartnerRole(t *testing.T) {
 	})
 }
 
+func TestAccDhcpfailoverResource_MsSharedSecret(t *testing.T) {
+	resourceName := "nios_dhcp_failover.test_ms_shared_secret"
+	var v dhcp.Dhcpfailover
+	dhcpfailoverName := acctest.RandomNameWithPrefix("failover")
+	primary := utils.GetNIOSGridMasterHostName()
+	secondary := utils.GetNIOSGridMemberHostName()
+	sharedSecret := "test1234"
+	sharedSecret1 := "test5678"
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		CheckDestroy:             testAccCheckDhcpfailoverDestroy(context.Background(), &v),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDhcpfailoverMsSharedSecret(dhcpfailoverName, primary, secondary, "GRID", "GRID", nil),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckDhcpfailoverExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "ms_shared_secret_version", "0"),
+				),
+			},
+			{
+				Config: testAccDhcpfailoverMsSharedSecret(dhcpfailoverName, primary, secondary, "GRID", "GRID", &sharedSecret),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckDhcpfailoverExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "ms_shared_secret_version", "1"),
+				),
+			},
+			{
+				Config: testAccDhcpfailoverMsSharedSecret(dhcpfailoverName, primary, secondary, "GRID", "GRID", &sharedSecret1),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckDhcpfailoverExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "ms_shared_secret_version", "2"),
+				),
+			},
+		},
+	})
+}
+
 func TestAccDhcpfailoverResource_MsSwitchoverInterval(t *testing.T) {
 	var resourceName = "nios_dhcp_failover.test_ms_switchover_interval"
 	var v dhcp.Dhcpfailover
@@ -1235,4 +1274,21 @@ resource "nios_dhcp_failover" "test_use_recycle_leases" {
     use_recycle_leases = %q
 }
 `, name, primary, secondary, primaryServerType, secondaryServerType, useRecycleLeases)
+}
+
+func testAccDhcpfailoverMsSharedSecret(name string, primary string, secondary string, primaryServerType string, secondaryServerType string, msSharedSecret *string) string {
+	var msSharedSecretValue string
+	if msSharedSecret != nil {
+		msSharedSecretValue = fmt.Sprintf("ms_shared_secret = %q", *msSharedSecret)
+	}
+	return fmt.Sprintf(`
+resource "nios_dhcp_failover" "test_ms_shared_secret" {
+	name = %q
+	primary = %q
+	secondary = %q
+	primary_server_type = %q
+	secondary_server_type = %q
+	%s
+}
+`, name, primary, secondary, primaryServerType, secondaryServerType, msSharedSecretValue)
 }
