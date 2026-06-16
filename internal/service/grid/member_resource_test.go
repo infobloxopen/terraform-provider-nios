@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -1854,6 +1855,68 @@ func TestAccMemberResource_NodeInfo(t *testing.T) {
 		},
 	}
 
+	nodeInfoSingleNode := []map[string]any{
+		{
+			"lan_ha_port_setting": map[string]any{
+				"ha_cloud_attribute": "UNK",
+				"ha_ip_address":      "172.28.38.12",
+				"ha_port_setting": map[string]any{
+					"auto_port_setting_enabled": true,
+					"speed":                     "10",
+				},
+				"lan_port_setting": map[string]any{
+					"auto_port_setting_enabled": true,
+				},
+				"mgmt_lan": "172.28.38.33",
+			},
+		},
+	}
+
+	nodeInfoThreeNodes := []map[string]any{
+		{
+			"lan_ha_port_setting": map[string]any{
+				"ha_cloud_attribute": "UNK",
+				"ha_ip_address":      "172.28.38.12",
+				"ha_port_setting": map[string]any{
+					"auto_port_setting_enabled": true,
+					"speed":                     "10",
+				},
+				"lan_port_setting": map[string]any{
+					"auto_port_setting_enabled": true,
+				},
+				"mgmt_lan": "172.28.38.33",
+			},
+		},
+		{
+			"lan_ha_port_setting": map[string]any{
+				"ha_cloud_attribute": "UNK",
+				"ha_ip_address":      "172.28.38.42",
+				"ha_port_setting": map[string]any{
+					"auto_port_setting_enabled": true,
+					"speed":                     "10",
+				},
+				"lan_port_setting": map[string]any{
+					"auto_port_setting_enabled": true,
+				},
+				"mgmt_lan": "172.28.38.44",
+			},
+		},
+		{
+			"lan_ha_port_setting": map[string]any{
+				"ha_cloud_attribute": "UNK",
+				"ha_ip_address":      "172.28.38.52",
+				"ha_port_setting": map[string]any{
+					"auto_port_setting_enabled": true,
+					"speed":                     "10",
+				},
+				"lan_port_setting": map[string]any{
+					"auto_port_setting_enabled": true,
+				},
+				"mgmt_lan": "172.28.38.55",
+			},
+		},
+	}
+
 	nodeInfoMGMTIPv4 := []map[string]any{
 		{
 			"mgmt_network_setting": map[string]any{
@@ -1937,6 +2000,29 @@ func TestAccMemberResource_NodeInfo(t *testing.T) {
 				),
 			},
 			// Update and Read
+			{
+				Config: testAccMemberNodeInfo(hostName, "IPV4", "VNIOS", "ALL_V4",
+					vipAddress, "172.28.38.1", "255.255.254.0", "false", 113, nodeInfoValUpdated, mgmtPortSettingVal),
+				ExpectError: regexp.MustCompile("enable_ha must be true when node_info has 2 nodes"),
+			},
+			// Condition 2: enable_ha true requires exactly 2 nodes (not more)
+			{
+				Config: testAccMemberNodeInfo(hostName, "IPV4", "VNIOS", "ALL_V4",
+					vipAddress, "172.28.38.1", "255.255.254.0", "true", 113, nodeInfoThreeNodes, mgmtPortSettingVal),
+				ExpectError: regexp.MustCompile("node_info must have exactly 2 nodes when enable_ha is true"),
+			},
+			// Condition 3a: node_info > 2 with enable_ha false is not allowed
+			{
+				Config: testAccMemberNodeInfo(hostName, "IPV4", "VNIOS", "ALL_V4",
+					vipAddress, "172.28.38.1", "255.255.254.0", "false", 0, nodeInfoThreeNodes, mgmtPortSettingVal),
+				ExpectError: regexp.MustCompile("node_info cannot have more than 2 nodes when enable_ha is false"),
+			},
+			//Condition 3b: single node with enable_ha true is not allowed
+			{
+				Config: testAccMemberNodeInfo(hostName, "IPV4", "VNIOS", "ALL_V4",
+					vipAddress, "172.28.38.1", "255.255.254.0", "true", 113, nodeInfoSingleNode, mgmtPortSettingVal),
+				ExpectError: regexp.MustCompile(`node_info must have exactly 2 nodes when enable_ha is true; a single\s+node_info entry is not valid`),
+			},
 			{
 				Config: testAccMemberNodeInfo(hostName, "IPV4", "VNIOS", "ALL_V4",
 					vipAddress, "172.28.38.1", "255.255.254.0", "true", 113, nodeInfoValUpdated, mgmtPortSettingVal),
@@ -2896,7 +2982,9 @@ func TestAccMemberResource_TrafficCaptureAuthDnsSetting(t *testing.T) {
 
 	trafficCaptureAuthDnsSettingVal := map[string]any{
 		"auth_dns_latency_listen_on_source": "VIP_V4",
-		"auth_dns_latency_trigger_enable":   false,
+		"auth_dns_latency_trigger_enable":   true,
+		"auth_dns_latency_threshold":        45,
+		"auth_dns_latency_reset":            35,
 	}
 	trafficCaptureAuthDnsSettingValUpdated := map[string]any{
 		"auth_dns_latency_listen_on_source": "VIP_V4",
@@ -2918,8 +3006,10 @@ func TestAccMemberResource_TrafficCaptureAuthDnsSetting(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "traffic_capture_auth_dns_setting.auth_dns_latency_listen_on_source", "VIP_V4"),
-					resource.TestCheckResourceAttr(resourceName, "traffic_capture_auth_dns_setting.auth_dns_latency_trigger_enable", "false"),
+					resource.TestCheckResourceAttr(resourceName, "traffic_capture_auth_dns_setting.auth_dns_latency_trigger_enable", "true"),
 					resource.TestCheckResourceAttr(resourceName, "use_traffic_capture_auth_dns", "true"),
+					resource.TestCheckResourceAttr(resourceName, "traffic_capture_auth_dns_setting.auth_dns_latency_threshold", "45"),
+					resource.TestCheckResourceAttr(resourceName, "traffic_capture_auth_dns_setting.auth_dns_latency_reset", "35"),
 				),
 			},
 			{

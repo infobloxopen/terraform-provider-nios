@@ -270,8 +270,11 @@ func TestAccViewResource_BlacklistRulesets(t *testing.T) {
 	var resourceName = "nios_dns_view.test_blacklist_rulesets"
 	var v dns.View
 	name := acctest.RandomNameWithPrefix("view")
-	blacklistRulesets := []string{"ruleset1"}
-	blacklistRulesetsUpdate := []string{"ruleset3"}
+	ruleSet1 := acctest.RandomNameWithPrefix("ruleset")
+	ruleSet2 := acctest.RandomNameWithPrefix("ruleset")
+	ruleSetName := []string{ruleSet1, ruleSet2}
+	blacklistRulesets := []string{ruleSet1}
+	blacklistRulesetsUpdate := []string{ruleSet2}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -279,18 +282,18 @@ func TestAccViewResource_BlacklistRulesets(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccViewBlacklistRulesets(name, blacklistRulesets),
+				Config: testAccViewBlacklistRulesets(name, ruleSetName, blacklistRulesets),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckViewExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "blacklist_rulesets.0", "ruleset1"),
+					resource.TestCheckResourceAttr(resourceName, "blacklist_rulesets.0", ruleSet1),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccViewBlacklistRulesets(name, blacklistRulesetsUpdate),
+				Config: testAccViewBlacklistRulesets(name, ruleSetName, blacklistRulesetsUpdate),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckViewExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "blacklist_rulesets.0", "ruleset3"),
+					resource.TestCheckResourceAttr(resourceName, "blacklist_rulesets.0", ruleSet2),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -947,6 +950,7 @@ func TestAccViewResource_EnableBlacklist(t *testing.T) {
 	var resourceName = "nios_dns_view.test_enable_blacklist"
 	var v dns.View
 	name := acctest.RandomNameWithPrefix("view")
+	ruleSetName := acctest.RandomNameWithPrefix("ruleset")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -954,7 +958,7 @@ func TestAccViewResource_EnableBlacklist(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccViewEnableBlacklist(name, true),
+				Config: testAccViewEnableBlacklist(name, ruleSetName, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckViewExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "enable_blacklist", "true"),
@@ -962,7 +966,7 @@ func TestAccViewResource_EnableBlacklist(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccViewEnableBlacklist(name, false),
+				Config: testAccViewEnableBlacklist(name, ruleSetName, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckViewExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "enable_blacklist", "false"),
@@ -2996,16 +3000,16 @@ resource "nios_dns_view" "test_blacklist_redirect_ttl" {
 `, name, blacklistRedirectTtl)
 }
 
-func testAccViewBlacklistRulesets(name string, blacklistRulesets []string) string {
+func testAccViewBlacklistRulesets(name string, ruleSetName, blacklistRulesets []string) string {
 	blacklistRulesetsStr := utils.ConvertStringSliceToHCL(blacklistRulesets)
 	return fmt.Sprintf(`
 resource "nios_misc_ruleset" "test_ruleset1" {
-	name = "ruleset1"
+	name = %q
 	type = "BLACKLIST"
 }
 
 resource "nios_misc_ruleset" "test_ruleset3" {
-	name = "ruleset3"
+	name = %q
 	type = "BLACKLIST"
 }
 
@@ -3017,7 +3021,7 @@ resource "nios_dns_view" "test_blacklist_rulesets" {
 		nios_misc_ruleset.test_ruleset3,
 	]
 }
-`, name, blacklistRulesetsStr)
+`, ruleSetName[0], ruleSetName[1], name, blacklistRulesetsStr)
 }
 
 func testAccViewComment(name, comment string) string {
@@ -3216,10 +3220,10 @@ resource "nios_dns_view" "test_edns_udp_size" {
 `, name, ednsUdpSize)
 }
 
-func testAccViewEnableBlacklist(name string, enableBlacklist bool) string {
+func testAccViewEnableBlacklist(name, ruleSetName string, enableBlacklist bool) string {
 	return fmt.Sprintf(`
 resource "nios_misc_ruleset" "test_ruleset1" {
-	name = "ruleset1"
+	name = %q
 	type = "BLACKLIST"
 }
 
@@ -3228,12 +3232,9 @@ resource "nios_dns_view" "test_enable_blacklist" {
 	enable_blacklist = %t
 	use_blacklist = true
 	blacklist_redirect_addresses = ["10.0.0.2"]
-	blacklist_rulesets = ["ruleset1"]
-	depends_on = [
-		nios_misc_ruleset.test_ruleset1,
-	]
+	blacklist_rulesets = [nios_misc_ruleset.test_ruleset1.name]
 }
-`, name, enableBlacklist)
+`, ruleSetName, name, enableBlacklist)
 }
 
 func testAccViewEnableFixedRrsetOrderFqdns(name string, enableFixedRrsetOrderFqdns bool) string {

@@ -11,6 +11,8 @@ import (
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -37,6 +39,7 @@ type RadiusAuthserviceModel struct {
 	Name             types.String `tfsdk:"name"`
 	RecoveryInterval types.Int64  `tfsdk:"recovery_interval"`
 	Servers          types.List   `tfsdk:"servers"`
+	SecretVersion    types.Int64  `tfsdk:"secret_version"`
 }
 
 var RadiusAuthserviceAttrTypes = map[string]attr.Type{
@@ -53,6 +56,7 @@ var RadiusAuthserviceAttrTypes = map[string]attr.Type{
 	"name":              types.StringType,
 	"recovery_interval": types.Int64Type,
 	"servers":           types.ListType{ElemType: types.ObjectType{AttrTypes: RadiusAuthserviceServersAttrTypes}},
+	"secret_version":    types.Int64Type,
 }
 
 var RadiusAuthserviceResourceSchemaAttributes = map[string]schema.Attribute{
@@ -142,6 +146,13 @@ var RadiusAuthserviceResourceSchemaAttributes = map[string]schema.Attribute{
 		},
 		Required:            true,
 		MarkdownDescription: "The ordered list of RADIUS authentication servers.",
+	},
+	"secret_version": schema.Int64Attribute{
+		Computed:            true,
+		MarkdownDescription: "Internal version incremented when shared_secret sub field of servers changes.",
+		PlanModifiers: []planmodifier.Int64{
+			int64planmodifier.UseStateForUnknown(),
+		},
 	},
 }
 

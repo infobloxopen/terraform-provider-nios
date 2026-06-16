@@ -672,6 +672,11 @@ resource "nios_dns_record_ptr" "test_ipv4addr" {
 
 func testAccRecordPtrFuncCallIpv4Addr(network, ptrdname, view, comment string) string {
 	return fmt.Sprintf(`
+resource "nios_ipam_network" "test_func_call" {
+	network = %[1]q
+	network_view = "default"
+}
+
 resource "nios_dns_record_ptr" "test_func_call" {
 	func_call = {
 		"attribute_name" = "ipv4addr"
@@ -679,13 +684,14 @@ resource "nios_dns_record_ptr" "test_func_call" {
 		"result_field" = "ips"
 		"object" = "network"
 		"object_parameters" = {
-			"network" = %q
+			"network" = %[1]q
 			"network_view" = "default"
 		}
 	}
-	ptrdname = %q
-	view = %q
-	comment = %q
+	ptrdname = %[2]q
+	view = %[3]q
+	comment = %[4]q
+	depends_on = [nios_ipam_network.test_func_call]
 }
 `, network, ptrdname, view, comment)
 }
