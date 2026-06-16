@@ -1857,14 +1857,80 @@ resource "nios_ipam_ipv6network" "test" {
 }
 
 resource "nios_dhcp_ipv6range" "test_use_subscribe_settings" {
-    network = nios_ipam_ipv6network.test.network
-    start_addr = %q
-    end_addr = %q
-    network_view = nios_ipam_ipv6network.test.network_view
+	network = nios_ipam_ipv6network.test.network
+	start_addr = %q
+	end_addr = %q
+	network_view = nios_ipam_ipv6network.test.network_view
 	subscribe_settings = %s
-    use_subscribe_settings = %q
+	use_subscribe_settings = %q
 }
 `, view, startAddr, endAddr, subscribeSettingsStr, useSubscribeSettings)
+}
+
+func TestAccIpv6rangeResource_EnableImmediateDiscovery(t *testing.T) {
+	resourceName := "nios_dhcp_ipv6range.test_enable_immediate_discovery"
+	var v dhcp.Ipv6range
+	view := acctest.RandomNameWithPrefix("network-view")
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccIpv6rangeEnableImmediateDiscovery(view, "14::101", "14::110", true),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckIpv6rangeExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "enable_immediate_discovery", "true"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccIpv6rangeResource_RestartIfNeeded(t *testing.T) {
+	resourceName := "nios_dhcp_ipv6range.test_restart_if_needed"
+	var v dhcp.Ipv6range
+	view := acctest.RandomNameWithPrefix("network-view")
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccIpv6rangeRestartIfNeeded(view, "14::121", "14::130", true),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckIpv6rangeExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "restart_if_needed", "true"),
+				),
+			},
+		},
+	})
+}
+
+func testAccIpv6rangeEnableImmediateDiscovery(view, startAddr, endAddr string, enableImmediateDiscovery bool) string {
+	config := fmt.Sprintf(`
+resource "nios_dhcp_ipv6range" "test_enable_immediate_discovery" {
+	network = nios_ipam_ipv6network.test.network
+	start_addr = %q
+	end_addr = %q
+	network_view = nios_ipam_network_view.test.name
+	enable_immediate_discovery = %t
+}
+`, startAddr, endAddr, enableImmediateDiscovery)
+	return strings.Join([]string{testAccBaseWithIpv6NetworkandView(view), config}, "")
+}
+
+func testAccIpv6rangeRestartIfNeeded(view, startAddr, endAddr string, restartIfNeeded bool) string {
+	config := fmt.Sprintf(`
+resource "nios_dhcp_ipv6range" "test_restart_if_needed" {
+	network = nios_ipam_ipv6network.test.network
+	start_addr = %q
+	end_addr = %q
+	network_view = nios_ipam_network_view.test.name
+	restart_if_needed = %t
+}
+`, startAddr, endAddr, restartIfNeeded)
+	return strings.Join([]string{testAccBaseWithIpv6NetworkandView(view), config}, "")
 }
 
 func testAccBaseWithIpv6NetworkandView(view string) string {

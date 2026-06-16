@@ -156,6 +156,36 @@ func TestAccIpv6dhcpoptionspaceResource_Name(t *testing.T) {
 	})
 }
 
+func TestAccIpv6dhcpoptionspaceResource_OptionDefinitions(t *testing.T) {
+	resourceName := "nios_dhcp_ipv6optionspace.test_option_definitions"
+	var v dhcp.Ipv6dhcpoptionspace
+	optionSpace := acctest.RandomNameWithPrefix("option-space")
+	optionDefName := acctest.RandomNameWithPrefix("ipv6-option-definition")
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccIpv6dhcpoptionspaceOptionDefinitions(optionSpace, optionDefName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckIpv6dhcpoptionspaceExists(context.Background(), resourceName, &v),
+					testAccCheckIpv6dhcpoptionspaceHasOptionDefinitions(&v),
+				),
+			},
+		},
+	})
+}
+
+func testAccCheckIpv6dhcpoptionspaceHasOptionDefinitions(v *dhcp.Ipv6dhcpoptionspace) resource.TestCheckFunc {
+	return func(state *terraform.State) error {
+		if len(v.OptionDefinitions) == 0 {
+			return fmt.Errorf("expected option_definitions to contain at least one entry")
+		}
+		return nil
+	}
+}
+
 func testAccCheckIpv6dhcpoptionspaceExists(ctx context.Context, resourceName string, v *dhcp.Ipv6dhcpoptionspace) resource.TestCheckFunc {
 	// Verify the resource exists in the cloud
 	return func(state *terraform.State) error {
@@ -249,4 +279,20 @@ resource "nios_dhcp_ipv6optionspace" "test_name" {
     name = %q
 }
 `, enterpriseNumber, name)
+}
+
+func testAccIpv6dhcpoptionspaceOptionDefinitions(optionSpace, optionDefName string) string {
+	return fmt.Sprintf(`
+resource "nios_dhcp_ipv6optionspace" "test_option_definitions" {
+	enterprise_number = "5896"
+	name = %q
+}
+
+resource "nios_dhcp_ipv6optiondefinition" "test_option_definition" {
+	code = "211"
+	name = %q
+	type = "string"
+	space = nios_dhcp_ipv6optionspace.test_option_definitions.name
+}
+`, optionSpace, optionDefName)
 }

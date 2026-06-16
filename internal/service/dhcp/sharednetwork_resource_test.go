@@ -843,6 +843,28 @@ func TestAccSharednetworkResource_Networks(t *testing.T) {
 	})
 }
 
+func TestAccSharednetworkResource_NetworkView(t *testing.T) {
+	resourceName := "nios_dhcp_shared_network.test_network_view"
+	var v dhcp.Sharednetwork
+	name := acctest.RandomNameWithPrefix("shared_network")
+	networkView := acctest.RandomNameWithPrefix("network-view")
+	networks := []string{"${nios_ipam_network.test_network1.ref}", "${nios_ipam_network.test_network2.ref}"}
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccSharednetworkNetworkView(name, networkView, networks),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckSharednetworkExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "network_view", networkView),
+				),
+			},
+		},
+	})
+}
+
 func TestAccSharednetworkResource_Nextserver(t *testing.T) {
 	var resourceName = "nios_dhcp_shared_network.test_nextserver"
 	var v dhcp.Sharednetwork
@@ -2027,6 +2049,32 @@ resource "nios_dhcp_shared_network" "test_networks" {
 	network3and4Replace2 := strings.Replace(network3and4Replace1, "test_network2", "test_network4", 1)
 	return strings.Join([]string{testAccBaseWithNetworks(
 		"201.45.0.0/24", "201.46.0.0/24"), network3and4Replace2, config}, "\n")
+}
+
+func testAccSharednetworkNetworkView(name, networkView string, networks []string) string {
+	networksStr := formatNetworksToHCL(networks)
+	config := fmt.Sprintf(`
+resource "nios_ipam_network_view" "test_network_view" {
+	name = %q
+}
+
+resource "nios_ipam_network" "test_network1" {
+	network      = "202.101.0.0/24"
+	network_view = nios_ipam_network_view.test_network_view.name
+}
+
+resource "nios_ipam_network" "test_network2" {
+	network      = "202.102.0.0/24"
+	network_view = nios_ipam_network_view.test_network_view.name
+}
+
+resource "nios_dhcp_shared_network" "test_network_view" {
+	name = %q
+	network_view = nios_ipam_network_view.test_network_view.name
+	networks = %s
+}
+`, networkView, name, networksStr)
+	return config
 }
 
 func testAccSharednetworkNextserver(name string, networks []string, nextserver string, useNextserver bool) string {

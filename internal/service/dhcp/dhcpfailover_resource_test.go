@@ -550,6 +550,29 @@ func TestAccDhcpfailoverResource_MsSharedSecret(t *testing.T) {
 	})
 }
 
+func TestAccDhcpfailoverResource_MsFailoverPartner(t *testing.T) {
+	resourceName := "nios_dhcp_failover.test_ms_failover_partner"
+	var v dhcp.Dhcpfailover
+	dhcpfailoverName := acctest.RandomNameWithPrefix("failover")
+	primary := utils.GetNIOSGridMasterHostName()
+	secondary := utils.GetNIOSGridMemberHostName()
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		CheckDestroy:             testAccCheckDhcpfailoverDestroy(context.Background(), &v),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDhcpfailoverMsFailoverPartner(dhcpfailoverName, primary, secondary),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckDhcpfailoverExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "ms_failover_partner", ""),
+				),
+			},
+		},
+	})
+}
+
 func TestAccDhcpfailoverResource_MsSwitchoverInterval(t *testing.T) {
 	var resourceName = "nios_dhcp_failover.test_ms_switchover_interval"
 	var v dhcp.Dhcpfailover
@@ -1291,4 +1314,16 @@ resource "nios_dhcp_failover" "test_ms_shared_secret" {
 	%s
 }
 `, name, primary, secondary, primaryServerType, secondaryServerType, msSharedSecretValue)
+}
+
+func testAccDhcpfailoverMsFailoverPartner(name, primary, secondary string) string {
+	return fmt.Sprintf(`
+resource "nios_dhcp_failover" "test_ms_failover_partner" {
+	name = %q
+	primary = %q
+	secondary = %q
+	primary_server_type = "GRID"
+	secondary_server_type = "GRID"
+}
+`, name, primary, secondary)
 }

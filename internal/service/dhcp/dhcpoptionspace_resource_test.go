@@ -124,6 +124,36 @@ func TestAccDhcpoptionspaceResource_Name(t *testing.T) {
 	})
 }
 
+func TestAccDhcpoptionspaceResource_OptionDefinitions(t *testing.T) {
+	resourceName := "nios_dhcp_optionspace.test_option_definitions"
+	var v dhcp.Dhcpoptionspace
+	optionSpace := acctest.RandomNameWithPrefix("dhcp-option-space")
+	optionDefName := acctest.RandomNameWithPrefix("dhcp-option-definition")
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDhcpoptionspaceOptionDefinitions(optionSpace, optionDefName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckDhcpoptionspaceExists(context.Background(), resourceName, &v),
+					testAccCheckDhcpoptionspaceHasOptionDefinitions(&v),
+				),
+			},
+		},
+	})
+}
+
+func testAccCheckDhcpoptionspaceHasOptionDefinitions(v *dhcp.Dhcpoptionspace) resource.TestCheckFunc {
+	return func(state *terraform.State) error {
+		if len(v.OptionDefinitions) == 0 {
+			return fmt.Errorf("expected option_definitions to contain at least one entry")
+		}
+		return nil
+	}
+}
+
 func testAccCheckDhcpoptionspaceExists(ctx context.Context, resourceName string, v *dhcp.Dhcpoptionspace) resource.TestCheckFunc {
 	// Verify the resource exists in the cloud
 	return func(state *terraform.State) error {
@@ -205,4 +235,19 @@ resource "nios_dhcp_optionspace" "test_name" {
     name = %q
 }
 `, name)
+}
+
+func testAccDhcpoptionspaceOptionDefinitions(optionSpace, optionDefName string) string {
+	return fmt.Sprintf(`
+resource "nios_dhcp_optionspace" "test_option_definitions" {
+	name = %q
+}
+
+resource "nios_dhcp_optiondefinition" "test_option_definition" {
+	code = "210"
+	name = %q
+	type = "string"
+	space = nios_dhcp_optionspace.test_option_definitions.name
+}
+`, optionSpace, optionDefName)
 }

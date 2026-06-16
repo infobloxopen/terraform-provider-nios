@@ -4066,3 +4066,119 @@ resource "nios_dhcp_range" "test_use_update_dns_on_lease_renewal" {
 }
 `, startAddr, endAddr, useUpdateDnsOnLeaseRenewal)
 }
+
+func TestAccRangeResource_RestartIfNeeded(t *testing.T) {
+	resourceName := "nios_dhcp_range.test_restart_if_needed"
+	var v dhcp.Range
+	startAddr := "10.10.0.11"
+	endAddr := "10.10.0.12"
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccRangeRestartIfNeeded(startAddr, endAddr, true),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckRangeExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "restart_if_needed", "true"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccRangeResource_SplitMember(t *testing.T) {
+	t.Skip("requires preconfigured MS server association in grid; current environment reports unknown MS server")
+	resourceName := "nios_dhcp_range.test_split_member"
+	var v dhcp.Range
+	startAddr := "10.10.0.21"
+	endAddr := "10.10.0.40"
+	splitMember := utils.GetNIOSGridMemberHostName()
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccRangeSplitMember(startAddr, endAddr, splitMember),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckRangeExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "split_member.ipv4addr", splitMember),
+				),
+			},
+		},
+	})
+}
+
+func TestAccRangeResource_SplitScopeExclusionPercent(t *testing.T) {
+	t.Skip("requires preconfigured MS server association in grid; current environment reports unknown MS server")
+	resourceName := "nios_dhcp_range.test_split_scope_exclusion_percent"
+	var v dhcp.Range
+	startAddr := "10.10.0.41"
+	endAddr := "10.10.0.60"
+	splitMember := utils.GetNIOSGridMemberHostName()
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccRangeSplitScopeExclusionPercent(startAddr, endAddr, splitMember, 40),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckRangeExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "split_scope_exclusion_percent", "40"),
+				),
+			},
+		},
+	})
+}
+
+func testAccRangeRestartIfNeeded(startAddr, endAddr string, restartIfNeeded bool) string {
+	return fmt.Sprintf(`
+resource "nios_ipam_network" "test_restart_if_needed" {
+	network = "10.10.0.0/24"
+	network_view = "default"
+}
+
+resource "nios_dhcp_range" "test_restart_if_needed" {
+	start_addr = %q
+	end_addr = %q
+	restart_if_needed = %t
+	depends_on = [nios_ipam_network.test_restart_if_needed]
+}
+`, startAddr, endAddr, restartIfNeeded)
+}
+
+func testAccRangeSplitMember(startAddr, endAddr, splitMember string) string {
+	return fmt.Sprintf(`
+resource "nios_dhcp_range" "test_split_member" {
+	start_addr = %q
+	end_addr = %q
+	member = {
+		name = %q
+	}
+	server_association_type = "MEMBER"
+	split_member = {
+		ipv4addr = %q
+	}
+}
+`, startAddr, endAddr, splitMember, splitMember)
+}
+
+func testAccRangeSplitScopeExclusionPercent(startAddr, endAddr, splitMember string, splitScopeExclusionPercent int) string {
+	return fmt.Sprintf(`
+resource "nios_dhcp_range" "test_split_scope_exclusion_percent" {
+	start_addr = %q
+	end_addr = %q
+	member = {
+		name = %q
+	}
+	server_association_type = "MEMBER"
+	split_member = {
+		ipv4addr = %q
+	}
+	split_scope_exclusion_percent = %d
+}
+`, startAddr, endAddr, splitMember, splitMember, splitScopeExclusionPercent)
+}
