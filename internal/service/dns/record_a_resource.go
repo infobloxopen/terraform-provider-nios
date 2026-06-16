@@ -94,6 +94,7 @@ func (r *RecordAResource) Create(ctx context.Context, req resource.CreateRequest
 	// Add internal ID exists in the Extensible Attributes if not already present
 	data.ExtAttrs, diags = AddInternalIDToExtAttrs(ctx, data.ExtAttrs, diags)
 	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
 		return
 	}
 
@@ -145,7 +146,8 @@ func (r *RecordAResource) Create(ctx context.Context, req resource.CreateRequest
 	res := apiRes.CreateRecordAResponseAsObject.GetResult()
 	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.ExtAttrs)
 	if diags.HasError() {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while create RecordA due inherited Extensible attributes, got error: %s", err))
+		resp.Diagnostics.Append(diags...)
+		resp.Diagnostics.AddError("Client Error", "Error while creating RecordA due to inherited Extensible attributes")
 		return
 	}
 
@@ -228,6 +230,7 @@ func (r *RecordAResource) Read(ctx context.Context, req resource.ReadRequest, re
 			)
 			return
 		}
+
 		stateTerraformId := (*stateExtAttrs)[terraformInternalIDEA]
 		if apiTerraformId.Value != stateTerraformId.Value {
 			if r.ReadByExtAttrs(ctx, &data, resp) {
@@ -238,7 +241,8 @@ func (r *RecordAResource) Read(ctx context.Context, req resource.ReadRequest, re
 
 	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.ExtAttrs)
 	if diags.HasError() {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while reading RecordA due inherited Extensible attributes, got error: %s", diags))
+		resp.Diagnostics.Append(diags...)
+		resp.Diagnostics.AddError("Client Error", "Error while reading RecordA due to inherited Extensible attributes")
 		return
 	}
 
@@ -336,14 +340,14 @@ func (r *RecordAResource) Update(ctx context.Context, req resource.UpdateRequest
 	}
 
 	associateInternalId, diags := req.Private.GetKey(ctx, "associate_internal_id")
-	resp.Diagnostics.Append(diags...)
 	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
 		return
 	}
-
 	if associateInternalId != nil {
 		data.ExtAttrs, diags = AddInternalIDToExtAttrs(ctx, data.ExtAttrs, diags)
 		if diags.HasError() {
+			resp.Diagnostics.Append(diags...)
 			return
 		}
 	}
@@ -392,7 +396,8 @@ func (r *RecordAResource) Update(ctx context.Context, req resource.UpdateRequest
 
 	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, planExtAttrs, *res.ExtAttrs)
 	if diags.HasError() {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while update RecordA due inherited Extensible attributes, got error: %s", diags))
+		resp.Diagnostics.Append(diags...)
+		resp.Diagnostics.AddError("Client Error", "Error while updating RecordA due to inherited Extensible attributes")
 		return
 	}
 
@@ -403,7 +408,6 @@ func (r *RecordAResource) Update(ctx context.Context, req resource.UpdateRequest
 
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
-
 	if associateInternalId != nil {
 		resp.Diagnostics.Append(resp.Private.SetKey(ctx, "associate_internal_id", nil)...)
 	}
@@ -457,7 +461,7 @@ func (r *RecordAResource) UpdateFuncCallAttributeName(ctx context.Context, data 
 }
 
 func (r *RecordAResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	if req.Identity.Raw.IsKnown() {
+	if req.Identity != nil && req.Identity.Raw.IsKnown() && !req.Identity.Raw.IsNull() {
 		diags := req.Identity.GetAttribute(ctx, path.Root("ref"), &req.ID)
 		if diags.HasError() {
 			resp.Diagnostics.Append(diags...)

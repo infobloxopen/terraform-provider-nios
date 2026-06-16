@@ -146,7 +146,7 @@ func (r *MemberResource) Create(ctx context.Context, req resource.CreateRequest,
 
 	res := apiRes.CreateMemberResponseAsObject.GetResult()
 
-	if !data.PreProvisioning.IsUnknown() && !data.PreProvisioning.IsNull() || (!data.TrafficCaptureAuthDnsSetting.IsUnknown() && !data.TrafficCaptureAuthDnsSetting.IsNull()) {
+	if !data.PreProvisioning.IsUnknown() && !data.PreProvisioning.IsNull() || (!data.TrafficCaptureAuthDnsSetting.IsUnknown() && !data.TrafficCaptureAuthDnsSetting.IsNull()) || (!data.MemberServiceCommunication.IsUnknown() && !data.MemberServiceCommunication.IsNull()) {
 		apiRes2, _, err2 := r.client.GridAPI.
 			MemberAPI.
 			Update(ctx, utils.ExtractResourceRef(*res.Ref)).
@@ -555,6 +555,33 @@ func (r *MemberResource) ValidateConfig(ctx context.Context, req resource.Valida
 			} else {
 				mgmtCheckComplete = true
 			}
+		}
+		// enableHaFalse: true when enable_ha is null (defaults to false) or explicitly false.
+		// Skipped when enable_ha is unknown (value not yet determined at plan time).
+		enableHaFalse := data.EnableHa.IsNull() || (!data.EnableHa.IsUnknown() && !data.EnableHa.ValueBool())
+		// enableHaTrue: true only when enable_ha is explicitly set to true.
+		enableHaTrue := !data.EnableHa.IsNull() && !data.EnableHa.IsUnknown() && data.EnableHa.ValueBool()
+
+		nodeCount := len(nodeInfo)
+
+		// Condition 1: len(nodeInfo) == 2 requires enable_ha to be true
+		if nodeCount == 2 && enableHaFalse {
+			resp.Diagnostics.AddError("Validation Error", "enable_ha must be true when node_info has 2 nodes")
+		}
+
+		// Condition 2: enable_ha true requires exactly 2 nodes (not more)
+		if enableHaTrue && nodeCount > 2 {
+			resp.Diagnostics.AddError("Validation Error", "node_info must have exactly 2 nodes when enable_ha is true")
+		}
+
+		// Condition 3a: len(nodeInfo) > 2 with enable_ha false (or not set) is not allowed
+		if nodeCount > 2 && enableHaFalse {
+			resp.Diagnostics.AddError("Validation Error", "node_info cannot have more than 2 nodes when enable_ha is false")
+		}
+
+		// Condition 3b: len(nodeInfo) == 1 with enable_ha true is not allowed
+		if nodeCount == 1 && enableHaTrue {
+			resp.Diagnostics.AddError("Validation Error", "node_info must have exactly 2 nodes when enable_ha is true; a single node_info entry is not valid")
 		}
 	}
 
