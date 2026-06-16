@@ -173,16 +173,9 @@ func (l *VlanList) List(ctx context.Context, req list.ListRequest, stream *list.
 			// By default, list only returns the identity.
 			// If IncludeResource is true, it gets the full resource and sets it in the result.Resource
 			if req.IncludeResource {
-				var extAttrsAll types.Map
+
 				if item.ExtAttrs != nil {
-					item.ExtAttrs, extAttrsAll, diags = RemoveInheritedExtAttrs(ctx, extAttrsAll, *item.ExtAttrs)
-					result.Diagnostics.Append(result.Resource.SetAttribute(ctx, path.Root("extattrs_all"), extAttrsAll)...)
-					if result.Diagnostics.HasError() {
-						if !push(result) {
-							return
-						}
-						continue
-					}
+					delete(*item.ExtAttrs, terraformInternalIDEA)
 				}
 				result1 := FlattenVlan(ctx, &item, &result.Diagnostics)
 				result.Diagnostics.Append(result.Resource.Set(ctx, &result1)...)
