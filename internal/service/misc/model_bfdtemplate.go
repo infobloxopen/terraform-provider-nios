@@ -9,36 +9,38 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-
 	"github.com/infobloxopen/infoblox-nios-go-client/misc"
-
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
 type BfdtemplateModel struct {
-	Ref                 types.String `tfsdk:"ref"`
-	AuthenticationKey   types.String `tfsdk:"authentication_key"`
-	AuthenticationKeyId types.Int64  `tfsdk:"authentication_key_id"`
-	AuthenticationType  types.String `tfsdk:"authentication_type"`
-	DetectionMultiplier types.Int64  `tfsdk:"detection_multiplier"`
-	MinRxInterval       types.Int64  `tfsdk:"min_rx_interval"`
-	MinTxInterval       types.Int64  `tfsdk:"min_tx_interval"`
-	Name                types.String `tfsdk:"name"`
+	Ref                      types.String `tfsdk:"ref"`
+	AuthenticationKey        types.String `tfsdk:"authentication_key"`
+	AuthenticationKeyVersion types.Int64  `tfsdk:"authentication_key_version"`
+	AuthenticationKeyId      types.Int64  `tfsdk:"authentication_key_id"`
+	AuthenticationType       types.String `tfsdk:"authentication_type"`
+	DetectionMultiplier      types.Int64  `tfsdk:"detection_multiplier"`
+	MinRxInterval            types.Int64  `tfsdk:"min_rx_interval"`
+	MinTxInterval            types.Int64  `tfsdk:"min_tx_interval"`
+	Name                     types.String `tfsdk:"name"`
 }
 
 var BfdtemplateAttrTypes = map[string]attr.Type{
-	"ref":                   types.StringType,
-	"authentication_key":    types.StringType,
-	"authentication_key_id": types.Int64Type,
-	"authentication_type":   types.StringType,
-	"detection_multiplier":  types.Int64Type,
-	"min_rx_interval":       types.Int64Type,
-	"min_tx_interval":       types.Int64Type,
-	"name":                  types.StringType,
+	"ref":                        types.StringType,
+	"authentication_key":         types.StringType,
+	"authentication_key_version": types.Int64Type,
+	"authentication_key_id":      types.Int64Type,
+	"authentication_type":        types.StringType,
+	"detection_multiplier":       types.Int64Type,
+	"min_rx_interval":            types.Int64Type,
+	"min_tx_interval":            types.Int64Type,
+	"name":                       types.StringType,
 }
 
 var BfdtemplateResourceSchemaAttributes = map[string]schema.Attribute{
@@ -48,10 +50,15 @@ var BfdtemplateResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"authentication_key": schema.StringAttribute{
 		Optional:            true,
-		Computed:            true,
-		Sensitive:           true,
-		Default:             stringdefault.StaticString(""),
+		WriteOnly:           true,
 		MarkdownDescription: "The authentication key for BFD protocol message-digest authentication.",
+	},
+	"authentication_key_version": schema.Int64Attribute{
+		Computed:            true,
+		MarkdownDescription: "Internal version incremented when authentication_key field changes.",
+		PlanModifiers: []planmodifier.Int64{
+			int64planmodifier.UseStateForUnknown(),
+		},
 	},
 	"authentication_key_id": schema.Int64Attribute{
 		Optional: true,
