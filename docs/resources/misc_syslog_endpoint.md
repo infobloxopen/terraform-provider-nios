@@ -57,6 +57,8 @@ resource "nios_misc_syslog_endpoint" "syslogendpoint_2" {
 
 ### Optional
 
+> **NOTE**: [Write-only arguments](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments) are supported in Terraform 1.11 and later.
+
 - `extattrs` (Map of String) Extensible attributes associated with the object. For valid values for extensible attributes, see {extattrs:values}.
 - `log_level` (String) The log level for a notification REST endpoint.
 - `outbound_members` (List of String) The list of members for outbound events.
@@ -65,11 +67,12 @@ resource "nios_misc_syslog_endpoint" "syslogendpoint_2" {
 - `timeout` (Number) The timeout of session management (in seconds).
 - `vendor_identifier` (String) The vendor identifier.
 - `wapi_user_name` (String) The user name for WAPI integration.
-- `wapi_user_password` (String, Sensitive) The user password for WAPI integration.
+- `wapi_user_password` (String, [Write-only](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments)) The user password for WAPI integration.
 
 ### Read-Only
 
 - `extattrs_all` (Map of String) Extensible attributes associated with the object, including default attributes.
+- `password_version` (Number) Internal revision incremented when admin user password changes.
 - `ref` (String) The reference to the object.
 
 <a id="nestedatt--syslog_servers"></a>

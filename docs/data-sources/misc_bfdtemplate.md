@@ -46,7 +46,7 @@ Required:
 
 Optional:
 
-- `authentication_key` (String, Sensitive) The authentication key for BFD protocol message-digest authentication.
+- `authentication_key` (String) The authentication key for BFD protocol message-digest authentication.
 - `authentication_key_id` (Number) The authentication key identifier for BFD protocol authentication. Valid values are between 1 and 255.
 - `authentication_type` (String) The authentication type for BFD protocol.
 - `detection_multiplier` (Number) The detection time multiplier value for BFD protocol. The negotiated transmit interval, multiplied by this value, provides the detection time for the receiving system in asynchronous BFD mode. Valid values are between 3 and 50.
@@ -55,4 +55,5 @@ Optional:
 
 Read-Only:
 
+- `authentication_key_version` (Number) Internal version incremented when authentication_key field changes.
 - `ref` (String) The reference to the object.

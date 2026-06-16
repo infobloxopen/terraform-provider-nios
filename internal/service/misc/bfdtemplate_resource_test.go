@@ -66,6 +66,62 @@ func TestAccBfdtemplateResource_disappears(t *testing.T) {
 	})
 }
 
+func TestAccBfdtemplateResource_AuthenticationKey(t *testing.T) {
+	var resourceName = "nios_misc_bfdtemplate.test_authentication_key"
+	var v misc.Bfdtemplate
+	name := acctest.RandomNameWithPrefix("tf_test_bfd_")
+	authenticationKey := "key1234"
+	authenticationKey1 := "1234key"
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// Create and Read
+			{
+				Config: testAccBfdtemplateAuthenticationKey(name, nil),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckBfdtemplateExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "name", name),
+					// Test fields with default value
+					resource.TestCheckResourceAttr(resourceName, "authentication_type", "NONE"),
+					resource.TestCheckResourceAttr(resourceName, "detection_multiplier", "3"),
+					resource.TestCheckResourceAttr(resourceName, "min_rx_interval", "100"),
+					resource.TestCheckResourceAttr(resourceName, "min_tx_interval", "100"),
+					resource.TestCheckResourceAttr(resourceName, "authentication_key_version", "0"),
+				),
+			},
+			{
+				Config: testAccBfdtemplateAuthenticationKey(name, &authenticationKey),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckBfdtemplateExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "name", name),
+					// Test fields with default value
+					resource.TestCheckResourceAttr(resourceName, "authentication_type", "NONE"),
+					resource.TestCheckResourceAttr(resourceName, "detection_multiplier", "3"),
+					resource.TestCheckResourceAttr(resourceName, "min_rx_interval", "100"),
+					resource.TestCheckResourceAttr(resourceName, "min_tx_interval", "100"),
+					resource.TestCheckResourceAttr(resourceName, "authentication_key_version", "1"),
+				),
+			},
+			{
+				Config: testAccBfdtemplateAuthenticationKey(name, &authenticationKey1),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckBfdtemplateExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "name", name),
+					// Test fields with default value
+					resource.TestCheckResourceAttr(resourceName, "authentication_type", "NONE"),
+					resource.TestCheckResourceAttr(resourceName, "detection_multiplier", "3"),
+					resource.TestCheckResourceAttr(resourceName, "min_rx_interval", "100"),
+					resource.TestCheckResourceAttr(resourceName, "min_tx_interval", "100"),
+					resource.TestCheckResourceAttr(resourceName, "authentication_key_version", "2"),
+				),
+			},
+			// Delete testing automatically occurs in TestCase
+		},
+	})
+}
+
 func TestAccBfdtemplateResource_AuthenticationKeyId(t *testing.T) {
 	var resourceName = "nios_misc_bfdtemplate.test_authentication_key_id"
 	var v misc.Bfdtemplate
@@ -323,6 +379,19 @@ resource "nios_misc_bfdtemplate" "test" {
     name = %q
 }
 `, name)
+}
+
+func testAccBfdtemplateAuthenticationKey(name string, authenticationKey *string) string {
+	var authKey string
+	if authenticationKey != nil {
+		authKey = fmt.Sprintf("authentication_key = %q", *authenticationKey)
+	}
+	return fmt.Sprintf(`
+resource "nios_misc_bfdtemplate" "test_authentication_key" {
+    name = %q
+    %s
+}
+`, name, authKey)
 }
 
 func testAccBfdtemplateAuthenticationKeyId(name string, authenticationKeyId string, authenticationType string, authenticationKey string, minRxInterval int, minTxInterval int) string {
