@@ -1398,6 +1398,7 @@ resource "nios_ip_allocation" "test_cli_credentials" {
 	view = %q
 	ipv4addrs = %s
 	use_cli_credentials = true
+	use_snmp3_credential = true
 	cli_credentials = [
 		{
 			user            = %q
