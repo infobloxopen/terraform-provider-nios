@@ -773,16 +773,6 @@ resource "nios_dns_record_ptr" "test_use_ttl" {
 `, ipv6addr, ptrdname, view, useTtl, ttl)
 }
 
-func testAccRecordPtrView(ipv4addr, ptrdname, view string) string {
-	return fmt.Sprintf(`
-resource "nios_dns_record_ptr" "test_view" {
-	ipv4addr = %q
-	ptrdname = %q
-	view     = %q
-}
-`, ipv4addr, ptrdname, view)
-}
-
 func testAccRecordPtrViewUpdate(ipv4addr, ptrdname, view string) string {
 	return fmt.Sprintf(`
 resource "nios_dns_view" "test_dns_view" {

@@ -696,16 +696,6 @@ resource "nios_dns_record_aaaa" "test_use_ttl" {
 `, name, ipV6Addr, view, useTtl)
 }
 
-func testAccRecordAaaaView(name, ipV6Addr, view string) string {
-	return fmt.Sprintf(`
-resource "nios_dns_record_aaaa" "test_view" {
-	name     = %q
-	ipv6addr = %q
-	view     = %q
-}
-`, name, ipV6Addr, view)
-}
-
 func testAccRecordAaaaViewUpdate(name, ipV6Addr, view string) string {
 	return fmt.Sprintf(`
 resource "nios_dns_view" "test_dns_view" {

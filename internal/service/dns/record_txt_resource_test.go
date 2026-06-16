@@ -625,16 +625,6 @@ resource "nios_dns_record_txt" "test_use_ttl" {
 `, name, text, useTtl)
 }
 
-func testAccRecordTxtView(name, text, view string) string {
-	return fmt.Sprintf(`
-resource "nios_dns_record_txt" "test_view" {
-	name = %q
-	text = %q
-	view = %q
-}
-`, name, text, view)
-}
-
 func testAccRecordTxtViewUpdate(name, text, view string) string {
 	return fmt.Sprintf(`
 resource "nios_dns_view" "test_dns_view" {

@@ -653,16 +653,6 @@ resource "nios_dns_record_cname" "test_use_ttl" {
 `, canonical, name, view, useTtl)
 }
 
-func testAccRecordCnameView(canonical, name, view string) string {
-	return fmt.Sprintf(`
-resource "nios_dns_record_cname" "test_view" {
-	canonical = %q
-	name      = %q
-	view      = %q
-}
-`, canonical, name, view)
-}
-
 func testAccRecordCnameViewUpdate(canonical, name, view string) string {
 	return fmt.Sprintf(`
 resource "nios_dns_view" "test_dns_view" {

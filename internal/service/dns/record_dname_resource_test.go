@@ -690,17 +690,6 @@ resource "nios_dns_zone_auth" "updated_zone" {
 `, zoneFqdn1, zoneFqdn2)
 }
 
-func testAccRecordDnameView(target, zoneFqdn string) string {
-	config := fmt.Sprintf(`
-resource "nios_dns_record_dname" "test_view" {
-    name   = nios_dns_zone_auth.test.fqdn
-    target = %q
-	view   = nios_dns_zone_auth.test.view
-}
-`, target)
-	return strings.Join([]string{testAccBaseWithZone(zoneFqdn), config}, "")
-}
-
 func testAccRecordDnameViewUpdate(target, zoneFqdn, view string) string {
 	config := fmt.Sprintf(`
 resource "nios_dns_record_dname" "test_view" {

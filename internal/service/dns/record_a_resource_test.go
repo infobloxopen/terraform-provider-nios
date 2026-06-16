@@ -695,16 +695,6 @@ resource "nios_dns_record_a" "test_use_ttl" {
 `, name, ipV4Addr, view, useTtl)
 }
 
-func testAccRecordAView(name, ipV4Addr, view string) string {
-	return fmt.Sprintf(`
-resource "nios_dns_record_a" "test_view" {
-	name = %q
-	ipv4addr = %q
-	view = %q
-}
-`, name, ipV4Addr, view)
-}
-
 func testAccRecordAViewUpdate(name, ipV4Addr, view string) string {
 	return fmt.Sprintf(`
 resource "nios_dns_view" "test_dns_view" {

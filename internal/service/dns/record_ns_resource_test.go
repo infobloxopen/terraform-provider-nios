@@ -369,17 +369,6 @@ func FormatZoneNameServersToHCL(servers []map[string]any) string {
   ]`, strings.Join(serverBlocks, ",\n"))
 }
 
-func testAccRecordNsView(name, nameserver, addresses, view string) string {
-	return fmt.Sprintf(`
-resource "nios_dns_record_ns" "test_view" {
-    name        = %q
-    nameserver  = %q
-    addresses   = %s
-    view        = %q
-}
-`, name, nameserver, addresses, view)
-}
-
 func testAccRecordNsViewUpdate(name, nameserver, addresses, view string) string {
 	return fmt.Sprintf(`
 resource "nios_dns_view" "test_dns_view" {

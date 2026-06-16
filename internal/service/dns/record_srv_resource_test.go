@@ -796,19 +796,6 @@ resource "nios_dns_record_srv" "test_weight" {
 `, name, target, port, priority, weight)
 }
 
-func testAccRecordSrvView(name, target string, port, priority, weight int, view string) string {
-	return fmt.Sprintf(`
-resource "nios_dns_record_srv" "test_view" {
-	name = %q
-	target = %q
-	port = %d
-	priority = %d
-	weight = %d
-	view = %q
-}
-`, name, target, port, priority, weight, view)
-}
-
 func testAccRecordSrvViewUpdate(name, target string, port, priority, weight int, view string) string {
 	return fmt.Sprintf(`
 resource "nios_dns_view" "test_dns_view" {
