@@ -145,7 +145,7 @@ var IPAllocationResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The CLI credentials for the host record.",
 		Validators: []validator.List{
 			listvalidator.SizeAtLeast(1),
-			listvalidator.AlsoRequires(path.MatchRoot("use_cli_credentials")),
+			listvalidator.AlsoRequires(path.MatchRoot("use_snmp3_credential")),
 		},
 	},
 	"cloud_info": schema.SingleNestedAttribute{

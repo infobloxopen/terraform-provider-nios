@@ -1915,8 +1915,7 @@ func TestAccFixedaddressResource_UseSnmpCredential(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config:             testAccFixedaddressUseSnmpCredential(ip, "CIRCUIT_ID", agentCircuitID, "false"),
-				ExpectNonEmptyPlan: true,
+				Config: testAccFixedaddressUseSnmpCredential(ip, "CIRCUIT_ID", agentCircuitID, "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_snmp_credential", "false"),
