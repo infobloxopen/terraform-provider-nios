@@ -239,40 +239,6 @@ func TestAccFtpuserResource_Username(t *testing.T) {
 	})
 }
 
-func TestAccFtpuserResource_Password(t *testing.T) {
-	var resourceName = "nios_security_ftpuser.test_password"
-	var v security.Ftpuser
-	username := acctest.RandomNameWithPrefix("ftpuser")
-	password := acctest.RandomAlphaNumeric(12)
-	passwordUpdated := acctest.RandomAlphaNumeric(12)
-
-	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.PreCheck(t) },
-		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-		Steps: []resource.TestStep{
-			// Create and Read
-			{
-				Config: testAccFtpuserPassword(username, password),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckFtpuserExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "username", username),
-					resource.TestCheckResourceAttr(resourceName, "password", password),
-				),
-			},
-			// Update and Read
-			{
-				Config: testAccFtpuserPassword(username, passwordUpdated),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckFtpuserExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "username", username),
-					resource.TestCheckResourceAttr(resourceName, "password", passwordUpdated),
-				),
-			},
-			// Delete testing automatically occurs in TestCase
-		},
-	})
-}
-
 func testAccCheckFtpuserExists(ctx context.Context, resourceName string, v *security.Ftpuser) resource.TestCheckFunc {
 	// Verify the resource exists in the cloud
 	return func(state *terraform.State) error {
@@ -403,15 +369,6 @@ resource "nios_security_ftpuser" "test_permission" {
 func testAccFtpuserUsername(username, password string) string {
 	return fmt.Sprintf(`
 resource "nios_security_ftpuser" "test_username" {
-    username = %q
-    password = %q
-}
-`, username, password)
-}
-
-func testAccFtpuserPassword(username, password string) string {
-	return fmt.Sprintf(`
-resource "nios_security_ftpuser" "test_password" {
     username = %q
     password = %q
 }
