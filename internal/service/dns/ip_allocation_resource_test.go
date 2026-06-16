@@ -164,7 +164,7 @@ func TestAccIPAllocationResource_CliCredentials(t *testing.T) {
 	name := acctest.RandomName() + ".example.com"
 	ipv4addr := []map[string]any{
 		{
-			"ipv4addr": "192.168.1.200",
+			"ipv4addr": "192.168.1.10",
 		},
 	}
 
@@ -1634,7 +1634,7 @@ resource "nios_ip_allocation" "test_snmp_credential" {
 		comment = %q
 		credential_group = %q
 	}
-	use_snmp_credential = %q
+	use_snmp_credential = %s
 }
 `, name, view, ipv4addrHCL, snmpCredentialCommStr, snmpCredentialComment, snmpCredentialGroup, useSnmpCredentials)
 }
@@ -1689,7 +1689,7 @@ resource "nios_ip_allocation" "test_use_snmp3_credential" {
 		privacy_protocol = %q
 		privacy_password = %q
 	}
-	use_snmp3_credential = %q
+	use_snmp3_credential = %s
 	use_cli_credentials = true
 }
 `, name, ipv4addrStr, user, authProtocol, authPassword, privProtocol, privPassword, useSnmp3Credential)
@@ -1701,7 +1701,7 @@ func testAccIPAllocationUseSnmp3CredentialOnly(name string, ipv4addr []map[strin
 resource "nios_ip_allocation" "test_use_snmp3_credential" {
 	name = %q
 	ipv4addrs = %s
-	use_snmp3_credential = %q
+	use_snmp3_credential = %s
 }
 `, name, ipv4addrStr, useSnmp3Credential)
 }
@@ -1713,7 +1713,7 @@ resource "nios_ip_allocation" "test_use_snmp_credential" {
 	name = %q
 	view = %q
 	ipv4addrs = %s
-	use_snmp_credential = %q
+	use_snmp_credential = %s
 	snmp_credential = {
 		community_string = %q
 		comment = %q
@@ -1730,7 +1730,7 @@ resource "nios_ip_allocation" "test_use_snmp_credential" {
 	name = %q
 	view = %q
 	ipv4addrs = %s
-	use_snmp_credential = %q
+	use_snmp_credential = %s
 }
 `, name, view, ipv4addrHCL, useSnmpCredential)
 }

@@ -767,6 +767,9 @@ func TestAccFixedaddressResource_EnableDdns(t *testing.T) {
 }
 
 func TestAccFixedaddressResource_EnableImmediateDiscovery(t *testing.T) {
+	if utils.GetNIOSDiscoveryMemberHostName() == "" {
+		t.Skip("Discovery Member is Required to run this test")
+	}
 	var resourceName = "nios_dhcp_fixed_address.test_enable_immediate_discovery"
 	var v dhcp.Fixedaddress
 	ip := "15.0.0.23"
@@ -2583,7 +2586,7 @@ resource "nios_dhcp_fixed_address" "test_snmp_credential" {
 		comment = %q
 		credential_group = %q
 	}
-	use_snmp_credential = %q
+	use_snmp_credential = %s
 }
 `, ip, matchClient, agentCircuitID, snmpCredentialCommStr, snmpCredentialComment, snmpCredentialGroup, useSnmpCredentials)
 }
@@ -2776,7 +2779,7 @@ resource "nios_dhcp_fixed_address" "test_use_snmp_credential" {
 	ipv4addr = %q
 	match_client = %q
 	agent_circuit_id = %d
-	use_snmp_credential = %q
+	use_snmp_credential = %s
 	snmp_credential = {
 		community_string = %q
 		comment = %q
@@ -2792,7 +2795,7 @@ resource "nios_dhcp_fixed_address" "test_use_snmp_credential" {
 	ipv4addr = %q
 	match_client = %q
 	agent_circuit_id = %d
-	use_snmp_credential = %q
+	use_snmp_credential = %s
 }
 `, ip, matchClient, agentCircuitID, useSnmpCredential)
 }

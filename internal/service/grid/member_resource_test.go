@@ -1361,7 +1361,7 @@ func TestAccMemberResource_Ipv6StaticRoutes(t *testing.T) {
 	var v grid.Member
 	hostName := fmt.Sprintf("infoblox-%s.localdomain", acctest.RandomName())
 	vipAddress := "172.28.39.122"
-	vipAddress6 := fmt.Sprintf("2001::%x", acctest.RandomNumber(65535))
+	vipAddress6 := fmt.Sprintf("2001::%x", acctest.RandomNumber(65534)+2)
 	networkSettingAddress := fmt.Sprintf("2001:db8:%x:%x::", acctest.RandomNumber(65535), acctest.RandomNumber(65535))
 	ipv6StaticRoutesVal := []map[string]any{
 		{

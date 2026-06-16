@@ -231,7 +231,6 @@ func (m *MemberOspfListModel) Flatten(ctx context.Context, from *grid.MemberOspf
 	}
 	m.AreaId = flex.FlattenStringPointer(from.AreaId)
 	m.AreaType = flex.FlattenStringPointer(from.AreaType)
-	m.AuthenticationKey = flex.FlattenStringPointer(from.AuthenticationKey)
 	m.AuthenticationType = flex.FlattenStringPointer(from.AuthenticationType)
 	m.AutoCalcCostEnabled = types.BoolPointerValue(from.AutoCalcCostEnabled)
 	m.Comment = flex.FlattenStringPointer(from.Comment)
