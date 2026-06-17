@@ -175,13 +175,19 @@ func (r *MemberResource) ModifyPlan(ctx context.Context, req resource.ModifyPlan
 		return
 	}
 
-	bkpServersHash := hashPasswords(ctx, data.ExternalSyslogBackupServers, &resp.Diagnostics,
+	var configData MemberModel
+	resp.Diagnostics.Append(req.Config.Get(ctx, &configData)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	bkpServersHash := hashPasswords(ctx, configData.ExternalSyslogBackupServers, &resp.Diagnostics,
 		func(m MemberExternalSyslogBackupServersModel) types.String { return m.Password })
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	lomUsersHash := hashPasswords(ctx, data.LomUsers, &resp.Diagnostics,
+	lomUsersHash := hashPasswords(ctx, configData.LomUsers, &resp.Diagnostics,
 		func(m MemberLomUsersModel) types.String { return m.Password })
 	if resp.Diagnostics.HasError() {
 		return
@@ -296,6 +302,7 @@ func (r *MemberResource) Create(ctx context.Context, req resource.CreateRequest,
 	}
 
 	var passwordVersion types.Int64
+	emptyPwd := ""
 	var bkpServers []MemberExternalSyslogBackupServersModel
 	resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("external_syslog_backup_servers"), &bkpServers)...)
 	if resp.Diagnostics.HasError() {
@@ -307,7 +314,7 @@ func (r *MemberResource) Create(ctx context.Context, req resource.CreateRequest,
 			break
 		}
 		if server.Password.IsNull() || server.Password.IsUnknown() {
-			continue
+			payload.ExternalSyslogBackupServers[i].Password = &emptyPwd
 		}
 
 		password := server.Password.ValueString()
@@ -325,7 +332,7 @@ func (r *MemberResource) Create(ctx context.Context, req resource.CreateRequest,
 			break
 		}
 		if user.Password.IsNull() || user.Password.IsUnknown() {
-			continue
+			payload.LomUsers[i].Password = &emptyPwd
 		}
 
 		password := user.Password.ValueString()
@@ -389,28 +396,40 @@ func (r *MemberResource) Create(ctx context.Context, req resource.CreateRequest,
 		resp.Diagnostics.AddError("Client Error", "Error while creating Member due to inherited Extensible attributes")
 		return
 	}
-	bkpServersHash := hashPasswords(ctx, data.ExternalSyslogBackupServers, &resp.Diagnostics,
-		func(m MemberExternalSyslogBackupServersModel) types.String { return m.Password })
+	var configData MemberModel
+	resp.Diagnostics.Append(req.Config.Get(ctx, &configData)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	lomUsersHash := hashPasswords(ctx, data.LomUsers, &resp.Diagnostics,
+	bkpServersHash := hashPasswords(ctx, configData.ExternalSyslogBackupServers, &resp.Diagnostics,
+		func(m MemberExternalSyslogBackupServersModel) types.String { return m.Password })
+
+	lomUsersHash := hashPasswords(ctx, configData.LomUsers, &resp.Diagnostics,
 		func(m MemberLomUsersModel) types.String { return m.Password })
-	if resp.Diagnostics.HasError() {
-		return
-	}
 	plannedHashes := memberPasswordsHashState{BkpServersPwd: bkpServersHash, LomUsersPwd: lomUsersHash}
 
 	if hasPasswordHashes(plannedHashes) {
 		passwordVersion = types.Int64Value(1)
 
-		hashSecretsJson, err := json.Marshal(plannedHashes)
-		if err != nil {
-			resp.Diagnostics.AddError("error marshalling password hashes", err.Error())
+		newHashToStore := marshalSecretsHashState(plannedHashes, &resp.Diagnostics)
+		if resp.Diagnostics.HasError() {
 			return
 		}
-		resp.Diagnostics.Append(resp.Private.SetKey(ctx, "password_hash", hashSecretsJson)...)
+
+		val := map[string]string{
+			"algo": "sha256",
+			"hash": newHashToStore,
+		}
+		b, err := json.Marshal(val)
+		if err != nil {
+			resp.Diagnostics.AddError("error marshalling secrets hash", err.Error())
+			return
+		}
+		resp.Diagnostics.Append(resp.Private.SetKey(ctx, "password_hash", b)...)
+	} else {
+		passwordVersion = types.Int64Value(0)
+		resp.Diagnostics.Append(resp.Private.SetKey(ctx, "password_hash", nil)...)
 	}
 	data.PasswordVersion = passwordVersion
 

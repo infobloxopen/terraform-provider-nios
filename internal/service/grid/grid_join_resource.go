@@ -7,8 +7,10 @@ import (
 	"io"
 	"strings"
 
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
@@ -69,9 +71,13 @@ func (r *GridJoinResource) Create(ctx context.Context, req resource.CreateReques
 		return
 	}
 
+	var memberPassword, sharedSecret types.String
+	resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("member_password"), &memberPassword)...)
+	resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("shared_secret"), &sharedSecret)...)
+
 	memberClient := niosclient.NewAPIClient(
 		option.WithNIOSUsername(data.MemberUsername.ValueString()),
-		option.WithNIOSPassword(data.MemberPassword.ValueString()),
+		option.WithNIOSPassword(memberPassword.ValueString()),
 		option.WithNIOSHostUrl(data.MemberURL.ValueString()),
 		option.WithDebug(true),
 	)
@@ -79,7 +85,7 @@ func (r *GridJoinResource) Create(ctx context.Context, req resource.CreateReques
 	joinReq := gridclient.GridJoin{
 		GridName:     data.GridName.ValueStringPointer(),
 		Master:       data.Master.ValueStringPointer(),
-		SharedSecret: data.SharedSecret.ValueStringPointer(),
+		SharedSecret: sharedSecret.ValueStringPointer(),
 	}
 
 	_, httpResp, err := memberClient.GridAPI.
