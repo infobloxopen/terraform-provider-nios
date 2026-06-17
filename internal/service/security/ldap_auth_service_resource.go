@@ -167,14 +167,13 @@ func (r *LdapAuthServiceResource) Create(ctx context.Context, req resource.Creat
 
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
-
-	// Read from Config separately — only to extract write-only bind_password from servers
-	var configData LdapAuthServiceModel
-	resp.Diagnostics.Append(req.Config.Get(ctx, &configData)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
+	// Read from Config separately — only to extract write-only fields
+	var configData LdapAuthServiceModel
+	resp.Diagnostics.Append(req.Config.Get(ctx, &configData)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}

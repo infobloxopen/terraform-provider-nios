@@ -167,16 +167,17 @@ func (r *TacacsplusAuthserviceResource) Create(ctx context.Context, req resource
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
 
-	// Read from Config separately — only to extract write-only shared_secret from servers
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	// Read from Config separately — only to extract write-only fields
 	var configData TacacsplusAuthserviceModel
 	resp.Diagnostics.Append(req.Config.Get(ctx, &configData)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	if resp.Diagnostics.HasError() {
-		return
-	}
 
 	payload := data.Expand(ctx, &resp.Diagnostics)
 	if resp.Diagnostics.HasError() {

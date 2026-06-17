@@ -167,17 +167,16 @@ func (r *RadiusAuthserviceResource) Create(ctx context.Context, req resource.Cre
 
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
 
-	// Read from Config separately — only to extract write-only shared_secret from servers
+	// Read from Config separately — only to extract write-only fields
     var configData RadiusAuthserviceModel
     resp.Diagnostics.Append(req.Config.Get(ctx, &configData)...)
     if resp.Diagnostics.HasError() {
         return
     }
-
-	if resp.Diagnostics.HasError() {
-		return
-	}
 
 	payload := data.Expand(ctx, &resp.Diagnostics)
 	if resp.Diagnostics.HasError() {
