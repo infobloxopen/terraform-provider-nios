@@ -172,11 +172,11 @@ func (r *RadiusAuthserviceResource) Create(ctx context.Context, req resource.Cre
 	}
 
 	// Read from Config separately — only to extract write-only fields
-    var configData RadiusAuthserviceModel
-    resp.Diagnostics.Append(req.Config.Get(ctx, &configData)...)
-    if resp.Diagnostics.HasError() {
-        return
-    }
+	var configData RadiusAuthserviceModel
+	resp.Diagnostics.Append(req.Config.Get(ctx, &configData)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
 
 	payload := data.Expand(ctx, &resp.Diagnostics)
 	if resp.Diagnostics.HasError() {
@@ -324,12 +324,12 @@ func (r *RadiusAuthserviceResource) Update(ctx context.Context, req resource.Upd
 		return
 	}
 
-	 // Read from Config separately — only to extract write-only shared_secret from servers
-    var configData RadiusAuthserviceModel
-    resp.Diagnostics.Append(req.Config.Get(ctx, &configData)...)
-    if resp.Diagnostics.HasError() {
-        return
-    }
+	// Read from Config separately — only to extract write-only shared_secret from servers
+	var configData RadiusAuthserviceModel
+	resp.Diagnostics.Append(req.Config.Get(ctx, &configData)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
 
 	diags = req.State.GetAttribute(ctx, path.Root("ref"), &data.Ref)
 	if diags.HasError() {
