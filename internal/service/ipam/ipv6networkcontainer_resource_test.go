@@ -1685,10 +1685,6 @@ func TestAccIpv6networkcontainerResource_RirOrganizationAction(t *testing.T) {
 	})
 }
 
-func TestAccIpv6networkcontainerResource_ZoneAssociations(t *testing.T) {
-	t.Skip("Provider bug: nios_dns_zone_auth Read fails with 'data failed to match schemas in oneOf(GetZoneAuthResponse)'")
-}
-
 func TestAccIpv6networkcontainerResource_MappedEAAttributes(t *testing.T) {
 	if utils.GetNIOSPxgridEndpointRef() == "" {
 		t.Skip("Skipping: NIOS_PXGRID_ENDPOINT_REF not set. A configured pxGrid/ISE endpoint is required.")

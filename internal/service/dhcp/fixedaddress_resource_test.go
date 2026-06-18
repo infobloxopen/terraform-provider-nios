@@ -24,7 +24,6 @@ import (
 //TODO : add tests
 // The following require additional resource/data source objects to be supported.
 // - Reserved Interface  (skipped: requires discovery:deviceinterface objects present on the grid)
-// - Network             (not done: test IPs are hardcoded to 15.0.0.x / 16.0.0.x; a nios_ipam_network resource should be used to allocate IPs dynamically)
 
 //TODO : OBJECTS TO BE PRESENT IN GRID FOR TESTS
 // - Network View - default , test_fixed_address
