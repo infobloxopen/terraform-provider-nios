@@ -48,3 +48,5 @@ pipeline.env
 .env
 
 Jenkinsfile
+providers-schema.json
+providers-schema-hashicorp.json
