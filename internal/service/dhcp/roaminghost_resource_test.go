@@ -967,6 +967,27 @@ func TestAccRoaminghostResource_Ipv6Options(t *testing.T) {
 	})
 }
 
+func TestAccRoaminghostResource_Ipv6Template(t *testing.T) {
+	resourceName := "nios_dhcp_roaminghost.test_ipv6_template"
+	var v dhcp.Roaminghost
+	name := acctest.RandomNameWithPrefix("roaminghost")
+	ipv6TemplateName := acctest.RandomNameWithPrefix("ipv6-fa-template")
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccRoaminghostIpv6Template(name, ipv6TemplateName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckRoaminghostExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "ipv6_template", ipv6TemplateName),
+				),
+			},
+		},
+	})
+}
+
 func TestAccRoaminghostResource_Mac(t *testing.T) {
 	var resourceName = "nios_dhcp_roaminghost.test_mac"
 	var v dhcp.Roaminghost
@@ -1227,6 +1248,28 @@ func TestAccRoaminghostResource_PxeLeaseTime(t *testing.T) {
 				),
 			},
 			// Delete testing automatically occurs in TestCase
+		},
+	})
+}
+
+func TestAccRoaminghostResource_Template(t *testing.T) {
+	resourceName := "nios_dhcp_roaminghost.test_template"
+	var v dhcp.Roaminghost
+	name := acctest.RandomNameWithPrefix("roaminghost")
+	mac := acctest.RandomMACAddress()
+	templateName := acctest.RandomNameWithPrefix("fa-template")
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccRoaminghostTemplate(name, mac, templateName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckRoaminghostExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "template", templateName),
+				),
+			},
 		},
 	})
 }
@@ -2190,6 +2233,22 @@ resource "nios_dhcp_roaminghost" "test_ipv6_options" {
 `, name, mac, addressType, matchClient, ipv6OptionsStr)
 }
 
+func testAccRoaminghostIpv6Template(name, ipv6TemplateName string) string {
+	return fmt.Sprintf(`
+resource "nios_dhcp_ipv6fixedaddresstemplate" "test_ipv6_template" {
+	name = %q
+}
+
+resource "nios_dhcp_roaminghost" "test_ipv6_template" {
+	name = %q
+	address_type = "IPV6"
+	ipv6_match_option = "DUID"
+	ipv6_duid = "03:03:01:01:00:90:7f:97:ad:95"
+	ipv6_template = nios_dhcp_ipv6fixedaddresstemplate.test_ipv6_template.name
+}
+`, ipv6TemplateName, name)
+}
+
 func testAccRoaminghostMac(name string, mac string, addressType string, matchClient string) string {
 	return fmt.Sprintf(`
 resource "nios_dhcp_roaminghost" "test_mac" {
@@ -2297,6 +2356,22 @@ resource "nios_dhcp_roaminghost" "test_pxe_lease_time" {
     use_pxe_lease_time = true
 }
 `, name, mac, addressType, matchClient, pxeLeaseTime)
+}
+
+func testAccRoaminghostTemplate(name, mac, templateName string) string {
+	return fmt.Sprintf(`
+resource "nios_dhcp_fixedaddresstemplate" "test_template" {
+	name = %q
+}
+
+resource "nios_dhcp_roaminghost" "test_template" {
+	name = %q
+	mac = %q
+	address_type = "IPV4"
+	match_client = "MAC_ADDRESS"
+	template = nios_dhcp_fixedaddresstemplate.test_template.name
+}
+`, templateName, name, mac)
 }
 
 func testAccRoaminghostUseBootfile(name string, mac string, addressType string, matchClient string, useBootfile string) string {

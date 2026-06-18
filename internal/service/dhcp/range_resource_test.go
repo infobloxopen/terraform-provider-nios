@@ -2181,6 +2181,27 @@ func TestAccRangeResource_SubscribeSettings(t *testing.T) {
 	})
 }
 
+func TestAccRangeResource_Template(t *testing.T) {
+	resourceName := "nios_dhcp_range.test_template"
+	var v dhcp.Range
+	startAddr := "10.10.50.61"
+	endAddr := "10.10.50.70"
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccRangeTemplate(startAddr, endAddr),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckRangeExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "template", ""),
+				),
+			},
+		},
+	})
+}
+
 func TestAccRangeResource_UnknownClients(t *testing.T) {
 	var resourceName = "nios_dhcp_range.test_unknown_clients"
 	var v dhcp.Range
@@ -4181,4 +4202,19 @@ resource "nios_dhcp_range" "test_split_scope_exclusion_percent" {
 	split_scope_exclusion_percent = %d
 }
 `, startAddr, endAddr, splitMember, splitMember, splitScopeExclusionPercent)
+}
+
+func testAccRangeTemplate(startAddr, endAddr string) string {
+	return fmt.Sprintf(`
+resource "nios_ipam_network" "test_template" {
+	network = "10.10.50.0/24"
+	network_view = "default"
+}
+
+resource "nios_dhcp_range" "test_template" {
+	start_addr = %q
+	end_addr = %q
+	depends_on = [nios_ipam_network.test_template]
+}
+`, startAddr, endAddr)
 }
