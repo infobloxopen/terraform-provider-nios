@@ -163,8 +163,15 @@ func (r *TacacsplusAuthserviceResource) Create(ctx context.Context, req resource
 	var data TacacsplusAuthserviceModel
 
 	// Read Terraform plan data into the model
-	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
+	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
 
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	// Read from Config separately — only to extract write-only fields
+	var configData TacacsplusAuthserviceModel
+	resp.Diagnostics.Append(req.Config.Get(ctx, &configData)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
@@ -177,7 +184,7 @@ func (r *TacacsplusAuthserviceResource) Create(ctx context.Context, req resource
 	secretVersion := types.Int64Value(0)
 	secretData := tacacsplusAuthserviceSecretsHashState{}
 
-	servers, diags := extractTacacsServers(ctx, data.Servers)
+	servers, diags := extractTacacsServers(ctx, configData.Servers)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -273,13 +280,16 @@ func (r *TacacsplusAuthserviceResource) Update(ctx context.Context, req resource
 	var plannedSecretVersion types.Int64
 
 	// Read Terraform plan data into the model
-	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
+	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
 	resp.Diagnostics.Append(req.Plan.GetAttribute(ctx, path.Root("secret_version"), &plannedSecretVersion)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
 	payload := data.Expand(ctx, &resp.Diagnostics)
+	// Read from Config separately — only to extract write-only shared_secret from servers
+	var configData TacacsplusAuthserviceModel
+	resp.Diagnostics.Append(req.Config.Get(ctx, &configData)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
@@ -296,7 +306,7 @@ func (r *TacacsplusAuthserviceResource) Update(ctx context.Context, req resource
 		return
 	}
 
-	servers, diags := extractTacacsServers(ctx, data.Servers)
+	servers, diags := extractTacacsServers(ctx, configData.Servers)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
