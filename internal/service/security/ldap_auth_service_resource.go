@@ -166,8 +166,14 @@ func (r *LdapAuthServiceResource) Create(ctx context.Context, req resource.Creat
 	var data LdapAuthServiceModel
 
 	// Read Terraform plan data into the model
-	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
+	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
 
+	// Read from Config separately — only to extract write-only fields
+	var configData LdapAuthServiceModel
+	resp.Diagnostics.Append(req.Config.Get(ctx, &configData)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
@@ -180,7 +186,7 @@ func (r *LdapAuthServiceResource) Create(ctx context.Context, req resource.Creat
 	passwordVersion := types.Int64Value(0)
 	secretData := serversBindPasswordHashState{}
 
-	servers, diags := extractLdapServers(ctx, data.Servers)
+	servers, diags := extractLdapServers(ctx, configData.Servers)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -312,9 +318,15 @@ func (r *LdapAuthServiceResource) Update(ctx context.Context, req resource.Updat
 	var passwordVersion types.Int64
 
 	// Read Terraform plan data into the model
-	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
+	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
 	resp.Diagnostics.Append(req.Plan.GetAttribute(ctx, path.Root("password_version"), &passwordVersion)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
 
+	// Read from Config separately — only to extract write-only bind_password from servers
+	var configData LdapAuthServiceModel
+	resp.Diagnostics.Append(req.Config.Get(ctx, &configData)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
@@ -330,7 +342,7 @@ func (r *LdapAuthServiceResource) Update(ctx context.Context, req resource.Updat
 		return
 	}
 
-	servers, diags := extractLdapServers(ctx, data.Servers)
+	servers, diags := extractLdapServers(ctx, configData.Servers)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
