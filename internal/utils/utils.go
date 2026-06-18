@@ -886,19 +886,6 @@ func ReorderAndFilterDHCPOptions(
 	return newList, &diags
 }
 
-func ProviderSetup() string {
-	return `
-	terraform {
-	  required_providers {
-		nios = {
-		  source  = "registry.terraform.io/infobloxopen/nios"
-		  version = "1.1.0"
-		}
-	  }
-	}
-`
-}
-
 // IsObjectNotFoundErr checks if a NIOS API error indicates the object was not found.
 // Some NIOS object types return 400 Bad Request instead of 404 when the object doesn't exist.
 func IsObjectNotFoundErr(statusCode int, err error) bool {

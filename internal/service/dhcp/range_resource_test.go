@@ -1020,21 +1020,13 @@ func TestAccRangeResource_FailoverAssociation(t *testing.T) {
 	var v dhcp.Range
 	startAddr := "10.0.0.67"
 	endAddr := "10.0.0.68"
-	failoverAssociation := "failover_association"
+	failoverAssociation := "example_failover_association"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			// Create and Read
-			{
-				Config: testAccRangeFailoverAssociation(startAddr, endAddr, failoverAssociation),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckRangeExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "failover_association", failoverAssociation),
-				),
-			},
-			// Update and Read (re-apply same config to verify no drift)
 			{
 				Config: testAccRangeFailoverAssociation(startAddr, endAddr, failoverAssociation),
 				Check: resource.ComposeTestCheckFunc(

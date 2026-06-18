@@ -167,6 +167,18 @@ func TestAccIPAllocationResource_CliCredentials(t *testing.T) {
 			"ipv4addr": "192.168.1.10",
 		},
 	}
+	cliCred := []map[string]any{{
+		"user":            "cliuser1",
+		"password":        "clipass1",
+		"credential_type": "SSH",
+		"comment":         "test cli cred",
+	}}
+	cliCredUpdated := []map[string]any{{
+		"user":            "cliuser2",
+		"password":        "clipass2",
+		"credential_type": "SSH",
+		"comment":         "updated cli cred",
+	}}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -174,7 +186,7 @@ func TestAccIPAllocationResource_CliCredentials(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create a resource without cli_credentials and Read
 			{
-				Config: testAccIPAllocationCliCredentials(name, "default", ipv4addr, "cliuser1", "clipass1", "SSH", "test cli cred"),
+				Config: testAccIPAllocationCliCredentials(name, "default", ipv4addr, cliCred),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIPAllocationExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "cli_credentials.#", "1"),
@@ -186,7 +198,7 @@ func TestAccIPAllocationResource_CliCredentials(t *testing.T) {
 			},
 			// Add cli_credentials and Read
 			{
-				Config: testAccIPAllocationCliCredentials(name, "default", ipv4addr, "cliuser2", "clipass2", "SSH", "updated cli cred"),
+				Config: testAccIPAllocationCliCredentials(name, "default", ipv4addr, cliCredUpdated),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIPAllocationExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "cli_credentials.#", "1"),
@@ -1390,8 +1402,9 @@ resource "nios_ip_allocation" "test_allow_telnet" {
 `, name, view, ipv4addrHCL, allowTelnet)
 }
 
-func testAccIPAllocationCliCredentials(name, view string, ipv4addr []map[string]any, user, password, credentialType, comment string) string {
+func testAccIPAllocationCliCredentials(name, view string, ipv4addr []map[string]any, cliCred []map[string]any) string {
 	ipv4addrHCL := utils.ConvertSliceOfMapsToHCL(ipv4addr)
+	cliCredHCL := utils.ConvertSliceOfMapsToHCL(cliCred)
 	return fmt.Sprintf(`
 resource "nios_ip_allocation" "test_cli_credentials" {
 	name = %q
@@ -1399,16 +1412,9 @@ resource "nios_ip_allocation" "test_cli_credentials" {
 	ipv4addrs = %s
 	use_cli_credentials = true
 	use_snmp3_credential = true
-	cli_credentials = [
-		{
-			user            = %q
-			password        = %q
-			credential_type = %q
-			comment         = %q
-		}
-	]
+	cli_credentials = %s
 }
-`, name, view, ipv4addrHCL, user, password, credentialType, comment)
+`, name, view, ipv4addrHCL, cliCredHCL)
 }
 
 func testAccIPAllocationCloudInfo(name, view string, ipv4addr []map[string]any) string {
