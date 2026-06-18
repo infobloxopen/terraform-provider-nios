@@ -1015,6 +1015,7 @@ func TestAccRangeResource_EnableImmediateDiscovery(t *testing.T) {
 }
 
 func TestAccRangeResource_FailoverAssociation(t *testing.T) {
+	t.Skip("Requires non-grid master candidate to be in discovery polling mode")
 	var resourceName = "nios_dhcp_range.test_failover_association"
 	var v dhcp.Range
 	startAddr := "10.0.0.67"
