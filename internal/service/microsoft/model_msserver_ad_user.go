@@ -59,7 +59,8 @@ var MsserverAdUserResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"login_password": schema.StringAttribute{
 		Optional:            true,
-		WriteOnly:           true,
+		Computed:            true,
+		Sensitive:           true,
 		MarkdownDescription: "The login password of the DHCP Microsoft Server.",
 	},
 	"enable_user_sync": schema.BoolAttribute{
@@ -175,6 +176,7 @@ func (m *MsserverAdUserModel) Flatten(ctx context.Context, from *microsoft.Msser
 		*m = MsserverAdUserModel{}
 	}
 	m.LoginName = flex.FlattenStringPointer(from.LoginName)
+	m.LoginPassword = flex.FlattenStringPointer(from.LoginPassword)
 	m.EnableUserSync = types.BoolPointerValue(from.EnableUserSync)
 	m.SynchronizationInterval = flex.FlattenInt64Pointer(from.SynchronizationInterval)
 	m.LastSyncTime = flex.FlattenInt64Pointer(from.LastSyncTime)

@@ -113,10 +113,12 @@ var MsserverResourceSchemaAttributes = map[string]schema.Attribute{
 	"ad_sites": schema.SingleNestedAttribute{
 		Attributes: MsserverAdSitesResourceSchemaAttributes,
 		Optional:   true,
+		Computed:   true,
 	},
 	"ad_user": schema.SingleNestedAttribute{
 		Attributes: MsserverAdUserResourceSchemaAttributes,
 		Optional:   true,
+		Computed:   true,
 	},
 	"address": schema.StringAttribute{
 		Required: true,
@@ -146,6 +148,7 @@ var MsserverResourceSchemaAttributes = map[string]schema.Attribute{
 	"dhcp_server": schema.SingleNestedAttribute{
 		Attributes: MsserverDhcpServerResourceSchemaAttributes,
 		Optional:   true,
+		Computed:   true,
 	},
 	"disabled": schema.BoolAttribute{
 		Optional:            true,
@@ -156,6 +159,7 @@ var MsserverResourceSchemaAttributes = map[string]schema.Attribute{
 	"dns_server": schema.SingleNestedAttribute{
 		Attributes: MsserverDnsServerResourceSchemaAttributes,
 		Optional:   true,
+		Computed:   true,
 	},
 	"dns_view": schema.StringAttribute{
 		Optional: true,
@@ -289,10 +293,9 @@ var MsserverResourceSchemaAttributes = map[string]schema.Attribute{
 			importmod.AssociateInternalId(),
 		},
 	},
-	// A computed trigger to cause an in-place Update when secrets change.
 	"password_version": schema.Int64Attribute{
 		Computed:            true,
-		MarkdownDescription: "Internal version incremented when any/all of the passwords (ad_sites.password, ad_user.password, dhcp_server.password, dns_server.password, loginpassword) change.",
+		MarkdownDescription: "Internal revision incremented when login_password changes.",
 		PlanModifiers: []planmodifier.Int64{
 			int64planmodifier.UseStateForUnknown(),
 		},
@@ -362,7 +365,7 @@ func (m *MsserverModel) Flatten(ctx context.Context, from *microsoft.Msserver, d
 	m.DnsServer = FlattenMsserverDnsServer(ctx, from.DnsServer, diags)
 	m.DnsView = flex.FlattenStringPointer(from.DnsView)
 	m.ExtAttrs = FlattenExtAttrs(ctx, m.ExtAttrs, from.ExtAttrs, diags)
-	m.GridMember = flex.FlattenStringPointer(from.GridMember)
+	m.GridMember = flex.FlattenStringPointerNilAsNotEmpty(from.GridMember)
 	m.LastSeen = flex.FlattenInt64Pointer(from.LastSeen)
 	m.LogDestination = flex.FlattenStringPointer(from.LogDestination)
 	m.LogLevel = flex.FlattenStringPointer(from.LogLevel)

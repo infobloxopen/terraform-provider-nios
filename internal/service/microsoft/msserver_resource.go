@@ -2,6 +2,8 @@ package microsoft
 
 import (
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -27,7 +29,6 @@ var readableAttributesForMsserver = "ad_domain,ad_sites,ad_user,address,comment,
 var _ resource.Resource = &MsserverResource{}
 var _ resource.ResourceWithImportState = &MsserverResource{}
 var _ resource.ResourceWithValidateConfig = &MsserverResource{}
-var _ resource.ResourceWithModifyPlan = &MsserverResource{}
 
 func NewMsserverResource() resource.Resource {
 	return &MsserverResource{}
@@ -69,25 +70,8 @@ func (r *MsserverResource) Configure(ctx context.Context, req resource.Configure
 	r.client = client
 }
 
-type msServerHashState struct {
-	AdSitePwd     string `json:"ad_site_pwd_hash"`
-	AdUserPwd     string `json:"ad_user_pwd_hash"`
-	DhcpServerPwd string `json:"dhcp_server_pwd_hash"`
-	DnsServerPwd  string `json:"dns_server_pwd_hash"`
-	LoginPwd      string `json:"login_pwd_hash"`
-}
-
-func hasPasswords(state msServerHashState) bool {
-	return state.AdSitePwd != "" || state.AdUserPwd != "" || state.DhcpServerPwd != "" || state.DnsServerPwd != "" || state.LoginPwd != ""
-}
-
-func marshalMsServerPasswordState(state msServerHashState, diags *diag.Diagnostics) string {
-	data, err := json.Marshal(state)
-	if err != nil {
-		diags.AddError("error marshalling password hash", err.Error())
-		return ""
-	}
-	return string(data)
+type secretsHashState struct {
+	Password string `json:"password_hash"`
 }
 
 func (r *MsserverResource) ModifyPlan(ctx context.Context, req resource.ModifyPlanRequest, resp *resource.ModifyPlanResponse) {
@@ -96,101 +80,83 @@ func (r *MsserverResource) ModifyPlan(ctx context.Context, req resource.ModifyPl
 	}
 
 	var statePwdVersion types.Int64
-	var adSitePwd, adUserPwd, dhcpServerPwd, dnsServerPwd, loginPwd types.String
+	var planPassword types.String
 
-	resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("ad_sites").AtName("login_password"), &adSitePwd)...)
-	resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("ad_user").AtName("login_password"), &adUserPwd)...)
-	resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("dhcp_server").AtName("login_password"), &dhcpServerPwd)...)
-	resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("dns_server").AtName("login_password"), &dnsServerPwd)...)
-	resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("login_password"), &loginPwd)...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-
+	// Normalize stateRev if null (e.g., first apply)
 	curRev := int64(0)
-	if !statePwdVersion.IsNull() && !statePwdVersion.IsUnknown() {
-		curRev = statePwdVersion.ValueInt64()
-	}
 
-	var prevEnvelope struct {
-		Algo string `json:"algo"`
-		Hash string `json:"hash"`
-	}
-	if b, diags := req.Private.GetKey(ctx, "password_hash"); diags != nil {
-		resp.Diagnostics.Append(diags...)
+	if !req.State.Raw.IsNull() && req.State.Raw.IsKnown() {
+		resp.Diagnostics.Append(req.State.GetAttribute(ctx, path.Root("password_version"), &statePwdVersion)...)
 		if resp.Diagnostics.HasError() {
 			return
 		}
-	} else if b != nil {
-		if err := json.Unmarshal(b, &prevEnvelope); err != nil {
-			prevEnvelope.Hash = ""
+		if !statePwdVersion.IsNull() && !statePwdVersion.IsUnknown() {
+			curRev = statePwdVersion.ValueInt64()
 		}
 	}
-
-	prevHashes := msServerHashState{}
-	if prevEnvelope.Hash != "" {
-		if err := json.Unmarshal([]byte(prevEnvelope.Hash), &prevHashes); err != nil {
-			prevHashes = msServerHashState{}
-		}
-	}
-
-	plannedHashes := prevHashes
-
-	isPasswordPresent(loginPwd, &plannedHashes)
-	isPasswordPresent(adSitePwd, &plannedHashes)
-	isPasswordPresent(adUserPwd, &plannedHashes)
-	isPasswordPresent(dhcpServerPwd, &plannedHashes)
-	isPasswordPresent(dnsServerPwd, &plannedHashes)
-
-	prevHasPasswords := hasPasswords(prevHashes)
-	plannedHasPasswords := hasPasswords(plannedHashes)
-	passwordsChanged := plannedHashes != prevHashes
-
-	bump := false
-	newHashToStore := prevEnvelope.Hash
-
-	switch {
-
-	case !plannedHasPasswords && prevHasPasswords:
-		bump = true
-		newHashToStore = ""
-
-	case plannedHasPasswords && (prevHashes == msServerHashState{} || passwordsChanged):
-		bump = true
-		newHashToStore = marshalMsServerPasswordState(plannedHashes, &resp.Diagnostics)
-	}
+	resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("login_password"), &planPassword)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	if bump {
+	// computeNewHash := !planPassword.IsUnknown()
+
+	prevHashes := secretsHashState{}
+	plannedHashes := secretsHashState{}
+
+	// if computeNewHash {
+
+	var prev struct {
+		Algo string `json:"algo"`
+		Hash string `json:"hash"`
+	}
+
+	if b, diags := req.Private.GetKey(ctx, "password_hash"); diags != nil {
+		resp.Diagnostics.Append(diags...)
+	} else if b != nil {
+		if err := json.Unmarshal(b, &prev); err != nil {
+			// Older buggy format: ignore and treat as different
+			prev.Hash = ""
+		}
+	}
+	var plannedHash string
+
+	if prev.Hash != "" {
+		// Best-effort parse; if this fails, treat prev.Hash as a legacy value and
+		// leave prevHashes at its zero value so that we will recompute as needed.
+		_ = json.Unmarshal([]byte(prev.Hash), &prevHashes)
+	}
+
+	if !planPassword.IsUnknown() {
+		if planPassword.IsNull() {
+			plannedHashes.Password = ""
+		} else {
+			h := sha256.New()
+			h.Write([]byte(planPassword.ValueString()))
+			plannedHashes.Password = hex.EncodeToString(h.Sum(nil))
+		}
+	}
+	if data, err := json.Marshal(plannedHashes); err == nil {
+		plannedHash = string(data)
+	}
+
+	if plannedHashes.Password != prevHashes.Password {
+		// Increment revision and store new hash if password modified
 		newRev := types.Int64Value(curRev + 1)
 		resp.Diagnostics.Append(resp.Plan.SetAttribute(ctx, path.Root("password_version"), newRev)...)
 
-		val := map[string]string{
-			"algo": "sha256",
-			"hash": newHashToStore,
-		}
+		val := map[string]string{"algo": "sha256", "hash": plannedHash}
 		b, err := json.Marshal(val)
 		if err != nil {
-			resp.Diagnostics.AddError("error marshalling password hash", err.Error())
+			resp.Diagnostics.AddError("Private State Marshal Error", err.Error())
 			return
 		}
 		resp.Diagnostics.Append(resp.Private.SetKey(ctx, "password_hash", b)...)
-		return
-	}
-
-	resp.Diagnostics.Append(
-		resp.Plan.SetAttribute(ctx, path.Root("password_version"), types.Int64Value(curRev))...,
-	)
-}
-
-func isPasswordPresent(password types.String, plannedHashes *msServerHashState) {
-	if password.IsNull() && !password.IsUnknown() {
-		plannedHashes.LoginPwd = password.ValueString()
 	} else {
-		plannedHashes.LoginPwd = ""
+		resp.Diagnostics.Append(resp.Plan.SetAttribute(ctx, path.Root("password_version"), curRev)...)
 	}
+	// }
+
 }
 
 func (r *MsserverResource) ValidateConfig(ctx context.Context, req resource.ValidateConfigRequest, resp *resource.ValidateConfigResponse) {
@@ -302,17 +268,6 @@ func (r *MsserverResource) Create(ctx context.Context, req resource.CreateReques
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	var passwordVersion types.Int64
-	var adSitePwd, adUserPwd, dhcpServerPwd, dnsServerPwd, loginPwd types.String
-
-	resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("ad_sites").AtName("login_password"), &adSitePwd)...)
-	resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("ad_user").AtName("login_password"), &adUserPwd)...)
-	resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("dhcp_server").AtName("login_password"), &dhcpServerPwd)...)
-	resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("dns_server").AtName("login_password"), &dnsServerPwd)...)
-	resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("login_password"), &loginPwd)...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
 
 	// Add internal ID exists in the Extensible Attributes if not already present
 	data.ExtAttrs, diags = AddInternalIDToExtAttrs(ctx, data.ExtAttrs, diags)
@@ -326,20 +281,30 @@ func (r *MsserverResource) Create(ctx context.Context, req resource.CreateReques
 		return
 	}
 
-	plannedHashes := msServerHashState{}
-	isPasswordPresent(adSitePwd, &plannedHashes)
-	isPasswordPresent(adUserPwd, &plannedHashes)
-	isPasswordPresent(dhcpServerPwd, &plannedHashes)
-	isPasswordPresent(dnsServerPwd, &plannedHashes)
-	isPasswordPresent(loginPwd, &plannedHashes)
-
-	*payload.AdSites.LoginPassword = adSitePwd.ValueString()
-	*payload.AdUser.LoginPassword = adUserPwd.ValueString()
-	*payload.DhcpServer.LoginPassword = dhcpServerPwd.ValueString()
-	*payload.DnsServer.LoginPassword = dnsServerPwd.ValueString()
-	*payload.LoginPassword = loginPwd.ValueString()
-
 	var apiRes *microsoft.CreateMsserverResponse
+	passwordVersion := types.Int64Value(0)
+	var password types.String
+	resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("login_password"), &password)...)
+
+	secretData := secretsHashState{}
+
+	if !password.IsNull() && !password.IsUnknown() {
+
+		payload.LoginPassword = password.ValueStringPointer()
+		passwordVersion = types.Int64Value(1)
+		h := sha256.New()
+		h.Write([]byte(password.ValueString()))
+		secretData.Password = hex.EncodeToString(h.Sum(nil))
+
+		secretDataJSON, _ := json.Marshal(secretData)
+		val := map[string]string{"algo": "sha256", "hash": string(secretDataJSON)}
+		hashedPassword, err := json.Marshal(val)
+		if err != nil {
+			resp.Diagnostics.AddError("Private State Marshal Error", err.Error())
+			return
+		}
+		resp.Diagnostics.Append(resp.Private.SetKey(ctx, "password_hash", hashedPassword)...)
+	}
 
 	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
 		var (
@@ -379,28 +344,6 @@ func (r *MsserverResource) Create(ctx context.Context, req resource.CreateReques
 		resp.Diagnostics.Append(diags...)
 		resp.Diagnostics.AddError("Client Error", "Error while creating Msserver due to inherited Extensible attributes")
 		return
-	}
-
-	if hasPasswords(plannedHashes) {
-		passwordVersion = types.Int64Value(1)
-
-		passwordJson := marshalMsServerPasswordState(plannedHashes, &resp.Diagnostics)
-		if resp.Diagnostics.HasError() {
-			return
-		}
-		val := map[string]string{
-			"algo": "sha256",
-			"hash": passwordJson,
-		}
-		b, err := json.Marshal(val)
-		if err != nil {
-			resp.Diagnostics.AddError("error marshalling password hash", err.Error())
-			return
-		}
-		resp.Diagnostics.Append(resp.Private.SetKey(ctx, "password_hash", b)...)
-	} else {
-		passwordVersion = types.Int64Value(0)
-		resp.Diagnostics.Append(resp.Private.SetKey(ctx, "password_hash", nil)...)
 	}
 
 	data.PasswordVersion = passwordVersion
@@ -564,16 +507,6 @@ func (r *MsserverResource) Update(ctx context.Context, req resource.UpdateReques
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	var adSitePwd, adUserPwd, dhcpServerPwd, dnsServerPwd, loginPwd types.String
-
-	resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("ad_sites").AtName("login_password"), &adSitePwd)...)
-	resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("ad_user").AtName("login_password"), &adUserPwd)...)
-	resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("dhcp_server").AtName("login_password"), &dhcpServerPwd)...)
-	resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("dns_server").AtName("login_password"), &dnsServerPwd)...)
-	resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("login_password"), &loginPwd)...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
 
 	planExtAttrs := data.ExtAttrs
 	diags = req.State.GetAttribute(ctx, path.Root("ref"), &data.Ref)
@@ -607,24 +540,19 @@ func (r *MsserverResource) Update(ctx context.Context, req resource.UpdateReques
 		resp.Diagnostics.Append(diags...)
 		return
 	}
+	var password types.String
+	resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("login_password"), &password)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
 
 	payload := data.Expand(ctx, &resp.Diagnostics)
 	if resp.Diagnostics.HasError() {
 		return
 	}
-
-	plannedHashes := msServerHashState{}
-	isPasswordPresent(adSitePwd, &plannedHashes)
-	isPasswordPresent(adUserPwd, &plannedHashes)
-	isPasswordPresent(dhcpServerPwd, &plannedHashes)
-	isPasswordPresent(dnsServerPwd, &plannedHashes)
-	isPasswordPresent(loginPwd, &plannedHashes)
-
-	*payload.AdSites.LoginPassword = adSitePwd.ValueString()
-	*payload.AdUser.LoginPassword = adUserPwd.ValueString()
-	*payload.DhcpServer.LoginPassword = dhcpServerPwd.ValueString()
-	*payload.DnsServer.LoginPassword = dnsServerPwd.ValueString()
-	*payload.LoginPassword = loginPwd.ValueString()
+	if !password.IsNull() && !password.IsUnknown() {
+		payload.LoginPassword = password.ValueStringPointer()
+	}
 
 	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
 
@@ -661,25 +589,6 @@ func (r *MsserverResource) Update(ctx context.Context, req resource.UpdateReques
 		resp.Diagnostics.Append(diags...)
 		resp.Diagnostics.AddError("Client Error", "Error while updating Msserver due to inherited Extensible attributes")
 		return
-	}
-
-	if hasPasswords(plannedHashes) {
-		passwordJson := marshalMsServerPasswordState(plannedHashes, &resp.Diagnostics)
-		if resp.Diagnostics.HasError() {
-			return
-		}
-		val := map[string]string{
-			"algo": "sha256",
-			"hash": passwordJson,
-		}
-		b, err := json.Marshal(val)
-		if err != nil {
-			resp.Diagnostics.AddError("error marshalling password hash", err.Error())
-			return
-		}
-		resp.Diagnostics.Append(resp.Private.SetKey(ctx, "password_hash", b)...)
-	} else {
-		resp.Diagnostics.Append(resp.Private.SetKey(ctx, "password_hash", nil)...)
 	}
 
 	data.Flatten(ctx, &res, &resp.Diagnostics)
