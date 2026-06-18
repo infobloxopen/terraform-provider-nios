@@ -7,6 +7,7 @@ import (
 	"math/rand"
 	"net/http"
 	"testing"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
@@ -2746,7 +2747,8 @@ func TestAccNetworkcontainerResource_LogicFilterRules(t *testing.T) {
 func TestAccNetworkcontainerResource_RemoveSubnets(t *testing.T) {
 	var resourceName = "nios_ipam_network_container.test_remove_subnets"
 	var v ipam.Networkcontainer
-	secondOctet := rand.Intn(256)
+	r := rand.New(rand.NewSource(time.Now().UnixNano()))
+	secondOctet := r.Intn(256)
 	parentNetwork := fmt.Sprintf("10.%d.0.0/16", secondOctet)
 	childNetwork := fmt.Sprintf("10.%d.0.0/24", secondOctet)
 
