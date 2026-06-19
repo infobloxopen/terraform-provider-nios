@@ -315,10 +315,10 @@ func (r *MemberResource) Create(ctx context.Context, req resource.CreateRequest,
 		}
 		if server.Password.IsNull() || server.Password.IsUnknown() {
 			payload.ExternalSyslogBackupServers[i].Password = &emptyPwd
+		} else {
+			password := server.Password.ValueString()
+			payload.ExternalSyslogBackupServers[i].Password = &password
 		}
-
-		password := server.Password.ValueString()
-		payload.ExternalSyslogBackupServers[i].Password = &password
 	}
 
 	var lomUsers []MemberLomUsersModel
@@ -333,10 +333,10 @@ func (r *MemberResource) Create(ctx context.Context, req resource.CreateRequest,
 		}
 		if user.Password.IsNull() || user.Password.IsUnknown() {
 			payload.LomUsers[i].Password = &emptyPwd
+		} else {
+			password := user.Password.ValueString()
+			payload.LomUsers[i].Password = &password
 		}
-
-		password := user.Password.ValueString()
-		payload.LomUsers[i].Password = &password
 	}
 
 	var apiRes *grid.CreateMemberResponse

@@ -74,6 +74,9 @@ func (r *GridJoinResource) Create(ctx context.Context, req resource.CreateReques
 	var memberPassword, sharedSecret types.String
 	resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("member_password"), &memberPassword)...)
 	resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("shared_secret"), &sharedSecret)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
 
 	memberClient := niosclient.NewAPIClient(
 		option.WithNIOSUsername(data.MemberUsername.ValueString()),

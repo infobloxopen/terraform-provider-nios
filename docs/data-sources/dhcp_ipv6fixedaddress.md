@@ -164,16 +164,16 @@ Optional:
 
 Required:
 
-- `authentication_password` (String) Authentication password for the SNMPv3 user.
 - `authentication_protocol` (String) Authentication protocol for the SNMPv3 user.
-- `privacy_password` (String) Privacy password for the SNMPv3 user.
 - `privacy_protocol` (String) Privacy protocol for the SNMPv3 user.
 - `user` (String) The SNMPv3 user name.
 
 Optional:
 
+- `authentication_password` (String) Authentication password for the SNMPv3 user.
 - `comment` (String) Comments for the SNMPv3 user.
 - `credential_group` (String) Group for the SNMPv3 credential.
+- `privacy_password` (String) Privacy password for the SNMPv3 user.
 
 
 <a id="nestedatt--result--snmp_credential"></a>

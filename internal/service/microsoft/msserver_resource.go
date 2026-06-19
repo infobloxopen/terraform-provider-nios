@@ -99,12 +99,8 @@ func (r *MsserverResource) ModifyPlan(ctx context.Context, req resource.ModifyPl
 		return
 	}
 
-	// computeNewHash := !planPassword.IsUnknown()
-
 	prevHashes := secretsHashState{}
 	plannedHashes := secretsHashState{}
-
-	// if computeNewHash {
 
 	var prev struct {
 		Algo string `json:"algo"`
@@ -155,7 +151,6 @@ func (r *MsserverResource) ModifyPlan(ctx context.Context, req resource.ModifyPl
 	} else {
 		resp.Diagnostics.Append(resp.Plan.SetAttribute(ctx, path.Root("password_version"), curRev)...)
 	}
-	// }
 
 }
 

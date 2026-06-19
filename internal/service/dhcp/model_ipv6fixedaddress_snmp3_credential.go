@@ -53,7 +53,7 @@ var Ipv6fixedaddressSnmp3CredentialResourceSchemaAttributes = map[string]schema.
 		MarkdownDescription: "Authentication protocol for the SNMPv3 user.",
 	},
 	"authentication_password": schema.StringAttribute{
-		Required:  true,
+		Optional:  true,
 		WriteOnly: true,
 		Validators: []validator.String{
 			customvalidator.ValidateTrimmedString(),
@@ -68,7 +68,7 @@ var Ipv6fixedaddressSnmp3CredentialResourceSchemaAttributes = map[string]schema.
 		MarkdownDescription: "Privacy protocol for the SNMPv3 user.",
 	},
 	"privacy_password": schema.StringAttribute{
-		Required:  true,
+		Optional:  true,
 		WriteOnly: true,
 		Validators: []validator.String{
 			customvalidator.ValidateTrimmedString(),
