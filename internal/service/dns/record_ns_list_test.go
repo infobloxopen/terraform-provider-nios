@@ -134,9 +134,8 @@ list "nios_dns_record_ns" "test" {
 	config {
 		filters = {
 			name = %q
-			nameserver = %q
 		}
 	}
 }
-`, name, nameserver)
+`, name)
 }
