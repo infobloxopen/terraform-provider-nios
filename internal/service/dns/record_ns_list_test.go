@@ -91,13 +91,14 @@ func TestAccRecordNsList_Filters(t *testing.T) {
 			{
 				ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 				Query:                    true,
-				Config:                   testAccRecordNsListConfigFilters(name),
+				Config:                   testAccRecordNsListConfigFilters(name, nameserver),
 				QueryResultChecks: []querycheck.QueryResultCheck{
 					querycheck.ExpectLengthAtLeast("nios_dns_record_ns.test", 1),
 					querycheck.ExpectResourceKnownValues(
 						resourceName,
 						queryfilter.ByResourceIdentity(map[string]knownvalue.Check{
-							"ref": knownvalue.StringRegexp(regexp.MustCompile("record:ns/")),
+							"ref":        knownvalue.StringRegexp(regexp.MustCompile("record:ns/")),
+							"nameserver": knownvalue.StringExact(nameserver),
 						}),
 						[]querycheck.KnownValueCheck{
 							{
@@ -125,7 +126,7 @@ list "nios_dns_record_ns" "test" {
 `
 }
 
-func testAccRecordNsListConfigFilters(name string) string {
+func testAccRecordNsListConfigFilters(name, nameserver string) string {
 	return fmt.Sprintf(`
 list "nios_dns_record_ns" "test" {
 	provider = nios
@@ -133,8 +134,9 @@ list "nios_dns_record_ns" "test" {
 	config {
 		filters = {
 			name = %q
+			nameserver = %q
 		}
 	}
 }
-`, name)
+`, name, nameserver)
 }
