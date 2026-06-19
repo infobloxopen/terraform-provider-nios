@@ -144,14 +144,12 @@ func (m *SnmpuserModel) Expand(ctx context.Context, diags *diag.Diagnostics) *se
 		return nil
 	}
 	to := &security.Snmpuser{
-		// AuthenticationPassword: flex.ExpandStringPointer(m.AuthenticationPassword),
 		AuthenticationProtocol: flex.ExpandStringPointer(m.AuthenticationProtocol),
 		Comment:                flex.ExpandStringPointer(m.Comment),
 		Disable:                flex.ExpandBoolPointer(m.Disable),
 		ExtAttrs:               ExpandExtAttrs(ctx, m.ExtAttrs, diags),
 		Name:                   flex.ExpandStringPointer(m.Name),
-		// PrivacyPassword:        flex.ExpandStringPointer(m.PrivacyPassword),
-		PrivacyProtocol: flex.ExpandStringPointer(m.PrivacyProtocol),
+		PrivacyProtocol:        flex.ExpandStringPointer(m.PrivacyProtocol),
 	}
 	return to
 }
