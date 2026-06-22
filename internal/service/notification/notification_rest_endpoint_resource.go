@@ -112,7 +112,7 @@ func (r *NotificationRestEndpointResource) ModifyPlan(ctx context.Context, req r
 	}
 
 	prevHashes := notificationRestEndpointHashState{}
-	plannedHashes := notificationRestEndpointHashState{}
+	plannedHashes := prevHashes
 
 	var prev struct {
 		Algo string `json:"algo"`
@@ -135,21 +135,14 @@ func (r *NotificationRestEndpointResource) ModifyPlan(ctx context.Context, req r
 		_ = json.Unmarshal([]byte(prev.Hash), &prevHashes)
 	}
 
-	if !password.IsUnknown() {
-		if password.IsNull() {
-			plannedHashes.Password = ""
-		} else {
-			plannedHashes.Password = hashString(password.ValueString())
-		}
+	if !password.IsUnknown() && !password.IsNull() {
+		plannedHashes.Password = hashString(password.ValueString())
 	}
 
-	if !wapiUserPassword.IsUnknown() {
-		if wapiUserPassword.IsNull() {
-			plannedHashes.WapiUserPassword = ""
-		} else {
-			plannedHashes.WapiUserPassword = hashString(wapiUserPassword.ValueString())
-		}
+	if !wapiUserPassword.IsUnknown() && !wapiUserPassword.IsNull() {
+		plannedHashes.WapiUserPassword = hashString(wapiUserPassword.ValueString())
 	}
+
 	if data, err := json.Marshal(plannedHashes); err != nil {
 		resp.Diagnostics.AddError("Private State Marshal Error", err.Error())
 		return

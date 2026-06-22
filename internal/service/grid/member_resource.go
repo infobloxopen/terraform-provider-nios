@@ -141,7 +141,9 @@ func (r *MemberResource) ModifyPlan(ctx context.Context, req resource.ModifyPlan
 	)
 
 	resp.Diagnostics.Append(req.Plan.GetAttribute(ctx, path.Root("external_syslog_backup_servers"), &bkpServers)...)
-	resp.Diagnostics.Append(req.State.GetAttribute(ctx, path.Root("password_version"), &statePwdVersion)...)
+	if !req.State.Raw.IsNull() && req.State.Raw.IsKnown() {
+		resp.Diagnostics.Append(req.State.GetAttribute(ctx, path.Root("password_version"), &statePwdVersion)...)
+	}
 	resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("lom_users"), &lomUsers)...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -302,7 +304,6 @@ func (r *MemberResource) Create(ctx context.Context, req resource.CreateRequest,
 	}
 
 	var passwordVersion types.Int64
-	emptyPwd := ""
 	var bkpServers []MemberExternalSyslogBackupServersModel
 	resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("external_syslog_backup_servers"), &bkpServers)...)
 	if resp.Diagnostics.HasError() {
@@ -313,9 +314,7 @@ func (r *MemberResource) Create(ctx context.Context, req resource.CreateRequest,
 		if i >= len(payload.ExternalSyslogBackupServers) {
 			break
 		}
-		if server.Password.IsNull() || server.Password.IsUnknown() {
-			payload.ExternalSyslogBackupServers[i].Password = &emptyPwd
-		} else {
+		if !server.Password.IsNull() && !server.Password.IsUnknown() {
 			password := server.Password.ValueString()
 			payload.ExternalSyslogBackupServers[i].Password = &password
 		}
@@ -331,9 +330,7 @@ func (r *MemberResource) Create(ctx context.Context, req resource.CreateRequest,
 		if i >= len(payload.LomUsers) {
 			break
 		}
-		if user.Password.IsNull() || user.Password.IsUnknown() {
-			payload.LomUsers[i].Password = &emptyPwd
-		} else {
+		if !user.Password.IsNull() && !user.Password.IsUnknown() {
 			password := user.Password.ValueString()
 			payload.LomUsers[i].Password = &password
 		}
@@ -664,7 +661,6 @@ func (r *MemberResource) Update(ctx context.Context, req resource.UpdateRequest,
 	}
 
 	var passwordVersion types.Int64
-	pwd := ""
 	resp.Diagnostics.Append(req.Plan.GetAttribute(ctx, path.Root("password_version"), &passwordVersion)...)
 	var bkpServers []MemberExternalSyslogBackupServersModel
 	resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("external_syslog_backup_servers"), &bkpServers)...)
@@ -676,9 +672,7 @@ func (r *MemberResource) Update(ctx context.Context, req resource.UpdateRequest,
 		if i >= len(payload.ExternalSyslogBackupServers) {
 			break
 		}
-		if server.Password.IsNull() || server.Password.IsUnknown() {
-			payload.ExternalSyslogBackupServers[i].Password = &pwd
-		} else {
+		if !server.Password.IsNull() && !server.Password.IsUnknown() {
 			password := server.Password.ValueString()
 			payload.ExternalSyslogBackupServers[i].Password = &password
 		}
@@ -694,9 +688,7 @@ func (r *MemberResource) Update(ctx context.Context, req resource.UpdateRequest,
 		if i >= len(payload.LomUsers) {
 			break
 		}
-		if user.Password.IsNull() || user.Password.IsUnknown() {
-			payload.LomUsers[i].Password = &pwd
-		} else {
+		if !user.Password.IsNull() && !user.Password.IsUnknown() {
 			password := user.Password.ValueString()
 			payload.LomUsers[i].Password = &password
 		}

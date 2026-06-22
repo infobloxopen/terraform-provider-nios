@@ -108,8 +108,8 @@ func (r *SnmpuserResource) ModifyPlan(ctx context.Context, req resource.ModifyPl
 	}
 
 	prevHashes := snmpuserSecretsHashState{}
-	plannedHashes := snmpuserSecretsHashState{}
 
+	plannedHashes := prevHashes
 	var prev struct {
 		Algo string `json:"algo"`
 		Hash string `json:"hash"`
@@ -131,21 +131,14 @@ func (r *SnmpuserResource) ModifyPlan(ctx context.Context, req resource.ModifyPl
 		_ = json.Unmarshal([]byte(prev.Hash), &prevHashes)
 	}
 
-	if !authenticationPassword.IsUnknown() {
-		if authenticationPassword.IsNull() {
-			plannedHashes.AuthHash = ""
-		} else {
-			plannedHashes.AuthHash = hashString(authenticationPassword.ValueString())
-		}
+	if !authenticationPassword.IsUnknown() && !authenticationPassword.IsNull() {
+		plannedHashes.AuthHash = hashString(authenticationPassword.ValueString())
 	}
 
-	if !privacyPassword.IsUnknown() {
-		if privacyPassword.IsNull() {
-			plannedHashes.PrivHash = ""
-		} else {
-			plannedHashes.PrivHash = hashString(privacyPassword.ValueString())
-		}
+	if !privacyPassword.IsUnknown() && !privacyPassword.IsNull() {
+		plannedHashes.PrivHash = hashString(privacyPassword.ValueString())
 	}
+
 	if data, err := json.Marshal(plannedHashes); err != nil {
 		resp.Diagnostics.AddError("Private State Marshal Error", err.Error())
 		return

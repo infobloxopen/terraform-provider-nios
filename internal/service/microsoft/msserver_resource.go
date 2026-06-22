@@ -100,7 +100,7 @@ func (r *MsserverResource) ModifyPlan(ctx context.Context, req resource.ModifyPl
 	}
 
 	prevHashes := secretsHashState{}
-	plannedHashes := secretsHashState{}
+	plannedHashes := prevHashes
 
 	var prev struct {
 		Algo string `json:"algo"`
@@ -123,15 +123,12 @@ func (r *MsserverResource) ModifyPlan(ctx context.Context, req resource.ModifyPl
 		_ = json.Unmarshal([]byte(prev.Hash), &prevHashes)
 	}
 
-	if !planPassword.IsUnknown() {
-		if planPassword.IsNull() {
-			plannedHashes.Password = ""
-		} else {
-			h := sha256.New()
-			h.Write([]byte(planPassword.ValueString()))
-			plannedHashes.Password = hex.EncodeToString(h.Sum(nil))
-		}
+	if !planPassword.IsUnknown() && !planPassword.IsNull() {
+		h := sha256.New()
+		h.Write([]byte(planPassword.ValueString()))
+		plannedHashes.Password = hex.EncodeToString(h.Sum(nil))
 	}
+
 	if data, err := json.Marshal(plannedHashes); err == nil {
 		plannedHash = string(data)
 	}
