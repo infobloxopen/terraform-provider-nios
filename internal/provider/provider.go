@@ -508,6 +508,7 @@ func (p *NIOSProvider) ListResources(ctx context.Context) []func() list.ListReso
 		dns.NewZoneForwardList,
 		dns.NewZoneStubList,
 		dns.NewZoneRpList,
+		dns.NewZoneDelegatedList,
 
 		dhcp.NewFixedaddressList,
 
