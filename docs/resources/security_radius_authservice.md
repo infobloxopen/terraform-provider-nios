@@ -82,8 +82,8 @@ resource "nios_security_radius_authservice" "radius_authservice_with_additional_
 ### Read-Only
 
 - `ref` (String) The reference to the object.
-- `uuid` (String) Universally Unique ID assigned for this object.
 - `secret_version` (Number) Internal version incremented when shared_secret sub field of servers changes.
+- `uuid` (String) Universally Unique ID assigned for this object.
 
 <a id="nestedatt--servers"></a>
 ### Nested Schema for `servers`

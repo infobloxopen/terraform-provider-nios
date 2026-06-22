@@ -126,8 +126,8 @@ resource "nios_ip_allocation" "allocation3" {
 - `last_queried` (Number) The time of the last DNS query in Epoch seconds format.
 - `ms_ad_user_data` (Attributes) The Microsoft Active Directory user related information. (see [below for nested schema](#nestedatt--ms_ad_user_data))
 - `ref` (String) The reference to the object.
-- `uuid` (String) Universally Unique ID assigned for this object.
 - `secrets_version` (Number) Internal version incremented when secrets (snmp3_credential and cli_credentials) change.
+- `uuid` (String) Universally Unique ID assigned for this object.
 - `zone` (String) The name of the zone in which the record resides. Example: "zone.com". If a view is not specified when searching by zone, the default view is used.
 
 <a id="nestedatt--cli_credentials"></a>
