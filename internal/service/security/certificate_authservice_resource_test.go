@@ -52,6 +52,7 @@ func TestAccCertificateAuthserviceResource_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "response_timeout", "1000"),
 					resource.TestCheckResourceAttr(resourceName, "trust_model", "DIRECT"),
 					resource.TestCheckResourceAttr(resourceName, "user_match_type", "AUTO_MATCH"),
+					resource.TestCheckResourceAttr(resourceName, "password_version", "0"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -524,6 +525,37 @@ func TestAccCertificateAuthserviceResource_RemoteLookupUsername(t *testing.T) {
 	})
 }
 
+func TestAccCertificateAuthserviceResource_RemoteLookupUserPassword(t *testing.T) {
+	var resourceName = "nios_security_certificate_authservice.test_remote_lookup_user_password"
+	var v security.CertificateAuthservice
+	name := acctest.RandomNameWithPrefix("certificate_authservice")
+	caCertificate := []string{utils.GetNIOSCACert1Ref()}
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// Create and Read
+			{
+				Config: testAccCertificateAuthserviceRemoteLookupUserPassword(name, caCertificate, "username1", "password1", "DISABLED"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckCertificateAuthserviceExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "password_version", "1"),
+				),
+			},
+			// Update and Read
+			{
+				Config: testAccCertificateAuthserviceRemoteLookupUserPassword(name, caCertificate, "username1", "password2", "DISABLED"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckCertificateAuthserviceExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "password_version", "2"),
+				),
+			},
+			// Delete testing automatically occurs in TestCase
+		},
+	})
+}
+
 func TestAccCertificateAuthserviceResource_ResponseTimeout(t *testing.T) {
 	var resourceName = "nios_security_certificate_authservice.test_response_timeout"
 	var v security.CertificateAuthservice
@@ -867,6 +899,19 @@ resource "nios_security_certificate_authservice" "test_remote_lookup_username" {
     ca_certificates = %s
 }
 `, ocspCheck, name, remoteLookupUsername, caCertificateStr)
+}
+
+func testAccCertificateAuthserviceRemoteLookupUserPassword(name string, caCertificate []string, remoteLookupUsername, remoteLookupPassword, ocspCheck string) string {
+	caCertificateStr := utils.ConvertStringSliceToHCL(caCertificate)
+	return fmt.Sprintf(`
+resource "nios_security_certificate_authservice" "test_remote_lookup_user_password" {
+	ocsp_check = %q
+	name = %q
+    remote_lookup_username = %q
+    remote_lookup_password = %q
+    ca_certificates = %s
+}
+`, ocspCheck, name, remoteLookupUsername, remoteLookupPassword, caCertificateStr)
 }
 
 func testAccCertificateAuthserviceResponseTimeout(name string, caCertificate []string, responseTimeout, ocspCheck string) string {

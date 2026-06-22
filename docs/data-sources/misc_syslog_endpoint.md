@@ -62,11 +62,12 @@ Optional:
 - `timeout` (Number) The timeout of session management (in seconds).
 - `vendor_identifier` (String) The vendor identifier.
 - `wapi_user_name` (String) The user name for WAPI integration.
-- `wapi_user_password` (String, Sensitive) The user password for WAPI integration.
+- `wapi_user_password` (String) The user password for WAPI integration.
 
 Read-Only:
 
 - `extattrs_all` (Map of String) Extensible attributes associated with the object, including default attributes.
+- `password_version` (Number) Internal revision incremented when admin user password changes.
 - `ref` (String) The reference to the object.
 
 <a id="nestedatt--result--syslog_servers"></a>
