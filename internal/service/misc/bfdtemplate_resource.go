@@ -29,10 +29,6 @@ type BfdtemplateResource struct {
 	client *niosclient.APIClient
 }
 
-type secretsHashState struct {
-	AuthenticationKey string `json:"authentication_key_hash"`
-}
-
 func (r *BfdtemplateResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_" + "misc_bfdtemplate"
 }
