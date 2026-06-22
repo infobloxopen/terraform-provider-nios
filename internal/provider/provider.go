@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
@@ -83,6 +84,17 @@ func (p *NIOSProvider) Schema(_ context.Context, _ provider.SchemaRequest, resp 
 				Validators: []validator.String{
 					stringvalidator.OneOf("LOCAL", "GM"),
 				},
+			},
+			"retry_timeout": schema.Int64Attribute{
+				Optional: true,
+				Validators: []validator.Int64{
+					int64validator.AtLeast(0),
+				},
+				Description: "Specifies the timeout duration (in seconds) for retrying operations that fail due to transient errors.",
+			},
+			"manage_internal_id_ea": schema.BoolAttribute{
+				Optional:    true,
+				Description: "Determines whether the provider manages the Terraform Internal ID extensible attribute in NIOS. This attribute is required by the provider to store the Terraform resource ID corresponding to NIOS objects. When true, the provider ensures the attribute exists and manages its lifecycle. When false, the provider does not validate, create, update, or otherwise manage the attribute. Default value: true",
 			},
 		},
 	}
