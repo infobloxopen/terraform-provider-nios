@@ -47,4 +47,6 @@ internal/service/*/.openapi-generator-ignore
 pipeline.env
 .env
 
+providers-schema-hashicorp.json
+
 Jenkinsfile

@@ -248,12 +248,13 @@ func TestAccRecordNsResource_Name(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "name", name1),
 				),
 			},
-			// Update and Read (name is Required so verify it stays consistent)
+			// Update and Read (name is immutable; update a mutable attribute to validate updates work)
 			{
-				Config: testAccRecordNsName(name2, nameserver, addressesHCL, "default"),
+				Config: testAccRecordNsName(name2, fmt.Sprintf("updated-%s", nameserver), addressesHCL, "default"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordNsExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "name", name2),
+					resource.TestCheckResourceAttr(resourceName, "nameserver", fmt.Sprintf("updated-%s", nameserver)),
 				),
 			},
 			// Delete testing automatically occurs in TestCase

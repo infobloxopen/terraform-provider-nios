@@ -4399,12 +4399,16 @@ resource "nios_dns_zone_auth" "test_restart_if_needed" {
 
 func testAccZoneAuthSetSoaSerialNumber(zoneFqdn, view string, gridPrimary []map[string]any, soaSerialNumber int64, setSoaSerialNumber bool) string {
 	gridPrimaryHCL := utils.ConvertSliceOfMapsToHCL(gridPrimary)
+	soaSerialNumberHCL := ""
+	if setSoaSerialNumber {
+		soaSerialNumberHCL = fmt.Sprintf("    soa_serial_number = %d", soaSerialNumber)
+	}
 	return fmt.Sprintf(`
 resource "nios_dns_zone_auth" "test_set_soa_serial_number" {
     fqdn = %q
     view = %q
     grid_primary = %s
-    soa_serial_number = %d
+    %s
     set_soa_serial_number = %t
     soa_retry = 3600
     soa_negative_ttl = 900
@@ -4412,7 +4416,7 @@ resource "nios_dns_zone_auth" "test_set_soa_serial_number" {
     soa_default_ttl = 28800
     soa_refresh = 10800
     use_grid_zone_timer = true
-}`, zoneFqdn, view, gridPrimaryHCL, soaSerialNumber, setSoaSerialNumber)
+}`, zoneFqdn, view, gridPrimaryHCL, soaSerialNumberHCL, setSoaSerialNumber)
 }
 
 func testAccZoneAuthUseImportFrom(zoneFqdn, view string) string {

@@ -925,7 +925,7 @@ resource "nios_dns_zone_auth" "test" {
 func testAccRecordNaptrViewUpdate(zoneFqdn, name string, order, preference int, replacement, view string) string {
 	config := fmt.Sprintf(`
 resource "nios_dns_record_naptr" "test_view" {
-    name = "${%q}.${nios_dns_zone_auth.test.fqdn}"
+    name = "%s.${nios_dns_zone_auth.test.fqdn}"
     order = %d
     preference = %d
     replacement = %q
