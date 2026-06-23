@@ -1462,7 +1462,7 @@ func TestAccFixedaddressResource_Snmp3Credential(t *testing.T) {
 	ip := "16.0.0.121"
 	ip1 := "16.0.0.132"
 	agentCircuitID := acctest.RandomNumber(10000)
-	agentCircuitID1 := acctest.RandomNumber(1000)
+	agentCircuitID1 := acctest.RandomNumber(10000)
 	snmp3Cred := map[string]any{
 		"user":                    "user1",
 		"authentication_protocol": "SHA",
