@@ -1108,6 +1108,7 @@ func TestAccMemberResource_ExternalSyslogBackupServers(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "external_syslog_backup_servers.0.port", "21"),
 					resource.TestCheckResourceAttr(resourceName, "external_syslog_backup_servers.0.enable", "true"),
 					resource.TestCheckResourceAttr(resourceName, "use_external_syslog_backup_servers", "true"),
+					resource.TestCheckResourceAttr(resourceName, "password_version", "1"),
 				),
 			},
 			{
@@ -1129,6 +1130,7 @@ func TestAccMemberResource_ExternalSyslogBackupServers(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "external_syslog_backup_servers.0.port", "22"),
 					resource.TestCheckResourceAttr(resourceName, "external_syslog_backup_servers.0.enable", "false"),
 					resource.TestCheckResourceAttr(resourceName, "use_external_syslog_backup_servers", "true"),
+					resource.TestCheckResourceAttr(resourceName, "password_version", "2"),
 				),
 			},
 		},
@@ -1642,6 +1644,7 @@ func TestAccMemberResource_LomUsers(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "lom_users.0.name", "LOMuser1"),
 					resource.TestCheckResourceAttr(resourceName, "lom_users.0.role", "USER"),
 					resource.TestCheckResourceAttr(resourceName, "lom_users.0.disable", "false"),
+					resource.TestCheckResourceAttr(resourceName, "password_version", "1"),
 				),
 			},
 			// Update and Read - disable the user
@@ -1663,6 +1666,7 @@ func TestAccMemberResource_LomUsers(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "lom_users.0.role", "OPERATOR"),
 					resource.TestCheckResourceAttr(resourceName, "lom_users.0.disable", "true"),
 					resource.TestCheckResourceAttr(resourceName, "lom_users.0.comment", "Updated user"),
+					resource.TestCheckResourceAttr(resourceName, "password_version", "2"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -4480,7 +4484,7 @@ func TestAccMemberResource_Import(t *testing.T) {
 				ImportState:                          true,
 				ImportStateIdFunc:                    testAccMemberImportStateIdFunc(resourceName),
 				ImportStateVerify:                    true,
-				ImportStateVerifyIgnore:              []string{"configure_csp_member_setting", "support_access_info"},
+				ImportStateVerifyIgnore:              []string{"configure_csp_member_setting", "support_access_info", "password_version"},
 				ImportStateVerifyIdentifierAttribute: "ref",
 				PlanOnly:                             true,
 			},
@@ -4490,7 +4494,7 @@ func TestAccMemberResource_Import(t *testing.T) {
 				ImportState:                          true,
 				ImportStateIdFunc:                    testAccMemberImportStateIdFunc(resourceName),
 				ImportStateVerify:                    true,
-				ImportStateVerifyIgnore:              []string{"extattrs_all", "configure_csp_member_setting", "support_access_info"},
+				ImportStateVerifyIgnore:              []string{"extattrs_all", "configure_csp_member_setting", "support_access_info", "password_version"},
 				ImportStateVerifyIdentifierAttribute: "ref",
 			},
 			// Delete testing automatically occurs in TestCase

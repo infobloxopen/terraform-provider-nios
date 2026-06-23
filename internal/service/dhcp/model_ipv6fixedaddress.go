@@ -15,6 +15,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
@@ -67,6 +68,7 @@ type Ipv6fixedaddressModel struct {
 	PreferredLifetime        types.Int64                              `tfsdk:"preferred_lifetime"`
 	ReservedInterface        types.String                             `tfsdk:"reserved_interface"`
 	RestartIfNeeded          types.Bool                               `tfsdk:"restart_if_needed"`
+	SecretsVersion           types.Int64                              `tfsdk:"secrets_version"`
 	Snmp3Credential          types.Object                             `tfsdk:"snmp3_credential"`
 	SnmpCredential           types.Object                             `tfsdk:"snmp_credential"`
 	Template                 types.String                             `tfsdk:"template"`
@@ -118,6 +120,7 @@ var Ipv6fixedaddressAttrTypes = map[string]attr.Type{
 	"preferred_lifetime":         types.Int64Type,
 	"reserved_interface":         types.StringType,
 	"restart_if_needed":          types.BoolType,
+	"secrets_version":            types.Int64Type,
 	"snmp3_credential":           types.ObjectType{AttrTypes: Ipv6fixedaddressSnmp3CredentialAttrTypes},
 	"snmp_credential":            types.ObjectType{AttrTypes: Ipv6fixedaddressSnmpCredentialAttrTypes},
 	"template":                   types.StringType,
@@ -163,7 +166,6 @@ var Ipv6fixedaddressResourceSchemaAttributes = map[string]schema.Attribute{
 			listvalidator.AlsoRequires(path.MatchRoot("use_cli_credentials")),
 		},
 		Optional:            true,
-		Computed:            true,
 		MarkdownDescription: "The CLI credentials for the IPv6 fixed address.",
 	},
 	"cloud_info": schema.SingleNestedAttribute{
@@ -403,10 +405,17 @@ var Ipv6fixedaddressResourceSchemaAttributes = map[string]schema.Attribute{
 		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Restarts the member service. The restart_if_needed flag can trigger a restart on DHCP services only when it is enabled on CP member.",
 	},
+	// A computed trigger to cause an in-place Update when secrets change.
+	"secrets_version": schema.Int64Attribute{
+		Computed:            true,
+		MarkdownDescription: "Internal version incremented when secrets (snmp3_credential and cli_credentials) change.",
+		PlanModifiers: []planmodifier.Int64{
+			int64planmodifier.UseStateForUnknown(),
+		},
+	},
 	"snmp3_credential": schema.SingleNestedAttribute{
 		Attributes: Ipv6fixedaddressSnmp3CredentialResourceSchemaAttributes,
 		Optional:   true,
-		Computed:   true,
 		Validators: []validator.Object{
 			objectvalidator.AlsoRequires(path.MatchRoot("use_snmp3_credential")),
 			objectvalidator.AlsoRequires(path.MatchRoot("use_cli_credentials")),
@@ -510,7 +519,6 @@ func (m *Ipv6fixedaddressModel) Expand(ctx context.Context, diags *diag.Diagnost
 		AddressType:              flex.ExpandStringPointer(m.AddressType),
 		AllowTelnet:              flex.ExpandBoolPointer(m.AllowTelnet),
 		CliCredentials:           flex.ExpandFrameworkListNestedBlock(ctx, m.CliCredentials, diags, ExpandIpv6fixedaddressCliCredentials),
-		CloudInfo:                ExpandIpv6fixedaddressCloudInfo(ctx, m.CloudInfo, diags),
 		Comment:                  flex.ExpandStringPointer(m.Comment),
 		DeviceDescription:        flex.ExpandStringPointer(m.DeviceDescription),
 		DeviceLocation:           flex.ExpandStringPointer(m.DeviceLocation),
@@ -518,7 +526,6 @@ func (m *Ipv6fixedaddressModel) Expand(ctx context.Context, diags *diag.Diagnost
 		DeviceVendor:             flex.ExpandStringPointer(m.DeviceVendor),
 		Disable:                  flex.ExpandBoolPointer(m.Disable),
 		DisableDiscovery:         flex.ExpandBoolPointer(m.DisableDiscovery),
-		DiscoveredData:           ExpandIpv6fixedaddressDiscoveredData(ctx, m.DiscoveredData, diags),
 		DomainName:               flex.ExpandStringPointer(m.DomainName.StringValue),
 		DomainNameServers:        flex.ExpandFrameworkListString(ctx, m.DomainNameServers, diags),
 		Duid:                     flex.ExpandDUID(m.Duid),
@@ -530,13 +537,12 @@ func (m *Ipv6fixedaddressModel) Expand(ctx context.Context, diags *diag.Diagnost
 		LogicFilterRules:         flex.ExpandFrameworkListNestedBlock(ctx, m.LogicFilterRules, diags, ExpandIpv6fixedaddressLogicFilterRules),
 		MacAddress:               flex.ExpandMACAddr(m.MacAddress),
 		MatchClient:              flex.ExpandStringPointer(m.MatchClient),
-		MsAdUserData:             ExpandIpv6fixedaddressMsAdUserData(ctx, m.MsAdUserData, diags),
 		Name:                     flex.ExpandStringPointer(m.Name),
 		Network:                  flex.ExpandIPv6CIDR(m.Network),
 		NetworkView:              flex.ExpandStringPointer(m.NetworkView),
 		Options:                  flex.ExpandFrameworkListNestedBlock(ctx, m.Options, diags, ExpandIpv6fixedaddressOptions),
 		PreferredLifetime:        flex.ExpandInt64Pointer(m.PreferredLifetime),
-		ReservedInterface:        flex.ExpandStringPointer(m.ReservedInterface),
+		ReservedInterface:        flex.ExpandStringPointerEmptyAsNil(m.ReservedInterface),
 		RestartIfNeeded:          flex.ExpandBoolPointer(m.RestartIfNeeded),
 		Snmp3Credential:          ExpandIpv6fixedaddressSnmp3Credential(ctx, m.Snmp3Credential, diags),
 		SnmpCredential:           ExpandIpv6fixedaddressSnmpCredential(ctx, m.SnmpCredential, diags),
@@ -582,17 +588,11 @@ func (m *Ipv6fixedaddressModel) Flatten(ctx context.Context, from *dhcp.Ipv6fixe
 	m.Ref = flex.FlattenStringPointer(from.Ref)
 	m.AddressType = flex.FlattenStringPointer(from.AddressType)
 	m.AllowTelnet = types.BoolPointerValue(from.AllowTelnet)
-	planCredentials := m.CliCredentials
+	planCliCreds := m.CliCredentials
 	m.CliCredentials = flex.FlattenFrameworkListNestedBlock(ctx, from.CliCredentials, Ipv6fixedaddressCliCredentialsAttrTypes, diags, FlattenIpv6fixedaddressCliCredentials)
-	if !planCredentials.IsUnknown() {
-		credentialVal, diags := utils.CopyFieldFromPlanToRespList(ctx, planCredentials, m.CliCredentials, "password")
-		if !diags.HasError() {
-			m.CliCredentials = credentialVal.(basetypes.ListValue)
-			reOrderedCredentials, diags := utils.ReorderAndFilterNestedListResponse(ctx, planCredentials, m.CliCredentials, "credential_type")
-			if !diags.HasError() {
-				m.CliCredentials = reOrderedCredentials.(basetypes.ListValue)
-			}
-		}
+	reOrderedCliCreds, diags := utils.ReorderAndFilterNestedListResponse(ctx, planCliCreds, m.CliCredentials, "credential_type")
+	if !diags.HasError() {
+		m.CliCredentials = reOrderedCliCreds.(basetypes.ListValue)
 	}
 	m.CloudInfo = FlattenIpv6fixedaddressCloudInfo(ctx, from.CloudInfo, diags)
 	m.Comment = flex.FlattenStringPointer(from.Comment)
@@ -629,25 +629,8 @@ func (m *Ipv6fixedaddressModel) Flatten(ctx context.Context, from *dhcp.Ipv6fixe
 	}
 	m.PreferredLifetime = flex.FlattenInt64Pointer(from.PreferredLifetime)
 	m.ReservedInterface = flex.FlattenStringPointer(from.ReservedInterface)
-	planSnmp3Credential := m.Snmp3Credential
 	m.Snmp3Credential = FlattenIpv6fixedaddressSnmp3Credential(ctx, from.Snmp3Credential, diags)
-	if !planSnmp3Credential.IsUnknown() {
-		snmp3CredentialVal, diags := utils.CopyFieldFromPlanToRespObject(ctx, planSnmp3Credential, m.Snmp3Credential, "privacy_password")
-		if !diags.HasError() {
-			m.Snmp3Credential = snmp3CredentialVal.(types.Object)
-		}
-		snmp3CredentialVal2, diags := utils.CopyFieldFromPlanToRespObject(ctx, planSnmp3Credential, m.Snmp3Credential, "authentication_password")
-		if !diags.HasError() {
-			m.Snmp3Credential = snmp3CredentialVal2.(types.Object)
-		}
-	}
-	planSnmpCredential := m.SnmpCredential
-	if from.UseSnmpCredential != nil && !*from.UseSnmpCredential && (planSnmpCredential.IsNull() || planSnmpCredential.IsUnknown()) {
-		m.SnmpCredential = types.ObjectNull(FixedaddressSnmpCredentialAttrTypes)
-	} else {
-		m.SnmpCredential = FlattenIpv6fixedaddressSnmpCredential(ctx, from.SnmpCredential, diags)
-	}
-
+	m.SnmpCredential = FlattenIpv6fixedaddressSnmpCredential(ctx, from.SnmpCredential, diags)
 	m.Template = flex.FlattenStringPointer(from.Template)
 	m.UseCliCredentials = types.BoolPointerValue(from.UseCliCredentials)
 	m.UseDomainName = types.BoolPointerValue(from.UseDomainName)
