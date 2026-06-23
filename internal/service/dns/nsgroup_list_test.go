@@ -144,7 +144,7 @@ func TestAccNsgroupList_ExtAttrFilters(t *testing.T) {
 				Query:                    true,
 				Config:                   testAccNsgroupListConfigExtAttrFilters(extAttrValue),
 				QueryResultChecks: []querycheck.QueryResultCheck{
-					querycheck.ExpectLength("nios_dns_nsgroup.test_extattrs", 1),
+					querycheck.ExpectLength("nios_dns_nsgroup.test", 1),
 				},
 			},
 		},

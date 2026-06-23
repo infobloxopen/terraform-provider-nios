@@ -19,7 +19,7 @@ list "nios_dns_nsgroup_forwardingmember" "list_ns_group_forwarding_member_using_
 }
 
 // List DNS NS Group Forwarding Members with resource details included
-list "nios_dns_nsgroup_forwardingmember" "list_nsgroups_with_resource" {
+list "nios_dns_nsgroup_forwardingmember" "list_ns_group_forwarding_member_with_resource" {
   provider         = nios
   include_resource = true
 }
