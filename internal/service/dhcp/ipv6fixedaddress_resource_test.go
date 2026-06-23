@@ -1325,7 +1325,6 @@ func TestAccIpv6fixedaddressResource_UsePreferredLifetime(t *testing.T) {
 }
 
 func TestAccIpv6fixedaddressResource_UseSnmp3Credential(t *testing.T) {
-	t.Skip("Skipping: removing snmp3_credential from config while toggling use_snmp3_credential causes plan drift on computed fields; needs resource-level Flatten fix")
 	var resourceName = "nios_dhcp_ipv6fixedaddress.test_use_snmp3_credential"
 	var v dhcp.Ipv6fixedaddress
 	ipv6Network := "2001:db8:abcd:1231::/64"
@@ -1338,18 +1337,18 @@ func TestAccIpv6fixedaddressResource_UseSnmp3Credential(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccIpv6fixedaddressUseSnmp3Credential(ipv6addr, duid, networkView, ipv6Network, true, true, "SNMP3_USER", "MD5", "AUTH_PASSWORD", "3DES", "PRIVACY_PASSWORD", "SNMP3 Credential Comment", "default"),
+				Config: testAccIpv6fixedaddressUseSnmp3Credential(ipv6addr, duid, networkView, ipv6Network, false, false, "", "", "", "", "", "", ""),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6fixedaddressExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_snmp3_credential", "true"),
+					resource.TestCheckResourceAttr(resourceName, "use_snmp3_credential", "false"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccIpv6fixedaddressUseSnmp3Credential(ipv6addr, duid, networkView, ipv6Network, false, true, "", "", "", "", "", "", ""),
+				Config: testAccIpv6fixedaddressUseSnmp3Credential(ipv6addr, duid, networkView, ipv6Network, true, true, "SNMP3_USER", "MD5", "AUTH_PASSWORD", "3DES", "PRIVACY_PASSWORD", "SNMP3 Credential Comment", "default"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6fixedaddressExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_snmp3_credential", "false"),
+					resource.TestCheckResourceAttr(resourceName, "use_snmp3_credential", "true"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -1358,7 +1357,6 @@ func TestAccIpv6fixedaddressResource_UseSnmp3Credential(t *testing.T) {
 }
 
 func TestAccIpv6fixedaddressResource_UseSnmpCredential(t *testing.T) {
-	t.Skip("Skipping: removing snmp_credential from config while toggling use_snmp_credential causes plan drift on computed fields; needs resource-level Flatten fix")
 	var resourceName = "nios_dhcp_ipv6fixedaddress.test_use_snmp_credential"
 	var v dhcp.Ipv6fixedaddress
 	ipv6Network := "2001:db8:abcd:1231::/64"

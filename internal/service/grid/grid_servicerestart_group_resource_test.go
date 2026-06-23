@@ -148,7 +148,7 @@ func TestAccGridServicerestartGroupResource_Members(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccGridServicerestartGroupMembers(name, "DNS", memberName),
+				Config: testAccGridServicerestartGroupMembers(name, "DHCP", memberName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckGridServicerestartGroupExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "members.0", memberName),

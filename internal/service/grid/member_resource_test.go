@@ -1361,7 +1361,7 @@ func TestAccMemberResource_Ipv6StaticRoutes(t *testing.T) {
 	var resourceName = "nios_grid_member.test_ipv6_static_routes"
 	var v grid.Member
 	hostName := fmt.Sprintf("infoblox-%s.localdomain", acctest.RandomName())
-	vipAddress := "172.28.39.122"
+	vipAddress := "172.28.38.122"
 	vipAddress6 := fmt.Sprintf("2001::%x", acctest.RandomNumber(65534)+2)
 	networkSettingAddress := fmt.Sprintf("2001:db8:%x:%x::", acctest.RandomNumber(65535), acctest.RandomNumber(65535))
 	ipv6StaticRoutesVal := []map[string]any{
@@ -2103,8 +2103,6 @@ func TestAccMemberResource_NtpSetting(t *testing.T) {
 }
 
 func TestAccMemberResource_OspfList(t *testing.T) {
-	// Authentication Key Issue
-	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_grid_member.test_ospf_list"
 	var v grid.Member
 
@@ -2115,7 +2113,7 @@ func TestAccMemberResource_OspfList(t *testing.T) {
 		{
 			"area_id":                "121",
 			"area_type":              "STANDARD",
-			"authentication_type":    "SIMPLE",
+			"authentication_type":    "NONE",
 			"auto_calc_cost_enabled": true,
 			"cost":                   1,
 			"dead_interval":          40,
@@ -2539,7 +2537,7 @@ func TestAccMemberResource_StaticRoutes(t *testing.T) {
 	var v grid.Member
 
 	hostName := fmt.Sprintf("infoblox-%s.localdomain", acctest.RandomName())
-	vipAddress := "172.28.39.55"
+	vipAddress := "172.28.38.141"
 
 	staticRoutesVal := []map[string]any{
 		{

@@ -168,16 +168,25 @@ func TestAccIPAllocationResource_CliCredentials(t *testing.T) {
 		},
 	}
 	cliCred := []map[string]any{{
-		"user":            "cliuser1",
-		"password":        "clipass1",
-		"credential_type": "SSH",
-		"comment":         "test cli cred",
+		"user":             "user1",
+		"credential_type":  "SSH",
+		"comment":          "cli credential comment",
+		"password":         "password1",
+		"credential_group": "default",
 	}}
-	cliCredUpdated := []map[string]any{{
-		"user":            "cliuser2",
-		"password":        "clipass2",
-		"credential_type": "SSH",
-		"comment":         "updated cli cred",
+	cliCred1 := []map[string]any{{
+		"user":             "user1",
+		"credential_type":  "SSH",
+		"comment":          "cli credential comment",
+		"password":         "password12",
+		"credential_group": "default",
+	}}
+	cliCred2 := []map[string]any{{
+		"user":             "user2",
+		"credential_type":  "SSH",
+		"comment":          "cli credential comment update",
+		"password":         "password12",
+		"credential_group": "default",
 	}}
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -186,26 +195,80 @@ func TestAccIPAllocationResource_CliCredentials(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create a resource without cli_credentials and Read
 			{
-				Config: testAccIPAllocationCliCredentials(name, "default", ipv4addr, cliCred),
+				Config: testAccIPAllocationCliCredentials(name, ipv4addr, nil),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIPAllocationExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "cli_credentials.#", "1"),
-					resource.TestCheckResourceAttr(resourceName, "cli_credentials.0.user", "cliuser1"),
-					resource.TestCheckResourceAttr(resourceName, "cli_credentials.0.credential_type", "SSH"),
-					resource.TestCheckResourceAttr(resourceName, "cli_credentials.0.comment", "test cli cred"),
-					resource.TestCheckResourceAttr(resourceName, "cli_credentials.0.credential_group", "default"),
+					resource.TestCheckResourceAttr(resourceName, "cli_credentials.#", "0"),
+					resource.TestCheckResourceAttr(resourceName, "secrets_version", "0"),
 				),
 			},
 			// Add cli_credentials and Read
 			{
-				Config: testAccIPAllocationCliCredentials(name, "default", ipv4addr, cliCredUpdated),
+				Config: testAccIPAllocationCliCredentials(name, ipv4addr, cliCred),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIPAllocationExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "cli_credentials.#", "1"),
-					resource.TestCheckResourceAttr(resourceName, "cli_credentials.0.user", "cliuser2"),
+					resource.TestCheckResourceAttr(resourceName, "cli_credentials.0.user", "user1"),
 					resource.TestCheckResourceAttr(resourceName, "cli_credentials.0.credential_type", "SSH"),
-					resource.TestCheckResourceAttr(resourceName, "cli_credentials.0.comment", "updated cli cred"),
-					resource.TestCheckResourceAttr(resourceName, "cli_credentials.0.credential_group", "default"),
+					resource.TestCheckResourceAttr(resourceName, "cli_credentials.0.comment", "cli credential comment"),
+					resource.TestCheckResourceAttr(resourceName, "secrets_version", "1"),
+				),
+			},
+			// Update password (write-only)field of cli_credentials and Read
+			{
+				Config: testAccIPAllocationCliCredentials(name, ipv4addr, cliCred1),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckIPAllocationExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "cli_credentials.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "cli_credentials.0.user", "user1"),
+					resource.TestCheckResourceAttr(resourceName, "cli_credentials.0.credential_type", "SSH"),
+					resource.TestCheckResourceAttr(resourceName, "cli_credentials.0.comment", "cli credential comment"),
+					resource.TestCheckResourceAttr(resourceName, "secrets_version", "2"),
+				),
+			},
+			// Update non write-only field of cli_credentials and Read
+			{
+				Config: testAccIPAllocationCliCredentials(name, ipv4addr, cliCred2),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckIPAllocationExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "cli_credentials.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "cli_credentials.0.user", "user2"),
+					resource.TestCheckResourceAttr(resourceName, "cli_credentials.0.credential_type", "SSH"),
+					resource.TestCheckResourceAttr(resourceName, "cli_credentials.0.comment", "cli credential comment update"),
+					resource.TestCheckResourceAttr(resourceName, "secrets_version", "2"),
+				),
+			},
+			// Update write-only field of cli_credentials and Read
+			{
+				Config: testAccIPAllocationCliCredentials(name, ipv4addr, cliCred),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckIPAllocationExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "cli_credentials.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "cli_credentials.0.user", "user1"),
+					resource.TestCheckResourceAttr(resourceName, "cli_credentials.0.credential_type", "SSH"),
+					resource.TestCheckResourceAttr(resourceName, "cli_credentials.0.comment", "cli credential comment"),
+					resource.TestCheckResourceAttr(resourceName, "secrets_version", "3"),
+				),
+			},
+			// Remove cli_credentials and Read
+			{
+				Config: testAccIPAllocationCliCredentials(name, ipv4addr, nil),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckIPAllocationExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "cli_credentials.#", "0"),
+					resource.TestCheckResourceAttr(resourceName, "secrets_version", "4"),
+				),
+			},
+			// Add cli_credentials again and Read
+			{
+				Config: testAccIPAllocationCliCredentials(name, ipv4addr, cliCred2),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckIPAllocationExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "cli_credentials.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "cli_credentials.0.user", "user2"),
+					resource.TestCheckResourceAttr(resourceName, "cli_credentials.0.credential_type", "SSH"),
+					resource.TestCheckResourceAttr(resourceName, "cli_credentials.0.comment", "cli credential comment update"),
+					resource.TestCheckResourceAttr(resourceName, "secrets_version", "5"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -1099,9 +1162,16 @@ func TestAccIPAllocationResource_UseCliCredentials(t *testing.T) {
 	name := acctest.RandomName() + ".example.com"
 	ipv4addr := []map[string]any{
 		{
-			"ipv4addr": "192.168.1.201",
+			"ipv4addr": "192.168.1.10",
 		},
 	}
+	cliCred := []map[string]any{{
+		"user":             "user1",
+		"credential_type":  "SSH",
+		"comment":          "cli credential comment",
+		"password":         "password1",
+		"credential_group": "default",
+	}}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1109,7 +1179,7 @@ func TestAccIPAllocationResource_UseCliCredentials(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccIPAllocationUseCliCredentials(name, "default", ipv4addr, "true"),
+				Config: testAccIPAllocationUseCliCredentials(name, ipv4addr, cliCred, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIPAllocationExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_cli_credentials", "true"),
@@ -1117,7 +1187,7 @@ func TestAccIPAllocationResource_UseCliCredentials(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccIPAllocationUseCliCredentials(name, "default", ipv4addr, "false"),
+				Config: testAccIPAllocationUseCliCredentials(name, ipv4addr, nil, "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIPAllocationExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_cli_credentials", "false"),
@@ -1402,19 +1472,21 @@ resource "nios_ip_allocation" "test_allow_telnet" {
 `, name, view, ipv4addrHCL, allowTelnet)
 }
 
-func testAccIPAllocationCliCredentials(name, view string, ipv4addr []map[string]any, cliCred []map[string]any) string {
+func testAccIPAllocationCliCredentials(name string, ipv4addr []map[string]any, cliCred []map[string]any) string {
+	cliCredentialsBlock := ""
+	if cliCred != nil {
+		cliCredentialsBlock = fmt.Sprintf("    cli_credentials = %s", utils.ConvertSliceOfMapsToHCL(cliCred))
+	}
 	ipv4addrHCL := utils.ConvertSliceOfMapsToHCL(ipv4addr)
-	cliCredHCL := utils.ConvertSliceOfMapsToHCL(cliCred)
 	return fmt.Sprintf(`
 resource "nios_ip_allocation" "test_cli_credentials" {
 	name = %q
-	view = %q
 	ipv4addrs = %s
+    %s
 	use_cli_credentials = true
 	use_snmp3_credential = true
-	cli_credentials = %s
 }
-`, name, view, ipv4addrHCL, cliCredHCL)
+`, name, ipv4addrHCL, cliCredentialsBlock)
 }
 
 func testAccIPAllocationCloudInfo(name, view string, ipv4addr []map[string]any) string {
@@ -1659,16 +1731,21 @@ resource "nios_ip_allocation" "test_ttl" {
 `, name, view, ipv4addrHCL, ttl, useTtl)
 }
 
-func testAccIPAllocationUseCliCredentials(name, view string, ipv4addr []map[string]any, useCliCredentials string) string {
-	ipv4addrHCL := utils.ConvertSliceOfMapsToHCL(ipv4addr)
+func testAccIPAllocationUseCliCredentials(name string, ipv4addr []map[string]any, cliCred []map[string]any, useCliCredentials string) string {
+	ipv4addrStr := utils.ConvertSliceOfMapsToHCL(ipv4addr)
+	cliCredentialsBlock := ""
+	if cliCred != nil {
+		cliCredentialsBlock = fmt.Sprintf("    cli_credentials = %s", utils.ConvertSliceOfMapsToHCL(cliCred))
+	}
 	return fmt.Sprintf(`
 resource "nios_ip_allocation" "test_use_cli_credentials" {
 	name = %q
-	view = %q
 	ipv4addrs = %s
-	use_cli_credentials = %s
+    %s
+	use_cli_credentials = %q
+	use_snmp3_credential = true
 }
-`, name, view, ipv4addrHCL, useCliCredentials)
+`, name, ipv4addrStr, cliCredentialsBlock, useCliCredentials)
 }
 
 func testAccIPAllocationUseDnsEaInheritance(name, view, useDnsEaInheritance string, ipv4addr []map[string]any) string {

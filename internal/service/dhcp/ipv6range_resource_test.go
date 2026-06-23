@@ -1507,7 +1507,7 @@ resource "nios_dhcp_ipv6range" "test_discovery_member" {
 	end_addr = %q
 	network_view = nios_ipam_network_view.test.name
 	discovery_member = %q
-	use_enable_discovery = %s
+	use_enable_discovery = %q
 }
 `, startAddr, endAddr, discoveryMember, useEnableDiscovery)
 	return strings.Join([]string{testAccBaseWithIpv6NetworkandView(view), config}, "")
