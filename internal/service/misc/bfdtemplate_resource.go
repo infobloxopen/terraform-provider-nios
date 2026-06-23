@@ -2,6 +2,9 @@ package misc
 
 import (
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
+	"encoding/json"
 	"fmt"
 	"net/http"
 
@@ -9,10 +12,11 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
-
+	"github.com/hashicorp/terraform-plugin-framework/types"
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
-
+	"github.com/infobloxopen/infoblox-nios-go-client/misc"
 	"github.com/infobloxopen/terraform-provider-nios/internal/config"
+	"github.com/infobloxopen/terraform-provider-nios/internal/retry"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
@@ -21,6 +25,7 @@ var readableAttributesForBfdtemplate = "authentication_key_id,authentication_typ
 // Ensure provider defined types fully satisfy framework interfaces.
 var _ resource.Resource = &BfdtemplateResource{}
 var _ resource.ResourceWithImportState = &BfdtemplateResource{}
+var _ resource.ResourceWithModifyPlan = &BfdtemplateResource{}
 
 func NewBfdtemplateResource() resource.Resource {
 	return &BfdtemplateResource{}
@@ -29,6 +34,10 @@ func NewBfdtemplateResource() resource.Resource {
 // BfdtemplateResource defines the resource implementation.
 type BfdtemplateResource struct {
 	client *niosclient.APIClient
+}
+
+type secretsHashState struct {
+	AuthenticationKey string `json:"authentication_key_hash"`
 }
 
 func (r *BfdtemplateResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -62,6 +71,84 @@ func (r *BfdtemplateResource) Configure(ctx context.Context, req resource.Config
 	r.client = client
 }
 
+func (r *BfdtemplateResource) ModifyPlan(ctx context.Context, req resource.ModifyPlanRequest, resp *resource.ModifyPlanResponse) {
+	if req.Plan.Raw.IsNull() {
+		return
+	}
+
+	var stateRev types.Int64
+	var planAuthenticationKey types.String
+
+	curRev := int64(0)
+	if !req.State.Raw.IsNull() && req.State.Raw.IsKnown() {
+		resp.Diagnostics.Append(req.State.GetAttribute(ctx, path.Root("authentication_key_version"), &stateRev)...)
+		if resp.Diagnostics.HasError() {
+			return
+		}
+		if !stateRev.IsNull() && !stateRev.IsUnknown() {
+			curRev = stateRev.ValueInt64()
+		}
+	}
+
+	resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("authentication_key"), &planAuthenticationKey)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	computeNewHash := !planAuthenticationKey.IsNull() && !planAuthenticationKey.IsUnknown()
+	prevHashes := secretsHashState{}
+	plannedHashes := secretsHashState{}
+
+	if computeNewHash {
+		var prev struct {
+			Algo string `json:"algo"`
+			Hash string `json:"hash"`
+		}
+
+		if b, diags := req.Private.GetKey(ctx, "authentication_key_hash"); diags != nil {
+			resp.Diagnostics.Append(diags...)
+		} else if b != nil {
+			if err := json.Unmarshal(b, &prev); err != nil {
+				prev.Hash = ""
+			}
+		}
+
+		var plannedHash string
+		if prev.Hash != "" {
+			_ = json.Unmarshal([]byte(prev.Hash), &prevHashes)
+		}
+
+		if !planAuthenticationKey.IsUnknown() {
+			if planAuthenticationKey.IsNull() {
+				plannedHashes.AuthenticationKey = ""
+			} else {
+				h := sha256.New()
+				h.Write([]byte(planAuthenticationKey.ValueString()))
+				plannedHashes.AuthenticationKey = hex.EncodeToString(h.Sum(nil))
+			}
+		}
+
+		if data, err := json.Marshal(plannedHashes); err == nil {
+			plannedHash = string(data)
+		}
+
+		if plannedHashes.AuthenticationKey != "" && plannedHashes.AuthenticationKey != prevHashes.AuthenticationKey {
+			newRev := types.Int64Value(curRev + 1)
+			resp.Diagnostics.Append(resp.Plan.SetAttribute(ctx, path.Root("authentication_key_version"), newRev)...)
+
+			val := map[string]string{"algo": "sha256", "hash": plannedHash}
+			b, err := json.Marshal(val)
+			if err != nil {
+				resp.Diagnostics.AddError("Private State Marshal Error", err.Error())
+				return
+			}
+			resp.Diagnostics.Append(resp.Private.SetKey(ctx, "authentication_key_hash", b)...)
+		} else {
+			resp.Diagnostics.Append(resp.Plan.SetAttribute(ctx, path.Root("authentication_key_version"), curRev)...)
+		}
+	}
+}
+
 func (r *BfdtemplateResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var data BfdtemplateModel
 
@@ -72,20 +159,68 @@ func (r *BfdtemplateResource) Create(ctx context.Context, req resource.CreateReq
 		return
 	}
 
-	apiRes, _, err := r.client.MiscAPI.
-		BfdtemplateAPI.
-		Create(ctx).
-		Bfdtemplate(*data.Expand(ctx, &resp.Diagnostics)).
-		ReturnFieldsPlus(readableAttributesForBfdtemplate).
-		ReturnAsObject(1).
-		Execute()
+	payload := data.Expand(ctx, &resp.Diagnostics)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	authenticationKeyVersion := types.Int64Value(0)
+	var authenticationKey types.String
+	resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("authentication_key"), &authenticationKey)...)
+	secretData := secretsHashState{}
+	if !authenticationKey.IsNull() && !authenticationKey.IsUnknown() {
+		payload.AuthenticationKey = authenticationKey.ValueStringPointer()
+		authenticationKeyVersion = types.Int64Value(1)
+		h := sha256.New()
+		h.Write([]byte(authenticationKey.ValueString()))
+		secretData.AuthenticationKey = hex.EncodeToString(h.Sum(nil))
+		secretDataJSON, _ := json.Marshal(secretData)
+		val := map[string]string{"algo": "sha256", "hash": string(secretDataJSON)}
+		hashedSecret, err := json.Marshal(val)
+		if err != nil {
+			resp.Diagnostics.AddError("Private State Marshal Error", err.Error())
+			return
+		}
+		resp.Diagnostics.Append(resp.Private.SetKey(ctx, "authentication_key_hash", hashedSecret)...)
+	}
+
+	var apiRes *misc.CreateBfdtemplateResponse
+
+	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		var (
+			httpRes *http.Response
+			callErr error
+		)
+		apiRes, httpRes, callErr = r.client.MiscAPI.
+			BfdtemplateAPI.
+			Create(ctx).
+			Bfdtemplate(*payload).
+			ReturnFieldsPlus(readableAttributesForBfdtemplate).
+			ReturnAsObject(1).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
+
 	if err != nil {
+		if retry.IsAlreadyExistsErr(err) {
+			// Resource already exists, import required
+			resp.Diagnostics.AddError(
+				"Resource Already Exists",
+				fmt.Sprintf("Resource already exists, error: %s.\nPlease import the existing resource into terraform state.", err.Error()),
+			)
+			return
+		}
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create Bfdtemplate, got error: %s", err))
 		return
 	}
 
 	res := apiRes.CreateBfdtemplateResponseAsObject.GetResult()
 
+	data.AuthenticationKeyVersion = authenticationKeyVersion
 	data.Flatten(ctx, &res, &resp.Diagnostics)
 
 	// Save data into Terraform state
@@ -102,13 +237,28 @@ func (r *BfdtemplateResource) Read(ctx context.Context, req resource.ReadRequest
 		return
 	}
 
-	apiRes, httpRes, err := r.client.MiscAPI.
-		BfdtemplateAPI.
-		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
-		ReturnFieldsPlus(readableAttributesForBfdtemplate).
-		ReturnAsObject(1).
-		ProxySearch(config.GetProxySearch()).
-		Execute()
+	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
+
+	var (
+		httpRes *http.Response
+		apiRes  *misc.GetBfdtemplateResponse
+	)
+
+	err := retry.Do(ctx, nil, func(ctx context.Context) (int, error) {
+		var callErr error
+		apiRes, httpRes, callErr = r.client.MiscAPI.
+			BfdtemplateAPI.
+			Read(ctx, resourceRef).
+			ReturnFieldsPlus(readableAttributesForBfdtemplate).
+			ReturnAsObject(1).
+			ProxySearch(config.GetProxySearch()).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
 
 	// Handle case not found
 	if err != nil {
@@ -146,13 +296,44 @@ func (r *BfdtemplateResource) Update(ctx context.Context, req resource.UpdateReq
 		return
 	}
 
-	apiRes, _, err := r.client.MiscAPI.
-		BfdtemplateAPI.
-		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
-		Bfdtemplate(*data.Expand(ctx, &resp.Diagnostics)).
-		ReturnFieldsPlus(readableAttributesForBfdtemplate).
-		ReturnAsObject(1).
-		Execute()
+	var authenticationKey types.String
+	resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("authentication_key"), &authenticationKey)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	payload := data.Expand(ctx, &resp.Diagnostics)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	if !authenticationKey.IsNull() && !authenticationKey.IsUnknown() {
+		payload.AuthenticationKey = authenticationKey.ValueStringPointer()
+	}
+
+	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
+
+	var apiRes *misc.UpdateBfdtemplateResponse
+
+	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		var (
+			httpRes *http.Response
+			callErr error
+		)
+		apiRes, httpRes, callErr = r.client.MiscAPI.
+			BfdtemplateAPI.
+			Update(ctx, resourceRef).
+			Bfdtemplate(*payload).
+			ReturnFieldsPlus(readableAttributesForBfdtemplate).
+			ReturnAsObject(1).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
+
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update Bfdtemplate, got error: %s", err))
 		return
@@ -176,14 +357,24 @@ func (r *BfdtemplateResource) Delete(ctx context.Context, req resource.DeleteReq
 		return
 	}
 
-	httpRes, err := r.client.MiscAPI.
-		BfdtemplateAPI.
-		Delete(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
-		Execute()
-	if err != nil {
-		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
-			return
+	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
+
+	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		httpRes, callErr := r.client.MiscAPI.
+			BfdtemplateAPI.
+			Delete(ctx, resourceRef).
+			Execute()
+
+		if httpRes != nil {
+			if httpRes.StatusCode == http.StatusNotFound {
+				return 0, nil
+			}
+			return httpRes.StatusCode, callErr
 		}
+		return 0, callErr
+	})
+
+	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete Bfdtemplate, got error: %s", err))
 		return
 	}

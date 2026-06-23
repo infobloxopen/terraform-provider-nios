@@ -557,6 +557,8 @@ func TestAccRecordUnknownResource_View(t *testing.T) {
 	var v dns.RecordUnknown
 	zoneFqdn := acctest.RandomNameWithPrefix("test-zone") + ".com"
 	name := acctest.RandomNameWithPrefix("record-unknown")
+	view1 := acctest.RandomNameWithPrefix("view")
+	view2 := acctest.RandomNameWithPrefix("view")
 	subfieldValues := []map[string]any{
 		{
 			"field_type":     "T",
@@ -571,18 +573,18 @@ func TestAccRecordUnknownResource_View(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRecordUnknownView(zoneFqdn, name, "SPF", subfieldValues, "custom_view_1"),
+				Config: testAccRecordUnknownView(zoneFqdn, name, "SPF", subfieldValues, view1),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordUnknownExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "view", "custom_view_1"),
+					resource.TestCheckResourceAttr(resourceName, "view", view1),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccRecordUnknownView(zoneFqdn, name, "SPF", subfieldValues, "custom_view_2"),
+				Config: testAccRecordUnknownView(zoneFqdn, name, "SPF", subfieldValues, view2),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordUnknownExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "view", "custom_view_2"),
+					resource.TestCheckResourceAttr(resourceName, "view", view2),
 				),
 			},
 			// Delete testing automatically occurs in TestCase

@@ -2,6 +2,9 @@ package security
 
 import (
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
+	"encoding/json"
 	"fmt"
 	"net/http"
 
@@ -12,7 +15,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
+	"github.com/infobloxopen/infoblox-nios-go-client/security"
 	"github.com/infobloxopen/terraform-provider-nios/internal/config"
+	"github.com/infobloxopen/terraform-provider-nios/internal/retry"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
@@ -21,6 +26,8 @@ var readableAttributesForCertificateAuthservice = "auto_populate_login,ca_certif
 // Ensure provider defined types fully satisfy framework interfaces.
 var _ resource.Resource = &CertificateAuthserviceResource{}
 var _ resource.ResourceWithImportState = &CertificateAuthserviceResource{}
+
+var _ resource.ResourceWithModifyPlan = &CertificateAuthserviceResource{}
 
 func NewCertificateAuthserviceResource() resource.Resource {
 	return &CertificateAuthserviceResource{}
@@ -62,6 +69,95 @@ func (r *CertificateAuthserviceResource) Configure(ctx context.Context, req reso
 	r.client = client
 }
 
+type certAuthHashState struct {
+	Password string `json:"password_hash"`
+}
+
+func (r *CertificateAuthserviceResource) ModifyPlan(ctx context.Context, req resource.ModifyPlanRequest, resp *resource.ModifyPlanResponse) {
+	if req.Plan.Raw.IsNull() {
+		return
+	}
+
+	var statePwdVersion types.Int64
+	var planPassword types.String
+
+	// Normalize stateRev if null (e.g., first apply)
+	curRev := int64(0)
+
+	if !req.State.Raw.IsNull() && req.State.Raw.IsKnown() {
+		resp.Diagnostics.Append(req.State.GetAttribute(ctx, path.Root("password_version"), &statePwdVersion)...)
+		if resp.Diagnostics.HasError() {
+			return
+		}
+		if !statePwdVersion.IsNull() && !statePwdVersion.IsUnknown() {
+			curRev = statePwdVersion.ValueInt64()
+		}
+	}
+	resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("remote_lookup_password"), &planPassword)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	computeNewHash := !planPassword.IsNull() && !planPassword.IsUnknown()
+
+	prevHashes := certAuthHashState{}
+	plannedHashes := certAuthHashState{}
+
+	if computeNewHash {
+
+		var prev struct {
+			Algo string `json:"algo"`
+			Hash string `json:"hash"`
+		}
+
+		if b, diags := req.Private.GetKey(ctx, "password_hash"); diags != nil {
+			resp.Diagnostics.Append(diags...)
+		} else if b != nil {
+			if err := json.Unmarshal(b, &prev); err != nil {
+				// Older buggy format: ignore and treat as different
+				prev.Hash = ""
+			}
+		}
+		var plannedHash string
+
+		if prev.Hash != "" {
+			// Best-effort parse; if this fails, treat prev.Hash as a legacy value and
+			// leave prevHashes at its zero value so that we will recompute as needed.
+			_ = json.Unmarshal([]byte(prev.Hash), &prevHashes)
+		}
+
+		if !planPassword.IsUnknown() {
+			if planPassword.IsNull() {
+				plannedHashes.Password = ""
+			} else {
+				h := sha256.New()
+				h.Write([]byte(planPassword.ValueString()))
+				plannedHashes.Password = hex.EncodeToString(h.Sum(nil))
+			}
+		}
+		if data, err := json.Marshal(plannedHashes); err == nil {
+			plannedHash = string(data)
+		}
+
+		if plannedHashes.Password != "" && plannedHashes.Password != prevHashes.Password {
+			// Increment version and store new hash if password modified
+			newRev := types.Int64Value(curRev + 1)
+			resp.Diagnostics.Append(resp.Plan.SetAttribute(ctx, path.Root("password_version"), newRev)...)
+
+			val := map[string]string{"algo": "sha256", "hash": plannedHash}
+			b, err := json.Marshal(val)
+			if err != nil {
+				resp.Diagnostics.AddError("error marshalling password hash", err.Error())
+				return
+			}
+			resp.Diagnostics.Append(resp.Private.SetKey(ctx, "password_hash", b)...)
+		} else {
+			resp.Diagnostics.Append(resp.Plan.SetAttribute(ctx, path.Root("password_version"), curRev)...)
+		}
+	}
+
+}
+
 func (r *CertificateAuthserviceResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	//var diags diag.Diagnostics
 	var data CertificateAuthserviceModel
@@ -78,19 +174,71 @@ func (r *CertificateAuthserviceResource) Create(ctx context.Context, req resourc
 		return
 	}
 
-	apiRes, _, err := r.client.SecurityAPI.
-		CertificateAuthserviceAPI.
-		Create(ctx).
-		CertificateAuthservice(*data.Expand(ctx, &resp.Diagnostics)).
-		ReturnFieldsPlus(readableAttributesForCertificateAuthservice).
-		ReturnAsObject(1).
-		Execute()
+	payload := data.Expand(ctx, &resp.Diagnostics)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	var apiRes *security.CreateCertificateAuthserviceResponse
+
+	passwordVersion := types.Int64Value(0)
+	var password types.String
+	resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("remote_lookup_password"), &password)...)
+
+	secretData := certAuthHashState{}
+
+	if !password.IsNull() && !password.IsUnknown() {
+
+		payload.RemoteLookupPassword = password.ValueStringPointer()
+		passwordVersion = types.Int64Value(1)
+		h := sha256.New()
+		h.Write([]byte(password.ValueString()))
+		secretData.Password = hex.EncodeToString(h.Sum(nil))
+
+		secretDataJSON, _ := json.Marshal(secretData)
+		val := map[string]string{"algo": "sha256", "hash": string(secretDataJSON)}
+		hashedPassword, err := json.Marshal(val)
+		if err != nil {
+			resp.Diagnostics.AddError("Private State Marshal Error", err.Error())
+			return
+		}
+		resp.Diagnostics.Append(resp.Private.SetKey(ctx, "password_hash", hashedPassword)...)
+	}
+
+	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		var (
+			httpRes *http.Response
+			callErr error
+		)
+		apiRes, httpRes, callErr = r.client.SecurityAPI.
+			CertificateAuthserviceAPI.
+			Create(ctx).
+			CertificateAuthservice(*payload).
+			ReturnFieldsPlus(readableAttributesForCertificateAuthservice).
+			ReturnAsObject(1).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
+
 	if err != nil {
+		if retry.IsAlreadyExistsErr(err) {
+			// Resource already exists, import required
+			resp.Diagnostics.AddError(
+				"Resource Already Exists",
+				fmt.Sprintf("Resource already exists, error: %s.\nPlease import the existing resource into terraform state.", err.Error()),
+			)
+			return
+		}
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create CertificateAuthservice, got error: %s", err))
 		return
 	}
 
 	res := apiRes.CreateCertificateAuthserviceResponseAsObject.GetResult()
+	data.PasswordVersion = passwordVersion
 
 	data.Flatten(ctx, &res, &resp.Diagnostics)
 
@@ -109,13 +257,28 @@ func (r *CertificateAuthserviceResource) Read(ctx context.Context, req resource.
 		return
 	}
 
-	apiRes, httpRes, err := r.client.SecurityAPI.
-		CertificateAuthserviceAPI.
-		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
-		ReturnFieldsPlus(readableAttributesForCertificateAuthservice).
-		ReturnAsObject(1).
-		ProxySearch(config.GetProxySearch()).
-		Execute()
+	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
+
+	var (
+		httpRes *http.Response
+		apiRes  *security.GetCertificateAuthserviceResponse
+	)
+
+	err := retry.Do(ctx, nil, func(ctx context.Context) (int, error) {
+		var callErr error
+		apiRes, httpRes, callErr = r.client.SecurityAPI.
+			CertificateAuthserviceAPI.
+			Read(ctx, resourceRef).
+			ReturnFieldsPlus(readableAttributesForCertificateAuthservice).
+			ReturnAsObject(1).
+			ProxySearch(config.GetProxySearch()).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
 
 	//remove from the state if not found
 	if err != nil {
@@ -155,14 +318,43 @@ func (r *CertificateAuthserviceResource) Update(ctx context.Context, req resourc
 		resp.Diagnostics.Append(diags...)
 		return
 	}
+	var password types.String
+	resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("remote_lookup_password"), &password)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
 
-	apiRes, _, err := r.client.SecurityAPI.
-		CertificateAuthserviceAPI.
-		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
-		CertificateAuthservice(*data.Expand(ctx, &resp.Diagnostics)).
-		ReturnFieldsPlus(readableAttributesForCertificateAuthservice).
-		ReturnAsObject(1).
-		Execute()
+	payload := data.Expand(ctx, &resp.Diagnostics)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+	if !password.IsNull() && !password.IsUnknown() {
+		payload.RemoteLookupPassword = password.ValueStringPointer()
+	}
+
+	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
+
+	var apiRes *security.UpdateCertificateAuthserviceResponse
+
+	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		var (
+			httpRes *http.Response
+			callErr error
+		)
+		apiRes, httpRes, callErr = r.client.SecurityAPI.
+			CertificateAuthserviceAPI.
+			Update(ctx, resourceRef).
+			CertificateAuthservice(*payload).
+			ReturnFieldsPlus(readableAttributesForCertificateAuthservice).
+			ReturnAsObject(1).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
+
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update CertificateAuthservice, got error: %s", err))
 		return
@@ -186,14 +378,24 @@ func (r *CertificateAuthserviceResource) Delete(ctx context.Context, req resourc
 		return
 	}
 
-	httpRes, err := r.client.SecurityAPI.
-		CertificateAuthserviceAPI.
-		Delete(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
-		Execute()
-	if err != nil {
-		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
-			return
+	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
+
+	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		httpRes, callErr := r.client.SecurityAPI.
+			CertificateAuthserviceAPI.
+			Delete(ctx, resourceRef).
+			Execute()
+
+		if httpRes != nil {
+			if httpRes.StatusCode == http.StatusNotFound {
+				return 0, nil
+			}
+			return httpRes.StatusCode, callErr
 		}
+		return 0, callErr
+	})
+
+	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete CertificateAuthservice, got error: %s", err))
 		return
 	}
