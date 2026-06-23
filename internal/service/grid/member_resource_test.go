@@ -2125,7 +2125,6 @@ func TestAccMemberResource_OspfList(t *testing.T) {
 			"key_id":                 1,
 			"retransmit_interval":    5,
 			"transmit_delay":         1,
-			"authentication_key":     "key",
 		},
 	}
 	ospfListValUpdated := []map[string]any{

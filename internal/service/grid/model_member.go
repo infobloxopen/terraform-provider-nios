@@ -1055,7 +1055,14 @@ func (m *MemberModel) Flatten(ctx context.Context, from *grid.Member, diags *dia
 	m.NatSetting = FlattenMemberNatSetting(ctx, from.NatSetting, diags)
 	m.NodeInfo = flex.FlattenFrameworkListNestedBlock(ctx, from.NodeInfo, MemberNodeInfoAttrTypes, diags, FlattenMemberNodeInfo)
 	m.NtpSetting = FlattenMemberNtpSetting(ctx, from.NtpSetting, diags)
+	planOspfList := m.OspfList
 	m.OspfList = flex.FlattenFrameworkListNestedBlock(ctx, from.OspfList, MemberOspfListAttrTypes, diags, FlattenMemberOspfList)
+	if !planOspfList.IsNull() {
+		result, copyDiags := utils.CopyFieldFromPlanToRespList(ctx, planOspfList, m.OspfList, "authentication_key")
+		if !copyDiags.HasError() {
+			m.OspfList = result.(basetypes.ListValue)
+		}
+	}
 	m.PassiveHaArpEnabled = types.BoolPointerValue(from.PassiveHaArpEnabled)
 	m.Platform = flex.FlattenStringPointer(from.Platform)
 	m.PreProvisioning = FlattenMemberPreProvisioning(ctx, from.PreProvisioning, diags)
