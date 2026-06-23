@@ -713,7 +713,7 @@ func (r *FixedaddressResource) ValidateConfig(ctx context.Context, req resource.
 		diags := data.SnmpCredential.As(ctx, &snmpCredential, basetypes.ObjectAsOptions{})
 		resp.Diagnostics.Append(diags...)
 		if !resp.Diagnostics.HasError() {
-			if snmpCredential.CommunityString.IsNull() || snmpCredential.CommunityString.IsUnknown() || snmpCredential.CommunityString.ValueString() == "" {
+			if snmpCredential.CommunityString.IsNull() || (!snmpCredential.CommunityString.IsUnknown() && snmpCredential.CommunityString.ValueString() == "") {
 				resp.Diagnostics.AddAttributeError(
 					path.Root("snmp_credential").AtName("community_string"),
 					"Invalid configuration",
