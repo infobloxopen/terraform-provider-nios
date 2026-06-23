@@ -790,7 +790,13 @@ func (m *FixedaddressModel) Flatten(ctx context.Context, from *dhcp.Fixedaddress
 			m.Snmp3Credential = snmp3CredentialVal2.(types.Object)
 		}
 	}
-	m.SnmpCredential = FlattenFixedaddressSnmpCredential(ctx, from.SnmpCredential, diags)
+	planSnmpCredential := m.SnmpCredential
+	if from.UseSnmpCredential != nil && !*from.UseSnmpCredential && (planSnmpCredential.IsNull() || planSnmpCredential.IsUnknown()) {
+		m.SnmpCredential = types.ObjectNull(FixedaddressSnmpCredentialAttrTypes)
+	} else {
+		m.SnmpCredential = FlattenFixedaddressSnmpCredential(ctx, from.SnmpCredential, diags)
+	}
+
 	if m.Template.IsUnknown() || m.Template.IsNull() {
 		m.Template = flex.FlattenStringPointer(from.Template)
 	}
