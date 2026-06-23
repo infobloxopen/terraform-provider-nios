@@ -1619,10 +1619,10 @@ func TestAccIpv6networkcontainerResource_RirOrganization(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccIpv6networkcontainerRirOrganization(network, "test"),
+				Config: testAccIpv6networkcontainerRirOrganization(network, "rir-org-test1"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networkcontainerExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "rir_organization", "test"),
+					resource.TestCheckResourceAttr(resourceName, "rir_organization", "rir-org-test1"),
 					resource.TestCheckResourceAttr(resourceName, "rir", "RIPE"),
 				),
 			},
@@ -2261,7 +2261,7 @@ func testAccIpv6networkcontainerRirRegistrationAction(parentNetwork, childNetwor
 	return fmt.Sprintf(`
 resource "nios_ipam_ipv6network_container" "test_rir_parent" {
     network = %q
-    rir_organization = "test"
+    rir_organization = "rir-org-test1"
     extattrs = {
         "RIPE Network Name" = "TEST-NET-V6"
         "RIPE Description" = "Test IPv6 network"
@@ -2277,7 +2277,7 @@ resource "nios_ipam_ipv6network_container" "test_rir_registration_action" {
     depends_on = [nios_ipam_ipv6network_container.test_rir_parent]
     network = %q
     rir_registration_action = %q
-    rir_organization = "test"
+    rir_organization = "rir-org-test1"
     extattrs = {
         "RIPE Network Name" = "TEST-NET-V6-CHILD"
         "RIPE Description" = "Test IPv6 child network"

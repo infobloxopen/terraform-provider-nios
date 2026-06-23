@@ -88,12 +88,6 @@ func (r *NetworkcontainerResource) Create(ctx context.Context, req resource.Crea
 		data.FuncCall = r.UpdateFuncCallAttributeName(ctx, data, &resp.Diagnostics)
 	}
 
-	// Save rir_registration_action before expand/flatten (server doesn't persist this)
-	planRirRegAction := data.RirRegistrationAction
-
-	// Save remove_subnets before expand/flatten (delete-only param, server doesn't persist this)
-	planRemoveSubnets := data.RemoveSubnets
-
 	payload := data.Expand(ctx, &resp.Diagnostics, true)
 	if resp.Diagnostics.HasError() {
 		return
@@ -148,16 +142,6 @@ func (r *NetworkcontainerResource) Create(ctx context.Context, req resource.Crea
 	// Retain the original function call attributes
 	if len(origFunCallAttrs) > 0 {
 		data.FuncCall = types.ObjectValueMust(FuncCallAttrTypes, origFunCallAttrs)
-	}
-
-	// Retain the planned rir_registration_action (server doesn't persist this action field)
-	if !planRirRegAction.IsNull() && !planRirRegAction.IsUnknown() {
-		data.RirRegistrationAction = planRirRegAction
-	}
-
-	// Retain the planned remove_subnets (delete-only param, server doesn't persist this)
-	if !planRemoveSubnets.IsNull() && !planRemoveSubnets.IsUnknown() {
-		data.RemoveSubnets = planRemoveSubnets
 	}
 
 	// Save data into Terraform state
@@ -244,23 +228,7 @@ func (r *NetworkcontainerResource) Read(ctx context.Context, req resource.ReadRe
 		return
 	}
 
-	// Save rir_registration_action from state (server doesn't persist this action field)
-	stateRirRegAction := data.RirRegistrationAction
-
-	// Save remove_subnets from state (delete-only param, server doesn't persist this)
-	stateRemoveSubnets := data.RemoveSubnets
-
 	data.Flatten(ctx, &res, &resp.Diagnostics)
-
-	// Restore rir_registration_action from state
-	if !stateRirRegAction.IsNull() && !stateRirRegAction.IsUnknown() {
-		data.RirRegistrationAction = stateRirRegAction
-	}
-
-	// Restore remove_subnets from state
-	if !stateRemoveSubnets.IsNull() && !stateRemoveSubnets.IsUnknown() {
-		data.RemoveSubnets = stateRemoveSubnets
-	}
 
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
@@ -408,23 +376,7 @@ func (r *NetworkcontainerResource) Update(ctx context.Context, req resource.Upda
 		return
 	}
 
-	// Save rir_registration_action from plan (server doesn't persist this action field)
-	planRirRegAction := data.RirRegistrationAction
-
-	// Save remove_subnets from plan (delete-only param, server doesn't persist this)
-	planRemoveSubnets := data.RemoveSubnets
-
 	data.Flatten(ctx, &res, &resp.Diagnostics)
-
-	// Restore rir_registration_action from plan
-	if !planRirRegAction.IsNull() && !planRirRegAction.IsUnknown() {
-		data.RirRegistrationAction = planRirRegAction
-	}
-
-	// Restore remove_subnets from plan
-	if !planRemoveSubnets.IsNull() && !planRemoveSubnets.IsUnknown() {
-		data.RemoveSubnets = planRemoveSubnets
-	}
 
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)

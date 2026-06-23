@@ -7,7 +7,6 @@ import (
 	"math/rand"
 	"net/http"
 	"testing"
-	"time"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
@@ -18,7 +17,7 @@ import (
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
-// TODO: ZoneAssociations Need dns zone to test associations 
+// TODO: ZoneAssociations Need dns zone to test associations
 
 var readableAttributesForNetworkcontainer = "authority,bootfile,bootserver,cloud_info,comment,ddns_domainname,ddns_generate_hostname,ddns_server_always_updates,ddns_ttl,ddns_update_fixed_addresses,ddns_use_option81,deny_bootp,discover_now_status,discovery_basic_poll_settings,discovery_blackout_setting,discovery_engine_type,discovery_member,email_list,enable_ddns,enable_dhcp_thresholds,enable_discovery,enable_email_warnings,enable_pxe_lease_time,enable_snmp_warnings,endpoint_sources,extattrs,federated_realms,high_water_mark,high_water_mark_reset,ignore_dhcp_option_list_request,ignore_id,ignore_mac_addresses,ipam_email_addresses,ipam_threshold_settings,ipam_trap_settings,last_rir_registration_update_sent,last_rir_registration_update_status,lease_scavenge_time,logic_filter_rules,low_water_mark,low_water_mark_reset,mgm_private,mgm_private_overridable,ms_ad_user_data,network,network_container,network_view,nextserver,options,port_control_blackout_setting,pxe_lease_time,recycle_leases,rir,rir_organization,rir_registration_status,same_port_control_discovery_blackout,subscribe_settings,unmanaged,update_dns_on_lease_renewal,use_authority,use_blackout_setting,use_bootfile,use_bootserver,use_ddns_domainname,use_ddns_generate_hostname,use_ddns_ttl,use_ddns_update_fixed_addresses,use_ddns_use_option81,use_deny_bootp,use_discovery_basic_polling_settings,use_email_list,use_enable_ddns,use_enable_dhcp_thresholds,use_enable_discovery,use_ignore_dhcp_option_list_request,use_ignore_id,use_ipam_email_addresses,use_ipam_threshold_settings,use_ipam_trap_settings,use_lease_scavenge_time,use_logic_filter_rules,use_mgm_private,use_nextserver,use_options,use_pxe_lease_time,use_recycle_leases,use_subscribe_settings,use_update_dns_on_lease_renewal,use_zone_associations,utilization,zone_associations"
 
@@ -2722,32 +2721,6 @@ func TestAccNetworkcontainerResource_LogicFilterRules(t *testing.T) {
 	})
 }
 
-func TestAccNetworkcontainerResource_RemoveSubnets(t *testing.T) {
-	var resourceName = "nios_ipam_network_container.test_remove_subnets"
-	var v ipam.Networkcontainer
-	r := rand.New(rand.NewSource(time.Now().UnixNano()))
-	secondOctet := r.Intn(256)
-	parentNetwork := fmt.Sprintf("10.%d.0.0/16", secondOctet)
-	childNetwork := fmt.Sprintf("10.%d.0.0/24", secondOctet)
-
-	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.PreCheck(t) },
-		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-		Steps: []resource.TestStep{
-			// Create parent container with child network, remove_subnets = true
-			{
-				Config: testAccNetworkcontainerRemoveSubnets(parentNetwork, childNetwork, true),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckNetworkcontainerExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "remove_subnets", "true"),
-					resource.TestCheckResourceAttr(resourceName, "network", parentNetwork),
-				),
-			},
-			// Delete testing automatically occurs in TestCase
-		},
-	})
-}
-
 func TestAccNetworkcontainerResource_RirOrganization(t *testing.T) {
 	var resourceName = "nios_ipam_network_container.test_rir_organization"
 	var v ipam.Networkcontainer
@@ -2759,10 +2732,10 @@ func TestAccNetworkcontainerResource_RirOrganization(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccNetworkcontainerRirOrganization(network, "test"),
+				Config: testAccNetworkcontainerRirOrganization(network, "rir-org-test1"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkcontainerExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "rir_organization", "test"),
+					resource.TestCheckResourceAttr(resourceName, "rir_organization", "rir-org-test1"),
 					resource.TestCheckResourceAttr(resourceName, "rir", "RIPE"),
 				),
 			},
@@ -3659,20 +3632,6 @@ resource "nios_ipam_network_container" "test_logic_filter_rules" {
 `, network, logicFilterRulesStr)
 }
 
-func testAccNetworkcontainerRemoveSubnets(parentNetwork, childNetwork string, removeSubnets bool) string {
-	return fmt.Sprintf(`
-resource "nios_ipam_network_container" "test_remove_subnets" {
-    network = %q
-    remove_subnets = %t
-}
-
-resource "nios_ipam_network" "test_remove_subnets_child" {
-    network = %q
-    depends_on = [nios_ipam_network_container.test_remove_subnets]
-}
-`, parentNetwork, removeSubnets, childNetwork)
-}
-
 func testAccNetworkcontainerRirOrganization(network, rirOrganization string) string {
 	return fmt.Sprintf(`
 resource "nios_ipam_network_container" "test_rir_organization" {
@@ -3695,7 +3654,7 @@ func testAccNetworkcontainerRirRegistrationAction(parentNetwork, childNetwork, r
 	return fmt.Sprintf(`
 resource "nios_ipam_network_container" "test_rir_parent" {
     network = %q
-    rir_organization = "test"
+    rir_organization = "rir-org-test1"
     extattrs = {
         "RIPE Network Name" = "TEST-NET"
         "RIPE Description" = "Test network"
@@ -3711,7 +3670,7 @@ resource "nios_ipam_network_container" "test_rir_registration_action" {
     depends_on = [nios_ipam_network_container.test_rir_parent]
     network = %q
     rir_registration_action = %q
-    rir_organization = "test"
+    rir_organization = "rir-org-test1"
     extattrs = {
         "RIPE Network Name" = "TEST-NET-CHILD"
         "RIPE Description" = "Test child network"

@@ -17,8 +17,8 @@ import (
 )
 
 // TODO: Members Need a valid member to test members and GO client does not support it yet.
-// TODO: SubscribeSettings Need a valid subscribe settings to test subscribe settings. 
-// TODO: ZoneAssociations Need dns zone to test associations. 
+// TODO: SubscribeSettings Need a valid subscribe settings to test subscribe settings.
+// TODO: ZoneAssociations Need dns zone to test associations.
 var readableAttributesForIpv6network = "cloud_info,comment,ddns_domainname,ddns_enable_option_fqdn,ddns_generate_hostname,ddns_server_always_updates,ddns_ttl,disable,discover_now_status,discovered_bgp_as,discovered_bridge_domain,discovered_tenant,discovered_vlan_id,discovered_vlan_name,discovered_vrf_description,discovered_vrf_name,discovered_vrf_rd,discovery_basic_poll_settings,discovery_blackout_setting,discovery_engine_type,discovery_member,domain_name,domain_name_servers,enable_ddns,enable_discovery,enable_ifmap_publishing,endpoint_sources,extattrs,federated_realms,last_rir_registration_update_sent,last_rir_registration_update_status,logic_filter_rules,members,mgm_private,mgm_private_overridable,ms_ad_user_data,network,network_container,network_view,options,port_control_blackout_setting,preferred_lifetime,recycle_leases,rir,rir_organization,rir_registration_status,same_port_control_discovery_blackout,subscribe_settings,unmanaged,unmanaged_count,update_dns_on_lease_renewal,use_blackout_setting,use_ddns_domainname,use_ddns_enable_option_fqdn,use_ddns_generate_hostname,use_ddns_ttl,use_discovery_basic_polling_settings,use_domain_name,use_domain_name_servers,use_enable_ddns,use_enable_discovery,use_enable_ifmap_publishing,use_logic_filter_rules,use_mgm_private,use_options,use_preferred_lifetime,use_recycle_leases,use_subscribe_settings,use_update_dns_on_lease_renewal,use_valid_lifetime,use_zone_associations,valid_lifetime,vlans,zone_associations"
 
 func TestAccIpv6networkResource_basic(t *testing.T) {
@@ -1901,10 +1901,10 @@ func TestAccIpv6networkResource_RirOrganization(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccIpv6networkRirOrganization(network, "test"),
+				Config: testAccIpv6networkRirOrganization(network, "rir-org-test1"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networkExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "rir_organization", "test"),
+					resource.TestCheckResourceAttr(resourceName, "rir_organization", "rir-org-test1"),
 					resource.TestCheckResourceAttr(resourceName, "rir", "RIPE"),
 				),
 			},
@@ -2624,7 +2624,7 @@ func testAccIpv6networkRirRegistrationAction(parentNetwork, childNetwork, rirReg
 	return fmt.Sprintf(`
 resource "nios_ipam_ipv6network_container" "test_rir_parent" {
     network = %q
-    rir_organization = "test"
+    rir_organization = "rir-org-test1"
     extattrs = {
         "RIPE Network Name" = "TEST-NET-V6"
         "RIPE Description" = "Test IPv6 network"
@@ -2640,7 +2640,7 @@ resource "nios_ipam_ipv6network" "test_rir_registration_action" {
     depends_on = [nios_ipam_ipv6network_container.test_rir_parent]
     network = %q
     rir_registration_action = %q
-    rir_organization = "test"
+    rir_organization = "rir-org-test1"
     extattrs = {
         "RIPE Network Name" = "TEST-NET-V6-CHILD"
         "RIPE Description" = "Test IPv6 child network"
