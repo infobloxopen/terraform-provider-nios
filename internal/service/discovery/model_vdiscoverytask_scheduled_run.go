@@ -159,7 +159,7 @@ func (m *VdiscoverytaskScheduledRunModel) Expand(ctx context.Context, diags *dia
 		Weekdays:        flex.ExpandFrameworkListString(ctx, m.Weekdays, diags),
 		TimeZone:        flex.ExpandStringPointer(m.TimeZone),
 		RecurringTime:   flex.ExpandInt64Pointer(m.RecurringTime),
-		Frequency:       flex.ExpandStringPointer(m.Frequency),
+		Frequency:       flex.ExpandStringPointerEmptyAsNil(m.Frequency),
 		Every:           flex.ExpandInt64Pointer(m.Every),
 		MinutesPastHour: flex.ExpandInt64Pointer(m.MinutesPastHour),
 		HourOfDay:       flex.ExpandInt64Pointer(m.HourOfDay),
@@ -193,7 +193,7 @@ func (m *VdiscoverytaskScheduledRunModel) Flatten(ctx context.Context, from *dis
 	m.Weekdays = flex.FlattenFrameworkUnorderedList(ctx, types.StringType, from.Weekdays, diags)
 	m.TimeZone = flex.FlattenStringPointer(from.TimeZone)
 	m.RecurringTime = flex.FlattenInt64Pointer(from.RecurringTime)
-	m.Frequency = flex.FlattenStringPointer(from.Frequency)
+	m.Frequency = flex.FlattenStringPointerNilAsNotEmpty(from.Frequency)
 	m.Every = flex.FlattenInt64Pointer(from.Every)
 	m.MinutesPastHour = flex.FlattenInt64Pointer(from.MinutesPastHour)
 	m.HourOfDay = flex.FlattenInt64Pointer(from.HourOfDay)
