@@ -17,9 +17,7 @@ func TestAccCertificateAuthserviceDataSource_Filters(t *testing.T) {
 	resourceName := "nios_security_certificate_authservice.test"
 	var v security.CertificateAuthservice
 	name := acctest.RandomNameWithPrefix("certificate_authservice")
-	caCertificate := []string{
-		"cacertificate/b25lLmVhcF9jYV9jZXJ0JDAuNzg5Y2IyOGVkZDgyMDE5MTYzODljOGQ5MGI2MTM4YmFlNDIxODY1YmY2YWZlMTdiMmEyNDRjNTIwNDRkMGQ3NWFiMGY0MGFjNTBmYzc3ZGMwM2YwOTI2NWRhNDRkYzllMjQ0OTBkZmMyMWEyOWVlYmIxODhlMDFlMWY5OGYwOTg:CN%3D%22ib-root-ca%22",
-	}
+	caCertificate := []string{utils.GetNIOSCACert1Ref()}
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },

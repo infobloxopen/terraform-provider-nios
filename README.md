@@ -20,9 +20,23 @@ The Terraform Provider for Infoblox NIOS allows you to manage your Infoblox NIOS
 
 ## Requirements
 
-- [Go](https://golang.org/doc/install) >= 1.18 (to build the provider plugin) (recommended version is 1.24.4 or later)
-- [Terraform](https://www.terraform.io/downloads.html) >= 1.8.0
+- [Go](https://golang.org/doc/install) >= 1.25.1
+- [Terraform](https://www.terraform.io/downloads.html) >= 1.12.1
 - [Infoblox NIOS](https://www.infoblox.com/products/nios/) (version 9.0.6 or higher)
+
+## Version Compatibility Matrix
+
+The table below shows the compatibility between different versions of the Terraform Provider NIOS and the required versions of NIOS, WAPI, Terraform, and Go.
+
+| Provider Version | Go Version | Terraform Version | NIOS Version | WAPI Version |
+|-----------------|------------|-------------------|--------------|--------------|
+| 2.0.0 | >= 1.25.1 | >= 1.12.1 | 9.1.0 or higher | v2.14 |
+| 1.1.0 , 1.0.0 , 0.0.1 | >= 1.18 | >= 1.8.0 | 9.0.6 or higher | v2.13.6 |
+
+
+> **Note:** Documentation and guides are maintained on version-specific branches. 
+> For v2.x, refer to the [`nios_v9.1.0`](https://github.com/infobloxopen/terraform-provider-nios/tree/nios_v9.1.0/README.md) branch. For v1.x, refer to the [`main`](https://github.com/infobloxopen/terraform-provider-nios/tree/main/README.md) branch.
+
 
 ## Getting Started
 

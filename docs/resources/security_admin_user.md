@@ -56,9 +56,11 @@ resource "nios_security_admin_user" "admin_user_additional_fields" {
 
 ### Required
 
+> **NOTE**: [Write-only arguments](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments) are supported in Terraform 1.11 and later.
+
 - `admin_groups` (List of String) The names of the Admin Groups to which this Admin User belongs. Currently, this is limited to only one Admin Group.
 - `name` (String) The name of the admin user.
-- `password` (String, Sensitive) The password for the administrator to use when logging in.
+- `password` (String, [Write-only](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments)) The password for the administrator to use when logging in.
 
 ### Optional
 
@@ -79,6 +81,7 @@ resource "nios_security_admin_user" "admin_user_additional_fields" {
 ### Read-Only
 
 - `extattrs_all` (Map of String) Extensible attributes associated with the object , including default attributes.
+- `password_revision` (Number) Internal revision incremented when admin user password changes.
 - `ref` (String) The reference to the object.
 - `status` (String) Status of the user account.
 
