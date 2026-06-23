@@ -1481,7 +1481,7 @@ func TestAccIpv6networkcontainerResource_DiscoveryMember(t *testing.T) {
 	var resourceName = "nios_ipam_ipv6network_container.test_discovery_member"
 	var v ipam.Ipv6networkcontainer
 	network := acctest.RandomIPv6Network()
-	discoveryMember := utils.GetNIOSGridMemberHostName()
+	discoveryMember := utils.GetNIOSDiscoveryMemberHostName()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1553,30 +1553,6 @@ func TestAccIpv6networkcontainerResource_EnableImmediateDiscovery(t *testing.T) 
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networkcontainerExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "enable_immediate_discovery", "false"),
-				),
-			},
-			// Delete testing automatically occurs in TestCase
-		},
-	})
-}
-
-func TestAccIpv6networkcontainerResource_FederatedRealms(t *testing.T) {
-	t.Skip("Requires federated realms server to be enabled")
-	var resourceName = "nios_ipam_ipv6network_container.test_federated_realms"
-	var v ipam.Ipv6networkcontainer
-	network := acctest.RandomIPv6Network()
-
-	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.PreCheck(t) },
-		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-		Steps: []resource.TestStep{
-			// Create and Read
-			{
-				Config: testAccIpv6networkcontainerFederatedRealms(network, "test_realm", "test_realm_id"),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckIpv6networkcontainerExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "federated_realms.0.name", "test_realm"),
-					resource.TestCheckResourceAttr(resourceName, "federated_realms.0.id", "test_realm_id"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -2225,7 +2201,7 @@ resource "nios_ipam_ipv6network_container" "test_discovery_member" {
 }
 
 func testAccIpv6networkcontainerEnableDiscovery(network string, enableDiscovery bool) string {
-	discoveryMember := utils.GetNIOSGridMemberHostName()
+	discoveryMember := utils.GetNIOSDiscoveryMemberHostName()
 	return fmt.Sprintf(`
 resource "nios_ipam_ipv6network_container" "test_enable_discovery" {
     network = %q
@@ -2237,7 +2213,7 @@ resource "nios_ipam_ipv6network_container" "test_enable_discovery" {
 }
 
 func testAccIpv6networkcontainerEnableImmediateDiscovery(network string, enableImmediateDiscovery bool) string {
-	discoveryMember := utils.GetNIOSGridMemberHostName()
+	discoveryMember := utils.GetNIOSDiscoveryMemberHostName()
 	return fmt.Sprintf(`
 resource "nios_ipam_ipv6network_container" "test_enable_immediate_discovery" {
     network = %q
