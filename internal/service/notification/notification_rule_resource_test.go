@@ -22,8 +22,6 @@ import (
 // Notification Template - DHCP_Lease, Version5_Syslog_Action_Template, IPAM_PxgridEvent
 
 // TODO
-// TestAccNotificationRuleResource_EventPriority
-// TestAccNotificationRuleResource_ScheduledEvent
 // TestAccNotificationRuleResource_NotificationAction
 
 var readableAttributesForNotificationRule = "all_members,comment,disable,enable_event_deduplication,enable_event_deduplication_log,event_deduplication_fields,event_deduplication_lookback_period,event_priority,event_type,expression_list,name,notification_action,notification_target,publish_settings,scheduled_event,selected_members,template_instance,use_publish_settings"
@@ -431,14 +429,15 @@ func TestAccNotificationRuleResource_EventDeduplicationLookbackPeriod(t *testing
 
 // The event priority can be configured only for outbound notification rules that contain the scheduled event type
 func TestAccNotificationRuleResource_EventPriority(t *testing.T) {
-	if notificationTarget == "" || syslogEndpoint == "" {
-		t.Skip("NIOS_NOTIFICATION_REST_ENDPOINT_REF and NIOS_SYSLOG_ENDPOINT_REF environment variables must be set for this test to run")
+	t.Skip("Requires a Schedule_Event_Template notification template supporting SCHEDULE event type to be uploaded to the NIOS grid")
+	if notificationTarget == "" {
+		t.Skip("NIOS_NOTIFICATION_REST_ENDPOINT_REF environment variable must be set for this test to run")
 	}
 	var resourceName = "nios_notification_rule.test_event_priority"
 	var v notification.NotificationRule
 	name := acctest.RandomNameWithPrefix("example-notification-rule")
 	localTemplateInstance := map[string]any{
-		"template": "Version5_Syslog_Action_Template",
+		"template": "Schedule_Event_Template",
 	}
 	scheduledEvent := map[string]any{
 		"weekdays":          []string{"MONDAY"},
@@ -456,7 +455,7 @@ func TestAccNotificationRuleResource_EventPriority(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccNotificationRuleEventPriority("SCHEDULE", expressionList, name, notificationAction, syslogEndpoint, localTemplateInstance, scheduledEvent, "NORMAL"),
+				Config: testAccNotificationRuleEventPriority("SCHEDULE", expressionList, name, notificationAction, notificationTarget, localTemplateInstance, scheduledEvent, "NORMAL"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNotificationRuleExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "event_priority", "NORMAL"),
@@ -464,7 +463,7 @@ func TestAccNotificationRuleResource_EventPriority(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccNotificationRuleEventPriority("SCHEDULE", expressionList, name, notificationAction, syslogEndpoint, localTemplateInstance, scheduledEvent, "HIGH"),
+				Config: testAccNotificationRuleEventPriority("SCHEDULE", expressionList, name, notificationAction, notificationTarget, localTemplateInstance, scheduledEvent, "HIGH"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNotificationRuleExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "event_priority", "HIGH"),
@@ -770,14 +769,15 @@ func TestAccNotificationRuleResource_PublishSettings(t *testing.T) {
 }
 
 func TestAccNotificationRuleResource_ScheduledEvent(t *testing.T) {
-	if notificationTarget == "" || syslogEndpoint == "" {
-		t.Skip("NIOS_NOTIFICATION_REST_ENDPOINT_REF and NIOS_SYSLOG_ENDPOINT_REF environment variables must be set for this test to run")
+	t.Skip("Requires a Schedule_Event_Template notification template supporting SCHEDULE event type to be uploaded to the NIOS grid")
+	if notificationTarget == "" {
+		t.Skip("NIOS_NOTIFICATION_REST_ENDPOINT_REF environment variable must be set for this test to run")
 	}
 	var resourceName = "nios_notification_rule.test_scheduled_event"
 	var v notification.NotificationRule
 	name := acctest.RandomNameWithPrefix("example-notification-rule")
 	localTemplateInstance := map[string]any{
-		"template": "Version5_Syslog_Action_Template",
+		"template": "Schedule_Event_Template",
 	}
 
 	scheduleEvent := map[string]any{
@@ -805,7 +805,7 @@ func TestAccNotificationRuleResource_ScheduledEvent(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccNotificationRuleScheduledEvent("SCHEDULE", expressionList, name, notificationAction, syslogEndpoint, localTemplateInstance, scheduleEvent),
+				Config: testAccNotificationRuleScheduledEvent("SCHEDULE", expressionList, name, notificationAction, notificationTarget, localTemplateInstance, scheduleEvent),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNotificationRuleExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "event_type", "SCHEDULE"),
@@ -820,7 +820,7 @@ func TestAccNotificationRuleResource_ScheduledEvent(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccNotificationRuleScheduledEvent("SCHEDULE", expressionList, name, notificationAction, syslogEndpoint, localTemplateInstance, scheduleEventUpdated),
+				Config: testAccNotificationRuleScheduledEvent("SCHEDULE", expressionList, name, notificationAction, notificationTarget, localTemplateInstance, scheduleEventUpdated),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNotificationRuleExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "scheduled_event.repeat", "RECUR"),
