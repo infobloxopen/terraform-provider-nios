@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
@@ -45,15 +46,15 @@ var Ipv6fixedaddressSnmp3CredentialResourceSchemaAttributes = map[string]schema.
 		MarkdownDescription: "The SNMPv3 user name.",
 	},
 	"authentication_protocol": schema.StringAttribute{
-		Required: true, Validators: []validator.String{
+		Required: true,
+		Validators: []validator.String{
 			stringvalidator.OneOf("MD5", "NONE", "SHA", "SHA-224", "SHA-256", "SHA-384", "SHA-512"),
 		},
 		MarkdownDescription: "Authentication protocol for the SNMPv3 user.",
 	},
 	"authentication_password": schema.StringAttribute{
 		Optional:  true,
-		Computed:  true,
-		Sensitive: true,
+		WriteOnly: true,
 		Validators: []validator.String{
 			customvalidator.ValidateTrimmedString(),
 		},
@@ -68,21 +69,25 @@ var Ipv6fixedaddressSnmp3CredentialResourceSchemaAttributes = map[string]schema.
 	},
 	"privacy_password": schema.StringAttribute{
 		Optional:  true,
-		Computed:  true,
-		Sensitive: true,
+		WriteOnly: true,
 		Validators: []validator.String{
 			customvalidator.ValidateTrimmedString(),
 		},
 		MarkdownDescription: "Privacy password for the SNMPv3 user.",
 	},
 	"comment": schema.StringAttribute{
-		Optional:            true,
-		Computed:            true,
+		Optional: true,
+		Computed: true,
+		Default:  stringdefault.StaticString(""),
+		Validators: []validator.String{
+			customvalidator.ValidateTrimmedString(),
+		},
 		MarkdownDescription: "Comments for the SNMPv3 user.",
 	},
 	"credential_group": schema.StringAttribute{
 		Optional:            true,
 		Computed:            true,
+		Default:             stringdefault.StaticString("default"),
 		MarkdownDescription: "Group for the SNMPv3 credential.",
 	},
 }
@@ -135,9 +140,7 @@ func (m *Ipv6fixedaddressSnmp3CredentialModel) Flatten(ctx context.Context, from
 	}
 	m.User = flex.FlattenStringPointer(from.User)
 	m.AuthenticationProtocol = flex.FlattenStringPointer(from.AuthenticationProtocol)
-	m.AuthenticationPassword = flex.FlattenStringPointer(from.AuthenticationPassword)
 	m.PrivacyProtocol = flex.FlattenStringPointer(from.PrivacyProtocol)
-	m.PrivacyPassword = flex.FlattenStringPointer(from.PrivacyPassword)
 	m.Comment = flex.FlattenStringPointer(from.Comment)
 	m.CredentialGroup = flex.FlattenStringPointer(from.CredentialGroup)
 }
