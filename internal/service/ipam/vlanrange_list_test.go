@@ -82,14 +82,24 @@ func TestAccVlanrangeList_Filters(t *testing.T) {
 					querycheck.ExpectResourceKnownValues(
 						resourceName,
 						queryfilter.ByResourceIdentity(map[string]knownvalue.Check{
-							// TODO : Update the ref prefix with the correct identifying object for the resource
 							"ref": knownvalue.StringRegexp(regexp.MustCompile("vlanrange/")),
 						}),
 						[]querycheck.KnownValueCheck{
-							// TODO : Add checks for required fields
 							{
 								Path:       tfjsonpath.New("name"),
 								KnownValue: knownvalue.StringExact(vlanRange),
+							},
+							{
+								Path:       tfjsonpath.New("end_vlan_id"),
+								KnownValue: knownvalue.Int64Exact(71),
+							},
+							{
+								Path:       tfjsonpath.New("start_vlan_id"),
+								KnownValue: knownvalue.Int64Exact(61),
+							},
+							{
+								Path:       tfjsonpath.New("vlan_view"),
+								KnownValue: knownvalue.StringRegexp(regexp.MustCompile("vlanview/")),
 							},
 						},
 					),
