@@ -431,9 +431,6 @@ func TestAccNotificationRuleResource_EventDeduplicationLookbackPeriod(t *testing
 
 // The event priority can be configured only for outbound notification rules that contain the scheduled event type
 func TestAccNotificationRuleResource_EventPriority(t *testing.T) {
-	// event_priority requires event_type=SCHEDULE, which needs a notification template supporting
-	// the SCHEDULE event type. No such template exists on the test grids (templates are read-only in NIOS).
-	t.Skip("Skipped: no notification template supporting SCHEDULE event_type exists on the test grid")
 	if notificationTarget == "" {
 		t.Skip("NIOS_NOTIFICATION_REST_ENDPOINT_REF environment variable must be set for this test to run")
 	}
@@ -761,9 +758,6 @@ func TestAccNotificationRuleResource_PublishSettings(t *testing.T) {
 }
 
 func TestAccNotificationRuleResource_ScheduledEvent(t *testing.T) {
-	// event_type=SCHEDULE requires a notification template supporting the SCHEDULE event type.
-	// No such template exists on the test grids (templates are read-only in NIOS).
-	t.Skip("Skipped: no notification template supporting SCHEDULE event_type exists on the test grid")
 	if notificationTarget == "" {
 		t.Skip("NIOS_NOTIFICATION_REST_ENDPOINT_REF environment variable must be set for this test to run")
 	}

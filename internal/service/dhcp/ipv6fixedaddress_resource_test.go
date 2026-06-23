@@ -1016,7 +1016,6 @@ func TestAccIpv6fixedaddressResource_PreferredLifetime(t *testing.T) {
 }
 
 func TestAccIpv6fixedaddressResource_Template(t *testing.T) {
-	t.Skip("Provider bug: template is write-only in WAPI but provider doesn't preserve planned value on read (returns empty string)")
 	var resourceName = "nios_dhcp_ipv6fixedaddress.test_template"
 	var v dhcp.Ipv6fixedaddress
 	ipv6Network := "2001:db8:abcd:1231::/64"
