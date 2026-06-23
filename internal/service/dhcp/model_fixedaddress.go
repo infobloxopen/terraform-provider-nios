@@ -16,6 +16,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
@@ -81,6 +82,7 @@ type FixedaddressModel struct {
 	PxeLeaseTime                   types.Int64         `tfsdk:"pxe_lease_time"`
 	ReservedInterface              types.String        `tfsdk:"reserved_interface"`
 	RestartIfNeeded                types.Bool          `tfsdk:"restart_if_needed"`
+	SecretsVersion                 types.Int64         `tfsdk:"secrets_version"`
 	Snmp3Credential                types.Object        `tfsdk:"snmp3_credential"`
 	SnmpCredential                 types.Object        `tfsdk:"snmp_credential"`
 	Template                       types.String        `tfsdk:"template"`
@@ -148,6 +150,7 @@ var FixedaddressAttrTypes = map[string]attr.Type{
 	"pxe_lease_time":                      types.Int64Type,
 	"reserved_interface":                  types.StringType,
 	"restart_if_needed":                   types.BoolType,
+	"secrets_version":                     types.Int64Type,
 	"snmp3_credential":                    types.ObjectType{AttrTypes: FixedaddressSnmp3CredentialAttrTypes},
 	"snmp_credential":                     types.ObjectType{AttrTypes: FixedaddressSnmpCredentialAttrTypes},
 	"template":                            types.StringType,
@@ -226,7 +229,6 @@ var FixedaddressResourceSchemaAttributes = map[string]schema.Attribute{
 			Attributes: FixedaddressCliCredentialsResourceSchemaAttributes,
 		},
 		Optional: true,
-		Computed: true,
 		Validators: []validator.List{
 			listvalidator.SizeAtLeast(1),
 			listvalidator.AlsoRequires(path.MatchRoot("use_cli_credentials")),
@@ -531,10 +533,17 @@ var FixedaddressResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional:            true,
 		MarkdownDescription: "Restarts the member service. The restart_if_needed flag can trigger a restart on DHCP services only when it is enabled on CP member.",
 	},
+	// A computed trigger to cause an in-place Update when secrets change.
+	"secrets_version": schema.Int64Attribute{
+		Computed:            true,
+		MarkdownDescription: "Internal version incremented when secrets (snmp3_credential and cli_credentials) change.",
+		PlanModifiers: []planmodifier.Int64{
+			int64planmodifier.UseStateForUnknown(),
+		},
+	},
 	"snmp3_credential": schema.SingleNestedAttribute{
 		Attributes: FixedaddressSnmp3CredentialResourceSchemaAttributes,
 		Optional:   true,
-		Computed:   true,
 		Validators: []validator.Object{
 			objectvalidator.AlsoRequires(path.MatchRoot("use_snmp3_credential")),
 			objectvalidator.AlsoRequires(path.MatchRoot("use_cli_credentials")),
@@ -740,17 +749,11 @@ func (m *FixedaddressModel) Flatten(ctx context.Context, from *dhcp.Fixedaddress
 	m.AlwaysUpdateDns = types.BoolPointerValue(from.AlwaysUpdateDns)
 	m.Bootfile = flex.FlattenStringPointer(from.Bootfile)
 	m.Bootserver = flex.FlattenStringPointer(from.Bootserver)
-	planCredentials := m.CliCredentials
+	planCliCreds := m.CliCredentials
 	m.CliCredentials = flex.FlattenFrameworkListNestedBlock(ctx, from.CliCredentials, FixedaddressCliCredentialsAttrTypes, diags, FlattenFixedaddressCliCredentials)
-	if !planCredentials.IsUnknown() {
-		credentialVal, diags := utils.CopyFieldFromPlanToRespList(ctx, planCredentials, m.CliCredentials, "password")
-		if !diags.HasError() {
-			m.CliCredentials = credentialVal.(basetypes.ListValue)
-			reOrderedCredentials, diags := utils.ReorderAndFilterNestedListResponse(ctx, planCredentials, m.CliCredentials, "credential_type")
-			if !diags.HasError() {
-				m.CliCredentials = reOrderedCredentials.(basetypes.ListValue)
-			}
-		}
+	reOrderedCliCreds, diags := utils.ReorderAndFilterNestedListResponse(ctx, planCliCreds, m.CliCredentials, "credential_type")
+	if !diags.HasError() {
+		m.CliCredentials = reOrderedCliCreds.(basetypes.ListValue)
 	}
 	m.ClientIdentifierPrependZero = types.BoolPointerValue(from.ClientIdentifierPrependZero)
 	m.CloudInfo = FlattenFixedaddressCloudInfo(ctx, from.CloudInfo, diags)
@@ -793,18 +796,7 @@ func (m *FixedaddressModel) Flatten(ctx context.Context, from *dhcp.Fixedaddress
 	}
 	m.PxeLeaseTime = flex.FlattenInt64Pointer(from.PxeLeaseTime)
 	m.ReservedInterface = flex.FlattenStringPointerNilAsNotEmpty(from.ReservedInterface)
-	planSnmp3Credential := m.Snmp3Credential
 	m.Snmp3Credential = FlattenFixedaddressSnmp3Credential(ctx, from.Snmp3Credential, diags)
-	if !planSnmp3Credential.IsUnknown() {
-		snmp3CredentialVal, diags := utils.CopyFieldFromPlanToRespObject(ctx, planSnmp3Credential, m.Snmp3Credential, "privacy_password")
-		if !diags.HasError() {
-			m.Snmp3Credential = snmp3CredentialVal.(types.Object)
-		}
-		snmp3CredentialVal2, diags := utils.CopyFieldFromPlanToRespObject(ctx, planSnmp3Credential, m.Snmp3Credential, "authentication_password")
-		if !diags.HasError() {
-			m.Snmp3Credential = snmp3CredentialVal2.(types.Object)
-		}
-	}
 	m.SnmpCredential = FlattenFixedaddressSnmpCredential(ctx, from.SnmpCredential, diags)
 	if m.Template.IsUnknown() || m.Template.IsNull() {
 		m.Template = flex.FlattenStringPointer(from.Template)

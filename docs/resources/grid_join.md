@@ -144,9 +144,11 @@ resource "nios_grid_join" "member_join_4" {
 
 ### Required
 
+> **NOTE**: [Write-only arguments](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments) are supported in Terraform 1.11 and later.
+
 - `grid_name` (String) The name of the Grid.
 - `master` (String) The virtual IP address of the grid master.
-- `member_password` (String, Sensitive) The password of the grid member.
+- `member_password` (String, [Write-only](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments)) The password of the grid member.
 - `member_url` (String) The URL of the grid member.
 - `member_username` (String) The username of the grid member.
-- `shared_secret` (String, Sensitive) The shared secret string of the grid.
+- `shared_secret` (String, [Write-only](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments)) The shared secret string of the grid.

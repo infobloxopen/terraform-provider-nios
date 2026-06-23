@@ -2,6 +2,7 @@ package dhcp
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -13,6 +14,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
+	"github.com/infobloxopen/infoblox-nios-go-client/dhcp"
 	"github.com/infobloxopen/terraform-provider-nios/internal/config"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
@@ -23,6 +25,8 @@ var readableAttributesForIpv6fixedaddress = "address_type,allow_telnet,cli_crede
 var _ resource.Resource = &Ipv6fixedaddressResource{}
 var _ resource.ResourceWithImportState = &Ipv6fixedaddressResource{}
 var _ resource.ResourceWithValidateConfig = &Ipv6fixedaddressResource{}
+
+var _ resource.ResourceWithModifyPlan = &Ipv6fixedaddressResource{}
 
 func NewIpv6fixedaddressResource() resource.Resource {
 	return &Ipv6fixedaddressResource{}
@@ -64,6 +68,129 @@ func (r *Ipv6fixedaddressResource) Configure(ctx context.Context, req resource.C
 	r.client = client
 }
 
+func (r *Ipv6fixedaddressResource) ModifyPlan(ctx context.Context, req resource.ModifyPlanRequest, resp *resource.ModifyPlanResponse) {
+	if req.Plan.Raw.IsNull() {
+		return
+	}
+
+	var (
+		planSnmp3 types.Object
+		stateRev  types.Int64
+		cliCreds  types.List
+		authPwd   types.String
+		privPwd   types.String
+	)
+
+	resp.Diagnostics.Append(req.Plan.GetAttribute(ctx, path.Root("snmp3_credential"), &planSnmp3)...)
+	resp.Diagnostics.Append(req.State.GetAttribute(ctx, path.Root("secrets_version"), &stateRev)...)
+	resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("cli_credentials"), &cliCreds)...)
+	resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("snmp3_credential").AtName("authentication_password"), &authPwd)...)
+	resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("snmp3_credential").AtName("privacy_password"), &privPwd)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	curRev := int64(0)
+	if !stateRev.IsNull() && !stateRev.IsUnknown() {
+		curRev = stateRev.ValueInt64()
+	}
+
+	var prevEnvelope struct {
+		Algo string `json:"algo"`
+		Hash string `json:"hash"`
+	}
+	if b, diags := req.Private.GetKey(ctx, "secrets_hash"); diags != nil {
+		resp.Diagnostics.Append(diags...)
+		if resp.Diagnostics.HasError() {
+			return
+		}
+	} else if b != nil {
+		if err := json.Unmarshal(b, &prevEnvelope); err != nil {
+			prevEnvelope.Hash = ""
+		}
+	}
+
+	prevHashes := fixedAddressHashState{}
+	if prevEnvelope.Hash != "" {
+		if err := json.Unmarshal([]byte(prevEnvelope.Hash), &prevHashes); err != nil {
+			prevHashes = fixedAddressHashState{}
+		}
+	}
+
+	plannedHashes := prevHashes
+
+	// SNMP3 block removed: clear both SNMP3 secret hashes.
+	if planSnmp3.IsNull() {
+		plannedHashes.AuthHash = ""
+		plannedHashes.PrivHash = ""
+	} else {
+		// Update only when config value is known.
+		if !authPwd.IsUnknown() {
+			plannedHashes.AuthHash = hashStringValue(authPwd)
+		}
+		if !privPwd.IsUnknown() {
+			plannedHashes.PrivHash = hashStringValue(privPwd)
+		}
+	}
+
+	// cli_credentials removed: clear CLI hash.
+	// If cli_credentials is known, compute a canonical hash for the full list.
+	if cliCreds.IsNull() {
+		plannedHashes.CliHash = ""
+	} else if !cliCreds.IsUnknown() {
+		plannedHashes.CliHash = hashCliPasswords(ctx, cliCreds,
+			&resp.Diagnostics,
+			func(m FixedaddressCliCredentialsModel) types.String { return m.Password },
+		)
+		if resp.Diagnostics.HasError() {
+			return
+		}
+	}
+
+	prevHasSecrets := hasSecretHashes(prevHashes)
+	plannedHasSecrets := hasSecretHashes(plannedHashes)
+	secretsChanged := plannedHashes != prevHashes
+
+	bump := false
+	newHashToStore := prevEnvelope.Hash
+
+	switch {
+
+	case !plannedHasSecrets && prevHasSecrets:
+		bump = true
+		newHashToStore = ""
+
+	case plannedHasSecrets && (prevHashes == fixedAddressHashState{} || secretsChanged):
+		bump = true
+		newHashToStore = marshalSecretsHashState(plannedHashes, &resp.Diagnostics)
+	}
+
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	if bump {
+		newRev := types.Int64Value(curRev + 1)
+		resp.Diagnostics.Append(resp.Plan.SetAttribute(ctx, path.Root("secrets_version"), newRev)...)
+
+		val := map[string]string{
+			"algo": "sha256",
+			"hash": newHashToStore,
+		}
+		b, err := json.Marshal(val)
+		if err != nil {
+			resp.Diagnostics.AddError("error marshalling secrets hash", err.Error())
+			return
+		}
+		resp.Diagnostics.Append(resp.Private.SetKey(ctx, "secrets_hash", b)...)
+		return
+	}
+
+	resp.Diagnostics.Append(
+		resp.Plan.SetAttribute(ctx, path.Root("secrets_version"), types.Int64Value(curRev))...,
+	)
+}
+
 func (r *Ipv6fixedaddressResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var diags diag.Diagnostics
 	var data Ipv6fixedaddressModel
@@ -87,13 +214,55 @@ func (r *Ipv6fixedaddressResource) Create(ctx context.Context, req resource.Crea
 		data.FuncCall = r.UpdateFuncCallAttributeName(ctx, data, &resp.Diagnostics)
 	}
 
+	var secretsVersion types.Int64
+	var (
+		planSnmp3 types.Object
+		authPwd   types.String
+		privPwd   types.String
+		cliCreds  types.List
+		cliModels []Ipv6fixedaddressCliCredentialsModel
+	)
+
+	resp.Diagnostics.Append(req.Plan.GetAttribute(ctx, path.Root("snmp3_credential"), &planSnmp3)...)
+	resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("snmp3_credential").AtName("authentication_password"), &authPwd)...)
+	resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("snmp3_credential").AtName("privacy_password"), &privPwd)...)
+
+	cliModels, cliCreds = loadCliCredentialModelsFromConfig[Ipv6fixedaddressCliCredentialsModel](ctx, req.Config, &resp.Diagnostics)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	payload := data.Expand(ctx, &resp.Diagnostics, true)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	if !planSnmp3.IsNull() && payload.Snmp3Credential != nil {
+		if !authPwd.IsNull() && !authPwd.IsUnknown() {
+			ap := authPwd.ValueString()
+			payload.Snmp3Credential.AuthenticationPassword = &ap
+		}
+		if !privPwd.IsNull() && !privPwd.IsUnknown() {
+			pp := privPwd.ValueString()
+			payload.Snmp3Credential.PrivacyPassword = &pp
+		}
+	}
+
+	applyCliCredentialPasswords(
+		payload.CliCredentials,
+		cliModels,
+		func(m Ipv6fixedaddressCliCredentialsModel) types.String { return m.Password },
+		func(p *dhcp.Ipv6fixedaddressCliCredentials, password string) { p.Password = &password },
+	)
+
 	apiRes, _, err := r.client.DHCPAPI.
 		Ipv6fixedaddressAPI.
 		Create(ctx).
-		Ipv6fixedaddress(*data.Expand(ctx, &resp.Diagnostics, true)).
+		Ipv6fixedaddress(*payload).
 		ReturnFieldsPlus(readableAttributesForIpv6fixedaddress).
 		ReturnAsObject(1).
 		Execute()
+
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create Ipv6fixedaddress, got error: %s", err))
 		return
@@ -105,6 +274,30 @@ func (r *Ipv6fixedaddressResource) Create(ctx context.Context, req resource.Crea
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while create Ipv6fixedaddress due inherited Extensible attributes, got error: %s", err))
 		return
 	}
+
+	secretData := buildSecretsHashState(ctx, authPwd, privPwd, cliCreds,
+		&resp.Diagnostics,
+		func(m Ipv6fixedaddressCliCredentialsModel) types.String { return m.Password },
+	)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	if hasSecretHashes(secretData) {
+		secretsVersion = types.Int64Value(1)
+
+		hashSecrets, err := marshalSecretsEnvelope(secretData)
+		if err != nil {
+			resp.Diagnostics.AddError("error marshalling secrets hash", err.Error())
+			return
+		}
+		resp.Diagnostics.Append(resp.Private.SetKey(ctx, "secrets_hash", hashSecrets)...)
+	} else {
+		secretsVersion = types.Int64Value(0)
+		resp.Diagnostics.Append(resp.Private.SetKey(ctx, "secrets_hash", nil)...)
+	}
+
+	data.SecretsVersion = secretsVersion
 
 	data.Flatten(ctx, &res, &resp.Diagnostics)
 
@@ -293,13 +486,57 @@ func (r *Ipv6fixedaddressResource) Update(ctx context.Context, req resource.Upda
 		return
 	}
 
+	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
+
+	payload := data.Expand(ctx, &resp.Diagnostics, false)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	var (
+		authPwd   types.String
+		privPwd   types.String
+		cliCreds  types.List
+		cliModels []Ipv6fixedaddressCliCredentialsModel
+	)
+
+	resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("snmp3_credential").AtName("authentication_password"), &authPwd)...)
+	resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("snmp3_credential").AtName("privacy_password"), &privPwd)...)
+
+	cliModels, cliCreds = loadCliCredentialModelsFromConfig[Ipv6fixedaddressCliCredentialsModel](ctx, req.Config, &resp.Diagnostics)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	var planSnmp3 types.Object
+	resp.Diagnostics.Append(req.Plan.GetAttribute(ctx, path.Root("snmp3_credential"), &planSnmp3)...)
+
+	if !planSnmp3.IsNull() && payload.Snmp3Credential != nil {
+		if !authPwd.IsNull() && !authPwd.IsUnknown() {
+			ap := authPwd.ValueString()
+			payload.Snmp3Credential.AuthenticationPassword = &ap
+		}
+		if !privPwd.IsNull() && !privPwd.IsUnknown() {
+			pp := privPwd.ValueString()
+			payload.Snmp3Credential.PrivacyPassword = &pp
+		}
+	}
+
+	applyCliCredentialPasswords(
+		payload.CliCredentials,
+		cliModels,
+		func(m Ipv6fixedaddressCliCredentialsModel) types.String { return m.Password },
+		func(p *dhcp.Ipv6fixedaddressCliCredentials, password string) { p.Password = &password },
+	)
+
 	apiRes, _, err := r.client.DHCPAPI.
 		Ipv6fixedaddressAPI.
-		Update(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
-		Ipv6fixedaddress(*data.Expand(ctx, &resp.Diagnostics, false)).
+		Update(ctx, resourceRef).
+		Ipv6fixedaddress(*payload).
 		ReturnFieldsPlus(readableAttributesForIpv6fixedaddress).
 		ReturnAsObject(1).
 		Execute()
+
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update Ipv6fixedaddress, got error: %s", err))
 		return
@@ -311,6 +548,25 @@ func (r *Ipv6fixedaddressResource) Update(ctx context.Context, req resource.Upda
 	if diags.HasError() {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while update Ipv6fixedaddress due inherited Extensible attributes, got error: %s", diags))
 		return
+	}
+
+	secretData := buildSecretsHashState(ctx, authPwd, privPwd, cliCreds,
+		&resp.Diagnostics,
+		func(m Ipv6fixedaddressCliCredentialsModel) types.String { return m.Password },
+	)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	if hasSecretHashes(secretData) {
+		hashSecrets, err := marshalSecretsEnvelope(secretData)
+		if err != nil {
+			resp.Diagnostics.AddError("error marshalling secrets hash", err.Error())
+			return
+		}
+		resp.Diagnostics.Append(resp.Private.SetKey(ctx, "secrets_hash", hashSecrets)...)
+	} else {
+		resp.Diagnostics.Append(resp.Private.SetKey(ctx, "secrets_hash", nil)...)
 	}
 
 	data.Flatten(ctx, &res, &resp.Diagnostics)
