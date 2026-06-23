@@ -109,7 +109,6 @@ func (r *SnmpuserResource) ModifyPlan(ctx context.Context, req resource.ModifyPl
 
 	prevHashes := snmpuserSecretsHashState{}
 
-	plannedHashes := prevHashes
 	var prev struct {
 		Algo string `json:"algo"`
 		Hash string `json:"hash"`
@@ -130,6 +129,8 @@ func (r *SnmpuserResource) ModifyPlan(ctx context.Context, req resource.ModifyPl
 		// leave prevHashes at its zero value so that we will recompute as needed.
 		_ = json.Unmarshal([]byte(prev.Hash), &prevHashes)
 	}
+
+	plannedHashes := prevHashes
 
 	if !authenticationPassword.IsUnknown() && !authenticationPassword.IsNull() {
 		plannedHashes.AuthHash = hashString(authenticationPassword.ValueString())

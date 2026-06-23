@@ -112,7 +112,6 @@ func (r *NotificationRestEndpointResource) ModifyPlan(ctx context.Context, req r
 	}
 
 	prevHashes := notificationRestEndpointHashState{}
-	plannedHashes := prevHashes
 
 	var prev struct {
 		Algo string `json:"algo"`
@@ -134,6 +133,8 @@ func (r *NotificationRestEndpointResource) ModifyPlan(ctx context.Context, req r
 		// leave prevHashes at its zero value so that we will recompute as needed.
 		_ = json.Unmarshal([]byte(prev.Hash), &prevHashes)
 	}
+
+	plannedHashes := prevHashes
 
 	if !password.IsUnknown() && !password.IsNull() {
 		plannedHashes.Password = hashString(password.ValueString())

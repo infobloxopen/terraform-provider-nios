@@ -100,7 +100,7 @@ func (r *MsserverResource) ModifyPlan(ctx context.Context, req resource.ModifyPl
 	}
 
 	prevHashes := secretsHashState{}
-	plannedHashes := prevHashes
+	plannedHashes := secretsHashState{}
 
 	var prev struct {
 		Algo string `json:"algo"`
