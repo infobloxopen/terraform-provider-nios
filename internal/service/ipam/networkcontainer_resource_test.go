@@ -2601,6 +2601,74 @@ func TestAccNetworkcontainerResource_UseUpdateDnsOnLeaseRenewal(t *testing.T) {
 	})
 }
 
+func TestAccNetworkcontainerResource_RemoveSubnetsTrue(t *testing.T) {
+	var containerResource ipam.Networkcontainer
+	var childNetwork1 ipam.Network
+	var childNetwork2 ipam.Network
+	containerResourceName := "nios_ipam_network_container.test_remove_subnets"
+	childNetwork1ResourceName := "nios_ipam_network.child1"
+	childNetwork2ResourceName := "nios_ipam_network.child2"
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// Create parent container and two child networks, then delete parent
+			// with remove_subnets=true and verify children are also removed
+			{
+				Config: testAccNetworkcontainerRemoveSubnets("10.20.0.0/16", "true", "10.20.1.0/24", "10.20.2.0/24"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNetworkcontainerExists(context.Background(), containerResourceName, &containerResource),
+					testAccCheckNetworkExists(context.Background(), childNetwork1ResourceName, &childNetwork1),
+					testAccCheckNetworkExists(context.Background(), childNetwork2ResourceName, &childNetwork2),
+					resource.TestCheckResourceAttr(containerResourceName, "network", "10.20.0.0/16"),
+					resource.TestCheckResourceAttr(containerResourceName, "remove_subnets", "true"),
+					// Delete parent container via API with remove_subnets=true
+					testAccCheckNetworkcontainerDeleteWithRemoveSubnets(context.Background(), &containerResource, true),
+					// Verify child networks are cascade-deleted
+					testAccCheckNetworkDestroy(context.Background(), &childNetwork1),
+					testAccCheckNetworkDestroy(context.Background(), &childNetwork2),
+				),
+				ExpectNonEmptyPlan: true,
+			},
+		},
+	})
+}
+
+func TestAccNetworkcontainerResource_RemoveSubnetsFalse(t *testing.T) {
+	var containerResource ipam.Networkcontainer
+	var childNetwork1 ipam.Network
+	var childNetwork2 ipam.Network
+	containerResourceName := "nios_ipam_network_container.test_remove_subnets"
+	childNetwork1ResourceName := "nios_ipam_network.child1"
+	childNetwork2ResourceName := "nios_ipam_network.child2"
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// Create parent container and two child networks, then delete parent
+			// with remove_subnets=false and verify children still exist
+			{
+				Config: testAccNetworkcontainerRemoveSubnets("10.21.0.0/16", "false", "10.21.1.0/24", "10.21.2.0/24"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNetworkcontainerExists(context.Background(), containerResourceName, &containerResource),
+					testAccCheckNetworkExists(context.Background(), childNetwork1ResourceName, &childNetwork1),
+					testAccCheckNetworkExists(context.Background(), childNetwork2ResourceName, &childNetwork2),
+					resource.TestCheckResourceAttr(containerResourceName, "network", "10.21.0.0/16"),
+					resource.TestCheckResourceAttr(containerResourceName, "remove_subnets", "false"),
+					// Delete parent with remove_subnets=false; parent is deleted but children remain
+					testAccCheckNetworkcontainerDeleteWithRemoveSubnets(context.Background(), &containerResource, false),
+					// Verify child networks still exist
+					testAccCheckNetworkExistsByRef(context.Background(), &childNetwork1),
+					testAccCheckNetworkExistsByRef(context.Background(), &childNetwork2),
+				),
+				ExpectNonEmptyPlan: true,
+			},
+		},
+	})
+}
+
 func testAccCheckNetworkcontainerExists(ctx context.Context, resourceName string, v *ipam.Networkcontainer) resource.TestCheckFunc {
 	// Verify the resource exists in the cloud
 	return func(state *terraform.State) error {
@@ -3371,74 +3439,6 @@ resource "nios_ipam_network_container" "test_use_update_dns_on_lease_renewal" {
     use_update_dns_on_lease_renewal = %q
 }
 `, network, useUpdateDnsOnLeaseRenewal)
-}
-
-func TestAccNetworkcontainerResource_RemoveSubnetsTrue(t *testing.T) {
-	var containerResource ipam.Networkcontainer
-	var childNetwork1 ipam.Network
-	var childNetwork2 ipam.Network
-	containerResourceName := "nios_ipam_network_container.test_remove_subnets"
-	childNetwork1ResourceName := "nios_ipam_network.child1"
-	childNetwork2ResourceName := "nios_ipam_network.child2"
-
-	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.PreCheck(t) },
-		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-		Steps: []resource.TestStep{
-			// Create parent container and two child networks, then delete parent
-			// with remove_subnets=true and verify children are also removed
-			{
-				Config: testAccNetworkcontainerRemoveSubnets("10.20.0.0/16", "true", "10.20.1.0/24", "10.20.2.0/24"),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckNetworkcontainerExists(context.Background(), containerResourceName, &containerResource),
-					testAccCheckNetworkExists(context.Background(), childNetwork1ResourceName, &childNetwork1),
-					testAccCheckNetworkExists(context.Background(), childNetwork2ResourceName, &childNetwork2),
-					resource.TestCheckResourceAttr(containerResourceName, "network", "10.20.0.0/16"),
-					resource.TestCheckResourceAttr(containerResourceName, "remove_subnets", "true"),
-					// Delete parent container via API with remove_subnets=true
-					testAccCheckNetworkcontainerDeleteWithRemoveSubnets(context.Background(), &containerResource, true),
-					// Verify child networks are cascade-deleted
-					testAccCheckNetworkDestroy(context.Background(), &childNetwork1),
-					testAccCheckNetworkDestroy(context.Background(), &childNetwork2),
-				),
-				ExpectNonEmptyPlan: true,
-			},
-		},
-	})
-}
-
-func TestAccNetworkcontainerResource_RemoveSubnetsFalse(t *testing.T) {
-	var containerResource ipam.Networkcontainer
-	var childNetwork1 ipam.Network
-	var childNetwork2 ipam.Network
-	containerResourceName := "nios_ipam_network_container.test_remove_subnets"
-	childNetwork1ResourceName := "nios_ipam_network.child1"
-	childNetwork2ResourceName := "nios_ipam_network.child2"
-
-	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.PreCheck(t) },
-		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-		Steps: []resource.TestStep{
-			// Create parent container and two child networks, then delete parent
-			// with remove_subnets=false and verify children still exist
-			{
-				Config: testAccNetworkcontainerRemoveSubnets("10.21.0.0/16", "false", "10.21.1.0/24", "10.21.2.0/24"),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckNetworkcontainerExists(context.Background(), containerResourceName, &containerResource),
-					testAccCheckNetworkExists(context.Background(), childNetwork1ResourceName, &childNetwork1),
-					testAccCheckNetworkExists(context.Background(), childNetwork2ResourceName, &childNetwork2),
-					resource.TestCheckResourceAttr(containerResourceName, "network", "10.21.0.0/16"),
-					resource.TestCheckResourceAttr(containerResourceName, "remove_subnets", "false"),
-					// Delete parent with remove_subnets=false; parent is deleted but children remain
-					testAccCheckNetworkcontainerDeleteWithRemoveSubnets(context.Background(), &containerResource, false),
-					// Verify child networks still exist
-					testAccCheckNetworkExistsByRef(context.Background(), &childNetwork1),
-					testAccCheckNetworkExistsByRef(context.Background(), &childNetwork2),
-				),
-				ExpectNonEmptyPlan: true,
-			},
-		},
-	})
 }
 
 func testAccNetworkcontainerRemoveSubnets(network, removeSubnets, childNetwork1, childNetwork2 string) string {

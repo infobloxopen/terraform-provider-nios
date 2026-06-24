@@ -1486,6 +1486,74 @@ func TestAccIpv6networkcontainerResource_ValidLifetime(t *testing.T) {
 	})
 }
 
+func TestAccIpv6networkcontainerResource_RemoveSubnetsTrue(t *testing.T) {
+	var containerResource ipam.Ipv6networkcontainer
+	var childNetwork1 ipam.Ipv6network
+	var childNetwork2 ipam.Ipv6network
+	containerResourceName := "nios_ipam_ipv6network_container.test_remove_subnets"
+	childNetwork1ResourceName := "nios_ipam_ipv6network.child1"
+	childNetwork2ResourceName := "nios_ipam_ipv6network.child2"
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// Create parent container and two child networks, then delete parent
+			// with remove_subnets=true and verify children are also removed
+			{
+				Config: testAccIpv6networkcontainerRemoveSubnets("2003:db8:abcd:14::/80", "true", "2003:db8:abcd:14::/81", "2003:db8:abcd:14:0:8000::/81"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckIpv6networkcontainerExists(context.Background(), containerResourceName, &containerResource),
+					testAccCheckIpv6networkExists(context.Background(), childNetwork1ResourceName, &childNetwork1),
+					testAccCheckIpv6networkExists(context.Background(), childNetwork2ResourceName, &childNetwork2),
+					resource.TestCheckResourceAttr(containerResourceName, "network", "2003:db8:abcd:14::/80"),
+					resource.TestCheckResourceAttr(containerResourceName, "remove_subnets", "true"),
+					// Delete parent container via API with remove_subnets=true
+					testAccCheckIpv6networkcontainerDeleteWithRemoveSubnets(context.Background(), &containerResource, true),
+					// Verify child networks are cascade-deleted
+					testAccCheckIpv6networkDestroy(context.Background(), &childNetwork1),
+					testAccCheckIpv6networkDestroy(context.Background(), &childNetwork2),
+				),
+				ExpectNonEmptyPlan: true,
+			},
+		},
+	})
+}
+
+func TestAccIpv6networkcontainerResource_RemoveSubnetsFalse(t *testing.T) {
+	var containerResource ipam.Ipv6networkcontainer
+	var childNetwork1 ipam.Ipv6network
+	var childNetwork2 ipam.Ipv6network
+	containerResourceName := "nios_ipam_ipv6network_container.test_remove_subnets"
+	childNetwork1ResourceName := "nios_ipam_ipv6network.child1"
+	childNetwork2ResourceName := "nios_ipam_ipv6network.child2"
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// Create parent container and two child networks, then delete parent
+			// with remove_subnets=false and verify children still exist
+			{
+				Config: testAccIpv6networkcontainerRemoveSubnets("2003:db8:abcd:15::/80", "false", "2003:db8:abcd:15::/81", "2003:db8:abcd:15:0:8000::/81"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckIpv6networkcontainerExists(context.Background(), containerResourceName, &containerResource),
+					testAccCheckIpv6networkExists(context.Background(), childNetwork1ResourceName, &childNetwork1),
+					testAccCheckIpv6networkExists(context.Background(), childNetwork2ResourceName, &childNetwork2),
+					resource.TestCheckResourceAttr(containerResourceName, "network", "2003:db8:abcd:15::/80"),
+					resource.TestCheckResourceAttr(containerResourceName, "remove_subnets", "false"),
+					// Delete parent with remove_subnets=false; parent is deleted but children remain
+					testAccCheckIpv6networkcontainerDeleteWithRemoveSubnets(context.Background(), &containerResource, false),
+					// Verify child networks still exist
+					testAccCheckIpv6networkExistsByRef(context.Background(), &childNetwork1),
+					testAccCheckIpv6networkExistsByRef(context.Background(), &childNetwork2),
+				),
+				ExpectNonEmptyPlan: true,
+			},
+		},
+	})
+}
+
 func testAccCheckIpv6networkcontainerExists(ctx context.Context, resourceName string, v *ipam.Ipv6networkcontainer) resource.TestCheckFunc {
 	// Verify the resource exists in the cloud
 	return func(state *terraform.State) error {
@@ -1976,74 +2044,6 @@ resource "nios_ipam_ipv6network_container" "test_valid_lifetime" {
     use_valid_lifetime = %q
 }
 `, network, validLifetime, useValidLifetime)
-}
-
-func TestAccIpv6networkcontainerResource_RemoveSubnetsTrue(t *testing.T) {
-	var containerResource ipam.Ipv6networkcontainer
-	var childNetwork1 ipam.Ipv6network
-	var childNetwork2 ipam.Ipv6network
-	containerResourceName := "nios_ipam_ipv6network_container.test_remove_subnets"
-	childNetwork1ResourceName := "nios_ipam_ipv6network.child1"
-	childNetwork2ResourceName := "nios_ipam_ipv6network.child2"
-
-	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.PreCheck(t) },
-		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-		Steps: []resource.TestStep{
-			// Create parent container and two child networks, then delete parent
-			// with remove_subnets=true and verify children are also removed
-			{
-				Config: testAccIpv6networkcontainerRemoveSubnets("2003:db8:abcd:14::/80", "true", "2003:db8:abcd:14::/81", "2003:db8:abcd:14:0:8000::/81"),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckIpv6networkcontainerExists(context.Background(), containerResourceName, &containerResource),
-					testAccCheckIpv6networkExists(context.Background(), childNetwork1ResourceName, &childNetwork1),
-					testAccCheckIpv6networkExists(context.Background(), childNetwork2ResourceName, &childNetwork2),
-					resource.TestCheckResourceAttr(containerResourceName, "network", "2003:db8:abcd:14::/80"),
-					resource.TestCheckResourceAttr(containerResourceName, "remove_subnets", "true"),
-					// Delete parent container via API with remove_subnets=true
-					testAccCheckIpv6networkcontainerDeleteWithRemoveSubnets(context.Background(), &containerResource, true),
-					// Verify child networks are cascade-deleted
-					testAccCheckIpv6networkDestroy(context.Background(), &childNetwork1),
-					testAccCheckIpv6networkDestroy(context.Background(), &childNetwork2),
-				),
-				ExpectNonEmptyPlan: true,
-			},
-		},
-	})
-}
-
-func TestAccIpv6networkcontainerResource_RemoveSubnetsFalse(t *testing.T) {
-	var containerResource ipam.Ipv6networkcontainer
-	var childNetwork1 ipam.Ipv6network
-	var childNetwork2 ipam.Ipv6network
-	containerResourceName := "nios_ipam_ipv6network_container.test_remove_subnets"
-	childNetwork1ResourceName := "nios_ipam_ipv6network.child1"
-	childNetwork2ResourceName := "nios_ipam_ipv6network.child2"
-
-	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.PreCheck(t) },
-		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-		Steps: []resource.TestStep{
-			// Create parent container and two child networks, then delete parent
-			// with remove_subnets=false and verify children still exist
-			{
-				Config: testAccIpv6networkcontainerRemoveSubnets("2003:db8:abcd:15::/80", "false", "2003:db8:abcd:15::/81", "2003:db8:abcd:15:0:8000::/81"),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckIpv6networkcontainerExists(context.Background(), containerResourceName, &containerResource),
-					testAccCheckIpv6networkExists(context.Background(), childNetwork1ResourceName, &childNetwork1),
-					testAccCheckIpv6networkExists(context.Background(), childNetwork2ResourceName, &childNetwork2),
-					resource.TestCheckResourceAttr(containerResourceName, "network", "2003:db8:abcd:15::/80"),
-					resource.TestCheckResourceAttr(containerResourceName, "remove_subnets", "false"),
-					// Delete parent with remove_subnets=false; parent is deleted but children remain
-					testAccCheckIpv6networkcontainerDeleteWithRemoveSubnets(context.Background(), &containerResource, false),
-					// Verify child networks still exist
-					testAccCheckIpv6networkExistsByRef(context.Background(), &childNetwork1),
-					testAccCheckIpv6networkExistsByRef(context.Background(), &childNetwork2),
-				),
-				ExpectNonEmptyPlan: true,
-			},
-		},
-	})
 }
 
 func testAccIpv6networkcontainerRemoveSubnets(network, removeSubnets, childNetwork1, childNetwork2 string) string {
