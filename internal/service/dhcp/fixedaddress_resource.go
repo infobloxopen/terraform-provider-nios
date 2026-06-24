@@ -12,6 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/identityschema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
 	"github.com/infobloxopen/infoblox-nios-go-client/dhcp"
@@ -946,6 +947,19 @@ func (r *FixedaddressResource) ValidateConfig(ctx context.Context, req resource.
 				"The 'snmp_credential' attribute is set, but 'use_snmp_credential' is false. "+
 					"Please set 'use_snmp_credential' to true to use SNMP Credentials.",
 			)
+		}
+		// Validate that community_string is provided when snmp_credential block is set
+		var snmpCredential FixedaddressSnmpCredentialModel
+		diags := data.SnmpCredential.As(ctx, &snmpCredential, basetypes.ObjectAsOptions{})
+		resp.Diagnostics.Append(diags...)
+		if !resp.Diagnostics.HasError() {
+			if snmpCredential.CommunityString.IsNull() || (!snmpCredential.CommunityString.IsUnknown() && snmpCredential.CommunityString.ValueString() == "") {
+				resp.Diagnostics.AddAttributeError(
+					path.Root("snmp_credential").AtName("community_string"),
+					"Invalid configuration",
+					"The 'community_string' attribute must be set when 'snmp_credential' is configured.",
+				)
+			}
 		}
 	}
 
