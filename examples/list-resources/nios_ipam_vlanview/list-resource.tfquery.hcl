@@ -23,4 +23,3 @@ list "nios_ipam_vlanview" "list_vlanviews_with_resource" {
   provider         = nios
   include_resource = true
 }
- 

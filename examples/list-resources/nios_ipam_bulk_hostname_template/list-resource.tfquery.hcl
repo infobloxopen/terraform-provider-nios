@@ -13,3 +13,4 @@ list "nios_ipam_bulk_hostname_template" "list_bulk_hostname_templates_with_resou
   provider         = nios
   include_resource = true
 }
+
