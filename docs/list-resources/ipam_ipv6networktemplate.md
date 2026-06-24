@@ -3,12 +3,12 @@
 page_title: "nios_ipam_ipv6networktemplate List Resource - nios"
 subcategory: "IPAM"
 description: |-
-  Query existing ipam Ipv6networktemplate.
+  Query existing IPAM IPv6 Network Templates.
 ---
 
 # nios_ipam_ipv6networktemplate (List Resource)
 
-Query existing ipam Ipv6networktemplate.
+Query existing IPAM IPv6 Network Templates.
 
 ## Example Usage
 
