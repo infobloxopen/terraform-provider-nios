@@ -1,4 +1,3 @@
-
 package ipam_test
 
 import (
@@ -12,7 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/querycheck"
 	"github.com/hashicorp/terraform-plugin-testing/querycheck/queryfilter"
 	"github.com/hashicorp/terraform-plugin-testing/tfjsonpath"
-    "github.com/hashicorp/terraform-plugin-testing/tfversion"
+	"github.com/hashicorp/terraform-plugin-testing/tfversion"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/ipam"
 
@@ -25,7 +24,7 @@ func TestAccSuperhostList_basic(t *testing.T) {
 	name := acctest.RandomNameWithPrefix("super-host")
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.PreCheck(t) },
+		PreCheck: func() { acctest.PreCheck(t) },
 		TerraformVersionChecks: []tfversion.TerraformVersionCheck{
 			tfversion.SkipBelow(tfversion.Version1_14_0),
 		},
@@ -33,16 +32,16 @@ func TestAccSuperhostList_basic(t *testing.T) {
 			// Create and Read
 			{
 				ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-				Config: testAccSuperhostBasicConfig(name),
+				Config:                   testAccSuperhostBasicConfig(name),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSuperhostExists(context.Background(), resourceName, &v),
 				),
 			},
-            // Query the object
+			// Query the object
 			{
 				ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-				Query:  true,
-				Config: testAccSuperhostListBasicConfig(),
+				Query:                    true,
+				Config:                   testAccSuperhostListBasicConfig(),
 				QueryResultChecks: []querycheck.QueryResultCheck{
 					querycheck.ExpectLengthAtLeast("nios_ipam_superhost.test", 1),
 				},
@@ -57,7 +56,7 @@ func TestAccSuperhostList_Filters(t *testing.T) {
 	name := acctest.RandomNameWithPrefix("super-host")
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.PreCheck(t) },
+		PreCheck: func() { acctest.PreCheck(t) },
 		TerraformVersionChecks: []tfversion.TerraformVersionCheck{
 			tfversion.SkipBelow(tfversion.Version1_14_0),
 		},
@@ -65,28 +64,26 @@ func TestAccSuperhostList_Filters(t *testing.T) {
 			// Create and Read
 			{
 				ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-				Config: testAccSuperhostBasicConfig(name),
+				Config:                   testAccSuperhostBasicConfig(name),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSuperhostExists(context.Background(), resourceName, &v),
-					// TODO : Update with required fields to verify the object was created with expected values
 					resource.TestCheckResourceAttr(resourceName, "name", name),
 				),
 			},
 			// Query the object
 			{
 				ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-				Query:  true,
-				Config: testAccSuperhostListConfigFilters(name),
+				Query:                    true,
+				Config:                   testAccSuperhostListConfigFilters(name),
 				QueryResultChecks: []querycheck.QueryResultCheck{
 					querycheck.ExpectLength("nios_ipam_superhost.test", 1),
 					querycheck.ExpectResourceKnownValues(
 						resourceName,
 						queryfilter.ByResourceIdentity(map[string]knownvalue.Check{
-						    // TODO : Update the ref prefix with the correct identifying object for the resource
 							"ref": knownvalue.StringRegexp(regexp.MustCompile("superhost/")),
 						}),
 						[]querycheck.KnownValueCheck{
-						    // TODO : Add checks for required fields
+		
 							{
 								Path:       tfjsonpath.New("name"),
 								KnownValue: knownvalue.StringExact(name),
@@ -107,7 +104,7 @@ func TestAccSuperhostList_ExtAttrFilters(t *testing.T) {
 	extAttrValue := acctest.RandomName()
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.PreCheck(t) },
+		PreCheck: func() { acctest.PreCheck(t) },
 		TerraformVersionChecks: []tfversion.TerraformVersionCheck{
 			tfversion.SkipBelow(tfversion.Version1_14_0),
 		},
@@ -126,8 +123,8 @@ func TestAccSuperhostList_ExtAttrFilters(t *testing.T) {
 			// Query the object
 			{
 				ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-				Query: true,
-				Config: testAccSuperhostListConfigExtAttrFilters(extAttrValue),
+				Query:                    true,
+				Config:                   testAccSuperhostListConfigExtAttrFilters(extAttrValue),
 				QueryResultChecks: []querycheck.QueryResultCheck{
 					querycheck.ExpectLength("nios_ipam_superhost.test", 1),
 				},
@@ -171,4 +168,3 @@ list "nios_ipam_superhost" "test" {
 }
 `, extAttrsValue)
 }
-
