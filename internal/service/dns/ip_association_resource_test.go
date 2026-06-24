@@ -218,7 +218,6 @@ resource "nios_ip_association" "association" {
 	ref = nios_ip_allocation.allocation.ref
 	mac = %q
 	configure_for_dhcp = %q
-	internal_id = nios_ip_allocation.allocation.internal_id
 }
 `, name, ipv4addrHCL, view, mac, configure_for_dhcp)
 }
@@ -237,7 +236,6 @@ resource "nios_ip_association" "mac_association" {
 	mac = %q
 	configure_for_dhcp = %q
 	match_client = %q
-	internal_id = nios_ip_allocation.allocation.internal_id
 }
 `, name, ipv4addrHCL, view, mac, configure_for_dhcp, match_client)
 }
@@ -257,7 +255,6 @@ resource "nios_ip_association" "duid_association" {
 	duid = %q
 	configure_for_dhcp = %q
 	match_client = %q
-	internal_id = nios_ip_allocation.allocation.internal_id
 }
 `, name, ipv4addrHCL, view, mac, duid, configure_for_dhcp, match_client)
 }
@@ -277,7 +274,6 @@ resource "nios_ip_association" "match_client" {
 	duid = %q
 	configure_for_dhcp = %q
 	match_client = %q
-	internal_id = nios_ip_allocation.allocation.internal_id
 }
 `, name, ipv4addrHCL, view, mac, duid, configure_for_dhcp, match_client)
 }
@@ -295,7 +291,6 @@ resource "nios_ip_association" "disable_association" {
 	ref = nios_ip_allocation.allocation.ref
 	mac = %q
 	configure_for_dhcp = %q
-	internal_id = nios_ip_allocation.allocation.internal_id
 }
 `, name, ipv4addrHCL, view, mac, configure_for_dhcp)
 }

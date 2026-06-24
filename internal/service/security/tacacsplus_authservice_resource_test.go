@@ -48,7 +48,7 @@ func TestAccTacacsplusAuthserviceResource_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "servers.0.auth_type", "CHAP"),
 					resource.TestCheckResourceAttr(resourceName, "servers.0.disable", "false"),
 					resource.TestCheckResourceAttr(resourceName, "servers.0.port", "49"),
-					resource.TestCheckResourceAttr(resourceName, "servers.0.shared_secret", "test"),
+					resource.TestCheckResourceAttr(resourceName, "secret_version", "1"),
 					// Test fields with default value
 					resource.TestCheckResourceAttr(resourceName, "acct_retries", "0"),
 					resource.TestCheckResourceAttr(resourceName, "acct_timeout", "1000"),

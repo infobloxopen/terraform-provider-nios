@@ -108,11 +108,26 @@
 - `nios_misc_dxl_endpoint` : Manage DXL endpoints and retrieve existing DXL endpoints. ([#389](https://github.com/infobloxopen/terraform-provider-nios/pull/389))
 - `nios_misc_syslog_endpoint` : Manage syslog endpoints and retrieve existing syslog endpoints. ([#438](https://github.com/infobloxopen/terraform-provider-nios/pull/438))
 
+### Modules
+
+- **NIOS Grid Member AWS Module** : Terraform module for deploying NIOS Grid EC2 instances on AWS and enabling HA support. ([#434](https://github.com/infobloxopen/terraform-provider-nios/pull/434))
+- **NIOS Grid Member Azure Module** : Terraform module for deploying NIOS Grid Virtual Machines on Azure and enabling HA support. ([#457](https://github.com/infobloxopen/terraform-provider-nios/pull/457))
+- **NIOS Grid Member GCP Module** : Terraform module for deploying NIOS Grid Compute instances on GCP and enabling HA support. ([#457](https://github.com/infobloxopen/terraform-provider-nios/pull/457))
+- **NIOS Grid Member OCI Module** : Terraform module for deploying NIOS Grid Compute instances on OCI and enabling HA support. ([#459](https://github.com/infobloxopen/terraform-provider-nios/pull/459))
+
+### Enhancements
+
+**Retry Mechanism** 
+  - Introduced a generic retry helper with exponential backoff and a provider-configurable retry timeout.
+
+**Terraform Search** 
+  - Introduced Terraform Search functionality for objects across DNS, DHCP,IPAM.
 
 ### Fixes
 
 - IPAM: Fixed VLAN type validation error in Network and IPv6 Network Container objects when reading network objects containing VLAN information. ([#380](https://github.com/infobloxopen/terraform-provider-nios/pull/380))
 - Fixed numerous bugs across DHCP, DNS, DTC, IPAM, Grid, Security, and other modules improving overall stability and reliability.
+- Sensitive fields like passwords which were earlier sotred as plain text in the state file, are marked as write-only and are encrypted and stored in the private state. These fields are stored as null in the state file.
 
 ## Version 1.1.0
 

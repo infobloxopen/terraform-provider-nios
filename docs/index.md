@@ -37,6 +37,7 @@ provider "nios" {
   nios_host_url = "<NIOS_HOST_URL>"
   nios_username = "<NIOS_USERNAME>"
   nios_password = "<NIOS_PASSWORD>"
+  retry_timeout = "<RETRY_TIMEOUT_IN_SECONDS>"
 }
 ```
 
@@ -45,8 +46,10 @@ provider "nios" {
 
 ### Optional
 
+- `manage_internal_id_ea` (Boolean) Determines whether the provider manages the Terraform Internal ID extensible attribute in NIOS. This attribute is required by the provider to store the Terraform resource ID corresponding to NIOS objects. When true, the provider ensures the attribute exists and manages its lifecycle. When false, the provider does not validate, create, update, or otherwise manage the attribute. Default value: true
 - `nios_host_url` (String)
 - `nios_password` (String)
 - `nios_username` (String)
 - `proxy_search` (String) Proxy search mode. Allowed values: LOCAL (default), GM.
 - `proxy_url` (String) Proxy URL to connect to Infoblox NIOS.
+- `retry_timeout` (Number) Specifies the timeout duration (in seconds) for retrying operations that fail due to transient errors.
