@@ -3,12 +3,12 @@
 page_title: "nios_ipam_networktemplate List Resource - nios"
 subcategory: "IPAM"
 description: |-
-  Query existing ipam Networktemplate.
+  Query existing IPAM Network Templates.
 ---
 
 # nios_ipam_networktemplate (List Resource)
 
-Query existing ipam Networktemplate.
+Query existing IPAM Network Templates.
 
 ## Example Usage
 

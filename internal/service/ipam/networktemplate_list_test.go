@@ -80,11 +80,9 @@ func TestAccNetworktemplateList_Filters(t *testing.T) {
 					querycheck.ExpectResourceKnownValues(
 						resourceName,
 						queryfilter.ByResourceIdentity(map[string]knownvalue.Check{
-							// TODO : Update the ref prefix with the correct identifying object for the resource
 							"ref": knownvalue.StringRegexp(regexp.MustCompile("networktemplate/")),
 						}),
 						[]querycheck.KnownValueCheck{
-							// TODO : Add checks for required fields
 							{
 								Path:       tfjsonpath.New("name"),
 								KnownValue: knownvalue.StringExact(name),
