@@ -59,7 +59,7 @@ var MemberExternalSyslogBackupServersResourceSchemaAttributes = map[string]schem
 	},
 	"password": schema.StringAttribute{
 		Required:            true,
-		Sensitive:           true,
+		WriteOnly:           true,
 		MarkdownDescription: "The password of the backup syslog server.",
 	},
 	"port": schema.Int64Attribute{
@@ -109,7 +109,6 @@ func (m *MemberExternalSyslogBackupServersModel) Expand(ctx context.Context, dia
 		AddressOrFqdn: flex.ExpandStringPointer(m.AddressOrFqdn),
 		DirectoryPath: flex.ExpandStringPointer(m.DirectoryPath),
 		Enable:        flex.ExpandBoolPointer(m.Enable),
-		Password:      flex.ExpandStringPointer(m.Password),
 		Port:          flex.ExpandInt64Pointer(m.Port),
 		Protocol:      flex.ExpandStringPointer(m.Protocol),
 		Username:      flex.ExpandStringPointer(m.Username),
@@ -141,5 +140,4 @@ func (m *MemberExternalSyslogBackupServersModel) Flatten(ctx context.Context, fr
 	m.Port = flex.FlattenInt64Pointer(from.Port)
 	m.Protocol = flex.FlattenStringPointer(from.Protocol)
 	m.Username = flex.FlattenStringPointer(from.Username)
-	m.Password = flex.FlattenStringPointer(from.Password)
 }

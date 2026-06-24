@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
+	"github.com/hashicorp/terraform-plugin-framework/resource/identityschema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
@@ -23,6 +24,7 @@ var readableAttributesForZoneStub = "address,comment,disable,disable_forwarding,
 // Ensure provider defined types fully satisfy framework interfaces.
 var _ resource.Resource = &ZoneStubResource{}
 var _ resource.ResourceWithImportState = &ZoneStubResource{}
+var _ resource.ResourceWithIdentity = &ZoneStubResource{}
 
 func NewZoneStubResource() resource.Resource {
 	return &ZoneStubResource{}
@@ -35,12 +37,25 @@ type ZoneStubResource struct {
 
 func (r *ZoneStubResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_" + "dns_zone_stub"
+	resp.ResourceBehavior = resource.ResourceBehavior{
+		MutableIdentity: true,
+	}
 }
 
 func (r *ZoneStubResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		MarkdownDescription: "Manages a DNS Stub Zone.",
 		Attributes:          ZoneStubResourceSchemaAttributes,
+	}
+}
+
+func (r *ZoneStubResource) IdentitySchema(ctx context.Context, req resource.IdentitySchemaRequest, resp *resource.IdentitySchemaResponse) {
+	resp.IdentitySchema = identityschema.Schema{
+		Attributes: map[string]identityschema.Attribute{
+			"ref": identityschema.StringAttribute{
+				RequiredForImport: true,
+			},
+		},
 	}
 }
 
@@ -78,6 +93,7 @@ func (r *ZoneStubResource) Create(ctx context.Context, req resource.CreateReques
 	// Add internal ID exists in the Extensible Attributes if not already present
 	data.ExtAttrs, diags = AddInternalIDToExtAttrs(ctx, data.ExtAttrs, diags)
 	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
 		return
 	}
 
@@ -123,11 +139,15 @@ func (r *ZoneStubResource) Create(ctx context.Context, req resource.CreateReques
 	res := apiRes.CreateZoneStubResponseAsObject.GetResult()
 	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.ExtAttrs)
 	if diags.HasError() {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while create ZoneStub due inherited Extensible attributes, got error: %s", err))
+		resp.Diagnostics.Append(diags...)
+		resp.Diagnostics.AddError("Client Error", "Error while creating ZoneStub due to inherited Extensible attributes")
 		return
 	}
 
 	data.Flatten(ctx, &res, &resp.Diagnostics)
+
+	// Save the Identity of the Resource
+	resp.Diagnostics.Append(resp.Identity.SetAttribute(ctx, path.Root("ref"), &data.Ref)...)
 
 	// Save data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
@@ -209,11 +229,15 @@ func (r *ZoneStubResource) Read(ctx context.Context, req resource.ReadRequest, r
 
 	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.ExtAttrs)
 	if diags.HasError() {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while reading ZoneStub due inherited Extensible attributes, got error: %s", diags))
+		resp.Diagnostics.Append(diags...)
+		resp.Diagnostics.AddError("Client Error", "Error while reading ZoneStub due to inherited Extensible attributes")
 		return
 	}
 
 	data.Flatten(ctx, &res, &resp.Diagnostics)
+
+	// Save the Identity of the Resource
+	resp.Diagnostics.Append(resp.Identity.SetAttribute(ctx, path.Root("ref"), &data.Ref)...)
 
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
@@ -270,6 +294,10 @@ func (r *ZoneStubResource) ReadByExtAttrs(ctx context.Context, data *ZoneStubMod
 	}
 
 	data.Flatten(ctx, &res, &resp.Diagnostics)
+
+	// Save the Identity of the Resource
+	resp.Diagnostics.Append(resp.Identity.SetAttribute(ctx, path.Root("ref"), &data.Ref)...)
+
 	resp.Diagnostics.Append(resp.State.Set(ctx, data)...)
 
 	return true
@@ -298,6 +326,7 @@ func (r *ZoneStubResource) Update(ctx context.Context, req resource.UpdateReques
 		resp.Diagnostics.Append(diags...)
 		return
 	}
+
 	associateInternalId, diags := req.Private.GetKey(ctx, "associate_internal_id")
 	resp.Diagnostics.Append(diags...)
 	if diags.HasError() {
@@ -306,6 +335,7 @@ func (r *ZoneStubResource) Update(ctx context.Context, req resource.UpdateReques
 	if associateInternalId != nil {
 		data.ExtAttrs, diags = AddInternalIDToExtAttrs(ctx, data.ExtAttrs, diags)
 		if diags.HasError() {
+			resp.Diagnostics.Append(diags...)
 			return
 		}
 	}
@@ -354,15 +384,18 @@ func (r *ZoneStubResource) Update(ctx context.Context, req resource.UpdateReques
 
 	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, planExtAttrs, *res.ExtAttrs)
 	if diags.HasError() {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while update ZoneStub due inherited Extensible attributes, got error: %s", diags))
+		resp.Diagnostics.Append(diags...)
+		resp.Diagnostics.AddError("Client Error", "Error while updating ZoneStub due to inherited Extensible attributes")
 		return
 	}
 
 	data.Flatten(ctx, &res, &resp.Diagnostics)
 
+	// Save the Identity of the Resource
+	resp.Diagnostics.Append(resp.Identity.SetAttribute(ctx, path.Root("ref"), &data.Ref)...)
+
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
-
 	if associateInternalId != nil {
 		resp.Diagnostics.Append(resp.Private.SetKey(ctx, "associate_internal_id", nil)...)
 	}
@@ -402,6 +435,13 @@ func (r *ZoneStubResource) Delete(ctx context.Context, req resource.DeleteReques
 }
 
 func (r *ZoneStubResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+	if req.Identity != nil && req.Identity.Raw.IsKnown() && !req.Identity.Raw.IsNull() {
+		diags := req.Identity.GetAttribute(ctx, path.Root("ref"), &req.ID)
+		if diags.HasError() {
+			resp.Diagnostics.Append(diags...)
+			return
+		}
+	}
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("ref"), req.ID)...)
 	resp.Diagnostics.Append(resp.Private.SetKey(ctx, "associate_internal_id", []byte("true"))...)
 }
