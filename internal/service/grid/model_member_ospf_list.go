@@ -190,6 +190,7 @@ func (m *MemberOspfListModel) Expand(ctx context.Context, diags *diag.Diagnostic
 	to := &grid.MemberOspfList{
 		AreaId:                 flex.ExpandStringPointer(m.AreaId),
 		AreaType:               flex.ExpandStringPointer(m.AreaType),
+		AuthenticationKey:      flex.ExpandStringPointer(m.AuthenticationKey),
 		AuthenticationType:     flex.ExpandStringPointer(m.AuthenticationType),
 		AutoCalcCostEnabled:    flex.ExpandBoolPointer(m.AutoCalcCostEnabled),
 		Comment:                flex.ExpandStringPointer(m.Comment),
@@ -230,7 +231,6 @@ func (m *MemberOspfListModel) Flatten(ctx context.Context, from *grid.MemberOspf
 	}
 	m.AreaId = flex.FlattenStringPointer(from.AreaId)
 	m.AreaType = flex.FlattenStringPointer(from.AreaType)
-	m.AuthenticationKey = flex.FlattenStringPointer(from.AuthenticationKey)
 	m.AuthenticationType = flex.FlattenStringPointer(from.AuthenticationType)
 	m.AutoCalcCostEnabled = types.BoolPointerValue(from.AutoCalcCostEnabled)
 	m.Comment = flex.FlattenStringPointer(from.Comment)
