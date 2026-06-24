@@ -67,7 +67,6 @@ func TestAccNetworkList_Filters(t *testing.T) {
 				Config:                   testAccNetworkBasicConfig(network),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkExists(context.Background(), resourceName, &v),
-					// TODO : Update with required fields to verify the object was created with expected values
 					resource.TestCheckResourceAttr(resourceName, "network", network),
 				),
 			},
@@ -84,7 +83,6 @@ func TestAccNetworkList_Filters(t *testing.T) {
 							"ref": knownvalue.StringRegexp(regexp.MustCompile("network/")),
 						}),
 						[]querycheck.KnownValueCheck{
-							// TODO : Add checks for required fields
 							{
 								Path:       tfjsonpath.New("network"),
 								KnownValue: knownvalue.StringExact(network),
