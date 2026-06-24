@@ -3,12 +3,12 @@
 page_title: "nios_ipam_vlan List Resource - nios"
 subcategory: "IPAM"
 description: |-
-  Query existing ipam Vlan.
+  Query existing IPAM VLANs.
 ---
 
 # nios_ipam_vlan (List Resource)
 
-Query existing ipam Vlan.
+Query existing IPAM VLANs.
 
 ## Example Usage
 
