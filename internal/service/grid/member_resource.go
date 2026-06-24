@@ -126,7 +126,7 @@ func (r *MemberResource) Create(ctx context.Context, req resource.CreateRequest,
 			ReturnAsObject(1).
 			Execute()
 		if err2 != nil {
-			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to Create Member with pre-provisioning or syslog proxy settings, got error: %s", err2))
+			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Member was created successfully but failed to apply pre_provisioning, traffic_capture_auth_dns_setting, member_service_communication settings: %s", err2))
 			return
 		}
 		res = apiRes2.UpdateMemberResponseAsObject.GetResult()
