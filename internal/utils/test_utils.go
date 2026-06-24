@@ -42,6 +42,10 @@ func GetNIOSGridMemberHostName() string {
 	return os.Getenv("NIOS_GRID_MEMBER_HOSTNAME")
 }
 
+func GetNIOSDiscoveryMemberHostName() string {
+	return os.Getenv("NIOS_DISCOVERY_MEMBER_HOSTNAME")
+}
+
 func GetNIOSNotificationRestEndpointRef() string {
 	return os.Getenv("NIOS_NOTIFICATION_REST_ENDPOINT_REF")
 }
