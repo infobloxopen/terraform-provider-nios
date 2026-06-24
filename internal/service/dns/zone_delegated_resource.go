@@ -25,6 +25,7 @@ var readableAttributesForZoneDelegated = "address,comment,delegate_to,delegated_
 var _ resource.Resource = &ZoneDelegatedResource{}
 var _ resource.ResourceWithImportState = &ZoneDelegatedResource{}
 var _ resource.ResourceWithIdentity = &ZoneDelegatedResource{}
+var _ resource.ResourceWithValidateConfig = &ZoneDelegatedResource{}
 
 func NewZoneDelegatedResource() resource.Resource {
 	return &ZoneDelegatedResource{}
