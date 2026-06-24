@@ -328,8 +328,8 @@ func (r *VlanResource) Update(ctx context.Context, req resource.UpdateRequest, r
 	}
 
 	associateInternalId, diags := req.Private.GetKey(ctx, "associate_internal_id")
+	resp.Diagnostics.Append(diags...)
 	if diags.HasError() {
-		resp.Diagnostics.Append(diags...)
 		return
 	}
 	if associateInternalId != nil {
