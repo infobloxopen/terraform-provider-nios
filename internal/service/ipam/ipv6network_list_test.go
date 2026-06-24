@@ -1,4 +1,3 @@
-
 package ipam_test
 
 import (
@@ -12,7 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/querycheck"
 	"github.com/hashicorp/terraform-plugin-testing/querycheck/queryfilter"
 	"github.com/hashicorp/terraform-plugin-testing/tfjsonpath"
-    "github.com/hashicorp/terraform-plugin-testing/tfversion"
+	"github.com/hashicorp/terraform-plugin-testing/tfversion"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/ipam"
 
@@ -25,7 +24,7 @@ func TestAccIpv6networkList_basic(t *testing.T) {
 	network := acctest.RandomIPv6Network()
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.PreCheck(t) },
+		PreCheck: func() { acctest.PreCheck(t) },
 		TerraformVersionChecks: []tfversion.TerraformVersionCheck{
 			tfversion.SkipBelow(tfversion.Version1_14_0),
 		},
@@ -33,16 +32,16 @@ func TestAccIpv6networkList_basic(t *testing.T) {
 			// Create and Read
 			{
 				ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-				Config: testAccIpv6networkBasicConfig(network),
+				Config:                   testAccIpv6networkBasicConfig(network),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networkExists(context.Background(), resourceName, &v),
 				),
 			},
-            // Query the object
+			// Query the object
 			{
 				ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-				Query:  true,
-				Config: testAccIpv6networkListBasicConfig(),
+				Query:                    true,
+				Config:                   testAccIpv6networkListBasicConfig(),
 				QueryResultChecks: []querycheck.QueryResultCheck{
 					querycheck.ExpectLengthAtLeast("nios_ipam_ipv6network.test", 1),
 				},
@@ -57,7 +56,7 @@ func TestAccIpv6networkList_Filters(t *testing.T) {
 	network := acctest.RandomIPv6Network()
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.PreCheck(t) },
+		PreCheck: func() { acctest.PreCheck(t) },
 		TerraformVersionChecks: []tfversion.TerraformVersionCheck{
 			tfversion.SkipBelow(tfversion.Version1_14_0),
 		},
@@ -65,7 +64,7 @@ func TestAccIpv6networkList_Filters(t *testing.T) {
 			// Create and Read
 			{
 				ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-				Config: testAccIpv6networkBasicConfig(network),
+				Config:                   testAccIpv6networkBasicConfig(network),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networkExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "network", network),
@@ -74,8 +73,8 @@ func TestAccIpv6networkList_Filters(t *testing.T) {
 			// Query the object
 			{
 				ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-				Query:  true,
-				Config: testAccIpv6networkListConfigFilters(network),
+				Query:                    true,
+				Config:                   testAccIpv6networkListConfigFilters(network),
 				QueryResultChecks: []querycheck.QueryResultCheck{
 					querycheck.ExpectLength("nios_ipam_ipv6network.test", 1),
 					querycheck.ExpectResourceKnownValues(
@@ -104,7 +103,7 @@ func TestAccIpv6networkList_ExtAttrFilters(t *testing.T) {
 	extAttrValue := acctest.RandomName()
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.PreCheck(t) },
+		PreCheck: func() { acctest.PreCheck(t) },
 		TerraformVersionChecks: []tfversion.TerraformVersionCheck{
 			tfversion.SkipBelow(tfversion.Version1_14_0),
 		},
@@ -123,8 +122,8 @@ func TestAccIpv6networkList_ExtAttrFilters(t *testing.T) {
 			// Query the object
 			{
 				ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-				Query: true,
-				Config: testAccIpv6networkListConfigExtAttrFilters(extAttrValue),
+				Query:                    true,
+				Config:                   testAccIpv6networkListConfigExtAttrFilters(extAttrValue),
 				QueryResultChecks: []querycheck.QueryResultCheck{
 					querycheck.ExpectLength("nios_ipam_ipv6network.test", 1),
 				},
@@ -168,4 +167,3 @@ list "nios_ipam_ipv6network" "test" {
 }
 `, extAttrsValue)
 }
-
