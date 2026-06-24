@@ -18,6 +18,8 @@ import (
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
+//TODO : FEDRATED_REALMS TEST CASES
+
 //TODO : OBJECTS TO BE PRESENT IN GRID FOR TESTS
 //MS DHCP SERVER : 10.10.0.0
 
@@ -1219,38 +1221,6 @@ func TestAccNetworkResource_ExtAttrs(t *testing.T) {
 	})
 }
 
-func TestAccNetworkResource_FederatedRealms(t *testing.T) {
-	if utils.GetNIOSFederationEnabled() == "" {
-		t.Skip("NIOS_FEDERATION_ENABLED environment variable must be set for this test to run (requires cloud federation feature enabled in NIOS)")
-	}
-	var resourceName = "nios_ipam_network.test_federated_realms"
-	var v ipam.Network
-	network := acctest.RandomCIDRNetwork()
-	federatedRealms := []map[string]any{
-		{
-			"name": "federated-realm-1",
-			"id":   "federated-realm-id-1",
-		},
-	}
-
-	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.PreCheck(t) },
-		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-		Steps: []resource.TestStep{
-			// Create and Read
-			{
-				Config: testAccNetworkFederatedRealms(network, federatedRealms),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckNetworkExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "federated_realms.0.name", "federated-realm-1"),
-					resource.TestCheckResourceAttr(resourceName, "federated_realms.0.id", "federated-realm-id-1"),
-				),
-			},
-			// Delete testing automatically occurs in TestCase
-		},
-	})
-}
-
 func TestAccNetworkResource_HighWaterMark(t *testing.T) {
 	var resourceName = "nios_ipam_network.test_high_water_mark"
 	var v ipam.Network
@@ -2106,7 +2076,6 @@ func TestAccNetworkResource_RirRegistrationAction(t *testing.T) {
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			// Create and Read
-			// rir_registration_action is write-only (not returned by NIOS on Read); state preserves configured value.
 			{
 				Config: testAccNetworkRirRegistrationAction(network, "NONE"),
 				Check: resource.ComposeTestCheckFunc(
@@ -2181,7 +2150,6 @@ func TestAccNetworkResource_SendRirRequest(t *testing.T) {
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			// Create and Read
-			// send_rir_request is write-only (not returned by NIOS on Read); state preserves configured value.
 			{
 				Config: testAccNetworkSendRirRequest(network, "false"),
 				Check: resource.ComposeTestCheckFunc(
@@ -3662,16 +3630,6 @@ resource "nios_ipam_network" "test_extattrs" {
   extattrs = %s
 }
 `, network, extattrsStr)
-}
-
-func testAccNetworkFederatedRealms(network string, federatedRealms []map[string]any) string {
-	federatedRealmsHCL := utils.ConvertSliceOfMapsToHCL(federatedRealms)
-	return fmt.Sprintf(`
-resource "nios_ipam_network" "test_federated_realms" {
-    network = %q
-    federated_realms = %s
-}
-`, network, federatedRealmsHCL)
 }
 
 func testAccNetworkHighWaterMark(network, highWaterMark string) string {

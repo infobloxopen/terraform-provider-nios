@@ -1148,7 +1148,6 @@ func TestAccIpv6networkResource_RirRegistrationAction(t *testing.T) {
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			// Create and Read
-			// rir_registration_action is write-only (not returned by NIOS on Read); state preserves configured value.
 			{
 				Config: testAccIpv6networkRirRegistrationAction(network, "NONE"),
 				Check: resource.ComposeTestCheckFunc(
@@ -1228,7 +1227,6 @@ func TestAccIpv6networkResource_SendRirRequest(t *testing.T) {
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			// Create and Read
-			// send_rir_request is write-only (not returned by NIOS on Read); state preserves configured value.
 			{
 				Config: testAccIpv6networkSendRirRequest(network, "false"),
 				Check: resource.ComposeTestCheckFunc(
