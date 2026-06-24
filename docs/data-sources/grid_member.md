@@ -140,6 +140,7 @@ Read-Only:
 - `member_service_communication` (Attributes List) Configure communication type for various services. (see [below for nested schema](#nestedatt--result--member_service_communication))
 - `mmdb_ea_build_time` (Number) Extensible attributes Topology database build time.
 - `mmdb_geoip_build_time` (Number) GeoIP Topology database build time.
+- `password_version` (Number) Internal revision incremented when external_syslog_backup_servers.password or lom_users.password changes.
 - `ref` (String) The reference to the object.
 - `service_status` (Attributes List) The service status list of a grid member. (see [below for nested schema](#nestedatt--result--service_status))
 - `support_access_info` (String) The information string for support access.
@@ -291,7 +292,7 @@ Optional:
 Required:
 
 - `address_or_fqdn` (String) The IPv4 or IPv6 address or FQDN of the backup syslog server.
-- `password` (String, Sensitive) The password of the backup syslog server.
+- `password` (String) The password of the backup syslog server.
 - `username` (String) The username of the backup syslog server.
 
 Optional:
@@ -403,7 +404,7 @@ Read-Only:
 Required:
 
 - `name` (String) The LOM user name.
-- `password` (String, Sensitive) The LOM user password.
+- `password` (String) The LOM user password.
 
 Optional:
 

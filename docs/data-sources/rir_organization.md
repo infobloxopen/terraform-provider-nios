@@ -53,7 +53,7 @@ Required:
 - `id` (String) The RIR organization identifier. Valid Examples for ID are ORG-CA1-RIPE or ORG-CB2-TEST
 - `maintainer` (String) The RIR organization maintainer.
 - `name` (String) The RIR organization name.
-- `password` (String, Sensitive) The password for the maintainer of RIR organization.
+- `password` (String) The password for the maintainer of RIR organization.
 - `sender_email` (String) The sender e-mail address for RIR organization.
 
 Optional:
@@ -62,5 +62,6 @@ Optional:
 
 Read-Only:
 
+- `password_version` (Number) Internal version incremented when secret field changes.
 - `ref` (String) The reference to the object.
 - `uuid` (String) Universally Unique ID assigned for this object.

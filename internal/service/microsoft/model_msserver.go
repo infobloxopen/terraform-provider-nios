@@ -10,6 +10,7 @@ import (
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
@@ -60,6 +61,7 @@ type MsserverModel struct {
 	UseMsRpcTimeoutInSeconds    types.Bool   `tfsdk:"use_ms_rpc_timeout_in_seconds"`
 	Version                     types.String `tfsdk:"version"`
 	ExtAttrsAll                 types.Map    `tfsdk:"extattrs_all"`
+	PasswordVersion             types.Int64  `tfsdk:"password_version"`
 }
 
 var MsserverAttrTypes = map[string]attr.Type{
@@ -98,6 +100,7 @@ var MsserverAttrTypes = map[string]attr.Type{
 	"use_ms_rpc_timeout_in_seconds": types.BoolType,
 	"version":                       types.StringType,
 	"extattrs_all":                  types.MapType{ElemType: types.StringType},
+	"password_version":              types.Int64Type,
 }
 
 var MsserverResourceSchemaAttributes = map[string]schema.Attribute{
@@ -213,8 +216,7 @@ var MsserverResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"login_password": schema.StringAttribute{
 		Optional:            true,
-		Computed:            true,
-		Sensitive:           true,
+		WriteOnly:           true,
 		MarkdownDescription: "Microsoft Server login password",
 	},
 	"managing_member": schema.StringAttribute{
@@ -297,6 +299,13 @@ var MsserverResourceSchemaAttributes = map[string]schema.Attribute{
 			importmod.AssociateInternalId(),
 		},
 	},
+	"password_version": schema.Int64Attribute{
+		Computed:            true,
+		MarkdownDescription: "Internal revision incremented when login_password changes.",
+		PlanModifiers: []planmodifier.Int64{
+			int64planmodifier.UseStateForUnknown(),
+		},
+	},
 }
 
 func (m *MsserverModel) Expand(ctx context.Context, diags *diag.Diagnostics) *microsoft.Msserver {
@@ -363,12 +372,11 @@ func (m *MsserverModel) Flatten(ctx context.Context, from *microsoft.Msserver, d
 	m.DnsServer = FlattenMsserverDnsServer(ctx, from.DnsServer, diags)
 	m.DnsView = flex.FlattenStringPointer(from.DnsView)
 	m.ExtAttrs = FlattenExtAttrs(ctx, m.ExtAttrs, from.ExtAttrs, diags)
-	m.GridMember = flex.FlattenStringPointer(from.GridMember)
+	m.GridMember = flex.FlattenStringPointerNilAsNotEmpty(from.GridMember)
 	m.LastSeen = flex.FlattenInt64Pointer(from.LastSeen)
 	m.LogDestination = flex.FlattenStringPointer(from.LogDestination)
 	m.LogLevel = flex.FlattenStringPointer(from.LogLevel)
 	m.LoginName = flex.FlattenStringPointer(from.LoginName)
-	m.LoginPassword = flex.FlattenStringPointer(from.LoginPassword)
 	m.ManagingMember = flex.FlattenStringPointer(from.ManagingMember)
 	m.MsMaxConnection = flex.FlattenInt64Pointer(from.MsMaxConnection)
 	m.MsRpcTimeoutInSeconds = flex.FlattenInt64Pointer(from.MsRpcTimeoutInSeconds)

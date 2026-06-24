@@ -59,6 +59,8 @@ resource "nios_misc_dxl_endpoint" "misc_dxl_endpoint_with_additional_fields" {
 
 ### Optional
 
+> **NOTE**: [Write-only arguments](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments) are supported in Terraform 1.11 and later.
+
 - `brokers` (Attributes List) The list of DXL endpoint brokers. Note that you cannot specify brokers and brokers_import_token at the same time. (see [below for nested schema](#nestedatt--brokers))
 - `brokers_import_file` (String) The file path for the DXL broker configuration file. When specified, the file is uploaded and the resulting configuration is stored in the brokers field.
 - `brokers_import_token` (String) The token returned by the uploadinit function call in object fileop for a DXL broker configuration file. Note that you cannot specify brokers and brokers_import_token at the same time.
@@ -72,7 +74,7 @@ resource "nios_misc_dxl_endpoint" "misc_dxl_endpoint_with_additional_fields" {
 - `topics` (List of String) DXL topics
 - `vendor_identifier` (String) The vendor identifier.
 - `wapi_user_name` (String) The user name for WAPI integration.
-- `wapi_user_password` (String, Sensitive) The user password for WAPI integration.
+- `wapi_user_password` (String, [Write-only](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments)) The user password for WAPI integration.
 
 ### Read-Only
 
@@ -81,6 +83,7 @@ resource "nios_misc_dxl_endpoint" "misc_dxl_endpoint_with_additional_fields" {
 - `client_certificate_valid_from` (Number) The timestamp when client certificate for a DXL endpoint was created.
 - `client_certificate_valid_to` (Number) The timestamp when the client certificate for a DXL endpoint expires.
 - `extattrs_all` (Map of String) Extensible attributes associated with the object, including default and internal attributes.
+- `password_version` (Number) Internal version incremented when wapi_user_password changes.
 - `ref` (String) The reference to the object.
 - `uuid` (String) Universally Unique ID assigned for this object.
 

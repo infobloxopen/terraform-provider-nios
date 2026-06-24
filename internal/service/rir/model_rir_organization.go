@@ -9,38 +9,40 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-
 	"github.com/infobloxopen/infoblox-nios-go-client/rir"
-
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
 type RirOrganizationModel struct {
-	Ref         types.String `tfsdk:"ref"`
-	Uuid        types.String `tfsdk:"uuid"`
-	ExtAttrs    types.Map    `tfsdk:"extattrs"`
-	Id          types.String `tfsdk:"id"`
-	Maintainer  types.String `tfsdk:"maintainer"`
-	Name        types.String `tfsdk:"name"`
-	Password    types.String `tfsdk:"password"`
-	Rir         types.String `tfsdk:"rir"`
-	SenderEmail types.String `tfsdk:"sender_email"`
+	Ref             types.String `tfsdk:"ref"`
+	Uuid            types.String `tfsdk:"uuid"`
+	ExtAttrs        types.Map    `tfsdk:"extattrs"`
+	Id              types.String `tfsdk:"id"`
+	Maintainer      types.String `tfsdk:"maintainer"`
+	Name            types.String `tfsdk:"name"`
+	Password        types.String `tfsdk:"password"`
+	PasswordVersion types.Int64  `tfsdk:"password_version"`
+	Rir             types.String `tfsdk:"rir"`
+	SenderEmail     types.String `tfsdk:"sender_email"`
 }
 
 var RirOrganizationAttrTypes = map[string]attr.Type{
-	"ref":          types.StringType,
-	"uuid":         types.StringType,
-	"extattrs":     types.MapType{ElemType: types.StringType},
-	"id":           types.StringType,
-	"maintainer":   types.StringType,
-	"name":         types.StringType,
-	"password":     types.StringType,
-	"rir":          types.StringType,
-	"sender_email": types.StringType,
+	"ref":              types.StringType,
+	"uuid":             types.StringType,
+	"extattrs":         types.MapType{ElemType: types.StringType},
+	"id":               types.StringType,
+	"maintainer":       types.StringType,
+	"name":             types.StringType,
+	"password":         types.StringType,
+	"password_version": types.Int64Type,
+	"rir":              types.StringType,
+	"sender_email":     types.StringType,
 }
 
 var RirOrganizationResourceSchemaAttributes = map[string]schema.Attribute{
@@ -90,12 +92,19 @@ var RirOrganizationResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"password": schema.StringAttribute{
 		Required:  true,
-		Sensitive: true,
+		WriteOnly: true,
 		Validators: []validator.String{
 			stringvalidator.LengthBetween(0, 256),
 			customvalidator.ValidateTrimmedString(),
 		},
 		MarkdownDescription: "The password for the maintainer of RIR organization.",
+	},
+	"password_version": schema.Int64Attribute{
+		Computed:            true,
+		MarkdownDescription: "Internal version incremented when secret field changes.",
+		PlanModifiers: []planmodifier.Int64{
+			int64planmodifier.UseStateForUnknown(),
+		},
 	},
 	"rir": schema.StringAttribute{
 		Computed: true,

@@ -2,6 +2,7 @@ package security
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"net/http"
 
@@ -9,9 +10,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
-
+	"github.com/hashicorp/terraform-plugin-framework/types"
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
-
 	"github.com/infobloxopen/terraform-provider-nios/internal/config"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
@@ -21,6 +21,7 @@ var readableAttributesForTacacsplusAuthservice = "acct_retries,acct_timeout,auth
 // Ensure provider defined types fully satisfy framework interfaces.
 var _ resource.Resource = &TacacsplusAuthserviceResource{}
 var _ resource.ResourceWithImportState = &TacacsplusAuthserviceResource{}
+var _ resource.ResourceWithModifyPlan = &TacacsplusAuthserviceResource{}
 
 func NewTacacsplusAuthserviceResource() resource.Resource {
 	return &TacacsplusAuthserviceResource{}
@@ -62,6 +63,102 @@ func (r *TacacsplusAuthserviceResource) Configure(ctx context.Context, req resou
 	r.client = client
 }
 
+type tacacsplusAuthserviceSecretsHashState struct {
+	ServersHash string `json:"servers_secret_hash"`
+}
+
+func (r *TacacsplusAuthserviceResource) ModifyPlan(ctx context.Context, req resource.ModifyPlanRequest, resp *resource.ModifyPlanResponse) {
+	if req.Plan.Raw.IsNull() {
+		return
+	}
+
+	var stateSecretVersion types.Int64
+	curRev := int64(0)
+
+	if !req.State.Raw.IsNull() && req.State.Raw.IsKnown() {
+		resp.Diagnostics.Append(req.State.GetAttribute(ctx, path.Root("secret_version"), &stateSecretVersion)...)
+		if resp.Diagnostics.HasError() {
+			return
+		}
+		if !stateSecretVersion.IsNull() && !stateSecretVersion.IsUnknown() {
+			curRev = stateSecretVersion.ValueInt64()
+		}
+	}
+
+	var data TacacsplusAuthserviceModel
+	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	servers, diags := extractTacacsServers(ctx, data.Servers)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	if len(servers) == 0 {
+		return
+	}
+
+	var prev struct {
+		Algo string `json:"algo"`
+		Hash string `json:"hash"`
+	}
+
+	prevHashes := tacacsplusAuthserviceSecretsHashState{}
+
+	if b, diags := req.Private.GetKey(ctx, "servers_secret_hash"); diags != nil {
+		resp.Diagnostics.Append(diags...)
+		if resp.Diagnostics.HasError() {
+			return
+		}
+	} else if b != nil {
+		if err := json.Unmarshal(b, &prev); err != nil {
+			prev.Hash = ""
+		}
+		if prev.Hash != "" {
+			if err := json.Unmarshal([]byte(prev.Hash), &prevHashes); err != nil {
+				prevHashes = tacacsplusAuthserviceSecretsHashState{}
+			}
+		}
+	}
+
+	newHash, err := hashTacacsServers(servers)
+	if err != nil {
+		resp.Diagnostics.AddError("Hash Error", err.Error())
+		return
+	}
+
+	plannedHashes := tacacsplusAuthserviceSecretsHashState{ServersHash: newHash}
+	plannedHashJSON, err := json.Marshal(plannedHashes)
+	if err != nil {
+		resp.Diagnostics.AddError("Private State Marshal Error", err.Error())
+		return
+	}
+
+	if plannedHashes.ServersHash != "" && plannedHashes.ServersHash != prevHashes.ServersHash {
+		resp.Diagnostics.Append(
+			resp.Plan.SetAttribute(ctx, path.Root("secret_version"), types.Int64Value(curRev+1))...,
+		)
+
+		val := map[string]string{
+			"algo": "sha256",
+			"hash": string(plannedHashJSON),
+		}
+		b, err := json.Marshal(val)
+		if err != nil {
+			resp.Diagnostics.AddError("Private State Marshal Error", err.Error())
+			return
+		}
+		resp.Diagnostics.Append(resp.Private.SetKey(ctx, "servers_secret_hash", b)...)
+	} else {
+		resp.Diagnostics.Append(
+			resp.Plan.SetAttribute(ctx, path.Root("secret_version"), types.Int64Value(curRev))...,
+		)
+	}
+}
+
 func (r *TacacsplusAuthserviceResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var data TacacsplusAuthserviceModel
 
@@ -72,13 +169,60 @@ func (r *TacacsplusAuthserviceResource) Create(ctx context.Context, req resource
 		return
 	}
 
+	// Read from Config separately — only to extract write-only fields
+	var configData TacacsplusAuthserviceModel
+	resp.Diagnostics.Append(req.Config.Get(ctx, &configData)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	payload := data.Expand(ctx, &resp.Diagnostics)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	secretVersion := types.Int64Value(0)
+	secretData := tacacsplusAuthserviceSecretsHashState{}
+
+	servers, diags := extractTacacsServers(ctx, configData.Servers)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	if len(servers) > 0 && len(payload.Servers) == len(servers) {
+		for i := range servers {
+			if !servers[i].SharedSecret.IsNull() && !servers[i].SharedSecret.IsUnknown() {
+				payload.Servers[i].SharedSecret = servers[i].SharedSecret.ValueStringPointer()
+			}
+		}
+
+		serversHash, err := hashTacacsServers(servers)
+		if err != nil {
+			resp.Diagnostics.AddError("Hash Error", err.Error())
+			return
+		}
+
+		secretData.ServersHash = serversHash
+		secretDataJSON, _ := json.Marshal(secretData)
+		val := map[string]string{"algo": "sha256", "hash": string(secretDataJSON)}
+		hashedSecret, err := json.Marshal(val)
+		if err != nil {
+			resp.Diagnostics.AddError("Private State Marshal Error", err.Error())
+			return
+		}
+		resp.Diagnostics.Append(resp.Private.SetKey(ctx, "servers_secret_hash", hashedSecret)...)
+		secretVersion = types.Int64Value(1)
+	}
+
 	apiRes, _, err := r.client.SecurityAPI.
 		TacacsplusAuthserviceAPI.
 		Create(ctx).
-		TacacsplusAuthservice(*data.Expand(ctx, &resp.Diagnostics)).
+		TacacsplusAuthservice(*payload).
 		ReturnFieldsPlus(readableAttributesForTacacsplusAuthservice).
 		ReturnAsObject(1).
 		Execute()
+
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create TacacsplusAuthservice, got error: %s", err))
 		return
@@ -86,6 +230,7 @@ func (r *TacacsplusAuthserviceResource) Create(ctx context.Context, req resource
 
 	res := apiRes.CreateTacacsplusAuthserviceResponseAsObject.GetResult()
 
+	data.SecretVersion = secretVersion
 	data.Flatten(ctx, &res, &resp.Diagnostics)
 
 	// Save data into Terraform state
@@ -132,10 +277,19 @@ func (r *TacacsplusAuthserviceResource) Read(ctx context.Context, req resource.R
 func (r *TacacsplusAuthserviceResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	var diags diag.Diagnostics
 	var data TacacsplusAuthserviceModel
+	var plannedSecretVersion types.Int64
 
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
+	resp.Diagnostics.Append(req.Plan.GetAttribute(ctx, path.Root("secret_version"), &plannedSecretVersion)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
 
+	payload := data.Expand(ctx, &resp.Diagnostics)
+	// Read from Config separately — only to extract write-only shared_secret from servers
+	var configData TacacsplusAuthserviceModel
+	resp.Diagnostics.Append(req.Config.Get(ctx, &configData)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
@@ -152,23 +306,38 @@ func (r *TacacsplusAuthserviceResource) Update(ctx context.Context, req resource
 		return
 	}
 
+	servers, diags := extractTacacsServers(ctx, configData.Servers)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	if len(servers) > 0 && len(payload.Servers) == len(servers) {
+		for i := range servers {
+			if !servers[i].SharedSecret.IsNull() && !servers[i].SharedSecret.IsUnknown() {
+				payload.Servers[i].SharedSecret = servers[i].SharedSecret.ValueStringPointer()
+			}
+		}
+	}
+
+	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
+
 	apiRes, _, err := r.client.SecurityAPI.
 		TacacsplusAuthserviceAPI.
-		Update(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
-		TacacsplusAuthservice(*data.Expand(ctx, &resp.Diagnostics)).
+		Update(ctx, resourceRef).
+		TacacsplusAuthservice(*payload).
 		ReturnFieldsPlus(readableAttributesForTacacsplusAuthservice).
 		ReturnAsObject(1).
 		Execute()
+
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update TacacsplusAuthservice, got error: %s", err))
 		return
 	}
 
 	res := apiRes.UpdateTacacsplusAuthserviceResponseAsObject.GetResult()
-
 	data.Flatten(ctx, &res, &resp.Diagnostics)
-
-	// Save updated data into Terraform state
+	data.SecretVersion = plannedSecretVersion
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 

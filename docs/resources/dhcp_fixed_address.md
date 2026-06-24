@@ -166,6 +166,7 @@ resource "nios_dhcp_fixed_address" "create_fixed_address_with_func_call" {
 - `ms_ad_user_data` (Attributes) The Microsoft Active Directory user related information. (see [below for nested schema](#nestedatt--ms_ad_user_data))
 - `ref` (String) The reference to the object.
 - `uuid` (String) Universally Unique ID assigned for this object.
+- `secrets_version` (Number) Internal version incremented when secrets (snmp3_credential and cli_credentials) change.
 
 <a id="nestedatt--cli_credentials"></a>
 ### Nested Schema for `cli_credentials`
@@ -178,7 +179,7 @@ Optional:
 
 - `comment` (String) The comment for the credential.
 - `credential_group` (String) Group for the CLI credential.
-- `password` (String, Sensitive) The CLI password.
+- `password` (String, [Write-only](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments)) The CLI password.
 - `user` (String) The CLI user name.
 
 Read-Only:
@@ -261,10 +262,10 @@ Required:
 
 Optional:
 
-- `authentication_password` (String, Sensitive) Authentication password for the SNMPv3 user.
+- `authentication_password` (String, [Write-only](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments)) Authentication password for the SNMPv3 user.
 - `comment` (String) Comments for the SNMPv3 user.
 - `credential_group` (String) Group for the SNMPv3 credential.
-- `privacy_password` (String, Sensitive) Privacy password for the SNMPv3 user.
+- `privacy_password` (String, [Write-only](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments)) Privacy password for the SNMPv3 user.
 
 
 <a id="nestedatt--snmp_credential"></a>
