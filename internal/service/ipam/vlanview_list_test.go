@@ -1,4 +1,3 @@
-
 package ipam_test
 
 import (
@@ -12,7 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/querycheck"
 	"github.com/hashicorp/terraform-plugin-testing/querycheck/queryfilter"
 	"github.com/hashicorp/terraform-plugin-testing/tfjsonpath"
-    "github.com/hashicorp/terraform-plugin-testing/tfversion"
+	"github.com/hashicorp/terraform-plugin-testing/tfversion"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/ipam"
 
@@ -25,7 +24,7 @@ func TestAccVlanviewList_basic(t *testing.T) {
 	name := acctest.RandomNameWithPrefix("vlan_view")
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.PreCheck(t) },
+		PreCheck: func() { acctest.PreCheck(t) },
 		TerraformVersionChecks: []tfversion.TerraformVersionCheck{
 			tfversion.SkipBelow(tfversion.Version1_14_0),
 		},
@@ -38,11 +37,11 @@ func TestAccVlanviewList_basic(t *testing.T) {
 					testAccCheckVlanviewExists(context.Background(), resourceName, &v),
 				),
 			},
-            // Query the object
+			// Query the object
 			{
 				ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-				Query:  true,
-				Config: testAccVlanviewListBasicConfig(),
+				Query:                    true,
+				Config:                   testAccVlanviewListBasicConfig(),
 				QueryResultChecks: []querycheck.QueryResultCheck{
 					querycheck.ExpectLengthAtLeast("nios_ipam_vlanview.test", 1),
 				},
@@ -57,7 +56,7 @@ func TestAccVlanviewList_Filters(t *testing.T) {
 	name := acctest.RandomNameWithPrefix("vlan_view")
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.PreCheck(t) },
+		PreCheck: func() { acctest.PreCheck(t) },
 		TerraformVersionChecks: []tfversion.TerraformVersionCheck{
 			tfversion.SkipBelow(tfversion.Version1_14_0),
 		},
@@ -81,11 +80,11 @@ func TestAccVlanviewList_Filters(t *testing.T) {
 					querycheck.ExpectResourceKnownValues(
 						resourceName,
 						queryfilter.ByResourceIdentity(map[string]knownvalue.Check{
-						    // TODO : Update the ref prefix with the correct identifying object for the resource
+							// TODO : Update the ref prefix with the correct identifying object for the resource
 							"ref": knownvalue.StringRegexp(regexp.MustCompile("vlanview/")),
 						}),
 						[]querycheck.KnownValueCheck{
-						    // TODO : Add checks for required fields
+							// TODO : Add checks for required fields
 							{
 								Path:       tfjsonpath.New("name"),
 								KnownValue: knownvalue.StringExact(name),
@@ -106,7 +105,7 @@ func TestAccVlanviewList_ExtAttrFilters(t *testing.T) {
 	extAttrValue := acctest.RandomName()
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.PreCheck(t) },
+		PreCheck: func() { acctest.PreCheck(t) },
 		TerraformVersionChecks: []tfversion.TerraformVersionCheck{
 			tfversion.SkipBelow(tfversion.Version1_14_0),
 		},
@@ -125,8 +124,8 @@ func TestAccVlanviewList_ExtAttrFilters(t *testing.T) {
 			// Query the object
 			{
 				ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-				Query: true,
-				Config: testAccVlanviewListConfigExtAttrFilters(extAttrValue),
+				Query:                    true,
+				Config:                   testAccVlanviewListConfigExtAttrFilters(extAttrValue),
 				QueryResultChecks: []querycheck.QueryResultCheck{
 					querycheck.ExpectLength("nios_ipam_vlanview.test", 1),
 				},
@@ -170,4 +169,3 @@ list "nios_ipam_vlanview" "test" {
 }
 `, extAttrsValue)
 }
-
