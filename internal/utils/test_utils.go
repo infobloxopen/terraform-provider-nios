@@ -42,6 +42,10 @@ func GetNIOSGridMemberHostName() string {
 	return os.Getenv("NIOS_GRID_MEMBER_HOSTNAME")
 }
 
+func GetNIOSDiscoveryMemberHostName() string {
+	return os.Getenv("NIOS_DISCOVERY_MEMBER_HOSTNAME")
+}
+
 func GetNIOSNotificationRestEndpointRef() string {
 	return os.Getenv("NIOS_NOTIFICATION_REST_ENDPOINT_REF")
 }
@@ -56,4 +60,12 @@ func GetGSSTSIGCertRef() string {
 
 func GetNIOSGridMasterConfigAddrType() string {
 	return os.Getenv("NIOS_GRID_MASTER_CONFIG_ADDR_TYPE")
+}
+
+func GetNIOSSyslogEndpointRef() string {
+	return os.Getenv("NIOS_SYSLOG_ENDPOINT_REF")
+}
+
+func GetSubscriberBlockSizeEditable() string {
+	return os.Getenv("SUBSCRIBER_BLOCK_SIZE_EDITABLE")
 }

@@ -432,7 +432,7 @@ func TestAccDxlEndpointResource_TemplateInstance(t *testing.T) {
 		"template": "Version5_DXL_Session_Template",
 	}
 	templateInstanceValUpdated := map[string]any{
-		"template": "Version5_DXL_Session_Template2",
+		"template": "Version5_DXL_Session_Template1",
 	}
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -452,7 +452,7 @@ func TestAccDxlEndpointResource_TemplateInstance(t *testing.T) {
 				Config: testAccDxlEndpointTemplateInstance(clientCertificateFile, broker, name, "GM", templateInstanceValUpdated),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDxlEndpointExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "template_instance.template", "Version5_DXL_Session_Template2"),
+					resource.TestCheckResourceAttr(resourceName, "template_instance.template", "Version5_DXL_Session_Template1"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -578,6 +578,36 @@ func TestAccDxlEndpointResource_WapiUserName(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDxlEndpointExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "wapi_user_name", "admin_updated"),
+				),
+			},
+			// Delete testing automatically occurs in TestCase
+		},
+	})
+}
+
+func TestAccDxlEndpointResource_WapiUserPassword(t *testing.T) {
+	var resourceName = "nios_misc_dxl_endpoint.test_wapi_user_password"
+	var v misc.DxlEndpoint
+	name := acctest.RandomNameWithPrefix("dxl-endpoint")
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// Create and Read
+			{
+				Config: testAccDxlEndpointWapiUserPassword(clientCertificateFile, broker, name, "GM", "admin", "password"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckDxlEndpointExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "password_version", "1"),
+				),
+			},
+			// Update and Read
+			{
+				Config: testAccDxlEndpointWapiUserPassword(clientCertificateFile, broker, name, "GM", "admin_updated", "password123"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckDxlEndpointExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "password_version", "2"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -873,6 +903,20 @@ func testAccDxlEndpointWapiUserName(clientCertificateToken string, broker []map[
 	brokerStr := utils.ConvertSliceOfMapsToHCL(broker)
 	return fmt.Sprintf(`
 resource "nios_misc_dxl_endpoint" "test_wapi_user_name" {
+    client_certificate_file = %q
+    name = %q
+    outbound_member_type = %q
+    wapi_user_name = %q
+    wapi_user_password = %q
+	brokers = %s
+}
+`, clientCertificateToken, name, outboundMemberType, wapiUserName, password, brokerStr)
+}
+
+func testAccDxlEndpointWapiUserPassword(clientCertificateToken string, broker []map[string]any, name string, outboundMemberType string, wapiUserName, password string) string {
+	brokerStr := utils.ConvertSliceOfMapsToHCL(broker)
+	return fmt.Sprintf(`
+resource "nios_misc_dxl_endpoint" "test_wapi_user_password" {
     client_certificate_file = %q
     name = %q
     outbound_member_type = %q

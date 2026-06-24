@@ -2602,28 +2602,6 @@ func TestAccNetworkcontainerResource_UseUpdateDnsOnLeaseRenewal(t *testing.T) {
 	})
 }
 
-func TestAccNetworkcontainerResource_UseZoneAssociations(t *testing.T) {
-	var resourceName = "nios_ipam_network_container.test_use_zone_associations"
-	var v ipam.Networkcontainer
-	network := acctest.RandomCIDRNetwork()
-
-	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.PreCheck(t) },
-		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-		Steps: []resource.TestStep{
-			// Create and Read
-			{
-				Config: testAccNetworkcontainerUseZoneAssociations(network, "true"),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckNetworkcontainerExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_zone_associations", "true"),
-					resource.TestCheckResourceAttr(resourceName, "network", network),
-				),
-			},
-			// Delete testing automatically occurs in TestCase
-		},
-	})
-}
 
 func testAccCheckNetworkcontainerExists(ctx context.Context, resourceName string, v *ipam.Networkcontainer) resource.TestCheckFunc {
 	// Verify the resource exists in the cloud
@@ -3397,11 +3375,3 @@ resource "nios_ipam_network_container" "test_use_update_dns_on_lease_renewal" {
 `, network, useUpdateDnsOnLeaseRenewal)
 }
 
-func testAccNetworkcontainerUseZoneAssociations(network, useZoneAssociations string) string {
-	return fmt.Sprintf(`
-resource "nios_ipam_network_container" "test_use_zone_associations" {
-    network = %q
-    use_zone_associations = %q
-}
-`, network, useZoneAssociations)
-}

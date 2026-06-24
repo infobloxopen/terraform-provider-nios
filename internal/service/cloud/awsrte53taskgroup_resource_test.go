@@ -413,6 +413,7 @@ func TestAccAwsrte53taskgroupResource_TaskList(t *testing.T) {
 	var v cloud.Awsrte53taskgroup
 	taskGroupName := acctest.RandomNameWithPrefix("test-taskgroup")
 	gridMember := utils.GetNIOSGridMasterHostName()
+	awsUserName := acctest.RandomNameWithPrefix("aws-user")
 	taskList := []map[string]any{
 		{
 			"aws_user":           "${nios_cloud_aws_user.test.ref}",
@@ -457,7 +458,7 @@ func TestAccAwsrte53taskgroupResource_TaskList(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccAwsrte53taskgroupTaskList(taskGroupName, gridMember, taskList),
+				Config: testAccAwsrte53taskgroupTaskList(awsUserName, taskGroupName, gridMember, taskList),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAwsrte53taskgroupExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "task_list.#", "2"),
@@ -475,7 +476,7 @@ func TestAccAwsrte53taskgroupResource_TaskList(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccAwsrte53taskgroupTaskList(taskGroupName, gridMember, taskListUpdate),
+				Config: testAccAwsrte53taskgroupTaskList(awsUserName, taskGroupName, gridMember, taskListUpdate),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAwsrte53taskgroupExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "task_list.#", "1"),
@@ -782,13 +783,13 @@ resource "nios_cloud_aws_route53_task_group" "test_sync_child_accounts" {
 `, taskGroupName, gridMember, syncChildAccounts)
 }
 
-func testAccAwsrte53taskgroupTaskList(taskGroupName, gridMember string, taskList []map[string]any) string {
+func testAccAwsrte53taskgroupTaskList(awsUserName, taskGroupName, gridMember string, taskList []map[string]any) string {
 	taskListHCL := utils.ConvertSliceOfMapsToHCL(taskList)
 	return fmt.Sprintf(`
 resource "nios_cloud_aws_user" "test" {
   access_key_id     = "AKIAEXAMPLE"
   account_id        = "337773173961"
-  name              = "aws-user"
+  name              = %q
   secret_access_key = "S1JGWfwcZWESkfpyhxigL9A/u96mY"
 }
 
@@ -801,7 +802,7 @@ resource "nios_cloud_aws_route53_task_group" "test_task_list" {
 	role_arn = "arn:aws:iam::123456789012:role/Role-name"
 	depends_on = [nios_cloud_aws_user.test]
 }
-`, taskGroupName, gridMember, taskListHCL)
+`, awsUserName, taskGroupName, gridMember, taskListHCL)
 }
 
 func getTestDataPath() string {
