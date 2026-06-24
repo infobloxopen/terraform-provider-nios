@@ -2003,8 +2003,8 @@ func TestAccIpv6networkcontainerResource_RemoveSubnetsTrue(t *testing.T) {
 					// Delete parent container via API with remove_subnets=true
 					testAccCheckIpv6networkcontainerDeleteWithRemoveSubnets(context.Background(), &containerResource, true),
 					// Verify child networks are cascade-deleted
-					testAccCheckIpv6networkNotExistsByRef(context.Background(), &childNetwork1),
-					testAccCheckIpv6networkNotExistsByRef(context.Background(), &childNetwork2),
+					testAccCheckIpv6networkDestroy(context.Background(), &childNetwork1),
+					testAccCheckIpv6networkDestroy(context.Background(), &childNetwork2),
 				),
 				ExpectNonEmptyPlan: true,
 			},
@@ -2077,24 +2077,6 @@ func testAccCheckIpv6networkcontainerDeleteWithRemoveSubnets(ctx context.Context
 			return err
 		}
 		return nil
-	}
-}
-
-// testAccCheckIpv6networkNotExistsByRef verifies the network was deleted from NIOS
-func testAccCheckIpv6networkNotExistsByRef(ctx context.Context, v *ipam.Ipv6network) resource.TestCheckFunc {
-	return func(state *terraform.State) error {
-		_, httpRes, err := acctest.NIOSClient.IPAMAPI.
-			Ipv6networkAPI.
-			Read(ctx, utils.ExtractResourceRef(*v.Ref)).
-			ReturnAsObject(1).
-			Execute()
-		if err != nil {
-			if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
-				return nil // expected — network was cascade-deleted
-			}
-			return err
-		}
-		return errors.New("expected network to be deleted but it still exists")
 	}
 }
 
