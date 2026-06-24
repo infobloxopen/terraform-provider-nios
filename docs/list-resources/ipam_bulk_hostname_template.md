@@ -3,12 +3,12 @@
 page_title: "nios_ipam_bulk_hostname_template List Resource - nios"
 subcategory: "IPAM"
 description: |-
-  Query existing ipam Bulkhostnametemplate.
+  Query existing IPAM Bulk Hostname Template.
 ---
 
 # nios_ipam_bulk_hostname_template (List Resource)
 
-Query existing ipam Bulkhostnametemplate.
+Query existing IPAM Bulk Hostname Template.
 
 ## Example Usage
 

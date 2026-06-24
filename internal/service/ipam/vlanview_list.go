@@ -61,7 +61,7 @@ type VlanviewListModel struct {
 
 func (l *VlanviewList) ListResourceConfigSchema(ctx context.Context, req list.ListResourceSchemaRequest, resp *list.ListResourceSchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Query existing ipam Vlanview.",
+		MarkdownDescription: "Query existing IPAM Vlan View.",
 		Attributes: map[string]schema.Attribute{
 			"filters": schema.MapAttribute{
 				MarkdownDescription: "Filters are used to return a more specific list of results. Filters can be used to match resources by specific attributes, e.g. name. If you specify multiple filters, the results returned will have only resources that match all the specified filters.",

@@ -33,7 +33,7 @@ func TestAccBulkhostnametemplateList_basic(t *testing.T) {
 			// Create and Read
 			{
 				ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-				Config: testAccBulkhostnametemplateBasicConfig(templateName, templateFormat),
+				Config:                   testAccBulkhostnametemplateBasicConfig(templateName, templateFormat),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckBulkhostnametemplateExists(context.Background(), resourceName, &v),
 				),
@@ -66,7 +66,7 @@ func TestAccBulkhostnametemplateList_Filters(t *testing.T) {
 			// Create and Read
 			{
 				ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-				Config: testAccBulkhostnametemplateBasicConfig(templateName, templateFormat),
+				Config:                   testAccBulkhostnametemplateBasicConfig(templateName, templateFormat),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckBulkhostnametemplateExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "template_name", templateName),
@@ -75,18 +75,16 @@ func TestAccBulkhostnametemplateList_Filters(t *testing.T) {
 			// Query the object
 			{
 				ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-				Query:  true,
-				Config: testAccBulkhostnametemplateListConfigFilters(templateName),
+				Query:                    true,
+				Config:                   testAccBulkhostnametemplateListConfigFilters(templateName),
 				QueryResultChecks: []querycheck.QueryResultCheck{
 					querycheck.ExpectLength("nios_ipam_bulk_hostname_template.test", 1),
 					querycheck.ExpectResourceKnownValues(
 						resourceName,
 						queryfilter.ByResourceIdentity(map[string]knownvalue.Check{
-							// TODO : Update the ref prefix with the correct identifying object for the resource
 							"ref": knownvalue.StringRegexp(regexp.MustCompile("bulkhostnametemplate/")),
 						}),
 						[]querycheck.KnownValueCheck{
-							// TODO : Add checks for required fields
 							{
 								Path:       tfjsonpath.New("template_name"),
 								KnownValue: knownvalue.StringExact(templateName),
