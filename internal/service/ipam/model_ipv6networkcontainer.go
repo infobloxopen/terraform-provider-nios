@@ -478,6 +478,7 @@ var Ipv6networkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 	"rir_registration_action": schema.StringAttribute{
 		Optional:            true,
 		MarkdownDescription: "The RIR registration action.",
+		Computed:            true,
 	},
 	"rir_registration_status": schema.StringAttribute{
 		Optional:            true,
@@ -782,6 +783,9 @@ func (m *Ipv6networkcontainerModel) Flatten(ctx context.Context, from *ipam.Ipv6
 	m.RemoveSubnets = types.BoolPointerValue(from.RemoveSubnets)
 	m.Rir = flex.FlattenStringPointer(from.Rir)
 	m.RirOrganization = flex.FlattenStringPointer(from.RirOrganization)
+	if m.RirRegistrationAction.IsNull() || m.RirRegistrationAction.IsUnknown() {
+		m.RirRegistrationAction = flex.FlattenStringPointer(from.RirRegistrationAction)
+	}
 	m.RirRegistrationStatus = flex.FlattenStringPointer(from.RirRegistrationStatus)
 	m.SamePortControlDiscoveryBlackout = types.BoolPointerValue(from.SamePortControlDiscoveryBlackout)
 	m.SubscribeSettings = FlattenIpv6networkcontainerSubscribeSettings(ctx, from.SubscribeSettings, diags)
