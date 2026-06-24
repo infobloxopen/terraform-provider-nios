@@ -157,13 +157,13 @@ resource "nios_ipam_networktemplate" "test" {
   name = %q
   netmask = %d
   extattrs = {
-    Site = %q
+    "Tenant ID" = %q
   } 
 }
 
 data "nios_ipam_networktemplate" "test" {
   extattrfilters = {
-    Site = nios_ipam_networktemplate.test.extattrs.Site
+    "Tenant ID" = nios_ipam_networktemplate.test.extattrs["Tenant ID"]
   }
 }
 `, name, netmask, extAttrsValue)

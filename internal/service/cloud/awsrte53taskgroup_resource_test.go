@@ -19,17 +19,19 @@ import (
 
 var readableAttributesForAwsrte53taskgroup = "account_id,comment,consolidate_zones,consolidated_view,disabled,grid_member,name,network_view,network_view_mapping_policy,role_arn,sync_child_accounts,sync_status,task_list"
 
-// TODO : OBJECTS TO BE PRESENT IN GRID FOR TESTS
-// Two Grid members are needed for testing ( "infoblox.localdomain" "member.com"),
-// add  "member.com" within "infoblox.localdomain"
-// Tasklist unordered issue exist, similar to dhcp options
-// AWS secret and key has to added, or can be skipped if privacy concern
-// upload child is a limitation with multiple accounts sync policy
+// TODO
+// Additional Support Required - AwsAccountIdsFileToken (Support for File Operation)
+
+// OBJECTS TO BE PRESENT IN GRID FOR TESTS :
+// A Grid Master and a Member are required for testing
+
+// Upload child is a limitation with multiple accounts sync policy
+
 func TestAccAwsrte53taskgroupResource_basic(t *testing.T) {
 	var resourceName = "nios_cloud_aws_route53_task_group.test"
 	var v cloud.Awsrte53taskgroup
 	taskGroupName := acctest.RandomNameWithPrefix("test-taskgroup")
-	gridMember := "infoblox.localdomain"
+	gridMember := utils.GetNIOSGridMasterHostName()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -57,7 +59,7 @@ func TestAccAwsrte53taskgroupResource_disappears(t *testing.T) {
 	resourceName := "nios_cloud_aws_route53_task_group.test"
 	var v cloud.Awsrte53taskgroup
 	taskGroupName := acctest.RandomNameWithPrefix("test-taskgroup")
-	gridMember := "infoblox.localdomain"
+	gridMember := utils.GetNIOSGridMasterHostName()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -110,7 +112,7 @@ func TestAccAwsrte53taskgroupResource_Comment(t *testing.T) {
 	var resourceName = "nios_cloud_aws_route53_task_group.test_comment"
 	var v cloud.Awsrte53taskgroup
 	taskGroupName := acctest.RandomNameWithPrefix("test-taskgroup")
-	gridMember := "infoblox.localdomain"
+	gridMember := utils.GetNIOSGridMasterHostName()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -141,7 +143,7 @@ func TestAccAwsrte53taskgroupResource_ConsolidateZones(t *testing.T) {
 	var resourceName = "nios_cloud_aws_route53_task_group.test_consolidate_zones"
 	var v cloud.Awsrte53taskgroup
 	taskGroupName := acctest.RandomNameWithPrefix("test-taskgroup")
-	gridMember := "infoblox.localdomain"
+	gridMember := utils.GetNIOSGridMasterHostName()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -164,7 +166,7 @@ func TestAccAwsrte53taskgroupResource_ConsolidatedView(t *testing.T) {
 	var resourceName = "nios_cloud_aws_route53_task_group.test_consolidated_view"
 	var v cloud.Awsrte53taskgroup
 	taskGroupName := acctest.RandomNameWithPrefix("test-taskgroup")
-	gridMember := "infoblox.localdomain"
+	gridMember := utils.GetNIOSGridMasterHostName()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -186,7 +188,7 @@ func TestAccAwsrte53taskgroupResource_Disabled(t *testing.T) {
 	var resourceName = "nios_cloud_aws_route53_task_group.test_disabled"
 	var v cloud.Awsrte53taskgroup
 	taskGroupName := acctest.RandomNameWithPrefix("test-taskgroup")
-	gridMember := "infoblox.localdomain"
+	gridMember := utils.GetNIOSGridMasterHostName()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -217,6 +219,8 @@ func TestAccAwsrte53taskgroupResource_GridMember(t *testing.T) {
 	var resourceName = "nios_cloud_aws_route53_task_group.test_grid_member"
 	var v cloud.Awsrte53taskgroup
 	taskGroupName := acctest.RandomNameWithPrefix("test-taskgroup")
+	gridMember := utils.GetNIOSGridMasterHostName()
+	gridMemberUpdatedName := utils.GetNIOSGridMemberHostName()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -224,18 +228,18 @@ func TestAccAwsrte53taskgroupResource_GridMember(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccAwsrte53taskgroupGridMember("infoblox.localdomain", taskGroupName),
+				Config: testAccAwsrte53taskgroupGridMember(gridMember, taskGroupName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAwsrte53taskgroupExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "grid_member", "infoblox.localdomain"),
+					resource.TestCheckResourceAttr(resourceName, "grid_member", gridMember),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccAwsrte53taskgroupGridMember("member.com", taskGroupName),
+				Config: testAccAwsrte53taskgroupGridMember(gridMemberUpdatedName, taskGroupName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAwsrte53taskgroupExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "grid_member", "member.com"),
+					resource.TestCheckResourceAttr(resourceName, "grid_member", gridMemberUpdatedName),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -247,7 +251,7 @@ func TestAccAwsrte53taskgroupResource_MultipleAccountsSyncPolicy(t *testing.T) {
 	var resourceName = "nios_cloud_aws_route53_task_group.test_multiple_accounts_sync_policy"
 	var v cloud.Awsrte53taskgroup
 	taskGroupName := acctest.RandomNameWithPrefix("test-taskgroup")
-	gridMember := "infoblox.localdomain"
+	gridMember := utils.GetNIOSGridMasterHostName()
 	roleArn := "arn:aws:iam:::role/Role-name"
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -271,7 +275,7 @@ func TestAccAwsrte53taskgroupResource_Name(t *testing.T) {
 	var resourceName = "nios_cloud_aws_route53_task_group.test_name"
 	var v cloud.Awsrte53taskgroup
 	taskGroupName := acctest.RandomNameWithPrefix("test-taskgroup")
-	gridMember := "infoblox.localdomain"
+	gridMember := utils.GetNIOSGridMasterHostName()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -302,7 +306,7 @@ func TestAccAwsrte53taskgroupResource_NetworkView(t *testing.T) {
 	var resourceName = "nios_cloud_aws_route53_task_group.test_network_view"
 	var v cloud.Awsrte53taskgroup
 	taskGroupName := acctest.RandomNameWithPrefix("test-taskgroup")
-	gridMember := "infoblox.localdomain"
+	gridMember := utils.GetNIOSGridMasterHostName()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -324,7 +328,7 @@ func TestAccAwsrte53taskgroupResource_NetworkViewMappingPolicy(t *testing.T) {
 	var resourceName = "nios_cloud_aws_route53_task_group.test_network_view_mapping_policy"
 	var v cloud.Awsrte53taskgroup
 	taskGroupName := acctest.RandomNameWithPrefix("test-taskgroup")
-	gridMember := "infoblox.localdomain"
+	gridMember := utils.GetNIOSGridMasterHostName()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -346,7 +350,7 @@ func TestAccAwsrte53taskgroupResource_RoleArn(t *testing.T) {
 	var resourceName = "nios_cloud_aws_route53_task_group.test_role_arn"
 	var v cloud.Awsrte53taskgroup
 	taskGroupName := acctest.RandomNameWithPrefix("test-taskgroup")
-	gridMember := "infoblox.localdomain"
+	gridMember := utils.GetNIOSGridMasterHostName()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -377,7 +381,7 @@ func TestAccAwsrte53taskgroupResource_SyncChildAccounts(t *testing.T) {
 	var resourceName = "nios_cloud_aws_route53_task_group.test_sync_child_accounts"
 	var v cloud.Awsrte53taskgroup
 	taskGroupName := acctest.RandomNameWithPrefix("test-taskgroup")
-	gridMember := "infoblox.localdomain"
+	gridMember := utils.GetNIOSGridMasterHostName()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -408,7 +412,7 @@ func TestAccAwsrte53taskgroupResource_TaskList(t *testing.T) {
 	var resourceName = "nios_cloud_aws_route53_task_group.test_task_list"
 	var v cloud.Awsrte53taskgroup
 	taskGroupName := acctest.RandomNameWithPrefix("test-taskgroup")
-	gridMember := "infoblox.localdomain"
+	gridMember := utils.GetNIOSGridMasterHostName()
 	taskList := []map[string]any{
 		{
 			"aws_user":           "${nios_cloud_aws_user.test.ref}",
@@ -495,7 +499,7 @@ func TestAccAwsrte53taskgroupResource_AwsAccountIdsFilePath(t *testing.T) {
 	var v cloud.Awsrte53taskgroup
 
 	taskGroupName := acctest.RandomNameWithPrefix("test-taskgroup-")
-	gridMember := "infoblox.localdomain"
+	gridMember := utils.GetNIOSGridMasterHostName()
 	disabled := false
 	syncChildAccounts := true
 	networkViewMappingPolicy := "DIRECT"
@@ -637,7 +641,7 @@ resource "nios_cloud_aws_route53_task_group" "test" {
 
 func testAccAwsrte53taskgroupAwsAccountIdsFileToken(awsAccountIdsFileToken string) string {
 	taskGroupName := acctest.RandomNameWithPrefix("test-taskgroup")
-	gridMember := "infoblox.localdomain"
+	gridMember := utils.GetNIOSGridMasterHostName()
 
 	return fmt.Sprintf(`
 resource "nios_cloud_aws_route53_task_group" "test_aws_account_ids_file_token" {
