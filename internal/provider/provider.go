@@ -483,6 +483,11 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 
 func (p *NIOSProvider) ListResources(ctx context.Context) []func() list.ListResource {
 	return []func() list.ListResource{
+		dns.NewNsgroupDelegationList,
+		dns.NewNsgroupForwardingmemberList,
+		dns.NewNsgroupForwardstubserverList,
+		dns.NewNsgroupList,
+		dns.NewNsgroupStubmemberList,
 		dns.NewRecordAList,
 		dns.NewRecordAaaaList,
 		dns.NewRecordAliasList,
@@ -504,6 +509,11 @@ func (p *NIOSProvider) ListResources(ctx context.Context) []func() list.ListReso
 		dns.NewSharedrecordMxList,
 		dns.NewSharedrecordTxtList,
 		dns.NewSharedrecordSrvList,
+		dns.NewViewList,
+		dns.NewZoneAuthList,
+		dns.NewZoneForwardList,
+		dns.NewZoneStubList,
+		dns.NewZoneRpList,
 
 		dhcp.NewFixedaddressList,
 
