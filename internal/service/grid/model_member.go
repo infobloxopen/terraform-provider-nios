@@ -15,6 +15,7 @@ import (
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
@@ -119,6 +120,7 @@ type MemberModel struct {
 	UseV4Vrrp                       types.Bool                       `tfsdk:"use_v4_vrrp"`
 	VipSetting                      types.Object                     `tfsdk:"vip_setting"`
 	VpnMtu                          types.Int64                      `tfsdk:"vpn_mtu"`
+	PasswordVersion                 types.Int64                      `tfsdk:"password_version"`
 }
 
 var MemberAttrTypes = map[string]attr.Type{
@@ -209,6 +211,7 @@ var MemberAttrTypes = map[string]attr.Type{
 	"use_v4_vrrp":                         types.BoolType,
 	"vip_setting":                         types.ObjectType{AttrTypes: MemberVipSettingAttrTypes},
 	"vpn_mtu":                             types.Int64Type,
+	"password_version":                    types.Int64Type,
 }
 
 var MemberResourceSchemaAttributes = map[string]schema.Attribute{
@@ -371,7 +374,6 @@ var MemberResourceSchemaAttributes = map[string]schema.Attribute{
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: MemberExternalSyslogBackupServersResourceSchemaAttributes,
 		},
-		Computed: true,
 		Optional: true,
 		Validators: []validator.List{
 			listvalidator.SizeAtLeast(1),
@@ -460,7 +462,6 @@ var MemberResourceSchemaAttributes = map[string]schema.Attribute{
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: MemberLomUsersResourceSchemaAttributes,
 		},
-		Computed: true,
 		Optional: true,
 		Validators: []validator.List{
 			listvalidator.SizeAtLeast(1),
@@ -868,6 +869,13 @@ var MemberResourceSchemaAttributes = map[string]schema.Attribute{
 		Default:             int64default.StaticInt64(1450),
 		MarkdownDescription: "The VPN maximum transmission unit (MTU).",
 	},
+	"password_version": schema.Int64Attribute{
+		Computed:            true,
+		MarkdownDescription: "Internal revision incremented when external_syslog_backup_servers.password or lom_users.password changes.",
+		PlanModifiers: []planmodifier.Int64{
+			int64planmodifier.UseStateForUnknown(),
+		},
+	},
 }
 
 func (m *MemberModel) Expand(ctx context.Context, diags *diag.Diagnostics, isCreate bool) *grid.Member {
@@ -1055,7 +1063,14 @@ func (m *MemberModel) Flatten(ctx context.Context, from *grid.Member, diags *dia
 	m.NatSetting = FlattenMemberNatSetting(ctx, from.NatSetting, diags)
 	m.NodeInfo = flex.FlattenFrameworkListNestedBlock(ctx, from.NodeInfo, MemberNodeInfoAttrTypes, diags, FlattenMemberNodeInfo)
 	m.NtpSetting = FlattenMemberNtpSetting(ctx, from.NtpSetting, diags)
+	planOspfList := m.OspfList
 	m.OspfList = flex.FlattenFrameworkListNestedBlock(ctx, from.OspfList, MemberOspfListAttrTypes, diags, FlattenMemberOspfList)
+	if !planOspfList.IsNull() {
+		result, copyDiags := utils.CopyFieldFromPlanToRespList(ctx, planOspfList, m.OspfList, "authentication_key")
+		if !copyDiags.HasError() {
+			m.OspfList = result.(basetypes.ListValue)
+		}
+	}
 	m.PassiveHaArpEnabled = types.BoolPointerValue(from.PassiveHaArpEnabled)
 	m.Platform = flex.FlattenStringPointer(from.Platform)
 	m.PreProvisioning = FlattenMemberPreProvisioning(ctx, from.PreProvisioning, diags)
