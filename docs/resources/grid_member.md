@@ -188,6 +188,7 @@ resource "nios_grid_member" "example_member_with_additional_fields" {
 - `is_dscp_capable` (Boolean) Determines if a Grid member supports DSCP (Differentiated Services Code Point).
 - `mmdb_ea_build_time` (Number) Extensible attributes Topology database build time.
 - `mmdb_geoip_build_time` (Number) GeoIP Topology database build time.
+- `password_version` (Number) Internal revision incremented when external_syslog_backup_servers.password or lom_users.password changes.
 - `ref` (String) The reference to the object.
 - `service_status` (Attributes List) The service status list of a grid member. (see [below for nested schema](#nestedatt--service_status))
 - `support_access_info` (String) The information string for support access.
@@ -338,7 +339,7 @@ Optional:
 Required:
 
 - `address_or_fqdn` (String) The IPv4 or IPv6 address or FQDN of the backup syslog server.
-- `password` (String, Sensitive) The password of the backup syslog server.
+- `password` (String, [Write-only](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments)) The password of the backup syslog server.
 - `username` (String) The username of the backup syslog server.
 
 Optional:
@@ -450,7 +451,7 @@ Read-Only:
 Required:
 
 - `name` (String) The LOM user name.
-- `password` (String, Sensitive) The LOM user password.
+- `password` (String, [Write-only](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments)) The LOM user password.
 
 Optional:
 
