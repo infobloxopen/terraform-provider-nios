@@ -2,6 +2,9 @@ package rir
 
 import (
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"regexp"
@@ -10,10 +13,11 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
-
+	"github.com/hashicorp/terraform-plugin-framework/types"
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
-
+	"github.com/infobloxopen/infoblox-nios-go-client/rir"
 	"github.com/infobloxopen/terraform-provider-nios/internal/config"
+	"github.com/infobloxopen/terraform-provider-nios/internal/retry"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
@@ -67,6 +71,7 @@ var validRipeOrgTypes = map[string]struct{}{
 // Ensure provider defined types fully satisfy framework interfaces.
 var _ resource.Resource = &RirOrganizationResource{}
 var _ resource.ResourceWithImportState = &RirOrganizationResource{}
+var _ resource.ResourceWithModifyPlan = &RirOrganizationResource{}
 
 func NewRirOrganizationResource() resource.Resource {
 	return &RirOrganizationResource{}
@@ -75,6 +80,10 @@ func NewRirOrganizationResource() resource.Resource {
 // RirOrganizationResource defines the resource implementation.
 type RirOrganizationResource struct {
 	client *niosclient.APIClient
+}
+
+type secretsHashState struct {
+	Password string `json:"password_hash"`
 }
 
 func (r *RirOrganizationResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -108,6 +117,84 @@ func (r *RirOrganizationResource) Configure(ctx context.Context, req resource.Co
 	r.client = client
 }
 
+func (r *RirOrganizationResource) ModifyPlan(ctx context.Context, req resource.ModifyPlanRequest, resp *resource.ModifyPlanResponse) {
+	if req.Plan.Raw.IsNull() {
+		return
+	}
+
+	var stateRev types.Int64
+	var planPassword types.String
+
+	curRev := int64(0)
+	if !req.State.Raw.IsNull() && req.State.Raw.IsKnown() {
+		resp.Diagnostics.Append(req.State.GetAttribute(ctx, path.Root("password_version"), &stateRev)...)
+		if resp.Diagnostics.HasError() {
+			return
+		}
+		if !stateRev.IsNull() && !stateRev.IsUnknown() {
+			curRev = stateRev.ValueInt64()
+		}
+	}
+
+	resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("password"), &planPassword)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	computeNewHash := !planPassword.IsNull() && !planPassword.IsUnknown()
+	prevHashes := secretsHashState{}
+	plannedHashes := secretsHashState{}
+
+	if computeNewHash {
+		var prev struct {
+			Algo string `json:"algo"`
+			Hash string `json:"hash"`
+		}
+
+		if b, diags := req.Private.GetKey(ctx, "password_hash"); diags != nil {
+			resp.Diagnostics.Append(diags...)
+		} else if b != nil {
+			if err := json.Unmarshal(b, &prev); err != nil {
+				prev.Hash = ""
+			}
+		}
+
+		var plannedHash string
+		if prev.Hash != "" {
+			_ = json.Unmarshal([]byte(prev.Hash), &prevHashes)
+		}
+
+		if !planPassword.IsUnknown() {
+			if planPassword.IsNull() {
+				plannedHashes.Password = ""
+			} else {
+				h := sha256.New()
+				h.Write([]byte(planPassword.ValueString()))
+				plannedHashes.Password = hex.EncodeToString(h.Sum(nil))
+			}
+		}
+
+		if data, err := json.Marshal(plannedHashes); err == nil {
+			plannedHash = string(data)
+		}
+
+		if plannedHashes.Password != "" && plannedHashes.Password != prevHashes.Password {
+			newRev := types.Int64Value(curRev + 1)
+			resp.Diagnostics.Append(resp.Plan.SetAttribute(ctx, path.Root("password_version"), newRev)...)
+
+			val := map[string]string{"algo": "sha256", "hash": plannedHash}
+			b, err := json.Marshal(val)
+			if err != nil {
+				resp.Diagnostics.AddError("Private State Marshal Error", err.Error())
+				return
+			}
+			resp.Diagnostics.Append(resp.Private.SetKey(ctx, "password_hash", b)...)
+		} else {
+			resp.Diagnostics.Append(resp.Plan.SetAttribute(ctx, path.Root("password_version"), curRev)...)
+		}
+	}
+}
+
 func (r *RirOrganizationResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var data RirOrganizationModel
 
@@ -118,20 +205,68 @@ func (r *RirOrganizationResource) Create(ctx context.Context, req resource.Creat
 		return
 	}
 
-	apiRes, _, err := r.client.RIRAPI.
-		RirOrganizationAPI.
-		Create(ctx).
-		RirOrganization(*data.Expand(ctx, &resp.Diagnostics)).
-		ReturnFieldsPlus(readableAttributesForRirOrganization).
-		ReturnAsObject(1).
-		Execute()
+	payload := data.Expand(ctx, &resp.Diagnostics)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	passwordVersion := types.Int64Value(0)
+	var password types.String
+	resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("password"), &password)...)
+	secretData := secretsHashState{}
+	if !password.IsNull() && !password.IsUnknown() {
+		payload.Password = password.ValueStringPointer()
+		passwordVersion = types.Int64Value(1)
+		h := sha256.New()
+		h.Write([]byte(password.ValueString()))
+		secretData.Password = hex.EncodeToString(h.Sum(nil))
+		secretDataJSON, _ := json.Marshal(secretData)
+		val := map[string]string{"algo": "sha256", "hash": string(secretDataJSON)}
+		hashedSecret, err := json.Marshal(val)
+		if err != nil {
+			resp.Diagnostics.AddError("Private State Marshal Error", err.Error())
+			return
+		}
+		resp.Diagnostics.Append(resp.Private.SetKey(ctx, "password_hash", hashedSecret)...)
+	}
+
+	var apiRes *rir.CreateRirOrganizationResponse
+
+	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		var (
+			httpRes *http.Response
+			callErr error
+		)
+		apiRes, httpRes, callErr = r.client.RIRAPI.
+			RirOrganizationAPI.
+			Create(ctx).
+			RirOrganization(*payload).
+			ReturnFieldsPlus(readableAttributesForRirOrganization).
+			ReturnAsObject(1).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
+
 	if err != nil {
+		if retry.IsAlreadyExistsErr(err) {
+			// Resource already exists, import required
+			resp.Diagnostics.AddError(
+				"Resource Already Exists",
+				fmt.Sprintf("Resource already exists, error: %s.\nPlease import the existing resource into terraform state.", err.Error()),
+			)
+			return
+		}
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create RirOrganization, got error: %s", err))
 		return
 	}
 
 	res := apiRes.CreateRirOrganizationResponseAsObject.GetResult()
 
+	data.PasswordVersion = passwordVersion
 	data.Flatten(ctx, &res, &resp.Diagnostics)
 
 	// Save data into Terraform state
@@ -148,13 +283,28 @@ func (r *RirOrganizationResource) Read(ctx context.Context, req resource.ReadReq
 		return
 	}
 
-	apiRes, httpRes, err := r.client.RIRAPI.
-		RirOrganizationAPI.
-		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
-		ReturnFieldsPlus(readableAttributesForRirOrganization).
-		ReturnAsObject(1).
-		ProxySearch(config.GetProxySearch()).
-		Execute()
+	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
+
+	var (
+		httpRes *http.Response
+		apiRes  *rir.GetRirOrganizationResponse
+	)
+
+	err := retry.Do(ctx, nil, func(ctx context.Context) (int, error) {
+		var callErr error
+		apiRes, httpRes, callErr = r.client.RIRAPI.
+			RirOrganizationAPI.
+			Read(ctx, resourceRef).
+			ReturnFieldsPlus(readableAttributesForRirOrganization).
+			ReturnAsObject(1).
+			ProxySearch(config.GetProxySearch()).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
 
 	// Handle not found case
 	if err != nil {
@@ -192,13 +342,44 @@ func (r *RirOrganizationResource) Update(ctx context.Context, req resource.Updat
 		return
 	}
 
-	apiRes, _, err := r.client.RIRAPI.
-		RirOrganizationAPI.
-		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
-		RirOrganization(*data.Expand(ctx, &resp.Diagnostics)).
-		ReturnFieldsPlus(readableAttributesForRirOrganization).
-		ReturnAsObject(1).
-		Execute()
+	var password types.String
+	resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("password"), &password)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	payload := data.Expand(ctx, &resp.Diagnostics)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	if !password.IsNull() && !password.IsUnknown() {
+		payload.Password = password.ValueStringPointer()
+	}
+
+	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
+
+	var apiRes *rir.UpdateRirOrganizationResponse
+
+	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		var (
+			httpRes *http.Response
+			callErr error
+		)
+		apiRes, httpRes, callErr = r.client.RIRAPI.
+			RirOrganizationAPI.
+			Update(ctx, resourceRef).
+			RirOrganization(*payload).
+			ReturnFieldsPlus(readableAttributesForRirOrganization).
+			ReturnAsObject(1).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
+
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update RirOrganization, got error: %s", err))
 		return
@@ -222,14 +403,24 @@ func (r *RirOrganizationResource) Delete(ctx context.Context, req resource.Delet
 		return
 	}
 
-	httpRes, err := r.client.RIRAPI.
-		RirOrganizationAPI.
-		Delete(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
-		Execute()
-	if err != nil {
-		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
-			return
+	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
+
+	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		httpRes, callErr := r.client.RIRAPI.
+			RirOrganizationAPI.
+			Delete(ctx, resourceRef).
+			Execute()
+
+		if httpRes != nil {
+			if httpRes.StatusCode == http.StatusNotFound {
+				return 0, nil
+			}
+			return httpRes.StatusCode, callErr
 		}
+		return 0, callErr
+	})
+
+	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete RirOrganization, got error: %s", err))
 		return
 	}

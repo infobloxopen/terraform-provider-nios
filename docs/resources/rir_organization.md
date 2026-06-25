@@ -57,11 +57,13 @@ resource "nios_rir_organization" "rir_organization_with_additional_fields" {
 
 ### Required
 
+> **NOTE**: [Write-only arguments](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments) are supported in Terraform 1.11 and later.
+
 - `extattrs` (Map of String) Extensible attributes associated with the object.
 - `id` (String) The RIR organization identifier. Valid Examples for ID are ORG-CA1-RIPE or ORG-CB2-TEST
 - `maintainer` (String) The RIR organization maintainer.
 - `name` (String) The RIR organization name.
-- `password` (String, Sensitive) The password for the maintainer of RIR organization.
+- `password` (String, [Write-only](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments)) The password for the maintainer of RIR organization.
 - `sender_email` (String) The sender e-mail address for RIR organization.
 
 ### Optional
@@ -70,4 +72,5 @@ resource "nios_rir_organization" "rir_organization_with_additional_fields" {
 
 ### Read-Only
 
+- `password_version` (Number) Internal version incremented when secret field changes.
 - `ref` (String) The reference to the object.

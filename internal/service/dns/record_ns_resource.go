@@ -8,11 +8,14 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
+	"github.com/hashicorp/terraform-plugin-framework/resource/identityschema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
+	"github.com/infobloxopen/infoblox-nios-go-client/dns"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/config"
+	"github.com/infobloxopen/terraform-provider-nios/internal/retry"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
@@ -21,6 +24,7 @@ var readableAttributesForRecordNs = "addresses,cloud_info,creator,dns_name,last_
 // Ensure provider defined types fully satisfy framework interfaces.
 var _ resource.Resource = &RecordNsResource{}
 var _ resource.ResourceWithImportState = &RecordNsResource{}
+var _ resource.ResourceWithIdentity = &RecordNsResource{}
 
 func NewRecordNsResource() resource.Resource {
 	return &RecordNsResource{}
@@ -33,12 +37,25 @@ type RecordNsResource struct {
 
 func (r *RecordNsResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_" + "dns_record_ns"
+	resp.ResourceBehavior = resource.ResourceBehavior{
+		MutableIdentity: true,
+	}
 }
 
 func (r *RecordNsResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		MarkdownDescription: "Manages a DNS NS record.",
 		Attributes:          RecordNsResourceSchemaAttributes,
+	}
+}
+
+func (r *RecordNsResource) IdentitySchema(ctx context.Context, req resource.IdentitySchemaRequest, resp *resource.IdentitySchemaResponse) {
+	resp.IdentitySchema = identityschema.Schema{
+		Attributes: map[string]identityschema.Attribute{
+			"ref": identityschema.StringAttribute{
+				RequiredForImport: true,
+			},
+		},
 	}
 }
 
@@ -72,14 +89,41 @@ func (r *RecordNsResource) Create(ctx context.Context, req resource.CreateReques
 		return
 	}
 
-	apiRes, _, err := r.client.DNSAPI.
-		RecordNsAPI.
-		Create(ctx).
-		RecordNs(*data.Expand(ctx, &resp.Diagnostics, true)).
-		ReturnFieldsPlus(readableAttributesForRecordNs).
-		ReturnAsObject(1).
-		Execute()
+	payload := data.Expand(ctx, &resp.Diagnostics, true)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	var apiRes *dns.CreateRecordNsResponse
+
+	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		var (
+			httpRes *http.Response
+			callErr error
+		)
+		apiRes, httpRes, callErr = r.client.DNSAPI.
+			RecordNsAPI.
+			Create(ctx).
+			RecordNs(*payload).
+			ReturnFieldsPlus(readableAttributesForRecordNs).
+			ReturnAsObject(1).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
+
 	if err != nil {
+		if retry.IsAlreadyExistsErr(err) {
+			// Resource already exists, import required
+			resp.Diagnostics.AddError(
+				"Resource Already Exists",
+				fmt.Sprintf("Resource already exists, error: %s.\nPlease import the existing resource into terraform state.", err.Error()),
+			)
+			return
+		}
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create RecordNs, got error: %s", err))
 		return
 	}
@@ -87,6 +131,9 @@ func (r *RecordNsResource) Create(ctx context.Context, req resource.CreateReques
 	res := apiRes.CreateRecordNsResponseAsObject.GetResult()
 
 	data.Flatten(ctx, &res, &resp.Diagnostics)
+
+	// Save the Identity of the Resource
+	resp.Diagnostics.Append(resp.Identity.SetAttribute(ctx, path.Root("ref"), &data.Ref)...)
 
 	// Save data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
@@ -102,13 +149,28 @@ func (r *RecordNsResource) Read(ctx context.Context, req resource.ReadRequest, r
 		return
 	}
 
-	apiRes, httpRes, err := r.client.DNSAPI.
-		RecordNsAPI.
-		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
-		ReturnFieldsPlus(readableAttributesForRecordNs).
-		ReturnAsObject(1).
-		ProxySearch(config.GetProxySearch()).
-		Execute()
+	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
+
+	var (
+		httpRes *http.Response
+		apiRes  *dns.GetRecordNsResponse
+	)
+
+	err := retry.Do(ctx, nil, func(ctx context.Context) (int, error) {
+		var callErr error
+		apiRes, httpRes, callErr = r.client.DNSAPI.
+			RecordNsAPI.
+			Read(ctx, resourceRef).
+			ReturnFieldsPlus(readableAttributesForRecordNs).
+			ReturnAsObject(1).
+			ProxySearch(config.GetProxySearch()).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
 
 	// Handle not found case
 	if err != nil {
@@ -124,6 +186,9 @@ func (r *RecordNsResource) Read(ctx context.Context, req resource.ReadRequest, r
 	res := apiRes.GetRecordNsResponseObjectAsResult.GetResult()
 
 	data.Flatten(ctx, &res, &resp.Diagnostics)
+
+	// Save the Identity of the Resource
+	resp.Diagnostics.Append(resp.Identity.SetAttribute(ctx, path.Root("ref"), &data.Ref)...)
 
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
@@ -146,13 +211,34 @@ func (r *RecordNsResource) Update(ctx context.Context, req resource.UpdateReques
 		return
 	}
 
-	apiRes, _, err := r.client.DNSAPI.
-		RecordNsAPI.
-		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
-		RecordNs(*data.Expand(ctx, &resp.Diagnostics, false)).
-		ReturnFieldsPlus(readableAttributesForRecordNs).
-		ReturnAsObject(1).
-		Execute()
+	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
+
+	payload := data.Expand(ctx, &resp.Diagnostics, false)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	var apiRes *dns.UpdateRecordNsResponse
+
+	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		var (
+			httpRes *http.Response
+			callErr error
+		)
+		apiRes, httpRes, callErr = r.client.DNSAPI.
+			RecordNsAPI.
+			Update(ctx, resourceRef).
+			RecordNs(*payload).
+			ReturnFieldsPlus(readableAttributesForRecordNs).
+			ReturnAsObject(1).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
+
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update RecordNs, got error: %s", err))
 		return
@@ -161,6 +247,9 @@ func (r *RecordNsResource) Update(ctx context.Context, req resource.UpdateReques
 	res := apiRes.UpdateRecordNsResponseAsObject.GetResult()
 
 	data.Flatten(ctx, &res, &resp.Diagnostics)
+
+	// Save the Identity of the Resource
+	resp.Diagnostics.Append(resp.Identity.SetAttribute(ctx, path.Root("ref"), &data.Ref)...)
 
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
@@ -176,19 +265,36 @@ func (r *RecordNsResource) Delete(ctx context.Context, req resource.DeleteReques
 		return
 	}
 
-	httpRes, err := r.client.DNSAPI.
-		RecordNsAPI.
-		Delete(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
-		Execute()
-	if err != nil {
-		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
-			return
+	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
+
+	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		httpRes, callErr := r.client.DNSAPI.
+			RecordNsAPI.
+			Delete(ctx, resourceRef).
+			Execute()
+
+		if httpRes != nil {
+			if httpRes.StatusCode == http.StatusNotFound {
+				return 0, nil
+			}
+			return httpRes.StatusCode, callErr
 		}
+		return 0, callErr
+	})
+
+	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete RecordNs, got error: %s", err))
 		return
 	}
 }
 
 func (r *RecordNsResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+	if req.Identity != nil && req.Identity.Raw.IsKnown() && !req.Identity.Raw.IsNull() {
+		diags := req.Identity.GetAttribute(ctx, path.Root("ref"), &req.ID)
+		if diags.HasError() {
+			resp.Diagnostics.Append(diags...)
+			return
+		}
+	}
 	resource.ImportStatePassthroughID(ctx, path.Root("ref"), req, resp)
 }

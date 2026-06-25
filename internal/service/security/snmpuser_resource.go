@@ -2,6 +2,9 @@ package security
 
 import (
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
+	"encoding/json"
 	"fmt"
 	"net/http"
 
@@ -9,10 +12,13 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
+	"github.com/infobloxopen/infoblox-nios-go-client/security"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/config"
+	"github.com/infobloxopen/terraform-provider-nios/internal/retry"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
@@ -22,6 +28,7 @@ var readableAttributesForSnmpuser = "authentication_protocol,comment,disable,ext
 var _ resource.Resource = &SnmpuserResource{}
 var _ resource.ResourceWithImportState = &SnmpuserResource{}
 var _ resource.ResourceWithValidateConfig = &SnmpuserResource{}
+var _ resource.ResourceWithModifyPlan = &SnmpuserResource{}
 
 func NewSnmpuserResource() resource.Resource {
 	return &SnmpuserResource{}
@@ -61,6 +68,117 @@ func (r *SnmpuserResource) Configure(ctx context.Context, req resource.Configure
 	}
 
 	r.client = client
+}
+
+type snmpuserSecretsHashState struct {
+	AuthHash string `json:"auth_hash"`
+	PrivHash string `json:"priv_hash"`
+}
+
+func hashString(s string) string {
+	h := sha256.New()
+	h.Write([]byte(s))
+	return hex.EncodeToString(h.Sum(nil))
+}
+
+func (r *SnmpuserResource) ModifyPlan(ctx context.Context, req resource.ModifyPlanRequest, resp *resource.ModifyPlanResponse) {
+	if req.Plan.Raw.IsNull() {
+		return
+	}
+
+	var statePwdVersion types.Int64
+	var authenticationPassword, privacyPassword types.String
+
+	// Normalize stateRev if null (e.g., first apply)
+	curRev := int64(0)
+
+	if !req.State.Raw.IsNull() && req.State.Raw.IsKnown() {
+		resp.Diagnostics.Append(req.State.GetAttribute(ctx, path.Root("password_version"), &statePwdVersion)...)
+		if resp.Diagnostics.HasError() {
+			return
+		}
+		if !statePwdVersion.IsNull() && !statePwdVersion.IsUnknown() {
+			curRev = statePwdVersion.ValueInt64()
+		}
+	}
+	resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("authentication_password"), &authenticationPassword)...)
+	resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("privacy_password"), &privacyPassword)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	prevHashes := snmpuserSecretsHashState{}
+
+	var prev struct {
+		Algo string `json:"algo"`
+		Hash string `json:"hash"`
+	}
+
+	if b, diags := req.Private.GetKey(ctx, "password_hash"); diags != nil {
+		resp.Diagnostics.Append(diags...)
+	} else if b != nil {
+		if err := json.Unmarshal(b, &prev); err != nil {
+			// Older buggy format: ignore and treat as different
+			prev.Hash = ""
+		}
+	}
+	var plannedHash string
+
+	if prev.Hash != "" {
+		// Best-effort parse; if this fails, treat prev.Hash as a legacy value and
+		// leave prevHashes at its zero value so that we will recompute as needed.
+		_ = json.Unmarshal([]byte(prev.Hash), &prevHashes)
+	}
+
+	plannedHashes := prevHashes
+
+	if !authenticationPassword.IsUnknown() && !authenticationPassword.IsNull() {
+		plannedHashes.AuthHash = hashString(authenticationPassword.ValueString())
+	}
+
+	if !privacyPassword.IsUnknown() && !privacyPassword.IsNull() {
+		plannedHashes.PrivHash = hashString(privacyPassword.ValueString())
+	}
+
+	if data, err := json.Marshal(plannedHashes); err != nil {
+		resp.Diagnostics.AddError("Private State Marshal Error", err.Error())
+		return
+	} else {
+		plannedHash = string(data)
+	}
+
+	if plannedHashes != prevHashes {
+		// Increment version and store new hash if password modified
+		newRev := types.Int64Value(curRev + 1)
+		resp.Diagnostics.Append(resp.Plan.SetAttribute(ctx, path.Root("password_version"), newRev)...)
+
+		val := map[string]string{"algo": "sha256", "hash": plannedHash}
+		b, err := json.Marshal(val)
+		if err != nil {
+			resp.Diagnostics.AddError("Private State Marshal Error", err.Error())
+			return
+		}
+		resp.Diagnostics.Append(resp.Private.SetKey(ctx, "password_hash", b)...)
+	} else {
+		resp.Diagnostics.Append(resp.Plan.SetAttribute(ctx, path.Root("password_version"), curRev)...)
+	}
+
+}
+
+func hasPasswords(state snmpuserSecretsHashState) bool {
+	return state.AuthHash != "" || state.PrivHash != ""
+}
+
+func marshalSecretsEnvelope(state snmpuserSecretsHashState) ([]byte, error) {
+	hashJSON, err := json.Marshal(state)
+	if err != nil {
+		return nil, err
+	}
+
+	return json.Marshal(map[string]string{
+		"algo": "sha256",
+		"hash": string(hashJSON),
+	})
 }
 
 func (r *SnmpuserResource) ValidateConfig(ctx context.Context, req resource.ValidateConfigRequest, resp *resource.ValidateConfigResponse) {
@@ -108,6 +226,7 @@ func (r *SnmpuserResource) ValidateConfig(ctx context.Context, req resource.Vali
 func (r *SnmpuserResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var diags diag.Diagnostics
 	var data SnmpuserModel
+	var authPwd, privPwd types.String
 
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
@@ -122,14 +241,62 @@ func (r *SnmpuserResource) Create(ctx context.Context, req resource.CreateReques
 		return
 	}
 
-	apiRes, _, err := r.client.SecurityAPI.
-		SnmpuserAPI.
-		Create(ctx).
-		Snmpuser(*data.Expand(ctx, &resp.Diagnostics)).
-		ReturnFieldsPlus(readableAttributesForSnmpuser).
-		ReturnAsObject(1).
-		Execute()
+	payload := data.Expand(ctx, &resp.Diagnostics)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	var passwordVersion types.Int64
+
+	resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("authentication_password"), &authPwd)...)
+	resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("privacy_password"), &privPwd)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	var plannedHashState snmpuserSecretsHashState
+
+	if !authPwd.IsNull() && !authPwd.IsUnknown() {
+		ap := authPwd.ValueString()
+		payload.AuthenticationPassword = &ap
+		plannedHashState.AuthHash = hashString(ap)
+	}
+	if !privPwd.IsNull() && !privPwd.IsUnknown() {
+		pp := privPwd.ValueString()
+		payload.PrivacyPassword = &pp
+		plannedHashState.PrivHash = hashString(pp)
+	}
+
+	var apiRes *security.CreateSnmpuserResponse
+
+	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		var (
+			httpRes *http.Response
+			callErr error
+		)
+		apiRes, httpRes, callErr = r.client.SecurityAPI.
+			SnmpuserAPI.
+			Create(ctx).
+			Snmpuser(*payload).
+			ReturnFieldsPlus(readableAttributesForSnmpuser).
+			ReturnAsObject(1).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
+
 	if err != nil {
+		if retry.IsAlreadyExistsErr(err) {
+			// Resource already exists, import required
+			resp.Diagnostics.AddError(
+				"Resource Already Exists",
+				fmt.Sprintf("Resource already exists, error: %s.\nPlease import the existing resource into terraform state.", err.Error()),
+			)
+			return
+		}
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create Snmpuser, got error: %s", err))
 		return
 	}
@@ -140,6 +307,20 @@ func (r *SnmpuserResource) Create(ctx context.Context, req resource.CreateReques
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while creating Snmpuser due inherited Extensible attributes, got error: %s", diags))
 		return
 	}
+
+	if hasPasswords(plannedHashState) {
+		passwordVersion = types.Int64Value(1)
+		hashPasswords, err := marshalSecretsEnvelope(plannedHashState)
+		if err != nil {
+			resp.Diagnostics.AddError("error marshalling passwords hash", err.Error())
+			return
+		}
+		resp.Diagnostics.Append(resp.Private.SetKey(ctx, "password_hash", hashPasswords)...)
+	} else {
+		passwordVersion = types.Int64Value(0)
+		resp.Diagnostics.Append(resp.Private.SetKey(ctx, "password_hash", nil)...)
+	}
+	data.PasswordVersion = passwordVersion
 
 	data.Flatten(ctx, &res, &resp.Diagnostics)
 
@@ -164,13 +345,28 @@ func (r *SnmpuserResource) Read(ctx context.Context, req resource.ReadRequest, r
 		return
 	}
 
-	apiRes, httpRes, err := r.client.SecurityAPI.
-		SnmpuserAPI.
-		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
-		ReturnFieldsPlus(readableAttributesForSnmpuser).
-		ReturnAsObject(1).
-		ProxySearch(config.GetProxySearch()).
-		Execute()
+	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
+
+	var (
+		httpRes *http.Response
+		apiRes  *security.GetSnmpuserResponse
+	)
+
+	err := retry.Do(ctx, nil, func(ctx context.Context) (int, error) {
+		var callErr error
+		apiRes, httpRes, callErr = r.client.SecurityAPI.
+			SnmpuserAPI.
+			Read(ctx, resourceRef).
+			ReturnFieldsPlus(readableAttributesForSnmpuser).
+			ReturnAsObject(1).
+			ProxySearch(config.GetProxySearch()).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
 
 	// If the resource is not found, try searching using Extensible Attributes
 	if err != nil {
@@ -277,6 +473,7 @@ func (r *SnmpuserResource) ReadByExtAttrs(ctx context.Context, data *SnmpuserMod
 func (r *SnmpuserResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	var diags diag.Diagnostics
 	var data SnmpuserModel
+	var authPwd, privPwd types.String
 
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
@@ -316,13 +513,53 @@ func (r *SnmpuserResource) Update(ctx context.Context, req resource.UpdateReques
 		return
 	}
 
-	apiRes, _, err := r.client.SecurityAPI.
-		SnmpuserAPI.
-		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
-		Snmpuser(*data.Expand(ctx, &resp.Diagnostics)).
-		ReturnFieldsPlus(readableAttributesForSnmpuser).
-		ReturnAsObject(1).
-		Execute()
+	payload := data.Expand(ctx, &resp.Diagnostics)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("authentication_password"), &authPwd)...)
+	resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("privacy_password"), &privPwd)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	var plannedHashState snmpuserSecretsHashState
+
+	if !authPwd.IsNull() && !authPwd.IsUnknown() {
+		ap := authPwd.ValueString()
+		payload.AuthenticationPassword = &ap
+		plannedHashState.AuthHash = hashString(ap)
+	}
+	if !privPwd.IsNull() && !privPwd.IsUnknown() {
+		pp := privPwd.ValueString()
+		payload.PrivacyPassword = &pp
+		plannedHashState.PrivHash = hashString(pp)
+	}
+
+	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
+
+	var apiRes *security.UpdateSnmpuserResponse
+
+	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		var (
+			httpRes *http.Response
+			callErr error
+		)
+		apiRes, httpRes, callErr = r.client.SecurityAPI.
+			SnmpuserAPI.
+			Update(ctx, resourceRef).
+			Snmpuser(*payload).
+			ReturnFieldsPlus(readableAttributesForSnmpuser).
+			ReturnAsObject(1).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
+
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update Snmpuser, got error: %s", err))
 		return
@@ -334,6 +571,18 @@ func (r *SnmpuserResource) Update(ctx context.Context, req resource.UpdateReques
 	if diags.HasError() {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while update Snmpuser due inherited Extensible attributes, got error: %s", diags))
 		return
+	}
+
+	if hasPasswords(plannedHashState) {
+		hashPasswords, err := marshalSecretsEnvelope(plannedHashState)
+		if err != nil {
+			resp.Diagnostics.AddError("error marshalling passwords hash", err.Error())
+			return
+		}
+		resp.Diagnostics.Append(resp.Private.SetKey(ctx, "password_hash", hashPasswords)...)
+
+	} else {
+		resp.Diagnostics.Append(resp.Private.SetKey(ctx, "password_hash", nil)...)
 	}
 
 	data.Flatten(ctx, &res, &resp.Diagnostics)
@@ -356,14 +605,24 @@ func (r *SnmpuserResource) Delete(ctx context.Context, req resource.DeleteReques
 		return
 	}
 
-	httpRes, err := r.client.SecurityAPI.
-		SnmpuserAPI.
-		Delete(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
-		Execute()
-	if err != nil {
-		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
-			return
+	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
+
+	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		httpRes, callErr := r.client.SecurityAPI.
+			SnmpuserAPI.
+			Delete(ctx, resourceRef).
+			Execute()
+
+		if httpRes != nil {
+			if httpRes.StatusCode == http.StatusNotFound {
+				return 0, nil
+			}
+			return httpRes.StatusCode, callErr
 		}
+		return 0, callErr
+	})
+
+	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete Snmpuser, got error: %s", err))
 		return
 	}

@@ -451,8 +451,8 @@ func TestAccMsserverResource_GridMember(t *testing.T) {
 
 	address := "10.10.0.13"
 	loginName := acctest.RandomName()
-	member1 := "infoblox.localdomain"
-	member2 := "member.com"
+	member1 := utils.GetNIOSGridMasterHostName()
+	member2 := "infoblox.member2"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -854,6 +854,40 @@ func TestAccMsserverResource_UseMsRpcTimeoutInSeconds(t *testing.T) {
 	})
 }
 
+func TestAccMsserverResource_LoginPassword(t *testing.T) {
+	var resourceName = "nios_microsoft_msserver.test_login_password"
+	var v microsoft.Msserver
+
+	address := "10.10.0.25"
+	loginName := acctest.RandomName()
+	pwd1 := "pass1234!@"
+	pwd2 := "pass7890$#"
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// Create and Read
+			{
+				Config: testAccMsserverLoginPassword(address, loginName, pwd1),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckMsserverExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "password_version", "1"),
+				),
+			},
+			// Update and Read
+			{
+				Config: testAccMsserverLoginPassword(address, loginName, pwd2),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckMsserverExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "password_version", "2"),
+				),
+			},
+			// Delete testing automatically occurs in TestCase
+		},
+	})
+}
+
 func testAccCheckMsserverExists(ctx context.Context, resourceName string, v *microsoft.Msserver) resource.TestCheckFunc {
 	// Verify the resource exists in the cloud
 	return func(state *terraform.State) error {
@@ -1066,6 +1100,16 @@ resource "nios_microsoft_msserver" "test_login_name" {
 	login_name = %q
 }
 `, address, loginName)
+}
+
+func testAccMsserverLoginPassword(address, loginName, loginPassword string) string {
+	return fmt.Sprintf(`
+resource "nios_microsoft_msserver" "test_login_password" {
+    address = %q
+	login_name = %q
+    login_password = %q
+}
+`, address, loginName, loginPassword)
 }
 
 func testAccMsserverMsMaxConnection(address, loginName, msMaxConnection string) string {

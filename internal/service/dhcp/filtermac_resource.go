@@ -12,8 +12,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
+	"github.com/infobloxopen/infoblox-nios-go-client/dhcp"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/config"
+	"github.com/infobloxopen/terraform-provider-nios/internal/retry"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
@@ -82,14 +84,41 @@ func (r *FiltermacResource) Create(ctx context.Context, req resource.CreateReque
 		return
 	}
 
-	apiRes, _, err := r.client.DHCPAPI.
-		FiltermacAPI.
-		Create(ctx).
-		Filtermac(*data.Expand(ctx, &resp.Diagnostics)).
-		ReturnFieldsPlus(readableAttributesForFiltermac).
-		ReturnAsObject(1).
-		Execute()
+	payload := data.Expand(ctx, &resp.Diagnostics)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	var apiRes *dhcp.CreateFiltermacResponse
+
+	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		var (
+			httpRes *http.Response
+			callErr error
+		)
+		apiRes, httpRes, callErr = r.client.DHCPAPI.
+			FiltermacAPI.
+			Create(ctx).
+			Filtermac(*payload).
+			ReturnFieldsPlus(readableAttributesForFiltermac).
+			ReturnAsObject(1).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
+
 	if err != nil {
+		if retry.IsAlreadyExistsErr(err) {
+			// Resource already exists, import required
+			resp.Diagnostics.AddError(
+				"Resource Already Exists",
+				fmt.Sprintf("Resource already exists, error: %s.\nPlease import the existing resource into terraform state.", err.Error()),
+			)
+			return
+		}
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create Filtermac, got error: %s", err))
 		return
 	}
@@ -124,13 +153,28 @@ func (r *FiltermacResource) Read(ctx context.Context, req resource.ReadRequest, 
 		return
 	}
 
-	apiRes, httpRes, err := r.client.DHCPAPI.
-		FiltermacAPI.
-		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
-		ReturnFieldsPlus(readableAttributesForFiltermac).
-		ReturnAsObject(1).
-		ProxySearch(config.GetProxySearch()).
-		Execute()
+	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
+
+	var (
+		httpRes *http.Response
+		apiRes  *dhcp.GetFiltermacResponse
+	)
+
+	err := retry.Do(ctx, nil, func(ctx context.Context) (int, error) {
+		var callErr error
+		apiRes, httpRes, callErr = r.client.DHCPAPI.
+			FiltermacAPI.
+			Read(ctx, resourceRef).
+			ReturnFieldsPlus(readableAttributesForFiltermac).
+			ReturnAsObject(1).
+			ProxySearch(config.GetProxySearch()).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
 
 	// If the resource is not found, try searching using Extensible Attributes
 	if err != nil {
@@ -277,13 +321,34 @@ func (r *FiltermacResource) Update(ctx context.Context, req resource.UpdateReque
 		return
 	}
 
-	apiRes, _, err := r.client.DHCPAPI.
-		FiltermacAPI.
-		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
-		Filtermac(*data.Expand(ctx, &resp.Diagnostics)).
-		ReturnFieldsPlus(readableAttributesForFiltermac).
-		ReturnAsObject(1).
-		Execute()
+	payload := data.Expand(ctx, &resp.Diagnostics)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
+
+	var apiRes *dhcp.UpdateFiltermacResponse
+
+	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		var (
+			httpRes *http.Response
+			callErr error
+		)
+		apiRes, httpRes, callErr = r.client.DHCPAPI.
+			FiltermacAPI.
+			Update(ctx, resourceRef).
+			Filtermac(*payload).
+			ReturnFieldsPlus(readableAttributesForFiltermac).
+			ReturnAsObject(1).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
+
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update Filtermac, got error: %s", err))
 		return
@@ -316,14 +381,24 @@ func (r *FiltermacResource) Delete(ctx context.Context, req resource.DeleteReque
 		return
 	}
 
-	httpRes, err := r.client.DHCPAPI.
-		FiltermacAPI.
-		Delete(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
-		Execute()
-	if err != nil {
-		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
-			return
+	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
+
+	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		httpRes, callErr := r.client.DHCPAPI.
+			FiltermacAPI.
+			Delete(ctx, resourceRef).
+			Execute()
+
+		if httpRes != nil {
+			if httpRes.StatusCode == http.StatusNotFound {
+				return 0, nil
+			}
+			return httpRes.StatusCode, callErr
 		}
+		return 0, callErr
+	})
+
+	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete Filtermac, got error: %s", err))
 		return
 	}

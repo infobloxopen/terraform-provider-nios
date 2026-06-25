@@ -15,6 +15,7 @@ import (
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
@@ -26,97 +27,100 @@ import (
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 	importmod "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/import"
+	internaltypes "github.com/infobloxopen/terraform-provider-nios/internal/types"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
 type MemberModel struct {
-	Ref                             types.String `tfsdk:"ref"`
-	ActivePosition                  types.String `tfsdk:"active_position"`
-	AdditionalIpList                types.List   `tfsdk:"additional_ip_list"`
-	AutomatedTrafficCaptureSetting  types.Object `tfsdk:"automated_traffic_capture_setting"`
-	BgpAs                           types.List   `tfsdk:"bgp_as"`
-	Comment                         types.String `tfsdk:"comment"`
-	ConfigAddrType                  types.String `tfsdk:"config_addr_type"`
-	CspAccessKey                    types.List   `tfsdk:"csp_access_key"`
-	CspMemberSetting                types.Object `tfsdk:"csp_member_setting"`
-	ConfigureCspMemberSetting       types.Bool   `tfsdk:"configure_csp_member_setting"`
-	DnsResolverSetting              types.Object `tfsdk:"dns_resolver_setting"`
-	Dscp                            types.Int64  `tfsdk:"dscp"`
-	EmailSetting                    types.Object `tfsdk:"email_setting"`
-	EnableHa                        types.Bool   `tfsdk:"enable_ha"`
-	EnableLom                       types.Bool   `tfsdk:"enable_lom"`
-	EnableMemberRedirect            types.Bool   `tfsdk:"enable_member_redirect"`
-	EnableRoApiAccess               types.Bool   `tfsdk:"enable_ro_api_access"`
-	ExtAttrs                        types.Map    `tfsdk:"extattrs"`
-	ExtAttrsAll                     types.Map    `tfsdk:"extattrs_all"`
-	ExternalSyslogBackupServers     types.List   `tfsdk:"external_syslog_backup_servers"`
-	ExternalSyslogServerEnable      types.Bool   `tfsdk:"external_syslog_server_enable"`
-	HaCloudPlatform                 types.String `tfsdk:"ha_cloud_platform"`
-	HaOnCloud                       types.Bool   `tfsdk:"ha_on_cloud"`
-	HostName                        types.String `tfsdk:"host_name"`
-	Ipv6Setting                     types.Object `tfsdk:"ipv6_setting"`
-	Ipv6StaticRoutes                types.List   `tfsdk:"ipv6_static_routes"`
-	IsDscpCapable                   types.Bool   `tfsdk:"is_dscp_capable"`
-	Lan2Enabled                     types.Bool   `tfsdk:"lan2_enabled"`
-	Lan2PortSetting                 types.Object `tfsdk:"lan2_port_setting"`
-	LomNetworkConfig                types.List   `tfsdk:"lom_network_config"`
-	LomUsers                        types.List   `tfsdk:"lom_users"`
-	MasterCandidate                 types.Bool   `tfsdk:"master_candidate"`
-	MemberServiceCommunication      types.List   `tfsdk:"member_service_communication"`
-	MgmtPortSetting                 types.Object `tfsdk:"mgmt_port_setting"`
-	MmdbEaBuildTime                 types.Int64  `tfsdk:"mmdb_ea_build_time"`
-	MmdbGeoipBuildTime              types.Int64  `tfsdk:"mmdb_geoip_build_time"`
-	NatSetting                      types.Object `tfsdk:"nat_setting"`
-	NodeInfo                        types.List   `tfsdk:"node_info"`
-	NtpSetting                      types.Object `tfsdk:"ntp_setting"`
-	OspfList                        types.List   `tfsdk:"ospf_list"`
-	PassiveHaArpEnabled             types.Bool   `tfsdk:"passive_ha_arp_enabled"`
-	Platform                        types.String `tfsdk:"platform"`
-	PreProvisioning                 types.Object `tfsdk:"pre_provisioning"`
-	PreserveIfOwnsDelegation        types.Bool   `tfsdk:"preserve_if_owns_delegation"`
-	RemoteConsoleAccessEnable       types.Bool   `tfsdk:"remote_console_access_enable"`
-	RouterId                        types.Int64  `tfsdk:"router_id"`
-	ServiceStatus                   types.List   `tfsdk:"service_status"`
-	ServiceTypeConfiguration        types.String `tfsdk:"service_type_configuration"`
-	SnmpSetting                     types.Object `tfsdk:"snmp_setting"`
-	StaticRoutes                    types.List   `tfsdk:"static_routes"`
-	SupportAccessEnable             types.Bool   `tfsdk:"support_access_enable"`
-	SupportAccessInfo               types.String `tfsdk:"support_access_info"`
-	SyslogProxySetting              types.Object `tfsdk:"syslog_proxy_setting"`
-	SyslogServers                   types.List   `tfsdk:"syslog_servers"`
-	SyslogSize                      types.Int64  `tfsdk:"syslog_size"`
-	ThresholdTraps                  types.List   `tfsdk:"threshold_traps"`
-	TimeZone                        types.String `tfsdk:"time_zone"`
-	TrafficCaptureAuthDnsSetting    types.Object `tfsdk:"traffic_capture_auth_dns_setting"`
-	TrafficCaptureChrSetting        types.Object `tfsdk:"traffic_capture_chr_setting"`
-	TrafficCaptureQpsSetting        types.Object `tfsdk:"traffic_capture_qps_setting"`
-	TrafficCaptureRecDnsSetting     types.Object `tfsdk:"traffic_capture_rec_dns_setting"`
-	TrafficCaptureRecQueriesSetting types.Object `tfsdk:"traffic_capture_rec_queries_setting"`
-	TrapNotifications               types.List   `tfsdk:"trap_notifications"`
-	UpgradeGroup                    types.String `tfsdk:"upgrade_group"`
-	UseAutomatedTrafficCapture      types.Bool   `tfsdk:"use_automated_traffic_capture"`
-	UseDnsResolverSetting           types.Bool   `tfsdk:"use_dns_resolver_setting"`
-	UseDscp                         types.Bool   `tfsdk:"use_dscp"`
-	UseEmailSetting                 types.Bool   `tfsdk:"use_email_setting"`
-	UseEnableLom                    types.Bool   `tfsdk:"use_enable_lom"`
-	UseEnableMemberRedirect         types.Bool   `tfsdk:"use_enable_member_redirect"`
-	UseExternalSyslogBackupServers  types.Bool   `tfsdk:"use_external_syslog_backup_servers"`
-	UseRemoteConsoleAccessEnable    types.Bool   `tfsdk:"use_remote_console_access_enable"`
-	UseSnmpSetting                  types.Bool   `tfsdk:"use_snmp_setting"`
-	UseSupportAccessEnable          types.Bool   `tfsdk:"use_support_access_enable"`
-	UseSyslogProxySetting           types.Bool   `tfsdk:"use_syslog_proxy_setting"`
-	UseThresholdTraps               types.Bool   `tfsdk:"use_threshold_traps"`
-	UseTimeZone                     types.Bool   `tfsdk:"use_time_zone"`
-	UseTrafficCaptureAuthDns        types.Bool   `tfsdk:"use_traffic_capture_auth_dns"`
-	UseTrafficCaptureChr            types.Bool   `tfsdk:"use_traffic_capture_chr"`
-	UseTrafficCaptureQps            types.Bool   `tfsdk:"use_traffic_capture_qps"`
-	UseTrafficCaptureRecDns         types.Bool   `tfsdk:"use_traffic_capture_rec_dns"`
-	UseTrafficCaptureRecQueries     types.Bool   `tfsdk:"use_traffic_capture_rec_queries"`
-	UseTrapNotifications            types.Bool   `tfsdk:"use_trap_notifications"`
-	UseV4Vrrp                       types.Bool   `tfsdk:"use_v4_vrrp"`
-	VipSetting                      types.Object `tfsdk:"vip_setting"`
-	VpnMtu                          types.Int64  `tfsdk:"vpn_mtu"`
+	Ref                             types.String                     `tfsdk:"ref"`
+	ActivePosition                  types.String                     `tfsdk:"active_position"`
+	AdditionalIpList                types.List                       `tfsdk:"additional_ip_list"`
+	AutomatedTrafficCaptureSetting  types.Object                     `tfsdk:"automated_traffic_capture_setting"`
+	BgpAs                           types.List                       `tfsdk:"bgp_as"`
+	Comment                         types.String                     `tfsdk:"comment"`
+	ConfigAddrType                  types.String                     `tfsdk:"config_addr_type"`
+	CspAccessKey                    types.List                       `tfsdk:"csp_access_key"`
+	CspMemberSetting                types.Object                     `tfsdk:"csp_member_setting"`
+	ConfigureCspMemberSetting       types.Bool                       `tfsdk:"configure_csp_member_setting"`
+	DnsResolverSetting              types.Object                     `tfsdk:"dns_resolver_setting"`
+	GridLevelDnsResolverSetting     types.Object                     `tfsdk:"grid_level_dns_resolver_setting"`
+	Dscp                            types.Int64                      `tfsdk:"dscp"`
+	EmailSetting                    types.Object                     `tfsdk:"email_setting"`
+	EnableHa                        types.Bool                       `tfsdk:"enable_ha"`
+	EnableLom                       types.Bool                       `tfsdk:"enable_lom"`
+	EnableMemberRedirect            types.Bool                       `tfsdk:"enable_member_redirect"`
+	EnableRoApiAccess               types.Bool                       `tfsdk:"enable_ro_api_access"`
+	ExtAttrs                        types.Map                        `tfsdk:"extattrs"`
+	ExtAttrsAll                     types.Map                        `tfsdk:"extattrs_all"`
+	ExternalSyslogBackupServers     types.List                       `tfsdk:"external_syslog_backup_servers"`
+	ExternalSyslogServerEnable      types.Bool                       `tfsdk:"external_syslog_server_enable"`
+	HaCloudPlatform                 types.String                     `tfsdk:"ha_cloud_platform"`
+	HaOnCloud                       types.Bool                       `tfsdk:"ha_on_cloud"`
+	HostName                        types.String                     `tfsdk:"host_name"`
+	Ipv6Setting                     types.Object                     `tfsdk:"ipv6_setting"`
+	Ipv6StaticRoutes                types.List                       `tfsdk:"ipv6_static_routes"`
+	IsDscpCapable                   types.Bool                       `tfsdk:"is_dscp_capable"`
+	Lan2Enabled                     types.Bool                       `tfsdk:"lan2_enabled"`
+	Lan2PortSetting                 types.Object                     `tfsdk:"lan2_port_setting"`
+	LomNetworkConfig                types.List                       `tfsdk:"lom_network_config"`
+	LomUsers                        types.List                       `tfsdk:"lom_users"`
+	MasterCandidate                 types.Bool                       `tfsdk:"master_candidate"`
+	MemberServiceCommunication      internaltypes.UnorderedListValue `tfsdk:"member_service_communication"`
+	MgmtPortSetting                 types.Object                     `tfsdk:"mgmt_port_setting"`
+	MmdbEaBuildTime                 types.Int64                      `tfsdk:"mmdb_ea_build_time"`
+	MmdbGeoipBuildTime              types.Int64                      `tfsdk:"mmdb_geoip_build_time"`
+	NatSetting                      types.Object                     `tfsdk:"nat_setting"`
+	NodeInfo                        types.List                       `tfsdk:"node_info"`
+	NtpSetting                      types.Object                     `tfsdk:"ntp_setting"`
+	OspfList                        types.List                       `tfsdk:"ospf_list"`
+	PassiveHaArpEnabled             types.Bool                       `tfsdk:"passive_ha_arp_enabled"`
+	Platform                        types.String                     `tfsdk:"platform"`
+	PreProvisioning                 types.Object                     `tfsdk:"pre_provisioning"`
+	PreserveIfOwnsDelegation        types.Bool                       `tfsdk:"preserve_if_owns_delegation"`
+	RemoteConsoleAccessEnable       types.Bool                       `tfsdk:"remote_console_access_enable"`
+	RouterId                        types.Int64                      `tfsdk:"router_id"`
+	ServiceStatus                   types.List                       `tfsdk:"service_status"`
+	ServiceTypeConfiguration        types.String                     `tfsdk:"service_type_configuration"`
+	SnmpSetting                     types.Object                     `tfsdk:"snmp_setting"`
+	StaticRoutes                    types.List                       `tfsdk:"static_routes"`
+	SupportAccessEnable             types.Bool                       `tfsdk:"support_access_enable"`
+	SupportAccessInfo               types.String                     `tfsdk:"support_access_info"`
+	SyslogProxySetting              types.Object                     `tfsdk:"syslog_proxy_setting"`
+	SyslogServers                   types.List                       `tfsdk:"syslog_servers"`
+	SyslogSize                      types.Int64                      `tfsdk:"syslog_size"`
+	ThresholdTraps                  types.List                       `tfsdk:"threshold_traps"`
+	TimeZone                        types.String                     `tfsdk:"time_zone"`
+	TrafficCaptureAuthDnsSetting    types.Object                     `tfsdk:"traffic_capture_auth_dns_setting"`
+	TrafficCaptureChrSetting        types.Object                     `tfsdk:"traffic_capture_chr_setting"`
+	TrafficCaptureQpsSetting        types.Object                     `tfsdk:"traffic_capture_qps_setting"`
+	TrafficCaptureRecDnsSetting     types.Object                     `tfsdk:"traffic_capture_rec_dns_setting"`
+	TrafficCaptureRecQueriesSetting types.Object                     `tfsdk:"traffic_capture_rec_queries_setting"`
+	TrapNotifications               types.List                       `tfsdk:"trap_notifications"`
+	UpgradeGroup                    types.String                     `tfsdk:"upgrade_group"`
+	UseAutomatedTrafficCapture      types.Bool                       `tfsdk:"use_automated_traffic_capture"`
+	UseDnsResolverSetting           types.Bool                       `tfsdk:"use_dns_resolver_setting"`
+	UseDscp                         types.Bool                       `tfsdk:"use_dscp"`
+	UseEmailSetting                 types.Bool                       `tfsdk:"use_email_setting"`
+	UseEnableLom                    types.Bool                       `tfsdk:"use_enable_lom"`
+	UseEnableMemberRedirect         types.Bool                       `tfsdk:"use_enable_member_redirect"`
+	UseExternalSyslogBackupServers  types.Bool                       `tfsdk:"use_external_syslog_backup_servers"`
+	UseRemoteConsoleAccessEnable    types.Bool                       `tfsdk:"use_remote_console_access_enable"`
+	UseSnmpSetting                  types.Bool                       `tfsdk:"use_snmp_setting"`
+	UseSupportAccessEnable          types.Bool                       `tfsdk:"use_support_access_enable"`
+	UseSyslogProxySetting           types.Bool                       `tfsdk:"use_syslog_proxy_setting"`
+	UseThresholdTraps               types.Bool                       `tfsdk:"use_threshold_traps"`
+	UseTimeZone                     types.Bool                       `tfsdk:"use_time_zone"`
+	UseTrafficCaptureAuthDns        types.Bool                       `tfsdk:"use_traffic_capture_auth_dns"`
+	UseTrafficCaptureChr            types.Bool                       `tfsdk:"use_traffic_capture_chr"`
+	UseTrafficCaptureQps            types.Bool                       `tfsdk:"use_traffic_capture_qps"`
+	UseTrafficCaptureRecDns         types.Bool                       `tfsdk:"use_traffic_capture_rec_dns"`
+	UseTrafficCaptureRecQueries     types.Bool                       `tfsdk:"use_traffic_capture_rec_queries"`
+	UseTrapNotifications            types.Bool                       `tfsdk:"use_trap_notifications"`
+	UseV4Vrrp                       types.Bool                       `tfsdk:"use_v4_vrrp"`
+	VipSetting                      types.Object                     `tfsdk:"vip_setting"`
+	VpnMtu                          types.Int64                      `tfsdk:"vpn_mtu"`
+	PasswordVersion                 types.Int64                      `tfsdk:"password_version"`
 }
 
 var MemberAttrTypes = map[string]attr.Type{
@@ -131,6 +135,7 @@ var MemberAttrTypes = map[string]attr.Type{
 	"csp_member_setting":                  types.ObjectType{AttrTypes: MemberCspMemberSettingAttrTypes},
 	"configure_csp_member_setting":        types.BoolType,
 	"dns_resolver_setting":                types.ObjectType{AttrTypes: MemberDnsResolverSettingAttrTypes},
+	"grid_level_dns_resolver_setting":     types.ObjectType{AttrTypes: MemberDnsResolverSettingAttrTypes},
 	"dscp":                                types.Int64Type,
 	"email_setting":                       types.ObjectType{AttrTypes: MemberEmailSettingAttrTypes},
 	"enable_ha":                           types.BoolType,
@@ -152,7 +157,7 @@ var MemberAttrTypes = map[string]attr.Type{
 	"lom_network_config":                  types.ListType{ElemType: types.ObjectType{AttrTypes: MemberLomNetworkConfigAttrTypes}},
 	"lom_users":                           types.ListType{ElemType: types.ObjectType{AttrTypes: MemberLomUsersAttrTypes}},
 	"master_candidate":                    types.BoolType,
-	"member_service_communication":        types.ListType{ElemType: types.ObjectType{AttrTypes: MemberMemberServiceCommunicationAttrTypes}},
+	"member_service_communication":        internaltypes.NewUnorderedList(types.ObjectType{AttrTypes: MemberMemberServiceCommunicationAttrTypes}),
 	"mgmt_port_setting":                   types.ObjectType{AttrTypes: MemberMgmtPortSettingAttrTypes},
 	"mmdb_ea_build_time":                  types.Int64Type,
 	"mmdb_geoip_build_time":               types.Int64Type,
@@ -206,6 +211,7 @@ var MemberAttrTypes = map[string]attr.Type{
 	"use_v4_vrrp":                         types.BoolType,
 	"vip_setting":                         types.ObjectType{AttrTypes: MemberVipSettingAttrTypes},
 	"vpn_mtu":                             types.Int64Type,
+	"password_version":                    types.Int64Type,
 }
 
 var MemberResourceSchemaAttributes = map[string]schema.Attribute{
@@ -287,6 +293,11 @@ var MemberResourceSchemaAttributes = map[string]schema.Attribute{
 		},
 		MarkdownDescription: "DNS resolver setting for member.",
 	},
+	"grid_level_dns_resolver_setting": schema.SingleNestedAttribute{
+		Attributes:          MemberDnsResolverSettingResourceSchemaAttributes,
+		Optional:            true,
+		MarkdownDescription: "Grid-level DNS resolver setting. When configured, this will update the grid DNS resolver settings and restart grid services. To unset resolvers, set resolvers to null in this block.",
+	},
 	"configure_csp_member_setting": schema.BoolAttribute{
 		Optional:            true,
 		Computed:            true,
@@ -363,7 +374,6 @@ var MemberResourceSchemaAttributes = map[string]schema.Attribute{
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: MemberExternalSyslogBackupServersResourceSchemaAttributes,
 		},
-		Computed: true,
 		Optional: true,
 		Validators: []validator.List{
 			listvalidator.SizeAtLeast(1),
@@ -452,7 +462,6 @@ var MemberResourceSchemaAttributes = map[string]schema.Attribute{
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: MemberLomUsersResourceSchemaAttributes,
 		},
-		Computed: true,
 		Optional: true,
 		Validators: []validator.List{
 			listvalidator.SizeAtLeast(1),
@@ -466,9 +475,11 @@ var MemberResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "Determines if a Grid member is a Grid Master Candidate or not. This flag enables the Grid member to assume the role of the Grid Master as a disaster recovery measure.",
 	},
 	"member_service_communication": schema.ListNestedAttribute{
+		CustomType: internaltypes.NewUnorderedList(types.ObjectType{AttrTypes: MemberMemberServiceCommunicationAttrTypes}),
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: MemberMemberServiceCommunicationResourceSchemaAttributes,
 		},
+		Optional:            true,
 		Computed:            true,
 		MarkdownDescription: "Configure communication type for various services.",
 	},
@@ -857,6 +868,13 @@ var MemberResourceSchemaAttributes = map[string]schema.Attribute{
 		Default:             int64default.StaticInt64(1450),
 		MarkdownDescription: "The VPN maximum transmission unit (MTU).",
 	},
+	"password_version": schema.Int64Attribute{
+		Computed:            true,
+		MarkdownDescription: "Internal revision incremented when external_syslog_backup_servers.password or lom_users.password changes.",
+		PlanModifiers: []planmodifier.Int64{
+			int64planmodifier.UseStateForUnknown(),
+		},
+	},
 }
 
 func (m *MemberModel) Expand(ctx context.Context, diags *diag.Diagnostics, isCreate bool) *grid.Member {
@@ -890,7 +908,6 @@ func (m *MemberModel) Expand(ctx context.Context, diags *diag.Diagnostics, isCre
 		LomNetworkConfig:                flex.ExpandFrameworkListNestedBlock(ctx, m.LomNetworkConfig, diags, ExpandMemberLomNetworkConfig),
 		LomUsers:                        flex.ExpandFrameworkListNestedBlock(ctx, m.LomUsers, diags, ExpandMemberLomUsers),
 		MasterCandidate:                 flex.ExpandBoolPointer(m.MasterCandidate),
-		MemberServiceCommunication:      flex.ExpandFrameworkListNestedBlockEmptyAsNil(ctx, m.MemberServiceCommunication, diags, ExpandMemberMemberServiceCommunication),
 		MgmtPortSetting:                 ExpandMemberMgmtPortSetting(ctx, m.MgmtPortSetting, diags),
 		NatSetting:                      ExpandMemberNatSetting(ctx, m.NatSetting, diags),
 		NodeInfo:                        flex.ExpandFrameworkListNestedBlock(ctx, m.NodeInfo, diags, ExpandMemberNodeInfo),
@@ -910,7 +927,6 @@ func (m *MemberModel) Expand(ctx context.Context, diags *diag.Diagnostics, isCre
 		SyslogSize:                      flex.ExpandInt64Pointer(m.SyslogSize),
 		ThresholdTraps:                  flex.ExpandFrameworkListNestedBlock(ctx, m.ThresholdTraps, diags, ExpandMemberThresholdTraps),
 		TimeZone:                        flex.ExpandStringPointer(m.TimeZone),
-		TrafficCaptureAuthDnsSetting:    ExpandMemberTrafficCaptureAuthDnsSetting(ctx, m.TrafficCaptureAuthDnsSetting, diags),
 		TrafficCaptureChrSetting:        ExpandMemberTrafficCaptureChrSetting(ctx, m.TrafficCaptureChrSetting, diags),
 		TrafficCaptureQpsSetting:        ExpandMemberTrafficCaptureQpsSetting(ctx, m.TrafficCaptureQpsSetting, diags),
 		TrafficCaptureRecDnsSetting:     ExpandMemberTrafficCaptureRecDnsSetting(ctx, m.TrafficCaptureRecDnsSetting, diags),
@@ -943,6 +959,8 @@ func (m *MemberModel) Expand(ctx context.Context, diags *diag.Diagnostics, isCre
 
 	if !isCreate {
 		to.PreProvisioning = ExpandMemberPreProvisioning(ctx, m.PreProvisioning, diags)
+		to.TrafficCaptureAuthDnsSetting = ExpandMemberTrafficCaptureAuthDnsSetting(ctx, m.TrafficCaptureAuthDnsSetting, diags)
+		to.MemberServiceCommunication = flex.ExpandFrameworkListNestedBlockEmptyAsNil(ctx, m.MemberServiceCommunication, diags, ExpandMemberMemberServiceCommunication)
 	}
 
 	if m.ConfigureCspMemberSetting.ValueBool() {
@@ -1029,14 +1047,29 @@ func (m *MemberModel) Flatten(ctx context.Context, from *grid.Member, diags *dia
 		}
 	}
 	m.MasterCandidate = types.BoolPointerValue(from.MasterCandidate)
-	m.MemberServiceCommunication = flex.FlattenFrameworkListNestedBlock(ctx, from.MemberServiceCommunication, MemberMemberServiceCommunicationAttrTypes, diags, FlattenMemberMemberServiceCommunication)
+	planMsc := m.MemberServiceCommunication
+	listVal := flex.FlattenFrameworkListNestedBlock(ctx, from.MemberServiceCommunication, MemberMemberServiceCommunicationAttrTypes, diags, FlattenMemberMemberServiceCommunication)
+	if !planMsc.IsUnknown() && !planMsc.IsNull() {
+		reOrderedList, reorderDiags := utils.ReorderAndFilterNestedListResponse(ctx, planMsc.ListValue, listVal, "service")
+		if !reorderDiags.HasError() {
+			listVal = reOrderedList.(basetypes.ListValue)
+		}
+	}
+	m.MemberServiceCommunication = internaltypes.UnorderedListValue{ListValue: listVal}
 	m.MgmtPortSetting = FlattenMemberMgmtPortSetting(ctx, from.MgmtPortSetting, diags)
 	m.MmdbEaBuildTime = flex.FlattenInt64Pointer(from.MmdbEaBuildTime)
 	m.MmdbGeoipBuildTime = flex.FlattenInt64Pointer(from.MmdbGeoipBuildTime)
 	m.NatSetting = FlattenMemberNatSetting(ctx, from.NatSetting, diags)
 	m.NodeInfo = flex.FlattenFrameworkListNestedBlock(ctx, from.NodeInfo, MemberNodeInfoAttrTypes, diags, FlattenMemberNodeInfo)
 	m.NtpSetting = FlattenMemberNtpSetting(ctx, from.NtpSetting, diags)
+	planOspfList := m.OspfList
 	m.OspfList = flex.FlattenFrameworkListNestedBlock(ctx, from.OspfList, MemberOspfListAttrTypes, diags, FlattenMemberOspfList)
+	if !planOspfList.IsNull() {
+		result, copyDiags := utils.CopyFieldFromPlanToRespList(ctx, planOspfList, m.OspfList, "authentication_key")
+		if !copyDiags.HasError() {
+			m.OspfList = result.(basetypes.ListValue)
+		}
+	}
 	m.PassiveHaArpEnabled = types.BoolPointerValue(from.PassiveHaArpEnabled)
 	m.Platform = flex.FlattenStringPointer(from.Platform)
 	m.PreProvisioning = FlattenMemberPreProvisioning(ctx, from.PreProvisioning, diags)
@@ -1044,7 +1077,7 @@ func (m *MemberModel) Flatten(ctx context.Context, from *grid.Member, diags *dia
 	m.RemoteConsoleAccessEnable = types.BoolPointerValue(from.RemoteConsoleAccessEnable)
 	m.RouterId = flex.FlattenInt64Pointer(from.RouterId)
 	m.ServiceStatus = flex.FlattenFrameworkListNestedBlock(ctx, from.ServiceStatus, MemberServiceStatusAttrTypes, diags, FlattenMemberServiceStatus)
-	m.ServiceTypeConfiguration = flex.FlattenStringPointer(from.ServiceTypeConfiguration)
+	m.ServiceTypeConfiguration = FlattenServiceTypeConfiguration(m.ServiceTypeConfiguration, from.ServiceTypeConfiguration)
 	m.SnmpSetting = FlattenMemberSnmpSetting(ctx, from.SnmpSetting, diags)
 	m.StaticRoutes = flex.FlattenFrameworkListNestedBlock(ctx, from.StaticRoutes, MemberStaticRoutesAttrTypes, diags, FlattenMemberStaticRoutes)
 	m.SupportAccessEnable = types.BoolPointerValue(from.SupportAccessEnable)
@@ -1104,6 +1137,12 @@ func (m *MemberModel) Flatten(ctx context.Context, from *grid.Member, diags *dia
 	m.UseV4Vrrp = types.BoolPointerValue(from.UseV4Vrrp)
 	m.VipSetting = FlattenMemberVipSetting(ctx, from.VipSetting, diags)
 	m.VpnMtu = flex.FlattenInt64Pointer(from.VpnMtu)
+	planGridLevelDnsResolverSetting := m.GridLevelDnsResolverSetting
+	if planGridLevelDnsResolverSetting.IsNull() || planGridLevelDnsResolverSetting.IsUnknown() {
+		m.GridLevelDnsResolverSetting = types.ObjectNull(MemberDnsResolverSettingAttrTypes)
+	} else {
+		m.GridLevelDnsResolverSetting = planGridLevelDnsResolverSetting
+	}
 }
 
 func ExpandHACloudPlatform(v types.String) *string {
@@ -1121,4 +1160,11 @@ func FlattenHACloudPlatform(s *string) types.String {
 		return types.StringNull()
 	}
 	return types.StringValue(*s)
+}
+
+func FlattenServiceTypeConfiguration(planValue types.String, apiValue *string) types.String {
+	if !planValue.IsNull() && !planValue.IsUnknown() && planValue.ValueString() == "CUSTOM" {
+		return planValue
+	}
+	return flex.FlattenStringPointer(apiValue)
 }
