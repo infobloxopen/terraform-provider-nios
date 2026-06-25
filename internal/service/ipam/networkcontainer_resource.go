@@ -397,6 +397,11 @@ func (r *NetworkcontainerResource) Delete(ctx context.Context, req resource.Dele
 			NetworkcontainerAPI.
 			Delete(ctx, resourceRef)
 
+		// remove_subnets is a delete-only argument; pass it as a query parameter
+		if !data.RemoveSubnets.IsNull() && !data.RemoveSubnets.IsUnknown() {
+			deleteReq = deleteReq.RemoveSubnets(data.RemoveSubnets.ValueBool())
+		}
+
 		httpRes, callErr := deleteReq.Execute()
 
 		if httpRes != nil {
