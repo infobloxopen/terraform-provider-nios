@@ -250,9 +250,7 @@ func TestAccNotificationRestEndpointResource_ClientCertificateToken(t *testing.T
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
-			// client_certificate_token is computed from the file upload;
-			// it is not returned on subsequent reads (not in readable attrs).
-			// Verify the resource is created and updated without errors.
+			// Create and Read
 			{
 				Config: testAccNotificationRestEndpointClientCertificateToken(name, outboundMemberType, uri, clientCertificateFile),
 				Check: resource.ComposeTestCheckFunc(
@@ -280,11 +278,12 @@ func TestAccNotificationRestEndpointResource_Password(t *testing.T) {
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
-			// Create and Read - password is write-only/sensitive, only verify resource exists
+			// Create and Read
 			{
 				Config: testAccNotificationRestEndpointPassword(name, outboundMemberType, uri, "example_username", "example_password"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNotificationRestEndpointExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "password_version", "1"),
 					resource.TestCheckResourceAttr(resourceName, "username", "example_username"),
 				),
 			},
@@ -293,6 +292,7 @@ func TestAccNotificationRestEndpointResource_Password(t *testing.T) {
 				Config: testAccNotificationRestEndpointPassword(name, outboundMemberType, uri, "example_username", "example_password_updated"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNotificationRestEndpointExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "password_version", "2"),
 					resource.TestCheckResourceAttr(resourceName, "username", "example_username"),
 				),
 			},
@@ -310,11 +310,12 @@ func TestAccNotificationRestEndpointResource_WapiUserPassword(t *testing.T) {
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
-			// Create and Read - wapi_user_password is write-only/sensitive, only verify resource exists
+			// Create and Read
 			{
 				Config: testAccNotificationRestEndpointWapiUserPassword(name, outboundMemberType, uri, "example_wapi_username", "example_wapi_password"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNotificationRestEndpointExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "password_version", "1"),
 					resource.TestCheckResourceAttr(resourceName, "wapi_user_name", "example_wapi_username"),
 				),
 			},
@@ -323,6 +324,7 @@ func TestAccNotificationRestEndpointResource_WapiUserPassword(t *testing.T) {
 				Config: testAccNotificationRestEndpointWapiUserPassword(name, outboundMemberType, uri, "example_wapi_username", "example_wapi_password_updated"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNotificationRestEndpointExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "password_version", "2"),
 					resource.TestCheckResourceAttr(resourceName, "wapi_user_name", "example_wapi_username"),
 				),
 			},

@@ -599,6 +599,7 @@ func TestAccDxlEndpointResource_WapiUserPassword(t *testing.T) {
 				Config: testAccDxlEndpointWapiUserPassword(clientCertificateFile, broker, name, "GM", "admin", "password123"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDxlEndpointExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "password_version", "1"),
 					resource.TestCheckResourceAttr(resourceName, "wapi_user_name", "admin"),
 				),
 			},
@@ -607,6 +608,7 @@ func TestAccDxlEndpointResource_WapiUserPassword(t *testing.T) {
 				Config: testAccDxlEndpointWapiUserPassword(clientCertificateFile, broker, name, "GM", "admin", "password456"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDxlEndpointExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "password_version", "2"),
 					resource.TestCheckResourceAttr(resourceName, "wapi_user_name", "admin"),
 				),
 			},

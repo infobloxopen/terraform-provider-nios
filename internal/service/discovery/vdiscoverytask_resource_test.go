@@ -1322,10 +1322,7 @@ func TestAccVdiscoverytaskResource_ServiceAccountFileToken(t *testing.T) {
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
-			// Create: verify the resource is created successfully with a service
-			// account file. service_account_file_token is Computed from file upload
-			// but NIOS does not echo it back on subsequent reads, so only resource
-			// existence is checked.
+			// Create and Read
 			{
 				Config: testAccVdiscoverytaskServiceAccountFileToken(name, "GCP", memberUpdatedName, serviceAccountFile, cdiscoveryFile, "DISCOVER", true, true, true, true, false, "AUTO_CREATE", "AUTO_CREATE", true),
 				Check: resource.ComposeTestCheckFunc(
@@ -1333,7 +1330,7 @@ func TestAccVdiscoverytaskResource_ServiceAccountFileToken(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "service_account_file", serviceAccountFile),
 				),
 			},
-			// Update: change service account file and verify resource still exists
+			// Update and Read
 			{
 				Config: testAccVdiscoverytaskServiceAccountFileToken(name, "GCP", memberUpdatedName, serviceAccountFile2, cdiscoveryFile, "DISCOVER", true, true, true, true, false, "AUTO_CREATE", "AUTO_CREATE", true),
 				Check: resource.ComposeTestCheckFunc(

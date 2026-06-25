@@ -4562,7 +4562,7 @@ func TestAccMemberResource_MemberServiceCommunication(t *testing.T) {
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
-			// Create and verify member_service_communication is populated by NIOS
+			// Create and verify 
 			{
 				Config: testAccMemberMemberServiceCommunication(
 					hostName,

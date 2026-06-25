@@ -248,7 +248,7 @@ func TestAccRecordNsResource_Name(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "name", name1),
 				),
 			},
-			// Update and Read (name is immutable; update a mutable attribute to validate updates work)
+			// Update and Read
 			{
 				Config: testAccRecordNsName(name2, fmt.Sprintf("updated-%s", nameserver), addressesHCL, "default"),
 				Check: resource.ComposeTestCheckFunc(

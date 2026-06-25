@@ -372,8 +372,7 @@ func TestAccExtensibleattributedefResource_DescendantsAction(t *testing.T) {
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
-			// Create with Inheritable flag — descendants_action is not readable
-			// from NIOS WAPI, so verify the resource is created without error
+			// Create and Read
 			{
 				Config: testAccExtensibleattributedefDescendantsAction(name, eaType),
 				Check: resource.ComposeTestCheckFunc(

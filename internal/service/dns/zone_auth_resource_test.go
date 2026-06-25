@@ -4401,14 +4401,13 @@ func testAccZoneAuthSetSoaSerialNumber(zoneFqdn, view string, gridPrimary []map[
 	gridPrimaryHCL := utils.ConvertSliceOfMapsToHCL(gridPrimary)
 	soaSerialNumberHCL := ""
 	if setSoaSerialNumber {
-		soaSerialNumberHCL = fmt.Sprintf("    soa_serial_number = %d", soaSerialNumber)
+		soaSerialNumberHCL = fmt.Sprintf("\n    soa_serial_number = %d", soaSerialNumber)
 	}
 	return fmt.Sprintf(`
 resource "nios_dns_zone_auth" "test_set_soa_serial_number" {
     fqdn = %q
     view = %q
-    grid_primary = %s
-    %s
+    grid_primary = %s%s
     set_soa_serial_number = %t
     soa_retry = 3600
     soa_negative_ttl = 900
