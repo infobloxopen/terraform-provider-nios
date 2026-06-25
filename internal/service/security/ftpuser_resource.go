@@ -2,6 +2,9 @@ package security
 
 import (
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
+	"encoding/json"
 	"fmt"
 	"net/http"
 
@@ -9,10 +12,11 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
-
+	"github.com/hashicorp/terraform-plugin-framework/types"
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
-
+	"github.com/infobloxopen/infoblox-nios-go-client/security"
 	"github.com/infobloxopen/terraform-provider-nios/internal/config"
+	"github.com/infobloxopen/terraform-provider-nios/internal/retry"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
@@ -21,6 +25,7 @@ var readableAttributesForFtpuser = "extattrs,home_dir,permission,username"
 // Ensure provider defined types fully satisfy framework interfaces.
 var _ resource.Resource = &FtpuserResource{}
 var _ resource.ResourceWithImportState = &FtpuserResource{}
+var _ resource.ResourceWithModifyPlan = &FtpuserResource{}
 
 func NewFtpuserResource() resource.Resource {
 	return &FtpuserResource{}
@@ -62,6 +67,84 @@ func (r *FtpuserResource) Configure(ctx context.Context, req resource.ConfigureR
 	r.client = client
 }
 
+func (r *FtpuserResource) ModifyPlan(ctx context.Context, req resource.ModifyPlanRequest, resp *resource.ModifyPlanResponse) {
+	if req.Plan.Raw.IsNull() {
+		return
+	}
+
+	var stateRev types.Int64
+	var planSecret types.String
+
+	curRev := int64(0)
+	if !req.State.Raw.IsNull() && req.State.Raw.IsKnown() {
+		resp.Diagnostics.Append(req.State.GetAttribute(ctx, path.Root("password_version"), &stateRev)...)
+		if resp.Diagnostics.HasError() {
+			return
+		}
+		if !stateRev.IsNull() && !stateRev.IsUnknown() {
+			curRev = stateRev.ValueInt64()
+		}
+	}
+
+	resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("password"), &planSecret)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	computeNewHash := !planSecret.IsNull() && !planSecret.IsUnknown()
+	prevHashes := secretsHashState{}
+	plannedHashes := secretsHashState{}
+
+	if computeNewHash {
+		var prev struct {
+			Algo string `json:"algo"`
+			Hash string `json:"hash"`
+		}
+
+		if b, diags := req.Private.GetKey(ctx, "password_hash"); diags != nil {
+			resp.Diagnostics.Append(diags...)
+		} else if b != nil {
+			if err := json.Unmarshal(b, &prev); err != nil {
+				prev.Hash = ""
+			}
+		}
+
+		var plannedHash string
+		if prev.Hash != "" {
+			_ = json.Unmarshal([]byte(prev.Hash), &prevHashes)
+		}
+
+		if !planSecret.IsUnknown() {
+			if planSecret.IsNull() {
+				plannedHashes.Password = ""
+			} else {
+				h := sha256.New()
+				h.Write([]byte(planSecret.ValueString()))
+				plannedHashes.Password = hex.EncodeToString(h.Sum(nil))
+			}
+		}
+
+		if data, err := json.Marshal(plannedHashes); err == nil {
+			plannedHash = string(data)
+		}
+
+		if plannedHashes.Password != "" && plannedHashes.Password != prevHashes.Password {
+			newRev := types.Int64Value(curRev + 1)
+			resp.Diagnostics.Append(resp.Plan.SetAttribute(ctx, path.Root("password_version"), newRev)...)
+
+			val := map[string]string{"algo": "sha256", "hash": plannedHash}
+			b, err := json.Marshal(val)
+			if err != nil {
+				resp.Diagnostics.AddError("Private State Marshal Error", err.Error())
+				return
+			}
+			resp.Diagnostics.Append(resp.Private.SetKey(ctx, "password_hash", b)...)
+		} else {
+			resp.Diagnostics.Append(resp.Plan.SetAttribute(ctx, path.Root("password_version"), curRev)...)
+		}
+	}
+}
+
 func (r *FtpuserResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var diags diag.Diagnostics
 	var data FtpuserModel
@@ -79,14 +162,61 @@ func (r *FtpuserResource) Create(ctx context.Context, req resource.CreateRequest
 		return
 	}
 
-	apiRes, _, err := r.client.SecurityAPI.
-		FtpuserAPI.
-		Create(ctx).
-		Ftpuser(*data.Expand(ctx, &resp.Diagnostics, true)).
-		ReturnFieldsPlus(readableAttributesForFtpuser).
-		ReturnAsObject(1).
-		Execute()
+	payload := data.Expand(ctx, &resp.Diagnostics, true)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	passwordVersion := types.Int64Value(0)
+	var password types.String
+	resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("password"), &password)...)
+	secretData := secretsHashState{}
+	if !password.IsNull() && !password.IsUnknown() {
+		payload.Password = password.ValueStringPointer()
+		passwordVersion = types.Int64Value(1)
+		h := sha256.New()
+		h.Write([]byte(password.ValueString()))
+		secretData.Password = hex.EncodeToString(h.Sum(nil))
+		secretDataJSON, _ := json.Marshal(secretData)
+		val := map[string]string{"algo": "sha256", "hash": string(secretDataJSON)}
+		hashedSecret, err := json.Marshal(val)
+		if err != nil {
+			resp.Diagnostics.AddError("Private State Marshal Error", err.Error())
+			return
+		}
+		resp.Diagnostics.Append(resp.Private.SetKey(ctx, "password_hash", hashedSecret)...)
+	}
+
+	var apiRes *security.CreateFtpuserResponse
+
+	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		var (
+			httpRes *http.Response
+			callErr error
+		)
+		apiRes, httpRes, callErr = r.client.SecurityAPI.
+			FtpuserAPI.
+			Create(ctx).
+			Ftpuser(*payload).
+			ReturnFieldsPlus(readableAttributesForFtpuser).
+			ReturnAsObject(1).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
+
 	if err != nil {
+		if retry.IsAlreadyExistsErr(err) {
+			// Resource already exists, import required
+			resp.Diagnostics.AddError(
+				"Resource Already Exists",
+				fmt.Sprintf("Resource already exists, error: %s.\nPlease import the existing resource into terraform state.", err.Error()),
+			)
+			return
+		}
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create Ftpuser, got error: %s", err))
 		return
 	}
@@ -98,6 +228,7 @@ func (r *FtpuserResource) Create(ctx context.Context, req resource.CreateRequest
 		return
 	}
 
+	data.PasswordVersion = passwordVersion
 	data.Flatten(ctx, &res, &resp.Diagnostics)
 
 	// Save data into Terraform state
@@ -121,13 +252,28 @@ func (r *FtpuserResource) Read(ctx context.Context, req resource.ReadRequest, re
 		return
 	}
 
-	apiRes, httpRes, err := r.client.SecurityAPI.
-		FtpuserAPI.
-		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
-		ReturnFieldsPlus(readableAttributesForFtpuser).
-		ReturnAsObject(1).
-		ProxySearch(config.GetProxySearch()).
-		Execute()
+	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
+
+	var (
+		httpRes *http.Response
+		apiRes  *security.GetFtpuserResponse
+	)
+
+	err := retry.Do(ctx, nil, func(ctx context.Context) (int, error) {
+		var callErr error
+		apiRes, httpRes, callErr = r.client.SecurityAPI.
+			FtpuserAPI.
+			Read(ctx, resourceRef).
+			ReturnFieldsPlus(readableAttributesForFtpuser).
+			ReturnAsObject(1).
+			ProxySearch(config.GetProxySearch()).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
 
 	// If the resource is not found, try searching using Extensible Attributes
 	if err != nil {
@@ -273,13 +419,44 @@ func (r *FtpuserResource) Update(ctx context.Context, req resource.UpdateRequest
 		return
 	}
 
-	apiRes, _, err := r.client.SecurityAPI.
-		FtpuserAPI.
-		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
-		Ftpuser(*data.Expand(ctx, &resp.Diagnostics, false)).
-		ReturnFieldsPlus(readableAttributesForFtpuser).
-		ReturnAsObject(1).
-		Execute()
+	var password types.String
+	resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("password"), &password)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
+
+	payload := data.Expand(ctx, &resp.Diagnostics, false)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	if !password.IsNull() && !password.IsUnknown() {
+		payload.Password = password.ValueStringPointer()
+	}
+
+	var apiRes *security.UpdateFtpuserResponse
+
+	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		var (
+			httpRes *http.Response
+			callErr error
+		)
+		apiRes, httpRes, callErr = r.client.SecurityAPI.
+			FtpuserAPI.
+			Update(ctx, resourceRef).
+			Ftpuser(*payload).
+			ReturnFieldsPlus(readableAttributesForFtpuser).
+			ReturnAsObject(1).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
+
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update Ftpuser, got error: %s", err))
 		return
@@ -313,14 +490,24 @@ func (r *FtpuserResource) Delete(ctx context.Context, req resource.DeleteRequest
 		return
 	}
 
-	httpRes, err := r.client.SecurityAPI.
-		FtpuserAPI.
-		Delete(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
-		Execute()
-	if err != nil {
-		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
-			return
+	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
+
+	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		httpRes, callErr := r.client.SecurityAPI.
+			FtpuserAPI.
+			Delete(ctx, resourceRef).
+			Execute()
+
+		if httpRes != nil {
+			if httpRes.StatusCode == http.StatusNotFound {
+				return 0, nil
+			}
+			return httpRes.StatusCode, callErr
 		}
+		return 0, callErr
+	})
+
+	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete Ftpuser, got error: %s", err))
 		return
 	}

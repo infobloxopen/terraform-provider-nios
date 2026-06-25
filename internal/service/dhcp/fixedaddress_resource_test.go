@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -39,7 +40,7 @@ func TestAccFixedaddressResource_basic(t *testing.T) {
 	var resourceName = "nios_dhcp_fixed_address.test"
 	var v dhcp.Fixedaddress
 	ip := "15.0.0.1"
-	agentCircuitID := acctest.RandomNumber(1000)
+	agentCircuitID := acctest.RandomNumber(10000)
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -88,7 +89,7 @@ func TestAccFixedaddressResource_disappears(t *testing.T) {
 	resourceName := "nios_dhcp_fixed_address.test"
 	var v dhcp.Fixedaddress
 	ip := "15.0.0.2"
-	agentCircuitID := acctest.RandomNumber(1000)
+	agentCircuitID := acctest.RandomNumber(10000)
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -132,6 +133,15 @@ func TestAccFixedaddressResource_AgentCircuitId(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "agent_circuit_id", "32"),
 				),
 			},
+			// Update and Read
+			{
+				Config: testAccFixedaddressAgentCircuitIdWithRemoteId(ip, "CIRCUIT_ID", 35, 34, "test_agent_circuit_id"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "agent_circuit_id", "35"),
+					resource.TestCheckResourceAttr(resourceName, "agent_remote_id", "34"),
+				),
+			},
 			// Delete testing automatically occurs in TestCase
 		},
 	})
@@ -163,6 +173,15 @@ func TestAccFixedaddressResource_AgentRemoteId(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "agent_remote_id", fmt.Sprintf("%v", agentRemoteID+10)),
 				),
 			},
+			// Update and Read
+			{
+				Config: testAccFixedaddressAgentCircuitIdWithRemoteId(ip, "REMOTE_ID", 35, agentRemoteID+20, "test_agent_remote_id"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "agent_circuit_id", "35"),
+					resource.TestCheckResourceAttr(resourceName, "agent_remote_id", fmt.Sprintf("%v", agentRemoteID+20)),
+				),
+			},
 			// Delete testing automatically occurs in TestCase
 		},
 	})
@@ -172,7 +191,7 @@ func TestAccFixedaddressResource_AllowTelnet(t *testing.T) {
 	var resourceName = "nios_dhcp_fixed_address.test_allow_telnet"
 	var v dhcp.Fixedaddress
 	ip := "15.0.0.5"
-	agentCircuitID := acctest.RandomNumber(1000)
+	agentCircuitID := acctest.RandomNumber(10000)
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -194,7 +213,7 @@ func TestAccFixedaddressResource_AlwaysUpdateDns(t *testing.T) {
 	var resourceName = "nios_dhcp_fixed_address.test_always_update_dns"
 	var v dhcp.Fixedaddress
 	ip := "15.0.0.6"
-	agentCircuitID := acctest.RandomNumber(1000)
+	agentCircuitID := acctest.RandomNumber(10000)
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -225,7 +244,7 @@ func TestAccFixedaddressResource_Bootfile(t *testing.T) {
 	var resourceName = "nios_dhcp_fixed_address.test_bootfile"
 	var v dhcp.Fixedaddress
 	ip := "15.0.0.7"
-	agentCircuitID := acctest.RandomNumber(1000)
+	agentCircuitID := acctest.RandomNumber(10000)
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -256,7 +275,7 @@ func TestAccFixedaddressResource_Bootserver(t *testing.T) {
 	var resourceName = "nios_dhcp_fixed_address.test_bootserver"
 	var v dhcp.Fixedaddress
 	ip := "15.0.0.8"
-	agentCircuitID := acctest.RandomNumber(1000)
+	agentCircuitID := acctest.RandomNumber(10000)
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -285,9 +304,33 @@ func TestAccFixedaddressResource_Bootserver(t *testing.T) {
 
 func TestAccFixedaddressResource_CliCredentials(t *testing.T) {
 	var resourceName = "nios_dhcp_fixed_address.test_cli_credentials"
+	var resourceName1 = "nios_dhcp_fixed_address.test_cli_credentials1"
 	var v dhcp.Fixedaddress
 	ip := "15.0.0.9"
-	agentCircuitID := acctest.RandomNumber(1000)
+	agentCircuitID := acctest.RandomNumber(10000)
+	ip1 := "16.0.0.9"
+
+	cliCred := []map[string]any{{
+		"user":             "user1",
+		"credential_type":  "SSH",
+		"comment":          "cli credential comment",
+		"password":         "password1",
+		"credential_group": "default",
+	}}
+	cliCred1 := []map[string]any{{
+		"user":             "user1",
+		"credential_type":  "SSH",
+		"comment":          "cli credential comment",
+		"password":         "password12",
+		"credential_group": "default",
+	}}
+	cliCred2 := []map[string]any{{
+		"user":             "user2",
+		"credential_type":  "SSH",
+		"comment":          "cli credential comment update",
+		"password":         "password12",
+		"credential_group": "default",
+	}}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -300,7 +343,6 @@ func TestAccFixedaddressResource_CliCredentials(t *testing.T) {
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "cli_credentials.0.comment", "Comment for CLI Credentials"),
 					resource.TestCheckResourceAttr(resourceName, "cli_credentials.0.user", "NIOS_USER"),
-					resource.TestCheckResourceAttr(resourceName, "cli_credentials.0.password", "NIOS_PASSWORD"),
 					resource.TestCheckResourceAttr(resourceName, "cli_credentials.0.credential_type", "SSH"),
 					resource.TestCheckResourceAttr(resourceName, "cli_credentials.0.credential_group", "default"),
 				),
@@ -312,7 +354,6 @@ func TestAccFixedaddressResource_CliCredentials(t *testing.T) {
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "cli_credentials.1.comment", "Updated Comment for CLI Credentials"),
 					resource.TestCheckResourceAttr(resourceName, "cli_credentials.1.user", "NIOS_USER"),
-					resource.TestCheckResourceAttr(resourceName, "cli_credentials.1.password", "NIOS_PASSWORD"),
 					resource.TestCheckResourceAttr(resourceName, "cli_credentials.1.credential_type", "TELNET"),
 					resource.TestCheckResourceAttr(resourceName, "cli_credentials.1.credential_group", "default"),
 				),
@@ -324,7 +365,6 @@ func TestAccFixedaddressResource_CliCredentials(t *testing.T) {
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "cli_credentials.1.comment", "Updated Comment for CLI Credentials"),
 					resource.TestCheckResourceAttr(resourceName, "cli_credentials.1.user", "NIOS_USER"),
-					resource.TestCheckResourceAttr(resourceName, "cli_credentials.1.password", "NIOS_PASSWORD"),
 					resource.TestCheckResourceAttr(resourceName, "cli_credentials.1.credential_type", "ENABLE_TELNET"),
 					resource.TestCheckResourceAttr(resourceName, "cli_credentials.1.credential_group", "default"),
 				),
@@ -336,9 +376,52 @@ func TestAccFixedaddressResource_CliCredentials(t *testing.T) {
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "cli_credentials.1.comment", "Updated Comment for CLI Credentials"),
 					resource.TestCheckResourceAttr(resourceName, "cli_credentials.1.user", "NIOS_USER"),
-					resource.TestCheckResourceAttr(resourceName, "cli_credentials.1.password", "NIOS_PASSWORD"),
 					resource.TestCheckResourceAttr(resourceName, "cli_credentials.1.credential_type", "ENABLE_SSH"),
 					resource.TestCheckResourceAttr(resourceName, "cli_credentials.1.credential_group", "default"),
+				),
+			},
+			// Create an IPv6 FA without cli_credentials and Read
+			{
+				Config: testAccFixedaddressCliCredentialsSecrets(resourceName1, ip1, "CIRCUIT_ID", agentCircuitID, nil),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckFixedaddressExists(context.Background(), resourceName1, &v),
+					resource.TestCheckResourceAttr(resourceName1, "cli_credentials.#", "0"),
+					resource.TestCheckResourceAttr(resourceName1, "secrets_version", "0"),
+				),
+			},
+			// Add cli_credentials and Read
+			{
+				Config: testAccFixedaddressCliCredentialsSecrets(resourceName1, ip1, "CIRCUIT_ID", agentCircuitID, cliCred),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckFixedaddressExists(context.Background(), resourceName1, &v),
+					resource.TestCheckResourceAttr(resourceName1, "cli_credentials.0.credential_type", "SSH"),
+					resource.TestCheckResourceAttr(resourceName1, "cli_credentials.0.user", "user1"),
+					resource.TestCheckResourceAttr(resourceName1, "cli_credentials.0.credential_group", "default"),
+					resource.TestCheckResourceAttr(resourceName1, "secrets_version", "1"),
+				),
+			},
+			// Update write-only field of cli_credentials and Read
+			{
+				Config: testAccFixedaddressCliCredentialsSecrets(resourceName1, ip1, "CIRCUIT_ID", agentCircuitID, cliCred1),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckFixedaddressExists(context.Background(), resourceName1, &v),
+					resource.TestCheckResourceAttr(resourceName1, "cli_credentials.0.comment", "cli credential comment"),
+					resource.TestCheckResourceAttr(resourceName1, "cli_credentials.0.user", "user1"),
+					resource.TestCheckResourceAttr(resourceName1, "cli_credentials.0.credential_type", "SSH"),
+					resource.TestCheckResourceAttr(resourceName1, "cli_credentials.0.credential_group", "default"),
+					resource.TestCheckResourceAttr(resourceName1, "secrets_version", "2"),
+				),
+			},
+			// Update non write-only field of cli_credentials and Read
+			{
+				Config: testAccFixedaddressCliCredentialsSecrets(resourceName1, ip1, "CIRCUIT_ID", agentCircuitID, cliCred2),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckFixedaddressExists(context.Background(), resourceName1, &v),
+					resource.TestCheckResourceAttr(resourceName1, "cli_credentials.0.comment", "cli credential comment update"),
+					resource.TestCheckResourceAttr(resourceName1, "cli_credentials.0.user", "user2"),
+					resource.TestCheckResourceAttr(resourceName1, "cli_credentials.0.credential_type", "SSH"),
+					resource.TestCheckResourceAttr(resourceName1, "cli_credentials.0.credential_group", "default"),
+					resource.TestCheckResourceAttr(resourceName1, "secrets_version", "2"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -350,7 +433,7 @@ func TestAccFixedaddressResource_ClientIdentifierPrependZero(t *testing.T) {
 	var resourceName = "nios_dhcp_fixed_address.test_client_identifier_prepend_zero"
 	var v dhcp.Fixedaddress
 	ip := "15.0.0.10"
-	agentCircuitID := acctest.RandomNumber(1000)
+	agentCircuitID := acctest.RandomNumber(10000)
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -381,7 +464,7 @@ func TestAccFixedaddressResource_Comment(t *testing.T) {
 	var resourceName = "nios_dhcp_fixed_address.test_comment"
 	var v dhcp.Fixedaddress
 	ip := "15.0.0.11"
-	agentCircuitID := acctest.RandomNumber(1000)
+	agentCircuitID := acctest.RandomNumber(10000)
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -412,7 +495,7 @@ func TestAccFixedaddressResource_DdnsDomainname(t *testing.T) {
 	var resourceName = "nios_dhcp_fixed_address.test_ddns_domainname"
 	var v dhcp.Fixedaddress
 	ip := "15.0.0.12"
-	agentCircuitID := acctest.RandomNumber(1000)
+	agentCircuitID := acctest.RandomNumber(10000)
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -443,7 +526,7 @@ func TestAccFixedaddressResource_DdnsHostname(t *testing.T) {
 	var resourceName = "nios_dhcp_fixed_address.test_ddns_hostname"
 	var v dhcp.Fixedaddress
 	ip := "15.0.0.13"
-	agentCircuitID := acctest.RandomNumber(1000)
+	agentCircuitID := acctest.RandomNumber(10000)
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -474,7 +557,7 @@ func TestAccFixedaddressResource_DenyBootp(t *testing.T) {
 	var resourceName = "nios_dhcp_fixed_address.test_deny_bootp"
 	var v dhcp.Fixedaddress
 	ip := "15.0.0.14"
-	agentCircuitID := acctest.RandomNumber(1000)
+	agentCircuitID := acctest.RandomNumber(10000)
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -505,7 +588,7 @@ func TestAccFixedaddressResource_DeviceDescription(t *testing.T) {
 	var resourceName = "nios_dhcp_fixed_address.test_device_description"
 	var v dhcp.Fixedaddress
 	ip := "15.0.0.15"
-	agentCircuitID := acctest.RandomNumber(1000)
+	agentCircuitID := acctest.RandomNumber(10000)
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -536,7 +619,7 @@ func TestAccFixedaddressResource_DeviceLocation(t *testing.T) {
 	var resourceName = "nios_dhcp_fixed_address.test_device_location"
 	var v dhcp.Fixedaddress
 	ip := "15.0.0.16"
-	agentCircuitID := acctest.RandomNumber(1000)
+	agentCircuitID := acctest.RandomNumber(10000)
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -567,7 +650,7 @@ func TestAccFixedaddressResource_DeviceType(t *testing.T) {
 	var resourceName = "nios_dhcp_fixed_address.test_device_type"
 	var v dhcp.Fixedaddress
 	ip := "15.0.0.17"
-	agentCircuitID := acctest.RandomNumber(1000)
+	agentCircuitID := acctest.RandomNumber(10000)
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -598,7 +681,7 @@ func TestAccFixedaddressResource_DeviceVendor(t *testing.T) {
 	var resourceName = "nios_dhcp_fixed_address.test_device_vendor"
 	var v dhcp.Fixedaddress
 	ip := "15.0.0.18"
-	agentCircuitID := acctest.RandomNumber(1000)
+	agentCircuitID := acctest.RandomNumber(10000)
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -659,7 +742,7 @@ func TestAccFixedaddressResource_Disable(t *testing.T) {
 	var resourceName = "nios_dhcp_fixed_address.test_disable"
 	var v dhcp.Fixedaddress
 	ip := "15.0.0.20"
-	agentCircuitID := acctest.RandomNumber(1000)
+	agentCircuitID := acctest.RandomNumber(10000)
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -690,7 +773,7 @@ func TestAccFixedaddressResource_DisableDiscovery(t *testing.T) {
 	var resourceName = "nios_dhcp_fixed_address.test_disable_discovery"
 	var v dhcp.Fixedaddress
 	ip := "15.0.0.21"
-	agentCircuitID := acctest.RandomNumber(1000)
+	agentCircuitID := acctest.RandomNumber(10000)
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -721,7 +804,7 @@ func TestAccFixedaddressResource_EnableDdns(t *testing.T) {
 	var resourceName = "nios_dhcp_fixed_address.test_enable_ddns"
 	var v dhcp.Fixedaddress
 	ip := "15.0.0.22"
-	agentCircuitID := acctest.RandomNumber(1000)
+	agentCircuitID := acctest.RandomNumber(10000)
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -749,11 +832,13 @@ func TestAccFixedaddressResource_EnableDdns(t *testing.T) {
 }
 
 func TestAccFixedaddressResource_EnableImmediateDiscovery(t *testing.T) {
-	t.Skip("Skipping test as Discovery is not supported")
+	if utils.GetNIOSDiscoveryMemberHostName() == "" {
+		t.Skip("Discovery Member is Required to run this test")
+	}
 	var resourceName = "nios_dhcp_fixed_address.test_enable_immediate_discovery"
 	var v dhcp.Fixedaddress
 	ip := "15.0.0.23"
-	agentCircuitID := acctest.RandomNumber(1000)
+	agentCircuitID := acctest.RandomNumber(10000)
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -784,7 +869,7 @@ func TestAccFixedaddressResource_EnablePxeLeaseTime(t *testing.T) {
 	var resourceName = "nios_dhcp_fixed_address.test_enable_pxe_lease_time"
 	var v dhcp.Fixedaddress
 	ip := "15.0.0.24"
-	agentCircuitID := acctest.RandomNumber(1000)
+	agentCircuitID := acctest.RandomNumber(10000)
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -815,7 +900,7 @@ func TestAccFixedaddressResource_ExtAttrs(t *testing.T) {
 	var resourceName = "nios_dhcp_fixed_address.test_extattrs"
 	var v dhcp.Fixedaddress
 	ip := "15.0.0.25"
-	agentCircuitID := acctest.RandomNumber(1000)
+	agentCircuitID := acctest.RandomNumber(10000)
 	extAttrValue1 := acctest.RandomName()
 	extAttrValue2 := acctest.RandomName()
 
@@ -852,7 +937,7 @@ func TestAccFixedaddressResource_IgnoreDhcpOptionListRequest(t *testing.T) {
 	var resourceName = "nios_dhcp_fixed_address.test_ignore_dhcp_option_list_request"
 	var v dhcp.Fixedaddress
 	ip := "15.0.0.26"
-	agentCircuitID := acctest.RandomNumber(1000)
+	agentCircuitID := acctest.RandomNumber(10000)
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -884,7 +969,7 @@ func TestAccFixedaddressResource_Ipv4addr(t *testing.T) {
 	var v dhcp.Fixedaddress
 	ip := "15.0.0.27"
 	IPUpdated := "15.0.0.60"
-	agentCircuitID := acctest.RandomNumber(1000)
+	agentCircuitID := acctest.RandomNumber(10000)
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -912,12 +997,11 @@ func TestAccFixedaddressResource_Ipv4addr(t *testing.T) {
 }
 
 // TestAccFixedaddressResource_FuncCall tests the "func_call" attribute functionality
-// which allocates IPv4 addresses using next_available_ip. Since func_call attribute can't be
-// updated, the comment is updated to demonstrate an update to the resource
+// which allocates IPv4 addresses using next_available_ip.
 func TestAccFixedaddressResource_FuncCall(t *testing.T) {
 	var resourceName = "nios_dhcp_fixed_address.test_func_call"
 	var v dhcp.Fixedaddress
-	agentCircuitID := acctest.RandomNumber(1000)
+	agentCircuitID := acctest.RandomNumber(10000)
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -932,7 +1016,7 @@ func TestAccFixedaddressResource_FuncCall(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccFixedaddressFuncCall("CIRCUIT_ID", agentCircuitID, "comment", "next_available_ip", "ips", "network", "15.0.0.0/24", "Function Call with Update"),
+				Config: testAccFixedaddressFuncCall("CIRCUIT_ID", agentCircuitID, "ipv4addr", "next_available_ip", "ips", "network", "16.0.0.0/24", "Function Call with Update"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
 				),
@@ -942,11 +1026,10 @@ func TestAccFixedaddressResource_FuncCall(t *testing.T) {
 }
 
 func TestAccFixedaddressResource_LogicFilterRules(t *testing.T) {
-	t.Skip("Skipping test as support for MAC/NAC/Option logic filter rules is not implemented yet")
 	var resourceName = "nios_dhcp_fixed_address.test_logic_filter_rules"
 	var v dhcp.Fixedaddress
 	ip := "15.0.0.28"
-	agentCircuitID := acctest.RandomNumber(1000)
+	agentCircuitID := acctest.RandomNumber(10000)
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -954,19 +1037,19 @@ func TestAccFixedaddressResource_LogicFilterRules(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccFixedaddressLogicFilterRules(ip, "CIRCUIT_ID", agentCircuitID, "FILTER_NAME", "MAC"),
+				Config: testAccFixedaddressLogicFilterRules(ip, "CIRCUIT_ID", agentCircuitID, "example-mac-filter-1", "MAC"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "logic_filter_rules.0.filter", "FILTER_NAME"),
+					resource.TestCheckResourceAttr(resourceName, "logic_filter_rules.0.filter", "example-mac-filter-1"),
 					resource.TestCheckResourceAttr(resourceName, "logic_filter_rules.0.type", "MAC"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccFixedaddressLogicFilterRules(ip, "CIRCUIT_ID", agentCircuitID, "FILTER_NAME_UPDATED", "Options"),
+				Config: testAccFixedaddressLogicFilterRules(ip, "CIRCUIT_ID", agentCircuitID, "example-option-filter-1", "Option"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "logic_filter_rules.0.filter", "FILTER_NAME_UPDATED"),
+					resource.TestCheckResourceAttr(resourceName, "logic_filter_rules.0.filter", "example-option-filter-1"),
 					resource.TestCheckResourceAttr(resourceName, "logic_filter_rules.0.type", "Option"),
 				),
 			},
@@ -1018,7 +1101,7 @@ func TestAccFixedaddressResource_MatchClient(t *testing.T) {
 	var resourceName = "nios_dhcp_fixed_address.test_match_client"
 	var v dhcp.Fixedaddress
 	ip := "15.0.0.30"
-	agentCircuitID := acctest.RandomNumber(1000)
+	agentCircuitID := acctest.RandomNumber(10000)
 	agentRemoteID := acctest.RandomNumber(1000)
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -1051,7 +1134,7 @@ func TestAccFixedaddressResource_MsOptions(t *testing.T) {
 	var resourceName = "nios_dhcp_fixed_address.test_ms_options"
 	var v dhcp.Fixedaddress
 	ip := "15.0.0.31"
-	agentCircuitID := acctest.RandomNumber(1000)
+	agentCircuitID := acctest.RandomNumber(10000)
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1079,10 +1162,9 @@ func TestAccFixedaddressResource_MsOptions(t *testing.T) {
 }
 
 func TestAccFixedaddressResource_MsServer(t *testing.T) {
-	t.Skip("Skipping test as MS Server is supposed to be set up on the GRID")
 	var resourceName = "nios_dhcp_fixed_address.test_ms_server"
 	var v dhcp.Fixedaddress
-	ip := "50.0.0.132"
+	ip := "150.0.0.32"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1090,20 +1172,12 @@ func TestAccFixedaddressResource_MsServer(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccFixedaddressMsServer(ip, "MAC_ADDRESS", "00:1a:6b:3c:4d:5e", "10.34.98.68", "ms_server", "example_fixed_address"),
+				Config: testAccFixedaddressMsServer(ip, "MAC_ADDRESS", "00:1a:6b:3c:4d:5e", "10.10.10.10", "default", "example_fixed_address"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ms_server", "10.34.98.68"),
+					resource.TestCheckResourceAttr(resourceName, "ms_server.ipv4addr", "10.10.10.10"),
 				),
 			},
-			// Update and Read
-			//{
-			//	Config: testAccFixedaddressMsServer(ip, "CIRCUIT_ID", agentCircuitID, "2.2.2.2"),
-			//	Check: resource.ComposeTestCheckFunc(
-			//		testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
-			//		resource.TestCheckResourceAttr(resourceName, "ms_server", "2.2.2.2"),
-			//	),
-			//},
 			// Delete testing automatically occurs in TestCase
 		},
 	})
@@ -1113,7 +1187,7 @@ func TestAccFixedaddressResource_Name(t *testing.T) {
 	var resourceName = "nios_dhcp_fixed_address.test_name"
 	var v dhcp.Fixedaddress
 	ip := "15.0.0.33"
-	agentCircuitID := acctest.RandomNumber(1000)
+	agentCircuitID := acctest.RandomNumber(10000)
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1145,7 +1219,7 @@ func TestAccFixedaddressResource_Network(t *testing.T) {
 	var v dhcp.Fixedaddress
 	ip := "15.0.0.34"
 	ipUpdated := acctest.RandomIPWithSpecificOctetsSet("16.0.0")
-	agentCircuitID := acctest.RandomNumber(1000)
+	agentCircuitID := acctest.RandomNumber(10000)
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1176,7 +1250,7 @@ func TestAccFixedaddressResource_NetworkView(t *testing.T) {
 	var resourceName = "nios_dhcp_fixed_address.test_network_view"
 	var v dhcp.Fixedaddress
 	ip := "15.0.0.35"
-	agentCircuitID := acctest.RandomNumber(1000)
+	agentCircuitID := acctest.RandomNumber(10000)
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1199,7 +1273,7 @@ func TestAccFixedaddressResource_Nextserver(t *testing.T) {
 	var resourceName = "nios_dhcp_fixed_address.test_nextserver"
 	var v dhcp.Fixedaddress
 	ip := "15.0.0.36"
-	agentCircuitID := acctest.RandomNumber(1000)
+	agentCircuitID := acctest.RandomNumber(10000)
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1230,7 +1304,7 @@ func TestAccFixedaddressResource_Options(t *testing.T) {
 	var resourceName = "nios_dhcp_fixed_address.test_options"
 	var v dhcp.Fixedaddress
 	ip := "15.0.0.237"
-	agentCircuitID := acctest.RandomNumber(1000)
+	agentCircuitID := acctest.RandomNumber(10000)
 
 	options := []map[string]any{
 		{
@@ -1291,7 +1365,7 @@ func TestAccFixedaddressResource_PxeLeaseTime(t *testing.T) {
 	var resourceName = "nios_dhcp_fixed_address.test_pxe_lease_time"
 	var v dhcp.Fixedaddress
 	ip := "15.0.0.38"
-	agentCircuitID := acctest.RandomNumber(1000)
+	agentCircuitID := acctest.RandomNumber(10000)
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1323,7 +1397,7 @@ func TestAccFixedaddressResource_ReservedInterface(t *testing.T) {
 	var resourceName = "nios_dhcp_fixed_address.test_reserved_interface"
 	var v dhcp.Fixedaddress
 	ip := "15.0.0.39"
-	agentCircuitID := acctest.RandomNumber(1000)
+	agentCircuitID := acctest.RandomNumber(10000)
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1351,11 +1425,10 @@ func TestAccFixedaddressResource_ReservedInterface(t *testing.T) {
 }
 
 func TestAccFixedaddressResource_RestartIfNeeded(t *testing.T) {
-	t.Skip("Skipping test as it requires a CP member to be configured")
 	var resourceName = "nios_dhcp_fixed_address.test_restart_if_needed"
 	var v dhcp.Fixedaddress
 	ip := "15.0.0.40"
-	agentCircuitID := acctest.RandomNumber(1000)
+	agentCircuitID := acctest.RandomNumber(10000)
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1384,9 +1457,52 @@ func TestAccFixedaddressResource_RestartIfNeeded(t *testing.T) {
 
 func TestAccFixedaddressResource_Snmp3Credential(t *testing.T) {
 	var resourceName = "nios_dhcp_fixed_address.test_snmp3_credential"
+	var resourceName1 = "nios_dhcp_fixed_address.test_snmp3_credential1"
 	var v dhcp.Fixedaddress
 	ip := "16.0.0.121"
-	agentCircuitID := acctest.RandomNumber(1000)
+	ip1 := "16.0.0.132"
+	agentCircuitID := acctest.RandomNumber(10000)
+	agentCircuitID1 := acctest.RandomNumber(10000)
+	snmp3Cred := map[string]any{
+		"user":                    "user1",
+		"authentication_protocol": "SHA",
+		"authentication_password": "authPass",
+		"privacy_protocol":        "AES",
+		"privacy_password":        "privPass",
+		"comment":                 "SNMP3 Credential Comment",
+	}
+	snmp3Cred1 := map[string]any{
+		"user":                    "user1",
+		"authentication_protocol": "SHA",
+		"authentication_password": "authPass123",
+		"privacy_protocol":        "AES",
+		"privacy_password":        "privPass",
+		"comment":                 "SNMP3 Credential Comment",
+	}
+	snmp3Cred2 := map[string]any{
+		"user":                    "user1",
+		"authentication_protocol": "SHA",
+		"authentication_password": "authPass123",
+		"privacy_protocol":        "AES",
+		"privacy_password":        "privPass123",
+		"comment":                 "SNMP3 Credential Comment",
+	}
+	snmp3Cred3 := map[string]any{
+		"user":                    "user1",
+		"authentication_protocol": "SHA",
+		"authentication_password": "authPass345",
+		"privacy_protocol":        "AES",
+		"privacy_password":        "privPass345",
+		"comment":                 "SNMP3 Credential Comment",
+	}
+	snmp3Cred4 := map[string]any{
+		"user":                    "user2",
+		"authentication_protocol": "SHA",
+		"authentication_password": "authPass",
+		"privacy_protocol":        "AES",
+		"privacy_password":        "privPass",
+		"comment":                 "SNMP3 Credential Comment",
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1399,9 +1515,7 @@ func TestAccFixedaddressResource_Snmp3Credential(t *testing.T) {
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "snmp3_credential.user", "snmp"),
 					resource.TestCheckResourceAttr(resourceName, "snmp3_credential.authentication_protocol", "MD5"),
-					resource.TestCheckResourceAttr(resourceName, "snmp3_credential.authentication_password", "snmp1234"),
 					resource.TestCheckResourceAttr(resourceName, "snmp3_credential.privacy_protocol", "3DES"),
-					resource.TestCheckResourceAttr(resourceName, "snmp3_credential.privacy_password", "snmp1234"),
 					resource.TestCheckResourceAttr(resourceName, "snmp3_credential.comment", "SNMP3 Credential Comment"),
 					resource.TestCheckResourceAttr(resourceName, "snmp3_credential.credential_group", "default"),
 				),
@@ -1413,11 +1527,94 @@ func TestAccFixedaddressResource_Snmp3Credential(t *testing.T) {
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "snmp3_credential.user", "SNMP3_USER_UPDATE"),
 					resource.TestCheckResourceAttr(resourceName, "snmp3_credential.authentication_protocol", "SHA-224"),
-					resource.TestCheckResourceAttr(resourceName, "snmp3_credential.authentication_password", "AUTH_PASSWORD"),
 					resource.TestCheckResourceAttr(resourceName, "snmp3_credential.privacy_protocol", "AES-256"),
-					resource.TestCheckResourceAttr(resourceName, "snmp3_credential.privacy_password", "PRIVACY_PASSWORD"),
 					resource.TestCheckResourceAttr(resourceName, "snmp3_credential.comment", "SNMP3 Credential Comment Updated"),
 					resource.TestCheckResourceAttr(resourceName, "snmp3_credential.credential_group", "default"),
+				),
+			},
+			// Create an IPV6 FA without SNMP3 credentials and read
+			{
+				Config: testAccFixedaddressSnmp3CredentialSecret(resourceName1, ip1, "CIRCUIT_ID", agentCircuitID1, nil, "false"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckFixedaddressExists(context.Background(), resourceName1, &v),
+					resource.TestCheckResourceAttr(resourceName1, "secrets_version", "0"),
+				),
+			},
+			// Add SNMP3 credentials field and read
+			{
+				Config: testAccFixedaddressSnmp3CredentialSecret(resourceName1, ip1, "CIRCUIT_ID", agentCircuitID1, snmp3Cred, "true"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckFixedaddressExists(context.Background(), resourceName1, &v),
+					resource.TestCheckResourceAttr(resourceName1, "snmp3_credential.user", "user1"),
+					resource.TestCheckResourceAttr(resourceName1, "snmp3_credential.authentication_protocol", "SHA"),
+					resource.TestCheckResourceAttr(resourceName1, "snmp3_credential.privacy_protocol", "AES"),
+					resource.TestCheckResourceAttr(resourceName1, "snmp3_credential.comment", "SNMP3 Credential Comment"),
+					resource.TestCheckResourceAttr(resourceName1, "snmp3_credential.credential_group", "default"),
+					resource.TestCheckResourceAttr(resourceName1, "secrets_version", "1"),
+				),
+			},
+			// Update (write-only) authentication_password field in SNMP3 credentials and read
+			{
+				Config: testAccFixedaddressSnmp3CredentialSecret(resourceName1, ip1, "CIRCUIT_ID", agentCircuitID1, snmp3Cred1, "true"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckFixedaddressExists(context.Background(), resourceName1, &v),
+					resource.TestCheckResourceAttr(resourceName1, "snmp3_credential.user", "user1"),
+					resource.TestCheckResourceAttr(resourceName1, "snmp3_credential.authentication_protocol", "SHA"),
+					resource.TestCheckResourceAttr(resourceName1, "snmp3_credential.privacy_protocol", "AES"),
+					resource.TestCheckResourceAttr(resourceName1, "snmp3_credential.comment", "SNMP3 Credential Comment"),
+					resource.TestCheckResourceAttr(resourceName1, "snmp3_credential.credential_group", "default"),
+					resource.TestCheckResourceAttr(resourceName1, "secrets_version", "2"),
+				),
+			},
+			// Update (write-only) privacy_password field in SNMP3 credentials and read
+			{
+				Config: testAccFixedaddressSnmp3CredentialSecret(resourceName1, ip1, "CIRCUIT_ID", agentCircuitID1, snmp3Cred2, "true"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckFixedaddressExists(context.Background(), resourceName1, &v),
+					resource.TestCheckResourceAttr(resourceName1, "snmp3_credential.user", "user1"),
+					resource.TestCheckResourceAttr(resourceName1, "snmp3_credential.authentication_protocol", "SHA"),
+					resource.TestCheckResourceAttr(resourceName1, "snmp3_credential.privacy_protocol", "AES"),
+					resource.TestCheckResourceAttr(resourceName1, "snmp3_credential.comment", "SNMP3 Credential Comment"),
+					resource.TestCheckResourceAttr(resourceName1, "snmp3_credential.credential_group", "default"),
+					resource.TestCheckResourceAttr(resourceName1, "secrets_version", "3"),
+				),
+			},
+			// Update both the write-only fields of SNMP3 credentials (authentication_password and privacy_password) and read
+			{
+				Config: testAccFixedaddressSnmp3CredentialSecret(resourceName1, ip1, "CIRCUIT_ID", agentCircuitID1, snmp3Cred3, "true"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckFixedaddressExists(context.Background(), resourceName1, &v),
+					resource.TestCheckResourceAttr(resourceName1, "snmp3_credential.user", "user1"),
+					resource.TestCheckResourceAttr(resourceName1, "snmp3_credential.authentication_protocol", "SHA"),
+					resource.TestCheckResourceAttr(resourceName1, "snmp3_credential.privacy_protocol", "AES"),
+					resource.TestCheckResourceAttr(resourceName1, "snmp3_credential.comment", "SNMP3 Credential Comment"),
+					resource.TestCheckResourceAttr(resourceName1, "snmp3_credential.credential_group", "default"),
+					resource.TestCheckResourceAttr(resourceName1, "secrets_version", "4"),
+				),
+			},
+			// Update (non write-only) user field in SNMP3 credentials and read
+			{
+				Config: testAccFixedaddressSnmp3CredentialSecret(resourceName1, ip1, "CIRCUIT_ID", agentCircuitID1, snmp3Cred, "true"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckFixedaddressExists(context.Background(), resourceName1, &v),
+					resource.TestCheckResourceAttr(resourceName1, "snmp3_credential.user", "user1"),
+					resource.TestCheckResourceAttr(resourceName1, "snmp3_credential.authentication_protocol", "SHA"),
+					resource.TestCheckResourceAttr(resourceName1, "snmp3_credential.privacy_protocol", "AES"),
+					resource.TestCheckResourceAttr(resourceName1, "snmp3_credential.comment", "SNMP3 Credential Comment"),
+					resource.TestCheckResourceAttr(resourceName1, "snmp3_credential.credential_group", "default"),
+					resource.TestCheckResourceAttr(resourceName1, "secrets_version", "5"),
+				),
+			},
+			{
+				Config: testAccFixedaddressSnmp3CredentialSecret(resourceName1, ip1, "CIRCUIT_ID", agentCircuitID1, snmp3Cred4, "true"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckFixedaddressExists(context.Background(), resourceName1, &v),
+					resource.TestCheckResourceAttr(resourceName1, "snmp3_credential.user", "user2"),
+					resource.TestCheckResourceAttr(resourceName1, "snmp3_credential.authentication_protocol", "SHA"),
+					resource.TestCheckResourceAttr(resourceName1, "snmp3_credential.privacy_protocol", "AES"),
+					resource.TestCheckResourceAttr(resourceName1, "snmp3_credential.comment", "SNMP3 Credential Comment"),
+					resource.TestCheckResourceAttr(resourceName1, "snmp3_credential.credential_group", "default"),
+					resource.TestCheckResourceAttr(resourceName1, "secrets_version", "5"),
 				),
 			},
 			//Delete testing automatically occurs in TestCase
@@ -1429,7 +1626,7 @@ func TestAccFixedaddressResource_SnmpCredential(t *testing.T) {
 	var resourceName = "nios_dhcp_fixed_address.test_snmp_credential"
 	var v dhcp.Fixedaddress
 	ip := "15.0.0.42"
-	agentCircuitID := acctest.RandomNumber(1000)
+	agentCircuitID := acctest.RandomNumber(10000)
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1461,11 +1658,10 @@ func TestAccFixedaddressResource_SnmpCredential(t *testing.T) {
 }
 
 func TestAccFixedaddressResource_Template(t *testing.T) {
-	t.Skip("Skipping test as Fixed Address Template is not implemented yet")
 	var resourceName = "nios_dhcp_fixed_address.test_template"
 	var v dhcp.Fixedaddress
 	ip := "15.0.0.43"
-	agentCircuitID := acctest.RandomNumber(1000)
+	macAddress := "00:1d:2e:3f:4a:5c"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1473,20 +1669,13 @@ func TestAccFixedaddressResource_Template(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccFixedaddressTemplate(ip, "CIRCUIT_ID", agentCircuitID, ""),
+				Config: testAccFixedaddressTemplate(ip, "MAC_ADDRESS", macAddress, "${nios_dhcp_fixedaddresstemplate.test.name}"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "template", "TEMPLATE_REPLACE_ME"),
+					resource.TestCheckResourceAttrPair(resourceName, "template", "nios_dhcp_fixedaddresstemplate.test", "name"),
 				),
 			},
-			// Update and Read
-			{
-				Config: testAccFixedaddressTemplate(ip, "CIRCUIT_ID", agentCircuitID, ""),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "template", "TEMPLATE_UPDATE_REPLACE_ME"),
-				),
-			},
+			// Fixed Address Template cannot be updated
 			// Delete testing automatically occurs in TestCase
 		},
 	})
@@ -1496,7 +1685,7 @@ func TestAccFixedaddressResource_UseBootfile(t *testing.T) {
 	var resourceName = "nios_dhcp_fixed_address.test_use_bootfile"
 	var v dhcp.Fixedaddress
 	ip := "15.0.0.44"
-	agentCircuitID := acctest.RandomNumber(1000)
+	agentCircuitID := acctest.RandomNumber(10000)
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1527,7 +1716,7 @@ func TestAccFixedaddressResource_UseBootserver(t *testing.T) {
 	var resourceName = "nios_dhcp_fixed_address.test_use_bootserver"
 	var v dhcp.Fixedaddress
 	ip := "15.0.0.45"
-	agentCircuitID := acctest.RandomNumber(1000)
+	agentCircuitID := acctest.RandomNumber(10000)
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1558,7 +1747,7 @@ func TestAccFixedaddressResource_UseCliCredentials(t *testing.T) {
 	var resourceName = "nios_dhcp_fixed_address.test_use_cli_credentials"
 	var v dhcp.Fixedaddress
 	ip := "15.0.0.46"
-	agentCircuitID := acctest.RandomNumber(1000)
+	agentCircuitID := acctest.RandomNumber(10000)
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1589,7 +1778,7 @@ func TestAccFixedaddressResource_UseDdnsDomainname(t *testing.T) {
 	var resourceName = "nios_dhcp_fixed_address.test_use_ddns_domainname"
 	var v dhcp.Fixedaddress
 	ip := "15.0.0.47"
-	agentCircuitID := acctest.RandomNumber(1000)
+	agentCircuitID := acctest.RandomNumber(10000)
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1620,7 +1809,7 @@ func TestAccFixedaddressResource_UseDenyBootp(t *testing.T) {
 	var resourceName = "nios_dhcp_fixed_address.test_use_deny_bootp"
 	var v dhcp.Fixedaddress
 	ip := "15.0.0.48"
-	agentCircuitID := acctest.RandomNumber(1000)
+	agentCircuitID := acctest.RandomNumber(10000)
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1651,7 +1840,7 @@ func TestAccFixedaddressResource_UseEnableDdns(t *testing.T) {
 	var resourceName = "nios_dhcp_fixed_address.test_use_enable_ddns"
 	var v dhcp.Fixedaddress
 	ip := "15.0.0.49"
-	agentCircuitID := acctest.RandomNumber(1000)
+	agentCircuitID := acctest.RandomNumber(10000)
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1682,7 +1871,7 @@ func TestAccFixedaddressResource_UseIgnoreDhcpOptionListRequest(t *testing.T) {
 	var resourceName = "nios_dhcp_fixed_address.test_use_ignore_dhcp_option_list_request"
 	var v dhcp.Fixedaddress
 	ip := "15.0.0.50"
-	agentCircuitID := acctest.RandomNumber(1000)
+	agentCircuitID := acctest.RandomNumber(10000)
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1713,7 +1902,7 @@ func TestAccFixedaddressResource_UseLogicFilterRules(t *testing.T) {
 	var resourceName = "nios_dhcp_fixed_address.test_use_logic_filter_rules"
 	var v dhcp.Fixedaddress
 	ip := "15.0.0.51"
-	agentCircuitID := acctest.RandomNumber(1000)
+	agentCircuitID := acctest.RandomNumber(10000)
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1744,7 +1933,7 @@ func TestAccFixedaddressResource_UseMsOptions(t *testing.T) {
 	var resourceName = "nios_dhcp_fixed_address.test_use_ms_options"
 	var v dhcp.Fixedaddress
 	ip := "15.0.0.52"
-	agentCircuitID := acctest.RandomNumber(1000)
+	agentCircuitID := acctest.RandomNumber(10000)
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1775,7 +1964,7 @@ func TestAccFixedaddressResource_UseNextserver(t *testing.T) {
 	var resourceName = "nios_dhcp_fixed_address.test_use_nextserver"
 	var v dhcp.Fixedaddress
 	ip := "15.0.0.53"
-	agentCircuitID := acctest.RandomNumber(1000)
+	agentCircuitID := acctest.RandomNumber(10000)
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1806,7 +1995,7 @@ func TestAccFixedaddressResource_UseOptions(t *testing.T) {
 	var resourceName = "nios_dhcp_fixed_address.test_use_options"
 	var v dhcp.Fixedaddress
 	ip := "15.0.0.54"
-	agentCircuitID := acctest.RandomNumber(1000)
+	agentCircuitID := acctest.RandomNumber(10000)
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1837,7 +2026,7 @@ func TestAccFixedaddressResource_UsePxeLeaseTime(t *testing.T) {
 	var resourceName = "nios_dhcp_fixed_address.test_use_pxe_lease_time"
 	var v dhcp.Fixedaddress
 	ip := "15.0.0.55"
-	agentCircuitID := acctest.RandomNumber(1000)
+	agentCircuitID := acctest.RandomNumber(10000)
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1865,11 +2054,10 @@ func TestAccFixedaddressResource_UsePxeLeaseTime(t *testing.T) {
 }
 
 func TestAccFixedaddressResource_UseSnmp3Credential(t *testing.T) {
-	t.Skip("Skipping test as SNMP3 Credential is not supported yet")
 	var resourceName = "nios_dhcp_fixed_address.test_use_snmp3_credential"
 	var v dhcp.Fixedaddress
 	ip := "15.0.0.56"
-	agentCircuitID := acctest.RandomNumber(1000)
+	agentCircuitID := acctest.RandomNumber(10000)
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1877,18 +2065,18 @@ func TestAccFixedaddressResource_UseSnmp3Credential(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccFixedaddressUseSnmp3Credential(ip, "CIRCUIT_ID", agentCircuitID, "true", "SNMP3_USER", "MD5", "AUTH_PASSWORD", "3DES", "PRIVACY_PASSWORD", "SNMP3 Credential Comment", "default"),
+				Config: testAccFixedaddressUseSnmp3CredentialUnset(ip, "CIRCUIT_ID", agentCircuitID, "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_snmp3_credential", "true"),
+					resource.TestCheckResourceAttr(resourceName, "use_snmp3_credential", "false"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccFixedaddressUseSnmp3Credential(ip, "CIRCUIT_ID", agentCircuitID, "false", "SNMP3_USER", "MD5", "AUTH_PASSWORD", "3DES", "PRIVACY_PASSWORD", "SNMP3 Credential Comment", "default"),
+				Config: testAccFixedaddressUseSnmp3Credential(ip, "CIRCUIT_ID", agentCircuitID, "true", "SNMP3_USER", "MD5", "AUTH_PASSWORD", "3DES", "PRIVACY_PASSWORD", "SNMP3 Credential Comment", "default"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_snmp3_credential", "false"),
+					resource.TestCheckResourceAttr(resourceName, "use_snmp3_credential", "true"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -1897,11 +2085,10 @@ func TestAccFixedaddressResource_UseSnmp3Credential(t *testing.T) {
 }
 
 func TestAccFixedaddressResource_UseSnmpCredential(t *testing.T) {
-	t.Skip("Skipping test as SNMP Credential are not set up in the GRID")
 	var resourceName = "nios_dhcp_fixed_address.test_use_snmp_credential"
 	var v dhcp.Fixedaddress
 	ip := "15.0.0.57"
-	agentCircuitID := acctest.RandomNumber(1000)
+	agentCircuitID := acctest.RandomNumber(10000)
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1909,7 +2096,7 @@ func TestAccFixedaddressResource_UseSnmpCredential(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccFixedaddressUseSnmpCredential(ip, "CIRCUIT_ID", agentCircuitID, "true"),
+				Config: testAccFixedaddressUseSnmpCredentialSet(ip, "CIRCUIT_ID", agentCircuitID, "true", "COMMUNITY_STRING", "SNMP Credential Comment", "default"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_snmp_credential", "true"),
@@ -2008,6 +2195,17 @@ resource "nios_dhcp_fixed_address" "test_agent_circuit_id" {
 `, ip, matchClient, agentCircuitId)
 }
 
+func testAccFixedaddressAgentCircuitIdWithRemoteId(ip, matchClient string, agentCircuitId, agentRemoteId int, resourceName string) string {
+	return fmt.Sprintf(`
+resource "nios_dhcp_fixed_address" "%s" {
+	ipv4addr = %q
+	match_client = %q
+	agent_circuit_id = %d
+	agent_remote_id = %d
+}
+`, resourceName, ip, matchClient, agentCircuitId, agentRemoteId)
+}
+
 func testAccFixedaddressAgentRemoteId(ip, matchClient string, agentRemoteId int) string {
 	return fmt.Sprintf(`
 resource "nios_dhcp_fixed_address" "test_agent_remote_id" {
@@ -2025,6 +2223,22 @@ resource "nios_dhcp_fixed_address" "test_allow_telnet" {
 	match_client = %q
 	agent_circuit_id = %d
 	allow_telnet = %q
+	cli_credentials = [{
+		comment          = "Comment for SSH Credentials"
+		user             = "NIOS_USER"
+		password         = "NIOS_PASSWORD"
+		credential_type  = "SSH"
+		credential_group = "default"
+	},
+	{
+		user             = "NIOS_USER"
+		comment          = "Comment for SSH Credentials"
+		password         = "NIOS_PASSWORD"
+		credential_type  = "TELNET"
+		credential_group = "default"
+	},
+	]
+	use_cli_credentials = true
 }
 `, ip, matchClient, agentCircuitID, allowTelnet)
 }
@@ -2106,6 +2320,25 @@ resource "nios_dhcp_fixed_address" "test_cli_credentials" {
 	use_cli_credentials = %q
 }
 `, ip, matchClient, agentCircuitID, cliCredComment, cliCredUser, cliCredPassword, cliCredType, cliCredGroup, useCLICredentials)
+}
+
+func testAccFixedaddressCliCredentialsSecrets(resourceName, ip, matchClient string, agentCircuitID int, cliCred []map[string]any) string {
+	cliCredentialsBlock := ""
+	if cliCred != nil {
+		cliCredentialsBlock = fmt.Sprintf("    cli_credentials = %s", utils.ConvertSliceOfMapsToHCL(cliCred))
+	}
+	resourceLabel := strings.TrimPrefix(resourceName, "nios_dhcp_fixed_address.")
+	config := fmt.Sprintf(`
+resource "nios_dhcp_fixed_address" %q {
+	ipv4addr = %q
+	match_client = %q
+	agent_circuit_id = %d
+    %s
+	use_cli_credentials = true
+	use_snmp3_credential = true
+}
+`, resourceLabel, ip, matchClient, agentCircuitID, cliCredentialsBlock)
+	return config
 }
 
 func testAccFixedaddressClientIdentifierPrependZero(ip, matchClient string, agentCircuitID int, clientIdentifierPrependZero string) string {
@@ -2347,6 +2580,7 @@ resource "nios_dhcp_fixed_address" "test_logic_filter_rules" {
 		filter = %q
 		type = %q
 	}]
+	use_logic_filter_rules = true
 }
 `, ip, matchClient, agentCircuitID, logicFilterRuleFilter, logicFilterRuleType)
 }
@@ -2400,17 +2634,39 @@ resource "nios_dhcp_fixed_address" "test_ms_options" {
 
 func testAccFixedaddressMsServer(ip, matchClient string, macAddress string, msServerIpv4Addr, networkView, name string) string {
 	return fmt.Sprintf(`
+resource "nios_ipam_network" "example_network" {
+  	network      = "150.0.0.0/24"
+	network_view = "default"
+	comment      = "Created by Terraform for FixedAddress MS Server Test"
+	members = [
+		{
+			struct = "msdhcpserver"
+			ipv4addr = %q
+		}
+	]
+}
+
+resource "nios_dhcp_range" "test_ms_server_range" {
+    start_addr = "150.0.0.35"
+	end_addr = "150.0.0.40"
+	ms_server = {
+		ipv4addr = nios_ipam_network.example_network.members[0].ipv4addr
+	}
+	server_association_type = "MS_SERVER"
+}
+
 resource "nios_dhcp_fixed_address" "test_ms_server" {
 	ipv4addr = %q
 	match_client = %q
 	mac = %q
 	ms_server = {
-		ipv4addr = %q
+		ipv4addr = nios_ipam_network.example_network.members[0].ipv4addr
 	}
 	network_view = %q
 	name = %q
+	depends_on = [nios_dhcp_range.test_ms_server_range]
 }
-`, ip, matchClient, macAddress, msServerIpv4Addr, networkView, name)
+`, msServerIpv4Addr, ip, matchClient, macAddress, networkView, name)
 }
 
 func testAccFixedaddressName(ip, matchClient string, agentCircuitID int, name string) string {
@@ -2527,6 +2783,25 @@ resource "nios_dhcp_fixed_address" "test_snmp3_credential" {
 `, ip, matchClient, agentCircuitID, snmp3CredentialUser, snmp3CredentialAuthProtocol, snmp3CredentialAuthPass, snmp3CredentialPrvProtocol, snmp3CredentialPrvPass, snmp3CredentialComment, snmp3CredentialGroup, useSnmp3Credentials)
 }
 
+func testAccFixedaddressSnmp3CredentialSecret(resourceName, ip, matchClient string, agentCircuitID int, snmp3Cred map[string]any, useSnmp3Cred string) string {
+	resourceLabel := strings.TrimPrefix(resourceName, "nios_dhcp_fixed_address.")
+	snmp3CredentialBlock := ""
+	if snmp3Cred != nil {
+		snmp3CredentialBlock = fmt.Sprintf("    snmp3_credential = %s", utils.ConvertMapToHCL(snmp3Cred))
+	}
+	config := fmt.Sprintf(`
+resource "nios_dhcp_fixed_address" %q {
+	ipv4addr = %q
+	match_client = %q
+	agent_circuit_id = %d
+	%s
+	use_snmp3_credential = %q
+	use_cli_credentials = true
+}
+`, resourceLabel, ip, matchClient, agentCircuitID, snmp3CredentialBlock, useSnmp3Cred)
+	return config
+}
+
 func testAccFixedaddressSnmpCredential(ip, matchClient string, agentCircuitID int, snmpCredentialCommStr, snmpCredentialComment, snmpCredentialGroup, useSnmpCredentials string) string {
 	return fmt.Sprintf(`
 resource "nios_dhcp_fixed_address" "test_snmp_credential" {
@@ -2543,15 +2818,19 @@ resource "nios_dhcp_fixed_address" "test_snmp_credential" {
 `, ip, matchClient, agentCircuitID, snmpCredentialCommStr, snmpCredentialComment, snmpCredentialGroup, useSnmpCredentials)
 }
 
-func testAccFixedaddressTemplate(ip, matchClient string, agentCircuitID int, template string) string {
+func testAccFixedaddressTemplate(ip, matchClient string, macAddress, template string) string {
 	return fmt.Sprintf(`
+resource "nios_dhcp_fixedaddresstemplate" "test" {
+    name = %q
+}
+
 resource "nios_dhcp_fixed_address" "test_template" {
 	ipv4addr = %q
 	match_client = %q
-	agent_circuit_id = %d
+	mac = %q
 	template = %q
 }
-`, ip, matchClient, agentCircuitID, template)
+`, fmt.Sprintf("FATemplate%s", matchClient), ip, matchClient, macAddress, template)
 }
 
 func testAccFixedaddressUseBootfile(ip, matchClient string, agentCircuitID int, useBootFile, bootFile string) string {
@@ -2688,13 +2967,9 @@ resource "nios_dhcp_fixed_address" "test_use_pxe_lease_time" {
 }
 
 func testAccFixedaddressUseSnmp3Credential(ip, matchClient string, agentCircuitID int, useSnmp3Credential, snmp3CredentialUser, snmp3CredentialAuthProtocol, snmp3CredentialAuthPass, snmp3CredentialPrvProtocol, snmp3CredentialPrvPass, snmp3CredentialComment, snmp3CredentialGroup string) string {
-	return fmt.Sprintf(`
-resource "nios_dhcp_fixed_address" "test_use_snmp3_credential" {
-	ipv4addr = %q
-	match_client = %q
-	agent_circuit_id = %d
-	use_snmp3_credential = %q
-	snmp3_credential = {
+	var snmp3Config string
+	if snmp3CredentialUser != "" && snmp3CredentialAuthProtocol != "" && snmp3CredentialAuthPass != "" && snmp3CredentialPrvProtocol != "" && snmp3CredentialPrvPass != "" && snmp3CredentialComment != "" && snmp3CredentialGroup != "" {
+		snmp3Config = fmt.Sprintf(`snmp3_credential = {
 		user = %q
 		authentication_protocol = %q
 		authentication_password = %q
@@ -2702,9 +2977,48 @@ resource "nios_dhcp_fixed_address" "test_use_snmp3_credential" {
 		privacy_password = %q
 		comment = %q
 		credential_group = %q
+	}`, snmp3CredentialUser, snmp3CredentialAuthProtocol, snmp3CredentialAuthPass, snmp3CredentialPrvProtocol, snmp3CredentialPrvPass, snmp3CredentialComment, snmp3CredentialGroup)
+	}
+	config := fmt.Sprintf(`
+resource "nios_dhcp_fixed_address" "test_use_snmp3_credential" {
+	ipv4addr = %q
+	match_client = %q
+	agent_circuit_id = %d
+	use_snmp3_credential = %q
+	%s
+	use_cli_credentials = true
+}
+`, ip, matchClient, agentCircuitID, useSnmp3Credential, snmp3Config)
+	return config
+}
+
+func testAccFixedaddressUseSnmp3CredentialUnset(ip, matchClient string, agentCircuitID int, useSnmp3Credential string) string {
+	return fmt.Sprintf(`
+resource "nios_dhcp_fixed_address" "test_use_snmp3_credential" {
+	ipv4addr = %q
+	match_client = %q
+	agent_circuit_id = %d
+	use_snmp3_credential = %q
+	snmp3_credential = null
+	use_cli_credentials = false
+}
+`, ip, matchClient, agentCircuitID, useSnmp3Credential)
+}
+
+func testAccFixedaddressUseSnmpCredentialSet(ip, matchClient string, agentCircuitID int, useSnmpCredential, snmpCredentialCommStr, snmpCredentialComment, snmpCredentialGroup string) string {
+	return fmt.Sprintf(`
+resource "nios_dhcp_fixed_address" "test_use_snmp_credential" {
+	ipv4addr = %q
+	match_client = %q
+	agent_circuit_id = %d
+	use_snmp_credential = %s
+	snmp_credential = {
+		community_string = %q
+		comment = %q
+		credential_group = %q
 	}
 }
-`, ip, matchClient, agentCircuitID, useSnmp3Credential, snmp3CredentialUser, snmp3CredentialAuthProtocol, snmp3CredentialAuthPass, snmp3CredentialPrvProtocol, snmp3CredentialPrvPass, snmp3CredentialComment, snmp3CredentialGroup)
+`, ip, matchClient, agentCircuitID, useSnmpCredential, snmpCredentialCommStr, snmpCredentialComment, snmpCredentialGroup)
 }
 
 func testAccFixedaddressUseSnmpCredential(ip, matchClient string, agentCircuitID int, useSnmpCredential string) string {
@@ -2713,7 +3027,7 @@ resource "nios_dhcp_fixed_address" "test_use_snmp_credential" {
 	ipv4addr = %q
 	match_client = %q
 	agent_circuit_id = %d
-	use_snmp_credential = %q
+	use_snmp_credential = %s
 }
 `, ip, matchClient, agentCircuitID, useSnmpCredential)
 }

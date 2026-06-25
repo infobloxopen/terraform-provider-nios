@@ -11,8 +11,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
+	"github.com/infobloxopen/infoblox-nios-go-client/rpz"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/config"
+	"github.com/infobloxopen/terraform-provider-nios/internal/retry"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
@@ -80,14 +82,41 @@ func (r *RecordRpzAaaaResource) Create(ctx context.Context, req resource.CreateR
 		return
 	}
 
-	apiRes, _, err := r.client.RPZAPI.
-		RecordRpzAaaaAPI.
-		Create(ctx).
-		RecordRpzAaaa(*data.Expand(ctx, &resp.Diagnostics)).
-		ReturnFieldsPlus(readableAttributesForRecordRpzAaaa).
-		ReturnAsObject(1).
-		Execute()
+	payload := data.Expand(ctx, &resp.Diagnostics)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	var apiRes *rpz.CreateRecordRpzAaaaResponse
+
+	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		var (
+			httpRes *http.Response
+			callErr error
+		)
+		apiRes, httpRes, callErr = r.client.RPZAPI.
+			RecordRpzAaaaAPI.
+			Create(ctx).
+			RecordRpzAaaa(*payload).
+			ReturnFieldsPlus(readableAttributesForRecordRpzAaaa).
+			ReturnAsObject(1).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
+
 	if err != nil {
+		if retry.IsAlreadyExistsErr(err) {
+			// Resource already exists, import required
+			resp.Diagnostics.AddError(
+				"Resource Already Exists",
+				fmt.Sprintf("Resource already exists, error: %s.\nPlease import the existing resource into terraform state.", err.Error()),
+			)
+			return
+		}
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create RecordRpzAaaa, got error: %s", err))
 		return
 	}
@@ -123,13 +152,28 @@ func (r *RecordRpzAaaaResource) Read(ctx context.Context, req resource.ReadReque
 		return
 	}
 
-	apiRes, httpRes, err := r.client.RPZAPI.
-		RecordRpzAaaaAPI.
-		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
-		ReturnFieldsPlus(readableAttributesForRecordRpzAaaa).
-		ReturnAsObject(1).
-		ProxySearch(config.GetProxySearch()).
-		Execute()
+	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
+
+	var (
+		httpRes *http.Response
+		apiRes  *rpz.GetRecordRpzAaaaResponse
+	)
+
+	err := retry.Do(ctx, nil, func(ctx context.Context) (int, error) {
+		var callErr error
+		apiRes, httpRes, callErr = r.client.RPZAPI.
+			RecordRpzAaaaAPI.
+			Read(ctx, resourceRef).
+			ReturnFieldsPlus(readableAttributesForRecordRpzAaaa).
+			ReturnAsObject(1).
+			ProxySearch(config.GetProxySearch()).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
 
 	// If the resource is not found, try searching using Extensible Attributes
 	if err != nil {
@@ -278,13 +322,34 @@ func (r *RecordRpzAaaaResource) Update(ctx context.Context, req resource.UpdateR
 		return
 	}
 
-	apiRes, _, err := r.client.RPZAPI.
-		RecordRpzAaaaAPI.
-		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
-		RecordRpzAaaa(*data.Expand(ctx, &resp.Diagnostics)).
-		ReturnFieldsPlus(readableAttributesForRecordRpzAaaa).
-		ReturnAsObject(1).
-		Execute()
+	payload := data.Expand(ctx, &resp.Diagnostics)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
+
+	var apiRes *rpz.UpdateRecordRpzAaaaResponse
+
+	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		var (
+			httpRes *http.Response
+			callErr error
+		)
+		apiRes, httpRes, callErr = r.client.RPZAPI.
+			RecordRpzAaaaAPI.
+			Update(ctx, resourceRef).
+			RecordRpzAaaa(*payload).
+			ReturnFieldsPlus(readableAttributesForRecordRpzAaaa).
+			ReturnAsObject(1).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
+
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update RecordRpzAaaa, got error: %s", err))
 		return
@@ -318,14 +383,24 @@ func (r *RecordRpzAaaaResource) Delete(ctx context.Context, req resource.DeleteR
 		return
 	}
 
-	httpRes, err := r.client.RPZAPI.
-		RecordRpzAaaaAPI.
-		Delete(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
-		Execute()
-	if err != nil {
-		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
-			return
+	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
+
+	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		httpRes, callErr := r.client.RPZAPI.
+			RecordRpzAaaaAPI.
+			Delete(ctx, resourceRef).
+			Execute()
+
+		if httpRes != nil {
+			if httpRes.StatusCode == http.StatusNotFound {
+				return 0, nil
+			}
+			return httpRes.StatusCode, callErr
 		}
+		return 0, callErr
+	})
+
+	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete RecordRpzAaaa, got error: %s", err))
 		return
 	}

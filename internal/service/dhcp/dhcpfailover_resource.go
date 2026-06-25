@@ -2,6 +2,9 @@ package dhcp
 
 import (
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
+	"encoding/json"
 	"fmt"
 	"net"
 	"net/http"
@@ -10,10 +13,11 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
-
+	"github.com/hashicorp/terraform-plugin-framework/types"
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
-
+	"github.com/infobloxopen/infoblox-nios-go-client/dhcp"
 	"github.com/infobloxopen/terraform-provider-nios/internal/config"
+	"github.com/infobloxopen/terraform-provider-nios/internal/retry"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
@@ -22,6 +26,7 @@ var readableAttributesForDhcpfailover = "association_type,comment,extattrs,failo
 // Ensure provider defined types fully satisfy framework interfaces.
 var _ resource.Resource = &DhcpfailoverResource{}
 var _ resource.ResourceWithImportState = &DhcpfailoverResource{}
+var _ resource.ResourceWithModifyPlan = &DhcpfailoverResource{}
 var _ resource.ResourceWithValidateConfig = &DhcpfailoverResource{}
 
 func NewDhcpfailoverResource() resource.Resource {
@@ -31,6 +36,10 @@ func NewDhcpfailoverResource() resource.Resource {
 // DhcpfailoverResource defines the resource implementation.
 type DhcpfailoverResource struct {
 	client *niosclient.APIClient
+}
+
+type secretsHashState struct {
+	MsSharedSecret string `json:"ms_shared_secret"`
 }
 
 func (r *DhcpfailoverResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -64,6 +73,84 @@ func (r *DhcpfailoverResource) Configure(ctx context.Context, req resource.Confi
 	r.client = client
 }
 
+func (r *DhcpfailoverResource) ModifyPlan(ctx context.Context, req resource.ModifyPlanRequest, resp *resource.ModifyPlanResponse) {
+	if req.Plan.Raw.IsNull() {
+		return
+	}
+
+	var stateRev types.Int64
+	var planSecret types.String
+
+	curRev := int64(0)
+	if !req.State.Raw.IsNull() && req.State.Raw.IsKnown() {
+		resp.Diagnostics.Append(req.State.GetAttribute(ctx, path.Root("ms_shared_secret_version"), &stateRev)...)
+		if resp.Diagnostics.HasError() {
+			return
+		}
+		if !stateRev.IsNull() && !stateRev.IsUnknown() {
+			curRev = stateRev.ValueInt64()
+		}
+	}
+
+	resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("ms_shared_secret"), &planSecret)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	computeNewHash := !planSecret.IsNull() && !planSecret.IsUnknown()
+	prevHashes := secretsHashState{}
+	plannedHashes := secretsHashState{}
+
+	if computeNewHash {
+		var prev struct {
+			Algo string `json:"algo"`
+			Hash string `json:"hash"`
+		}
+
+		if b, diags := req.Private.GetKey(ctx, "ms_shared_secret_hash"); diags != nil {
+			resp.Diagnostics.Append(diags...)
+		} else if b != nil {
+			if err := json.Unmarshal(b, &prev); err != nil {
+				prev.Hash = ""
+			}
+		}
+
+		var plannedHash string
+		if prev.Hash != "" {
+			_ = json.Unmarshal([]byte(prev.Hash), &prevHashes)
+		}
+
+		if !planSecret.IsUnknown() {
+			if planSecret.IsNull() {
+				plannedHashes.MsSharedSecret = ""
+			} else {
+				h := sha256.New()
+				h.Write([]byte(planSecret.ValueString()))
+				plannedHashes.MsSharedSecret = hex.EncodeToString(h.Sum(nil))
+			}
+		}
+
+		if data, err := json.Marshal(plannedHashes); err == nil {
+			plannedHash = string(data)
+		}
+
+		if plannedHashes.MsSharedSecret != "" && plannedHashes.MsSharedSecret != prevHashes.MsSharedSecret {
+			newRev := types.Int64Value(curRev + 1)
+			resp.Diagnostics.Append(resp.Plan.SetAttribute(ctx, path.Root("ms_shared_secret_version"), newRev)...)
+
+			val := map[string]string{"algo": "sha256", "hash": plannedHash}
+			b, err := json.Marshal(val)
+			if err != nil {
+				resp.Diagnostics.AddError("Private State Marshal Error", err.Error())
+				return
+			}
+			resp.Diagnostics.Append(resp.Private.SetKey(ctx, "ms_shared_secret_hash", b)...)
+		} else {
+			resp.Diagnostics.Append(resp.Plan.SetAttribute(ctx, path.Root("ms_shared_secret_version"), curRev)...)
+		}
+	}
+}
+
 func (r *DhcpfailoverResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var diags diag.Diagnostics
 	var data DhcpfailoverModel
@@ -81,14 +168,61 @@ func (r *DhcpfailoverResource) Create(ctx context.Context, req resource.CreateRe
 		return
 	}
 
-	apiRes, _, err := r.client.DHCPAPI.
-		DhcpfailoverAPI.
-		Create(ctx).
-		Dhcpfailover(*data.Expand(ctx, &resp.Diagnostics)).
-		ReturnFieldsPlus(readableAttributesForDhcpfailover).
-		ReturnAsObject(1).
-		Execute()
+	payload := data.Expand(ctx, &resp.Diagnostics)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	msSharedSecretVersion := types.Int64Value(0)
+	var msSharedSecret types.String
+	resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("ms_shared_secret"), &msSharedSecret)...)
+	secretData := secretsHashState{}
+	if !msSharedSecret.IsNull() && !msSharedSecret.IsUnknown() {
+		payload.MsSharedSecret = msSharedSecret.ValueStringPointer()
+		msSharedSecretVersion = types.Int64Value(1)
+		h := sha256.New()
+		h.Write([]byte(msSharedSecret.ValueString()))
+		secretData.MsSharedSecret = hex.EncodeToString(h.Sum(nil))
+		secretDataJSON, _ := json.Marshal(secretData)
+		val := map[string]string{"algo": "sha256", "hash": string(secretDataJSON)}
+		hashedSecret, err := json.Marshal(val)
+		if err != nil {
+			resp.Diagnostics.AddError("Private State Marshal Error", err.Error())
+			return
+		}
+		resp.Diagnostics.Append(resp.Private.SetKey(ctx, "ms_shared_secret_hash", hashedSecret)...)
+	}
+
+	var apiRes *dhcp.CreateDhcpfailoverResponse
+
+	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		var (
+			httpRes *http.Response
+			callErr error
+		)
+		apiRes, httpRes, callErr = r.client.DHCPAPI.
+			DhcpfailoverAPI.
+			Create(ctx).
+			Dhcpfailover(*payload).
+			ReturnFieldsPlus(readableAttributesForDhcpfailover).
+			ReturnAsObject(1).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
+
 	if err != nil {
+		if retry.IsAlreadyExistsErr(err) {
+			// Resource already exists, import required
+			resp.Diagnostics.AddError(
+				"Resource Already Exists",
+				fmt.Sprintf("Resource already exists, error: %s.\nPlease import the existing resource into terraform state.", err.Error()),
+			)
+			return
+		}
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create Dhcpfailover, got error: %s", err))
 		return
 	}
@@ -100,6 +234,7 @@ func (r *DhcpfailoverResource) Create(ctx context.Context, req resource.CreateRe
 		return
 	}
 
+	data.MsSharedSecretVersion = msSharedSecretVersion
 	data.Flatten(ctx, &res, &resp.Diagnostics)
 
 	// Save data into Terraform state
@@ -123,13 +258,28 @@ func (r *DhcpfailoverResource) Read(ctx context.Context, req resource.ReadReques
 		return
 	}
 
-	apiRes, httpRes, err := r.client.DHCPAPI.
-		DhcpfailoverAPI.
-		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
-		ReturnFieldsPlus(readableAttributesForDhcpfailover).
-		ReturnAsObject(1).
-		ProxySearch(config.GetProxySearch()).
-		Execute()
+	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
+
+	var (
+		httpRes *http.Response
+		apiRes  *dhcp.GetDhcpfailoverResponse
+	)
+
+	err := retry.Do(ctx, nil, func(ctx context.Context) (int, error) {
+		var callErr error
+		apiRes, httpRes, callErr = r.client.DHCPAPI.
+			DhcpfailoverAPI.
+			Read(ctx, resourceRef).
+			ReturnFieldsPlus(readableAttributesForDhcpfailover).
+			ReturnAsObject(1).
+			ProxySearch(config.GetProxySearch()).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
 
 	// If the resource is not found, try searching using Extensible Attributes
 	if err != nil {
@@ -276,13 +426,43 @@ func (r *DhcpfailoverResource) Update(ctx context.Context, req resource.UpdateRe
 		return
 	}
 
-	apiRes, _, err := r.client.DHCPAPI.
-		DhcpfailoverAPI.
-		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
-		Dhcpfailover(*data.Expand(ctx, &resp.Diagnostics)).
-		ReturnFieldsPlus(readableAttributesForDhcpfailover).
-		ReturnAsObject(1).
-		Execute()
+	var msSharedSecret types.String
+	resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("ms_shared_secret"), &msSharedSecret)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	payload := data.Expand(ctx, &resp.Diagnostics)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+	if !msSharedSecret.IsNull() && !msSharedSecret.IsUnknown() {
+		payload.MsSharedSecret = msSharedSecret.ValueStringPointer()
+	}
+
+	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
+
+	var apiRes *dhcp.UpdateDhcpfailoverResponse
+
+	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		var (
+			httpRes *http.Response
+			callErr error
+		)
+		apiRes, httpRes, callErr = r.client.DHCPAPI.
+			DhcpfailoverAPI.
+			Update(ctx, resourceRef).
+			Dhcpfailover(*payload).
+			ReturnFieldsPlus(readableAttributesForDhcpfailover).
+			ReturnAsObject(1).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
+
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update Dhcpfailover, got error: %s", err))
 		return
@@ -315,14 +495,24 @@ func (r *DhcpfailoverResource) Delete(ctx context.Context, req resource.DeleteRe
 		return
 	}
 
-	httpRes, err := r.client.DHCPAPI.
-		DhcpfailoverAPI.
-		Delete(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
-		Execute()
-	if err != nil {
-		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
-			return
+	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
+
+	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		httpRes, callErr := r.client.DHCPAPI.
+			DhcpfailoverAPI.
+			Delete(ctx, resourceRef).
+			Execute()
+
+		if httpRes != nil {
+			if httpRes.StatusCode == http.StatusNotFound {
+				return 0, nil
+			}
+			return httpRes.StatusCode, callErr
 		}
+		return 0, callErr
+	})
+
+	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete Dhcpfailover, got error: %s", err))
 		return
 	}
@@ -381,6 +571,15 @@ func (r *DhcpfailoverResource) ValidateConfig(ctx context.Context, req resource.
 					"primary must be a valid IPv4 address when primary_server_type is set to EXTERNAL.",
 				)
 			}
+		}
+	}
+
+	if !data.UseMsSwitchoverInterval.IsNull() && !data.UseMsSwitchoverInterval.IsUnknown() && data.UseMsSwitchoverInterval.ValueBool() {
+		if data.MsEnableSwitchoverInterval.IsNull() || data.MsEnableSwitchoverInterval.IsUnknown() || !data.MsEnableSwitchoverInterval.ValueBool() {
+			resp.Diagnostics.AddError(
+				"Invalid Configuration",
+				"ms_enable_switchover_interval must be set when use_ms_switchover_interval is true.",
+			)
 		}
 	}
 }

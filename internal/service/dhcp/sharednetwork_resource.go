@@ -9,10 +9,13 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
+	"github.com/infobloxopen/infoblox-nios-go-client/dhcp"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/config"
+	"github.com/infobloxopen/terraform-provider-nios/internal/retry"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
@@ -72,13 +75,69 @@ func (r *SharednetworkResource) ValidateConfig(ctx context.Context, req resource
 
 	if !data.DdnsServerAlwaysUpdates.IsNull() && !data.DdnsServerAlwaysUpdates.IsUnknown() {
 		// Check if ddns_use_option81 is set to false
-		if data.DdnsUseOption81.IsNull() && data.DdnsUseOption81.IsUnknown() && !data.DdnsUseOption81.ValueBool() {
+		if data.DdnsUseOption81.IsNull() || data.DdnsUseOption81.IsUnknown() || !data.DdnsUseOption81.ValueBool() {
 			resp.Diagnostics.AddAttributeError(
 				path.Root("ddns_server_always_updates"),
 				"Invalid Configuration",
 				"ddns_use_option81 must be set to true if ddns_server_always_updates is configured.",
 			)
 		}
+	}
+
+	boolIsTrue := func(b types.Bool) bool {
+		return !b.IsNull() && !b.IsUnknown() && b.ValueBool()
+	}
+	boolIsFalse := func(b types.Bool) bool {
+		return !b.IsNull() && !b.IsUnknown() && !b.ValueBool()
+	}
+	strEquals := func(s types.String, want string) bool {
+		return !s.IsNull() && !s.IsUnknown() && s.ValueString() == want
+	}
+
+	icidTrue := boolIsTrue(data.IgnoreClientIdentifier)
+	icidFalse := boolIsFalse(data.IgnoreClientIdentifier)
+	useIcidTrue := boolIsTrue(data.UseIgnoreClientIdentifier)
+	useIcidFalse := boolIsFalse(data.UseIgnoreClientIdentifier)
+
+	ignoreIdClient := strEquals(data.IgnoreId, "CLIENT")
+	ignoreIdNone := strEquals(data.IgnoreId, "NONE")
+	useIgnoreIdTrue := boolIsTrue(data.UseIgnoreId)
+	useIgnoreIdFalse := boolIsFalse(data.UseIgnoreId)
+
+	// Case 1: icid=true && useIcid=true  =>  ignore_id="CLIENT" && use_ignore_id=true
+	if icidTrue && useIcidTrue && (!ignoreIdClient || !useIgnoreIdTrue) {
+		resp.Diagnostics.AddAttributeError(
+			path.Root("ignore_id"),
+			"Invalid Configuration",
+			"ignore_id must be set to \"CLIENT\" and use_ignore_id must be set to true when ignore_client_identifier and use_ignore_client_identifier are both set to true.",
+		)
+	}
+
+	// Case 2: ignore_id="CLIENT" && use_ignore_id=true  =>  icid=true && useIcid=true
+	if ignoreIdClient && useIgnoreIdTrue && (!icidTrue || !useIcidTrue) {
+		resp.Diagnostics.AddAttributeError(
+			path.Root("ignore_client_identifier"),
+			"Invalid Configuration",
+			"ignore_client_identifier and use_ignore_client_identifier must both be set to true when ignore_id is \"CLIENT\" and use_ignore_id is true.",
+		)
+	}
+
+	// Case 3: ignore_id="NONE" && use_ignore_id=false  =>  icid=false && useIcid=false
+	if ignoreIdNone && useIgnoreIdFalse && (!icidFalse || !useIcidFalse) {
+		resp.Diagnostics.AddAttributeError(
+			path.Root("ignore_client_identifier"),
+			"Invalid Configuration",
+			"ignore_client_identifier and use_ignore_client_identifier must both be set to false when ignore_id is \"NONE\" and use_ignore_id is false.",
+		)
+	}
+
+	// Case 4: ignore_id="NONE" && use_ignore_id=true  =>  icid=false && useIcid=true
+	if ignoreIdNone && useIgnoreIdTrue && (icidTrue || !useIcidTrue) {
+		resp.Diagnostics.AddAttributeError(
+			path.Root("ignore_client_identifier"),
+			"Invalid Configuration",
+			"ignore_client_identifier must be set to false and use_ignore_client_identifier must be set to true when ignore_id is \"NONE\" and use_ignore_id is true.",
+		)
 	}
 
 	if !data.Options.IsNull() && !data.Options.IsUnknown() {
@@ -165,6 +224,7 @@ func (r *SharednetworkResource) ValidateConfig(ctx context.Context, req resource
 			}
 		}
 	}
+
 }
 
 func (r *SharednetworkResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
@@ -184,14 +244,41 @@ func (r *SharednetworkResource) Create(ctx context.Context, req resource.CreateR
 		return
 	}
 
-	apiRes, _, err := r.client.DHCPAPI.
-		SharednetworkAPI.
-		Create(ctx).
-		Sharednetwork(*data.Expand(ctx, &resp.Diagnostics, true)).
-		ReturnFieldsPlus(readableAttributesForSharednetwork).
-		ReturnAsObject(1).
-		Execute()
+	payload := data.Expand(ctx, &resp.Diagnostics, true)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	var apiRes *dhcp.CreateSharednetworkResponse
+
+	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		var (
+			httpRes *http.Response
+			callErr error
+		)
+		apiRes, httpRes, callErr = r.client.DHCPAPI.
+			SharednetworkAPI.
+			Create(ctx).
+			Sharednetwork(*payload).
+			ReturnFieldsPlus(readableAttributesForSharednetwork).
+			ReturnAsObject(1).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
+
 	if err != nil {
+		if retry.IsAlreadyExistsErr(err) {
+			// Resource already exists, import required
+			resp.Diagnostics.AddError(
+				"Resource Already Exists",
+				fmt.Sprintf("Resource already exists, error: %s.\nPlease import the existing resource into terraform state.", err.Error()),
+			)
+			return
+		}
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create Sharednetwork, got error: %s", err))
 		return
 	}
@@ -226,13 +313,28 @@ func (r *SharednetworkResource) Read(ctx context.Context, req resource.ReadReque
 		return
 	}
 
-	apiRes, httpRes, err := r.client.DHCPAPI.
-		SharednetworkAPI.
-		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
-		ReturnFieldsPlus(readableAttributesForSharednetwork).
-		ReturnAsObject(1).
-		ProxySearch(config.GetProxySearch()).
-		Execute()
+	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
+
+	var (
+		httpRes *http.Response
+		apiRes  *dhcp.GetSharednetworkResponse
+	)
+
+	err := retry.Do(ctx, nil, func(ctx context.Context) (int, error) {
+		var callErr error
+		apiRes, httpRes, callErr = r.client.DHCPAPI.
+			SharednetworkAPI.
+			Read(ctx, resourceRef).
+			ReturnFieldsPlus(readableAttributesForSharednetwork).
+			ReturnAsObject(1).
+			ProxySearch(config.GetProxySearch()).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
 
 	// If the resource is not found, try searching using Extensible Attributes
 	if err != nil {
@@ -378,13 +480,34 @@ func (r *SharednetworkResource) Update(ctx context.Context, req resource.UpdateR
 		return
 	}
 
-	apiRes, _, err := r.client.DHCPAPI.
-		SharednetworkAPI.
-		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
-		Sharednetwork(*data.Expand(ctx, &resp.Diagnostics, false)).
-		ReturnFieldsPlus(readableAttributesForSharednetwork).
-		ReturnAsObject(1).
-		Execute()
+	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
+
+	payload := data.Expand(ctx, &resp.Diagnostics, false)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	var apiRes *dhcp.UpdateSharednetworkResponse
+
+	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		var (
+			httpRes *http.Response
+			callErr error
+		)
+		apiRes, httpRes, callErr = r.client.DHCPAPI.
+			SharednetworkAPI.
+			Update(ctx, resourceRef).
+			Sharednetwork(*payload).
+			ReturnFieldsPlus(readableAttributesForSharednetwork).
+			ReturnAsObject(1).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
+
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update Sharednetwork, got error: %s", err))
 		return
@@ -418,14 +541,24 @@ func (r *SharednetworkResource) Delete(ctx context.Context, req resource.DeleteR
 		return
 	}
 
-	httpRes, err := r.client.DHCPAPI.
-		SharednetworkAPI.
-		Delete(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
-		Execute()
-	if err != nil {
-		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
-			return
+	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
+
+	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		httpRes, callErr := r.client.DHCPAPI.
+			SharednetworkAPI.
+			Delete(ctx, resourceRef).
+			Execute()
+
+		if httpRes != nil {
+			if httpRes.StatusCode == http.StatusNotFound {
+				return 0, nil
+			}
+			return httpRes.StatusCode, callErr
 		}
+		return 0, callErr
+	})
+
+	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete Sharednetwork, got error: %s", err))
 		return
 	}

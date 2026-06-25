@@ -319,8 +319,7 @@ func TestAccRecordPtrResource_Ipv4addr(t *testing.T) {
 }
 
 // TestAccRecordPtrResource_FuncCallIpv4Addr tests the "func_call" attribute functionality
-// which allocates IP addresses using next_available_ip. Since func_call attribute can't be
-// updated, the comment is updated to demonstrate an update to the resource
+// which allocates IP addresses using next_available_ip.
 func TestAccRecordPtrResource_FuncCallIpv4Addr(t *testing.T) {
 	var resourceName = "nios_dns_record_ptr.test_func_call"
 	var v dns.RecordPtr
@@ -673,6 +672,11 @@ resource "nios_dns_record_ptr" "test_ipv4addr" {
 
 func testAccRecordPtrFuncCallIpv4Addr(network, ptrdname, view, comment string) string {
 	return fmt.Sprintf(`
+resource "nios_ipam_network" "test_func_call" {
+	network = %[1]q
+	network_view = "default"
+}
+
 resource "nios_dns_record_ptr" "test_func_call" {
 	func_call = {
 		"attribute_name" = "ipv4addr"
@@ -680,13 +684,14 @@ resource "nios_dns_record_ptr" "test_func_call" {
 		"result_field" = "ips"
 		"object" = "network"
 		"object_parameters" = {
-			"network" = %q
+			"network" = %[1]q
 			"network_view" = "default"
 		}
 	}
-	ptrdname = %q
-	view = %q
-	comment = %q
+	ptrdname = %[2]q
+	view = %[3]q
+	comment = %[4]q
+	depends_on = [nios_ipam_network.test_func_call]
 }
 `, network, ptrdname, view, comment)
 }

@@ -317,12 +317,12 @@ func TestAccRecordAaaaResource_Ipv6addr(t *testing.T) {
 }
 
 // TestAccRecordAaaaResource_FuncCall tests the "func_call" attribute functionality
-// which allocates IPv6 addresses using next_available_ip. Since func_call attribute can't be
-// updated, the comment is updated to demonstrate an update to the resource
+// which allocates IPv6 addresses using next_available_ip.
 func TestAccRecordAaaaResource_FuncCall(t *testing.T) {
 	var resourceName = "nios_dns_record_aaaa.test_func_call"
 	var v dns.RecordAaaa
 	name := acctest.RandomName() + ".example.com"
+	ipv6Network := fmt.Sprintf("2001:db8:%x:%x::/64", acctest.RandomNumber(65535), acctest.RandomNumber(65535))
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -330,14 +330,14 @@ func TestAccRecordAaaaResource_FuncCall(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRecordAaaaFuncCall(name, "default", "ipv6addr", "next_available_ip", "ips", "ipv6network", "2001:db8:abcd:12::/64", "Original Function Call"),
+				Config: testAccRecordAaaaFuncCall(name, "default", "ipv6addr", "next_available_ip", "ips", "ipv6network", ipv6Network, "Original Function Call"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordAaaaExists(context.Background(), resourceName, &v),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccRecordAaaaFuncCall(name, "default", "ipv6addr", "next_available_ip", "ips", "ipv6network", "2001:db8:abcd:12::/64", "Updated Function Call"),
+				Config: testAccRecordAaaaFuncCall(name, "default", "ipv6addr", "next_available_ip", "ips", "ipv6network", ipv6Network, "Updated Function Call"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordAaaaExists(context.Background(), resourceName, &v),
 				),
@@ -427,7 +427,7 @@ func TestAccRecordAaaaResource_UseTtl(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRecordAaaaUseTtl(name, "2002:1111::1401", "default", 10, "false"),
+				Config: testAccRecordAaaaUseTtlOnly(name, "2002:1111::1401", "default", "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordAaaaExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_ttl", "false"),
@@ -604,20 +604,26 @@ resource "nios_dns_record_aaaa" "test_ipv6addr" {
 
 func testAccRecordAaaaFuncCall(name, view, attributeName, objFunc, resultField, object, objectParameters, comment string) string {
 	return fmt.Sprintf(`
+resource "nios_ipam_ipv6network" "test_func_call" {
+    network = %[7]q
+	network_view = "default"
+}
+
 resource "nios_dns_record_aaaa" "test_func_call" {
-	name = %q
-	view = %q
+	name = %[1]q
+	view = %[2]q
 	func_call = {
-		"attribute_name" = %q
-		"object_function" = %q
-		"result_field" = %q
-		"object" = %q
+		"attribute_name" = %[3]q
+		"object_function" = %[4]q
+		"result_field" = %[5]q
+		"object" = %[6]q
 		"object_parameters" = {
-			"network" = %q
+			"network" = %[7]q
 			"network_view" = "default"
 		}
 	}
-	comment = %q
+	comment = %[8]q
+	depends_on = [nios_ipam_ipv6network.test_func_call]
 }
 `, name, view, attributeName, objFunc, resultField, object, objectParameters, comment)
 }
@@ -654,4 +660,15 @@ resource "nios_dns_record_aaaa" "test_use_ttl" {
     use_ttl  = %q
 }
 `, name, ipV6Addr, view, ttl, useTtl)
+}
+
+func testAccRecordAaaaUseTtlOnly(name, ipV6Addr, view, useTtl string) string {
+	return fmt.Sprintf(`
+resource "nios_dns_record_aaaa" "test_use_ttl" {
+    name     = %q
+    ipv6addr = %q
+    view     = %q
+    use_ttl  = %q
+}
+`, name, ipV6Addr, view, useTtl)
 }

@@ -136,10 +136,11 @@ func TestAccGridServicerestartGroupResource_ExtAttrs(t *testing.T) {
 }
 
 func TestAccGridServicerestartGroupResource_Members(t *testing.T) {
-	t.Skip("Requires members to be present in the grid to test against")
 	var resourceName = "nios_grid_servicerestart_group.test_members"
 	var v grid.GridServicerestartGroup
 	name := acctest.RandomNameWithPrefix("grid-service")
+	memberName := utils.GetNIOSGridMasterHostName()
+	memberUpdatedName := utils.GetNIOSGridMemberHostName()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -147,18 +148,18 @@ func TestAccGridServicerestartGroupResource_Members(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccGridServicerestartGroupMembers(name, "DHCP", "infoblox.member"),
+				Config: testAccGridServicerestartGroupMembers(name, "DHCP", memberName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckGridServicerestartGroupExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "members.0", "infoblox.member"),
+					resource.TestCheckResourceAttr(resourceName, "members.0", memberName),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccGridServicerestartGroupMembers(name, "DNS", "infoblox.localdomain"),
+				Config: testAccGridServicerestartGroupMembers(name, "DNS", memberUpdatedName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckGridServicerestartGroupExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "members.0", "infoblox.localdomain"),
+					resource.TestCheckResourceAttr(resourceName, "members.0", memberUpdatedName),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -255,7 +256,7 @@ func TestAccGridServicerestartGroupResource_RecurringSchedule(t *testing.T) {
 			"repeat":            "ONCE",
 			"day_of_month":      30,
 			"month":             1,
-			"year":              2026,
+			"year":              2050,
 			"hour_of_day":       20,
 		},
 	}
@@ -297,7 +298,7 @@ func TestAccGridServicerestartGroupResource_RecurringSchedule(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "recurring_schedule.schedule.repeat", "ONCE"),
 					resource.TestCheckResourceAttr(resourceName, "recurring_schedule.schedule.day_of_month", "30"),
 					resource.TestCheckResourceAttr(resourceName, "recurring_schedule.schedule.month", "1"),
-					resource.TestCheckResourceAttr(resourceName, "recurring_schedule.schedule.year", "2026"),
+					resource.TestCheckResourceAttr(resourceName, "recurring_schedule.schedule.year", "2050"),
 					resource.TestCheckResourceAttr(resourceName, "recurring_schedule.schedule.hour_of_day", "20"),
 				),
 			},
