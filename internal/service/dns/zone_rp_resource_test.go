@@ -293,7 +293,6 @@ func TestAccZoneRpResource_ExternalSecondaries(t *testing.T) {
 }
 
 func TestAccZoneRpResource_FireeyeRuleMapping(t *testing.T) {
-	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_dns_zone_rp.test_fireeye_rule_mapping"
 	var v dns.ZoneRp
 	zoneFqdn := acctest.RandomNameWithPrefix("zone-rp") + ".com"
@@ -306,15 +305,55 @@ func TestAccZoneRpResource_FireeyeRuleMapping(t *testing.T) {
 				"lifetime":   "86400",
 				"rpz_rule":   "NODATA",
 			},
+			{
+				"alert_type": "INFECTION_MATCH",
+				"lifetime":   "86400",
+				"rpz_rule":   "PASSTHRU",
+			},
+			{
+				"alert_type": "MALWARE_CALLBACK",
+				"lifetime":   "604800",
+				"rpz_rule":   "PASSTHRU",
+			},
+			{
+				"alert_type": "MALWARE_OBJECT",
+				"lifetime":   "86400",
+				"rpz_rule":   "PASSTHRU",
+			},
+			{
+				"alert_type": "WEB_INFECTION",
+				"lifetime":   "86400",
+				"rpz_rule":   "PASSTHRU",
+			},
 		},
 	}
 	fireEyeRuleMappingUpdate1 := map[string]any{
 		"apt_override": "NOOVERRIDE",
 		"fireeye_alert_mapping": []map[string]any{
 			{
+				"alert_type": "DOMAIN_MATCH",
+				"lifetime":   "86400",
+				"rpz_rule":   "PASSTHRU",
+			},
+			{
 				"alert_type": "INFECTION_MATCH",
 				"lifetime":   "0",
 				"rpz_rule":   "NONE",
+			},
+			{
+				"alert_type": "MALWARE_CALLBACK",
+				"lifetime":   "604800",
+				"rpz_rule":   "PASSTHRU",
+			},
+			{
+				"alert_type": "MALWARE_OBJECT",
+				"lifetime":   "86400",
+				"rpz_rule":   "PASSTHRU",
+			},
+			{
+				"alert_type": "WEB_INFECTION",
+				"lifetime":   "86400",
+				"rpz_rule":   "PASSTHRU",
 			},
 		},
 	}
@@ -323,9 +362,29 @@ func TestAccZoneRpResource_FireeyeRuleMapping(t *testing.T) {
 		"apt_override": "NXDOMAIN",
 		"fireeye_alert_mapping": []map[string]any{
 			{
+				"alert_type": "DOMAIN_MATCH",
+				"lifetime":   "86400",
+				"rpz_rule":   "PASSTHRU",
+			},
+			{
+				"alert_type": "INFECTION_MATCH",
+				"lifetime":   "86400",
+				"rpz_rule":   "PASSTHRU",
+			},
+			{
 				"alert_type": "MALWARE_CALLBACK",
 				"lifetime":   "172800",
 				"rpz_rule":   "NXDOMAIN",
+			},
+			{
+				"alert_type": "MALWARE_OBJECT",
+				"lifetime":   "86400",
+				"rpz_rule":   "PASSTHRU",
+			},
+			{
+				"alert_type": "WEB_INFECTION",
+				"lifetime":   "86400",
+				"rpz_rule":   "PASSTHRU",
 			},
 		},
 	}
@@ -339,10 +398,10 @@ func TestAccZoneRpResource_FireeyeRuleMapping(t *testing.T) {
 				Config: testAccZoneRpFireeyeRuleMapping(zoneFqdn, "default", fireEyeRuleMapping),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneRpExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "fireeye_rule_mapping.apt_override", "NODATA"),
-					resource.TestCheckResourceAttr(resourceName, "fireeye_rule_mapping.fireeye_alert_mapping.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "fireeye_rule_mapping.apt_override", "PASSTHRU"),
+					resource.TestCheckResourceAttr(resourceName, "fireeye_rule_mapping.fireeye_alert_mapping.#", "5"),
 					resource.TestCheckResourceAttr(resourceName, "fireeye_rule_mapping.fireeye_alert_mapping.0.alert_type", "DOMAIN_MATCH"),
-					resource.TestCheckResourceAttr(resourceName, "fireeye_rule_mapping.fireeye_alert_mapping.0.lifetime", "5"),
+					resource.TestCheckResourceAttr(resourceName, "fireeye_rule_mapping.fireeye_alert_mapping.0.lifetime", "86400"),
 					resource.TestCheckResourceAttr(resourceName, "fireeye_rule_mapping.fireeye_alert_mapping.0.rpz_rule", "NODATA"),
 				),
 			},
@@ -352,10 +411,10 @@ func TestAccZoneRpResource_FireeyeRuleMapping(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneRpExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "fireeye_rule_mapping.apt_override", "NOOVERRIDE"),
-					resource.TestCheckResourceAttr(resourceName, "fireeye_rule_mapping.fireeye_alert_mapping.#", "1"),
-					resource.TestCheckResourceAttr(resourceName, "fireeye_rule_mapping.fireeye_alert_mapping.0.alert_type", "INFECTION_MATCH"),
-					resource.TestCheckResourceAttr(resourceName, "fireeye_rule_mapping.fireeye_alert_mapping.0.lifetime", "0"),
-					resource.TestCheckResourceAttr(resourceName, "fireeye_rule_mapping.fireeye_alert_mapping.0.rpz_rule", "NONE"),
+					resource.TestCheckResourceAttr(resourceName, "fireeye_rule_mapping.fireeye_alert_mapping.#", "5"),
+					resource.TestCheckResourceAttr(resourceName, "fireeye_rule_mapping.fireeye_alert_mapping.1.alert_type", "INFECTION_MATCH"),
+					resource.TestCheckResourceAttr(resourceName, "fireeye_rule_mapping.fireeye_alert_mapping.1.lifetime", "0"),
+					resource.TestCheckResourceAttr(resourceName, "fireeye_rule_mapping.fireeye_alert_mapping.1.rpz_rule", "NONE"),
 				),
 			},
 			// Update and Read
@@ -364,10 +423,10 @@ func TestAccZoneRpResource_FireeyeRuleMapping(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneRpExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "fireeye_rule_mapping.apt_override", "NXDOMAIN"),
-					resource.TestCheckResourceAttr(resourceName, "fireeye_rule_mapping.fireeye_alert_mapping.#", "1"),
-					resource.TestCheckResourceAttr(resourceName, "fireeye_rule_mapping.fireeye_alert_mapping.0.alert_type", "MALWARE_CALLBACK"),
-					resource.TestCheckResourceAttr(resourceName, "fireeye_rule_mapping.fireeye_alert_mapping.0.lifetime", "500"),
-					resource.TestCheckResourceAttr(resourceName, "fireeye_rule_mapping.fireeye_alert_mapping.0.rpz_rule", "NXDOMAIN"),
+					resource.TestCheckResourceAttr(resourceName, "fireeye_rule_mapping.fireeye_alert_mapping.#", "5"),
+					resource.TestCheckResourceAttr(resourceName, "fireeye_rule_mapping.fireeye_alert_mapping.2.alert_type", "MALWARE_CALLBACK"),
+					resource.TestCheckResourceAttr(resourceName, "fireeye_rule_mapping.fireeye_alert_mapping.2.lifetime", "172800"),
+					resource.TestCheckResourceAttr(resourceName, "fireeye_rule_mapping.fireeye_alert_mapping.2.rpz_rule", "NXDOMAIN"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
