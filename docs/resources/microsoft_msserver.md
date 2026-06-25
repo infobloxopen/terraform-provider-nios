@@ -62,6 +62,8 @@ resource "nios_microsoft_msserver" "msserver_with_ad_sites" {
 
 ### Optional
 
+> **NOTE**: [Write-only arguments](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments) are supported in Terraform 1.11 and later.
+
 - `ad_sites` (Attributes) (see [below for nested schema](#nestedatt--ad_sites))
 - `ad_user` (Attributes) (see [below for nested schema](#nestedatt--ad_user))
 - `comment` (String) User comments for this Microsoft Server
@@ -73,7 +75,7 @@ resource "nios_microsoft_msserver" "msserver_with_ad_sites" {
 - `grid_member` (String) eference to the assigned grid member
 - `log_destination` (String) Directs logging of sync messages either to syslog or mslog
 - `log_level` (String) Log level for this Microsoft Server
-- `login_password` (String, Sensitive) Microsoft Server login password
+- `login_password` (String, [Write-only](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments)) Microsoft Server login password
 - `ms_max_connection` (Number) Maximum number of connections to MS server
 - `ms_rpc_timeout_in_seconds` (Number) Timeout in seconds of RPC connections for this MS Server
 - `network_view` (String) Reference to the network view
@@ -91,6 +93,7 @@ resource "nios_microsoft_msserver" "msserver_with_ad_sites" {
 - `extattrs_all` (Map of String) Extensible attributes associated with the object, including default attributes.
 - `last_seen` (Number) Timestamp of the last message received
 - `managing_member` (String) Hostname of grid member managing this Microsoft Server
+- `password_version` (Number) Internal revision incremented when login_password changes.
 - `ref` (String) The reference to the object.
 - `root_ad_domain` (String) The root Active Directory domain to which this server belongs (if applicable).
 - `server_name` (String) Gives the server name as reported by itself

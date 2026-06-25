@@ -31,7 +31,8 @@ var FixedaddressSnmpCredentialAttrTypes = map[string]attr.Type{
 
 var FixedaddressSnmpCredentialResourceSchemaAttributes = map[string]schema.Attribute{
 	"community_string": schema.StringAttribute{
-		Required: true,
+		Optional: true,
+		Computed: true,
 		Validators: []validator.String{
 			customvalidator.ValidateTrimmedString(),
 		},
