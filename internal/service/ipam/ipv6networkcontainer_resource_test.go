@@ -1017,8 +1017,8 @@ func TestAccIpv6networkcontainerResource_SendRirRequest(t *testing.T) {
 }
 
 func TestAccIpv6networkcontainerResource_SubscribeSettings(t *testing.T) {
-	if utils.GetNIOSISEEnabled() == "" {
-		t.Skip("NIOS_ISE_ENABLED environment variable must be set for this test to run (requires Cisco ISE server configured in NIOS)")
+	if utils.GetNIOSPxgridEndpointRef() == "" {
+		t.Skip("NIOS_PXGRID_ENDPOINT_REF environment variable must be set for this test to run (requires Cisco ISE/pxGrid endpoint configured in NIOS)")
 	}
 	var resourceName = "nios_ipam_ipv6network_container.test_subscribe_settings"
 	var v ipam.Ipv6networkcontainer
@@ -2013,6 +2013,7 @@ func testAccIpv6networkcontainerSubscribeSettings(network, enabledAttribute stri
 	return fmt.Sprintf(`
 resource "nios_ipam_ipv6network_container" "test_subscribe_settings" {
     network = %q
+    network_view = "test_network_view"
     subscribe_settings = {
         enabled_attributes = [%q]
     }

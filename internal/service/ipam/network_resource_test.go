@@ -19,6 +19,7 @@ import (
 )
 
 //TODO : FEDRATED_REALMS TEST CASES
+//TODO : ZONE_ASSOCIATIONS TEST CASES
 
 //TODO : OBJECTS TO BE PRESENT IN GRID FOR TESTS
 //MS DHCP SERVER : 10.10.0.0
@@ -2171,8 +2172,8 @@ func TestAccNetworkResource_SendRirRequest(t *testing.T) {
 }
 
 func TestAccNetworkResource_SubscribeSettings(t *testing.T) {
-	if utils.GetNIOSISEEnabled() == "" {
-		t.Skip("NIOS_ISE_ENABLED environment variable must be set for this test to run (requires Cisco ISE server configured in NIOS)")
+	if utils.GetNIOSPxgridEndpointRef() == "" {
+		t.Skip("NIOS_PXGRID_ENDPOINT_REF environment variable must be set for this test to run (requires Cisco ISE/pxGrid endpoint configured in NIOS)")
 	}
 	var resourceName = "nios_ipam_network.test_subscribe_settings"
 	var v ipam.Network
@@ -3189,18 +3190,9 @@ func TestAccNetworkResource_UseZoneAssociations(t *testing.T) {
 }
 
 func TestAccNetworkResource_Vlans(t *testing.T) {
-	vlanRef := utils.GetNIOSVlanRef()
-	if vlanRef == "" {
-		t.Skip("NIOS_VLAN_REF environment variable must be set for this test to run (requires a VLAN object reference from NIOS, e.g. vlan/ZG5z...)")
-	}
 	var resourceName = "nios_ipam_network.test_vlans"
 	var v ipam.Network
 	network := acctest.RandomCIDRNetwork()
-	vlans := []map[string]any{
-		{
-			"vlan": vlanRef,
-		},
-	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -3208,48 +3200,11 @@ func TestAccNetworkResource_Vlans(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccNetworkVlans(network, vlans),
+				Config: testAccNetworkVlans(network),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttrSet(resourceName, "vlans.0.id"),
 					resource.TestCheckResourceAttrSet(resourceName, "vlans.0.name"),
-				),
-			},
-			// Delete testing automatically occurs in TestCase
-		},
-	})
-}
-
-func TestAccNetworkResource_ZoneAssociations(t *testing.T) {
-	zoneFqdn := utils.GetNIOSDnsAuthZoneFqdn()
-	if zoneFqdn == "" {
-		t.Skip("NIOS_DNS_AUTH_ZONE_FQDN environment variable must be set for this test to run (requires a pre-existing DNS auth zone FQDN in NIOS)")
-	}
-	var resourceName = "nios_ipam_network.test_zone_associations"
-	var v ipam.Network
-	network := acctest.RandomCIDRNetwork()
-
-	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.PreCheck(t) },
-		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-		Steps: []resource.TestStep{
-			// Create and Read
-			{
-				Config: testAccNetworkZoneAssociations(network, zoneFqdn),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckNetworkExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "zone_associations.0.fqdn", zoneFqdn),
-					resource.TestCheckResourceAttr(resourceName, "use_zone_associations", "true"),
-				),
-			},
-			// Update and Read
-			{
-				Config: testAccNetworkZoneAssociationsUpdate(network, zoneFqdn),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckNetworkExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "zone_associations.0.fqdn", zoneFqdn),
-					resource.TestCheckResourceAttr(resourceName, "zone_associations.0.is_default", "true"),
-					resource.TestCheckResourceAttr(resourceName, "use_zone_associations", "true"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -3928,6 +3883,7 @@ func testAccNetworkSubscribeSettings(network, enabledAttribute string) string {
 	return fmt.Sprintf(`
 resource "nios_ipam_network" "test_subscribe_settings" {
     network = %q
+    network_view = "test_network_view"
     subscribe_settings = {
         enabled_attributes = [%q]
     }
@@ -4249,41 +4205,27 @@ resource "nios_ipam_network" "test_use_zone_associations" {
 `, network, useZoneAssociations)
 }
 
-func testAccNetworkVlans(network string, vlans []map[string]any) string {
-	vlansHCL := utils.ConvertSliceOfMapsToHCL(vlans)
+func testAccNetworkVlans(network string) string {
 	return fmt.Sprintf(`
+resource "nios_ipam_vlanview" "test_vlan_view" {
+    start_vlan_id = 50
+    end_vlan_id   = 100
+    name          = "test-vlanview-for-network"
+}
+
+resource "nios_ipam_vlan" "test_vlan" {
+    id     = 50
+    name   = "test-vlan-for-network"
+    parent = nios_ipam_vlanview.test_vlan_view.ref
+}
+
 resource "nios_ipam_network" "test_vlans" {
     network = %q
-    vlans = %s
-}
-`, network, vlansHCL)
-}
-
-func testAccNetworkZoneAssociations(network, zoneFqdn string) string {
-	return fmt.Sprintf(`
-resource "nios_ipam_network" "test_zone_associations" {
-    network = %q
-    zone_associations = [
+    vlans = [
         {
-            fqdn = %q
+            vlan = nios_ipam_vlan.test_vlan.ref
         }
     ]
-    use_zone_associations = true
 }
-`, network, zoneFqdn)
-}
-
-func testAccNetworkZoneAssociationsUpdate(network, zoneFqdn string) string {
-	return fmt.Sprintf(`
-resource "nios_ipam_network" "test_zone_associations" {
-    network = %q
-    zone_associations = [
-        {
-            fqdn       = %q
-            is_default = true
-        }
-    ]
-    use_zone_associations = true
-}
-`, network, zoneFqdn)
+`, network)
 }

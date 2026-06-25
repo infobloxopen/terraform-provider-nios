@@ -1248,8 +1248,8 @@ func TestAccIpv6networkResource_SendRirRequest(t *testing.T) {
 }
 
 func TestAccIpv6networkResource_SubscribeSettings(t *testing.T) {
-	if utils.GetNIOSISEEnabled() == "" {
-		t.Skip("NIOS_ISE_ENABLED environment variable must be set for this test to run (requires Cisco ISE server configured in NIOS)")
+	if utils.GetNIOSPxgridEndpointRef() == "" {
+		t.Skip("NIOS_PXGRID_ENDPOINT_REF environment variable must be set for this test to run (requires Cisco ISE/pxGrid endpoint configured in NIOS)")
 	}
 	var resourceName = "nios_ipam_ipv6network.test_subscribe_settings"
 	var v ipam.Ipv6network
@@ -1964,10 +1964,6 @@ func TestAccIpv6networkResource_ValidLifetime(t *testing.T) {
 }
 
 func TestAccIpv6networkResource_Vlans(t *testing.T) {
-	vlanRef := utils.GetNIOSVlanRef()
-	if vlanRef == "" {
-		t.Skip("NIOS_VLAN_REF environment variable must be set for this test to run (requires a VLAN object reference from NIOS, e.g. vlan/ZG5z...)")
-	}
 	var resourceName = "nios_ipam_ipv6network.test_vlans"
 	var v ipam.Ipv6network
 	network := acctest.RandomIPv6Network()
@@ -1978,7 +1974,7 @@ func TestAccIpv6networkResource_Vlans(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccIpv6networkVlans(network, vlanRef),
+				Config: testAccIpv6networkVlans(network),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networkExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttrSet(resourceName, "vlans.0.id"),
@@ -2419,6 +2415,7 @@ func testAccIpv6networkSubscribeSettings(network, enabledAttribute string) strin
 	return fmt.Sprintf(`
 resource "nios_ipam_ipv6network" "test_subscribe_settings" {
     network = %q
+    network_view = "test_network_view"
     subscribe_settings = {
         enabled_attributes = [%q]
     }
@@ -2632,15 +2629,27 @@ resource "nios_ipam_ipv6network" "test_valid_lifetime" {
 `, network, validLifetime, useValidLifetime)
 }
 
-func testAccIpv6networkVlans(network, vlanRef string) string {
+func testAccIpv6networkVlans(network string) string {
 	return fmt.Sprintf(`
+resource "nios_ipam_vlanview" "test_vlan_view" {
+    start_vlan_id = 50
+    end_vlan_id   = 100
+    name          = "test-vlanview-for-ipv6network"
+}
+
+resource "nios_ipam_vlan" "test_vlan" {
+    id     = 50
+    name   = "test-vlan-for-ipv6network"
+    parent = nios_ipam_vlanview.test_vlan_view.ref
+}
+
 resource "nios_ipam_ipv6network" "test_vlans" {
     network = %q
     vlans = [
         {
-            vlan = %q
+            vlan = nios_ipam_vlan.test_vlan.ref
         }
     ]
 }
-`, network, vlanRef)
+`, network)
 }
