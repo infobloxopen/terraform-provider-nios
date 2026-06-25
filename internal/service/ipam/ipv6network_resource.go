@@ -408,6 +408,28 @@ func (r *Ipv6networkResource) Delete(ctx context.Context, req resource.DeleteReq
 
 	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
 
+	// NIOS rejects deleting a network that has VLANs assigned. Clear them first.
+	if !data.Vlans.IsNull() && !data.Vlans.IsUnknown() && len(data.Vlans.Elements()) > 0 {
+		clearPayload := ipam.NewIpv6network()
+		clearPayload.SetVlans([]ipam.Ipv6networkVlans{})
+
+		clearErr := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+			_, httpRes, callErr := r.client.IPAMAPI.
+				Ipv6networkAPI.
+				Update(ctx, resourceRef).
+				Ipv6network(*clearPayload).
+				Execute()
+			if httpRes != nil {
+				return httpRes.StatusCode, callErr
+			}
+			return 0, callErr
+		})
+		if clearErr != nil {
+			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to clear VLANs from Ipv6network before deletion, got error: %s", clearErr))
+			return
+		}
+	}
+
 	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
 		httpRes, callErr := r.client.IPAMAPI.
 			Ipv6networkAPI.
