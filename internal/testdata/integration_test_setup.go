@@ -18,6 +18,7 @@ import (
 
 	"github.com/infobloxopen/infoblox-nios-go-client/client"
 	"github.com/infobloxopen/infoblox-nios-go-client/dhcp"
+	"github.com/infobloxopen/infoblox-nios-go-client/discovery"
 	"github.com/infobloxopen/infoblox-nios-go-client/dns"
 	"github.com/infobloxopen/infoblox-nios-go-client/grid"
 	"github.com/infobloxopen/infoblox-nios-go-client/ipam"
@@ -79,8 +80,9 @@ func normalizeAddressFromEnv(value string) string {
 }
 
 type GridHostnames struct {
-	MasterHostname string
-	MemberHostname string
+	MasterHostname          string
+	MemberHostname          string
+	DiscoveryMemberHostname string
 }
 
 // ResolveAndStoreGridHostnames resolves grid hostnames from VIP addresses and
@@ -92,6 +94,7 @@ func ResolveAndStoreGridHostnames(gridClient *grid.APIClient) (GridHostnames, er
 
 	masterAddr := normalizeAddressFromEnv(os.Getenv("NIOS_HOST_URL"))
 	memberAddr := normalizeAddressFromEnv(os.Getenv("NIOS_MEMBER_URL"))
+	discoveryMemberAddr := normalizeAddressFromEnv(os.Getenv("NIOS_DISCOVERY_MEMBER_URL"))
 
 	memberListResp, _, err := gridClient.MemberAPI.List(context.Background()).
 		ReturnAsObject(1).
@@ -128,6 +131,10 @@ func ResolveAndStoreGridHostnames(gridClient *grid.APIClient) (GridHostnames, er
 		if memberAddr != "" && vipAddr == memberAddr && resolved.MemberHostname == "" {
 			resolved.MemberHostname = hostName
 		}
+
+		if discoveryMemberAddr != "" && vipAddr == discoveryMemberAddr && resolved.DiscoveryMemberHostname == "" {
+			resolved.DiscoveryMemberHostname = hostName
+		}
 	}
 
 	if resolved.MasterHostname != "" {
@@ -144,6 +151,13 @@ func ResolveAndStoreGridHostnames(gridClient *grid.APIClient) (GridHostnames, er
 		fmt.Printf("Mapped member VIP %q to hostname %q\n", memberAddr, resolved.MemberHostname)
 	}
 
+	if resolved.DiscoveryMemberHostname != "" {
+		if err := writePipelineEnvVar("NIOS_DISCOVERY_MEMBER_HOSTNAME", resolved.DiscoveryMemberHostname); err != nil {
+			return GridHostnames{}, fmt.Errorf("resolve hostnames: failed to write NIOS_DISCOVERY_MEMBER_HOSTNAME: %w", err)
+		}
+		fmt.Printf("Mapped discovery member VIP %q to hostname %q\n", discoveryMemberAddr, resolved.DiscoveryMemberHostname)
+	}
+
 	// Add Grid Master Config Addr Type as env variable
 	if gridMasterConfigAddrType != "" {
 		if err := writePipelineEnvVar("NIOS_GRID_MASTER_CONFIG_ADDR_TYPE", gridMasterConfigAddrType); err != nil {
@@ -158,6 +172,10 @@ func ResolveAndStoreGridHostnames(gridClient *grid.APIClient) (GridHostnames, er
 
 	if memberAddr != "" && resolved.MemberHostname == "" {
 		fmt.Printf("No member found with VIP address matching NIOS_MEMBER_URL (%q)\n", memberAddr)
+	}
+
+	if discoveryMemberAddr != "" && resolved.DiscoveryMemberHostname == "" {
+		fmt.Printf("No member found with VIP address matching NIOS_DISCOVERY_MEMBER_URL (%q)\n", discoveryMemberAddr)
 	}
 
 	return resolved, nil
@@ -560,6 +578,7 @@ type PreConfigClients struct {
 	PARENTAL     *parentalcontrol.APIClient
 	SECURITY     *security.APIClient
 	RIR          *rir.APIClient
+	DISCOVERY    *discovery.APIClient
 }
 
 // PreConfig creates the network views required for integration testing.
@@ -1314,7 +1333,7 @@ func PreConfig(clients PreConfigClients, hostnames GridHostnames) error {
 			MasterCandidate:          grid.PtrBool(member.masterCandidate),
 			VipSetting: &grid.MemberVipSetting{
 				Address:    grid.PtrString(member.vipAddress),
-				Gateway:    grid.PtrString("172.28.32.1"),
+				Gateway:    grid.PtrString("172.28.38.1"),
 				SubnetMask: grid.PtrString("255.255.254.0"),
 				Primary:    grid.PtrBool(true),
 				Dscp:       grid.PtrInt64(0),
@@ -1867,6 +1886,52 @@ func PreConfig(clients PreConfigClients, hostnames GridHostnames) error {
 		fmt.Printf("Syslog endpoint %q created successfully (ref: %s)\n", *syslogEndpointBody.Name, syslogEndpointRef)
 	}
 
+	// Enable Discovery service on the discovery member if NIOS_DISCOVERY_MEMBER_URL is set.
+	discoveryMemberAddr := normalizeAddressFromEnv(os.Getenv("NIOS_DISCOVERY_MEMBER_URL"))
+	if discoveryMemberAddr != "" {
+		if clients.DISCOVERY == nil {
+			return fmt.Errorf("preconfig: DISCOVERY client is required when NIOS_DISCOVERY_MEMBER_URL is set")
+		}
+
+		discoveryListResp, _, err := clients.DISCOVERY.DiscoveryMemberpropertiesAPI.List(context.Background()).
+			ReturnAsObject(1).
+			ReturnFieldsPlus("address,enable_service,is_sa").
+			Execute()
+		if err != nil {
+			return fmt.Errorf("preconfig: failed to list discovery member properties: %w", err)
+		}
+		if discoveryListResp.ListDiscoveryMemberpropertiesResponseObject == nil {
+			return fmt.Errorf("preconfig: discovery member properties list response object is nil")
+		}
+
+		discoveryMemberRef := ""
+		for _, dm := range discoveryListResp.ListDiscoveryMemberpropertiesResponseObject.Result {
+			if dm.Address != nil && strings.TrimSpace(*dm.Address) == discoveryMemberAddr {
+				discoveryMemberRef = dm.GetRef()
+				break
+			}
+		}
+
+		if discoveryMemberRef == "" {
+			fmt.Printf("No discovery member found with address %q, skipping discovery service enablement\n", discoveryMemberAddr)
+		} else {
+			extractedRef := utils.ExtractResourceRef(discoveryMemberRef)
+			discoveryMemberBody := discovery.DiscoveryMemberproperties{
+				EnableService: discovery.PtrBool(true),
+				IsSa:          discovery.PtrBool(true),
+			}
+
+			_, _, err = clients.DISCOVERY.DiscoveryMemberpropertiesAPI.Update(context.Background(), extractedRef).
+				DiscoveryMemberproperties(discoveryMemberBody).
+				Execute()
+			if err != nil {
+				return fmt.Errorf("preconfig: failed to enable discovery service on member %q: %w", discoveryMemberRef, err)
+			}
+
+			fmt.Printf("Discovery service enabled (enable_service=true, is_sa=true) for member %q\n", discoveryMemberRef)
+		}
+	}
+
 	return nil
 }
 
@@ -2158,6 +2223,7 @@ func main() {
 		PARENTAL:     apiClient.ParentalControlAPI,
 		SECURITY:     apiClient.SecurityAPI,
 		RIR:          apiClient.RIRAPI,
+		DISCOVERY:    apiClient.DiscoveryAPI,
 	}
 
 	err = PreConfig(clients, hostnames)

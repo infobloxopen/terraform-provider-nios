@@ -137,6 +137,8 @@ func (r *DistributionscheduleResource) Create(ctx context.Context, req resource.
 		return
 	}
 
+	payload.UpgradeGroups = mergeDistributionUpgradeGroups(listObj.GetUpgradeGroups(), payload.UpgradeGroups)
+
 	var apiRes *grid.UpdateDistributionscheduleResponse
 
 	err = retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
@@ -255,9 +257,23 @@ func (r *DistributionscheduleResource) Update(ctx context.Context, req resource.
 
 	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
 
+	currentRes, _, err := r.client.GridAPI.
+		DistributionscheduleAPI.
+		Read(ctx, resourceRef).
+		ReturnAsObject(1).
+		ReturnFieldsPlus("upgrade_groups").
+		ProxySearch(config.GetProxySearch()).
+		Execute()
+	if err != nil {
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read current Distributionschedule for merge, got error: %s", err))
+		return
+	}
+	currentObj := currentRes.GetDistributionscheduleResponseObjectAsResult.GetResult()
+	payload.UpgradeGroups = mergeDistributionUpgradeGroups(currentObj.GetUpgradeGroups(), payload.UpgradeGroups)
+
 	var apiRes *grid.UpdateDistributionscheduleResponse
 
-	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+	err = retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
 		var (
 			httpRes *http.Response
 			callErr error
@@ -296,4 +312,46 @@ func (r *DistributionscheduleResource) Delete(ctx context.Context, req resource.
 
 func (r *DistributionscheduleResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("ref"), req, resp)
+}
+
+// mergeDistributionUpgradeGroups merges currentGroups (from the grid) with userGroups (from the plan).
+// userGroups take precedence on name match; grid-only groups are retained.
+func mergeDistributionUpgradeGroups(currentGroups, userGroups []grid.DistributionscheduleUpgradeGroups) []grid.DistributionscheduleUpgradeGroups {
+	userByName := make(map[string]grid.DistributionscheduleUpgradeGroups, len(userGroups))
+	for _, g := range userGroups {
+		if g.Name != nil {
+			userByName[*g.Name] = g
+		}
+	}
+
+	seen := make(map[string]bool, len(currentGroups))
+	merged := make([]grid.DistributionscheduleUpgradeGroups, 0, len(currentGroups))
+
+	for _, cg := range currentGroups {
+		name := ""
+		if cg.Name != nil {
+			name = *cg.Name
+		}
+		if ug, ok := userByName[name]; ok {
+			ug.TimeZone = nil
+			merged = append(merged, ug)
+		} else {
+			cg.TimeZone = nil
+			merged = append(merged, cg)
+		}
+		seen[name] = true
+	}
+
+	for _, ug := range userGroups {
+		name := ""
+		if ug.Name != nil {
+			name = *ug.Name
+		}
+		if !seen[name] {
+			ug.TimeZone = nil
+			merged = append(merged, ug)
+		}
+	}
+
+	return merged
 }

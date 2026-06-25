@@ -2,6 +2,9 @@ package misc
 
 import (
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
+	"encoding/json"
 	"fmt"
 	"net/http"
 
@@ -9,10 +12,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
-
+	"github.com/hashicorp/terraform-plugin-framework/types"
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
 	"github.com/infobloxopen/infoblox-nios-go-client/misc"
-
 	"github.com/infobloxopen/terraform-provider-nios/internal/config"
 	"github.com/infobloxopen/terraform-provider-nios/internal/retry"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
@@ -23,6 +25,7 @@ var readableAttributesForBfdtemplate = "authentication_key_id,authentication_typ
 // Ensure provider defined types fully satisfy framework interfaces.
 var _ resource.Resource = &BfdtemplateResource{}
 var _ resource.ResourceWithImportState = &BfdtemplateResource{}
+var _ resource.ResourceWithModifyPlan = &BfdtemplateResource{}
 
 func NewBfdtemplateResource() resource.Resource {
 	return &BfdtemplateResource{}
@@ -31,6 +34,10 @@ func NewBfdtemplateResource() resource.Resource {
 // BfdtemplateResource defines the resource implementation.
 type BfdtemplateResource struct {
 	client *niosclient.APIClient
+}
+
+type secretsHashState struct {
+	AuthenticationKey string `json:"authentication_key_hash"`
 }
 
 func (r *BfdtemplateResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -64,6 +71,84 @@ func (r *BfdtemplateResource) Configure(ctx context.Context, req resource.Config
 	r.client = client
 }
 
+func (r *BfdtemplateResource) ModifyPlan(ctx context.Context, req resource.ModifyPlanRequest, resp *resource.ModifyPlanResponse) {
+	if req.Plan.Raw.IsNull() {
+		return
+	}
+
+	var stateRev types.Int64
+	var planAuthenticationKey types.String
+
+	curRev := int64(0)
+	if !req.State.Raw.IsNull() && req.State.Raw.IsKnown() {
+		resp.Diagnostics.Append(req.State.GetAttribute(ctx, path.Root("authentication_key_version"), &stateRev)...)
+		if resp.Diagnostics.HasError() {
+			return
+		}
+		if !stateRev.IsNull() && !stateRev.IsUnknown() {
+			curRev = stateRev.ValueInt64()
+		}
+	}
+
+	resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("authentication_key"), &planAuthenticationKey)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	computeNewHash := !planAuthenticationKey.IsNull() && !planAuthenticationKey.IsUnknown()
+	prevHashes := secretsHashState{}
+	plannedHashes := secretsHashState{}
+
+	if computeNewHash {
+		var prev struct {
+			Algo string `json:"algo"`
+			Hash string `json:"hash"`
+		}
+
+		if b, diags := req.Private.GetKey(ctx, "authentication_key_hash"); diags != nil {
+			resp.Diagnostics.Append(diags...)
+		} else if b != nil {
+			if err := json.Unmarshal(b, &prev); err != nil {
+				prev.Hash = ""
+			}
+		}
+
+		var plannedHash string
+		if prev.Hash != "" {
+			_ = json.Unmarshal([]byte(prev.Hash), &prevHashes)
+		}
+
+		if !planAuthenticationKey.IsUnknown() {
+			if planAuthenticationKey.IsNull() {
+				plannedHashes.AuthenticationKey = ""
+			} else {
+				h := sha256.New()
+				h.Write([]byte(planAuthenticationKey.ValueString()))
+				plannedHashes.AuthenticationKey = hex.EncodeToString(h.Sum(nil))
+			}
+		}
+
+		if data, err := json.Marshal(plannedHashes); err == nil {
+			plannedHash = string(data)
+		}
+
+		if plannedHashes.AuthenticationKey != "" && plannedHashes.AuthenticationKey != prevHashes.AuthenticationKey {
+			newRev := types.Int64Value(curRev + 1)
+			resp.Diagnostics.Append(resp.Plan.SetAttribute(ctx, path.Root("authentication_key_version"), newRev)...)
+
+			val := map[string]string{"algo": "sha256", "hash": plannedHash}
+			b, err := json.Marshal(val)
+			if err != nil {
+				resp.Diagnostics.AddError("Private State Marshal Error", err.Error())
+				return
+			}
+			resp.Diagnostics.Append(resp.Private.SetKey(ctx, "authentication_key_hash", b)...)
+		} else {
+			resp.Diagnostics.Append(resp.Plan.SetAttribute(ctx, path.Root("authentication_key_version"), curRev)...)
+		}
+	}
+}
+
 func (r *BfdtemplateResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var data BfdtemplateModel
 
@@ -77,6 +162,26 @@ func (r *BfdtemplateResource) Create(ctx context.Context, req resource.CreateReq
 	payload := data.Expand(ctx, &resp.Diagnostics)
 	if resp.Diagnostics.HasError() {
 		return
+	}
+
+	authenticationKeyVersion := types.Int64Value(0)
+	var authenticationKey types.String
+	resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("authentication_key"), &authenticationKey)...)
+	secretData := secretsHashState{}
+	if !authenticationKey.IsNull() && !authenticationKey.IsUnknown() {
+		payload.AuthenticationKey = authenticationKey.ValueStringPointer()
+		authenticationKeyVersion = types.Int64Value(1)
+		h := sha256.New()
+		h.Write([]byte(authenticationKey.ValueString()))
+		secretData.AuthenticationKey = hex.EncodeToString(h.Sum(nil))
+		secretDataJSON, _ := json.Marshal(secretData)
+		val := map[string]string{"algo": "sha256", "hash": string(secretDataJSON)}
+		hashedSecret, err := json.Marshal(val)
+		if err != nil {
+			resp.Diagnostics.AddError("Private State Marshal Error", err.Error())
+			return
+		}
+		resp.Diagnostics.Append(resp.Private.SetKey(ctx, "authentication_key_hash", hashedSecret)...)
 	}
 
 	var apiRes *misc.CreateBfdtemplateResponse
@@ -115,6 +220,7 @@ func (r *BfdtemplateResource) Create(ctx context.Context, req resource.CreateReq
 
 	res := apiRes.CreateBfdtemplateResponseAsObject.GetResult()
 
+	data.AuthenticationKeyVersion = authenticationKeyVersion
 	data.Flatten(ctx, &res, &resp.Diagnostics)
 
 	// Save data into Terraform state
@@ -190,9 +296,19 @@ func (r *BfdtemplateResource) Update(ctx context.Context, req resource.UpdateReq
 		return
 	}
 
+	var authenticationKey types.String
+	resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("authentication_key"), &authenticationKey)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
 	payload := data.Expand(ctx, &resp.Diagnostics)
 	if resp.Diagnostics.HasError() {
 		return
+	}
+
+	if !authenticationKey.IsNull() && !authenticationKey.IsUnknown() {
+		payload.AuthenticationKey = authenticationKey.ValueStringPointer()
 	}
 
 	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
