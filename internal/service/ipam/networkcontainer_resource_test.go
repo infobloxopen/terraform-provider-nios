@@ -2599,6 +2599,9 @@ func TestAccNetworkcontainerResource_DiscoveryMember(t *testing.T) {
 	var v ipam.Networkcontainer
 	network := acctest.RandomCIDRNetwork()
 	discoveryMember := utils.GetNIOSDiscoveryMemberHostName()
+	if discoveryMember == "" {
+		t.Skip("NIOS_DISCOVERY_MEMBER_HOSTNAME environment variable must be set")
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -2621,6 +2624,10 @@ func TestAccNetworkcontainerResource_EnableDiscovery(t *testing.T) {
 	var resourceName = "nios_ipam_network_container.test_enable_discovery"
 	var v ipam.Networkcontainer
 	network := acctest.RandomCIDRNetwork()
+	discoveryMember := utils.GetNIOSDiscoveryMemberHostName()
+	if discoveryMember == "" {
+		t.Skip("NIOS_DISCOVERY_MEMBER_HOSTNAME environment variable must be set")
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -2651,6 +2658,10 @@ func TestAccNetworkcontainerResource_EnableImmediateDiscovery(t *testing.T) {
 	var resourceName = "nios_ipam_network_container.test_enable_immediate_discovery"
 	var v ipam.Networkcontainer
 	network := acctest.RandomCIDRNetwork()
+	discoveryMember := utils.GetNIOSDiscoveryMemberHostName()
+	if discoveryMember == "" {
+		t.Skip("NIOS_DISCOVERY_MEMBER_HOSTNAME environment variable must be set")
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },

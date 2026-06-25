@@ -21,9 +21,6 @@ import (
 // Notification Rest Endpoint - rest_api, syslog, cisco
 // Notification Template - DHCP_Lease, Version5_Syslog_Action_Template, IPAM_PxgridEvent
 
-// TODO
-// TestAccNotificationRuleResource_NotificationAction
-
 var readableAttributesForNotificationRule = "all_members,comment,disable,enable_event_deduplication,enable_event_deduplication_log,event_deduplication_fields,event_deduplication_lookback_period,event_priority,event_type,expression_list,name,notification_action,notification_target,publish_settings,scheduled_event,selected_members,template_instance,use_publish_settings"
 
 var (
@@ -651,9 +648,7 @@ func TestAccNotificationRuleResource_NotificationAction(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "notification_action", "RESTAPI_TEMPLATE_INSTANCE"),
 				),
 			},
-			// notification_action cannot be updated to a different value without also changing notification_target
-			// (e.g. CISCOISE_PUBLISH requires a pxgrid endpoint, CISCOISE_QUARANTINE requires a cisco endpoint)
-			// So we verify the value persists on re-apply
+			// Update and Read
 			{
 				Config: testAccNotificationRuleNotificationAction(eventType, expressionList, name, "RESTAPI_TEMPLATE_INSTANCE", notificationTarget, templateInstance),
 				Check: resource.ComposeTestCheckFunc(

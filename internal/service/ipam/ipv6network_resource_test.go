@@ -1768,6 +1768,9 @@ func TestAccIpv6networkResource_DiscoveryMember(t *testing.T) {
 	var v ipam.Ipv6network
 	network := acctest.RandomIPv6Network()
 	discoveryMember := utils.GetNIOSDiscoveryMemberHostName()
+	if discoveryMember == "" {
+		t.Skip("NIOS_DISCOVERY_MEMBER_HOSTNAME environment variable must be set")
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1790,6 +1793,10 @@ func TestAccIpv6networkResource_EnableDiscovery(t *testing.T) {
 	var resourceName = "nios_ipam_ipv6network.test_enable_discovery"
 	var v ipam.Ipv6network
 	network := acctest.RandomIPv6Network()
+	discoveryMember := utils.GetNIOSDiscoveryMemberHostName()
+	if discoveryMember == "" {
+		t.Skip("NIOS_DISCOVERY_MEMBER_HOSTNAME environment variable must be set")
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1820,6 +1827,10 @@ func TestAccIpv6networkResource_EnableImmediateDiscovery(t *testing.T) {
 	var resourceName = "nios_ipam_ipv6network.test_enable_immediate_discovery"
 	var v ipam.Ipv6network
 	network := acctest.RandomIPv6Network()
+	discoveryMember := utils.GetNIOSDiscoveryMemberHostName()
+	if discoveryMember == "" {
+		t.Skip("NIOS_DISCOVERY_MEMBER_HOSTNAME environment variable must be set")
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },

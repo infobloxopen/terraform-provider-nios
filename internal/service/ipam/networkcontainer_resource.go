@@ -93,9 +93,6 @@ func (r *NetworkcontainerResource) Create(ctx context.Context, req resource.Crea
 		return
 	}
 
-	// remove_subnets is a delete-only parameter, not writable on create
-	payload.RemoveSubnets = nil
-
 	var apiRes *ipam.CreateNetworkcontainerResponse
 
 	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
@@ -339,9 +336,6 @@ func (r *NetworkcontainerResource) Update(ctx context.Context, req resource.Upda
 		return
 	}
 
-	// remove_subnets is a delete-only parameter, not writable on update
-	payload.RemoveSubnets = nil
-
 	var apiRes *ipam.UpdateNetworkcontainerResponse
 
 	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
@@ -402,10 +396,6 @@ func (r *NetworkcontainerResource) Delete(ctx context.Context, req resource.Dele
 		deleteReq := r.client.IPAMAPI.
 			NetworkcontainerAPI.
 			Delete(ctx, resourceRef)
-
-		if !data.RemoveSubnets.IsNull() && !data.RemoveSubnets.IsUnknown() {
-			deleteReq = deleteReq.RemoveSubnets(data.RemoveSubnets.ValueBool())
-		}
 
 		httpRes, callErr := deleteReq.Execute()
 

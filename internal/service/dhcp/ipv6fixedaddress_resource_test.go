@@ -24,8 +24,6 @@ var readableAttributesForIpv6fixedaddress = "address_type,allow_telnet,cli_crede
 // TODO: Add tests:
 // The following require additional resource/data source objects to be supported.
 // - Reserved Interface
-// - IPV6 Fixed Address Template
-// - SNMP credentials
 
 func TestAccIpv6fixedaddressResource_basic(t *testing.T) {
 	var resourceName = "nios_dhcp_ipv6fixedaddress.test"
