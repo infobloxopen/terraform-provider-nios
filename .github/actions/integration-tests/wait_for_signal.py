@@ -93,7 +93,30 @@ def fetch_signal() -> dict | None:
         return None
 
     file_name = f"ci-signal-{GIT_SHA}.json"
-    raw_content = files.get(file_name, {}).get("content", "")
+    file_data = files.get(file_name)
+    if not file_data:
+        return None
+
+    raw_content = file_data.get("content") or ""
+
+    # When total Gist size exceeds ~10 MB (e.g. many JUnit XML files),
+    # the API truncates file contents. Fall back to raw_url.
+    if (not raw_content or file_data.get("truncated")) and file_data.get("raw_url"):
+        raw_url = file_data["raw_url"]
+        try:
+            dl_req = urllib.request.Request(
+                raw_url,
+                headers={
+                    "Authorization": f"token {GH_TOKEN}",
+                    "Accept": "application/vnd.github+json",
+                },
+            )
+            with urllib.request.urlopen(dl_req, timeout=15) as resp:
+                raw_content = resp.read().decode()
+        except Exception as exc:
+            print(f"[{ts()}] ⚠  Failed to fetch raw_url for signal file ({exc}) — will retry")
+            return None
+
     if not raw_content:
         return None
 

@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -1107,6 +1108,7 @@ func TestAccMemberResource_ExternalSyslogBackupServers(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "external_syslog_backup_servers.0.port", "21"),
 					resource.TestCheckResourceAttr(resourceName, "external_syslog_backup_servers.0.enable", "true"),
 					resource.TestCheckResourceAttr(resourceName, "use_external_syslog_backup_servers", "true"),
+					resource.TestCheckResourceAttr(resourceName, "password_version", "1"),
 				),
 			},
 			{
@@ -1128,6 +1130,7 @@ func TestAccMemberResource_ExternalSyslogBackupServers(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "external_syslog_backup_servers.0.port", "22"),
 					resource.TestCheckResourceAttr(resourceName, "external_syslog_backup_servers.0.enable", "false"),
 					resource.TestCheckResourceAttr(resourceName, "use_external_syslog_backup_servers", "true"),
+					resource.TestCheckResourceAttr(resourceName, "password_version", "2"),
 				),
 			},
 		},
@@ -1354,12 +1357,15 @@ func TestAccMemberResource_Ipv6Setting(t *testing.T) {
 }
 
 func TestAccMemberResource_Ipv6StaticRoutes(t *testing.T) {
-	t.Skip("IPv6 Static Routes cannot be created if other routes exist.")
+	if utils.GetNIOSGridMasterConfigAddrType() != "BOTH" {
+		t.Skip("Skipping test since grid master config addr type is not set to BOTH")
+	}
 	var resourceName = "nios_grid_member.test_ipv6_static_routes"
 	var v grid.Member
 	hostName := fmt.Sprintf("infoblox-%s.localdomain", acctest.RandomName())
 	vipAddress := "172.28.38.122"
-	networkSettingAddress := fmt.Sprintf("2001:db8:%x:%x::%x", acctest.RandomNumber(65535), acctest.RandomNumber(65535), acctest.RandomNumber(65535))
+	vipAddress6 := fmt.Sprintf("2001::%x", acctest.RandomNumber(65534)+2)
+	networkSettingAddress := fmt.Sprintf("2001:db8:%x:%x::", acctest.RandomNumber(65535), acctest.RandomNumber(65535))
 	ipv6StaticRoutesVal := []map[string]any{
 		{
 			"address": networkSettingAddress,
@@ -1378,10 +1384,13 @@ func TestAccMemberResource_Ipv6StaticRoutes(t *testing.T) {
 					ipv6StaticRoutesVal,
 					vipAddress,
 					"172.28.38.1",
-					"255.255.254.0"),
+					"255.255.254.0",
+					vipAddress6),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ipv6_static_routes", "IPV6_STATIC_ROUTES_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "ipv6_static_routes.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "ipv6_static_routes.0.cidr", "64"),
+					resource.TestCheckResourceAttr(resourceName, "ipv6_static_routes.0.gateway", "2001::1"),
 				),
 			},
 			// Cannot change or remove IP address configuration due to existing static routes.
@@ -1635,6 +1644,7 @@ func TestAccMemberResource_LomUsers(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "lom_users.0.name", "LOMuser1"),
 					resource.TestCheckResourceAttr(resourceName, "lom_users.0.role", "USER"),
 					resource.TestCheckResourceAttr(resourceName, "lom_users.0.disable", "false"),
+					resource.TestCheckResourceAttr(resourceName, "password_version", "1"),
 				),
 			},
 			// Update and Read - disable the user
@@ -1656,6 +1666,7 @@ func TestAccMemberResource_LomUsers(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "lom_users.0.role", "OPERATOR"),
 					resource.TestCheckResourceAttr(resourceName, "lom_users.0.disable", "true"),
 					resource.TestCheckResourceAttr(resourceName, "lom_users.0.comment", "Updated user"),
+					resource.TestCheckResourceAttr(resourceName, "password_version", "2"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -1796,7 +1807,7 @@ func TestAccMemberResource_NodeInfo(t *testing.T) {
 		{
 			"lan_ha_port_setting": map[string]any{
 				"ha_cloud_attribute": "UNK",
-				"ha_ip_address":      "172.28.38.121",
+				"ha_ip_address":      "172.28.38.200",
 				"ha_port_setting": map[string]any{
 					"auto_port_setting_enabled": true,
 					"speed":                     "10",
@@ -1804,13 +1815,13 @@ func TestAccMemberResource_NodeInfo(t *testing.T) {
 				"lan_port_setting": map[string]any{
 					"auto_port_setting_enabled": true,
 				},
-				"mgmt_lan": "172.28.38.132",
+				"mgmt_lan": "172.28.38.201",
 			},
 		},
 		{
 			"lan_ha_port_setting": map[string]any{
 				"ha_cloud_attribute": "UNK",
-				"ha_ip_address":      "172.28.38.141",
+				"ha_ip_address":      "172.28.38.202",
 				"ha_port_setting": map[string]any{
 					"auto_port_setting_enabled": true,
 					"speed":                     "10",
@@ -1818,12 +1829,60 @@ func TestAccMemberResource_NodeInfo(t *testing.T) {
 				"lan_port_setting": map[string]any{
 					"auto_port_setting_enabled": true,
 				},
-				"mgmt_lan": "172.28.38.143",
+				"mgmt_lan": "172.28.38.203",
 			},
 		},
 	}
 
 	nodeInfoValUpdated := []map[string]any{
+		{
+			"lan_ha_port_setting": map[string]any{
+				"ha_cloud_attribute": "UNK",
+				"ha_ip_address":      "172.28.38.204",
+				"ha_port_setting": map[string]any{
+					"auto_port_setting_enabled": true,
+					"speed":                     "10",
+				},
+				"lan_port_setting": map[string]any{
+					"auto_port_setting_enabled": true,
+				},
+				"mgmt_lan": "172.28.38.205",
+			},
+		},
+		{
+			"lan_ha_port_setting": map[string]any{
+				"ha_cloud_attribute": "UNK",
+				"ha_ip_address":      "172.28.38.206",
+				"ha_port_setting": map[string]any{
+					"auto_port_setting_enabled": true,
+					"speed":                     "10",
+				},
+				"lan_port_setting": map[string]any{
+					"auto_port_setting_enabled": true,
+				},
+				"mgmt_lan": "172.28.38.207",
+			},
+		},
+	}
+
+	nodeInfoSingleNode := []map[string]any{
+		{
+			"lan_ha_port_setting": map[string]any{
+				"ha_cloud_attribute": "UNK",
+				"ha_ip_address":      "172.28.38.12",
+				"ha_port_setting": map[string]any{
+					"auto_port_setting_enabled": true,
+					"speed":                     "10",
+				},
+				"lan_port_setting": map[string]any{
+					"auto_port_setting_enabled": true,
+				},
+				"mgmt_lan": "172.28.38.33",
+			},
+		},
+	}
+
+	nodeInfoThreeNodes := []map[string]any{
 		{
 			"lan_ha_port_setting": map[string]any{
 				"ha_cloud_attribute": "UNK",
@@ -1852,12 +1911,26 @@ func TestAccMemberResource_NodeInfo(t *testing.T) {
 				"mgmt_lan": "172.28.38.44",
 			},
 		},
+		{
+			"lan_ha_port_setting": map[string]any{
+				"ha_cloud_attribute": "UNK",
+				"ha_ip_address":      "172.28.38.52",
+				"ha_port_setting": map[string]any{
+					"auto_port_setting_enabled": true,
+					"speed":                     "10",
+				},
+				"lan_port_setting": map[string]any{
+					"auto_port_setting_enabled": true,
+				},
+				"mgmt_lan": "172.28.38.55",
+			},
+		},
 	}
 
 	nodeInfoMGMTIPv4 := []map[string]any{
 		{
 			"mgmt_network_setting": map[string]any{
-				"address":     "172.28.38.254",
+				"address":     "172.28.38.208",
 				"gateway":     "172.28.38.1",
 				"subnet_mask": "255.255.255.0",
 			},
@@ -1896,10 +1969,10 @@ func TestAccMemberResource_NodeInfo(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "node_info.#", "2"),
-					resource.TestCheckResourceAttr(resourceName, "node_info.0.lan_ha_port_setting.ha_ip_address", "172.28.38.121"),
-					resource.TestCheckResourceAttr(resourceName, "node_info.0.lan_ha_port_setting.mgmt_lan", "172.28.38.132"),
-					resource.TestCheckResourceAttr(resourceName, "node_info.1.lan_ha_port_setting.ha_ip_address", "172.28.38.141"),
-					resource.TestCheckResourceAttr(resourceName, "node_info.1.lan_ha_port_setting.mgmt_lan", "172.28.38.143"),
+					resource.TestCheckResourceAttr(resourceName, "node_info.0.lan_ha_port_setting.ha_ip_address", "172.28.38.200"),
+					resource.TestCheckResourceAttr(resourceName, "node_info.0.lan_ha_port_setting.mgmt_lan", "172.28.38.201"),
+					resource.TestCheckResourceAttr(resourceName, "node_info.1.lan_ha_port_setting.ha_ip_address", "172.28.38.202"),
+					resource.TestCheckResourceAttr(resourceName, "node_info.1.lan_ha_port_setting.mgmt_lan", "172.28.38.203"),
 				),
 			},
 			// Update and Read
@@ -1910,7 +1983,7 @@ func TestAccMemberResource_NodeInfo(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "node_info.#", "1"),
-					resource.TestCheckResourceAttr(resourceName, "node_info.0.mgmt_network_setting.address", "172.28.38.254"),
+					resource.TestCheckResourceAttr(resourceName, "node_info.0.mgmt_network_setting.address", "172.28.38.208"),
 					resource.TestCheckResourceAttr(resourceName, "node_info.0.mgmt_network_setting.gateway", "172.28.38.1"),
 					resource.TestCheckResourceAttr(resourceName, "node_info.0.mgmt_network_setting.subnet_mask", "255.255.255.0"),
 					resource.TestCheckResourceAttr(resourceName, "node_info.0.mgmt_physical_setting.auto_port_setting_enabled", "false"),
@@ -1939,14 +2012,37 @@ func TestAccMemberResource_NodeInfo(t *testing.T) {
 			// Update and Read
 			{
 				Config: testAccMemberNodeInfo(hostName, "IPV4", "VNIOS", "ALL_V4",
+					vipAddress, "172.28.38.1", "255.255.254.0", "false", 113, nodeInfoValUpdated, mgmtPortSettingVal),
+				ExpectError: regexp.MustCompile("enable_ha must be true when node_info has 2 nodes"),
+			},
+			// Condition 2: enable_ha true requires exactly 2 nodes (not more)
+			{
+				Config: testAccMemberNodeInfo(hostName, "IPV4", "VNIOS", "ALL_V4",
+					vipAddress, "172.28.38.1", "255.255.254.0", "true", 113, nodeInfoThreeNodes, mgmtPortSettingVal),
+				ExpectError: regexp.MustCompile("node_info must have exactly 2 nodes when enable_ha is true"),
+			},
+			// Condition 3a: node_info > 2 with enable_ha false is not allowed
+			{
+				Config: testAccMemberNodeInfo(hostName, "IPV4", "VNIOS", "ALL_V4",
+					vipAddress, "172.28.38.1", "255.255.254.0", "false", 0, nodeInfoThreeNodes, mgmtPortSettingVal),
+				ExpectError: regexp.MustCompile("node_info cannot have more than 2 nodes when enable_ha is false"),
+			},
+			//Condition 3b: single node with enable_ha true is not allowed
+			{
+				Config: testAccMemberNodeInfo(hostName, "IPV4", "VNIOS", "ALL_V4",
+					vipAddress, "172.28.38.1", "255.255.254.0", "true", 113, nodeInfoSingleNode, mgmtPortSettingVal),
+				ExpectError: regexp.MustCompile(`node_info must have exactly 2 nodes when enable_ha is true; a single\s+node_info entry is not valid`),
+			},
+			{
+				Config: testAccMemberNodeInfo(hostName, "IPV4", "VNIOS", "ALL_V4",
 					vipAddress, "172.28.38.1", "255.255.254.0", "true", 113, nodeInfoValUpdated, mgmtPortSettingVal),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "node_info.#", "2"),
-					resource.TestCheckResourceAttr(resourceName, "node_info.0.lan_ha_port_setting.ha_ip_address", "172.28.38.12"),
-					resource.TestCheckResourceAttr(resourceName, "node_info.0.lan_ha_port_setting.mgmt_lan", "172.28.38.33"),
-					resource.TestCheckResourceAttr(resourceName, "node_info.1.lan_ha_port_setting.ha_ip_address", "172.28.38.42"),
-					resource.TestCheckResourceAttr(resourceName, "node_info.1.lan_ha_port_setting.mgmt_lan", "172.28.38.44"),
+					resource.TestCheckResourceAttr(resourceName, "node_info.0.lan_ha_port_setting.ha_ip_address", "172.28.38.204"),
+					resource.TestCheckResourceAttr(resourceName, "node_info.0.lan_ha_port_setting.mgmt_lan", "172.28.38.205"),
+					resource.TestCheckResourceAttr(resourceName, "node_info.1.lan_ha_port_setting.ha_ip_address", "172.28.38.206"),
+					resource.TestCheckResourceAttr(resourceName, "node_info.1.lan_ha_port_setting.mgmt_lan", "172.28.38.207"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -2011,8 +2107,6 @@ func TestAccMemberResource_NtpSetting(t *testing.T) {
 }
 
 func TestAccMemberResource_OspfList(t *testing.T) {
-	// Authentication Key Issue
-	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_grid_member.test_ospf_list"
 	var v grid.Member
 
@@ -2442,7 +2536,6 @@ func TestAccMemberResource_SnmpSetting(t *testing.T) {
 }
 
 func TestAccMemberResource_StaticRoutes(t *testing.T) {
-	t.Skip("Cannot create Static Routes if Static Routes already exist")
 	var resourceName = "nios_grid_member.test_static_routes"
 	var v grid.Member
 
@@ -2451,9 +2544,9 @@ func TestAccMemberResource_StaticRoutes(t *testing.T) {
 
 	staticRoutesVal := []map[string]any{
 		{
-			"address":     "172.28.90.10",
-			"gateway":     "172.28.90.1",
-			"subnet_mask": "255.255.254.0",
+			"address":     "172.28.90.0",
+			"gateway":     "172.28.38.1",
+			"subnet_mask": "255.255.255.0",
 		},
 	}
 
@@ -4391,7 +4484,7 @@ func TestAccMemberResource_Import(t *testing.T) {
 				ImportState:                          true,
 				ImportStateIdFunc:                    testAccMemberImportStateIdFunc(resourceName),
 				ImportStateVerify:                    true,
-				ImportStateVerifyIgnore:              []string{"configure_csp_member_setting", "support_access_info"},
+				ImportStateVerifyIgnore:              []string{"configure_csp_member_setting", "support_access_info", "password_version"},
 				ImportStateVerifyIdentifierAttribute: "ref",
 				PlanOnly:                             true,
 			},
@@ -4401,7 +4494,7 @@ func TestAccMemberResource_Import(t *testing.T) {
 				ImportState:                          true,
 				ImportStateIdFunc:                    testAccMemberImportStateIdFunc(resourceName),
 				ImportStateVerify:                    true,
-				ImportStateVerifyIgnore:              []string{"extattrs_all", "configure_csp_member_setting", "support_access_info"},
+				ImportStateVerifyIgnore:              []string{"extattrs_all", "configure_csp_member_setting", "support_access_info", "password_version"},
 				ImportStateVerifyIdentifierAttribute: "ref",
 			},
 			// Delete testing automatically occurs in TestCase
@@ -5257,12 +5350,25 @@ resource "nios_grid_member" "test_ipv6_setting" {
 `, hostName, configAddrType, platform, serviceTypeConfig, ipv6SettingStr, vipAddress, vipGateway, vipSubnetMask)
 }
 
-func testAccMemberIpv6StaticRoutes(hostName string, ipv6StaticRoutes []map[string]any, vipAddress, vipGateway, vipSubnetMask string) string {
+func testAccMemberIpv6StaticRoutes(hostName string, ipv6StaticRoutes []map[string]any, vipAddress, vipGateway, vipSubnetMask, vipAddress6 string) string {
 	ipv6StaticRoutesStr := utils.ConvertSliceOfMapsToHCL(ipv6StaticRoutes)
 	return fmt.Sprintf(`
 resource "nios_grid_member" "test_ipv6_static_routes" {
     host_name = %q
+    config_addr_type = "BOTH"
+    platform = "VNIOS"
+    service_type_configuration = "ALL_V4"
     ipv6_static_routes = %s
+    ipv6_setting = {
+        auto_router_config_enabled = false
+        dscp = 0
+        enabled = true
+        virtual_ip = %q
+        cidr_prefix = 64
+        gateway = "2001::1"
+        primary = true
+        use_dscp = false
+    }
 	vip_setting = {
         address = %q
         dscp = 0
@@ -5272,7 +5378,7 @@ resource "nios_grid_member" "test_ipv6_static_routes" {
         use_dscp = false
     }
 }
-`, hostName, ipv6StaticRoutesStr, vipAddress, vipGateway, vipSubnetMask)
+`, hostName, ipv6StaticRoutesStr, vipAddress6, vipAddress, vipGateway, vipSubnetMask)
 }
 
 func testAccMemberLan2Enabled(hostName string, lan2Enabled string, vipAddress, vipGateway, vipSubnetMask string) string {
@@ -5952,7 +6058,6 @@ resource "nios_grid_member" "test_static_routes" {
     }
 
     static_routes = %s
-	use_dscp = true
 }
 `, hostName, configAddrType, platform, serviceTypeConfig, vipAddress, vipGateway, vipSubnetMask, staticRoutesStr)
 }
