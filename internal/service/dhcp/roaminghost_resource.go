@@ -131,19 +131,7 @@ func (r *RoaminghostResource) Create(ctx context.Context, req resource.CreateReq
 		return
 	}
 
-	// Preserve template values from plan since the API does not return them after creation
-	planTemplate := data.Template
-	planIpv6Template := data.Ipv6Template
-
 	data.Flatten(ctx, &res, &resp.Diagnostics)
-
-	// Restore template values that are not returned by the API
-	if !planTemplate.IsNull() && !planTemplate.IsUnknown() && planTemplate.ValueString() != "" {
-		data.Template = planTemplate
-	}
-	if !planIpv6Template.IsNull() && !planIpv6Template.IsUnknown() && planIpv6Template.ValueString() != "" {
-		data.Ipv6Template = planIpv6Template
-	}
 
 	// Save data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
@@ -230,19 +218,7 @@ func (r *RoaminghostResource) Read(ctx context.Context, req resource.ReadRequest
 		return
 	}
 
-	// Preserve template values from state since the API does not return them
-	stateTemplate := data.Template
-	stateIpv6Template := data.Ipv6Template
-
 	data.Flatten(ctx, &res, &resp.Diagnostics)
-
-	// Restore template values that are not returned by the API
-	if !stateTemplate.IsNull() && !stateTemplate.IsUnknown() && stateTemplate.ValueString() != "" {
-		data.Template = stateTemplate
-	}
-	if !stateIpv6Template.IsNull() && !stateIpv6Template.IsUnknown() && stateIpv6Template.ValueString() != "" {
-		data.Ipv6Template = stateIpv6Template
-	}
 
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)

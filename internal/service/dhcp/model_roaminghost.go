@@ -708,8 +708,12 @@ func (m *RoaminghostModel) Flatten(ctx context.Context, from *dhcp.Roaminghost, 
 	}
 	m.PreferredLifetime = flex.FlattenInt64Pointer(from.PreferredLifetime)
 	m.PxeLeaseTime = flex.FlattenInt64Pointer(from.PxeLeaseTime)
-	m.Template = flex.FlattenStringPointer(from.Template)
-	m.Ipv6Template = flex.FlattenStringPointer(from.Ipv6Template)
+	if m.Template.IsUnknown() || m.Template.IsNull() {
+		m.Template = flex.FlattenStringPointer(from.Template)
+	}
+	if m.Ipv6Template.IsUnknown() || m.Ipv6Template.IsNull() {
+		m.Ipv6Template = flex.FlattenStringPointer(from.Ipv6Template)
+	}
 	m.UseBootfile = types.BoolPointerValue(from.UseBootfile)
 	m.UseBootserver = types.BoolPointerValue(from.UseBootserver)
 	m.UseDdnsDomainname = types.BoolPointerValue(from.UseDdnsDomainname)
