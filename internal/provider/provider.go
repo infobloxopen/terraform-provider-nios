@@ -518,6 +518,7 @@ func (p *NIOSProvider) ListResources(ctx context.Context) []func() list.ListReso
 		dhcp.NewFixedaddressList,
 
 		ipam.NewNetworkviewList,
+		ipam.NewSuperhostList,
 	}
 }
 
