@@ -511,13 +511,23 @@ func (r *NetworkcontainerResource) ValidateConfig(ctx context.Context, req resou
 
 		for i, option := range options {
 			isSpecialOption := false
+			optionName := ""
+			if option.Value.IsNull() || option.Value.IsUnknown() {
+				resp.Diagnostics.AddAttributeError(
+					path.Root("options").AtListIndex(i).AtName("value"),
+					"Invalid configuration for DHCP Option",
+					"The 'value' attribute is a required field and must be set for all DHCP Options.",
+				)
+			}
 
 			// First, determine if this is a special option
 			if !option.Name.IsNull() && !option.Name.IsUnknown() {
-				isSpecialOption = specialOptions[option.Name.ValueString()]
+				optionName = option.Name.ValueString()
+				isSpecialOption = specialOptions[optionName]
 			} else if !option.Num.IsNull() && !option.Num.IsUnknown() {
 				optionNum := option.Num.ValueInt64()
 				isSpecialOption = specialOptionsNum[optionNum]
+				optionName = fmt.Sprintf("with num = %d", optionNum)
 			} else {
 				resp.Diagnostics.AddAttributeError(
 					path.Root("options").AtListIndex(i).AtName("name"),
@@ -528,17 +538,48 @@ func (r *NetworkcontainerResource) ValidateConfig(ctx context.Context, req resou
 				continue
 			}
 
-			// Handle null value - allow for special options with use_option true/unset
-			if option.Value.IsNull() || option.Value.IsUnknown() {
-				if isSpecialOption && (option.UseOption.IsNull() || option.UseOption.IsUnknown() || option.UseOption.ValueBool()) {
-					continue // Valid inheritance pattern
+
+			if option.Value.ValueString() == "" {
+				if !isSpecialOption {
+					resp.Diagnostics.AddAttributeError(
+						path.Root("options").AtListIndex(i).AtName("value"),
+						"Invalid configuration for DHCP Option",
+						"The 'value' attribute cannot be set as empty for Custom DHCP Option '"+optionName+"'.",
+					)
+				} else if !option.UseOption.IsUnknown() && !option.UseOption.IsNull() && !option.UseOption.ValueBool() {
+					resp.Diagnostics.AddAttributeError(
+						path.Root("options").AtListIndex(i).AtName("value"),
+						"Invalid configuration for DHCP Option",
+						"The 'value' attribute cannot be set as empty for Special DHCP Option '"+optionName+"' when 'use_option' is set to false.",
+					)
 				}
+			}
+
+			if option.Value.ValueString() == "" {
+				if !isSpecialOption {
+					resp.Diagnostics.AddAttributeError(
+						path.Root("options").AtListIndex(i).AtName("value"),
+						"Invalid configuration for DHCP Option",
+						"The 'value' attribute cannot be set as empty for Custom DHCP Option '"+optionName+"'.",
+					)
+				} else if !option.UseOption.IsUnknown() && !option.UseOption.IsNull() && !option.UseOption.ValueBool() {
+					resp.Diagnostics.AddAttributeError(
+						path.Root("options").AtListIndex(i).AtName("value"),
+						"Invalid configuration for DHCP Option",
+						"The 'value' attribute cannot be set as empty for Special DHCP Option '"+optionName+"' when 'use_option' is set to false.",
+					)
+				}
+			}
+
+			if !isSpecialOption && !option.UseOption.IsNull() && !option.UseOption.IsUnknown() {
 				resp.Diagnostics.AddAttributeError(
-					path.Root("options").AtListIndex(i).AtName("value"),
-					"Invalid configuration for DHCP Option",
-					"The 'value' attribute is a required field and must be set for all DHCP Options.",
+					path.Root("options").AtListIndex(i).AtName("use_option"),
+					"Invalid configuration",
+					fmt.Sprintf("The 'use_option' attribute should not be set for Custom DHCP Option '%s'. "+
+						"It is only applicable for Special Options: routers, router-templates, domain-name-servers, "+
+						"domain-name, broadcast-address, broadcast-address-offset, dhcp-lease-time, dhcp6.name-servers.",
+						optionName),
 				)
-				continue
 			}
 		}
 	}
