@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
+	"github.com/hashicorp/terraform-plugin-framework/resource/identityschema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
@@ -24,6 +25,7 @@ var readableAttributesForSuperhost = "comment,dhcp_associated_objects,disabled,d
 // Ensure provider defined types fully satisfy framework interfaces.
 var _ resource.Resource = &SuperhostResource{}
 var _ resource.ResourceWithImportState = &SuperhostResource{}
+var _ resource.ResourceWithIdentity = &SuperhostResource{}
 var _ resource.ResourceWithValidateConfig = &SuperhostResource{}
 
 func NewSuperhostResource() resource.Resource {
@@ -37,12 +39,25 @@ type SuperhostResource struct {
 
 func (r *SuperhostResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_" + "ipam_superhost"
+	resp.ResourceBehavior = resource.ResourceBehavior{
+		MutableIdentity: true,
+	}
 }
 
 func (r *SuperhostResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		MarkdownDescription: "Manages a Super Host",
 		Attributes:          SuperhostResourceSchemaAttributes,
+	}
+}
+
+func (r *SuperhostResource) IdentitySchema(ctx context.Context, req resource.IdentitySchemaRequest, resp *resource.IdentitySchemaResponse) {
+	resp.IdentitySchema = identityschema.Schema{
+		Attributes: map[string]identityschema.Attribute{
+			"ref": identityschema.StringAttribute{
+				RequiredForImport: true,
+			},
+		},
 	}
 }
 
@@ -152,6 +167,9 @@ func (r *SuperhostResource) Create(ctx context.Context, req resource.CreateReque
 
 	data.Flatten(ctx, &res, &resp.Diagnostics)
 
+	// Save the Identity of the Resource
+	resp.Diagnostics.Append(resp.Identity.SetAttribute(ctx, path.Root("ref"), &data.Ref)...)
+
 	// Save data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
@@ -239,6 +257,9 @@ func (r *SuperhostResource) Read(ctx context.Context, req resource.ReadRequest, 
 
 	data.Flatten(ctx, &res, &resp.Diagnostics)
 
+	// Save the Identity of the Resource
+	resp.Diagnostics.Append(resp.Identity.SetAttribute(ctx, path.Root("ref"), &data.Ref)...)
+
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
@@ -295,6 +316,10 @@ func (r *SuperhostResource) ReadByExtAttrs(ctx context.Context, data *SuperhostM
 	}
 
 	data.Flatten(ctx, &res, &resp.Diagnostics)
+
+	// Save the Identity of the Resource
+	resp.Diagnostics.Append(resp.Identity.SetAttribute(ctx, path.Root("ref"), &data.Ref)...)
+
 	resp.Diagnostics.Append(resp.State.Set(ctx, data)...)
 
 	return true
@@ -344,8 +369,8 @@ func (r *SuperhostResource) Update(ctx context.Context, req resource.UpdateReque
 	}
 
 	associateInternalId, diags := req.Private.GetKey(ctx, "associate_internal_id")
+	resp.Diagnostics.Append(diags...)
 	if diags.HasError() {
-		resp.Diagnostics.Append(diags...)
 		return
 	}
 	if associateInternalId != nil {
@@ -363,12 +388,12 @@ func (r *SuperhostResource) Update(ctx context.Context, req resource.UpdateReque
 		return
 	}
 
+	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
+
 	payload := data.Expand(ctx, &resp.Diagnostics)
 	if resp.Diagnostics.HasError() {
 		return
 	}
-
-	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
 
 	var apiRes *ipam.UpdateSuperhostResponse
 
@@ -406,6 +431,9 @@ func (r *SuperhostResource) Update(ctx context.Context, req resource.UpdateReque
 	}
 
 	data.Flatten(ctx, &res, &resp.Diagnostics)
+
+	// Save the Identity of the Resource
+	resp.Diagnostics.Append(resp.Identity.SetAttribute(ctx, path.Root("ref"), &data.Ref)...)
 
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
@@ -481,6 +509,13 @@ func (r *SuperhostResource) ValidateConfig(ctx context.Context, req resource.Val
 }
 
 func (r *SuperhostResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+	if req.Identity != nil && req.Identity.Raw.IsKnown() && !req.Identity.Raw.IsNull() {
+		diags := req.Identity.GetAttribute(ctx, path.Root("ref"), &req.ID)
+		if diags.HasError() {
+			resp.Diagnostics.Append(diags...)
+			return
+		}
+	}
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("ref"), req.ID)...)
 	resp.Diagnostics.Append(resp.Private.SetKey(ctx, "associate_internal_id", []byte("true"))...)
 }
