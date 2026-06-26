@@ -3,12 +3,12 @@
 page_title: "nios_ipam_ipv6network List Resource - nios"
 subcategory: "IPAM"
 description: |-
-  Query existing ipam Ipv6network.
+  Query existing IPAM Ipv6 Network.
 ---
 
 # nios_ipam_ipv6network (List Resource)
 
-Query existing ipam Ipv6network.
+Query existing IPAM Ipv6 Network.
 
 
 

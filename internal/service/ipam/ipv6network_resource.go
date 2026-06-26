@@ -674,15 +674,15 @@ func (r *Ipv6networkResource) ValidateConfig(ctx context.Context, req resource.V
 		}
 	}
 
-	// discovery_basic_poll_settings should generally only be set when use_discovery_basic_polling_settings is true
-	// Note: This validation may trigger false positives when the API returns default values
-	if !data.DiscoveryBasicPollSettings.IsNull() && !data.DiscoveryBasicPollSettings.IsUnknown() {
-		// Only validate if use_discovery_basic_polling_settings is explicitly set to false by the user
-		// If it's null/unknown, allow the configuration (API will use defaults)
-		if !data.UseDiscoveryBasicPollingSettings.IsNull() && !data.UseDiscoveryBasicPollingSettings.IsUnknown() && !data.UseDiscoveryBasicPollingSettings.ValueBool() {
-			resp.Diagnostics.AddWarning(
-				"Discovery Basic Poll Settings May Be Ignored",
-				"When use_discovery_basic_polling_settings is set to false, discovery_basic_poll_settings may be ignored by the NIOS API. Consider setting use_discovery_basic_polling_settings to true or removing the discovery_basic_poll_settings block.",
+	useDiscoveryBasicPollingSettings := data.UseDiscoveryBasicPollingSettings
+	discoveryBasicPollSettings := data.DiscoveryBasicPollSettings
+	//  discovery_basic_poll_settings is provided and use_discovery_basic_polling_settings is false
+	if !discoveryBasicPollSettings.IsUnknown() && !discoveryBasicPollSettings.IsNull() {
+		// Only then check if use_discovery_basic_polling_settings is false
+		if !useDiscoveryBasicPollingSettings.ValueBool() {
+			resp.Diagnostics.AddError(
+				"Discovery Basic Poll Settings Not Allowed",
+				"When use_discovery_basic_polling_settings is set to false, discovery_basic_poll_settings cannot be configured. Either set use_discovery_basic_polling_settings to true or remove the discovery_basic_poll_settings block.",
 			)
 		}
 	}
