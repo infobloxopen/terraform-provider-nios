@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
+	"github.com/hashicorp/terraform-plugin-framework/resource/identityschema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
@@ -24,6 +25,7 @@ var readableAttributesForVlanview = "allow_range_overlapping,comment,end_vlan_id
 var _ resource.Resource = &VlanviewResource{}
 var _ resource.ResourceWithImportState = &VlanviewResource{}
 var _ resource.ResourceWithValidateConfig = &VlanviewResource{}
+var _ resource.ResourceWithIdentity = &VlanviewResource{}
 
 func NewVlanviewResource() resource.Resource {
 	return &VlanviewResource{}
@@ -36,12 +38,25 @@ type VlanviewResource struct {
 
 func (r *VlanviewResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_" + "ipam_vlanview"
+	resp.ResourceBehavior = resource.ResourceBehavior{
+		MutableIdentity: true,
+	}
 }
 
 func (r *VlanviewResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		MarkdownDescription: "Manages a VLAN View",
 		Attributes:          VlanviewResourceSchemaAttributes,
+	}
+}
+
+func (r *VlanviewResource) IdentitySchema(ctx context.Context, req resource.IdentitySchemaRequest, resp *resource.IdentitySchemaResponse) {
+	resp.IdentitySchema = identityschema.Schema{
+		Attributes: map[string]identityschema.Attribute{
+			"ref": identityschema.StringAttribute{
+				RequiredForImport: true,
+			},
+		},
 	}
 }
 
@@ -79,6 +94,7 @@ func (r *VlanviewResource) Create(ctx context.Context, req resource.CreateReques
 	// Add internal ID exists in the Extensible Attributes if not already present
 	data.ExtAttrs, diags = AddInternalIDToExtAttrs(ctx, data.ExtAttrs, diags)
 	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
 		return
 	}
 
@@ -124,11 +140,15 @@ func (r *VlanviewResource) Create(ctx context.Context, req resource.CreateReques
 	res := apiRes.CreateVlanviewResponseAsObject.GetResult()
 	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.ExtAttrs)
 	if diags.HasError() {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while create Vlanview due inherited Extensible attributes, got error: %s", err))
+		resp.Diagnostics.Append(diags...)
+		resp.Diagnostics.AddError("Client Error", "Error while creating Vlanview due to inherited Extensible attributes")
 		return
 	}
 
 	data.Flatten(ctx, &res, &resp.Diagnostics)
+
+	// Save the Identity of the Resource
+	resp.Diagnostics.Append(resp.Identity.SetAttribute(ctx, path.Root("ref"), &data.Ref)...)
 
 	// Save data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
@@ -210,11 +230,15 @@ func (r *VlanviewResource) Read(ctx context.Context, req resource.ReadRequest, r
 
 	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.ExtAttrs)
 	if diags.HasError() {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while reading Vlanview due inherited Extensible attributes, got error: %s", diags))
+		resp.Diagnostics.Append(diags...)
+		resp.Diagnostics.AddError("Client Error", "Error while reading Vlanview due to inherited Extensible attributes")
 		return
 	}
 
 	data.Flatten(ctx, &res, &resp.Diagnostics)
+
+	// Save the Identity of the Resource
+	resp.Diagnostics.Append(resp.Identity.SetAttribute(ctx, path.Root("ref"), &data.Ref)...)
 
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
@@ -271,6 +295,10 @@ func (r *VlanviewResource) ReadByExtAttrs(ctx context.Context, data *VlanviewMod
 	}
 
 	data.Flatten(ctx, &res, &resp.Diagnostics)
+
+	// Save the Identity of the Resource
+	resp.Diagnostics.Append(resp.Identity.SetAttribute(ctx, path.Root("ref"), &data.Ref)...)
+
 	resp.Diagnostics.Append(resp.State.Set(ctx, data)...)
 
 	return true
@@ -308,6 +336,7 @@ func (r *VlanviewResource) Update(ctx context.Context, req resource.UpdateReques
 	if associateInternalId != nil {
 		data.ExtAttrs, diags = AddInternalIDToExtAttrs(ctx, data.ExtAttrs, diags)
 		if diags.HasError() {
+			resp.Diagnostics.Append(diags...)
 			return
 		}
 	}
@@ -356,11 +385,15 @@ func (r *VlanviewResource) Update(ctx context.Context, req resource.UpdateReques
 
 	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, planExtAttrs, *res.ExtAttrs)
 	if diags.HasError() {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while update Vlanview due inherited Extensible attributes, got error: %s", diags))
+		resp.Diagnostics.Append(diags...)
+		resp.Diagnostics.AddError("Client Error", "Error while updating Vlanview due to inherited Extensible attributes")
 		return
 	}
 
 	data.Flatten(ctx, &res, &resp.Diagnostics)
+
+	// Save the Identity of the Resource
+	resp.Diagnostics.Append(resp.Identity.SetAttribute(ctx, path.Root("ref"), &data.Ref)...)
 
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
@@ -430,6 +463,13 @@ func (r *VlanviewResource) ValidateConfig(ctx context.Context, req resource.Vali
 }
 
 func (r *VlanviewResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+	if req.Identity != nil && req.Identity.Raw.IsKnown() && !req.Identity.Raw.IsNull() {
+		diags := req.Identity.GetAttribute(ctx, path.Root("ref"), &req.ID)
+		if diags.HasError() {
+			resp.Diagnostics.Append(diags...)
+			return
+		}
+	}
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("ref"), req.ID)...)
 	resp.Diagnostics.Append(resp.Private.SetKey(ctx, "associate_internal_id", []byte("true"))...)
 }

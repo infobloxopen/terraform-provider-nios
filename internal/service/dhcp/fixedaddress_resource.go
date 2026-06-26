@@ -2,6 +2,7 @@ package dhcp
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"net/http"
 
@@ -11,6 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/identityschema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
 	"github.com/infobloxopen/infoblox-nios-go-client/dhcp"
@@ -25,7 +27,10 @@ var readableAttributesForFixedaddress = "agent_circuit_id,agent_remote_id,allow_
 // Ensure provider defined types fully satisfy framework interfaces.
 var _ resource.Resource = &FixedaddressResource{}
 var _ resource.ResourceWithImportState = &FixedaddressResource{}
+var _ resource.ResourceWithValidateConfig = &FixedaddressResource{}
 var _ resource.ResourceWithIdentity = &FixedaddressResource{}
+
+var _ resource.ResourceWithModifyPlan = &FixedaddressResource{}
 
 func NewFixedaddressResource() resource.Resource {
 	return &FixedaddressResource{}
@@ -80,6 +85,128 @@ func (r *FixedaddressResource) Configure(ctx context.Context, req resource.Confi
 	r.client = client
 }
 
+func (r *FixedaddressResource) ModifyPlan(ctx context.Context, req resource.ModifyPlanRequest, resp *resource.ModifyPlanResponse) {
+	if req.Plan.Raw.IsNull() {
+		return
+	}
+	var (
+		planSnmp3 types.Object
+		stateRev  types.Int64
+		cliCreds  types.List
+		authPwd   types.String
+		privPwd   types.String
+	)
+
+	resp.Diagnostics.Append(req.Plan.GetAttribute(ctx, path.Root("snmp3_credential"), &planSnmp3)...)
+	resp.Diagnostics.Append(req.State.GetAttribute(ctx, path.Root("secrets_version"), &stateRev)...)
+	resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("cli_credentials"), &cliCreds)...)
+	resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("snmp3_credential").AtName("authentication_password"), &authPwd)...)
+	resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("snmp3_credential").AtName("privacy_password"), &privPwd)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	curRev := int64(0)
+	if !stateRev.IsNull() && !stateRev.IsUnknown() {
+		curRev = stateRev.ValueInt64()
+	}
+
+	var prevEnvelope struct {
+		Algo string `json:"algo"`
+		Hash string `json:"hash"`
+	}
+	if b, diags := req.Private.GetKey(ctx, "secrets_hash"); diags != nil {
+		resp.Diagnostics.Append(diags...)
+		if resp.Diagnostics.HasError() {
+			return
+		}
+	} else if b != nil {
+		if err := json.Unmarshal(b, &prevEnvelope); err != nil {
+			prevEnvelope.Hash = ""
+		}
+	}
+
+	prevHashes := fixedAddressHashState{}
+	if prevEnvelope.Hash != "" {
+		if err := json.Unmarshal([]byte(prevEnvelope.Hash), &prevHashes); err != nil {
+			prevHashes = fixedAddressHashState{}
+		}
+	}
+
+	plannedHashes := prevHashes
+
+	// SNMP3 block removed: clear both SNMP3 secret hashes.
+	if planSnmp3.IsNull() {
+		plannedHashes.AuthHash = ""
+		plannedHashes.PrivHash = ""
+	} else {
+		// Update only when config value is known.
+		if !authPwd.IsUnknown() {
+			plannedHashes.AuthHash = hashStringValue(authPwd)
+		}
+		if !privPwd.IsUnknown() {
+			plannedHashes.PrivHash = hashStringValue(privPwd)
+		}
+	}
+
+	// cli_credentials removed: clear CLI hash.
+	// If cli_credentials is known, compute a canonical hash for the full list.
+	if cliCreds.IsNull() {
+		plannedHashes.CliHash = ""
+	} else if !cliCreds.IsUnknown() {
+		plannedHashes.CliHash = hashCliPasswords(ctx, cliCreds,
+			&resp.Diagnostics,
+			func(m FixedaddressCliCredentialsModel) types.String { return m.Password },
+		)
+		if resp.Diagnostics.HasError() {
+			return
+		}
+	}
+
+	prevHasSecrets := hasSecretHashes(prevHashes)
+	plannedHasSecrets := hasSecretHashes(plannedHashes)
+	secretsChanged := plannedHashes != prevHashes
+
+	bump := false
+	newHashToStore := prevEnvelope.Hash
+
+	switch {
+
+	case !plannedHasSecrets && prevHasSecrets:
+		bump = true
+		newHashToStore = ""
+
+	case plannedHasSecrets && (prevHashes == fixedAddressHashState{} || secretsChanged):
+		bump = true
+		newHashToStore = marshalSecretsHashState(plannedHashes, &resp.Diagnostics)
+	}
+
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	if bump {
+		newRev := types.Int64Value(curRev + 1)
+		resp.Diagnostics.Append(resp.Plan.SetAttribute(ctx, path.Root("secrets_version"), newRev)...)
+
+		val := map[string]string{
+			"algo": "sha256",
+			"hash": newHashToStore,
+		}
+		b, err := json.Marshal(val)
+		if err != nil {
+			resp.Diagnostics.AddError("error marshalling secrets hash", err.Error())
+			return
+		}
+		resp.Diagnostics.Append(resp.Private.SetKey(ctx, "secrets_hash", b)...)
+		return
+	}
+
+	resp.Diagnostics.Append(
+		resp.Plan.SetAttribute(ctx, path.Root("secrets_version"), types.Int64Value(curRev))...,
+	)
+}
+
 func (r *FixedaddressResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var diags diag.Diagnostics
 	var data FixedaddressModel
@@ -104,10 +231,46 @@ func (r *FixedaddressResource) Create(ctx context.Context, req resource.CreateRe
 		data.FuncCall = r.UpdateFuncCallAttributeName(ctx, data, &resp.Diagnostics)
 	}
 
+	var secretsVersion types.Int64
+	var (
+		planSnmp3 types.Object
+		authPwd   types.String
+		privPwd   types.String
+		cliCreds  types.List
+		cliModels []FixedaddressCliCredentialsModel
+	)
+
+	resp.Diagnostics.Append(req.Plan.GetAttribute(ctx, path.Root("snmp3_credential"), &planSnmp3)...)
+	resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("snmp3_credential").AtName("authentication_password"), &authPwd)...)
+	resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("snmp3_credential").AtName("privacy_password"), &privPwd)...)
+
+	cliModels, cliCreds = loadCliCredentialModelsFromConfig[FixedaddressCliCredentialsModel](ctx, req.Config, &resp.Diagnostics)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
 	payload := data.Expand(ctx, &resp.Diagnostics, true)
 	if resp.Diagnostics.HasError() {
 		return
 	}
+
+	if !planSnmp3.IsNull() && payload.Snmp3Credential != nil {
+		if !authPwd.IsNull() && !authPwd.IsUnknown() {
+			ap := authPwd.ValueString()
+			payload.Snmp3Credential.AuthenticationPassword = &ap
+		}
+		if !privPwd.IsNull() && !privPwd.IsUnknown() {
+			pp := privPwd.ValueString()
+			payload.Snmp3Credential.PrivacyPassword = &pp
+		}
+	}
+
+	applyCliCredentialPasswords(
+		payload.CliCredentials,
+		cliModels,
+		func(m FixedaddressCliCredentialsModel) types.String { return m.Password },
+		func(p *dhcp.FixedaddressCliCredentials, password string) { p.Password = &password },
+	)
 
 	var apiRes *dhcp.CreateFixedaddressResponse
 
@@ -150,6 +313,30 @@ func (r *FixedaddressResource) Create(ctx context.Context, req resource.CreateRe
 		resp.Diagnostics.AddError("Client Error", "Error while creating Fixedaddress due to inherited Extensible attributes")
 		return
 	}
+
+	secretData := buildSecretsHashState(ctx, authPwd, privPwd, cliCreds,
+		&resp.Diagnostics,
+		func(m FixedaddressCliCredentialsModel) types.String { return m.Password },
+	)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	if hasSecretHashes(secretData) {
+		secretsVersion = types.Int64Value(1)
+
+		hashSecrets, err := marshalSecretsEnvelope(secretData)
+		if err != nil {
+			resp.Diagnostics.AddError("error marshalling secrets hash", err.Error())
+			return
+		}
+		resp.Diagnostics.Append(resp.Private.SetKey(ctx, "secrets_hash", hashSecrets)...)
+	} else {
+		secretsVersion = types.Int64Value(0)
+		resp.Diagnostics.Append(resp.Private.SetKey(ctx, "secrets_hash", nil)...)
+	}
+
+	data.SecretsVersion = secretsVersion
 
 	data.Flatten(ctx, &res, &resp.Diagnostics)
 
@@ -366,6 +553,42 @@ func (r *FixedaddressResource) Update(ctx context.Context, req resource.UpdateRe
 		return
 	}
 
+	var (
+		authPwd   types.String
+		privPwd   types.String
+		cliCreds  types.List
+		cliModels []FixedaddressCliCredentialsModel
+	)
+
+	resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("snmp3_credential").AtName("authentication_password"), &authPwd)...)
+	resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("snmp3_credential").AtName("privacy_password"), &privPwd)...)
+
+	cliModels, cliCreds = loadCliCredentialModelsFromConfig[FixedaddressCliCredentialsModel](ctx, req.Config, &resp.Diagnostics)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	var planSnmp3 types.Object
+	resp.Diagnostics.Append(req.Plan.GetAttribute(ctx, path.Root("snmp3_credential"), &planSnmp3)...)
+
+	if !planSnmp3.IsNull() && payload.Snmp3Credential != nil {
+		if !authPwd.IsNull() && !authPwd.IsUnknown() {
+			ap := authPwd.ValueString()
+			payload.Snmp3Credential.AuthenticationPassword = &ap
+		}
+		if !privPwd.IsNull() && !privPwd.IsUnknown() {
+			pp := privPwd.ValueString()
+			payload.Snmp3Credential.PrivacyPassword = &pp
+		}
+	}
+
+	applyCliCredentialPasswords(
+		payload.CliCredentials,
+		cliModels,
+		func(m FixedaddressCliCredentialsModel) types.String { return m.Password },
+		func(p *dhcp.FixedaddressCliCredentials, password string) { p.Password = &password },
+	)
+
 	var apiRes *dhcp.UpdateFixedaddressResponse
 
 	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
@@ -399,6 +622,25 @@ func (r *FixedaddressResource) Update(ctx context.Context, req resource.UpdateRe
 		resp.Diagnostics.Append(diags...)
 		resp.Diagnostics.AddError("Client Error", "Error while updating Fixedaddress due to inherited Extensible attributes")
 		return
+	}
+
+	secretData := buildSecretsHashState(ctx, authPwd, privPwd, cliCreds,
+		&resp.Diagnostics,
+		func(m FixedaddressCliCredentialsModel) types.String { return m.Password },
+	)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	if hasSecretHashes(secretData) {
+		hashSecrets, err := marshalSecretsEnvelope(secretData)
+		if err != nil {
+			resp.Diagnostics.AddError("error marshalling secrets hash", err.Error())
+			return
+		}
+		resp.Diagnostics.Append(resp.Private.SetKey(ctx, "secrets_hash", hashSecrets)...)
+	} else {
+		resp.Diagnostics.Append(resp.Private.SetKey(ctx, "secrets_hash", nil)...)
 	}
 
 	data.Flatten(ctx, &res, &resp.Diagnostics)
@@ -461,7 +703,7 @@ func (r *FixedaddressResource) UpdateFuncCallAttributeName(ctx context.Context, 
 }
 
 func (r *FixedaddressResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	if req.Identity.Raw.IsKnown() {
+	if req.Identity != nil && req.Identity.Raw.IsKnown() && !req.Identity.Raw.IsNull() {
 		diags := req.Identity.GetAttribute(ctx, path.Root("ref"), &req.ID)
 		if diags.HasError() {
 			resp.Diagnostics.Append(diags...)
@@ -705,6 +947,19 @@ func (r *FixedaddressResource) ValidateConfig(ctx context.Context, req resource.
 				"The 'snmp_credential' attribute is set, but 'use_snmp_credential' is false. "+
 					"Please set 'use_snmp_credential' to true to use SNMP Credentials.",
 			)
+		}
+		// Validate that community_string is provided when snmp_credential block is set
+		var snmpCredential FixedaddressSnmpCredentialModel
+		diags := data.SnmpCredential.As(ctx, &snmpCredential, basetypes.ObjectAsOptions{})
+		resp.Diagnostics.Append(diags...)
+		if !resp.Diagnostics.HasError() {
+			if snmpCredential.CommunityString.IsNull() || (!snmpCredential.CommunityString.IsUnknown() && snmpCredential.CommunityString.ValueString() == "") {
+				resp.Diagnostics.AddAttributeError(
+					path.Root("snmp_credential").AtName("community_string"),
+					"Invalid configuration",
+					"The 'community_string' attribute must be set when 'snmp_credential' is configured.",
+				)
+			}
 		}
 	}
 

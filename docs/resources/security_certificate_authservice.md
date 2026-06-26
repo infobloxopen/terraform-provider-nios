@@ -59,6 +59,8 @@ resource "nios_security_certificate_authservice" "certificate_authservice_with_a
 
 ### Optional
 
+> **NOTE**: [Write-only arguments](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments) are supported in Terraform 1.11 and later.
+
 - `auto_populate_login` (String) Specifies the value of the client certificate for automatically populating the NIOS login name.
 - `comment` (String) The descriptive comment for the certificate authentication service.
 - `disabled` (Boolean) Determines if this certificate authentication service is enabled or disabled.
@@ -68,8 +70,8 @@ resource "nios_security_certificate_authservice" "certificate_authservice_with_a
 - `ocsp_check` (String) Specifies the source of OCSP settings.
 - `ocsp_responders` (Attributes List) An ordered list of OCSP responders that are part of the certificate authentication service. (see [below for nested schema](#nestedatt--ocsp_responders))
 - `recovery_interval` (Number) The period of time the appliance waits before it attempts to contact a responder that is out of service again. The value must be between 1 and 600 seconds.
-- `remote_lookup_password` (String, Sensitive) The password for the service account.
-- `remote_lookup_service` (String) The password for the service account.
+- `remote_lookup_password` (String, [Write-only](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments)) The password for the service account.
+- `remote_lookup_service` (String) The service that will be used for remote lookup.
 - `remote_lookup_username` (String) The username for the service account.
 - `response_timeout` (Number) The validation timeout period in milliseconds.
 - `trust_model` (String) The OCSP trust model.
@@ -77,6 +79,7 @@ resource "nios_security_certificate_authservice" "certificate_authservice_with_a
 
 ### Read-Only
 
+- `password_version` (Number) Internal version incremented when remote_lookup_password changes.
 - `ref` (String) The reference to the object.
 
 <a id="nestedatt--ocsp_responders"></a>

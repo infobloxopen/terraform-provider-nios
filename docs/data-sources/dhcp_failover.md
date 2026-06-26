@@ -70,7 +70,7 @@ Optional:
 - `ms_enable_switchover_interval` (Boolean) Determines if the switchover interval is enabled or not.
 - `ms_failover_mode` (String) The mode for the failover association.
 - `ms_hotstandby_partner_role` (String) The partner role in the case of HotStandby.
-- `ms_shared_secret` (String, Sensitive) The failover association authentication. This is a write-only attribute.
+- `ms_shared_secret` (String) The failover association authentication. This is a write-only attribute.
 - `ms_switchover_interval` (Number) The time (in seconds) that DHCPv4 server will wait before transitioning the server from the COMMUNICATION-INT state to PARTNER-DOWN state.
 - `recycle_leases` (Boolean) Determines if the leases are kept in recycle bin until one week after expiration or not.
 - `use_failover_port` (Boolean) Use flag for: failover_port
@@ -86,6 +86,7 @@ Read-Only:
 - `ms_is_conflict` (Boolean) Determines if the matching Microsoft failover association (if any) is in synchronization (False) or not (True). If there is no matching failover association the returned values is False. This is a read-only attribute.
 - `ms_previous_state` (String) The previous failover association state. This is a read-only attribute.
 - `ms_server` (String) The primary Microsoft Server.
+- `ms_shared_secret_version` (Number) Internal version incremented when ms_shared_secret field changes.
 - `ms_state` (String) The failover association state. This is a read-only attribute.
 - `primary_state` (String) The primary server status of a DHCP failover object.
 - `ref` (String) The reference to the object.
