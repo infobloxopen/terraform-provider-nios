@@ -3,12 +3,12 @@
 page_title: "nios_ipam_network_container List Resource - nios"
 subcategory: "IPAM"
 description: |-
-  Query existing ipam Networkcontainer.
+  Query existing IPAM Network Container.
 ---
 
 # nios_ipam_network_container (List Resource)
 
-Query existing ipam Networkcontainer.
+Query existing IPAM Network Container.
 
 ## Example Usage
 
