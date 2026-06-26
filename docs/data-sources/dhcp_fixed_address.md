@@ -249,13 +249,10 @@ Optional:
 <a id="nestedatt--result--snmp_credential"></a>
 ### Nested Schema for `result.snmp_credential`
 
-Required:
-
-- `community_string` (String) The public community string.
-
 Optional:
 
 - `comment` (String) Comments for the SNMPv1 and SNMPv2 users.
+- `community_string` (String) The public community string.
 - `credential_group` (String) Group for the SNMPv1 and SNMPv2 credential.
 
 
