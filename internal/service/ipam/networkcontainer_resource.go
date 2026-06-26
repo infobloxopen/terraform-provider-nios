@@ -520,7 +520,6 @@ func (r *NetworkcontainerResource) ValidateConfig(ctx context.Context, req resou
 				)
 			}
 
-			// First, determine if this is a special option
 			if !option.Name.IsNull() && !option.Name.IsUnknown() {
 				optionName = option.Name.ValueString()
 				isSpecialOption = specialOptions[optionName]
