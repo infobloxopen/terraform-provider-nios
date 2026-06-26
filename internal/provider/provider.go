@@ -519,6 +519,7 @@ func (p *NIOSProvider) ListResources(ctx context.Context) []func() list.ListReso
 		dhcp.NewFixedaddressList,
 
 		ipam.NewNetworkviewList,
+		ipam.NewNetworkList,
 		ipam.NewIpv6networktemplateList,
 		ipam.NewVlanrangeList,
 		ipam.NewVlanList,
