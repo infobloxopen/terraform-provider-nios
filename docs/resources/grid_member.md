@@ -120,6 +120,7 @@ resource "nios_grid_member" "example_member_with_additional_fields" {
 - `extattrs` (Map of String) Extensible attributes associated with the object.
 - `external_syslog_backup_servers` (Attributes List) The list of external syslog backup servers. (see [below for nested schema](#nestedatt--external_syslog_backup_servers))
 - `external_syslog_server_enable` (Boolean) Determines if external syslog servers should be enabled.
+- `grid_level_dns_resolver_setting` (Attributes) Grid-level DNS resolver setting. When configured, this will update the grid DNS resolver settings and restart grid services. To unset resolvers, set resolvers to null in this block. (see [below for nested schema](#nestedatt--grid_level_dns_resolver_setting))
 - `ha_cloud_platform` (String) Cloud platform for HA.
 - `ha_on_cloud` (Boolean) True: HA on cloud. False: HA not on cloud.
 - `ipv6_setting` (Attributes) IPV6 setting for member. (see [below for nested schema](#nestedatt--ipv6_setting))
@@ -129,6 +130,7 @@ resource "nios_grid_member" "example_member_with_additional_fields" {
 - `lom_network_config` (Attributes List) The Network configurations for LOM. (see [below for nested schema](#nestedatt--lom_network_config))
 - `lom_users` (Attributes List) The list of LOM users. (see [below for nested schema](#nestedatt--lom_users))
 - `master_candidate` (Boolean) Determines if a Grid member is a Grid Master Candidate or not. This flag enables the Grid member to assume the role of the Grid Master as a disaster recovery measure.
+- `member_service_communication` (Attributes List) Configure communication type for various services. (see [below for nested schema](#nestedatt--member_service_communication))
 - `mgmt_port_setting` (Attributes) Settings for the member MGMT port. (see [below for nested schema](#nestedatt--mgmt_port_setting))
 - `nat_setting` (Attributes) NAT settings for the member. (see [below for nested schema](#nestedatt--nat_setting))
 - `node_info` (Attributes List) The node information list with detailed status report on the operations of the Grid Member, mgmt_port_setting must be enabled when configuring the MGMT Port using the node_info field. (see [below for nested schema](#nestedatt--node_info))
@@ -184,9 +186,9 @@ resource "nios_grid_member" "example_member_with_additional_fields" {
 - `active_position` (String) The active server of a Grid member.
 - `extattrs_all` (Map of String) Extensible attributes associated with the object, including default and internal attributes.
 - `is_dscp_capable` (Boolean) Determines if a Grid member supports DSCP (Differentiated Services Code Point).
-- `member_service_communication` (Attributes List) Configure communication type for various services. (see [below for nested schema](#nestedatt--member_service_communication))
 - `mmdb_ea_build_time` (Number) Extensible attributes Topology database build time.
 - `mmdb_geoip_build_time` (Number) GeoIP Topology database build time.
+- `password_version` (Number) Internal revision incremented when external_syslog_backup_servers.password or lom_users.password changes.
 - `ref` (String) The reference to the object.
 - `service_status` (Attributes List) The service status list of a grid member. (see [below for nested schema](#nestedatt--service_status))
 - `support_access_info` (String) The information string for support access.
@@ -337,7 +339,7 @@ Optional:
 Required:
 
 - `address_or_fqdn` (String) The IPv4 or IPv6 address or FQDN of the backup syslog server.
-- `password` (String, Sensitive) The password of the backup syslog server.
+- `password` (String, [Write-only](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments)) The password of the backup syslog server.
 - `username` (String) The username of the backup syslog server.
 
 Optional:
@@ -346,6 +348,15 @@ Optional:
 - `enable` (Boolean) If set to True, the syslog backup server is enabled.
 - `port` (Number) The port used to connect to the backup syslog server.
 - `protocol` (String) The transport protocol used to connect to the backup syslog server.
+
+
+<a id="nestedatt--grid_level_dns_resolver_setting"></a>
+### Nested Schema for `grid_level_dns_resolver_setting`
+
+Optional:
+
+- `resolvers` (List of String) The resolvers of a Grid member. The Grid member sends queries to the first name server address in the list. The second name server address is used if first one does not response.
+- `search_domains` (List of String) The Search Domain Group, which is a group of domain names that the Infoblox device can add to partial queries that do not specify a domain name. Note that you can set this parameter only when prefer_resolver or alternate_resolver is set.
 
 
 <a id="nestedatt--ipv6_setting"></a>
@@ -440,13 +451,26 @@ Read-Only:
 Required:
 
 - `name` (String) The LOM user name.
-- `password` (String, Sensitive) The LOM user password.
+- `password` (String, [Write-only](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments)) The LOM user password.
 
 Optional:
 
 - `comment` (String) The descriptive comment for the LOM user.
 - `disable` (Boolean) Determines whether the LOM user is disabled.
 - `role` (String) The LOM user role which specifies the list of actions that are allowed for the user.
+
+
+<a id="nestedatt--member_service_communication"></a>
+### Nested Schema for `member_service_communication`
+
+Optional:
+
+- `service` (String) The service for a Grid member.
+- `type` (String) Communication type.
+
+Read-Only:
+
+- `option` (String) The option for communication type.
 
 
 <a id="nestedatt--mgmt_port_setting"></a>
@@ -937,16 +961,6 @@ Optional:
 - `subnet_mask` (String) The subnet mask for the Grid Member.
 - `use_dscp` (Boolean) Use flag for: dscp
 - `vlan_id` (Number) The identifier for the VLAN. Valid values are from 1 to 4096.
-
-
-<a id="nestedatt--member_service_communication"></a>
-### Nested Schema for `member_service_communication`
-
-Read-Only:
-
-- `option` (String) The option for communication type.
-- `service` (String) The service for a Grid member.
-- `type` (String) Communication type.
 
 
 <a id="nestedatt--service_status"></a>

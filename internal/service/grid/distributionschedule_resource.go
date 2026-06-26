@@ -11,8 +11,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
+	"github.com/infobloxopen/infoblox-nios-go-client/grid"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/config"
+	"github.com/infobloxopen/terraform-provider-nios/internal/retry"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
@@ -130,15 +132,44 @@ func (r *DistributionscheduleResource) Create(ctx context.Context, req resource.
 	listObj := list[0]
 
 	// Update it with desired plan
-	apiRes, _, err := r.client.GridAPI.
-		DistributionscheduleAPI.
-		Update(ctx, utils.ExtractResourceRef(listObj.GetRef())).
-		Distributionschedule(*data.Expand(ctx, &resp.Diagnostics)).
-		ReturnFieldsPlus(readableAttributesForDistributionschedule).
-		ReturnAsObject(1).
-		Execute()
+	payload := data.Expand(ctx, &resp.Diagnostics)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	payload.UpgradeGroups = mergeDistributionUpgradeGroups(listObj.GetUpgradeGroups(), payload.UpgradeGroups)
+
+	var apiRes *grid.UpdateDistributionscheduleResponse
+
+	err = retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		var (
+			httpRes *http.Response
+			callErr error
+		)
+		apiRes, httpRes, callErr = r.client.GridAPI.
+			DistributionscheduleAPI.
+			Update(ctx, utils.ExtractResourceRef(listObj.GetRef())).
+			Distributionschedule(*payload).
+			ReturnFieldsPlus(readableAttributesForDistributionschedule).
+			ReturnAsObject(1).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
+
 	if err != nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update DistributionSchedule: %s", err))
+		if retry.IsAlreadyExistsErr(err) {
+			// Resource already exists, import required
+			resp.Diagnostics.AddError(
+				"Resource Already Exists",
+				fmt.Sprintf("Resource already exists, error: %s.\nPlease import the existing resource into terraform state.", err.Error()),
+			)
+			return
+		}
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create Distributionschedule, got error: %s", err))
 		return
 	}
 
@@ -158,13 +189,28 @@ func (r *DistributionscheduleResource) Read(ctx context.Context, req resource.Re
 		return
 	}
 
-	apiRes, httpRes, err := r.client.GridAPI.
-		DistributionscheduleAPI.
-		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
-		ReturnFieldsPlus(readableAttributesForDistributionschedule).
-		ReturnAsObject(1).
-		ProxySearch(config.GetProxySearch()).
-		Execute()
+	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
+
+	var (
+		httpRes *http.Response
+		apiRes  *grid.GetDistributionscheduleResponse
+	)
+
+	err := retry.Do(ctx, nil, func(ctx context.Context) (int, error) {
+		var callErr error
+		apiRes, httpRes, callErr = r.client.GridAPI.
+			DistributionscheduleAPI.
+			Read(ctx, resourceRef).
+			ReturnFieldsPlus(readableAttributesForDistributionschedule).
+			ReturnAsObject(1).
+			ProxySearch(config.GetProxySearch()).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
 
 	// Handle not found case
 	if err != nil {
@@ -204,13 +250,48 @@ func (r *DistributionscheduleResource) Update(ctx context.Context, req resource.
 		return
 	}
 
-	apiRes, _, err := r.client.GridAPI.
+	payload := data.Expand(ctx, &resp.Diagnostics)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
+
+	currentRes, _, err := r.client.GridAPI.
 		DistributionscheduleAPI.
-		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
-		Distributionschedule(*data.Expand(ctx, &resp.Diagnostics)).
-		ReturnFieldsPlus(readableAttributesForDistributionschedule).
+		Read(ctx, resourceRef).
 		ReturnAsObject(1).
+		ReturnFieldsPlus("upgrade_groups").
+		ProxySearch(config.GetProxySearch()).
 		Execute()
+	if err != nil {
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read current Distributionschedule for merge, got error: %s", err))
+		return
+	}
+	currentObj := currentRes.GetDistributionscheduleResponseObjectAsResult.GetResult()
+	payload.UpgradeGroups = mergeDistributionUpgradeGroups(currentObj.GetUpgradeGroups(), payload.UpgradeGroups)
+
+	var apiRes *grid.UpdateDistributionscheduleResponse
+
+	err = retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		var (
+			httpRes *http.Response
+			callErr error
+		)
+		apiRes, httpRes, callErr = r.client.GridAPI.
+			DistributionscheduleAPI.
+			Update(ctx, resourceRef).
+			Distributionschedule(*payload).
+			ReturnFieldsPlus(readableAttributesForDistributionschedule).
+			ReturnAsObject(1).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
+
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update Distributionschedule, got error: %s", err))
 		return
@@ -231,4 +312,46 @@ func (r *DistributionscheduleResource) Delete(ctx context.Context, req resource.
 
 func (r *DistributionscheduleResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("ref"), req, resp)
+}
+
+// mergeDistributionUpgradeGroups merges currentGroups (from the grid) with userGroups (from the plan).
+// userGroups take precedence on name match; grid-only groups are retained.
+func mergeDistributionUpgradeGroups(currentGroups, userGroups []grid.DistributionscheduleUpgradeGroups) []grid.DistributionscheduleUpgradeGroups {
+	userByName := make(map[string]grid.DistributionscheduleUpgradeGroups, len(userGroups))
+	for _, g := range userGroups {
+		if g.Name != nil {
+			userByName[*g.Name] = g
+		}
+	}
+
+	seen := make(map[string]bool, len(currentGroups))
+	merged := make([]grid.DistributionscheduleUpgradeGroups, 0, len(currentGroups))
+
+	for _, cg := range currentGroups {
+		name := ""
+		if cg.Name != nil {
+			name = *cg.Name
+		}
+		if ug, ok := userByName[name]; ok {
+			ug.TimeZone = nil
+			merged = append(merged, ug)
+		} else {
+			cg.TimeZone = nil
+			merged = append(merged, cg)
+		}
+		seen[name] = true
+	}
+
+	for _, ug := range userGroups {
+		name := ""
+		if ug.Name != nil {
+			name = *ug.Name
+		}
+		if !seen[name] {
+			ug.TimeZone = nil
+			merged = append(merged, ug)
+		}
+	}
+
+	return merged
 }

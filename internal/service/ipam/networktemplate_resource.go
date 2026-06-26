@@ -8,11 +8,14 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
+	"github.com/hashicorp/terraform-plugin-framework/resource/identityschema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
+	"github.com/infobloxopen/infoblox-nios-go-client/ipam"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/config"
+	"github.com/infobloxopen/terraform-provider-nios/internal/retry"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
@@ -22,6 +25,7 @@ var readableAttributesForNetworktemplate = "allow_any_netmask,authority,auto_cre
 var _ resource.Resource = &NetworktemplateResource{}
 var _ resource.ResourceWithImportState = &NetworktemplateResource{}
 var _ resource.ResourceWithValidateConfig = &NetworktemplateResource{}
+var _ resource.ResourceWithIdentity = &NetworktemplateResource{}
 
 func NewNetworktemplateResource() resource.Resource {
 	return &NetworktemplateResource{}
@@ -34,12 +38,25 @@ type NetworktemplateResource struct {
 
 func (r *NetworktemplateResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_" + "ipam_networktemplate"
+	resp.ResourceBehavior = resource.ResourceBehavior{
+		MutableIdentity: true,
+	}
 }
 
 func (r *NetworktemplateResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		MarkdownDescription: "Manages a Network Template.",
 		Attributes:          NetworktemplateResourceSchemaAttributes,
+	}
+}
+
+func (r *NetworktemplateResource) IdentitySchema(ctx context.Context, req resource.IdentitySchemaRequest, resp *resource.IdentitySchemaResponse) {
+	resp.IdentitySchema = identityschema.Schema{
+		Attributes: map[string]identityschema.Attribute{
+			"ref": identityschema.StringAttribute{
+				RequiredForImport: true,
+			},
+		},
 	}
 }
 
@@ -81,14 +98,41 @@ func (r *NetworktemplateResource) Create(ctx context.Context, req resource.Creat
 		return
 	}
 
-	apiRes, _, err := r.client.IPAMAPI.
-		NetworktemplateAPI.
-		Create(ctx).
-		Networktemplate(*data.Expand(ctx, &resp.Diagnostics)).
-		ReturnFieldsPlus(readableAttributesForNetworktemplate).
-		ReturnAsObject(1).
-		Execute()
+	payload := data.Expand(ctx, &resp.Diagnostics)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	var apiRes *ipam.CreateNetworktemplateResponse
+
+	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		var (
+			httpRes *http.Response
+			callErr error
+		)
+		apiRes, httpRes, callErr = r.client.IPAMAPI.
+			NetworktemplateAPI.
+			Create(ctx).
+			Networktemplate(*payload).
+			ReturnFieldsPlus(readableAttributesForNetworktemplate).
+			ReturnAsObject(1).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
+
 	if err != nil {
+		if retry.IsAlreadyExistsErr(err) {
+			// Resource already exists, import required
+			resp.Diagnostics.AddError(
+				"Resource Already Exists",
+				fmt.Sprintf("Resource already exists, error: %s.\nPlease import the existing resource into terraform state.", err.Error()),
+			)
+			return
+		}
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create Networktemplate, got error: %s", err))
 		return
 	}
@@ -102,6 +146,9 @@ func (r *NetworktemplateResource) Create(ctx context.Context, req resource.Creat
 	}
 
 	data.Flatten(ctx, &res, &resp.Diagnostics)
+
+	// Save the Identity of the Resource
+	resp.Diagnostics.Append(resp.Identity.SetAttribute(ctx, path.Root("ref"), &data.Ref)...)
 
 	// Save data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
@@ -124,13 +171,28 @@ func (r *NetworktemplateResource) Read(ctx context.Context, req resource.ReadReq
 		return
 	}
 
-	apiRes, httpRes, err := r.client.IPAMAPI.
-		NetworktemplateAPI.
-		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
-		ReturnFieldsPlus(readableAttributesForNetworktemplate).
-		ReturnAsObject(1).
-		ProxySearch(config.GetProxySearch()).
-		Execute()
+	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
+
+	var (
+		httpRes *http.Response
+		apiRes  *ipam.GetNetworktemplateResponse
+	)
+
+	err := retry.Do(ctx, nil, func(ctx context.Context) (int, error) {
+		var callErr error
+		apiRes, httpRes, callErr = r.client.IPAMAPI.
+			NetworktemplateAPI.
+			Read(ctx, resourceRef).
+			ReturnFieldsPlus(readableAttributesForNetworktemplate).
+			ReturnAsObject(1).
+			ProxySearch(config.GetProxySearch()).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
 
 	// If the resource is not found, try searching using Extensible Attributes
 	if err != nil {
@@ -174,6 +236,9 @@ func (r *NetworktemplateResource) Read(ctx context.Context, req resource.ReadReq
 	}
 
 	data.Flatten(ctx, &res, &resp.Diagnostics)
+
+	// Save the Identity of the Resource
+	resp.Diagnostics.Append(resp.Identity.SetAttribute(ctx, path.Root("ref"), &data.Ref)...)
 
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
@@ -230,6 +295,10 @@ func (r *NetworktemplateResource) ReadByExtAttrs(ctx context.Context, data *Netw
 	}
 
 	data.Flatten(ctx, &res, &resp.Diagnostics)
+
+	// Save the Identity of the Resource
+	resp.Diagnostics.Append(resp.Identity.SetAttribute(ctx, path.Root("ref"), &data.Ref)...)
+
 	resp.Diagnostics.Append(resp.State.Set(ctx, data)...)
 
 	return true
@@ -279,13 +348,34 @@ func (r *NetworktemplateResource) Update(ctx context.Context, req resource.Updat
 		return
 	}
 
-	apiRes, _, err := r.client.IPAMAPI.
-		NetworktemplateAPI.
-		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
-		Networktemplate(*data.Expand(ctx, &resp.Diagnostics)).
-		ReturnFieldsPlus(readableAttributesForNetworktemplate).
-		ReturnAsObject(1).
-		Execute()
+	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
+
+	payload := data.Expand(ctx, &resp.Diagnostics)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	var apiRes *ipam.UpdateNetworktemplateResponse
+
+	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		var (
+			httpRes *http.Response
+			callErr error
+		)
+		apiRes, httpRes, callErr = r.client.IPAMAPI.
+			NetworktemplateAPI.
+			Update(ctx, resourceRef).
+			Networktemplate(*payload).
+			ReturnFieldsPlus(readableAttributesForNetworktemplate).
+			ReturnAsObject(1).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
+
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update Networktemplate, got error: %s", err))
 		return
@@ -301,6 +391,9 @@ func (r *NetworktemplateResource) Update(ctx context.Context, req resource.Updat
 	}
 
 	data.Flatten(ctx, &res, &resp.Diagnostics)
+
+	// Save the Identity of the Resource
+	resp.Diagnostics.Append(resp.Identity.SetAttribute(ctx, path.Root("ref"), &data.Ref)...)
 
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
@@ -319,14 +412,24 @@ func (r *NetworktemplateResource) Delete(ctx context.Context, req resource.Delet
 		return
 	}
 
-	httpRes, err := r.client.IPAMAPI.
-		NetworktemplateAPI.
-		Delete(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
-		Execute()
-	if err != nil {
-		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
-			return
+	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
+
+	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		httpRes, callErr := r.client.IPAMAPI.
+			NetworktemplateAPI.
+			Delete(ctx, resourceRef).
+			Execute()
+
+		if httpRes != nil {
+			if httpRes.StatusCode == http.StatusNotFound {
+				return 0, nil
+			}
+			return httpRes.StatusCode, callErr
 		}
+		return 0, callErr
+	})
+
+	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete Networktemplate, got error: %s", err))
 		return
 	}
@@ -475,9 +578,30 @@ func (r *NetworktemplateResource) ValidateConfig(ctx context.Context, req resour
 			)
 		}
 	}
+
+	// Validate lease_scavenge_time
+	if !data.LeaseScavengeTime.IsNull() && !data.LeaseScavengeTime.IsUnknown() {
+		leaseScavengeTime := data.LeaseScavengeTime.ValueInt64()
+
+		// Must be -1 OR between 86400 and 2147472000
+		if leaseScavengeTime != -1 && (leaseScavengeTime < 86400 || leaseScavengeTime > 2147472000) {
+			resp.Diagnostics.AddAttributeError(
+				path.Root("lease_scavenge_time"),
+				"Invalid Configuration",
+				fmt.Sprintf("lease_scavenge_time must be -1 (to disable lease scavenging) or between 86400 (1 day) and 2147472000 seconds. Got: %d", leaseScavengeTime),
+			)
+		}
+	}
 }
 
 func (r *NetworktemplateResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+	if req.Identity != nil && req.Identity.Raw.IsKnown() && !req.Identity.Raw.IsNull() {
+		diags := req.Identity.GetAttribute(ctx, path.Root("ref"), &req.ID)
+		if diags.HasError() {
+			resp.Diagnostics.Append(diags...)
+			return
+		}
+	}
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("ref"), req.ID)...)
 	resp.Diagnostics.Append(resp.Private.SetKey(ctx, "associate_internal_id", []byte("true"))...)
 }
