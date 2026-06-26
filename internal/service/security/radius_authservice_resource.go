@@ -166,8 +166,14 @@ func (r *RadiusAuthserviceResource) Create(ctx context.Context, req resource.Cre
 	var data RadiusAuthserviceModel
 
 	// Read Terraform plan data into the model
-	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
+	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
 
+	// Read from Config separately — only to extract write-only fields
+	var configData RadiusAuthserviceModel
+	resp.Diagnostics.Append(req.Config.Get(ctx, &configData)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
@@ -180,7 +186,7 @@ func (r *RadiusAuthserviceResource) Create(ctx context.Context, req resource.Cre
 	secretVersion := types.Int64Value(0)
 	secretData := radiusAuthserviceSecretsHashState{}
 
-	servers, diags := extractRadiusServers(ctx, data.Servers)
+	servers, diags := extractRadiusServers(ctx, configData.Servers)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -312,8 +318,15 @@ func (r *RadiusAuthserviceResource) Update(ctx context.Context, req resource.Upd
 	var plannedSecretVersion types.Int64
 
 	// Read Terraform plan data into the model
-	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
+	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
 	resp.Diagnostics.Append(req.Plan.GetAttribute(ctx, path.Root("secret_version"), &plannedSecretVersion)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	// Read from Config separately — only to extract write-only shared_secret from servers
+	var configData RadiusAuthserviceModel
+	resp.Diagnostics.Append(req.Config.Get(ctx, &configData)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
@@ -329,7 +342,7 @@ func (r *RadiusAuthserviceResource) Update(ctx context.Context, req resource.Upd
 		return
 	}
 
-	servers, diags := extractRadiusServers(ctx, data.Servers)
+	servers, diags := extractRadiusServers(ctx, configData.Servers)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
