@@ -428,10 +428,16 @@ func (r *Ipv6networkcontainerResource) Delete(ctx context.Context, req resource.
 	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
 
 	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
-		httpRes, callErr := r.client.IPAMAPI.
+		deleteReq := r.client.IPAMAPI.
 			Ipv6networkcontainerAPI.
-			Delete(ctx, resourceRef).
-			Execute()
+			Delete(ctx, resourceRef)
+
+		// remove_subnets is a delete-only argument; pass it as a query parameter
+		if !data.RemoveSubnets.IsNull() && !data.RemoveSubnets.IsUnknown() {
+			deleteReq = deleteReq.RemoveSubnets(data.RemoveSubnets.ValueBool())
+		}
+
+		httpRes, callErr := deleteReq.Execute()
 
 		if httpRes != nil {
 			if httpRes.StatusCode == http.StatusNotFound {

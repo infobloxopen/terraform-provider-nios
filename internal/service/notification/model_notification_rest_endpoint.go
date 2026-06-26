@@ -12,6 +12,7 @@ import (
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
@@ -49,6 +50,7 @@ type NotificationRestEndpointModel struct {
 	VendorIdentifier           types.String `tfsdk:"vendor_identifier"`
 	WapiUserName               types.String `tfsdk:"wapi_user_name"`
 	WapiUserPassword           types.String `tfsdk:"wapi_user_password"`
+	PasswordVersion            types.Int64  `tfsdk:"password_version"`
 }
 
 var NotificationRestEndpointAttrTypes = map[string]attr.Type{
@@ -75,6 +77,7 @@ var NotificationRestEndpointAttrTypes = map[string]attr.Type{
 	"vendor_identifier":             types.StringType,
 	"wapi_user_name":                types.StringType,
 	"wapi_user_password":            types.StringType,
+	"password_version":              types.Int64Type,
 }
 
 var NotificationRestEndpointResourceSchemaAttributes = map[string]schema.Attribute{
@@ -163,7 +166,7 @@ var NotificationRestEndpointResourceSchemaAttributes = map[string]schema.Attribu
 	},
 	"password": schema.StringAttribute{
 		Optional:  true,
-		Sensitive: true,
+		WriteOnly: true,
 		Validators: []validator.String{
 			stringvalidator.AlsoRequires(path.MatchRoot("username")),
 		},
@@ -228,11 +231,18 @@ var NotificationRestEndpointResourceSchemaAttributes = map[string]schema.Attribu
 	},
 	"wapi_user_password": schema.StringAttribute{
 		Optional:  true,
-		Sensitive: true,
+		WriteOnly: true,
 		Validators: []validator.String{
 			stringvalidator.AlsoRequires(path.MatchRoot("wapi_user_name")),
 		},
 		MarkdownDescription: "The user password for WAPI integration.",
+	},
+	"password_version": schema.Int64Attribute{
+		Computed:            true,
+		MarkdownDescription: "Internal version incremented when password or wapi_user_password changes.",
+		PlanModifiers: []planmodifier.Int64{
+			int64planmodifier.UseStateForUnknown(),
+		},
 	},
 }
 
@@ -247,7 +257,6 @@ func (m *NotificationRestEndpointModel) Expand(ctx context.Context, diags *diag.
 		Name:                 flex.ExpandStringPointer(m.Name),
 		OutboundMemberType:   flex.ExpandStringPointer(m.OutboundMemberType),
 		OutboundMembers:      flex.ExpandFrameworkListString(ctx, m.OutboundMembers, diags),
-		Password:             flex.ExpandStringPointer(m.Password),
 		ServerCertValidation: flex.ExpandStringPointer(m.ServerCertValidation),
 		SyncDisabled:         flex.ExpandBoolPointer(m.SyncDisabled),
 		TemplateInstance:     ExpandNotificationRestEndpointTemplateInstance(ctx, m.TemplateInstance, diags),
@@ -256,7 +265,6 @@ func (m *NotificationRestEndpointModel) Expand(ctx context.Context, diags *diag.
 		Username:             flex.ExpandStringPointer(m.Username),
 		VendorIdentifier:     flex.ExpandStringPointer(m.VendorIdentifier),
 		WapiUserName:         flex.ExpandStringPointer(m.WapiUserName),
-		WapiUserPassword:     flex.ExpandStringPointer(m.WapiUserPassword),
 	}
 	return to
 }

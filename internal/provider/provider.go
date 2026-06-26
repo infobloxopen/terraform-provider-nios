@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/list"
@@ -92,7 +93,10 @@ func (p *NIOSProvider) Schema(_ context.Context, _ provider.SchemaRequest, resp 
 				},
 			},
 			"retry_timeout": schema.Int64Attribute{
-				Optional:    true,
+				Optional: true,
+				Validators: []validator.Int64{
+					int64validator.AtLeast(0),
+				},
 				Description: "Specifies the timeout duration (in seconds) for retrying operations that fail due to transient errors.",
 			},
 			"manage_internal_id_ea": schema.BoolAttribute{
@@ -479,12 +483,47 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 
 func (p *NIOSProvider) ListResources(ctx context.Context) []func() list.ListResource {
 	return []func() list.ListResource{
+		dns.NewNsgroupDelegationList,
+		dns.NewNsgroupForwardingmemberList,
+		dns.NewNsgroupForwardstubserverList,
+		dns.NewNsgroupList,
+		dns.NewNsgroupStubmemberList,
 		dns.NewRecordAList,
+		dns.NewRecordAaaaList,
+		dns.NewRecordAliasList,
+		dns.NewRecordCaaList,
+		dns.NewRecordCnameList,
+		dns.NewRecordDnameList,
+		dns.NewRecordMxList,
+		dns.NewRecordNaptrList,
+		dns.NewRecordNsList,
+		dns.NewRecordSrvList,
+		dns.NewRecordTxtList,
+		dns.NewRecordTlsaList,
+		dns.NewRecordPtrList,
+		dns.NewRecordUnknownList,
+		dns.NewSharedrecordgroupList,
+		dns.NewSharedrecordAList,
+		dns.NewSharedrecordAaaaList,
+		dns.NewSharedrecordCnameList,
+		dns.NewSharedrecordMxList,
+		dns.NewSharedrecordTxtList,
+		dns.NewSharedrecordSrvList,
+		dns.NewViewList,
+		dns.NewZoneAuthList,
+		dns.NewZoneForwardList,
+		dns.NewZoneStubList,
+		dns.NewZoneRpList,
+		dns.NewZoneDelegatedList,
 
 		dhcp.NewFixedaddressList,
 
 		ipam.NewNetworkviewList,
 		ipam.NewIpv6networkcontainerList,
+		ipam.NewBulkhostnametemplateList,
+		ipam.NewVlanviewList,
+		ipam.NewNetworktemplateList,
+		ipam.NewSuperhostList,
 	}
 }
 
