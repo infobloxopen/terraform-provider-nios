@@ -229,7 +229,7 @@ var ZoneAuthAttrTypes = map[string]attr.Type{
 	"ms_secondaries":              types.ListType{ElemType: types.ObjectType{AttrTypes: ZoneAuthMsSecondariesAttrTypes}},
 	"ms_sync_disabled":            types.BoolType,
 	"ms_sync_master_name":         types.StringType,
-	"network_associations":        types.ListType{ElemType: types.StringType},
+	"network_associations":        types.ListType{ElemType: types.ObjectType{AttrTypes: ZoneAuthNetworkAssociationsAttrTypes}},
 	"network_view":                types.StringType,
 	"notify_delay":                types.Int64Type,
 	"ns_group":                    types.StringType,
@@ -807,11 +807,17 @@ var ZoneAuthResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed:            true,
 		MarkdownDescription: "The name of MS synchronization master for this zone.",
 	},
-	"network_associations": schema.ListAttribute{
-		ElementType:         types.StringType,
-		Computed:            true,
-		MarkdownDescription: "The list with the associated network/network container information.",
-	},
+	"network_associations": schema.ListNestedAttribute{
+        NestedObject: schema.NestedAttributeObject{
+            Attributes: ZoneAuthNetworkAssociationsResourceSchemaAttributes,
+        },
+        Validators: []validator.List{
+            listvalidator.SizeAtLeast(1),
+        },
+        Computed:            true,
+        MarkdownDescription: "The list with the associated network/network container information.",
+    },
+
 	"network_view": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The name of the network view in which this zone resides.",
@@ -1384,7 +1390,7 @@ func (m *ZoneAuthModel) Flatten(ctx context.Context, from *dns.ZoneAuth, diags *
 	m.MsSecondaries = flex.FlattenFrameworkListNestedBlock(ctx, from.MsSecondaries, ZoneAuthMsSecondariesAttrTypes, diags, FlattenZoneAuthMsSecondaries)
 	m.MsSyncDisabled = types.BoolPointerValue(from.MsSyncDisabled)
 	m.MsSyncMasterName = flex.FlattenStringPointer(from.MsSyncMasterName)
-	m.NetworkAssociations = flex.FlattenFrameworkListString(ctx, from.NetworkAssociations, diags)
+	m.NetworkAssociations = flex.FlattenFrameworkListNestedBlock(ctx, from.NetworkAssociations, ZoneAuthNetworkAssociationsAttrTypes, diags, FlattenZoneAuthNetworkAssociations)
 	m.NetworkView = flex.FlattenStringPointer(from.NetworkView)
 	m.NotifyDelay = flex.FlattenInt64Pointer(from.NotifyDelay)
 	m.NsGroup = flex.FlattenStringPointerNilAsNotEmpty(from.NsGroup)
