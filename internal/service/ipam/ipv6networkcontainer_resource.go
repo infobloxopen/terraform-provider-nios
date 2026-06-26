@@ -668,19 +668,15 @@ func (r *Ipv6networkcontainerResource) ValidateConfig(ctx context.Context, req r
 		)
 	}
 
-	// discovery_basic_poll_settings should generally only be set when use_discovery_basic_polling_settings is true
-	// Note: This validation may trigger false positives when the API returns default values
+	//discovery_basic_poll_settings can be set only when use_discovery_basic_polling_settings is true
 	if !data.DiscoveryBasicPollSettings.IsNull() && !data.DiscoveryBasicPollSettings.IsUnknown() {
-		// Only validate if use_discovery_basic_polling_settings is explicitly set to false by the user
-		// If it's null/unknown, allow the configuration (API will use defaults)
 		if !data.UseDiscoveryBasicPollingSettings.IsNull() && !data.UseDiscoveryBasicPollingSettings.IsUnknown() && !data.UseDiscoveryBasicPollingSettings.ValueBool() {
-			resp.Diagnostics.AddWarning(
-				"Discovery Basic Poll Settings May Be Ignored",
-				"When use_discovery_basic_polling_settings is set to false, discovery_basic_poll_settings may be ignored by the NIOS API. Consider setting use_discovery_basic_polling_settings to true or removing the discovery_basic_poll_settings block.",
+			resp.Diagnostics.AddError(
+				"Discovery Basic Poll Settings Not Allowed",
+				"When use_discovery_basic_polling_settings is set to false, discovery_basic_poll_settings cannot be configured. Either set use_discovery_basic_polling_settings to true or remove the discovery_basic_poll_settings block.",
 			)
 		}
 	}
-
 	// same_port_control_discovery_blackout can be set to true only when use_blackout_setting is true
 	if !data.SamePortControlDiscoveryBlackout.IsNull() && !data.SamePortControlDiscoveryBlackout.IsUnknown() && data.SamePortControlDiscoveryBlackout.ValueBool() {
 		if !data.UseBlackoutSetting.IsNull() && !data.UseBlackoutSetting.IsUnknown() && !data.UseBlackoutSetting.ValueBool() {
