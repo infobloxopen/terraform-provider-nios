@@ -483,6 +483,11 @@ func (p *NIOSProvider) DataSources(ctx context.Context) []func() datasource.Data
 
 func (p *NIOSProvider) ListResources(ctx context.Context) []func() list.ListResource {
 	return []func() list.ListResource{
+		dns.NewNsgroupDelegationList,
+		dns.NewNsgroupForwardingmemberList,
+		dns.NewNsgroupForwardstubserverList,
+		dns.NewNsgroupList,
+		dns.NewNsgroupStubmemberList,
 		dns.NewRecordAList,
 		dns.NewRecordAaaaList,
 		dns.NewRecordAliasList,
@@ -498,15 +503,31 @@ func (p *NIOSProvider) ListResources(ctx context.Context) []func() list.ListReso
 		dns.NewRecordPtrList,
 		dns.NewRecordUnknownList,
 		dns.NewSharedrecordgroupList,
+		dns.NewSharedrecordAList,
+		dns.NewSharedrecordAaaaList,
+		dns.NewSharedrecordCnameList,
+		dns.NewSharedrecordMxList,
+		dns.NewSharedrecordTxtList,
+		dns.NewSharedrecordSrvList,
 		dns.NewViewList,
 		dns.NewZoneAuthList,
 		dns.NewZoneForwardList,
 		dns.NewZoneStubList,
 		dns.NewZoneRpList,
+		dns.NewZoneDelegatedList,
 
 		dhcp.NewFixedaddressList,
 
 		ipam.NewNetworkviewList,
+		ipam.NewIpv6networkcontainerList,
+		ipam.NewNetworkList,
+		ipam.NewIpv6networktemplateList,
+		ipam.NewVlanrangeList,
+		ipam.NewVlanList,
+		ipam.NewBulkhostnametemplateList,
+		ipam.NewVlanviewList,
+		ipam.NewNetworktemplateList,
+		ipam.NewSuperhostList,
 	}
 }
 
