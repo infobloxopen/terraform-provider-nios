@@ -16,7 +16,7 @@ func TestAccFixedaddressDataSource_Filters(t *testing.T) {
 	resourceName := "nios_dhcp_fixed_address.test"
 	var v dhcp.Fixedaddress
 	ip := acctest.RandomIPWithSpecificOctetsSet("16.0.0")
-	agentCircuitID := acctest.RandomNumber(255)
+	agentCircuitID := acctest.RandomNumber(10000)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -40,7 +40,7 @@ func TestAccFixedaddressDataSource_ExtAttrFilters(t *testing.T) {
 	resourceName := "nios_dhcp_fixed_address.test"
 	var v dhcp.Fixedaddress
 	ip := acctest.RandomIPWithSpecificOctetsSet("16.0.0")
-	agentCircuitID := acctest.RandomNumber(255)
+	agentCircuitID := acctest.RandomNumber(10000)
 	extAttrValue := acctest.RandomName()
 
 	resource.Test(t, resource.TestCase{
