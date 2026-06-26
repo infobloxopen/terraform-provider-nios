@@ -3,12 +3,12 @@
 page_title: "nios_ipam_ipv6network_container List Resource - nios"
 subcategory: "IPAM"
 description: |-
-  Query existing ipam Ipv6networkcontainer.
+  Query existing IPAM IPv6 Network Container
 ---
 
 # nios_ipam_ipv6network_container (List Resource)
 
-Query existing ipam Ipv6networkcontainer.
+Query existing IPAM IPv6 Network Container
 
 ## Example Usage
 
