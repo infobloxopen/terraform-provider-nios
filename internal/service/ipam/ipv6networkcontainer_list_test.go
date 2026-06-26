@@ -67,7 +67,6 @@ func TestAccIpv6networkcontainerList_Filters(t *testing.T) {
 				Config:                   testAccIpv6networkcontainerBasicConfig(network),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networkcontainerExists(context.Background(), resourceName, &v),
-					// TODO : Update with required fields to verify the object was created with expected values
 					resource.TestCheckResourceAttr(resourceName, "network", network),
 				),
 			},
@@ -81,11 +80,9 @@ func TestAccIpv6networkcontainerList_Filters(t *testing.T) {
 					querycheck.ExpectResourceKnownValues(
 						resourceName,
 						queryfilter.ByResourceIdentity(map[string]knownvalue.Check{
-							// TODO : Update the ref prefix with the correct identifying object for the resource
 							"ref": knownvalue.StringRegexp(regexp.MustCompile("ipv6networkcontainer/")),
 						}),
 						[]querycheck.KnownValueCheck{
-							// TODO : Add checks for required fields
 							{
 								Path:       tfjsonpath.New("network"),
 								KnownValue: knownvalue.StringExact(network),

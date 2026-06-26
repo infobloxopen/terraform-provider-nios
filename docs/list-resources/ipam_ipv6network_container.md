@@ -13,12 +13,6 @@ Query existing IPAM IPv6 Network Container
 ## Example Usage
 
 ```terraform
-// List all IPv6 Network Containers
-list "nios_ipam_ipv6network_container" "test" {
-  provider         = nios
-  include_resource = true
-}
-
 // List specific IPv6 Network Containers using filters
 list "nios_ipam_ipv6network_container" "list_containers_using_filters" {
   provider = nios

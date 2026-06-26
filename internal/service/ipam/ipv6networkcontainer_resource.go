@@ -668,7 +668,7 @@ func (r *Ipv6networkcontainerResource) ValidateConfig(ctx context.Context, req r
 		)
 	}
 
-	//discovery_basic_poll_settings can be set only when use_discovery_basic_polling_settings is true
+	// discovery_basic_poll_settings can be set only when use_discovery_basic_polling_settings is true
 	if !data.DiscoveryBasicPollSettings.IsNull() && !data.DiscoveryBasicPollSettings.IsUnknown() {
 		if !data.UseDiscoveryBasicPollingSettings.IsNull() && !data.UseDiscoveryBasicPollingSettings.IsUnknown() && !data.UseDiscoveryBasicPollingSettings.ValueBool() {
 			resp.Diagnostics.AddError(
