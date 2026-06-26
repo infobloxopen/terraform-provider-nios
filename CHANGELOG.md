@@ -110,24 +110,25 @@
 
 ### Modules
 
-- **NIOS Grid Member AWS Module** : Terraform module for deploying NIOS Grid EC2 instances on AWS and enabling HA support. ([#434](https://github.com/infobloxopen/terraform-provider-nios/pull/434))
-- **NIOS Grid Member Azure Module** : Terraform module for deploying NIOS Grid Virtual Machines on Azure and enabling HA support. ([#457](https://github.com/infobloxopen/terraform-provider-nios/pull/457))
-- **NIOS Grid Member GCP Module** : Terraform module for deploying NIOS Grid Compute instances on GCP and enabling HA support. ([#457](https://github.com/infobloxopen/terraform-provider-nios/pull/457))
-- **NIOS Grid Member OCI Module** : Terraform module for deploying NIOS Grid Compute instances on OCI and enabling HA support. ([#459](https://github.com/infobloxopen/terraform-provider-nios/pull/459))
+- **NIOS Grid Member AWS Module**: Terraform module for deploying NIOS Grid EC2 instances on AWS with optional high-availability (HA) support. ([#434](https://github.com/infobloxopen/terraform-provider-nios/pull/434))
+- **NIOS Grid Member Azure Module**: Terraform module for deploying NIOS Grid Virtual Machines on Azure with optional high-availability (HA) support. ([#457](https://github.com/infobloxopen/terraform-provider-nios/pull/457))
+- **NIOS Grid Member GCP Module**: Terraform module for deploying NIOS Grid Compute instances on GCP with optional high-availability (HA) support. ([#457](https://github.com/infobloxopen/terraform-provider-nios/pull/457))
 
 ### Enhancements
 
 **Retry Mechanism** 
-  - Introduced a generic retry helper with exponential backoff and a provider-configurable retry timeout.
+  - Added a generic retry helper with exponential backoff and a provider-configurable retry timeout for CRUD operations.
 
 **Terraform Search** 
-  - Introduced Terraform Search functionality for objects across DNS, DHCP,IPAM.
+  - Added Terraform Search support for objects across DNS, DHCP, and IPAM.
+
+**Write-only Fileds** 
+  - Sensitive fields (such as passwords) that were previously stored in plaintext in the state file are now marked as write-only, encrypted, and stored in private state. These fields now appear as null in the state file.
 
 ### Fixes
 
 - IPAM: Fixed VLAN type validation error in Network and IPv6 Network Container objects when reading network objects containing VLAN information. ([#380](https://github.com/infobloxopen/terraform-provider-nios/pull/380))
 - Fixed numerous bugs across DHCP, DNS, DTC, IPAM, Grid, Security, and other modules improving overall stability and reliability.
-- Sensitive fields like passwords which were earlier sotred as plain text in the state file, are marked as write-only and are encrypted and stored in the private state. These fields are stored as null in the state file.
 
 ## Version 1.1.0
 
