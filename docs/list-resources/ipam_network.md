@@ -3,12 +3,12 @@
 page_title: "nios_ipam_network List Resource - nios"
 subcategory: "IPAM"
 description: |-
-  Query existing ipam Network.
+  Query existing IPAM Network.
 ---
 
 # nios_ipam_network (List Resource)
 
-Query existing ipam Network.
+Query existing IPAM Network.
 
 ## Example Usage
 
