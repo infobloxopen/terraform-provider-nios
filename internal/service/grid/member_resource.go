@@ -806,6 +806,12 @@ func (r *MemberResource) ValidateConfig(ctx context.Context, req resource.Valida
 		}
 	}
 
+	// CSP Member Setting Validation
+	if !data.CspMemberSetting.IsNull() && !data.CspMemberSetting.IsUnknown() {
+		if data.ConfigureCspMemberSetting.IsNull() || data.ConfigureCspMemberSetting.IsUnknown() || !data.ConfigureCspMemberSetting.ValueBool() {
+			resp.Diagnostics.AddError("Validation Error", "configure_csp_member_setting must be set to true when csp_member_setting is provided")
+		}
+	}
 	// HA Cloud Platform Validations - bidirectional checks
 	if !data.HaCloudPlatform.IsNull() && !data.HaCloudPlatform.IsUnknown() {
 		// When ha_cloud_platform is provided, ha_on_cloud must be true
