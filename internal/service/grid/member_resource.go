@@ -2,6 +2,9 @@ package grid
 
 import (
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
+	"encoding/json"
 	"fmt"
 	"net/http"
 
@@ -9,10 +12,13 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
+	"github.com/infobloxopen/infoblox-nios-go-client/grid"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/config"
+	"github.com/infobloxopen/terraform-provider-nios/internal/retry"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
@@ -22,6 +28,8 @@ var readableAttributesForMember = "active_position,additional_ip_list,automated_
 var _ resource.Resource = &MemberResource{}
 var _ resource.ResourceWithImportState = &MemberResource{}
 var _ resource.ResourceWithValidateConfig = &MemberResource{}
+
+var _ resource.ResourceWithModifyPlan = &MemberResource{}
 
 func NewMemberResource() resource.Resource {
 	return &MemberResource{}
@@ -63,6 +71,194 @@ func (r *MemberResource) Configure(ctx context.Context, req resource.ConfigureRe
 	r.client = client
 }
 
+type memberPasswordsHashState struct {
+	BkpServersPwd string `json:"bkp_servers_password_hash"`
+	LomUsersPwd   string `json:"lom_users_password_hash"`
+}
+
+func hasPasswordHashes(state memberPasswordsHashState) bool {
+	return state.BkpServersPwd != "" || state.LomUsersPwd != ""
+}
+
+func hashPasswords[T any](ctx context.Context, passwordList types.List, diags *diag.Diagnostics, passwordOf func(T) types.String) string {
+	if passwordList.IsNull() || passwordList.IsUnknown() {
+		return ""
+	}
+
+	var pwdModels []T
+	diags.Append(passwordList.ElementsAs(ctx, &pwdModels, false)...)
+	if diags.HasError() {
+		return ""
+	}
+
+	passwordHashes := make([]string, 0, len(pwdModels))
+	hasAnyPassword := false
+
+	for _, pwdModel := range pwdModels {
+		password := passwordOf(pwdModel)
+		switch {
+		case password.IsUnknown(), password.IsNull():
+			passwordHashes = append(passwordHashes, "")
+		default:
+			hasAnyPassword = true
+			sum := sha256.Sum256([]byte(password.ValueString()))
+			passwordHashes = append(passwordHashes, hex.EncodeToString(sum[:]))
+		}
+	}
+
+	if !hasAnyPassword {
+		return ""
+	}
+	// Uses config order
+	data, err := json.Marshal(passwordHashes)
+	if err != nil {
+		diags.AddError("CLI Secrets Hash Error", err.Error())
+		return ""
+	}
+
+	sum := sha256.Sum256(data)
+	return hex.EncodeToString(sum[:])
+}
+
+func marshalSecretsHashState(state memberPasswordsHashState, diags *diag.Diagnostics) string {
+	data, err := json.Marshal(state)
+	if err != nil {
+		diags.AddError("error marshalling password hash state", err.Error())
+		return ""
+	}
+	return string(data)
+}
+
+func (r *MemberResource) ModifyPlan(ctx context.Context, req resource.ModifyPlanRequest, resp *resource.ModifyPlanResponse) {
+	if req.Plan.Raw.IsNull() {
+		return
+	}
+
+	var (
+		statePwdVersion types.Int64
+		bkpServers      types.List
+		lomUsers        types.List
+	)
+
+	resp.Diagnostics.Append(req.Plan.GetAttribute(ctx, path.Root("external_syslog_backup_servers"), &bkpServers)...)
+	if !req.State.Raw.IsNull() && req.State.Raw.IsKnown() {
+		resp.Diagnostics.Append(req.State.GetAttribute(ctx, path.Root("password_version"), &statePwdVersion)...)
+	}
+	resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("lom_users"), &lomUsers)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	// var passwordVersion types.Int64
+	curRev := int64(0)
+
+	if !statePwdVersion.IsNull() && !statePwdVersion.IsUnknown() {
+		curRev = statePwdVersion.ValueInt64()
+	}
+
+	var prevEnvelope struct {
+		Algo string `json:"algo"`
+		Hash string `json:"hash"`
+	}
+	if b, diags := req.Private.GetKey(ctx, "secrets_hash"); diags != nil {
+		resp.Diagnostics.Append(diags...)
+		if resp.Diagnostics.HasError() {
+			return
+		}
+	} else if b != nil {
+		if err := json.Unmarshal(b, &prevEnvelope); err != nil {
+			prevEnvelope.Hash = ""
+		}
+	}
+
+	var data MemberModel
+	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	var configData MemberModel
+	resp.Diagnostics.Append(req.Config.Get(ctx, &configData)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	bkpServersHash := hashPasswords(ctx, configData.ExternalSyslogBackupServers, &resp.Diagnostics,
+		func(m MemberExternalSyslogBackupServersModel) types.String { return m.Password })
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	lomUsersHash := hashPasswords(ctx, configData.LomUsers, &resp.Diagnostics,
+		func(m MemberLomUsersModel) types.String { return m.Password })
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	plannedHashes := memberPasswordsHashState{BkpServersPwd: bkpServersHash, LomUsersPwd: lomUsersHash}
+
+	var prev struct {
+		Algo string `json:"algo"`
+		Hash string `json:"hash"`
+	}
+	prevHashes := memberPasswordsHashState{}
+
+	if b, diags := req.Private.GetKey(ctx, "password_hash"); diags != nil {
+		resp.Diagnostics.Append(diags...)
+		if resp.Diagnostics.HasError() {
+			return
+		}
+	} else if b != nil {
+		if err := json.Unmarshal(b, &prev); err != nil {
+			prev.Hash = ""
+		}
+		if prev.Hash != "" {
+			if err := json.Unmarshal([]byte(prev.Hash), &prevHashes); err != nil {
+				prevHashes = memberPasswordsHashState{}
+			}
+		}
+	}
+
+	prevHasPasswords := hasPasswordHashes(prevHashes)
+	plannedHasPasswords := hasPasswordHashes(plannedHashes)
+	passwordsChanged := plannedHashes != prevHashes
+	bump := false
+	newHashToStore := prev.Hash
+
+	switch {
+	case !plannedHasPasswords && prevHasPasswords:
+		bump = true
+		newHashToStore = ""
+	case plannedHasPasswords && (!prevHasPasswords || passwordsChanged):
+		bump = true
+		newHashToStore = marshalSecretsHashState(plannedHashes, &resp.Diagnostics)
+	}
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	if bump {
+		newRev := types.Int64Value(curRev + 1)
+		resp.Diagnostics.Append(resp.Plan.SetAttribute(ctx, path.Root("password_version"), newRev)...)
+
+		val := map[string]string{
+			"algo": "sha256",
+			"hash": newHashToStore,
+		}
+		b, err := json.Marshal(val)
+		if err != nil {
+			resp.Diagnostics.AddError("error marshalling secrets hash", err.Error())
+			return
+		}
+		resp.Diagnostics.Append(resp.Private.SetKey(ctx, "password_hash", b)...)
+		return
+	}
+
+	resp.Diagnostics.Append(
+		resp.Plan.SetAttribute(ctx, path.Root("password_version"), types.Int64Value(curRev))...,
+	)
+}
+
 func (r *MemberResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var diags diag.Diagnostics
 	var data MemberModel
@@ -89,21 +285,94 @@ func (r *MemberResource) Create(ctx context.Context, req resource.CreateRequest,
 		data.SyslogServers = processedList
 	}
 
-	apiRes, _, err := r.client.GridAPI.
-		MemberAPI.
-		Create(ctx).
-		Member(*data.Expand(ctx, &resp.Diagnostics, true)).
-		ReturnFieldsPlus(readableAttributesForMember).
-		ReturnAsObject(1).
-		Execute()
+	if !data.GridLevelDnsResolverSetting.IsNull() && !data.GridLevelDnsResolverSetting.IsUnknown() {
+		dnsResolverSetting := ExpandMemberDnsResolverSetting(ctx, data.GridLevelDnsResolverSetting, &resp.Diagnostics)
+		if resp.Diagnostics.HasError() {
+			return
+		}
+
+		err := utils.ConfigureGridDNSResolver(ctx, r.client.GridAPI, dnsResolverSetting)
+		if err != nil {
+			resp.Diagnostics.AddError("Grid DNS Resolver Configuration Error", fmt.Sprintf("Unable to configure grid-level DNS resolver: %s", err))
+			return
+		}
+	}
+
+	payload := data.Expand(ctx, &resp.Diagnostics, true)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	var passwordVersion types.Int64
+	var bkpServers []MemberExternalSyslogBackupServersModel
+	resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("external_syslog_backup_servers"), &bkpServers)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	for i, server := range bkpServers {
+		if i >= len(payload.ExternalSyslogBackupServers) {
+			break
+		}
+		if !server.Password.IsNull() && !server.Password.IsUnknown() {
+			password := server.Password.ValueString()
+			payload.ExternalSyslogBackupServers[i].Password = &password
+		}
+	}
+
+	var lomUsers []MemberLomUsersModel
+	resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("lom_users"), &lomUsers)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	for i, user := range lomUsers {
+		if i >= len(payload.LomUsers) {
+			break
+		}
+		if !user.Password.IsNull() && !user.Password.IsUnknown() {
+			password := user.Password.ValueString()
+			payload.LomUsers[i].Password = &password
+		}
+	}
+
+	var apiRes *grid.CreateMemberResponse
+
+	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		var (
+			httpRes *http.Response
+			callErr error
+		)
+		apiRes, httpRes, callErr = r.client.GridAPI.
+			MemberAPI.
+			Create(ctx).
+			Member(*payload).
+			ReturnFieldsPlus(readableAttributesForMember).
+			ReturnAsObject(1).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
+
 	if err != nil {
+		if retry.IsAlreadyExistsErr(err) {
+			// Resource already exists, import required
+			resp.Diagnostics.AddError(
+				"Resource Already Exists",
+				fmt.Sprintf("Resource already exists, error: %s.\nPlease import the existing resource into terraform state.", err.Error()),
+			)
+			return
+		}
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create Member, got error: %s", err))
 		return
 	}
 
 	res := apiRes.CreateMemberResponseAsObject.GetResult()
 
-	if !data.PreProvisioning.IsUnknown() && !data.PreProvisioning.IsNull() {
+	if !data.PreProvisioning.IsUnknown() && !data.PreProvisioning.IsNull() || (!data.TrafficCaptureAuthDnsSetting.IsUnknown() && !data.TrafficCaptureAuthDnsSetting.IsNull()) || (!data.MemberServiceCommunication.IsUnknown() && !data.MemberServiceCommunication.IsNull()) {
 		apiRes2, _, err2 := r.client.GridAPI.
 			MemberAPI.
 			Update(ctx, utils.ExtractResourceRef(*res.Ref)).
@@ -124,6 +393,42 @@ func (r *MemberResource) Create(ctx context.Context, req resource.CreateRequest,
 		resp.Diagnostics.AddError("Client Error", "Error while creating Member due to inherited Extensible attributes")
 		return
 	}
+	var configData MemberModel
+	resp.Diagnostics.Append(req.Config.Get(ctx, &configData)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	bkpServersHash := hashPasswords(ctx, configData.ExternalSyslogBackupServers, &resp.Diagnostics,
+		func(m MemberExternalSyslogBackupServersModel) types.String { return m.Password })
+
+	lomUsersHash := hashPasswords(ctx, configData.LomUsers, &resp.Diagnostics,
+		func(m MemberLomUsersModel) types.String { return m.Password })
+	plannedHashes := memberPasswordsHashState{BkpServersPwd: bkpServersHash, LomUsersPwd: lomUsersHash}
+
+	if hasPasswordHashes(plannedHashes) {
+		passwordVersion = types.Int64Value(1)
+
+		newHashToStore := marshalSecretsHashState(plannedHashes, &resp.Diagnostics)
+		if resp.Diagnostics.HasError() {
+			return
+		}
+
+		val := map[string]string{
+			"algo": "sha256",
+			"hash": newHashToStore,
+		}
+		b, err := json.Marshal(val)
+		if err != nil {
+			resp.Diagnostics.AddError("error marshalling secrets hash", err.Error())
+			return
+		}
+		resp.Diagnostics.Append(resp.Private.SetKey(ctx, "password_hash", b)...)
+	} else {
+		passwordVersion = types.Int64Value(0)
+		resp.Diagnostics.Append(resp.Private.SetKey(ctx, "password_hash", nil)...)
+	}
+	data.PasswordVersion = passwordVersion
 
 	data.Flatten(ctx, &res, &resp.Diagnostics)
 
@@ -148,13 +453,28 @@ func (r *MemberResource) Read(ctx context.Context, req resource.ReadRequest, res
 		return
 	}
 
-	apiRes, httpRes, err := r.client.GridAPI.
-		MemberAPI.
-		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
-		ReturnFieldsPlus(readableAttributesForMember).
-		ReturnAsObject(1).
-		ProxySearch(config.GetProxySearch()).
-		Execute()
+	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
+
+	var (
+		httpRes *http.Response
+		apiRes  *grid.GetMemberResponse
+	)
+
+	err := retry.Do(ctx, nil, func(ctx context.Context) (int, error) {
+		var callErr error
+		apiRes, httpRes, callErr = r.client.GridAPI.
+			MemberAPI.
+			Read(ctx, resourceRef).
+			ReturnFieldsPlus(readableAttributesForMember).
+			ReturnAsObject(1).
+			ProxySearch(config.GetProxySearch()).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
 
 	// If the resource is not found, try searching using Extensible Attributes
 	if err != nil {
@@ -311,13 +631,90 @@ func (r *MemberResource) Update(ctx context.Context, req resource.UpdateRequest,
 		return
 	}
 
-	apiRes, _, err := r.client.GridAPI.
-		MemberAPI.
-		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
-		Member(*data.Expand(ctx, &resp.Diagnostics, false)).
-		ReturnFieldsPlus(readableAttributesForMember).
-		ReturnAsObject(1).
-		Execute()
+	if !data.GridLevelDnsResolverSetting.IsNull() && !data.GridLevelDnsResolverSetting.IsUnknown() {
+		var stateGridLevelDnsResolverSetting types.Object
+		// Check if grid-level DNS resolver setting has changed.
+		diags = req.State.GetAttribute(ctx, path.Root("grid_level_dns_resolver_setting"), &stateGridLevelDnsResolverSetting)
+		if diags.HasError() {
+			resp.Diagnostics.Append(diags...)
+			return
+		}
+		if !data.GridLevelDnsResolverSetting.Equal(stateGridLevelDnsResolverSetting) {
+			dnsResolverSetting := ExpandMemberDnsResolverSetting(ctx, data.GridLevelDnsResolverSetting, &resp.Diagnostics)
+			if resp.Diagnostics.HasError() {
+				return
+			}
+
+			err := utils.ConfigureGridDNSResolver(ctx, r.client.GridAPI, dnsResolverSetting)
+			if err != nil {
+				resp.Diagnostics.AddError("Grid DNS Resolver Configuration Error", fmt.Sprintf("Unable to configure grid-level DNS resolver: %s", err))
+				return
+			}
+		}
+	}
+
+	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
+
+	payload := data.Expand(ctx, &resp.Diagnostics, false)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	var passwordVersion types.Int64
+	resp.Diagnostics.Append(req.Plan.GetAttribute(ctx, path.Root("password_version"), &passwordVersion)...)
+	var bkpServers []MemberExternalSyslogBackupServersModel
+	resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("external_syslog_backup_servers"), &bkpServers)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	for i, server := range bkpServers {
+		if i >= len(payload.ExternalSyslogBackupServers) {
+			break
+		}
+		if !server.Password.IsNull() && !server.Password.IsUnknown() {
+			password := server.Password.ValueString()
+			payload.ExternalSyslogBackupServers[i].Password = &password
+		}
+	}
+
+	var lomUsers []MemberLomUsersModel
+	resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("lom_users"), &lomUsers)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	for i, user := range lomUsers {
+		if i >= len(payload.LomUsers) {
+			break
+		}
+		if !user.Password.IsNull() && !user.Password.IsUnknown() {
+			password := user.Password.ValueString()
+			payload.LomUsers[i].Password = &password
+		}
+	}
+
+	var apiRes *grid.UpdateMemberResponse
+
+	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		var (
+			httpRes *http.Response
+			callErr error
+		)
+		apiRes, httpRes, callErr = r.client.GridAPI.
+			MemberAPI.
+			Update(ctx, resourceRef).
+			Member(*payload).
+			ReturnFieldsPlus(readableAttributesForMember).
+			ReturnAsObject(1).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
+
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update Member, got error: %s", err))
 		return
@@ -331,6 +728,8 @@ func (r *MemberResource) Update(ctx context.Context, req resource.UpdateRequest,
 		resp.Diagnostics.AddError("Client Error", "Error while updating Member due to inherited Extensible attributes")
 		return
 	}
+
+	data.PasswordVersion = passwordVersion
 
 	data.Flatten(ctx, &res, &resp.Diagnostics)
 
@@ -351,14 +750,24 @@ func (r *MemberResource) Delete(ctx context.Context, req resource.DeleteRequest,
 		return
 	}
 
-	httpRes, err := r.client.GridAPI.
-		MemberAPI.
-		Delete(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
-		Execute()
-	if err != nil {
-		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
-			return
+	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
+
+	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		httpRes, callErr := r.client.GridAPI.
+			MemberAPI.
+			Delete(ctx, resourceRef).
+			Execute()
+
+		if httpRes != nil {
+			if httpRes.StatusCode == http.StatusNotFound {
+				return 0, nil
+			}
+			return httpRes.StatusCode, callErr
 		}
+		return 0, callErr
+	})
+
+	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete Member, got error: %s", err))
 		return
 	}
@@ -397,9 +806,39 @@ func (r *MemberResource) ValidateConfig(ctx context.Context, req resource.Valida
 		}
 	}
 
+	// CSP Member Setting Validation
+	if !data.CspMemberSetting.IsNull() && !data.CspMemberSetting.IsUnknown() {
+		if data.ConfigureCspMemberSetting.IsNull() || data.ConfigureCspMemberSetting.IsUnknown() || !data.ConfigureCspMemberSetting.ValueBool() {
+			resp.Diagnostics.AddError("Validation Error", "configure_csp_member_setting must be set to true when csp_member_setting is provided")
+		}
+	}
+	// HA Cloud Platform Validations - bidirectional checks
+	if !data.HaCloudPlatform.IsNull() && !data.HaCloudPlatform.IsUnknown() {
+		// When ha_cloud_platform is provided, ha_on_cloud must be true
+		if data.HaOnCloud.IsNull() || data.HaOnCloud.IsUnknown() || !data.HaOnCloud.ValueBool() {
+			resp.Diagnostics.AddError("Validation Error", "ha_on_cloud must be set to true when ha_cloud_platform is provided")
+		}
+	}
+
 	if !data.HaOnCloud.IsNull() && !data.HaOnCloud.IsUnknown() && data.HaOnCloud.ValueBool() {
+		// When ha_on_cloud is true, ha_cloud_platform must be provided
+		if data.HaCloudPlatform.IsNull() || data.HaCloudPlatform.IsUnknown() {
+			resp.Diagnostics.AddError("Validation Error", "ha_cloud_platform must be set when ha_on_cloud is true")
+		}
+		// When ha_on_cloud is true, enable_ha must be true
 		if data.EnableHa.IsNull() || data.EnableHa.IsUnknown() || !data.EnableHa.ValueBool() {
-			resp.Diagnostics.AddError("Validation Error", "enable_ha must be true when ha_on_cloud is provided")
+			resp.Diagnostics.AddError("Validation Error", "enable_ha must be true when ha_on_cloud is true")
+		}
+		// When ha_on_cloud is true, platform must be VNIOS
+		if data.Platform.IsNull() || data.Platform.IsUnknown() || data.Platform.ValueString() != "VNIOS" {
+			resp.Diagnostics.AddError("Validation Error", "platform must be set to VNIOS when ha_on_cloud is true")
+		}
+	}
+
+	// Validation: enable_ha requires node_info to be provided
+	if !data.EnableHa.IsNull() && !data.EnableHa.IsUnknown() && data.EnableHa.ValueBool() {
+		if data.NodeInfo.IsNull() || data.NodeInfo.IsUnknown() {
+			resp.Diagnostics.AddError("Validation Error", "node_info must be provided when enable_ha is true")
 		}
 	}
 
@@ -412,9 +851,64 @@ func (r *MemberResource) ValidateConfig(ctx context.Context, req resource.Valida
 			return
 		}
 
-		for _, node := range nodeInfo {
+		// Validation: If enable_ha is true, node_info must have exactly 2 elements
+		if !data.EnableHa.IsNull() && !data.EnableHa.IsUnknown() && data.EnableHa.ValueBool() {
+			if len(nodeInfo) != 2 {
+				resp.Diagnostics.AddError("Validation Error", "node_info must contain exactly 2 elements when enable_ha is true")
+			}
+		}
+
+		for i, node := range nodeInfo {
+			// Validation: lan_ha_port_setting requires enable_ha to be true
+			if !node.LanHaPortSetting.IsNull() && !node.LanHaPortSetting.IsUnknown() {
+				lanHaPortSetting := node.LanHaPortSetting.Attributes()
+
+				if !lanHaPortSetting["mgmt_lan"].IsNull() && !lanHaPortSetting["mgmt_lan"].IsUnknown() {
+					if data.EnableHa.IsNull() || data.EnableHa.IsUnknown() || !data.EnableHa.ValueBool() {
+						resp.Diagnostics.AddError("Validation Error",
+							fmt.Sprintf("enable_ha must be set to true when node_info[%d].lan_ha_port_setting.mgmt_lan is provided", i))
+					}
+				}
+
+				// Validation: When enable_ha is true, both mgmt_lan and ha_ip_address must be set for all nodes
+				if !data.EnableHa.IsNull() && !data.EnableHa.IsUnknown() && data.EnableHa.ValueBool() {
+					if lanHaPortSetting["mgmt_lan"].IsNull() || lanHaPortSetting["mgmt_lan"].IsUnknown() {
+						resp.Diagnostics.AddError("Validation Error",
+							fmt.Sprintf("node_info[%d].lan_ha_port_setting.mgmt_lan must be set when enable_ha is true", i))
+					}
+					if lanHaPortSetting["ha_ip_address"].IsNull() || lanHaPortSetting["ha_ip_address"].IsUnknown() {
+						resp.Diagnostics.AddError("Validation Error",
+							fmt.Sprintf("node_info[%d].lan_ha_port_setting.ha_ip_address must be set when enable_ha is true", i))
+					}
+				}
+			} else if !data.EnableHa.IsNull() && !data.EnableHa.IsUnknown() && data.EnableHa.ValueBool() {
+				// Validation: When enable_ha is true, lan_ha_port_setting must be provided for all nodes
+				resp.Diagnostics.AddError("Validation Error",
+					fmt.Sprintf("node_info[%d].lan_ha_port_setting must be provided when enable_ha is true", i))
+			}
+
 			if !node.V6MgmtNetworkSetting.IsNull() && !node.V6MgmtNetworkSetting.IsUnknown() {
 				v6MgmtNetworkSetting := node.V6MgmtNetworkSetting.Attributes()
+
+				// Validation: When v6_mgmt_network_setting is set, mgmt_port_setting.enabled must be true
+				if data.MgmtPortSetting.IsNull() || data.MgmtPortSetting.IsUnknown() || data.MgmtPortSetting.Attributes()["enabled"].String() != "true" {
+					resp.Diagnostics.AddError("Validation Error", "mgmt_port_setting.enabled must be set to true when node_info.v6_mgmt_network_setting is provided")
+				}
+
+				// Validation: When v6_mgmt_network_setting is set, virtual_ip, gateway, cidr_prefix, and enabled must be set
+				if v6MgmtNetworkSetting["virtual_ip"].IsNull() || v6MgmtNetworkSetting["virtual_ip"].IsUnknown() {
+					resp.Diagnostics.AddError("Validation Error", fmt.Sprintf("node_info[%d].v6_mgmt_network_setting.virtual_ip must be set when node_info.v6_mgmt_network_setting is provided", i))
+				}
+				if v6MgmtNetworkSetting["gateway"].IsNull() || v6MgmtNetworkSetting["gateway"].IsUnknown() {
+					resp.Diagnostics.AddError("Validation Error", fmt.Sprintf("node_info[%d].v6_mgmt_network_setting.gateway must be set when node_info.v6_mgmt_network_setting is provided", i))
+				}
+				if v6MgmtNetworkSetting["cidr_prefix"].IsNull() || v6MgmtNetworkSetting["cidr_prefix"].IsUnknown() {
+					resp.Diagnostics.AddError("Validation Error", fmt.Sprintf("node_info[%d].v6_mgmt_network_setting.cidr_prefix must be set when node_info.v6_mgmt_network_setting is provided", i))
+				}
+				if v6MgmtNetworkSetting["enabled"].IsNull() || v6MgmtNetworkSetting["enabled"].IsUnknown() || v6MgmtNetworkSetting["enabled"].String() != "true" {
+					resp.Diagnostics.AddError("Validation Error", fmt.Sprintf("node_info[%d].v6_mgmt_network_setting.enabled must be set to true when node_info.v6_mgmt_network_setting is provided", i))
+				}
+
 				if v6MgmtNetworkSetting["auto_router_config_enabled"].String() == "true" {
 					if !v6MgmtNetworkSetting["gateway"].IsNull() && !v6MgmtNetworkSetting["gateway"].IsUnknown() {
 						resp.Diagnostics.AddError("Validation Error", "node_info.v6_mgmt_network_setting.gateway cannot be set when node_info.v6_mgmt_network_setting.auto_router_config_enabled is true")
@@ -444,6 +938,33 @@ func (r *MemberResource) ValidateConfig(ctx context.Context, req resource.Valida
 			} else {
 				mgmtCheckComplete = true
 			}
+		}
+		// enableHaFalse: true when enable_ha is null (defaults to false) or explicitly false.
+		// Skipped when enable_ha is unknown (value not yet determined at plan time).
+		enableHaFalse := data.EnableHa.IsNull() || (!data.EnableHa.IsUnknown() && !data.EnableHa.ValueBool())
+		// enableHaTrue: true only when enable_ha is explicitly set to true.
+		enableHaTrue := !data.EnableHa.IsNull() && !data.EnableHa.IsUnknown() && data.EnableHa.ValueBool()
+
+		nodeCount := len(nodeInfo)
+
+		// Condition 1: len(nodeInfo) == 2 requires enable_ha to be true
+		if nodeCount == 2 && enableHaFalse {
+			resp.Diagnostics.AddError("Validation Error", "enable_ha must be true when node_info has 2 nodes")
+		}
+
+		// Condition 2: enable_ha true requires exactly 2 nodes (not more)
+		if enableHaTrue && nodeCount > 2 {
+			resp.Diagnostics.AddError("Validation Error", "node_info must have exactly 2 nodes when enable_ha is true")
+		}
+
+		// Condition 3a: len(nodeInfo) > 2 with enable_ha false (or not set) is not allowed
+		if nodeCount > 2 && enableHaFalse {
+			resp.Diagnostics.AddError("Validation Error", "node_info cannot have more than 2 nodes when enable_ha is false")
+		}
+
+		// Condition 3b: len(nodeInfo) == 1 with enable_ha true is not allowed
+		if nodeCount == 1 && enableHaTrue {
+			resp.Diagnostics.AddError("Validation Error", "node_info must have exactly 2 nodes when enable_ha is true; a single node_info entry is not valid")
 		}
 	}
 
@@ -500,12 +1021,6 @@ func (r *MemberResource) ValidateConfig(ctx context.Context, req resource.Valida
 		}
 	}
 
-	if !data.HaOnCloud.IsUnknown() && !data.HaOnCloud.IsNull() && data.HaOnCloud.ValueBool() {
-		if data.Platform.IsNull() || data.Platform.IsUnknown() || data.Platform.ValueString() != "VNIOS" {
-			resp.Diagnostics.AddError("Validation Error", "platform must be set to 'vNIOS' when ha_on_cloud is true")
-		}
-	}
-
 	if !data.ConfigAddrType.IsNull() && !data.ConfigAddrType.IsUnknown() && (data.ConfigAddrType.ValueString() == "IPV6" || data.ConfigAddrType.ValueString() == "BOTH") {
 		if data.Ipv6Setting.IsNull() || data.Ipv6Setting.IsUnknown() {
 			resp.Diagnostics.AddError("Validation Error", "ipv6_setting must be provided when config_addr_type is set to IPV6 or BOTH")
@@ -513,6 +1028,18 @@ func (r *MemberResource) ValidateConfig(ctx context.Context, req resource.Valida
 			if data.Ipv6Setting.Attributes()["enabled"].IsNull() || data.Ipv6Setting.Attributes()["enabled"].IsUnknown() || data.Ipv6Setting.Attributes()["enabled"].String() != "true" {
 				resp.Diagnostics.AddError("Validation Error", "ipv6_setting.enabled must be true when config_addr_type is set to IPV6 or BOTH")
 			}
+		}
+	}
+
+	if !data.Ipv6Setting.IsNull() && !data.Ipv6Setting.IsUnknown() {
+		ipv6Attrs := data.Ipv6Setting.Attributes()
+		hasVirtualIP := !ipv6Attrs["virtual_ip"].IsNull() && !ipv6Attrs["virtual_ip"].IsUnknown()
+		hasCidrPrefix := !ipv6Attrs["cidr_prefix"].IsNull() && !ipv6Attrs["cidr_prefix"].IsUnknown()
+		hasGateway := !ipv6Attrs["gateway"].IsNull() && !ipv6Attrs["gateway"].IsUnknown()
+		if (hasVirtualIP && hasCidrPrefix && hasGateway) &&
+			(data.ConfigAddrType.IsNull() || data.ConfigAddrType.IsUnknown() ||
+				(data.ConfigAddrType.ValueString() != "IPV6" && data.ConfigAddrType.ValueString() != "BOTH")) {
+			resp.Diagnostics.AddError("Validation Error", "config_addr_type must be set to IPV6 or BOTH when ipv6_setting.virtual_ip, ipv6_setting.cidr_prefix, and ipv6_setting.gateway are provided")
 		}
 	}
 
@@ -545,8 +1072,8 @@ func (r *MemberResource) ValidateConfig(ctx context.Context, req resource.Valida
 				resp.Diagnostics.AddError("Validation Error", "vip_setting.address cannot be set when config_addr_type is set to IPV6")
 			}
 		}
-		if !data.ServiceTypeConfiguration.IsNull() && !data.ServiceTypeConfiguration.IsUnknown() && data.ServiceTypeConfiguration.ValueString() == "ALL_V4" {
-			resp.Diagnostics.AddError("Validation Error", "service_type_configuration cannot be set to ALL_V4 when config_addr_type is set to IPV6")
+		if !data.ServiceTypeConfiguration.IsUnknown() && (data.ServiceTypeConfiguration.IsNull() || data.ServiceTypeConfiguration.ValueString() == "ALL_V4") {
+			resp.Diagnostics.AddError("Validation Error", "service_type_configuration must be ALL_V6 when the config_addr_type is IPV6")
 		}
 	}
 

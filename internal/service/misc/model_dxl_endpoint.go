@@ -12,6 +12,7 @@ import (
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
@@ -43,6 +44,7 @@ type DxlEndpointModel struct {
 	Name                       types.String `tfsdk:"name"`
 	OutboundMemberType         types.String `tfsdk:"outbound_member_type"`
 	OutboundMembers            types.List   `tfsdk:"outbound_members"`
+	PasswordVersion            types.Int64  `tfsdk:"password_version"`
 	TemplateInstance           types.Object `tfsdk:"template_instance"`
 	Timeout                    types.Int64  `tfsdk:"timeout"`
 	Topics                     types.List   `tfsdk:"topics"`
@@ -69,6 +71,7 @@ var DxlEndpointAttrTypes = map[string]attr.Type{
 	"name":                          types.StringType,
 	"outbound_member_type":          types.StringType,
 	"outbound_members":              types.ListType{ElemType: types.StringType},
+	"password_version":              types.Int64Type,
 	"template_instance":             types.ObjectType{AttrTypes: DxlEndpointTemplateInstanceAttrTypes},
 	"timeout":                       types.Int64Type,
 	"topics":                        types.ListType{ElemType: types.StringType},
@@ -183,6 +186,13 @@ var DxlEndpointResourceSchemaAttributes = map[string]schema.Attribute{
 		},
 		MarkdownDescription: "The list of members for outbound events.",
 	},
+	"password_version": schema.Int64Attribute{
+		Computed:            true,
+		MarkdownDescription: "Internal version incremented when wapi_user_password changes.",
+		PlanModifiers: []planmodifier.Int64{
+			int64planmodifier.UseStateForUnknown(),
+		},
+	},
 	"template_instance": schema.SingleNestedAttribute{
 		Attributes:          DxlEndpointTemplateInstanceResourceSchemaAttributes,
 		Computed:            true,
@@ -217,7 +227,7 @@ var DxlEndpointResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The user name for WAPI integration.",
 	},
 	"wapi_user_password": schema.StringAttribute{
-		Sensitive: true,
+		WriteOnly: true,
 		Optional:  true,
 		Validators: []validator.String{
 			stringvalidator.AlsoRequires(path.MatchRoot("wapi_user_name")),

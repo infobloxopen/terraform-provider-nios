@@ -3,15 +3,19 @@ package dns
 import (
 	"context"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/dns"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
 type RecordHostSnmp3CredentialModel struct {
@@ -36,31 +40,55 @@ var RecordHostSnmp3CredentialAttrTypes = map[string]attr.Type{
 
 var RecordHostSnmp3CredentialResourceSchemaAttributes = map[string]schema.Attribute{
 	"user": schema.StringAttribute{
-		Optional:            true,
+		Required: true,
+		Validators: []validator.String{
+			customvalidator.ValidateTrimmedString(),
+		},
 		MarkdownDescription: "The SNMPv3 user name.",
 	},
 	"authentication_protocol": schema.StringAttribute{
-		Optional:            true,
+		Required: true,
+		Validators: []validator.String{
+			stringvalidator.OneOf("MD5", "NONE", "SHA", "SHA-224", "SHA-256", "SHA-384", "SHA-512"),
+		},
 		MarkdownDescription: "Authentication protocol for the SNMPv3 user.",
 	},
 	"authentication_password": schema.StringAttribute{
-		Optional:            true,
+		Required:  true,
+		WriteOnly: true,
+		Validators: []validator.String{
+			customvalidator.ValidateTrimmedString(),
+		},
 		MarkdownDescription: "Authentication password for the SNMPv3 user.",
 	},
 	"privacy_protocol": schema.StringAttribute{
-		Optional:            true,
+		Required: true,
+		Validators: []validator.String{
+			stringvalidator.OneOf("3DES", "AES", "AES-192", "AES-192C", "AES-256", "AES-256C", "DES", "NONE"),
+		},
 		MarkdownDescription: "Privacy protocol for the SNMPv3 user.",
 	},
 	"privacy_password": schema.StringAttribute{
-		Optional:            true,
+		Required:  true,
+		WriteOnly: true,
+		Validators: []validator.String{
+			customvalidator.ValidateTrimmedString(),
+		},
 		MarkdownDescription: "Privacy password for the SNMPv3 user.",
 	},
 	"comment": schema.StringAttribute{
-		Optional:            true,
+		Optional: true,
+		Computed: true,
+		Default:  stringdefault.StaticString(""),
+		Validators: []validator.String{
+			customvalidator.ValidateTrimmedString(),
+		},
 		MarkdownDescription: "Comments for the SNMPv3 user.",
 	},
 	"credential_group": schema.StringAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             stringdefault.StaticString("default"),
 		MarkdownDescription: "Group for the SNMPv3 credential.",
 	},
 }
@@ -113,9 +141,7 @@ func (m *RecordHostSnmp3CredentialModel) Flatten(ctx context.Context, from *dns.
 	}
 	m.User = flex.FlattenStringPointer(from.User)
 	m.AuthenticationProtocol = flex.FlattenStringPointer(from.AuthenticationProtocol)
-	m.AuthenticationPassword = flex.FlattenStringPointer(from.AuthenticationPassword)
 	m.PrivacyProtocol = flex.FlattenStringPointer(from.PrivacyProtocol)
-	m.PrivacyPassword = flex.FlattenStringPointer(from.PrivacyPassword)
 	m.Comment = flex.FlattenStringPointer(from.Comment)
 	m.CredentialGroup = flex.FlattenStringPointer(from.CredentialGroup)
 }

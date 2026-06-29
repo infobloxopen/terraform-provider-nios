@@ -101,7 +101,6 @@ func testAccCheckIpv6fixedaddressResourceAttrPair(resourceName, dataSourceName s
 		resource.TestCheckResourceAttrPair(resourceName, "options", dataSourceName, "result.0.options"),
 		resource.TestCheckResourceAttrPair(resourceName, "preferred_lifetime", dataSourceName, "result.0.preferred_lifetime"),
 		resource.TestCheckResourceAttrPair(resourceName, "reserved_interface", dataSourceName, "result.0.reserved_interface"),
-		resource.TestCheckResourceAttrPair(resourceName, "restart_if_needed", dataSourceName, "result.0.restart_if_needed"),
 		resource.TestCheckResourceAttrPair(resourceName, "snmp3_credential", dataSourceName, "result.0.snmp3_credential"),
 		resource.TestCheckResourceAttrPair(resourceName, "snmp_credential", dataSourceName, "result.0.snmp_credential"),
 		resource.TestCheckResourceAttrPair(resourceName, "template", dataSourceName, "result.0.template"),

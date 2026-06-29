@@ -11,8 +11,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
+	"github.com/infobloxopen/infoblox-nios-go-client/grid"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/config"
+	"github.com/infobloxopen/terraform-provider-nios/internal/retry"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
@@ -130,15 +132,45 @@ func (r *UpgradescheduleResource) Create(ctx context.Context, req resource.Creat
 	listObj := list[0]
 
 	// Update it with desired plan
-	apiRes, _, err := r.client.GridAPI.
-		UpgradescheduleAPI.
-		Update(ctx, utils.ExtractResourceRef(listObj.GetRef())).
-		Upgradeschedule(*data.Expand(ctx, &resp.Diagnostics)).
-		ReturnFieldsPlus(readableAttributesForUpgradeschedule).
-		ReturnAsObject(1).
-		Execute()
+	payload := data.Expand(ctx, &resp.Diagnostics)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	// Merge: grid groups + user groups (user wins on name conflict).
+	payload.UpgradeGroups = mergeUpgradeGroups(listObj.GetUpgradeGroups(), payload.UpgradeGroups)
+
+	var apiRes *grid.UpdateUpgradescheduleResponse
+
+	err = retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		var (
+			httpRes *http.Response
+			callErr error
+		)
+		apiRes, httpRes, callErr = r.client.GridAPI.
+			UpgradescheduleAPI.
+			Update(ctx, utils.ExtractResourceRef(listObj.GetRef())).
+			Upgradeschedule(*payload).
+			ReturnFieldsPlus(readableAttributesForUpgradeschedule).
+			ReturnAsObject(1).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
+
 	if err != nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update UpgradeSchedule: %s", err))
+		if retry.IsAlreadyExistsErr(err) {
+			// Resource already exists, import required
+			resp.Diagnostics.AddError(
+				"Resource Already Exists",
+				fmt.Sprintf("Resource already exists, error: %s.\nPlease import the existing resource into terraform state.", err.Error()),
+			)
+			return
+		}
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create Upgradeschedule, got error: %s", err))
 		return
 	}
 
@@ -159,15 +191,30 @@ func (r *UpgradescheduleResource) Read(ctx context.Context, req resource.ReadReq
 		return
 	}
 
-	apiRes, httpRes, err := r.client.GridAPI.
-		UpgradescheduleAPI.
-		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
-		ReturnFieldsPlus(readableAttributesForUpgradeschedule).
-		ReturnAsObject(1).
-		ProxySearch(config.GetProxySearch()).
-		Execute()
+	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
 
-		// Handle not found case
+	var (
+		httpRes *http.Response
+		apiRes  *grid.GetUpgradescheduleResponse
+	)
+
+	err := retry.Do(ctx, nil, func(ctx context.Context) (int, error) {
+		var callErr error
+		apiRes, httpRes, callErr = r.client.GridAPI.
+			UpgradescheduleAPI.
+			Read(ctx, resourceRef).
+			ReturnFieldsPlus(readableAttributesForUpgradeschedule).
+			ReturnAsObject(1).
+			ProxySearch(config.GetProxySearch()).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
+
+	// Handle not found case
 	if err != nil {
 		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
 			// Resource no longer exists, remove from state
@@ -203,13 +250,49 @@ func (r *UpgradescheduleResource) Update(ctx context.Context, req resource.Updat
 		return
 	}
 
-	apiRes, _, err := r.client.GridAPI.
+	payload := data.Expand(ctx, &resp.Diagnostics)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
+
+	// Fetch the current upgrade groups from the grid and merge with the plan.
+	currentRes, _, err := r.client.GridAPI.
 		UpgradescheduleAPI.
-		Update(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
-		Upgradeschedule(*data.Expand(ctx, &resp.Diagnostics)).
-		ReturnFieldsPlus(readableAttributesForUpgradeschedule).
+		Read(ctx, resourceRef).
 		ReturnAsObject(1).
+		ReturnFieldsPlus("upgrade_groups").
+		ProxySearch(config.GetProxySearch()).
 		Execute()
+	if err != nil {
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read current Upgradeschedule for merge, got error: %s", err))
+		return
+	}
+	currentObj := currentRes.GetUpgradescheduleResponseObjectAsResult.GetResult()
+	payload.UpgradeGroups = mergeUpgradeGroups(currentObj.GetUpgradeGroups(), payload.UpgradeGroups)
+
+	var apiRes *grid.UpdateUpgradescheduleResponse
+
+	err = retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		var (
+			httpRes *http.Response
+			callErr error
+		)
+		apiRes, httpRes, callErr = r.client.GridAPI.
+			UpgradescheduleAPI.
+			Update(ctx, resourceRef).
+			Upgradeschedule(*payload).
+			ReturnFieldsPlus(readableAttributesForUpgradeschedule).
+			ReturnAsObject(1).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
+
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update Upgradeschedule, got error: %s", err))
 		return
@@ -230,4 +313,49 @@ func (r *UpgradescheduleResource) Delete(ctx context.Context, req resource.Delet
 
 func (r *UpgradescheduleResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("ref"), req, resp)
+}
+
+// mergeUpgradeGroups merges currentGroups (from the grid) with userGroups (from the plan).
+// userGroups take precedence: if a group with the same name exists in both, the user's
+// version is kept. Groups present only in the grid are retained as-is.
+// time_zone is stripped from every group to avoid "not writable" errors on update.
+func mergeUpgradeGroups(currentGroups, userGroups []grid.UpgradescheduleUpgradeGroups) []grid.UpgradescheduleUpgradeGroups {
+	userByName := make(map[string]grid.UpgradescheduleUpgradeGroups, len(userGroups))
+	for _, g := range userGroups {
+		if g.Name != nil {
+			userByName[*g.Name] = g
+		}
+	}
+
+	seen := make(map[string]bool, len(currentGroups))
+	merged := make([]grid.UpgradescheduleUpgradeGroups, 0, len(currentGroups))
+
+	for _, cg := range currentGroups {
+		name := ""
+		if cg.Name != nil {
+			name = *cg.Name
+		}
+		if ug, ok := userByName[name]; ok {
+			ug.TimeZone = nil
+			merged = append(merged, ug)
+		} else {
+			cg.TimeZone = nil
+			merged = append(merged, cg)
+		}
+		seen[name] = true
+	}
+
+	// Append any user groups not already present in the current list.
+	for _, ug := range userGroups {
+		name := ""
+		if ug.Name != nil {
+			name = *ug.Name
+		}
+		if !seen[name] {
+			ug.TimeZone = nil
+			merged = append(merged, ug)
+		}
+	}
+
+	return merged
 }
