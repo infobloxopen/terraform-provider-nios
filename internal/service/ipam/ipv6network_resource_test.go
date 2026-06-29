@@ -2567,7 +2567,8 @@ func testAccIpv6networkUseSubscribeSettings(network, useSubscribeSettings string
 	}
 	return fmt.Sprintf(`
 resource "nios_ipam_ipv6network" "test_use_subscribe_settings" {
-    network = %q
+    network      = %q
+    network_view = "test_network_view"
     use_subscribe_settings = %q%s
 }
 `, network, useSubscribeSettings, subscribeSettingsBlock)
