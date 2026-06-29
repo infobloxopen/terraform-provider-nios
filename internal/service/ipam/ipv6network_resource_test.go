@@ -1191,13 +1191,22 @@ func TestAccIpv6networkResource_RirRegistrationStatus(t *testing.T) {
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			// Create and Read
-			// Update is not applicable: only two valid values exist (NOT_REGISTERED, REGISTERED),
-			// and REGISTERED requires rir_organization which significantly changes the resource config.
 			{
-				Config: testAccIpv6networkRirRegistrationStatus(network, "NOT_REGISTERED"),
+				Config: testAccIpv6networkRirRegistrationStatus(network, "NOT_REGISTERED", "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networkExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "rir_registration_status", "NOT_REGISTERED"),
+					resource.TestCheckResourceAttr(resourceName, "same_port_control_discovery_blackout", "false"),
+					resource.TestCheckResourceAttr(resourceName, "network", network),
+				),
+			},
+			// Update and Read
+			{
+				Config: testAccIpv6networkRirRegistrationStatus(network, "NOT_REGISTERED", "true"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckIpv6networkExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "rir_registration_status", "NOT_REGISTERED"),
+					resource.TestCheckResourceAttr(resourceName, "same_port_control_discovery_blackout", "true"),
 					resource.TestCheckResourceAttr(resourceName, "network", network),
 				),
 			},
@@ -2331,20 +2340,6 @@ resource "nios_ipam_ipv6network" "test_members" {
 `, network, memberName)
 }
 
-func testAccIpv6networkMembersUpdate(network, memberName string) string {
-	return fmt.Sprintf(`
-resource "nios_ipam_ipv6network" "test_members" {
-    network = %q
-    members = [
-        {
-            name = %q
-            ipv6addr = "fd12:3456:789a::1"
-        }
-    ]
-}
-`, network, memberName)
-}
-
 func testAccIpv6networkNetwork(network string) string {
 	return fmt.Sprintf(`
 resource "nios_ipam_ipv6network" "test_network" {
@@ -2430,13 +2425,15 @@ resource "nios_ipam_ipv6network" "test_rir_registration_action" {
 `, network, rirRegistrationAction, comment)
 }
 
-func testAccIpv6networkRirRegistrationStatus(network, rirRegistrationStatus string) string {
+func testAccIpv6networkRirRegistrationStatus(network, rirRegistrationStatus, samePortControl string) string {
 	return fmt.Sprintf(`
 resource "nios_ipam_ipv6network" "test_rir_registration_status" {
     network = %q
     rir_registration_status = %q
+    same_port_control_discovery_blackout = %q
+    use_blackout_setting = "true"
 }
-`, network, rirRegistrationStatus)
+`, network, rirRegistrationStatus, samePortControl)
 }
 
 func testAccIpv6networkSamePortControlDiscoveryBlackout(network, samePortControlDiscoveryBlackout, useBlackoutSetting string) string {

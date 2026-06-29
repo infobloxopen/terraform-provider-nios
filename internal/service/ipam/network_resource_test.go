@@ -2068,7 +2068,7 @@ func TestAccNetworkResource_RirOrganization(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "rir", "RIPE"),
 				),
 			},
-			// Update and Read - update extattr while keeping rir_organization
+			// Update and Read
 			{
 				Config: testAccNetworkRirOrganizationUpdated(network, "rir-org-test1"),
 				Check: resource.ComposeTestCheckFunc(
@@ -2125,10 +2125,20 @@ func TestAccNetworkResource_RirRegistrationStatus(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccNetworkRirRegistrationStatus(network, "NOT_REGISTERED"),
+				Config: testAccNetworkRirRegistrationStatus(network, "NOT_REGISTERED", "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "rir_registration_status", "NOT_REGISTERED"),
+					resource.TestCheckResourceAttr(resourceName, "same_port_control_discovery_blackout", "false"),
+				),
+			},
+			// Update and Read
+			{
+				Config: testAccNetworkRirRegistrationStatus(network, "NOT_REGISTERED", "true"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNetworkExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "rir_registration_status", "NOT_REGISTERED"),
+					resource.TestCheckResourceAttr(resourceName, "same_port_control_discovery_blackout", "true"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -3912,13 +3922,15 @@ resource "nios_ipam_network" "test_rir_registration_action" {
 `, network, rirRegistrationAction, comment)
 }
 
-func testAccNetworkRirRegistrationStatus(network, rirRegistrationStatus string) string {
+func testAccNetworkRirRegistrationStatus(network, rirRegistrationStatus, samePortControl string) string {
 	return fmt.Sprintf(`
 resource "nios_ipam_network" "test_rir_registration_status" {
     network = %q
     rir_registration_status = %q
+    same_port_control_discovery_blackout = %q
+    use_blackout_setting = "true"
 }
-`, network, rirRegistrationStatus)
+`, network, rirRegistrationStatus, samePortControl)
 }
 
 func testAccNetworkSamePortControlDiscoveryBlackout(network, samePortControlDiscoveryBlackout, useBlackoutSetting string) string {
