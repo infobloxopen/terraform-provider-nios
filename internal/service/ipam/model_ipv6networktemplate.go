@@ -592,7 +592,7 @@ func (m *Ipv6networktemplateModel) Flatten(ctx context.Context, from *ipam.Ipv6n
 	m.RangeTemplates = flex.FlattenFrameworkListString(ctx, from.RangeTemplates, diags)
 	m.RecycleLeases = types.BoolPointerValue(from.RecycleLeases)
 	m.Rir = flex.FlattenStringPointer(from.Rir)
-	m.RirOrganization = flex.FlattenStringPointer(from.RirOrganization)
+	m.RirOrganization = flex.FlattenStringPointerNilAsNotEmpty(from.RirOrganization)
 	m.RirRegistrationAction = flex.FlattenStringPointer(from.RirRegistrationAction)
 	m.RirRegistrationStatus = flex.FlattenStringPointer(from.RirRegistrationStatus)
 	m.SendRirRequest = types.BoolPointerValue(from.SendRirRequest)

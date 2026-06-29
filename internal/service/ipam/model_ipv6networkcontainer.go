@@ -815,6 +815,11 @@ func (m *Ipv6networkcontainerModel) Flatten(ctx context.Context, from *ipam.Ipv6
 	m.Utilization = flex.FlattenInt64Pointer(from.Utilization)
 	m.ValidLifetime = flex.FlattenInt64Pointer(from.ValidLifetime)
 	m.ZoneAssociations = flex.FlattenFrameworkListNestedBlock(ctx, from.ZoneAssociations, Ipv6networkcontainerZoneAssociationsAttrTypes, diags, FlattenIpv6networkcontainerZoneAssociations)
+	// When null/unknown (e.g. data source or import), apply the schema default (true)
+	if m.RemoveSubnets.IsNull() || m.RemoveSubnets.IsUnknown() {
+		defaultVal := true
+		m.RemoveSubnets = types.BoolPointerValue(&defaultVal)
+	}
 }
 
 func ExpandIpv6NetworkcontainerNetwork(str cidrtypes.IPv6Prefix) *ipam.Ipv6networkcontainerNetwork {
