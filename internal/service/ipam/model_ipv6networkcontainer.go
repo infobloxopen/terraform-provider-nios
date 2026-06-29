@@ -476,6 +476,9 @@ var Ipv6networkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional:            true,
 		MarkdownDescription: "The RIR organization associated with the IPv6 network container.",
 		Computed:            true,
+		PlanModifiers: []planmodifier.String{
+			planmodifiers.ImmutableString(),
+		},
 	},
 	"rir_registration_action": schema.StringAttribute{
 		Optional:            true,
@@ -509,6 +512,7 @@ var Ipv6networkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"subscribe_settings": schema.SingleNestedAttribute{
 		Attributes: Ipv6networkcontainerSubscribeSettingsResourceSchemaAttributes,
+		Optional:   true,
 		Computed:   true,
 	},
 	"unmanaged": schema.BoolAttribute{

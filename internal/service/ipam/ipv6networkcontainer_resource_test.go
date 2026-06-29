@@ -1637,6 +1637,7 @@ func TestAccIpv6networkcontainerResource_RirOrganization(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "rir", "RIPE"),
 				),
 			},
+			// Update is not tested: rir_organization is immutable
 			// Delete testing automatically occurs in TestCase
 		},
 	})
@@ -1706,6 +1707,16 @@ func TestAccIpv6networkcontainerResource_MappedEAAttributes(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "use_subscribe_settings", "true"),
 					resource.TestCheckResourceAttr(resourceName, "subscribe_settings.mapped_ea_attributes.0.name", "MAC"),
 					resource.TestCheckResourceAttr(resourceName, "subscribe_settings.mapped_ea_attributes.0.mapped_ea", "Site"),
+				),
+			},
+			// Update and Read
+			{
+				Config: testAccIpv6networkcontainerMappedEAAttributes(network, "MAC", "Building"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckIpv6networkcontainerExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "use_subscribe_settings", "true"),
+					resource.TestCheckResourceAttr(resourceName, "subscribe_settings.mapped_ea_attributes.0.name", "MAC"),
+					resource.TestCheckResourceAttr(resourceName, "subscribe_settings.mapped_ea_attributes.0.mapped_ea", "Building"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -2374,6 +2385,7 @@ func testAccIpv6networkcontainerMappedEAAttributes(network, name, mappedEa strin
 	return fmt.Sprintf(`
 resource "nios_ipam_ipv6network_container" "test_mapped_ea_attributes" {
     network = %q
+    network_view = "test_network_view"
     use_subscribe_settings = true
     subscribe_settings = {
         enabled_attributes = ["USERNAME"]

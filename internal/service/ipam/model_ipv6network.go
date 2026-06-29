@@ -594,6 +594,9 @@ var Ipv6networkResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional:            true,
 		MarkdownDescription: "The RIR organization associated with the IPv6 network.",
 		Computed:            true,
+		PlanModifiers: []planmodifier.String{
+			planmodifiers.ImmutableString(),
+		},
 	},
 	"rir_registration_action": schema.StringAttribute{
 		Optional:            true,

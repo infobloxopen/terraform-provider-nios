@@ -1891,7 +1891,8 @@ resource "nios_dhcp_shared_network" "test_ignore_client_identifier" {
    name = %q
    networks = %s
    ignore_client_identifier = %t
-   use_ignore_client_identifier = %t%s
+   use_ignore_client_identifier = %t
+   %s
 }
 `, name, networksStr, ignoreClientIdentifier, useIgnoreClientIdentifier, extraConfig)
 	return strings.Join([]string{testAccBaseWithNetworks(
@@ -1932,7 +1933,8 @@ resource "nios_dhcp_shared_network" "test_ignore_id" {
    name = %q
    networks = %s
    ignore_id = %q
-   use_ignore_id = %t%s
+   use_ignore_id = %t
+   %s
 }
 `, name, networksStr, ignoreId, useIgnoreId, extraConfig)
 	return strings.Join([]string{testAccBaseWithNetworks(

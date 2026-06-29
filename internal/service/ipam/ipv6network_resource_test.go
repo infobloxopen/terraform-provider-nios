@@ -1620,6 +1620,9 @@ func TestAccIpv6networkResource_UseRecycleLeases(t *testing.T) {
 }
 
 func TestAccIpv6networkResource_UseSubscribeSettings(t *testing.T) {
+	if utils.GetNIOSPxgridEndpointRef() == "" {
+		t.Skip("Skipping: NIOS_PXGRID_ENDPOINT_REF not set. A configured pxGrid/ISE endpoint is required.")
+	}
 	var resourceName = "nios_ipam_ipv6network.test_use_subscribe_settings"
 	var v ipam.Ipv6network
 	network := acctest.RandomIPv6Network()
@@ -1634,6 +1637,15 @@ func TestAccIpv6networkResource_UseSubscribeSettings(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networkExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_subscribe_settings", "false"),
+					resource.TestCheckResourceAttr(resourceName, "network", network),
+				),
+			},
+			// Update and Read
+			{
+				Config: testAccIpv6networkUseSubscribeSettings(network, "true"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckIpv6networkExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "use_subscribe_settings", "true"),
 					resource.TestCheckResourceAttr(resourceName, "network", network),
 				),
 			},
@@ -1784,6 +1796,14 @@ func TestAccIpv6networkResource_DiscoveryMember(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "discovery_member", discoveryMember),
 				),
 			},
+			// Update and Read
+			{
+				Config: testAccIpv6networkDiscoveryMemberDisabled(network),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckIpv6networkExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "use_enable_discovery", "false"),
+				),
+			},
 			// Delete testing automatically occurs in TestCase
 		},
 	})
@@ -1919,6 +1939,7 @@ func TestAccIpv6networkResource_RirOrganization(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "rir", "RIPE"),
 				),
 			},
+			// Update is not tested: rir_organization is immutable
 			// Delete testing automatically occurs in TestCase
 		},
 	})
@@ -1927,7 +1948,6 @@ func TestAccIpv6networkResource_RirOrganization(t *testing.T) {
 func TestAccIpv6networkResource_RirOrganizationAction(t *testing.T) {
 	var resourceName = "nios_ipam_ipv6network.test_rir_registration_action"
 	var v ipam.Ipv6network
-	// Parent container needs a larger prefix, child network is within it
 	third := rand.Intn(65536)
 	fourth := rand.Intn(65536)
 	parentNetwork := fmt.Sprintf("2001:db8:%x::/48", third)
@@ -1988,6 +2008,16 @@ func TestAccIpv6networkResource_MappedEAAttributes(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "use_subscribe_settings", "true"),
 					resource.TestCheckResourceAttr(resourceName, "subscribe_settings.mapped_ea_attributes.0.name", "MAC"),
 					resource.TestCheckResourceAttr(resourceName, "subscribe_settings.mapped_ea_attributes.0.mapped_ea", "Site"),
+				),
+			},
+			// Update and Read
+			{
+				Config: testAccIpv6networkMappedEAAttributes(network, "MAC", "Building"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckIpv6networkExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "use_subscribe_settings", "true"),
+					resource.TestCheckResourceAttr(resourceName, "subscribe_settings.mapped_ea_attributes.0.name", "MAC"),
+					resource.TestCheckResourceAttr(resourceName, "subscribe_settings.mapped_ea_attributes.0.mapped_ea", "Building"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -2522,12 +2552,25 @@ resource "nios_ipam_ipv6network" "test_use_recycle_leases" {
 }
 
 func testAccIpv6networkUseSubscribeSettings(network, useSubscribeSettings string) string {
+	subscribeSettingsBlock := ""
+	if useSubscribeSettings == "true" {
+		subscribeSettingsBlock = `
+    subscribe_settings = {
+        enabled_attributes = ["USERNAME"]
+        mapped_ea_attributes = [
+            {
+                name = "IP_ADDRESS"
+                mapped_ea = "Site"
+            }
+        ]
+    }`
+	}
 	return fmt.Sprintf(`
 resource "nios_ipam_ipv6network" "test_use_subscribe_settings" {
     network = %q
-    use_subscribe_settings = %q
+    use_subscribe_settings = %q%s
 }
-`, network, useSubscribeSettings)
+`, network, useSubscribeSettings, subscribeSettingsBlock)
 }
 
 func testAccIpv6networkUseUpdateDnsOnLeaseRenewal(network, useUpdateDnsOnLeaseRenewal string) string {
@@ -2576,6 +2619,15 @@ resource "nios_ipam_ipv6network" "test_discovery_member" {
     use_enable_discovery = true
 }
 `, network, discoveryMember)
+}
+
+func testAccIpv6networkDiscoveryMemberDisabled(network string) string {
+	return fmt.Sprintf(`
+resource "nios_ipam_ipv6network" "test_discovery_member" {
+    network = %q
+    use_enable_discovery = false
+}
+`, network)
 }
 
 func testAccIpv6networkEnableDiscovery(network string, enableDiscovery bool) string {
@@ -2669,6 +2721,7 @@ func testAccIpv6networkMappedEAAttributes(network, name, mappedEa string) string
 	return fmt.Sprintf(`
 resource "nios_ipam_ipv6network" "test_mapped_ea_attributes" {
     network = %q
+    network_view = "test_network_view"
     use_subscribe_settings = true
     subscribe_settings = {
         enabled_attributes = ["USERNAME"]

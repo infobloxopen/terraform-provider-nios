@@ -19,10 +19,7 @@ import (
 
 // TODO: DiscoveryMember requires discovering to be enabled.
 // TODO: EnableDiscovery requires a valid discovery member.
-// TODO: EnableImmediateDiscovery requires a valid discovery member.
 // TODO: Federated realms serve need to enabled
-// TODO: LogicFilterRules Logic filter rule required
-// TODO: RemoveSubnets Need child objects and only delete param
 // TODO: RirOrganization rir organization configuration required
 // TODO: RirOrganizationAction rir organization configuration required
 // TODO: ZoneAssociations Need dns zone to test associations
@@ -2623,6 +2620,14 @@ func TestAccNetworkcontainerResource_DiscoveryMember(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "discovery_member", discoveryMember),
 				),
 			},
+			// Update and Read
+			{
+				Config: testAccNetworkcontainerDiscoveryMemberDisabled(network),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNetworkcontainerExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "use_enable_discovery", "false"),
+				),
+			},
 			// Delete testing automatically occurs in TestCase
 		},
 	})
@@ -2758,6 +2763,7 @@ func TestAccNetworkcontainerResource_RirOrganization(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "rir", "RIPE"),
 				),
 			},
+			// Update is not tested: rir_organization is immutable
 			// Delete testing automatically occurs in TestCase
 		},
 	})
@@ -2766,7 +2772,6 @@ func TestAccNetworkcontainerResource_RirOrganization(t *testing.T) {
 func TestAccNetworkcontainerResource_RirOrganizationAction(t *testing.T) {
 	var resourceName = "nios_ipam_network_container.test_rir_registration_action"
 	var v ipam.Networkcontainer
-	// Parent needs a larger CIDR, child is a subnet within it
 	octet1 := 10 + rand.Intn(246)
 	octet2 := rand.Intn(256)
 	parentNetwork := fmt.Sprintf("%d.%d.0.0/16", octet1, octet2)
@@ -2827,6 +2832,16 @@ func TestAccNetworkcontainerResource_MappedEAAttributes(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "use_subscribe_settings", "true"),
 					resource.TestCheckResourceAttr(resourceName, "subscribe_settings.mapped_ea_attributes.0.name", "MAC"),
 					resource.TestCheckResourceAttr(resourceName, "subscribe_settings.mapped_ea_attributes.0.mapped_ea", "Site"),
+				),
+			},
+			// Update and Read
+			{
+				Config: testAccNetworkcontainerMappedEAAttributes(network, "MAC", "Building"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNetworkcontainerExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "use_subscribe_settings", "true"),
+					resource.TestCheckResourceAttr(resourceName, "subscribe_settings.mapped_ea_attributes.0.name", "MAC"),
+					resource.TestCheckResourceAttr(resourceName, "subscribe_settings.mapped_ea_attributes.0.mapped_ea", "Building"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -3683,6 +3698,15 @@ resource "nios_ipam_network_container" "test_discovery_member" {
 `, network, discoveryMember)
 }
 
+func testAccNetworkcontainerDiscoveryMemberDisabled(network string) string {
+	return fmt.Sprintf(`
+resource "nios_ipam_network_container" "test_discovery_member" {
+    network = %q
+    use_enable_discovery = false
+}
+`, network)
+}
+
 func testAccNetworkcontainerEnableDiscovery(network string, enableDiscovery bool) string {
 	discoveryMember := utils.GetNIOSDiscoveryMemberHostName()
 	return fmt.Sprintf(`
@@ -3774,6 +3798,7 @@ func testAccNetworkcontainerMappedEAAttributes(network, name, mappedEa string) s
 	return fmt.Sprintf(`
 resource "nios_ipam_network_container" "test_mapped_ea_attributes" {
     network = %q
+    network_view = "test_network_view"
     use_subscribe_settings = true
     subscribe_settings = {
         enabled_attributes = ["USERNAME"]

@@ -642,20 +642,15 @@ func TestAccNotificationRuleResource_NotificationAction(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccNotificationRuleNotificationAction(eventType, expressionList, name, "RESTAPI_TEMPLATE_INSTANCE", notificationTarget, templateInstance),
+				Config: testAccNotificationRuleNotificationAction(eventType, expressionList, name, notificationAction, notificationTarget, templateInstance),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNotificationRuleExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "notification_action", "RESTAPI_TEMPLATE_INSTANCE"),
+					resource.TestCheckResourceAttr(resourceName, "notification_action", notificationAction),
 				),
 			},
-			// Update and Read
-			{
-				Config: testAccNotificationRuleNotificationAction(eventType, expressionList, name, "RESTAPI_TEMPLATE_INSTANCE", notificationTarget, templateInstance),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckNotificationRuleExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "notification_action", "RESTAPI_TEMPLATE_INSTANCE"),
-				),
-			},
+			// Update is not tested: changing notification_action requires a different endpoint type
+			// (e.g., CISCOISE_PUBLISH/CISCOISE_QUARANTINE needs a Cisco ISE endpoint), and no
+			// alternate endpoint is available on the test grid.
 			// Delete testing automatically occurs in TestCase
 		},
 	})

@@ -735,6 +735,9 @@ var NetworkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional:            true,
 		MarkdownDescription: "The RIR organization assoicated with the network container.",
 		Computed:            true,
+		PlanModifiers: []planmodifier.String{
+			planmodifiers.ImmutableString(),
+		},
 	},
 	"rir_registration_action": schema.StringAttribute{
 		Optional:            true,
