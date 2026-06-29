@@ -268,7 +268,7 @@ func (m *NetworkviewModel) Flatten(ctx context.Context, from *ipam.Networkview, 
 			}
 		}
 	}
-	
+
 	m.DdnsZonePrimaries = flex.FlattenFrameworkListNestedBlock(ctx, from.DdnsZonePrimaries, NetworkviewDdnsZonePrimariesAttrTypes, diags, FlattenNetworkviewDdnsZonePrimaries)
 	m.ExtAttrs = FlattenExtAttrs(ctx, m.ExtAttrs, from.ExtAttrs, diags)
 	m.FederatedRealms = flex.FlattenFrameworkListNestedBlock(ctx, from.FederatedRealms, NetworkviewFederatedRealmsAttrTypes, diags, FlattenNetworkviewFederatedRealms)

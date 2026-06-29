@@ -631,6 +631,19 @@ func (r *NetworkResource) ValidateConfig(ctx context.Context, req resource.Valid
 			)
 		}
 	}
+
+	// enabled_attributes is required when subscribe_settings is configured
+	if !data.SubscribeSettings.IsNull() && !data.SubscribeSettings.IsUnknown() {
+		attrs := data.SubscribeSettings.Attributes()
+		enabledAttrs, exists := attrs["enabled_attributes"]
+		if !exists || enabledAttrs.IsNull() || enabledAttrs.IsUnknown() {
+			resp.Diagnostics.AddAttributeError(
+				path.Root("subscribe_settings").AtName("enabled_attributes"),
+				"Missing Required Attribute",
+				"The 'enabled_attributes' attribute is required when 'subscribe_settings' is configured.",
+			)
+		}
+	}
 }
 
 func (r *NetworkResource) isNetworkConvertedToContainer(ctx context.Context, data *NetworkModel) bool {

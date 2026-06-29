@@ -83,7 +83,7 @@ func TestAccSuperhostList_Filters(t *testing.T) {
 							"ref": knownvalue.StringRegexp(regexp.MustCompile("superhost/")),
 						}),
 						[]querycheck.KnownValueCheck{
-		
+
 							{
 								Path:       tfjsonpath.New("name"),
 								KnownValue: knownvalue.StringExact(name),

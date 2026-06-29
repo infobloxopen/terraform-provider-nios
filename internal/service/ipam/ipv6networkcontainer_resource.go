@@ -674,4 +674,17 @@ func (r *Ipv6networkcontainerResource) ValidateConfig(ctx context.Context, req r
 			"When 'use_mgm_private' is set to true, 'mgm_private' must also be set to true.",
 		)
 	}
+
+	// enabled_attributes is required when subscribe_settings is configured
+	if !data.SubscribeSettings.IsNull() && !data.SubscribeSettings.IsUnknown() {
+		attrs := data.SubscribeSettings.Attributes()
+		enabledAttrs, exists := attrs["enabled_attributes"]
+		if !exists || enabledAttrs.IsNull() || enabledAttrs.IsUnknown() {
+			resp.Diagnostics.AddAttributeError(
+				path.Root("subscribe_settings").AtName("enabled_attributes"),
+				"Missing Required Attribute",
+				"The 'enabled_attributes' attribute is required when 'subscribe_settings' is configured.",
+			)
+		}
+	}
 }

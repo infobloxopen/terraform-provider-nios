@@ -511,7 +511,6 @@ func TestAccNetworkcontainerResource_DeleteReason(t *testing.T) {
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			// Create and Read
-			// delete_reason is write-only (not returned by NIOS on Read); state preserves configured value.
 			{
 				Config: testAccNetworkcontainerDeleteReason(network, "test-delete-reason"),
 				Check: resource.ComposeTestCheckFunc(
@@ -1650,12 +1649,21 @@ func TestAccNetworkcontainerResource_RirRegistrationAction(t *testing.T) {
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			// Create and Read
-			// rir_registration_action is write-only (not returned by NIOS on Read); state preserves configured value.
 			{
-				Config: testAccNetworkcontainerRirRegistrationAction(network, "NONE"),
+				Config: testAccNetworkcontainerRirRegistrationAction(network, "NONE", "initial comment"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkcontainerExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "rir_registration_action", "NONE"),
+					resource.TestCheckResourceAttr(resourceName, "comment", "initial comment"),
+				),
+			},
+			// Update and Read
+			{
+				Config: testAccNetworkcontainerRirRegistrationAction(network, "NONE", "updated comment"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNetworkcontainerExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "rir_registration_action", "NONE"),
+					resource.TestCheckResourceAttr(resourceName, "comment", "updated comment"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -1728,7 +1736,6 @@ func TestAccNetworkcontainerResource_SendRirRequest(t *testing.T) {
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			// Create and Read
-			// send_rir_request is write-only (not returned by NIOS on Read); state preserves configured value.
 			{
 				Config: testAccNetworkcontainerSendRirRequest(network, "false"),
 				Check: resource.ComposeTestCheckFunc(
@@ -3310,13 +3317,14 @@ resource "nios_ipam_network_container" "test_restart_if_needed" {
 `, network, restartIfNeeded)
 }
 
-func testAccNetworkcontainerRirRegistrationAction(network, rirRegistrationAction string) string {
+func testAccNetworkcontainerRirRegistrationAction(network, rirRegistrationAction, comment string) string {
 	return fmt.Sprintf(`
 resource "nios_ipam_network_container" "test_rir_registration_action" {
     network = %q
     rir_registration_action = %q
+    comment = %q
 }
-`, network, rirRegistrationAction)
+`, network, rirRegistrationAction, comment)
 }
 
 func testAccNetworkcontainerRirRegistrationStatus(network, rirRegistrationStatus string) string {
