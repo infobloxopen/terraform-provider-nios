@@ -3150,6 +3150,9 @@ func TestAccNetworkResource_UseRecycleLeases(t *testing.T) {
 }
 
 func TestAccNetworkResource_UseSubscribeSettings(t *testing.T) {
+	if utils.GetNIOSPxgridEndpointRef() == "" {
+		t.Skip("Skipping: NIOS_PXGRID_ENDPOINT_REF not set. A configured pxGrid/ISE endpoint is required.")
+	}
 	var resourceName = "nios_ipam_network.test_use_subscribe_settings"
 	var v ipam.Network
 	network := acctest.RandomCIDRNetwork()
@@ -3160,10 +3163,20 @@ func TestAccNetworkResource_UseSubscribeSettings(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccNetworkUseSubscribeSettings(network, "false"),
+				Config: testAccNetworkUseSubscribeSettings(network, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_subscribe_settings", "false"),
+					resource.TestCheckResourceAttr(resourceName, "network", network),
+				),
+			},
+			// Update and Read
+			{
+				Config: testAccNetworkUseSubscribeSettings(network, true),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNetworkExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "use_subscribe_settings", "true"),
+					resource.TestCheckResourceAttr(resourceName, "network", network),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -4251,13 +4264,26 @@ resource "nios_ipam_network" "test_use_recycle_leases" {
 `, network, useRecycleLeases)
 }
 
-func testAccNetworkUseSubscribeSettings(network, useSubscribeSettings string) string {
+func testAccNetworkUseSubscribeSettings(network string, useSubscribeSettings bool) string {
+	if useSubscribeSettings {
+		return fmt.Sprintf(`
+resource "nios_ipam_network" "test_use_subscribe_settings" {
+    network = %q
+    network_view = "test_network_view"
+    subscribe_settings = {
+        enabled_attributes = ["DOMAINNAME"]
+    }
+    use_subscribe_settings = true
+}
+`, network)
+	}
 	return fmt.Sprintf(`
 resource "nios_ipam_network" "test_use_subscribe_settings" {
     network = %q
-    use_subscribe_settings = %s
+    network_view = "test_network_view"
+    use_subscribe_settings = false
 }
-`, network, useSubscribeSettings)
+`, network)
 }
 
 func testAccNetworkUseUpdateDnsOnLeaseRenewal(network, useUpdateDnsOnLeaseRenewal string) string {
