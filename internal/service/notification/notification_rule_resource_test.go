@@ -648,9 +648,6 @@ func TestAccNotificationRuleResource_NotificationAction(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "notification_action", notificationAction),
 				),
 			},
-			// Update is not tested: changing notification_action requires a different endpoint type
-			// (e.g., CISCOISE_PUBLISH/CISCOISE_QUARANTINE needs a Cisco ISE endpoint), and no
-			// alternate endpoint is available on the test grid.
 			// Delete testing automatically occurs in TestCase
 		},
 	})

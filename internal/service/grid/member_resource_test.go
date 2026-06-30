@@ -5227,6 +5227,7 @@ func testAccMemberHaCloudPlatform(hostName string, haCloudPlatform string, vipAd
 	return fmt.Sprintf(`
 resource "nios_grid_member" "test_ha_cloud_platform" {
     host_name = %q
+    ha_on_cloud = true
     ha_cloud_platform = %q
 	vip_setting = {
 		address = %q

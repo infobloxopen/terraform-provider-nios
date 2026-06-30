@@ -17,12 +17,13 @@ import (
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
-// TODO: DiscoveryMember requires discovering to be enabled.
-// TODO: EnableDiscovery requires a valid discovery member.
-// TODO: Federated realms serve need to enabled
-// TODO: RirOrganization rir organization configuration required
-// TODO: RirOrganizationAction rir organization configuration required
-// TODO: ZoneAssociations Need dns zone to test associations
+// TODO:
+// Write acceptance tests for DiscoveryMember.
+// Write acceptance tests for EnableDiscovery.
+// Write acceptance tests for FederatedRealms.
+// Write acceptance tests for RirOrganization.
+// Write acceptance tests for RirRegistrationAction.
+// Write acceptance tests for ZoneAssociations.
 
 var readableAttributesForNetworkcontainer = "authority,bootfile,bootserver,cloud_info,comment,ddns_domainname,ddns_generate_hostname,ddns_server_always_updates,ddns_ttl,ddns_update_fixed_addresses,ddns_use_option81,deny_bootp,discover_now_status,discovery_basic_poll_settings,discovery_blackout_setting,discovery_engine_type,discovery_member,email_list,enable_ddns,enable_dhcp_thresholds,enable_discovery,enable_email_warnings,enable_pxe_lease_time,enable_snmp_warnings,endpoint_sources,extattrs,federated_realms,high_water_mark,high_water_mark_reset,ignore_dhcp_option_list_request,ignore_id,ignore_mac_addresses,ipam_email_addresses,ipam_threshold_settings,ipam_trap_settings,last_rir_registration_update_sent,last_rir_registration_update_status,lease_scavenge_time,logic_filter_rules,low_water_mark,low_water_mark_reset,mgm_private,mgm_private_overridable,ms_ad_user_data,network,network_container,network_view,nextserver,options,port_control_blackout_setting,pxe_lease_time,recycle_leases,rir,rir_organization,rir_registration_status,same_port_control_discovery_blackout,subscribe_settings,unmanaged,update_dns_on_lease_renewal,use_authority,use_blackout_setting,use_bootfile,use_bootserver,use_ddns_domainname,use_ddns_generate_hostname,use_ddns_ttl,use_ddns_update_fixed_addresses,use_ddns_use_option81,use_deny_bootp,use_discovery_basic_polling_settings,use_email_list,use_enable_ddns,use_enable_dhcp_thresholds,use_enable_discovery,use_ignore_dhcp_option_list_request,use_ignore_id,use_ipam_email_addresses,use_ipam_threshold_settings,use_ipam_trap_settings,use_lease_scavenge_time,use_logic_filter_rules,use_mgm_private,use_nextserver,use_options,use_pxe_lease_time,use_recycle_leases,use_subscribe_settings,use_update_dns_on_lease_renewal,use_zone_associations,utilization,zone_associations"
 
@@ -2600,13 +2601,13 @@ func TestAccNetworkcontainerResource_UseUpdateDnsOnLeaseRenewal(t *testing.T) {
 }
 
 func TestAccNetworkcontainerResource_DiscoveryMember(t *testing.T) {
-	var resourceName = "nios_ipam_network_container.test_discovery_member"
-	var v ipam.Networkcontainer
-	network := acctest.RandomCIDRNetwork()
 	discoveryMember := utils.GetNIOSDiscoveryMemberHostName()
 	if discoveryMember == "" {
 		t.Skip("NIOS_DISCOVERY_MEMBER_HOSTNAME environment variable must be set")
 	}
+	var resourceName = "nios_ipam_network_container.test_discovery_member"
+	var v ipam.Networkcontainer
+	network := acctest.RandomCIDRNetwork()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -2634,13 +2635,13 @@ func TestAccNetworkcontainerResource_DiscoveryMember(t *testing.T) {
 }
 
 func TestAccNetworkcontainerResource_EnableDiscovery(t *testing.T) {
-	var resourceName = "nios_ipam_network_container.test_enable_discovery"
-	var v ipam.Networkcontainer
-	network := acctest.RandomCIDRNetwork()
 	discoveryMember := utils.GetNIOSDiscoveryMemberHostName()
 	if discoveryMember == "" {
 		t.Skip("NIOS_DISCOVERY_MEMBER_HOSTNAME environment variable must be set")
 	}
+	var resourceName = "nios_ipam_network_container.test_enable_discovery"
+	var v ipam.Networkcontainer
+	network := acctest.RandomCIDRNetwork()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -2668,13 +2669,13 @@ func TestAccNetworkcontainerResource_EnableDiscovery(t *testing.T) {
 }
 
 func TestAccNetworkcontainerResource_EnableImmediateDiscovery(t *testing.T) {
-	var resourceName = "nios_ipam_network_container.test_enable_immediate_discovery"
-	var v ipam.Networkcontainer
-	network := acctest.RandomCIDRNetwork()
 	discoveryMember := utils.GetNIOSDiscoveryMemberHostName()
 	if discoveryMember == "" {
 		t.Skip("NIOS_DISCOVERY_MEMBER_HOSTNAME environment variable must be set")
 	}
+	var resourceName = "nios_ipam_network_container.test_enable_immediate_discovery"
+	var v ipam.Networkcontainer
+	network := acctest.RandomCIDRNetwork()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },

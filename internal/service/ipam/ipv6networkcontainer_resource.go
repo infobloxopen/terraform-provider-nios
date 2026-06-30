@@ -12,6 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/identityschema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
 	"github.com/infobloxopen/infoblox-nios-go-client/ipam"
@@ -712,5 +713,31 @@ func (r *Ipv6networkcontainerResource) ValidateConfig(ctx context.Context, req r
 			"Invalid MGM Private Configuration",
 			"When 'use_mgm_private' is set to true, 'mgm_private' must also be set to true.",
 		)
+	}
+
+	// Validate subscribe_settings.mapped_ea_attributes: name and mapped_ea are required for each item
+	if !data.SubscribeSettings.IsNull() && !data.SubscribeSettings.IsUnknown() {
+		var subscribeSettings Ipv6networkcontainerSubscribeSettingsModel
+		resp.Diagnostics.Append(data.SubscribeSettings.As(ctx, &subscribeSettings, basetypes.ObjectAsOptions{})...)
+		if !resp.Diagnostics.HasError() && !subscribeSettings.MappedEaAttributes.IsNull() && !subscribeSettings.MappedEaAttributes.IsUnknown() {
+			var mappedEaAttrs []Ipv6networkcontainersubscribesettingsMappedEaAttributesModel
+			resp.Diagnostics.Append(subscribeSettings.MappedEaAttributes.ElementsAs(ctx, &mappedEaAttrs, false)...)
+			for i, item := range mappedEaAttrs {
+				if item.Name.IsNull() || item.Name.IsUnknown() || item.Name.ValueString() == "" {
+					resp.Diagnostics.AddAttributeError(
+						path.Root("subscribe_settings").AtName("mapped_ea_attributes").AtListIndex(i).AtName("name"),
+						"Missing Required Attribute",
+						"The 'name' attribute is required for each item in 'mapped_ea_attributes'.",
+					)
+				}
+				if item.MappedEa.IsNull() || item.MappedEa.IsUnknown() || item.MappedEa.ValueString() == "" {
+					resp.Diagnostics.AddAttributeError(
+						path.Root("subscribe_settings").AtName("mapped_ea_attributes").AtListIndex(i).AtName("mapped_ea"),
+						"Missing Required Attribute",
+						"The 'mapped_ea' attribute is required for each item in 'mapped_ea_attributes'.",
+					)
+				}
+			}
+		}
 	}
 }
