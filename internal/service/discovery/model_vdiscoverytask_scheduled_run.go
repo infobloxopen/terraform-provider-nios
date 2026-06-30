@@ -155,8 +155,17 @@ func (m *VdiscoverytaskScheduledRunModel) Expand(ctx context.Context, diags *dia
 	if m == nil {
 		return nil
 	}
+
+	var weekdays []string
+	if !m.Weekdays.IsNull() && !m.Weekdays.IsUnknown() {
+		weekdays = flex.ExpandFrameworkListString(ctx, m.Weekdays, diags)
+		if len(weekdays) == 0 {
+			weekdays = nil
+		}
+	}
+
 	to := &discovery.VdiscoverytaskScheduledRun{
-		Weekdays:        flex.ExpandFrameworkListString(ctx, m.Weekdays, diags),
+		Weekdays:        weekdays,
 		TimeZone:        flex.ExpandStringPointer(m.TimeZone),
 		RecurringTime:   flex.ExpandInt64Pointer(m.RecurringTime),
 		Frequency:       flex.ExpandStringPointerEmptyAsNil(m.Frequency),
