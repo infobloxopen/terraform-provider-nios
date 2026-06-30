@@ -17,11 +17,10 @@ import (
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
-// TODO: Write acceptance tests for Members.
-// TODO: Write acceptance tests for SendRirRequest.
-// TODO: Write acceptance tests for FederatedRealms.
-// TODO: Write acceptance tests for ZoneAssociations 
-// TODO: Write acceptance tests for SubscribeSettings.
+// TODO: Pending Tests :
+// SendRirRequest
+// FederatedRealms
+// ZoneAssociations
 
 var readableAttributesForIpv6networkcontainer = "cloud_info,comment,ddns_domainname,ddns_enable_option_fqdn,ddns_generate_hostname,ddns_server_always_updates,ddns_ttl,discover_now_status,discovery_basic_poll_settings,discovery_blackout_setting,discovery_engine_type,discovery_member,domain_name_servers,enable_ddns,enable_discovery,endpoint_sources,extattrs,last_rir_registration_update_sent,last_rir_registration_update_status,logic_filter_rules,mgm_private,mgm_private_overridable,ms_ad_user_data,network,network_container,network_view,options,port_control_blackout_setting,preferred_lifetime,rir,rir_organization,rir_registration_status,same_port_control_discovery_blackout,subscribe_settings,unmanaged,update_dns_on_lease_renewal,use_blackout_setting,use_ddns_domainname,use_ddns_enable_option_fqdn,use_ddns_generate_hostname,use_ddns_ttl,use_discovery_basic_polling_settings,use_domain_name_servers,use_enable_ddns,use_enable_discovery,use_logic_filter_rules,use_mgm_private,use_options,use_preferred_lifetime,use_subscribe_settings,use_update_dns_on_lease_renewal,use_valid_lifetime,use_zone_associations,utilization,valid_lifetime,zone_associations"
 
@@ -1338,6 +1337,9 @@ func TestAccIpv6networkcontainerResource_UsePreferredLifetime(t *testing.T) {
 }
 
 func TestAccIpv6networkcontainerResource_UseSubscribeSettings(t *testing.T) {
+	if utils.GetNIOSPxgridEndpointRef() == "" {
+		t.Skip("Skipping: NIOS_PXGRID_ENDPOINT_REF not set. A configured pxGrid/ISE endpoint is required.")
+	}
 	var resourceName = "nios_ipam_ipv6network_container.test_use_subscribe_settings"
 	var v ipam.Ipv6networkcontainer
 	network := acctest.RandomIPv6Network()
@@ -1352,6 +1354,15 @@ func TestAccIpv6networkcontainerResource_UseSubscribeSettings(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networkcontainerExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_subscribe_settings", "false"),
+					resource.TestCheckResourceAttr(resourceName, "network", network),
+				),
+			},
+			// Update and Read
+			{
+				Config: testAccIpv6networkcontainerUseSubscribeSettings(network, "true"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckIpv6networkcontainerExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "use_subscribe_settings", "true"),
 					resource.TestCheckResourceAttr(resourceName, "network", network),
 				),
 			},
@@ -1670,6 +1681,46 @@ func TestAccIpv6networkcontainerResource_RirOrganizationAction(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networkcontainerExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "rir_registration_action", "NONE"),
+				),
+			},
+			// Delete testing automatically occurs in TestCase
+		},
+	})
+}
+
+func TestAccIpv6networkcontainerResource_SubscribeSettings(t *testing.T) {
+	if utils.GetNIOSPxgridEndpointRef() == "" {
+		t.Skip("Skipping: NIOS_PXGRID_ENDPOINT_REF not set. A configured pxGrid/ISE endpoint is required.")
+	}
+	var resourceName = "nios_ipam_ipv6network_container.test_subscribe_settings"
+	var v ipam.Ipv6networkcontainer
+	network := acctest.RandomIPv6Network()
+	subscribeSettings := map[string]any{
+		"enabled_attributes": []string{"DOMAINNAME", "ENDPOINT_PROFILE"},
+	}
+	subscribeSettingsUpdated := map[string]any{
+		"enabled_attributes": []string{"SECURITY_GROUP"},
+	}
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// Create and Read
+			{
+				Config: testAccIpv6networkcontainerSubscribeSettings(network, subscribeSettings, "true"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckIpv6networkcontainerExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "subscribe_settings.enabled_attributes.0", "DOMAINNAME"),
+					resource.TestCheckResourceAttr(resourceName, "subscribe_settings.enabled_attributes.1", "ENDPOINT_PROFILE"),
+				),
+			},
+			// Update and Read
+			{
+				Config: testAccIpv6networkcontainerSubscribeSettings(network, subscribeSettingsUpdated, "true"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckIpv6networkcontainerExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "subscribe_settings.enabled_attributes.0", "SECURITY_GROUP"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -2238,12 +2289,27 @@ resource "nios_ipam_ipv6network_container" "test_use_preferred_lifetime" {
 }
 
 func testAccIpv6networkcontainerUseSubscribeSettings(network, useSubscribeSettings string) string {
+	subscribeSettingsBlock := ""
+	if useSubscribeSettings == "true" {
+		subscribeSettingsBlock = `
+    subscribe_settings = {
+        enabled_attributes = ["USERNAME"]
+        mapped_ea_attributes = [
+            {
+                name = "IP_ADDRESS"
+                mapped_ea = "Site"
+            }
+        ]
+    }`
+	}
 	return fmt.Sprintf(`
 resource "nios_ipam_ipv6network_container" "test_use_subscribe_settings" {
     network = %q
+    network_view = "test_network_view"
     use_subscribe_settings = %q
+    %s
 }
-`, network, useSubscribeSettings)
+`, network, useSubscribeSettings, subscribeSettingsBlock)
 }
 
 func testAccIpv6networkcontainerUseUpdateDnsOnLeaseRenewal(network, useUpdateDnsOnLeaseRenewal string) string {
@@ -2379,6 +2445,18 @@ resource "nios_ipam_ipv6network_container" "test_rir_registration_action" {
     }
 }
 `, parentNetwork, childNetwork, rirRegistrationAction)
+}
+
+func testAccIpv6networkcontainerSubscribeSettings(network string, subscribeSettings map[string]any, useSubscribeSettings string) string {
+	subscribeSettingsStr := utils.ConvertMapToHCL(subscribeSettings)
+	return fmt.Sprintf(`
+resource "nios_ipam_ipv6network_container" "test_subscribe_settings" {
+    network = %q
+    network_view = "test_network_view"
+    subscribe_settings = %s
+    use_subscribe_settings = %q
+}
+`, network, subscribeSettingsStr, useSubscribeSettings)
 }
 
 func testAccIpv6networkcontainerMappedEAAttributes(network, name, mappedEa string) string {
