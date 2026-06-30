@@ -119,7 +119,7 @@ func TestAccIpv6networkResource_disappears(t *testing.T) {
 func TestAccIpv6networkResource_AutoCreateReversezone(t *testing.T) {
 	var resourceName = "nios_ipam_ipv6network.test_auto_create_reversezone"
 	var v ipam.Ipv6network
-	network := acctest.RandomIPv6Network()
+	network := acctest.RandomIPv6NetworkWith4BitBoundary()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },

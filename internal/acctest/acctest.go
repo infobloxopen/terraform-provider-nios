@@ -82,6 +82,19 @@ func RandomIPv6Network() string {
 	return fmt.Sprintf("2001:db8:%x:%x::/%d", third, fourth, cidr)
 }
 
+// RandomIPv6NetworkWith4BitBoundary generates a random IPv6 network with a CIDR
+// that is a 4-bit boundary (multiple of 4). This is required for operations like
+// auto_create_reversezone which only supports 4-bit boundary CIDRs.
+func RandomIPv6NetworkWith4BitBoundary() string {
+	third := rand.Intn(65536)  // 0-FFFF for third hextet
+	fourth := rand.Intn(65536) // 0-FFFF for fourth hextet
+	// Valid 4-bit boundary CIDRs for IPv6: multiples of 4 between 64 and 124
+	validCidrs := []int{64, 68, 72, 76, 80, 84, 88, 92, 96, 100, 104, 108, 112, 116, 120, 124}
+	cidr := validCidrs[rand.Intn(len(validCidrs))]
+
+	return fmt.Sprintf("2001:db8:%x:%x::/%d", third, fourth, cidr)
+}
+
 // RandomAlphaNumeric generates a random alphanumeric string of the specified length.
 func RandomAlphaNumeric(length int) string {
 	const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
