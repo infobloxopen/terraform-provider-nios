@@ -120,7 +120,7 @@
   - Added a generic retry helper with exponential backoff and a provider-configurable retry timeout for CRUD operations.
 
 **Terraform Search** 
-  - Added Terraform Search support for objects across DNS, DHCP, and IPAM.
+  - Added Terraform Search support for all the objects across DNS (except Host Record), DHCP, and IPAM.
 
 **Write-only Fileds** 
   - Sensitive fields (such as passwords) that were previously stored in plaintext in the state file are now marked as write-only, encrypted, and stored in private state. These fields now appear as null in the state file.
