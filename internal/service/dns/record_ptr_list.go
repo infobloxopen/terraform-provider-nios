@@ -79,10 +79,7 @@ func (l *RecordPtrList) ListResourceConfigSchema(ctx context.Context, req list.L
 
 func (l *RecordPtrList) List(ctx context.Context, req list.ListRequest, stream *list.ListResultsStream) {
 	var data RecordPtrListModel
-	pageCount := 0
-	// Default Limit is 100
 	limit := int32(req.Limit)
-	var totalFetched int32
 
 	diags := req.Config.Get(ctx, &data)
 	if diags.HasError() {
@@ -90,71 +87,102 @@ func (l *RecordPtrList) List(ctx context.Context, req list.ListRequest, stream *
 		return
 	}
 
-	allResults, err := utils.ReadWithPages(
-		func(pageID string, maxResultsPerPage int32) ([]dns.RecordPtr, string, error) {
+	baseFilters := flex.ExpandFrameworkMapString(ctx, data.Filters, &diags)
+	if baseFilters == nil {
+		baseFilters = make(map[string]interface{})
+	}
 
-			var paging int32 = 1
+	// To exclude SYSTEM records we query STATIC and DYNAMIC separately.
+	_, userSetCreator := baseFilters["creator"]
 
-			// Adjust page size to not fetch more than the remaining needed results.
-			if remaining := limit - totalFetched; remaining < maxResultsPerPage {
-				maxResultsPerPage = remaining
-			}
+	creatorsToFetch := []string{"STATIC", "DYNAMIC"}
+	if userSetCreator {
+		creatorsToFetch = []string{""} // empty string = use baseFilters as-is
+	}
 
-			//Increment the page count
-			pageCount++
+	var allResults []dns.RecordPtr
+	remaining := limit
 
-			request := l.client.DNSAPI.
-				RecordPtrAPI.
-				List(ctx).
-				Filters(flex.ExpandFrameworkMapString(ctx, data.Filters, &diags)).
-				Extattrfilter(flex.ExpandFrameworkMapString(ctx, data.ExtAttrFilters, &diags)).
-				ReturnAsObject(1).
-				ReturnFieldsPlus(readableAttributesForRecordPtr).
-				Paging(paging).
-				MaxResults(maxResultsPerPage)
+	for _, creator := range creatorsToFetch {
+		if remaining <= 0 {
+			break
+		}
 
-			// Add page ID if provided
-			if pageID != "" {
-				request = request.PageId(pageID)
-			}
+		// Build a per-creator copy of the filters map.
+		iterFilters := make(map[string]interface{}, len(baseFilters))
+		for k, v := range baseFilters {
+			iterFilters[k] = v
+		}
+		if creator != "" {
+			iterFilters["creator"] = creator
+		}
 
-			// Execute the request
-			apiRes, _, err := request.Execute()
-			if err != nil {
-				return nil, "", err
-			}
+		pageCount := 0
+		var totalFetched int32
+		iterLimit := remaining // each creator call gets its share of the remaining limit
 
-			res := apiRes.ListRecordPtrResponseObject.GetResult()
-			tflog.Info(ctx, fmt.Sprintf("Page %d : Retrieved %d results", pageCount, len(res)))
+		results, err := utils.ReadWithPages(
+			func(pageID string, maxResultsPerPage int32) ([]dns.RecordPtr, string, error) {
+				var paging int32 = 1
 
-			totalFetched += int32(len(res))
-
-			// Check for next page ID in additional properties
-			additionalProperties := apiRes.ListRecordPtrResponseObject.AdditionalProperties
-			var nextPageID string
-
-			// If the cumulative limit is reached, stop pagination.
-			if totalFetched >= limit {
-				tflog.Info(ctx, "Limit reached, stopped fetching more pages.")
-				return res, "", nil
-			}
-
-			npId, ok := additionalProperties["next_page_id"]
-			if ok {
-				if npIdStr, ok := npId.(string); ok {
-					nextPageID = npIdStr
+				// Adjust page size to not fetch more than the remaining needed results.
+				if r := iterLimit - totalFetched; r < maxResultsPerPage {
+					maxResultsPerPage = r
 				}
-			} else {
-				tflog.Info(ctx, "No next page ID found. This is the last page.")
-			}
-			return res, nextPageID, nil
-		},
-	)
 
-	if err != nil {
-		diags.AddError("Client Error", fmt.Sprintf("Unable to list RecordPtr, got error: %s", err))
-		stream.Results = list.ListResultsStreamDiagnostics(diags)
-		return
+				pageCount++
+
+				request := l.client.DNSAPI.
+					RecordPtrAPI.
+					List(ctx).
+					Filters(iterFilters).
+					Extattrfilter(flex.ExpandFrameworkMapString(ctx, data.ExtAttrFilters, &diags)).
+					ReturnAsObject(1).
+					ReturnFieldsPlus(readableAttributesForRecordPtr).
+					Paging(paging).
+					MaxResults(maxResultsPerPage)
+
+				if pageID != "" {
+					request = request.PageId(pageID)
+				}
+
+				apiRes, _, err := request.Execute()
+				if err != nil {
+					return nil, "", err
+				}
+
+				res := apiRes.ListRecordPtrResponseObject.GetResult()
+				tflog.Info(ctx, fmt.Sprintf("Creator=%q Page %d: retrieved %d results", creator, pageCount, len(res)))
+
+				totalFetched += int32(len(res))
+
+				// If the limit for this creator is reached, stop pagination.
+				if totalFetched >= iterLimit {
+					tflog.Info(ctx, "Limit reached, stopped fetching more pages.")
+					return res, "", nil
+				}
+
+				additionalProperties := apiRes.ListRecordPtrResponseObject.AdditionalProperties
+				var nextPageID string
+				if npId, ok := additionalProperties["next_page_id"]; ok {
+					if npIdStr, ok := npId.(string); ok {
+						nextPageID = npIdStr
+					}
+				} else {
+					tflog.Info(ctx, "No next page ID found. This is the last page.")
+				}
+				return res, nextPageID, nil
+			},
+		)
+
+		if err != nil {
+			diags.AddError("Client Error", fmt.Sprintf("Unable to list RecordPtr, got error: %s", err))
+			stream.Results = list.ListResultsStreamDiagnostics(diags)
+			return
+		}
+
+		allResults = append(allResults, results...)
+		remaining -= int32(len(results))
 	}
 
 	stream.Results = func(push func(list.ListResult) bool) {
