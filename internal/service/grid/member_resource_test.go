@@ -5236,7 +5236,43 @@ resource "nios_grid_member" "test_ha_cloud_platform" {
 		primary = true
 		subnet_mask = %q
 		use_dscp = false
+		lan_gateway     = "172.28.48.1"
+		lan_subnet_mask = "255.255.255.0"
 	}
+	platform = "VNIOS"
+	enable_ha = true
+	router_id = 213
+
+	node_info = [
+	{
+	  lan_ha_port_setting = {
+		ha_cloud_attribute = "3"
+		ha_ip_address = "172.28.38.235"
+		ha_port_setting = {
+			auto_port_setting_enabled = true
+			speed = "10"
+		}
+		lan_port_setting = {
+			auto_port_setting_enabled = true
+		}
+		mgmt_lan = "172.28.38.236"
+	  }
+	},
+    {
+      lan_ha_port_setting = {
+      	ha_cloud_attribute = "4"
+      	ha_ip_address = "172.28.38.237"
+      	ha_port_setting = {
+        	auto_port_setting_enabled = true
+        	speed = "10"
+        }
+      	lan_port_setting = {
+        	auto_port_setting_enabled = true
+      	}
+      	mgmt_lan = "172.28.38.238"
+      }
+    }
+  ]
 }
 `, hostName, haCloudPlatform, vipAddress, vipGateway, vipSubnetMask)
 }
