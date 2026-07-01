@@ -17,7 +17,6 @@ import (
 )
 
 // TODO: Pending Tests :
-// Members
 // ZoneAssociations
 var readableAttributesForIpv6network = "cloud_info,comment,ddns_domainname,ddns_enable_option_fqdn,ddns_generate_hostname,ddns_server_always_updates,ddns_ttl,disable,discover_now_status,discovered_bgp_as,discovered_bridge_domain,discovered_tenant,discovered_vlan_id,discovered_vlan_name,discovered_vrf_description,discovered_vrf_name,discovered_vrf_rd,discovery_basic_poll_settings,discovery_blackout_setting,discovery_engine_type,discovery_member,domain_name,domain_name_servers,enable_ddns,enable_discovery,enable_ifmap_publishing,endpoint_sources,extattrs,federated_realms,last_rir_registration_update_sent,last_rir_registration_update_status,logic_filter_rules,members,mgm_private,mgm_private_overridable,ms_ad_user_data,network,network_container,network_view,options,port_control_blackout_setting,preferred_lifetime,recycle_leases,rir,rir_organization,rir_registration_status,same_port_control_discovery_blackout,subscribe_settings,unmanaged,unmanaged_count,update_dns_on_lease_renewal,use_blackout_setting,use_ddns_domainname,use_ddns_enable_option_fqdn,use_ddns_generate_hostname,use_ddns_ttl,use_discovery_basic_polling_settings,use_domain_name,use_domain_name_servers,use_enable_ddns,use_enable_discovery,use_enable_ifmap_publishing,use_logic_filter_rules,use_mgm_private,use_options,use_preferred_lifetime,use_recycle_leases,use_subscribe_settings,use_update_dns_on_lease_renewal,use_valid_lifetime,use_zone_associations,valid_lifetime,vlans,zone_associations"
 
@@ -2065,6 +2064,50 @@ func TestAccIpv6networkResource_MappedEAAttributes(t *testing.T) {
 	})
 }
 
+func TestAccIpv6networkResource_Members(t *testing.T) {
+	memberName := utils.GetNIOSGridMasterHostName()
+	memberUpdatedName := utils.GetNIOSGridMemberHostName()
+	var resourceName = "nios_ipam_ipv6network.test_members"
+	var v ipam.Ipv6network
+	network := acctest.RandomIPv6Network()
+	membersVal := []map[string]any{
+		{
+			"name": memberName,
+		},
+	}
+	membersValUpdated := []map[string]any{
+		{
+			"name": memberUpdatedName,
+		},
+	}
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// Create and Read
+			{
+				Config: testAccIpv6networkMembers(network, membersVal),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckIpv6networkExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "members.0.name", memberName),
+					resource.TestCheckResourceAttr(resourceName, "network", network),
+				),
+			},
+			// Update and Read
+			{
+				Config: testAccIpv6networkMembers(network, membersValUpdated),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckIpv6networkExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "members.0.name", memberUpdatedName),
+					resource.TestCheckResourceAttr(resourceName, "network", network),
+				),
+			},
+			// Delete testing automatically occurs in TestCase
+		},
+	})
+}
+
 func testAccCheckIpv6networkExists(ctx context.Context, resourceName string, v *ipam.Ipv6network) resource.TestCheckFunc {
 	// Verify the resource exists in the cloud
 	return func(state *terraform.State) error {
@@ -2769,6 +2812,16 @@ resource "nios_ipam_ipv6network" "test_subscribe_settings" {
     use_subscribe_settings = %q
 }
 `, network, subscribeSettingsStr, useSubscribeSettings)
+}
+
+func testAccIpv6networkMembers(network string, members []map[string]any) string {
+	membersStr := utils.ConvertSliceOfMapsToHCL(members)
+	return fmt.Sprintf(`
+resource "nios_ipam_ipv6network" "test_members" {
+    network = %q
+    members = %s
+}
+`, network, membersStr)
 }
 
 func testAccIpv6networkMappedEAAttributes(network, name, mappedEa string) string {
