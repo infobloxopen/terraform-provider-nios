@@ -92,7 +92,8 @@ func (l *RecordPtrList) List(ctx context.Context, req list.ListRequest, stream *
 		baseFilters = make(map[string]interface{})
 	}
 
-	// To exclude SYSTEM records we query STATIC and DYNAMIC separately.
+	// To exclude SYSTEM records we query STATIC and DYNAMIC separately
+	// unless the user explicitly filters by `creator`.
 	_, userSetCreator := baseFilters["creator"]
 
 	creatorsToFetch := []string{"STATIC", "DYNAMIC"}
