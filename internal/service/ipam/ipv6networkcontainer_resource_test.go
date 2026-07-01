@@ -18,7 +18,6 @@ import (
 )
 
 // TODO: Pending Tests :
-// SendRirRequest
 // FederatedRealms
 // ZoneAssociations
 
@@ -833,6 +832,38 @@ func TestAccIpv6networkcontainerResource_RirRegistrationStatus(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networkcontainerExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "rir_registration_status", "NOT_REGISTERED"),
+					resource.TestCheckResourceAttr(resourceName, "network", network),
+				),
+			},
+			// Delete testing automatically occurs in TestCase
+		},
+	})
+}
+
+func TestAccIpv6networkcontainerResource_SendRirRequest(t *testing.T) {
+	var resourceName = "nios_ipam_ipv6network_container.test_send_rir_request"
+	var v ipam.Ipv6networkcontainer
+	network := acctest.RandomIPv6Network()
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// Create and Read
+			{
+				Config: testAccIpv6networkcontainerSendRirRequest(network, "true"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckIpv6networkcontainerExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "send_rir_request", "true"),
+					resource.TestCheckResourceAttr(resourceName, "network", network),
+				),
+			},
+			// Update and Read
+			{
+				Config: testAccIpv6networkcontainerSendRirRequest(network, "false"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckIpv6networkcontainerExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "send_rir_request", "false"),
 					resource.TestCheckResourceAttr(resourceName, "network", network),
 				),
 			},
@@ -2137,6 +2168,15 @@ resource "nios_ipam_ipv6network_container" "test_rir_registration_status" {
     rir_registration_status = %q
 }
 `, network, rirRegistrationStatus)
+}
+
+func testAccIpv6networkcontainerSendRirRequest(network, sendRirRequest string) string {
+	return fmt.Sprintf(`
+resource "nios_ipam_ipv6network_container" "test_send_rir_request" {
+	network = %q
+    send_rir_request = %q
+}
+`, network, sendRirRequest)
 }
 
 func testAccIpv6networkcontainerSamePortControlDiscoveryBlackout(network, samePortControlDiscoveryBlackout, useBlackoutSetting string) string {
