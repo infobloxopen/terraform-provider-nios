@@ -808,15 +808,15 @@ var ZoneAuthResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The name of MS synchronization master for this zone.",
 	},
 	"network_associations": schema.ListNestedAttribute{
-        NestedObject: schema.NestedAttributeObject{
-            Attributes: ZoneAuthNetworkAssociationsResourceSchemaAttributes,
-        },
-        Validators: []validator.List{
-            listvalidator.SizeAtLeast(1),
-        },
-        Computed:            true,
-        MarkdownDescription: "The list with the associated network/network container information.",
-    },
+		NestedObject: schema.NestedAttributeObject{
+			Attributes: ZoneAuthNetworkAssociationsResourceSchemaAttributes,
+		},
+		Validators: []validator.List{
+			listvalidator.SizeAtLeast(1),
+		},
+		Computed:            true,
+		MarkdownDescription: "The list with the associated network/network container information.",
+	},
 
 	"network_view": schema.StringAttribute{
 		Computed:            true,
