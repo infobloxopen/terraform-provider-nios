@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/identityschema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
 	"github.com/infobloxopen/infoblox-nios-go-client/ipam"
@@ -625,6 +626,32 @@ func (r *NetworkcontainerResource) ValidateConfig(ctx context.Context, req resou
 				"Same Port Control Discovery Blackout Not Allowed",
 				"When use_blackout_setting is set to false, same_port_control_discovery_blackout cannot be set to true. Either set use_blackout_setting to true or set same_port_control_discovery_blackout to false.",
 			)
+		}
+	}
+
+	// Validate subscribe_settings.mapped_ea_attributes: name and mapped_ea are required for each item
+	if !data.SubscribeSettings.IsNull() && !data.SubscribeSettings.IsUnknown() {
+		var subscribeSettings NetworkcontainerSubscribeSettingsModel
+		resp.Diagnostics.Append(data.SubscribeSettings.As(ctx, &subscribeSettings, basetypes.ObjectAsOptions{})...)
+		if !resp.Diagnostics.HasError() && !subscribeSettings.MappedEaAttributes.IsNull() && !subscribeSettings.MappedEaAttributes.IsUnknown() {
+			var mappedEaAttrs []NetworkcontainersubscribesettingsMappedEaAttributesModel
+			resp.Diagnostics.Append(subscribeSettings.MappedEaAttributes.ElementsAs(ctx, &mappedEaAttrs, false)...)
+			for i, item := range mappedEaAttrs {
+				if item.Name.IsNull() || item.Name.IsUnknown() || item.Name.ValueString() == "" {
+					resp.Diagnostics.AddAttributeError(
+						path.Root("subscribe_settings").AtName("mapped_ea_attributes").AtListIndex(i).AtName("name"),
+						"Missing Required Attribute",
+						"The 'name' attribute is required for each item in 'mapped_ea_attributes'.",
+					)
+				}
+				if item.MappedEa.IsNull() || item.MappedEa.IsUnknown() || item.MappedEa.ValueString() == "" {
+					resp.Diagnostics.AddAttributeError(
+						path.Root("subscribe_settings").AtName("mapped_ea_attributes").AtListIndex(i).AtName("mapped_ea"),
+						"Missing Required Attribute",
+						"The 'mapped_ea' attribute is required for each item in 'mapped_ea_attributes'.",
+					)
+				}
+			}
 		}
 	}
 

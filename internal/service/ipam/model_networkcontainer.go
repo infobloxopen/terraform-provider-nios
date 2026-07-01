@@ -719,6 +719,8 @@ var NetworkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"remove_subnets": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(true),
 		MarkdownDescription: "Remove subnets delete option. Determines whether all child objects should be removed alongside with the network container or child objects should be assigned to another parental container. By default child objects are deleted with the network container.",
 	},
 	"restart_if_needed": schema.BoolAttribute{
@@ -735,6 +737,9 @@ var NetworkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional:            true,
 		MarkdownDescription: "The RIR organization assoicated with the network container.",
 		Computed:            true,
+		PlanModifiers: []planmodifier.String{
+			planmodifiers.ImmutableString(),
+		},
 	},
 	"rir_registration_action": schema.StringAttribute{
 		Optional:            true,
@@ -1203,6 +1208,10 @@ func (m *NetworkcontainerModel) Flatten(ctx context.Context, from *ipam.Networkc
 	m.UseZoneAssociations = types.BoolPointerValue(from.UseZoneAssociations)
 	m.Utilization = flex.FlattenInt64Pointer(from.Utilization)
 	m.ZoneAssociations = flex.FlattenFrameworkListNestedBlock(ctx, from.ZoneAssociations, NetworkcontainerZoneAssociationsAttrTypes, diags, FlattenNetworkcontainerZoneAssociations)
+	if m.RemoveSubnets.IsNull() || m.RemoveSubnets.IsUnknown() {
+		defaultVal := true
+		m.RemoveSubnets = types.BoolPointerValue(&defaultVal)
+	}
 }
 
 func ExpandNetworkcontainerNetwork(str cidrtypes.IPv4Prefix) *ipam.NetworkcontainerNetwork {
