@@ -83,7 +83,10 @@ This module provisions vNIOS on AWS. The NIOS configuration (`nios_grid_member` 
 
 ## Usage
 
-### Step 1: Deploy AWS Infrastructure 
+#### This module supports three deployment modes — **Standalone**, **Grid Member Join**, and **HA Pair**. 
+### 1. Standalone Mode
+
+Deploy a single vNIOS instance.
 
 ```hcl
 provider "aws" {
@@ -99,7 +102,7 @@ module "node1" {
   mgmt_subnet_id    = var.mgmt_subnet_id
   lan1_subnet_id    = var.lan1_subnet_id
 
-  ami_id          = var.ami_id
+  ami_id = var.ami_id
 
   instance_type     = var.instance_type
   key_name          = var.key_name
@@ -109,38 +112,51 @@ module "node1" {
   volume_type           = var.volume_type
   delete_on_termination = var.delete_on_termination
 
-  enable_ipv6      = var.enable_ipv6
+  enable_ipv6 = var.enable_ipv6
 
   name = var.name
-  tags        = var.tags
+  tags = var.tags
 
   nios_license           = var.nios_license
   remote_console_enabled = var.remote_console_enabled
   default_admin_password = var.default_admin_password
+
+  ha_enable = false
 }
 ```
 
-**Deploy the infrastructure:**
+**Steps:**
+
+**Step 1.** Deploy the infrastructure
+
 ```bash
+terraform init
+terraform plan
 terraform apply
 ```
 
-### Step 2: Wait for NIOS to Boot
+Wait ~30 minutes for NIOS to fully boot before applying any grid configuration.
 
-NIOS takes approximately **30 minutes** to fully boot, make sure the grid is up and running before triggering the grid join.
+#### NIOS Provider Configuration
 
-### Step 3: Join the Grid Member to the Master Grid / Configure HA
+The two modes below — **Master-Member Configuration** and **HA Pair Configuration** — use the NIOS Terraform provider to configure the grid. (The Standalone deployment above does not need it.) Declare the provider once before applying any `nios_grid_member` / `nios_grid_join` resources.
 
-Once Grid is up and running, configure the grid member and join to the grid.
-
-
-#### Examples
-
-#### Example 1: Join a Member to a Master
-
-#### Deploy AWS infrastructure for Master and Member
-
+```hcl
+terraform {
+  required_providers {
+    nios = {
+      source  = "infobloxopen/nios"
+      version = ">= 1.2.0"
+    }
+  }
+}
 ```
+
+### 2. Master-Member Configuration
+
+Deploy master and member nodes, then configure the member to join the master grid.
+
+```hcl
 module "node1" {
   // ... (same config as Step 1)
   ha_enable = false
@@ -150,8 +166,23 @@ module "node2" {
   // ... (same config as Step 1)
   ha_enable = false
 }
+```
 
-// After NIOS is ready (~30 min), configure grid member
+**Steps:**
+
+**Step 1.** Deploy the infrastructure 
+
+```bash
+terraform init
+terraform plan
+terraform apply
+```
+
+Wait ~30 minutes for NIOS to boot.
+
+**Step 2.** Configure the grid member and join it to the master:
+
+```hcl
 provider "nios" {
   nios_host_url = "https://${module.node1.eth1_ipv4}"
   nios_username = "username"
@@ -179,17 +210,17 @@ resource "nios_grid_member" "member" {
 
 // Join member to existing grid master
 resource "nios_grid_join" "member_join" {
-  member_url       = "https://${module.node2.eth1_ipv4}"
+  member_url      = "https://${module.node2.eth1_ipv4}"
   member_username = "UserName"
   member_password = "Password"
   grid_name       = "Infoblox"
   master          = module.node1.eth1_ipv4
   shared_secret   = "secret"
-  depends_on = [nios_grid_member.member]
+  depends_on      = [nios_grid_member.member]
 }
 ```
 
-### Example 2: HA Grid Configuration
+### 3. HA Pair Configuration
 
 Deploy 2 AWS EC2 instances for SA-HA Config with the required IAM Permissions.
 
@@ -197,37 +228,43 @@ Deploy 2 AWS EC2 instances for SA-HA Config with the required IAM Permissions.
 // Deploy AWS infrastructure for Node 1 (Active Node)
 module "node1" {
   // ... (same config as Step 1)
-  ha_enable = true
+  ha_enable              = true
   private_ips_count_eth2 = 1
-  iam_instance_profile = var.iam_instance_profile
+  iam_instance_profile   = var.iam_instance_profile
 }
 
 // Deploy AWS infrastructure for Node 2 (Passive Node)
 module "node2" {
   // ... (same config as Step 1)
-  ha_enable = true
+  ha_enable            = true
   iam_instance_profile = var.iam_instance_profile
 }
 ```
-#### After both the grids are up and running (~30 min), configure HA 
 
-1. Import Node1 under nios_grid_member.ha_pair
+**Steps:**
 
-```hcl 
-resource "nios_grid_member" "ha_pair"{}
+**Step 1.** **Step 1.** Deploy the infrastructure 
+
+```bash
+terraform init
+terraform plan
+terraform apply
 ```
 
-```hcl 
-terraform import nios_grid_member.ha_pair <ref>
-```
+Wait ~30 minutes for NIOS to boot.
 
-2. Modify the resource to set ha_on_cloud to true and provide the cloud attributes.
+**Step 2.**  Import Node1 under `nios_grid_member.ha_pair` and configure it as the HA pair. Using a config-driven `import` block alongside the full resource definition lets a single `terraform apply` perform the import **and** apply the HA configuration. Set `ha_on_cloud = true`, `master_candidate = true`, and `upgrade_group = "Grid Master"`:
 
-```
+```hcl
 provider "nios" {
   nios_host_url = "https://${module.node1.eth1_ipv4}"
   nios_username = "username"
   nios_password = "password"
+}
+
+import {
+  to = nios_grid_member.ha_pair
+  id = "<grid_member_ref>"
 }
 
 resource "nios_grid_member" "ha_pair" {
@@ -238,6 +275,9 @@ resource "nios_grid_member" "ha_pair" {
   router_id         = 100
   ha_on_cloud       = true
   ha_cloud_platform = "AWS"
+
+  upgrade_group    = "Grid Master"
+  master_candidate = true
 
   vip_setting = {
     address     = module.node1.eth2_secondary_ip_for_ha
@@ -251,7 +291,7 @@ resource "nios_grid_member" "ha_pair" {
       lan_ha_port_setting = {
         ha_ip_address      = module.node1.eth2_ip
         mgmt_lan           = module.node1.eth1_ipv4
-        ha_cloud_attribute = module.node1.eth2_eni 
+        ha_cloud_attribute = module.node1.eth2_eni
       }
     },
     {
@@ -259,7 +299,7 @@ resource "nios_grid_member" "ha_pair" {
       lan_ha_port_setting = {
         ha_ip_address      = module.node2.eth2_ip
         mgmt_lan           = module.node2.eth1_ipv4
-        ha_cloud_attribute = module.node2.eth2_eni  
+        ha_cloud_attribute = module.node2.eth2_eni
       }
     }
   ]
@@ -268,17 +308,26 @@ resource "nios_grid_member" "ha_pair" {
   grid_level_dns_resolver_setting = {
     resolvers = [
       "10.10.10.10"
-  ] }
+    ]
+  }
 }
 ```
 
-3. Join Node2 (Passive Node) to Node1 (Active Node).
+Run `terraform apply` to import Node1 and configure it as the HA active node.
 
-```
+**Step 3.** Join Node2 (Passive Node) to Node1 (Active Node). Point the NIOS provider at the HA VIP (the secondary IP on ETH2), since the active node now serves the grid through the VIP
+
+```hcl
+provider "nios" {
+  nios_host_url = "https://${module.node1.eth2_secondary_ip_for_ha}"
+  nios_username = "<username>"
+  nios_password = "<password>"
+}
+
 resource "nios_grid_join" "ha_member_join" {
   member_url      = "https://${module.node2.eth1_ipv4}"
-  member_username = "admin"
-  member_password = "password"
+  member_username = "<username>"
+  member_password = "<password>"
   grid_name       = "Grid Name"
   master          = module.node1.eth2_secondary_ip_for_ha
   shared_secret   = "your-shared-secret"
@@ -286,10 +335,31 @@ resource "nios_grid_join" "ha_member_join" {
 }
 ```
 
+#### Best Practices for HA Deployment
+
+> **Note:** Deletion of the Grid Master via Terraform is **not supported**. Removing the `nios_grid_member` / `nios_grid_join` resources or running `terraform destroy` will not delete the Grid Master from NIOS.
+
+> **Recommended Workflow:** Use a **separate Terraform workspace** for HA configuration. The NIOS HA setup is a one-time provisioning task — once the HA pair is formed and the passive node has joined the grid, the configuration is complete and does not require ongoing Terraform management.
+
+After successfully deploying the HA pair:
+
+1. **Verify HA formation** is complete through the NIOS UI or API.
+2. **Remove the HA grid member and join resources from Terraform state** to prevent accidental modifications:
+   ```bash
+   terraform state rm nios_grid_member.ha_pair
+   terraform state rm nios_grid_join.ha_member_join
+   ```
+3. Optionally, you can delete the entire Terraform state for this workspace if no further infrastructure management is needed.
+
+This approach ensures that:
+- Your HA infrastructure is provisioned correctly.
+- Subsequent Terraform operations don't interfere with the running HA pair.
+- The grid master configuration remains stable and is managed through NIOS directly.
+
 ### Boot Time
-- NIOS takes around **30 minutes** to fully boot after EC2 instance creation, make sure the grid is up and running before triggering the grid join.
-- Always verify NIOS API is responding before applying `nios_grid_member` resources
+- NIOS takes around **30 minutes** to fully boot after EC2 instance creation. Make sure the grid is up and running before triggering the grid join.
+- Always verify the NIOS API is responding before applying `nios_grid_member` resources.
 
 ### HA Requirements
-- Set `ha_enable = true` to create ETH2 interface
-- Provide `iam_instance_profile` with permissions for HA operations
+- Set `ha_enable = true` to create the ETH2 interface.
+- Provide `iam_instance_profile` with permissions for HA operations.
