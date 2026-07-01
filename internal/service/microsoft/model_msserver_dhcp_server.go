@@ -65,7 +65,6 @@ var MsserverDhcpServerResourceSchemaAttributes = map[string]schema.Attribute{
 	"login_password": schema.StringAttribute{
 		Optional:            true,
 		Computed:            true,
-		Sensitive:           true,
 		MarkdownDescription: "Microsoft Server login password",
 	},
 	"managed": schema.BoolAttribute{
