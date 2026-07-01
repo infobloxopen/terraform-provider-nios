@@ -9,8 +9,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
+	"github.com/hashicorp/terraform-plugin-framework/resource/identityschema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
 	"github.com/infobloxopen/infoblox-nios-go-client/ipam"
@@ -25,6 +27,7 @@ var readableAttributesForIpv6networkcontainer = "cloud_info,comment,ddns_domainn
 // Ensure provider defined types fully satisfy framework interfaces.
 var _ resource.Resource = &Ipv6networkcontainerResource{}
 var _ resource.ResourceWithImportState = &Ipv6networkcontainerResource{}
+var _ resource.ResourceWithIdentity = &Ipv6networkcontainerResource{}
 var _ resource.ResourceWithValidateConfig = &Ipv6networkcontainerResource{}
 
 func NewIpv6networkcontainerResource() resource.Resource {
@@ -38,12 +41,25 @@ type Ipv6networkcontainerResource struct {
 
 func (r *Ipv6networkcontainerResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_" + "ipam_ipv6network_container"
+	resp.ResourceBehavior = resource.ResourceBehavior{
+		MutableIdentity: true,
+	}
 }
 
 func (r *Ipv6networkcontainerResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		MarkdownDescription: "Manages an IPv6 Network Container",
 		Attributes:          Ipv6networkcontainerResourceSchemaAttributes,
+	}
+}
+
+func (r *Ipv6networkcontainerResource) IdentitySchema(ctx context.Context, req resource.IdentitySchemaRequest, resp *resource.IdentitySchemaResponse) {
+	resp.IdentitySchema = identityschema.Schema{
+		Attributes: map[string]identityschema.Attribute{
+			"ref": identityschema.StringAttribute{
+				RequiredForImport: true,
+			},
+		},
 	}
 }
 
@@ -81,6 +97,7 @@ func (r *Ipv6networkcontainerResource) Create(ctx context.Context, req resource.
 	// Add internal ID exists in the Extensible Attributes if not already present
 	data.ExtAttrs, diags = AddInternalIDToExtAttrs(ctx, data.ExtAttrs, diags)
 	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
 		return
 	}
 
@@ -132,7 +149,8 @@ func (r *Ipv6networkcontainerResource) Create(ctx context.Context, req resource.
 	res := apiRes.CreateIpv6networkcontainerResponseAsObject.GetResult()
 	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.ExtAttrs)
 	if diags.HasError() {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while create Ipv6networkcontainer due inherited Extensible attributes, got error: %s", err))
+		resp.Diagnostics.Append(diags...)
+		resp.Diagnostics.AddError("Client Error", "Error while creating Ipv6networkcontainer due to inherited Extensible attributes")
 		return
 	}
 
@@ -142,6 +160,9 @@ func (r *Ipv6networkcontainerResource) Create(ctx context.Context, req resource.
 	if len(origFunCallAttrs) > 0 {
 		data.FuncCall = types.ObjectValueMust(FuncCallAttrTypes, origFunCallAttrs)
 	}
+
+	// Save the Identity of the Resource
+	resp.Diagnostics.Append(resp.Identity.SetAttribute(ctx, path.Root("ref"), &data.Ref)...)
 
 	// Save data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
@@ -223,11 +244,15 @@ func (r *Ipv6networkcontainerResource) Read(ctx context.Context, req resource.Re
 
 	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.ExtAttrs)
 	if diags.HasError() {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while reading Ipv6networkcontainer due inherited Extensible attributes, got error: %s", diags))
+		resp.Diagnostics.Append(diags...)
+		resp.Diagnostics.AddError("Client Error", "Error while reading Ipv6networkcontainer due to inherited Extensible attributes")
 		return
 	}
 
 	data.Flatten(ctx, &res, &resp.Diagnostics)
+
+	// Save the Identity of the Resource
+	resp.Diagnostics.Append(resp.Identity.SetAttribute(ctx, path.Root("ref"), &data.Ref)...)
 
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
@@ -284,6 +309,10 @@ func (r *Ipv6networkcontainerResource) ReadByExtAttrs(ctx context.Context, data 
 	}
 
 	data.Flatten(ctx, &res, &resp.Diagnostics)
+
+	// Save the Identity of the Resource
+	resp.Diagnostics.Append(resp.Identity.SetAttribute(ctx, path.Root("ref"), &data.Ref)...)
+
 	resp.Diagnostics.Append(resp.State.Set(ctx, data)...)
 
 	return true
@@ -312,6 +341,7 @@ func (r *Ipv6networkcontainerResource) Update(ctx context.Context, req resource.
 		resp.Diagnostics.Append(diags...)
 		return
 	}
+
 	associateInternalId, diags := req.Private.GetKey(ctx, "associate_internal_id")
 	resp.Diagnostics.Append(diags...)
 	if diags.HasError() {
@@ -320,6 +350,7 @@ func (r *Ipv6networkcontainerResource) Update(ctx context.Context, req resource.
 	if associateInternalId != nil {
 		data.ExtAttrs, diags = AddInternalIDToExtAttrs(ctx, data.ExtAttrs, diags)
 		if diags.HasError() {
+			resp.Diagnostics.Append(diags...)
 			return
 		}
 	}
@@ -368,15 +399,18 @@ func (r *Ipv6networkcontainerResource) Update(ctx context.Context, req resource.
 
 	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, planExtAttrs, *res.ExtAttrs)
 	if diags.HasError() {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while update Ipv6networkcontainer due inherited Extensible attributes, got error: %s", diags))
+		resp.Diagnostics.Append(diags...)
+		resp.Diagnostics.AddError("Client Error", "Error while updating Ipv6networkcontainer due to inherited Extensible attributes")
 		return
 	}
 
 	data.Flatten(ctx, &res, &resp.Diagnostics)
 
+	// Save the Identity of the Resource
+	resp.Diagnostics.Append(resp.Identity.SetAttribute(ctx, path.Root("ref"), &data.Ref)...)
+
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
-
 	if associateInternalId != nil {
 		resp.Diagnostics.Append(resp.Private.SetKey(ctx, "associate_internal_id", nil)...)
 	}
@@ -436,6 +470,13 @@ func (r *Ipv6networkcontainerResource) UpdateFuncCallAttributeName(ctx context.C
 }
 
 func (r *Ipv6networkcontainerResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+	if req.Identity != nil && req.Identity.Raw.IsKnown() && !req.Identity.Raw.IsNull() {
+		diags := req.Identity.GetAttribute(ctx, path.Root("ref"), &req.ID)
+		if diags.HasError() {
+			resp.Diagnostics.Append(diags...)
+			return
+		}
+	}
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("ref"), req.ID)...)
 	resp.Diagnostics.Append(resp.Private.SetKey(ctx, "associate_internal_id", []byte("true"))...)
 }
@@ -643,13 +684,12 @@ func (r *Ipv6networkcontainerResource) ValidateConfig(ctx context.Context, req r
 			)
 		}
 	}
-
-	// same_port_control_discovery_blackout can be set only when use_blackout_setting is true
-	if !data.SamePortControlDiscoveryBlackout.IsNull() && !data.SamePortControlDiscoveryBlackout.IsUnknown() {
+	// same_port_control_discovery_blackout can be set to true only when use_blackout_setting is true
+	if !data.SamePortControlDiscoveryBlackout.IsNull() && !data.SamePortControlDiscoveryBlackout.IsUnknown() && data.SamePortControlDiscoveryBlackout.ValueBool() {
 		if !data.UseBlackoutSetting.IsNull() && !data.UseBlackoutSetting.IsUnknown() && !data.UseBlackoutSetting.ValueBool() {
 			resp.Diagnostics.AddError(
 				"Same Port Control Discovery Blackout Not Allowed",
-				"When use_blackout_setting is set to false, same_port_control_discovery_blackout cannot be configured. Either set use_blackout_setting to true or remove the same_port_control_discovery_blackout attribute.",
+				"When use_blackout_setting is set to false, same_port_control_discovery_blackout cannot be set to true. Either set use_blackout_setting to true or set same_port_control_discovery_blackout to false.",
 			)
 		}
 	}
@@ -673,5 +713,31 @@ func (r *Ipv6networkcontainerResource) ValidateConfig(ctx context.Context, req r
 			"Invalid MGM Private Configuration",
 			"When 'use_mgm_private' is set to true, 'mgm_private' must also be set to true.",
 		)
+	}
+
+	// Validate subscribe_settings.mapped_ea_attributes: name and mapped_ea are required for each item
+	if !data.SubscribeSettings.IsNull() && !data.SubscribeSettings.IsUnknown() {
+		var subscribeSettings Ipv6networkcontainerSubscribeSettingsModel
+		resp.Diagnostics.Append(data.SubscribeSettings.As(ctx, &subscribeSettings, basetypes.ObjectAsOptions{})...)
+		if !resp.Diagnostics.HasError() && !subscribeSettings.MappedEaAttributes.IsNull() && !subscribeSettings.MappedEaAttributes.IsUnknown() {
+			var mappedEaAttrs []Ipv6networkcontainersubscribesettingsMappedEaAttributesModel
+			resp.Diagnostics.Append(subscribeSettings.MappedEaAttributes.ElementsAs(ctx, &mappedEaAttrs, false)...)
+			for i, item := range mappedEaAttrs {
+				if item.Name.IsNull() || item.Name.IsUnknown() || item.Name.ValueString() == "" {
+					resp.Diagnostics.AddAttributeError(
+						path.Root("subscribe_settings").AtName("mapped_ea_attributes").AtListIndex(i).AtName("name"),
+						"Missing Required Attribute",
+						"The 'name' attribute is required for each item in 'mapped_ea_attributes'.",
+					)
+				}
+				if item.MappedEa.IsNull() || item.MappedEa.IsUnknown() || item.MappedEa.ValueString() == "" {
+					resp.Diagnostics.AddAttributeError(
+						path.Root("subscribe_settings").AtName("mapped_ea_attributes").AtListIndex(i).AtName("mapped_ea"),
+						"Missing Required Attribute",
+						"The 'mapped_ea' attribute is required for each item in 'mapped_ea_attributes'.",
+					)
+				}
+			}
+		}
 	}
 }

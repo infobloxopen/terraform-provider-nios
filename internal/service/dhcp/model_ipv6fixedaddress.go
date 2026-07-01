@@ -640,7 +640,10 @@ func (m *Ipv6fixedaddressModel) Flatten(ctx context.Context, from *dhcp.Ipv6fixe
 	} else {
 		m.SnmpCredential = FlattenIpv6fixedaddressSnmpCredential(ctx, from.SnmpCredential, diags)
 	}
-	m.Template = flex.FlattenStringPointer(from.Template)
+
+	if m.Template.IsUnknown() || m.Template.IsNull() {
+		m.Template = flex.FlattenStringPointer(from.Template)
+	}
 	m.UseCliCredentials = types.BoolPointerValue(from.UseCliCredentials)
 	m.UseDomainName = types.BoolPointerValue(from.UseDomainName)
 	m.UseDomainNameServers = types.BoolPointerValue(from.UseDomainNameServers)

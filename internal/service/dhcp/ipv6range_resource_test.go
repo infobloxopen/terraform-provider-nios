@@ -397,8 +397,8 @@ func TestAccIpv6rangeResource_DiscoveryBlackoutSetting(t *testing.T) {
 
 func TestAccIpv6rangeResource_DiscoveryMember(t *testing.T) {
 	gridMemberHostname := utils.GetNIOSDiscoveryMemberHostName()
-	if gridMemberHostname == "" {
-		t.Skip("Skipping test: NIOS_DISCOVERY_MEMBER_HOSTNAME must be set")
+	if gridMemberHostname == "" || utils.GetNIOSDiscoveryMemberConfigAddrType() != "BOTH" {
+		t.Skip("Skipping test: NIOS_DISCOVERY_MEMBER_HOSTNAME must be set and Member should have IPv6 enabled")
 	}
 	var resourceName = "nios_dhcp_ipv6range.test_discovery_member"
 	var v dhcp.Ipv6range
@@ -431,8 +431,8 @@ func TestAccIpv6rangeResource_DiscoveryMember(t *testing.T) {
 
 func TestAccIpv6rangeResource_EnableDiscovery(t *testing.T) {
 	gridMemberHostname := utils.GetNIOSDiscoveryMemberHostName()
-	if gridMemberHostname == "" {
-		t.Skip("Skipping test: NIOS_DISCOVERY_MEMBER_HOSTNAME must be set")
+	if gridMemberHostname == "" || utils.GetNIOSDiscoveryMemberConfigAddrType() != "BOTH" {
+		t.Skip("Skipping test: NIOS_DISCOVERY_MEMBER_HOSTNAME must be set and Member should have IPv6 enabled")
 	}
 	var resourceName = "nios_dhcp_ipv6range.test_enable_discovery"
 	var v dhcp.Ipv6range

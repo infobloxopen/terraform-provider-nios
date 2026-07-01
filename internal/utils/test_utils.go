@@ -62,6 +62,10 @@ func GetNIOSGridMasterConfigAddrType() string {
 	return os.Getenv("NIOS_GRID_MASTER_CONFIG_ADDR_TYPE")
 }
 
+func GetNIOSDiscoveryMemberConfigAddrType() string {
+	return os.Getenv("NIOS_DISCOVERY_MEMBER_CONFIG_ADDR_TYPE")
+}
+
 func GetNIOSSyslogEndpointRef() string {
 	return os.Getenv("NIOS_SYSLOG_ENDPOINT_REF")
 }
