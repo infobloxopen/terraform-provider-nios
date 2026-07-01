@@ -493,6 +493,36 @@ func TestAccIpv6rangeResource_EndAddr(t *testing.T) {
 	})
 }
 
+func TestAccIpv6rangeResource_EnableImmediateDiscovery(t *testing.T) {
+	resourceName := "nios_dhcp_ipv6range.test_enable_immediate_discovery"
+	var v dhcp.Ipv6range
+	view := acctest.RandomNameWithPrefix("network-view")
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// Create and Read
+			{
+				Config: testAccIpv6rangeEnableImmediateDiscovery(view, "14::101", "14::110", true),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckIpv6rangeExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "enable_immediate_discovery", "true"),
+				),
+			},
+			// Update and Read
+			{
+				Config: testAccIpv6rangeEnableImmediateDiscovery(view, "14::101", "14::110", false),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckIpv6rangeExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "enable_immediate_discovery", "false"),
+				),
+			},
+			// Delete testing automatically occurs in TestCase
+		},
+	})
+}
+
 func TestAccIpv6rangeResource_Exclude(t *testing.T) {
 	var resourceName = "nios_dhcp_ipv6range.test_exclude"
 	var v dhcp.Ipv6range
@@ -984,6 +1014,7 @@ func TestAccIpv6rangeResource_RestartIfNeeded(t *testing.T) {
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
+			// Create and Read
 			{
 				Config: testAccIpv6rangeRestartIfNeeded(view, "14::121", "14::130", true),
 				Check: resource.ComposeTestCheckFunc(
@@ -991,6 +1022,15 @@ func TestAccIpv6rangeResource_RestartIfNeeded(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "restart_if_needed", "true"),
 				),
 			},
+			// Update and Read
+			{
+				Config: testAccIpv6rangeRestartIfNeeded(view, "14::121", "14::130", false),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckIpv6rangeExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "restart_if_needed", "false"),
+				),
+			},
+			// Delete testing automatically occurs in TestCase
 		},
 	})
 }
@@ -1926,26 +1966,6 @@ resource "nios_dhcp_ipv6range" "test_use_subscribe_settings" {
 	use_subscribe_settings = %q
 }
 `, view, startAddr, endAddr, subscribeSettingsStr, useSubscribeSettings)
-}
-
-func TestAccIpv6rangeResource_EnableImmediateDiscovery(t *testing.T) {
-	resourceName := "nios_dhcp_ipv6range.test_enable_immediate_discovery"
-	var v dhcp.Ipv6range
-	view := acctest.RandomNameWithPrefix("network-view")
-
-	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.PreCheck(t) },
-		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-		Steps: []resource.TestStep{
-			{
-				Config: testAccIpv6rangeEnableImmediateDiscovery(view, "14::101", "14::110", true),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckIpv6rangeExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "enable_immediate_discovery", "true"),
-				),
-			},
-		},
-	})
 }
 
 func testAccIpv6rangeEnableImmediateDiscovery(view, startAddr, endAddr string, enableImmediateDiscovery bool) string {

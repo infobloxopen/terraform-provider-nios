@@ -4115,6 +4115,7 @@ func TestAccRangeResource_RestartIfNeeded(t *testing.T) {
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
+			// Create and Read
 			{
 				Config: testAccRangeRestartIfNeeded(startAddr, endAddr, true),
 				Check: resource.ComposeTestCheckFunc(
@@ -4122,6 +4123,15 @@ func TestAccRangeResource_RestartIfNeeded(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "restart_if_needed", "true"),
 				),
 			},
+			// Update and Read
+			{
+				Config: testAccRangeRestartIfNeeded(startAddr, endAddr, false),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckRangeExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "restart_if_needed", "false"),
+				),
+			},
+			// Delete testing automatically occurs in TestCase
 		},
 	})
 }

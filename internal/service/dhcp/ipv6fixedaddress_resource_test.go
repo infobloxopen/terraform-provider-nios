@@ -18,12 +18,11 @@ import (
 
 var readableAttributesForIpv6fixedaddress = "address_type,allow_telnet,cli_credentials,cloud_info,comment,device_description,device_location,device_type,device_vendor,disable,disable_discovery,discover_now_status,discovered_data,domain_name,domain_name_servers,duid,extattrs,ipv6addr,ipv6prefix,ipv6prefix_bits,logic_filter_rules,mac_address,match_client,ms_ad_user_data,name,network,network_view,options,preferred_lifetime,reserved_interface,snmp3_credential,snmp_credential,use_cli_credentials,use_domain_name,use_domain_name_servers,use_logic_filter_rules,use_options,use_preferred_lifetime,use_snmp3_credential,use_snmp_credential,use_valid_lifetime,valid_lifetime"
 
+// TODO: Pending Tests
+// Reserved Interface
+
 // Objects to be present on GRID for tests
 // filteroption - ipv6_option_filter and ipv6_option_filter1
-
-// TODO: Add tests:
-// The following require additional resource/data source objects to be supported.
-// - Reserved Interface
 
 func TestAccIpv6fixedaddressResource_basic(t *testing.T) {
 	var resourceName = "nios_dhcp_ipv6fixedaddress.test"
@@ -655,6 +654,7 @@ func TestAccIpv6fixedaddressResource_EnableImmediateDiscovery(t *testing.T) {
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
+			// Create and Read
 			{
 				Config: testAccIpv6fixedaddressEnableImmediateDiscovery(ipv6addr, duid, networkView, ipv6Network, true),
 				Check: resource.ComposeTestCheckFunc(
@@ -662,6 +662,15 @@ func TestAccIpv6fixedaddressResource_EnableImmediateDiscovery(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "enable_immediate_discovery", "true"),
 				),
 			},
+			// Update and Read
+			{
+				Config: testAccIpv6fixedaddressEnableImmediateDiscovery(ipv6addr, duid, networkView, ipv6Network, false),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckIpv6fixedaddressExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "enable_immediate_discovery", "false"),
+				),
+			},
+			// Delete testing automatically occurs in TestCase
 		},
 	})
 }
@@ -1199,6 +1208,7 @@ func TestAccIpv6fixedaddressResource_RestartIfNeeded(t *testing.T) {
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
+			// Create and Read
 			{
 				Config: testAccIpv6fixedaddressRestartIfNeeded(ipv6addr, duid, networkView, ipv6Network, true),
 				Check: resource.ComposeTestCheckFunc(
@@ -1206,6 +1216,15 @@ func TestAccIpv6fixedaddressResource_RestartIfNeeded(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "restart_if_needed", "true"),
 				),
 			},
+			// Update and Read
+			{
+				Config: testAccIpv6fixedaddressRestartIfNeeded(ipv6addr, duid, networkView, ipv6Network, false),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckIpv6fixedaddressExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "restart_if_needed", "false"),
+				),
+			},
+			// Delete testing automatically occurs in TestCase
 		},
 	})
 }

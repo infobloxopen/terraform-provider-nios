@@ -5224,6 +5224,17 @@ resource "nios_grid_member" "test_external_syslog_backup_servers" {
 }
 
 func testAccMemberHaCloudPlatform(hostName string, haCloudPlatform string, vipAddress, vipGateway, vipSubnetMask string) string {
+	lanSettingsStr := ""
+	mgmtLan1 := "172.28.38.236"
+	mgmtLan2 := "172.28.38.238"
+	if haCloudPlatform == "GCP" {
+		lanSettingsStr = `
+		lan_gateway     = "10.1.0.1"
+		lan_subnet_mask = "255.255.255.0"
+		`
+		mgmtLan1 = "10.1.0.12"
+		mgmtLan2 = "10.1.0.14"
+	}
 	return fmt.Sprintf(`
 resource "nios_grid_member" "test_ha_cloud_platform" {
     host_name = %q
@@ -5236,8 +5247,8 @@ resource "nios_grid_member" "test_ha_cloud_platform" {
 		primary = true
 		subnet_mask = %q
 		use_dscp = false
-		lan_gateway     = "172.28.48.1"
-		lan_subnet_mask = "255.255.255.0"
+		%s
+		
 	}
 	platform = "VNIOS"
 	enable_ha = true
@@ -5255,7 +5266,7 @@ resource "nios_grid_member" "test_ha_cloud_platform" {
 		lan_port_setting = {
 			auto_port_setting_enabled = true
 		}
-		mgmt_lan = "172.28.38.236"
+		mgmt_lan = %q
 	  }
 	},
     {
@@ -5269,12 +5280,13 @@ resource "nios_grid_member" "test_ha_cloud_platform" {
       	lan_port_setting = {
         	auto_port_setting_enabled = true
       	}
-      	mgmt_lan = "172.28.38.238"
+      	mgmt_lan = %q
       }
     }
   ]
 }
-`, hostName, haCloudPlatform, vipAddress, vipGateway, vipSubnetMask)
+`, hostName, haCloudPlatform, vipAddress, vipGateway, vipSubnetMask, lanSettingsStr,
+		mgmtLan1, mgmtLan2)
 }
 
 func testAccMemberHaOnCloud(hostName string, haOnCloud string, haCloudPlatform, vipAddress, vipGateway, vipSubnetMask, enableHA string, routerID int) string {
