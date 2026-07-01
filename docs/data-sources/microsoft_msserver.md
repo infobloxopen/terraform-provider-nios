@@ -173,7 +173,7 @@ Optional:
 - `enable_dns_reports_sync` (Boolean) Enable or Disable MS DNS data for reports from this MS Server
 - `enable_monitoring` (Boolean) Flag indicating if the DNS service is monitored and controlled
 - `login_name` (String) Microsoft Server login name
-- `login_password` (String) Microsoft Server login password
+- `login_password` (String, Sensitive) Microsoft Server login password
 - `managed` (Boolean) flag indicating if the DNS service is managed
 - `next_sync_control` (String) Defines what control to apply on the DNS server
 - `synchronization_min_delay` (Number) Minimum number of minutes between two synchronizations
