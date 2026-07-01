@@ -29,7 +29,7 @@ var NetworkcontainersubscribesettingsMappedEaAttributesAttrTypes = map[string]at
 var NetworkcontainersubscribesettingsMappedEaAttributesResourceSchemaAttributes = map[string]schema.Attribute{
 	"name": schema.StringAttribute{
 		Optional:            true,
-		MarkdownDescription: "The Cisco ISE attribute name that is enabled for publishsing from a Cisco ISE endpoint.",
+		MarkdownDescription: "The Cisco ISE attribute name that is enabled for publishing from a Cisco ISE endpoint.",
 		Computed:            true,
 		Validators: []validator.String{
 			stringvalidator.OneOf(
