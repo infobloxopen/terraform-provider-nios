@@ -715,42 +715,41 @@ func (r *Ipv6networkcontainerResource) ValidateConfig(ctx context.Context, req r
 		)
 	}
 
-	// Validate subscribe_settings.mapped_ea_attributes: name and mapped_ea are required for each item
+	// Validate subscribe_settings: enabled_attributes is required, and each
+	// mapped_ea_attributes item requires name and mapped_ea.
 	if !data.SubscribeSettings.IsNull() && !data.SubscribeSettings.IsUnknown() {
 		var subscribeSettings Ipv6networkcontainerSubscribeSettingsModel
 		resp.Diagnostics.Append(data.SubscribeSettings.As(ctx, &subscribeSettings, basetypes.ObjectAsOptions{})...)
-		if !resp.Diagnostics.HasError() && !subscribeSettings.MappedEaAttributes.IsNull() && !subscribeSettings.MappedEaAttributes.IsUnknown() {
-			var mappedEaAttrs []Ipv6networkcontainersubscribesettingsMappedEaAttributesModel
-			resp.Diagnostics.Append(subscribeSettings.MappedEaAttributes.ElementsAs(ctx, &mappedEaAttrs, false)...)
-			for i, item := range mappedEaAttrs {
-				if item.Name.IsNull() || item.Name.IsUnknown() || item.Name.ValueString() == "" {
-					resp.Diagnostics.AddAttributeError(
-						path.Root("subscribe_settings").AtName("mapped_ea_attributes").AtListIndex(i).AtName("name"),
-						"Missing Required Attribute",
-						"The 'name' attribute is required for each item in 'mapped_ea_attributes'.",
-					)
-				}
-				if item.MappedEa.IsNull() || item.MappedEa.IsUnknown() || item.MappedEa.ValueString() == "" {
-					resp.Diagnostics.AddAttributeError(
-						path.Root("subscribe_settings").AtName("mapped_ea_attributes").AtListIndex(i).AtName("mapped_ea"),
-						"Missing Required Attribute",
-						"The 'mapped_ea' attribute is required for each item in 'mapped_ea_attributes'.",
-					)
+		if !resp.Diagnostics.HasError() {
+			// enabled_attributes is required when subscribe_settings is configured
+			if subscribeSettings.EnabledAttributes.IsNull() || subscribeSettings.EnabledAttributes.IsUnknown() {
+				resp.Diagnostics.AddAttributeError(
+					path.Root("subscribe_settings").AtName("enabled_attributes"),
+					"Missing Required Attribute",
+					"The 'enabled_attributes' attribute is required when 'subscribe_settings' is configured.",
+				)
+			}
+
+			if !subscribeSettings.MappedEaAttributes.IsNull() && !subscribeSettings.MappedEaAttributes.IsUnknown() {
+				var mappedEaAttrs []Ipv6networkcontainersubscribesettingsMappedEaAttributesModel
+				resp.Diagnostics.Append(subscribeSettings.MappedEaAttributes.ElementsAs(ctx, &mappedEaAttrs, false)...)
+				for i, item := range mappedEaAttrs {
+					if item.Name.IsNull() || item.Name.IsUnknown() || item.Name.ValueString() == "" {
+						resp.Diagnostics.AddAttributeError(
+							path.Root("subscribe_settings").AtName("mapped_ea_attributes").AtListIndex(i).AtName("name"),
+							"Missing Required Attribute",
+							"The 'name' attribute is required for each item in 'mapped_ea_attributes'.",
+						)
+					}
+					if item.MappedEa.IsNull() || item.MappedEa.IsUnknown() || item.MappedEa.ValueString() == "" {
+						resp.Diagnostics.AddAttributeError(
+							path.Root("subscribe_settings").AtName("mapped_ea_attributes").AtListIndex(i).AtName("mapped_ea"),
+							"Missing Required Attribute",
+							"The 'mapped_ea' attribute is required for each item in 'mapped_ea_attributes'.",
+						)
+					}
 				}
 			}
-		}
-	}
-
-	// enabled_attributes is required when subscribe_settings is configured
-	if !data.SubscribeSettings.IsNull() && !data.SubscribeSettings.IsUnknown() {
-		attrs := data.SubscribeSettings.Attributes()
-		enabledAttrs, exists := attrs["enabled_attributes"]
-		if !exists || enabledAttrs.IsNull() || enabledAttrs.IsUnknown() {
-			resp.Diagnostics.AddAttributeError(
-				path.Root("subscribe_settings").AtName("enabled_attributes"),
-				"Missing Required Attribute",
-				"The 'enabled_attributes' attribute is required when 'subscribe_settings' is configured.",
-			)
 		}
 	}
 }

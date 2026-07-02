@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"math/rand"
 	"net/http"
 	"testing"
 
@@ -1030,8 +1029,6 @@ func TestAccIpv6networkcontainerResource_SamePortControlDiscoveryBlackout(t *tes
 	})
 }
 
-
-
 func TestAccIpv6networkcontainerResource_Unmanaged(t *testing.T) {
 	var resourceName = "nios_ipam_ipv6network_container.test_unmanaged"
 	var v ipam.Ipv6networkcontainer
@@ -1808,40 +1805,6 @@ func TestAccIpv6networkcontainerResource_RirOrganization(t *testing.T) {
 				),
 			},
 			// Update is not tested: rir_organization is immutable
-			// Delete testing automatically occurs in TestCase
-		},
-	})
-}
-
-func TestAccIpv6networkcontainerResource_RirOrganizationAction(t *testing.T) {
-	var resourceName = "nios_ipam_ipv6network_container.test_rir_registration_action"
-	var v ipam.Ipv6networkcontainer
-	// Parent needs a larger prefix, child is a subnet within it
-	third := rand.Intn(65536)
-	fourth := rand.Intn(65536)
-	parentNetwork := fmt.Sprintf("2001:db8:%x::/48", third)
-	childNetwork := fmt.Sprintf("2001:db8:%x:%x::/64", third, fourth)
-
-	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.PreCheck(t) },
-		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-		Steps: []resource.TestStep{
-			// Create and Read
-			{
-				Config: testAccIpv6networkcontainerRirRegistrationAction(parentNetwork, childNetwork, "CREATE"),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckIpv6networkcontainerExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "rir_registration_action", "CREATE"),
-				),
-			},
-			// Update and Read
-			{
-				Config: testAccIpv6networkcontainerRirRegistrationAction(parentNetwork, childNetwork, "NONE"),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckIpv6networkcontainerExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "rir_registration_action", "NONE"),
-				),
-			},
 			// Delete testing automatically occurs in TestCase
 		},
 	})

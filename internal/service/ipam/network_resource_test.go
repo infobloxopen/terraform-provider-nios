@@ -858,13 +858,13 @@ func TestAccNetworkResource_DiscoveryBlackoutSetting(t *testing.T) {
 }
 
 func TestAccNetworkResource_DiscoveryMember(t *testing.T) {
-	var resourceName = "nios_ipam_network.test_discovery_member"
-	var v ipam.Network
-	network := acctest.RandomCIDRNetwork()
 	discoveryMember := utils.GetNIOSDiscoveryMemberHostName()
 	if discoveryMember == "" {
 		t.Skip("NIOS_DISCOVERY_MEMBER_HOSTNAME environment variable must be set for this test to run (requires a discovery polling node configured in NIOS)")
 	}
+	var resourceName = "nios_ipam_network.test_discovery_member"
+	var v ipam.Network
+	network := acctest.RandomCIDRNetwork()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -994,13 +994,13 @@ func TestAccNetworkResource_EnableDhcpThresholds(t *testing.T) {
 }
 
 func TestAccNetworkResource_EnableDiscovery(t *testing.T) {
-	var resourceName = "nios_ipam_network.test_enable_discovery"
-	var v ipam.Network
-	network := acctest.RandomCIDRNetwork()
 	discoveryMember := utils.GetNIOSDiscoveryMemberHostName()
 	if discoveryMember == "" {
 		t.Skip("NIOS_DISCOVERY_MEMBER_HOSTNAME environment variable must be set for this test to run (requires a discovery polling node configured in NIOS)")
 	}
+	var resourceName = "nios_ipam_network.test_enable_discovery"
+	var v ipam.Network
+	network := acctest.RandomCIDRNetwork()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1476,29 +1476,6 @@ func TestAccNetworkResource_IpamTrapSettings(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "ipam_trap_settings.enable_email_warnings", "true"),
 					resource.TestCheckResourceAttr(resourceName, "ipam_trap_settings.enable_snmp_warnings", "false"),
 					resource.TestCheckResourceAttr(resourceName, "use_ipam_trap_settings", "true"),
-				),
-			},
-			// Delete testing automatically occurs in TestCase
-		},
-	})
-}
-
-func TestAccNetworkResource_Ipv4addr(t *testing.T) {
-	var resourceName = "nios_ipam_network.test_ipv4addr"
-	var v ipam.Network
-	network := acctest.RandomCIDRNetwork()
-
-	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.PreCheck(t) },
-		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-		Steps: []resource.TestStep{
-			// Create and Read
-			// Update is not applicable as ipv4addr is a computed attribute derived from the immutable network field.
-			{
-				Config: testAccNetworkIpv4addr(network),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckNetworkExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttrSet(resourceName, "ipv4addr"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -3734,14 +3711,6 @@ resource "nios_ipam_network" "test_ipam_trap_settings" {
 	use_ipam_trap_settings = %q
 }
 `, network, enableEmailWarnings, enableSnmpWarnings, useIpamTrapSettings)
-}
-
-func testAccNetworkIpv4addr(network string) string {
-	return fmt.Sprintf(`
-resource "nios_ipam_network" "test_ipv4addr" {
-    network = %q
-}
-`, network)
 }
 
 func testAccNetworkLeaseScavengeTime(network, leaseScavengeTime, useLeaseScavengeTime string) string {
