@@ -732,12 +732,14 @@ var NetworkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 	"rir": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The registry (RIR) that allocated the network container address space.",
-		Default:             stringdefault.StaticString("NONE"),
 	},
 	"rir_organization": schema.StringAttribute{
 		Optional:            true,
 		MarkdownDescription: "The RIR organization assoicated with the network container.",
 		Computed:            true,
+		PlanModifiers: []planmodifier.String{
+			planmodifiers.ImmutableString(),
+		},
 	},
 	"rir_registration_action": schema.StringAttribute{
 		Optional:            true,
@@ -1166,7 +1168,9 @@ func (m *NetworkcontainerModel) Flatten(ctx context.Context, from *ipam.Networkc
 	m.RecycleLeases = types.BoolPointerValue(from.RecycleLeases)
 	m.Rir = flex.FlattenStringPointer(from.Rir)
 	m.RirOrganization = flex.FlattenStringPointer(from.RirOrganization)
-	m.RirRegistrationAction = flex.FlattenStringPointer(from.RirRegistrationAction)
+	if m.RirRegistrationAction.IsNull() || m.RirRegistrationAction.IsUnknown() {
+		m.RirRegistrationAction = flex.FlattenStringPointer(from.RirRegistrationAction)
+	}
 	m.RirRegistrationStatus = flex.FlattenStringPointer(from.RirRegistrationStatus)
 	m.SamePortControlDiscoveryBlackout = types.BoolPointerValue(from.SamePortControlDiscoveryBlackout)
 	m.SubscribeSettings = FlattenNetworkcontainerSubscribeSettings(ctx, from.SubscribeSettings, diags)

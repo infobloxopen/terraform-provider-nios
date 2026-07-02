@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"math/rand"
 	"net/http"
 	"testing"
 
@@ -16,15 +17,9 @@ import (
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
-// TODO: DiscoveryMember requires discovering to be enabled.
-// TODO: EnableDiscovery requires a valid discovery member.
-// TODO: EnableImmediateDiscovery requires a valid discovery member.
-// TODO: Federated realms serve need to enabled
-// TODO: LogicFilterRules Logic filter rule required
-// TODO: RirOrganization rir organization configuration required
-// TODO: RirOrganizationAction rir organization configuration required
-// TODO: ZoneAssociations Need dns zone to test associations
-// TODO: MappedEAAttributes Need ISE server to test mapped_ea_attributes
+// TODO: Pending Tests :
+// FederatedRealms
+// ZoneAssociations
 
 var readableAttributesForNetworkcontainer = "authority,bootfile,bootserver,cloud_info,comment,ddns_domainname,ddns_generate_hostname,ddns_server_always_updates,ddns_ttl,ddns_update_fixed_addresses,ddns_use_option81,deny_bootp,discover_now_status,discovery_basic_poll_settings,discovery_blackout_setting,discovery_engine_type,discovery_member,email_list,enable_ddns,enable_dhcp_thresholds,enable_discovery,enable_email_warnings,enable_pxe_lease_time,enable_snmp_warnings,endpoint_sources,extattrs,federated_realms,high_water_mark,high_water_mark_reset,ignore_dhcp_option_list_request,ignore_id,ignore_mac_addresses,ipam_email_addresses,ipam_threshold_settings,ipam_trap_settings,last_rir_registration_update_sent,last_rir_registration_update_status,lease_scavenge_time,logic_filter_rules,low_water_mark,low_water_mark_reset,mgm_private,mgm_private_overridable,ms_ad_user_data,network,network_container,network_view,nextserver,options,port_control_blackout_setting,pxe_lease_time,recycle_leases,rir,rir_organization,rir_registration_status,same_port_control_discovery_blackout,subscribe_settings,unmanaged,update_dns_on_lease_renewal,use_authority,use_blackout_setting,use_bootfile,use_bootserver,use_ddns_domainname,use_ddns_generate_hostname,use_ddns_ttl,use_ddns_update_fixed_addresses,use_ddns_use_option81,use_deny_bootp,use_discovery_basic_polling_settings,use_email_list,use_enable_ddns,use_enable_dhcp_thresholds,use_enable_discovery,use_ignore_dhcp_option_list_request,use_ignore_id,use_ipam_email_addresses,use_ipam_threshold_settings,use_ipam_trap_settings,use_lease_scavenge_time,use_logic_filter_rules,use_mgm_private,use_nextserver,use_options,use_pxe_lease_time,use_recycle_leases,use_subscribe_settings,use_update_dns_on_lease_renewal,use_zone_associations,utilization,zone_associations"
 
@@ -2547,6 +2542,9 @@ func TestAccNetworkcontainerResource_UseRecycleLeases(t *testing.T) {
 }
 
 func TestAccNetworkcontainerResource_UseSubscribeSettings(t *testing.T) {
+	if utils.GetNIOSPxgridEndpointRef() == "" {
+		t.Skip("Skipping: NIOS_PXGRID_ENDPOINT_REF not set. A configured pxGrid/ISE endpoint is required.")
+	}
 	var resourceName = "nios_ipam_network_container.test_use_subscribe_settings"
 	var v ipam.Networkcontainer
 	network := acctest.RandomCIDRNetwork()
@@ -2561,6 +2559,15 @@ func TestAccNetworkcontainerResource_UseSubscribeSettings(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkcontainerExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_subscribe_settings", "false"),
+					resource.TestCheckResourceAttr(resourceName, "network", network),
+				),
+			},
+			// Update and Read
+			{
+				Config: testAccNetworkcontainerUseSubscribeSettings(network, "true"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNetworkcontainerExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "use_subscribe_settings", "true"),
 					resource.TestCheckResourceAttr(resourceName, "network", network),
 				),
 			},
@@ -2601,6 +2608,295 @@ func TestAccNetworkcontainerResource_UseUpdateDnsOnLeaseRenewal(t *testing.T) {
 	})
 }
 
+func TestAccNetworkcontainerResource_DiscoveryMember(t *testing.T) {
+	discoveryMember := utils.GetNIOSDiscoveryMemberHostName()
+	if discoveryMember == "" {
+		t.Skip("NIOS_DISCOVERY_MEMBER_HOSTNAME environment variable must be set")
+	}
+	var resourceName = "nios_ipam_network_container.test_discovery_member"
+	var v ipam.Networkcontainer
+	network := acctest.RandomCIDRNetwork()
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// Create and Read
+			{
+				Config: testAccNetworkcontainerDiscoveryMember(network, discoveryMember),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNetworkcontainerExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "discovery_member", discoveryMember),
+				),
+			},
+			// Update and Read
+			{
+				Config: testAccNetworkcontainerDiscoveryMemberDisabled(network),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNetworkcontainerExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "use_enable_discovery", "false"),
+				),
+			},
+			// Delete testing automatically occurs in TestCase
+		},
+	})
+}
+
+func TestAccNetworkcontainerResource_EnableDiscovery(t *testing.T) {
+	discoveryMember := utils.GetNIOSDiscoveryMemberHostName()
+	if discoveryMember == "" {
+		t.Skip("NIOS_DISCOVERY_MEMBER_HOSTNAME environment variable must be set")
+	}
+	var resourceName = "nios_ipam_network_container.test_enable_discovery"
+	var v ipam.Networkcontainer
+	network := acctest.RandomCIDRNetwork()
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// Create and Read
+			{
+				Config: testAccNetworkcontainerEnableDiscovery(network, true),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNetworkcontainerExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "enable_discovery", "true"),
+				),
+			},
+			// Update and Read
+			{
+				Config: testAccNetworkcontainerEnableDiscovery(network, false),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNetworkcontainerExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "enable_discovery", "false"),
+				),
+			},
+			// Delete testing automatically occurs in TestCase
+		},
+	})
+}
+
+func TestAccNetworkcontainerResource_EnableImmediateDiscovery(t *testing.T) {
+	discoveryMember := utils.GetNIOSDiscoveryMemberHostName()
+	if discoveryMember == "" {
+		t.Skip("NIOS_DISCOVERY_MEMBER_HOSTNAME environment variable must be set")
+	}
+	var resourceName = "nios_ipam_network_container.test_enable_immediate_discovery"
+	var v ipam.Networkcontainer
+	network := acctest.RandomCIDRNetwork()
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// Create and Read
+			{
+				Config: testAccNetworkcontainerEnableImmediateDiscovery(network, true),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNetworkcontainerExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "enable_immediate_discovery", "true"),
+				),
+			},
+			// Update and Read
+			{
+				Config: testAccNetworkcontainerEnableImmediateDiscovery(network, false),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNetworkcontainerExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "enable_immediate_discovery", "false"),
+				),
+			},
+			// Delete testing automatically occurs in TestCase
+		},
+	})
+}
+
+func TestAccNetworkcontainerResource_LogicFilterRules(t *testing.T) {
+	var resourceName = "nios_ipam_network_container.test_logic_filter_rules"
+	var v ipam.Networkcontainer
+	network := acctest.RandomCIDRNetwork()
+	logicFilterRulesVal := []map[string]any{
+		{
+			"filter": "mac_filter",
+			"type":   "MAC",
+		},
+	}
+	logicFilterRulesValUpdated := []map[string]any{
+		{
+			"filter": "example-option-filter-1",
+			"type":   "Option",
+		},
+	}
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// Create and Read
+			{
+				Config: testAccNetworkcontainerLogicFilterRules(network, logicFilterRulesVal),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNetworkcontainerExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "logic_filter_rules.0.filter", "mac_filter"),
+					resource.TestCheckResourceAttr(resourceName, "logic_filter_rules.0.type", "MAC"),
+				),
+			},
+			// Update and Read
+			{
+				Config: testAccNetworkcontainerLogicFilterRules(network, logicFilterRulesValUpdated),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNetworkcontainerExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "logic_filter_rules.0.filter", "example-option-filter-1"),
+					resource.TestCheckResourceAttr(resourceName, "logic_filter_rules.0.type", "Option"),
+				),
+			},
+			// Delete testing automatically occurs in TestCase
+		},
+	})
+}
+
+func TestAccNetworkcontainerResource_RirOrganization(t *testing.T) {
+	var resourceName = "nios_ipam_network_container.test_rir_organization"
+	var v ipam.Networkcontainer
+	network := acctest.RandomCIDRNetwork()
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// Create and Read
+			{
+				Config: testAccNetworkcontainerRirOrganization(network, "rir-org-test1"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNetworkcontainerExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "rir_organization", "rir-org-test1"),
+					resource.TestCheckResourceAttr(resourceName, "rir", "RIPE"),
+				),
+			},
+			// Update is not tested: rir_organization is immutable
+			// Delete testing automatically occurs in TestCase
+		},
+	})
+}
+
+func TestAccNetworkcontainerResource_RirOrganizationAction(t *testing.T) {
+	var resourceName = "nios_ipam_network_container.test_rir_registration_action"
+	var v ipam.Networkcontainer
+	octet1 := 10 + rand.Intn(246)
+	octet2 := rand.Intn(256)
+	parentNetwork := fmt.Sprintf("%d.%d.0.0/16", octet1, octet2)
+	childNetwork := fmt.Sprintf("%d.%d.0.0/24", octet1, octet2)
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// Create and Read
+			{
+				Config: testAccNetworkcontainerRirRegistrationAction(parentNetwork, childNetwork, "CREATE"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNetworkcontainerExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "rir_registration_action", "CREATE"),
+				),
+			},
+			// Update and Read
+			{
+				Config: testAccNetworkcontainerRirRegistrationAction(parentNetwork, childNetwork, "NONE"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNetworkcontainerExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "rir_registration_action", "NONE"),
+				),
+			},
+			// Delete testing automatically occurs in TestCase
+		},
+	})
+}
+
+func TestAccNetworkcontainerResource_SubscribeSettings(t *testing.T) {
+	if utils.GetNIOSPxgridEndpointRef() == "" {
+		t.Skip("Skipping: NIOS_PXGRID_ENDPOINT_REF not set. A configured pxGrid/ISE endpoint is required.")
+	}
+	var resourceName = "nios_ipam_network_container.test_subscribe_settings"
+	var v ipam.Networkcontainer
+	network := acctest.RandomCIDRNetwork()
+	subscribeSettings := map[string]any{
+		"enabled_attributes": []string{"DOMAINNAME", "ENDPOINT_PROFILE"},
+	}
+	subscribeSettingsUpdated := map[string]any{
+		"enabled_attributes": []string{"SECURITY_GROUP"},
+	}
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// Create and Read
+			{
+				Config: testAccNetworkcontainerSubscribeSettings(network, subscribeSettings, "true"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNetworkcontainerExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "subscribe_settings.enabled_attributes.0", "DOMAINNAME"),
+					resource.TestCheckResourceAttr(resourceName, "subscribe_settings.enabled_attributes.1", "ENDPOINT_PROFILE"),
+				),
+			},
+			// Update and Read
+			{
+				Config: testAccNetworkcontainerSubscribeSettings(network, subscribeSettingsUpdated, "true"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNetworkcontainerExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "subscribe_settings.enabled_attributes.0", "SECURITY_GROUP"),
+				),
+			},
+			// Delete testing automatically occurs in TestCase
+		},
+	})
+}
+
+func TestAccNetworkcontainerResource_MappedEAAttributes(t *testing.T) {
+	if utils.GetNIOSPxgridEndpointRef() == "" {
+		t.Skip("Skipping: NIOS_PXGRID_ENDPOINT_REF not set. A configured pxGrid/ISE endpoint is required.")
+	}
+	var resourceName = "nios_ipam_network_container.test_mapped_ea_attributes"
+	var v ipam.Networkcontainer
+	network := acctest.RandomCIDRNetwork()
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// Create and Read
+			{
+				Config: testAccNetworkcontainerMappedEAAttributes(network, "IP_ADDRESS", "Site"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNetworkcontainerExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "use_subscribe_settings", "true"),
+					resource.TestCheckResourceAttr(resourceName, "subscribe_settings.mapped_ea_attributes.0.name", "IP_ADDRESS"),
+					resource.TestCheckResourceAttr(resourceName, "subscribe_settings.mapped_ea_attributes.0.mapped_ea", "Site"),
+				),
+			},
+			// Update and Read
+			{
+				Config: testAccNetworkcontainerMappedEAAttributes(network, "MAC", "Site"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNetworkcontainerExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "use_subscribe_settings", "true"),
+					resource.TestCheckResourceAttr(resourceName, "subscribe_settings.mapped_ea_attributes.0.name", "MAC"),
+					resource.TestCheckResourceAttr(resourceName, "subscribe_settings.mapped_ea_attributes.0.mapped_ea", "Site"),
+				),
+			},
+			// Update and Read
+			{
+				Config: testAccNetworkcontainerMappedEAAttributes(network, "MAC", "Building"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNetworkcontainerExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "use_subscribe_settings", "true"),
+					resource.TestCheckResourceAttr(resourceName, "subscribe_settings.mapped_ea_attributes.0.name", "MAC"),
+					resource.TestCheckResourceAttr(resourceName, "subscribe_settings.mapped_ea_attributes.0.mapped_ea", "Building"),
+				),
+			},
+			// Delete testing automatically occurs in TestCase
+		},
+	})
+}
 func TestAccNetworkcontainerResource_RemoveSubnetsTrue(t *testing.T) {
 	var containerResource ipam.Networkcontainer
 	var childNetwork1 ipam.Network
@@ -3424,12 +3720,37 @@ resource "nios_ipam_network_container" "test_use_recycle_leases" {
 }
 
 func testAccNetworkcontainerUseSubscribeSettings(network, useSubscribeSettings string) string {
+	if useSubscribeSettings == "true" {
+		return fmt.Sprintf(`
+resource "nios_ipam_network_container" "test_use_subscribe_settings" {
+    network = %q
+    network_view = "test_network_view"
+    use_subscribe_settings = %q
+    subscribe_settings = {
+        enabled_attributes = ["USERNAME"]
+    }
+}
+`, network, useSubscribeSettings)
+	}
 	return fmt.Sprintf(`
 resource "nios_ipam_network_container" "test_use_subscribe_settings" {
     network = %q
+    network_view = "test_network_view"
     use_subscribe_settings = %q
 }
 `, network, useSubscribeSettings)
+}
+
+func testAccNetworkcontainerSubscribeSettings(network string, subscribeSettings map[string]any, useSubscribeSettings string) string {
+	subscribeSettingsStr := utils.ConvertMapToHCL(subscribeSettings)
+	return fmt.Sprintf(`
+resource "nios_ipam_network_container" "test_subscribe_settings" {
+    network = %q
+    network_view = "test_network_view"
+    subscribe_settings = %s
+    use_subscribe_settings = %q
+}
+`, network, subscribeSettingsStr, useSubscribeSettings)
 }
 
 func testAccNetworkcontainerUseUpdateDnsOnLeaseRenewal(network, useUpdateDnsOnLeaseRenewal string) string {
@@ -3441,6 +3762,130 @@ resource "nios_ipam_network_container" "test_use_update_dns_on_lease_renewal" {
 `, network, useUpdateDnsOnLeaseRenewal)
 }
 
+func testAccNetworkcontainerDiscoveryMember(network, discoveryMember string) string {
+	return fmt.Sprintf(`
+resource "nios_ipam_network_container" "test_discovery_member" {
+    network = %q
+    discovery_member = %q
+    use_enable_discovery = true
+}
+`, network, discoveryMember)
+}
+
+func testAccNetworkcontainerDiscoveryMemberDisabled(network string) string {
+	return fmt.Sprintf(`
+resource "nios_ipam_network_container" "test_discovery_member" {
+    network = %q
+    use_enable_discovery = false
+}
+`, network)
+}
+
+func testAccNetworkcontainerEnableDiscovery(network string, enableDiscovery bool) string {
+	discoveryMember := utils.GetNIOSDiscoveryMemberHostName()
+	return fmt.Sprintf(`
+resource "nios_ipam_network_container" "test_enable_discovery" {
+    network = %q
+    discovery_member = %q
+    enable_discovery = %t
+    use_enable_discovery = true
+}
+`, network, discoveryMember, enableDiscovery)
+}
+
+func testAccNetworkcontainerEnableImmediateDiscovery(network string, enableImmediateDiscovery bool) string {
+	discoveryMember := utils.GetNIOSDiscoveryMemberHostName()
+	return fmt.Sprintf(`
+resource "nios_ipam_network_container" "test_enable_immediate_discovery" {
+    network = %q
+    discovery_member = %q
+    enable_immediate_discovery = %t
+    use_enable_discovery = true
+}
+`, network, discoveryMember, enableImmediateDiscovery)
+}
+
+func testAccNetworkcontainerLogicFilterRules(network string, logicFilterRules []map[string]any) string {
+	logicFilterRulesStr := utils.ConvertSliceOfMapsToHCL(logicFilterRules)
+	return fmt.Sprintf(`
+resource "nios_ipam_network_container" "test_logic_filter_rules" {
+    network = %q
+    logic_filter_rules = %s
+    use_logic_filter_rules = true
+}
+`, network, logicFilterRulesStr)
+}
+
+func testAccNetworkcontainerRirOrganization(network, rirOrganization string) string {
+	return fmt.Sprintf(`
+resource "nios_ipam_network_container" "test_rir_organization" {
+    network = %q
+    rir_organization = %q
+    extattrs = {
+        "RIPE Network Name" = "TEST-NET"
+        "RIPE Description" = "Test network"
+        "RIPE Country" = "United States (US)"
+        "RIPE Admin Contact" = "TEST-RIPE"
+        "RIPE Technical Contact" = "TEST-RIPE"
+        "RIPE Registry Source" = "RIPE"
+        "RIPE IPv4 Status" = "ASSIGNED PA"
+    }
+}
+`, network, rirOrganization)
+}
+
+func testAccNetworkcontainerRirRegistrationAction(parentNetwork, childNetwork, rirRegistrationAction string) string {
+	return fmt.Sprintf(`
+resource "nios_ipam_network_container" "test_rir_parent" {
+    network = %q
+    rir_organization = "rir-org-test1"
+    extattrs = {
+        "RIPE Network Name" = "TEST-NET"
+        "RIPE Description" = "Test network"
+        "RIPE Country" = "United States (US)"
+        "RIPE Admin Contact" = "TEST-RIPE"
+        "RIPE Technical Contact" = "TEST-RIPE"
+        "RIPE Registry Source" = "RIPE"
+        "RIPE IPv4 Status" = "ASSIGNED PA"
+    }
+}
+
+resource "nios_ipam_network_container" "test_rir_registration_action" {
+    depends_on = [nios_ipam_network_container.test_rir_parent]
+    network = %q
+    rir_registration_action = %q
+    rir_organization = "rir-org-test1"
+    extattrs = {
+        "RIPE Network Name" = "TEST-NET-CHILD"
+        "RIPE Description" = "Test child network"
+        "RIPE Country" = "United States (US)"
+        "RIPE Admin Contact" = "TEST-RIPE"
+        "RIPE Technical Contact" = "TEST-RIPE"
+        "RIPE Registry Source" = "RIPE"
+        "RIPE IPv4 Status" = "ASSIGNED PA"
+    }
+}
+`, parentNetwork, childNetwork, rirRegistrationAction)
+}
+
+func testAccNetworkcontainerMappedEAAttributes(network, name, mappedEa string) string {
+	return fmt.Sprintf(`
+resource "nios_ipam_network_container" "test_mapped_ea_attributes" {
+    network = %q
+    network_view = "test_network_view"
+    use_subscribe_settings = true
+    subscribe_settings = {
+        enabled_attributes = ["USERNAME"]
+        mapped_ea_attributes = [
+            {
+                name = %q
+                mapped_ea = %q
+            }
+        ]
+    }
+}
+`, network, name, mappedEa)
+}
 func testAccNetworkcontainerRemoveSubnets(network, removeSubnets, childNetwork1, childNetwork2 string) string {
 	return fmt.Sprintf(`
 resource "nios_ipam_network_container" "test_remove_subnets" {

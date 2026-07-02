@@ -26,13 +26,16 @@ var Ipv6networkcontainerSubscribeSettingsAttrTypes = map[string]attr.Type{
 
 var Ipv6networkcontainerSubscribeSettingsResourceSchemaAttributes = map[string]schema.Attribute{
 	"enabled_attributes": schema.ListAttribute{
-		ElementType: types.StringType,
-		Computed:    true,
+		ElementType:         types.StringType,
+		Optional:            true,
+		Computed:            true,
+		MarkdownDescription: "The list of Cisco ISE attributes allowed for subscription.",
 	},
 	"mapped_ea_attributes": schema.ListNestedAttribute{
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: Ipv6networkcontainersubscribesettingsMappedEaAttributesResourceSchemaAttributes,
 		},
+		Optional:            true,
 		Computed:            true,
 		MarkdownDescription: "The list of NIOS extensible attributes to Cisco ISE attributes mappings.",
 	},
