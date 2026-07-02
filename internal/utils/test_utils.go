@@ -42,12 +42,20 @@ func GetNIOSGridMemberHostName() string {
 	return os.Getenv("NIOS_GRID_MEMBER_HOSTNAME")
 }
 
+func GetNIOSDiscoveryMemberHostName() string {
+	return os.Getenv("NIOS_DISCOVERY_MEMBER_HOSTNAME")
+}
+
 func GetNIOSNotificationRestEndpointRef() string {
 	return os.Getenv("NIOS_NOTIFICATION_REST_ENDPOINT_REF")
 }
 
 func GetNIOSPxgridEndpointRef() string {
 	return os.Getenv("NIOS_PXGRID_ENDPOINT_REF")
+}
+
+func GetNIOSDiscoveryMemberConfigAddrType() string {
+	return os.Getenv("NIOS_DISCOVERY_MEMBER_CONFIG_ADDR_TYPE")
 }
 
 func GetGSSTSIGCertRef() string {

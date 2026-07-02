@@ -14,8 +14,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
+	"github.com/infobloxopen/infoblox-nios-go-client/ipam"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/config"
+	"github.com/infobloxopen/terraform-provider-nios/internal/retry"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
@@ -347,10 +349,47 @@ func (r *Ipv6networkResource) Delete(ctx context.Context, req resource.DeleteReq
 		return
 	}
 
-	httpRes, err := r.client.IPAMAPI.
-		Ipv6networkAPI.
-		Delete(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
-		Execute()
+	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
+
+	// NIOS rejects deleting a network that has VLANs assigned. Clear them first.
+	if !data.Vlans.IsNull() && !data.Vlans.IsUnknown() && len(data.Vlans.Elements()) > 0 {
+		clearPayload := ipam.NewIpv6network()
+		clearPayload.SetVlans([]ipam.Ipv6networkVlans{})
+
+		clearErr := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+			_, httpRes, callErr := r.client.IPAMAPI.
+				Ipv6networkAPI.
+				Update(ctx, resourceRef).
+				Ipv6network(*clearPayload).
+				Execute()
+			if httpRes != nil {
+				return httpRes.StatusCode, callErr
+			}
+			return 0, callErr
+		})
+		if clearErr != nil {
+			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to clear VLANs from Ipv6network before deletion, got error: %s", clearErr))
+			return
+		}
+	}
+
+	var httpRes *http.Response
+	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		var callErr error
+		httpRes, callErr = r.client.IPAMAPI.
+			Ipv6networkAPI.
+			Delete(ctx, resourceRef).
+			Execute()
+
+		if httpRes != nil {
+			if httpRes.StatusCode == http.StatusNotFound {
+				return 0, nil
+			}
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
+
 	if err != nil {
 		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
 			return
@@ -632,6 +671,40 @@ func (r *Ipv6networkResource) ValidateConfig(ctx context.Context, req resource.V
 			resp.Diagnostics.AddError(
 				"Same Port Control Discovery Blackout Not Allowed",
 				"When use_blackout_setting is set to false, same_port_control_discovery_blackout cannot be configured. Either set use_blackout_setting to true or remove the same_port_control_discovery_blackout attribute.",
+			)
+		}
+	}
+
+	// mgm_private and use_mgm_private must both be true if either one is true
+	mgmPrivateSet := !data.MgmPrivate.IsNull() && !data.MgmPrivate.IsUnknown()
+	useMgmPrivateSet := !data.UseMgmPrivate.IsNull() && !data.UseMgmPrivate.IsUnknown()
+
+	mgmPrivateTrue := mgmPrivateSet && data.MgmPrivate.ValueBool()
+	useMgmPrivateTrue := useMgmPrivateSet && data.UseMgmPrivate.ValueBool()
+
+	if mgmPrivateTrue && !useMgmPrivateTrue {
+		resp.Diagnostics.AddAttributeError(
+			path.Root("use_mgm_private"),
+			"Invalid MGM Private Configuration",
+			"When 'mgm_private' is set to true, 'use_mgm_private' must also be set to true.",
+		)
+	} else if useMgmPrivateTrue && !mgmPrivateTrue {
+		resp.Diagnostics.AddAttributeError(
+			path.Root("mgm_private"),
+			"Invalid MGM Private Configuration",
+			"When 'use_mgm_private' is set to true, 'mgm_private' must also be set to true.",
+		)
+	}
+
+	// enabled_attributes is required when subscribe_settings is configured
+	if !data.SubscribeSettings.IsNull() && !data.SubscribeSettings.IsUnknown() {
+		attrs := data.SubscribeSettings.Attributes()
+		enabledAttrs, exists := attrs["enabled_attributes"]
+		if !exists || enabledAttrs.IsNull() || enabledAttrs.IsUnknown() {
+			resp.Diagnostics.AddAttributeError(
+				path.Root("subscribe_settings").AtName("enabled_attributes"),
+				"Missing Required Attribute",
+				"The 'enabled_attributes' attribute is required when 'subscribe_settings' is configured.",
 			)
 		}
 	}

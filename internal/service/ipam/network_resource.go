@@ -13,8 +13,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
+	"github.com/infobloxopen/infoblox-nios-go-client/ipam"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/config"
+	"github.com/infobloxopen/terraform-provider-nios/internal/retry"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
@@ -346,10 +348,47 @@ func (r *NetworkResource) Delete(ctx context.Context, req resource.DeleteRequest
 		return
 	}
 
-	httpRes, err := r.client.IPAMAPI.
-		NetworkAPI.
-		Delete(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
-		Execute()
+	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
+
+	// NIOS rejects deleting a network that has VLANs assigned. Clear them first.
+	if !data.Vlans.IsNull() && !data.Vlans.IsUnknown() && len(data.Vlans.Elements()) > 0 {
+		clearPayload := ipam.NewNetwork()
+		clearPayload.SetVlans([]ipam.NetworkVlans{})
+
+		clearErr := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+			_, httpRes, callErr := r.client.IPAMAPI.
+				NetworkAPI.
+				Update(ctx, resourceRef).
+				Network(*clearPayload).
+				Execute()
+			if httpRes != nil {
+				return httpRes.StatusCode, callErr
+			}
+			return 0, callErr
+		})
+		if clearErr != nil {
+			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to clear VLANs from Network before deletion, got error: %s", clearErr))
+			return
+		}
+	}
+
+	var httpRes *http.Response
+	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		var callErr error
+		httpRes, callErr = r.client.IPAMAPI.
+			NetworkAPI.
+			Delete(ctx, resourceRef).
+			Execute()
+
+		if httpRes != nil {
+			if httpRes.StatusCode == http.StatusNotFound {
+				return 0, nil
+			}
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
+
 	if err != nil {
 		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
 			return
@@ -537,6 +576,19 @@ func (r *NetworkResource) ValidateConfig(ctx context.Context, req resource.Valid
 			resp.Diagnostics.AddError(
 				"Same Port Control Discovery Blackout Not Allowed",
 				"When use_blackout_setting is set to false, same_port_control_discovery_blackout cannot be configured. Either set use_blackout_setting to true or remove the same_port_control_discovery_blackout attribute.",
+			)
+		}
+	}
+
+	// enabled_attributes is required when subscribe_settings is configured
+	if !data.SubscribeSettings.IsNull() && !data.SubscribeSettings.IsUnknown() {
+		attrs := data.SubscribeSettings.Attributes()
+		enabledAttrs, exists := attrs["enabled_attributes"]
+		if !exists || enabledAttrs.IsNull() || enabledAttrs.IsUnknown() {
+			resp.Diagnostics.AddAttributeError(
+				path.Root("subscribe_settings").AtName("enabled_attributes"),
+				"Missing Required Attribute",
+				"The 'enabled_attributes' attribute is required when 'subscribe_settings' is configured.",
 			)
 		}
 	}
