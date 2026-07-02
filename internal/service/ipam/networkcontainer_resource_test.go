@@ -3160,6 +3160,14 @@ func testAccCheckNetworkcontainerDisappears(ctx context.Context, v *ipam.Network
 	}
 }
 
+func testAccNetworkcontainerBasicConfig(network string) string {
+	return fmt.Sprintf(`
+resource "nios_ipam_network_container" "test" {
+	network = %q
+}
+`, network)
+}
+
 func testAccNetworkcontainerAuthority(network, authority, useAuthority string) string {
 	return fmt.Sprintf(`
 resource "nios_ipam_network_container" "test_authority" {
@@ -3168,14 +3176,6 @@ resource "nios_ipam_network_container" "test_authority" {
 	use_authority = %q
 }
 `, network, authority, useAuthority)
-}
-
-func testAccNetworkcontainerBasicConfig(network string) string {
-	return fmt.Sprintf(`
-resource "nios_ipam_network_container" "test" {
-	network = %q
-}
-`, network)
 }
 
 func testAccNetworkcontainerBootfile(network, bootfile, useBootfile string) string {
