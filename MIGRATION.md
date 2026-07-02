@@ -7,7 +7,7 @@ This guide covers the changes introduced in the NIOS Terraform provider and outl
 
 ## Prerequisites
 
-- Terraform v1.8.0 or later
+- Terraform v1.12.1 or later
 - Infoblox NIOS (version 9.0.6 or higher)
 - Backup of your current Terraform state files
 
@@ -33,7 +33,7 @@ terraform {
   required_providers {
     nios = {
       source  = "infobloxopen/nios"
-      version = "1.1.0"
+      version = "1.2.0"
     }
   }
 }
