@@ -1170,16 +1170,17 @@ func TestAccIpv6rangeResource_Template(t *testing.T) {
 	resourceName := "nios_dhcp_ipv6range.test_template"
 	var v dhcp.Ipv6range
 	view := acctest.RandomNameWithPrefix("network-view")
+	templateName := acctest.RandomNameWithPrefix("ipv6range-template")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccIpv6rangeTemplate(view, "14::131", "14::140"),
+				Config: testAccIpv6rangeTemplate(view, "14::131", "14::140", templateName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6rangeExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "template", ""),
+					resource.TestCheckResourceAttr(resourceName, "template", templateName),
 				),
 			},
 		},
@@ -1998,15 +1999,23 @@ resource "nios_dhcp_ipv6range" "test_restart_if_needed" {
 	return strings.Join([]string{testAccBaseWithIpv6NetworkandView(view), config}, "")
 }
 
-func testAccIpv6rangeTemplate(view, startAddr, endAddr string) string {
+func testAccIpv6rangeTemplate(view, startAddr, endAddr, templateName string) string {
 	config := fmt.Sprintf(`
+resource "nios_dhcp_ipv6_range_template" "test_template" {
+	name                = %q
+	number_of_addresses = 10
+	offset              = 1
+	cloud_api_compatible = true
+}
+
 resource "nios_dhcp_ipv6range" "test_template" {
 	network = nios_ipam_ipv6network.test.network
 	start_addr = %q
 	end_addr = %q
 	network_view = nios_ipam_network_view.test.name
+	template = nios_dhcp_ipv6_range_template.test_template.name
 }
-`, startAddr, endAddr)
+`, templateName, startAddr, endAddr)
 	return strings.Join([]string{testAccBaseWithIpv6NetworkandView(view), config}, "")
 }
 

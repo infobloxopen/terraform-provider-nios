@@ -15,6 +15,7 @@ import (
 	"github.com/infobloxopen/terraform-provider-nios/internal/acctest"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
+
 // TODO: Pending Tests
 // SPLIT MEMBER
 // SPLIT SCOPE
@@ -2192,16 +2193,17 @@ func TestAccRangeResource_Template(t *testing.T) {
 	var v dhcp.Range
 	startAddr := "10.10.50.61"
 	endAddr := "10.10.50.70"
+	templateName := acctest.RandomNameWithPrefix("range-template")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccRangeTemplate(startAddr, endAddr),
+				Config: testAccRangeTemplate(startAddr, endAddr, templateName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangeExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "template", ""),
+					resource.TestCheckResourceAttr(resourceName, "template", templateName),
 				),
 			},
 		},
@@ -4152,8 +4154,15 @@ resource "nios_dhcp_range" "test_restart_if_needed" {
 `, startAddr, endAddr, restartIfNeeded)
 }
 
-func testAccRangeTemplate(startAddr, endAddr string) string {
+func testAccRangeTemplate(startAddr, endAddr, templateName string) string {
 	return fmt.Sprintf(`
+resource "nios_dhcp_range_template" "test_template" {
+	name                = %q
+	number_of_addresses = 10
+	offset              = 1
+	cloud_api_compatible = true
+}
+
 resource "nios_ipam_network" "test_template" {
 	network = "10.10.50.0/24"
 	network_view = "default"
@@ -4162,7 +4171,8 @@ resource "nios_ipam_network" "test_template" {
 resource "nios_dhcp_range" "test_template" {
 	start_addr = %q
 	end_addr = %q
+	template = nios_dhcp_range_template.test_template.name
 	depends_on = [nios_ipam_network.test_template]
 }
-`, startAddr, endAddr)
+`, templateName, startAddr, endAddr)
 }
