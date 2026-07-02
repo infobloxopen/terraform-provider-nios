@@ -745,6 +745,9 @@ var NetworkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional:            true,
 		MarkdownDescription: "The RIR registration action.",
 		Computed:            true,
+		Validators: []validator.String{
+			stringvalidator.OneOf("CREATE", "MODIFY", "DELETE", "NONE"),
+		},
 	},
 	"rir_registration_status": schema.StringAttribute{
 		Optional:            true,
