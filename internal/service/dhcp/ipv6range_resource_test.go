@@ -396,9 +396,9 @@ func TestAccIpv6rangeResource_DiscoveryBlackoutSetting(t *testing.T) {
 }
 
 func TestAccIpv6rangeResource_DiscoveryMember(t *testing.T) {
-	gridMemberHostname := utils.GetNIOSDiscoveryMemberHostName()
-	if gridMemberHostname == "" || utils.GetNIOSDiscoveryMemberConfigAddrType() != "BOTH" {
-		t.Skip("Skipping test: NIOS_DISCOVERY_MEMBER_HOSTNAME must be set and Member should have IPv6 enabled")
+	discoveryMember := utils.GetNIOSDiscoveryMemberHostName()
+	if discoveryMember == "" {
+		t.Skip("NIOS_DISCOVERY_MEMBER_HOSTNAME environment variable must be set")
 	}
 	var resourceName = "nios_dhcp_ipv6range.test_discovery_member"
 	var v dhcp.Ipv6range
@@ -410,10 +410,10 @@ func TestAccIpv6rangeResource_DiscoveryMember(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccIpv6rangeDiscoveryMember(view, "14::1", "14::10", gridMemberHostname, "true"),
+				Config: testAccIpv6rangeDiscoveryMember(view, "14::1", "14::10", discoveryMember, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6rangeExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "discovery_member", gridMemberHostname),
+					resource.TestCheckResourceAttr(resourceName, "discovery_member", discoveryMember),
 				),
 			},
 			// Update and Read - disable discovery
@@ -430,8 +430,8 @@ func TestAccIpv6rangeResource_DiscoveryMember(t *testing.T) {
 }
 
 func TestAccIpv6rangeResource_EnableDiscovery(t *testing.T) {
-	gridMemberHostname := utils.GetNIOSDiscoveryMemberHostName()
-	if gridMemberHostname == "" || utils.GetNIOSDiscoveryMemberConfigAddrType() != "BOTH" {
+	discoveryMember := utils.GetNIOSDiscoveryMemberHostName()
+	if discoveryMember == "" || utils.GetNIOSDiscoveryMemberConfigAddrType() != "BOTH" {
 		t.Skip("Skipping test: NIOS_DISCOVERY_MEMBER_HOSTNAME must be set and Member should have IPv6 enabled")
 	}
 	var resourceName = "nios_dhcp_ipv6range.test_enable_discovery"
@@ -444,7 +444,7 @@ func TestAccIpv6rangeResource_EnableDiscovery(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccIpv6rangeEnableDiscovery(view, "15::1", "15::10", "true", gridMemberHostname),
+				Config: testAccIpv6rangeEnableDiscovery(view, "15::1", "15::10", "true", discoveryMember),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6rangeExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "enable_discovery", "true"),
@@ -452,7 +452,7 @@ func TestAccIpv6rangeResource_EnableDiscovery(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccIpv6rangeEnableDiscovery(view, "15::1", "15::10", "false", gridMemberHostname),
+				Config: testAccIpv6rangeEnableDiscovery(view, "15::1", "15::10", "false", discoveryMember),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6rangeExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "enable_discovery", "false"),
@@ -494,6 +494,10 @@ func TestAccIpv6rangeResource_EndAddr(t *testing.T) {
 }
 
 func TestAccIpv6rangeResource_EnableImmediateDiscovery(t *testing.T) {
+	discoveryMember := utils.GetNIOSDiscoveryMemberHostName()
+	if discoveryMember == "" {
+		t.Skip("NIOS_DISCOVERY_MEMBER_HOSTNAME environment variable must be set")
+	}
 	resourceName := "nios_dhcp_ipv6range.test_enable_immediate_discovery"
 	var v dhcp.Ipv6range
 	view := acctest.RandomNameWithPrefix("network-view")

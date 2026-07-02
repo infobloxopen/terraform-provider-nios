@@ -643,6 +643,10 @@ func TestAccIpv6fixedaddressResource_Duid(t *testing.T) {
 }
 
 func TestAccIpv6fixedaddressResource_EnableImmediateDiscovery(t *testing.T) {
+	discoveryMember := utils.GetNIOSDiscoveryMemberHostName()
+	if discoveryMember == "" {
+		t.Skip("NIOS_DISCOVERY_MEMBER_HOSTNAME environment variable must be set")
+	}
 	resourceName := "nios_dhcp_ipv6fixedaddress.test_enable_immediate_discovery"
 	var v dhcp.Ipv6fixedaddress
 	ipv6Network := "2001:db8:abcd:12a4::/64"

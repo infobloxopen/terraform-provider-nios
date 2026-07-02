@@ -850,6 +850,7 @@ func TestAccSharednetworkResource_NetworkView(t *testing.T) {
 	networkView := acctest.RandomNameWithPrefix("network-view")
 	networks := []string{"${nios_ipam_network.test_network1.ref}", "${nios_ipam_network.test_network2.ref}"}
 
+	// network_view is immutable and cannot be updated after the resource is created.
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
