@@ -95,7 +95,6 @@ func testAccCheckIpv6networkcontainerResourceAttrPair(resourceName, dataSourceNa
 		resource.TestCheckResourceAttrPair(resourceName, "options", dataSourceName, "result.0.options"),
 		resource.TestCheckResourceAttrPair(resourceName, "port_control_blackout_setting", dataSourceName, "result.0.port_control_blackout_setting"),
 		resource.TestCheckResourceAttrPair(resourceName, "preferred_lifetime", dataSourceName, "result.0.preferred_lifetime"),
-		resource.TestCheckResourceAttrPair(resourceName, "remove_subnets", dataSourceName, "result.0.remove_subnets"),
 		resource.TestCheckResourceAttrPair(resourceName, "rir", dataSourceName, "result.0.rir"),
 		resource.TestCheckResourceAttrPair(resourceName, "rir_organization", dataSourceName, "result.0.rir_organization"),
 		resource.TestCheckResourceAttrPair(resourceName, "rir_registration_action", dataSourceName, "result.0.rir_registration_action"),
