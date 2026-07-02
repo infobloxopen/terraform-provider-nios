@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"path/filepath"
+	"regexp"
 	"runtime"
 	"testing"
 
@@ -395,6 +396,11 @@ func TestAccVdiscoverytaskResource_CredentialsType(t *testing.T) {
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
+			// Negative test case: Attempt to create a vdiscoverytask with credentials_type set to INDIRECT for a driver type that does not support it.
+			{
+				Config:      testAccVdiscoverytaskCredentialsTypeIndirectInvalid(name, "VMWARE", "vcenter.example.com", "vc_admin", "vmware_password", memberName, "protocol = \"HTTPS\"\nport = 443"),
+				ExpectError: regexp.MustCompile(`'credentials_type' cannot be 'INDIRECT'`),
+			},
 			// Create and Read
 			{
 				Config: testAccVdiscoverytaskCredentialsTypeIndirect(name, "INDIRECT", "arn:aws:iam::123456789012:role/InfobloxDiscoveryRole", "DISCOVER", memberName, true, true, true, "AWS", "AUTO_CREATE", "AUTO_CREATE", true, true, true, "us-east-1"),
@@ -623,6 +629,14 @@ func TestAccVdiscoverytaskResource_FqdnOrIp(t *testing.T) {
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
+			// Negative: VMWARE requires fqdn_or_ip
+			{
+				Config: testAccVdiscoverytaskFqdnOrIp(
+					name, "", "vc_admin", "vmware_password", memberName,
+					true, true, true, true, false, "VMWARE", "AUTO_CREATE", "HTTPS", "AUTO_CREATE", "us-east-1", 443,
+				),
+				ExpectError: regexp.MustCompile(`'fqdn_or_ip' is required`),
+			},
 			// Create and Read
 			{
 				Config: testAccVdiscoverytaskFqdnOrIp(name, "vcenter.example.com", "vc_admin", "vmware_password", memberName, true, true, true, true, false, "VMWARE", "AUTO_CREATE", "HTTPS", "AUTO_CREATE", "us-east-1", 443),
@@ -1021,6 +1035,22 @@ func TestAccVdiscoverytaskResource_PrivateNetworkViewMappingPolicy(t *testing.T)
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
+			// Negative: AUTO_CREATE must not have private_network_view
+			{
+				Config: testAccVdiscoverytaskPrivateNetworkViewMappingPolicyDirect(
+					name, "AUTO_CREATE", "test_network_view", "aws_access_key", "aws_secret_key",
+					memberName, true, true, true, "AWS", "AUTO_CREATE", true, false, "us-east-1",
+				),
+				ExpectError: regexp.MustCompile(`'private_network_view' must not be set`),
+			},
+			// Negative: DIRECT requires private_network_view
+			{
+				Config: testAccVdiscoverytaskPrivateNetworkViewMappingPolicyAutoCreate(
+					name, "DIRECT", "aws_access_key", "aws_secret_key",
+					memberName, true, true, true, "AWS", "AUTO_CREATE", true, false, "us-east-1",
+				),
+				ExpectError: regexp.MustCompile(`'private_network_view' is required`),
+			},
 			// Create and Read
 			{
 				Config: testAccVdiscoverytaskPrivateNetworkViewMappingPolicyAutoCreate(name, "AUTO_CREATE", "aws_access_key", "aws_secret_key", memberName, true, true, true, "AWS", "AUTO_CREATE", true, false, "us-east-1"),
@@ -1117,6 +1147,22 @@ func TestAccVdiscoverytaskResource_PublicNetworkViewMappingPolicy(t *testing.T) 
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
+			// Negative: AUTO_CREATE must not have public_network_view
+			{
+				Config: testAccVdiscoverytaskPublicNetworkViewMappingPolicyDirect(
+					name, "AUTO_CREATE", "test_network_view2", "aws_access_key", "aws_secret_key",
+					memberName, true, true, true, "AWS", "AUTO_CREATE", true, false, "us-east-1",
+				),
+				ExpectError: regexp.MustCompile(`'public_network_view' must not be set`),
+			},
+			// Negative: DIRECT requires public_network_view
+			{
+				Config: testAccVdiscoverytaskPublicNetworkViewMappingPolicyAutoCreate(
+					name, "DIRECT", "aws_access_key", "aws_secret_key",
+					memberName, true, true, true, "AWS", "AUTO_CREATE", true, false, "us-east-1",
+				),
+				ExpectError: regexp.MustCompile(`'public_network_view' is required`),
+			},
 			// Create and Read
 			{
 				Config: testAccVdiscoverytaskPublicNetworkViewMappingPolicyAutoCreate(name, "AUTO_CREATE", "aws_access_key", "aws_secret_key", memberName, true, true, true, "AWS", "AUTO_CREATE", true, false, "us-east-1"),
@@ -1347,6 +1393,22 @@ func TestAccVdiscoverytaskResource_UpdateDnsViewPrivateIp(t *testing.T) {
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
+			// Negative: AUTO_CREATE + update_dns_view_private_ip=true is invalid
+			{
+				Config: testAccVdiscoverytaskUpdateDnsViewPrivateIpFalse(
+					name, true, "aws_access_key", "aws_secret_key", memberName,
+					true, true, true, "AWS", "AUTO_CREATE", "AUTO_CREATE", true, false, "us-east-1",
+				),
+				ExpectError: regexp.MustCompile(`'update_dns_view_private_ip' cannot be true`),
+			},
+			// Negative: update_dns_view_private_ip=true requires dns_view_private_ip
+			{
+				Config: testAccVdiscoverytaskUpdateDnsViewPrivateIpTrue(
+					name, true, "", "aws_access_key", "aws_secret_key", memberName,
+					true, true, true, "AWS", "DIRECT", "default", "AUTO_CREATE", true, false, "us-east-1",
+				),
+				ExpectError: regexp.MustCompile(`'dns_view_private_ip' is required`),
+			},
 			{
 				Config: testAccVdiscoverytaskUpdateDnsViewPrivateIpFalse(name, false, "aws_access_key", "aws_secret_key", memberName, true, true, true, "AWS", "AUTO_CREATE", "AUTO_CREATE", true, false, "us-east-1"),
 				Check: resource.ComposeTestCheckFunc(
@@ -1377,6 +1439,22 @@ func TestAccVdiscoverytaskResource_UpdateDnsViewPublicIp(t *testing.T) {
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
+			// Negative: AUTO_CREATE + update_dns_view_public_ip=true is invalid
+			{
+				Config: testAccVdiscoverytaskUpdateDnsViewPublicIpFalse(
+					name, true, "aws_access_key", "aws_secret_key", memberName,
+					true, true, true, "AWS", "AUTO_CREATE", "AUTO_CREATE", true, false, "us-east-1",
+				),
+				ExpectError: regexp.MustCompile(`'update_dns_view_public_ip' cannot be true`),
+			},
+			// Negative: update_dns_view_public_ip=true requires dns_view_public_ip
+			{
+				Config: testAccVdiscoverytaskUpdateDnsViewPublicIpTrue(
+					name, true, "", "aws_access_key", "aws_secret_key", memberName,
+					true, true, true, "AWS", "AUTO_CREATE", "DIRECT", "default", true, false, "us-east-1",
+				),
+				ExpectError: regexp.MustCompile(`'dns_view_public_ip' is required`),
+			},
 			//Create and Read
 			{
 				Config: testAccVdiscoverytaskUpdateDnsViewPublicIpFalse(name, false, "aws_access_key", "aws_secret_key", memberName, true, true, true, "AWS", "AUTO_CREATE", "AUTO_CREATE", true, false, "us-east-1"),
@@ -2674,6 +2752,30 @@ resource "nios_discovery_vdiscovery_task" "test_username" {
     selected_regions                    = %q
 }
 `, name, username, password, member, autoConsolidateCloudEa, autoConsolidateManagedTenant, autoConsolidateManagedVm, driverType, mergeData, updateMetadata, privateNetworkViewMappingPolicy, publicNetworkViewMappingPolicy, selectedRegions)
+}
+
+func testAccVdiscoverytaskCredentialsTypeIndirectInvalid(
+	name, driverType, fqdnOrIp, username, password, member, extraFields string,
+) string {
+	return fmt.Sprintf(`
+resource "nios_discovery_vdiscovery_task" "test_credentials_type" {
+    name                                = %q
+    credentials_type                    = "INDIRECT"
+    driver_type                         = %q
+    fqdn_or_ip                          = %q
+    username                            = %q
+    password                            = %q
+    member                              = %q
+    auto_consolidate_cloud_ea           = true
+    auto_consolidate_managed_tenant     = true
+    auto_consolidate_managed_vm         = true
+    private_network_view_mapping_policy = "AUTO_CREATE"
+    public_network_view_mapping_policy  = "AUTO_CREATE"
+    merge_data                          = true
+    update_metadata                     = false
+    %s
+}
+`, name, driverType, fqdnOrIp, username, password, member, extraFields)
 }
 
 // Helper function to get test data path
