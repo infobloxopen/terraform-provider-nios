@@ -362,6 +362,30 @@ func TestAccExtensibleattributedefResource_Name(t *testing.T) {
 	})
 }
 
+func TestAccExtensibleattributedefResource_DescendantsAction(t *testing.T) {
+	var resourceName = "nios_grid_extensibleattributedef.test_descendants_action"
+	var v grid.Extensibleattributedef
+	name := acctest.RandomNameWithPrefix("tf_test_ea_")
+	eaType := "STRING"
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// Create and Read
+			{
+				Config: testAccExtensibleattributedefDescendantsAction(name, eaType),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckExtensibleattributedefExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "name", name),
+					resource.TestCheckResourceAttr(resourceName, "flags", "I"),
+				),
+			},
+			// Delete testing automatically occurs in TestCase
+		},
+	})
+}
+
 func TestAccExtensibleattributedefResource_Type(t *testing.T) {
 	var resourceName = "nios_grid_extensibleattributedef.test_type"
 	var v grid.Extensibleattributedef
@@ -537,6 +561,16 @@ func testAccExtensibleattributedefType(name string, eaType string) string {
 resource "nios_grid_extensibleattributedef" "test_type" {
     name = %q
     type = %q
+}
+`, name, eaType)
+}
+
+func testAccExtensibleattributedefDescendantsAction(name string, eaType string) string {
+	return fmt.Sprintf(`
+resource "nios_grid_extensibleattributedef" "test_descendants_action" {
+    name  = %q
+    type  = %q
+    flags = "I"
 }
 `, name, eaType)
 }

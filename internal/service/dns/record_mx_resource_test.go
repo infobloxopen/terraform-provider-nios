@@ -456,6 +456,37 @@ func TestAccRecordMxResource_View(t *testing.T) {
 	})
 }
 
+func TestAccRecordMxResource_DdnsPrincipal(t *testing.T) {
+	var resourceName = "nios_dns_record_mx.test_ddns_principal"
+	var v dns.RecordMx
+	name := acctest.RandomNameWithPrefix("record-mx") + ".example.com"
+	mailExchanger := acctest.RandomNameWithPrefix("mail-exchanger") + ".example.com"
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// Create and Read
+			{
+				Config: testAccRecordMxDdnsPrincipal(name, mailExchanger, 10, "default", "DDNS_PRINCIPAL_REPLACE_ME"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckRecordMxExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "ddns_principal", "DDNS_PRINCIPAL_REPLACE_ME"),
+				),
+			},
+			// Update and Read
+			{
+				Config: testAccRecordMxDdnsPrincipal(name, mailExchanger, 10, "default", "DDNS_PRINCIPAL_UPDATE_REPLACE_ME"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckRecordMxExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "ddns_principal", "DDNS_PRINCIPAL_UPDATE_REPLACE_ME"),
+				),
+			},
+			// Delete testing automatically occurs in TestCase
+		},
+	})
+}
+
 func testAccCheckRecordMxExists(ctx context.Context, resourceName string, v *dns.RecordMx) resource.TestCheckFunc {
 	// Verify the resource exists in the cloud
 	return func(state *terraform.State) error {
@@ -689,4 +720,17 @@ resource "nios_dns_record_mx" "test_view" {
     view            = nios_dns_zone_auth.test_dns_zone.view
 }
 `, view, name, mail_exchanger, preference)
+}
+
+func testAccRecordMxDdnsPrincipal(name, mail_exchanger string, preference int64, view, ddnsPrincipal string) string {
+	return fmt.Sprintf(`
+resource "nios_dns_record_mx" "test_ddns_principal" {
+    name            = %q
+    mail_exchanger  = %q
+    preference      = %d
+    view            = %q
+    creator         = "DYNAMIC"
+    ddns_principal  = %q
+}
+`, name, mail_exchanger, preference, view, ddnsPrincipal)
 }

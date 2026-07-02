@@ -288,6 +288,30 @@ func TestAccSharedrecordTxtResource_UseTtl(t *testing.T) {
 	})
 }
 
+func TestAccSharedrecordTxtResource_SharedRecordGroup(t *testing.T) {
+	var resourceName = "nios_dns_sharedrecord_txt.test_shared_record_group"
+	var v dns.SharedrecordTxt
+	name := acctest.RandomNameWithPrefix("sharedrecord-txt-")
+	text := "v=spf1 include:example.com ~all"
+	sharedRecordGroup := acctest.RandomNameWithPrefix("sharedrecordgroup-")
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// Create and Read
+			{
+				Config: testAccSharedrecordTxtSharedRecordGroup(name, sharedRecordGroup, text),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckSharedrecordTxtExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "shared_record_group", sharedRecordGroup),
+				),
+			},
+			// Delete testing automatically occurs in TestCase
+		},
+	})
+}
+
 func testAccCheckSharedrecordTxtExists(ctx context.Context, resourceName string, v *dns.SharedrecordTxt) resource.TestCheckFunc {
 	// Verify the resource exists in the cloud
 	return func(state *terraform.State) error {
@@ -448,4 +472,15 @@ resource "nios_dns_sharedrecordgroup" "parent_sharedrecord_group" {
   name = %q
 }
 `, name)
+}
+
+func testAccSharedrecordTxtSharedRecordGroup(name, sharedRecordGroup, text string) string {
+	config := fmt.Sprintf(`
+resource "nios_dns_sharedrecord_txt" "test_shared_record_group" {
+	name = %q
+	shared_record_group = nios_dns_sharedrecordgroup.parent_sharedrecord_group.name
+	text = %q
+}
+`, name, text)
+	return strings.Join([]string{testAccBaseSharedRecordGroup(sharedRecordGroup), config}, "")
 }
