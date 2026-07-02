@@ -1805,7 +1805,6 @@ func TestAccNetworkcontainerResource_SubscribeSettings(t *testing.T) {
 	})
 }
 
-
 func TestAccNetworkcontainerResource_Unmanaged(t *testing.T) {
 	var resourceName = "nios_ipam_network_container.test_unmanaged"
 	var v ipam.Networkcontainer

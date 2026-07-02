@@ -186,7 +186,7 @@ func TestAccNetworkResource_AutoCreateReversezone(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "auto_create_reversezone", "true"),
 				),
 			},
-			// auto_create_reversezone is immutable
+			// Update Testing is not possible as auto_create_reversezone is immutable
 			// Delete testing automatically occurs in TestCase
 		},
 	})

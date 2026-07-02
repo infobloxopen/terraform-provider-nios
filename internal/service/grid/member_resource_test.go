@@ -5248,7 +5248,6 @@ resource "nios_grid_member" "test_ha_cloud_platform" {
 		subnet_mask = %q
 		use_dscp = false
 		%s
-		
 	}
 	platform = "VNIOS"
 	enable_ha = true
