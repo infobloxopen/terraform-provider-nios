@@ -3599,7 +3599,7 @@ resource "nios_ipam_network_container" "test_rir_registration_status" {
     network = %q
     rir_registration_status = %q
     same_port_control_discovery_blackout = %q
-    use_blackout_setting = "true"
+    use_blackout_setting = true
 }
 `, network, rirRegistrationStatus, samePortControl)
 }

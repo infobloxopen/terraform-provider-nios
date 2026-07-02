@@ -1110,7 +1110,10 @@ func TestAccIpv6networkResource_RestartIfNeeded(t *testing.T) {
 func TestAccIpv6networkResource_RirRegistrationAction(t *testing.T) {
 	var resourceName = "nios_ipam_ipv6network.test_rir_registration_action"
 	var v ipam.Ipv6network
-	network := acctest.RandomIPv6Network()
+	third := rand.Intn(65536)
+	fourth := rand.Intn(65536)
+	parentNetwork := fmt.Sprintf("2001:db8:%x::/48", third)
+	childNetwork := fmt.Sprintf("2001:db8:%x:%x::/64", third, fourth)
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1118,20 +1121,18 @@ func TestAccIpv6networkResource_RirRegistrationAction(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccIpv6networkRirRegistrationAction(network, "NONE", "initial comment"),
+				Config: testAccIpv6networkRirRegistrationAction(parentNetwork, childNetwork, "CREATE"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networkExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "rir_registration_action", "NONE"),
-					resource.TestCheckResourceAttr(resourceName, "comment", "initial comment"),
+					resource.TestCheckResourceAttr(resourceName, "rir_registration_action", "CREATE"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccIpv6networkRirRegistrationAction(network, "NONE", "updated comment"),
+				Config: testAccIpv6networkRirRegistrationAction(parentNetwork, childNetwork, "NONE"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networkExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "rir_registration_action", "NONE"),
-					resource.TestCheckResourceAttr(resourceName, "comment", "updated comment"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -2118,39 +2119,6 @@ func TestAccIpv6networkResource_RirOrganization(t *testing.T) {
 				),
 			},
 			// Update is not tested: rir_organization is immutable
-			// Delete testing automatically occurs in TestCase
-		},
-	})
-}
-
-func TestAccIpv6networkResource_RirOrganizationAction(t *testing.T) {
-	var resourceName = "nios_ipam_ipv6network.test_rir_registration_action"
-	var v ipam.Ipv6network
-	third := rand.Intn(65536)
-	fourth := rand.Intn(65536)
-	parentNetwork := fmt.Sprintf("2001:db8:%x::/48", third)
-	childNetwork := fmt.Sprintf("2001:db8:%x:%x::/64", third, fourth)
-
-	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.PreCheck(t) },
-		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-		Steps: []resource.TestStep{
-			// Create and Read
-			{
-				Config: testAccIpv6networkRirRegistrationAction(parentNetwork, childNetwork, "CREATE"),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckIpv6networkExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "rir_registration_action", "CREATE"),
-				),
-			},
-			// Update and Read
-			{
-				Config: testAccIpv6networkRirRegistrationAction(parentNetwork, childNetwork, "NONE"),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckIpv6networkExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "rir_registration_action", "NONE"),
-				),
-			},
 			// Delete testing automatically occurs in TestCase
 		},
 	})

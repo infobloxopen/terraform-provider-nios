@@ -186,6 +186,7 @@ func TestAccNetworkResource_AutoCreateReversezone(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "auto_create_reversezone", "true"),
 				),
 			},
+			// auto_create_reversezone is immutable
 			// Delete testing automatically occurs in TestCase
 		},
 	})
@@ -1096,6 +1097,10 @@ func TestAccNetworkResource_EnableIfmapPublishing(t *testing.T) {
 }
 
 func TestAccNetworkResource_EnableImmediateDiscovery(t *testing.T) {
+	discoveryMember := utils.GetNIOSDiscoveryMemberHostName()
+	if discoveryMember == "" {
+		t.Skip("NIOS_DISCOVERY_MEMBER_HOSTNAME environment variable must be set for this test to run (requires a discovery polling node configured in NIOS)")
+	}
 	var resourceName = "nios_ipam_network.test_enable_immediate_discovery"
 	var v ipam.Network
 	network := acctest.RandomCIDRNetwork()

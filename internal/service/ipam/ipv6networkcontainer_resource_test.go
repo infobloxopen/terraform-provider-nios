@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"math/rand"
 	"net/http"
 	"testing"
 
@@ -100,7 +101,7 @@ func TestAccIpv6networkcontainerResource_disappears(t *testing.T) {
 func TestAccIpv6networkcontainerResource_AutoCreateReversezone(t *testing.T) {
 	var resourceName = "nios_ipam_ipv6network_container.test_auto_create_reversezone"
 	var v ipam.Ipv6networkcontainer
-	network := acctest.RandomIPv6Network()
+	network := acctest.RandomIPv6NetworkWith4BitBoundary()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -902,7 +903,10 @@ func TestAccIpv6networkcontainerResource_RestartIfNeeded(t *testing.T) {
 func TestAccIpv6networkcontainerResource_RirRegistrationAction(t *testing.T) {
 	var resourceName = "nios_ipam_ipv6network_container.test_rir_registration_action"
 	var v ipam.Ipv6networkcontainer
-	network := acctest.RandomIPv6Network()
+	third := rand.Intn(65536)
+	fourth := rand.Intn(65536)
+	parentNetwork := fmt.Sprintf("2001:db8:%x::/48", third)
+	childNetwork := fmt.Sprintf("2001:db8:%x:%x::/64", third, fourth)
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -910,20 +914,18 @@ func TestAccIpv6networkcontainerResource_RirRegistrationAction(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccIpv6networkcontainerRirRegistrationAction(network, "NONE", "initial comment"),
+				Config: testAccIpv6networkcontainerRirRegistrationAction(parentNetwork, childNetwork, "CREATE"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networkcontainerExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "rir_registration_action", "NONE"),
-					resource.TestCheckResourceAttr(resourceName, "comment", "initial comment"),
+					resource.TestCheckResourceAttr(resourceName, "rir_registration_action", "CREATE"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccIpv6networkcontainerRirRegistrationAction(network, "NONE", "updated comment"),
+				Config: testAccIpv6networkcontainerRirRegistrationAction(parentNetwork, childNetwork, "NONE"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networkcontainerExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "rir_registration_action", "NONE"),
-					resource.TestCheckResourceAttr(resourceName, "comment", "updated comment"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
