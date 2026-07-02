@@ -124,6 +124,38 @@ func TestAccDhcpoptionspaceResource_Name(t *testing.T) {
 	})
 }
 
+func TestAccDhcpoptionspaceResource_OptionDefinitions(t *testing.T) {
+	resourceName := "nios_dhcp_optionspace.test_option_definitions"
+	var v dhcp.Dhcpoptionspace
+	optionSpace := acctest.RandomNameWithPrefix("dhcp-option-space")
+	optionDefName := acctest.RandomNameWithPrefix("dhcp-option-definition")
+	optionDefName2 := acctest.RandomNameWithPrefix("dhcp-option-definition")
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// Create and Read
+			{
+				Config: testAccDhcpoptionspaceOptionDefinitions(optionSpace, optionDefName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckDhcpoptionspaceExists(context.Background(), resourceName, &v),
+				),
+			},
+			// Update and Read
+			{
+				Config: testAccDhcpoptionspaceOptionDefinitionsUpdate(optionSpace, optionDefName, optionDefName2),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckDhcpoptionspaceExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr("nios_dhcp_optiondefinition.test_option_definition2", "name", optionDefName2),
+					resource.TestCheckResourceAttr("nios_dhcp_optiondefinition.test_option_definition2", "code", "211"),
+					resource.TestCheckResourceAttr("nios_dhcp_optiondefinition.test_option_definition2", "space", optionSpace),
+				),
+			},
+		},
+	})
+}
+
 func testAccCheckDhcpoptionspaceExists(ctx context.Context, resourceName string, v *dhcp.Dhcpoptionspace) resource.TestCheckFunc {
 	// Verify the resource exists in the cloud
 	return func(state *terraform.State) error {
@@ -205,4 +237,41 @@ resource "nios_dhcp_optionspace" "test_name" {
     name = %q
 }
 `, name)
+}
+
+func testAccDhcpoptionspaceOptionDefinitions(optionSpace, optionDefName string) string {
+	return fmt.Sprintf(`
+resource "nios_dhcp_optionspace" "test_option_definitions" {
+	name = %q
+}
+
+resource "nios_dhcp_optiondefinition" "test_option_definition" {
+	code = "210"
+	name = %q
+	type = "string"
+	space = nios_dhcp_optionspace.test_option_definitions.name
+}
+`, optionSpace, optionDefName)
+}
+
+func testAccDhcpoptionspaceOptionDefinitionsUpdate(optionSpace, optionDefName, optionDefName2 string) string {
+	return fmt.Sprintf(`
+resource "nios_dhcp_optionspace" "test_option_definitions" {
+	name = %q
+}
+
+resource "nios_dhcp_optiondefinition" "test_option_definition" {
+	code = "210"
+	name = %q
+	type = "string"
+	space = nios_dhcp_optionspace.test_option_definitions.name
+}
+
+resource "nios_dhcp_optiondefinition" "test_option_definition2" {
+	code = "211"
+	name = %q
+	type = "string"
+	space = nios_dhcp_optionspace.test_option_definitions.name
+}
+`, optionSpace, optionDefName, optionDefName2)
 }

@@ -16,6 +16,10 @@ import (
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
+// TODO: Pending Tests
+// SPLIT MEMBER
+// SPLIT SCOPE
+
 // TODO: grid setup to run test cases
 // Cisco ISE settings
 // failover association:  "failover_association_1",  "failover_association"
@@ -2184,6 +2188,28 @@ func TestAccRangeResource_SubscribeSettings(t *testing.T) {
 	})
 }
 
+func TestAccRangeResource_Template(t *testing.T) {
+	resourceName := "nios_dhcp_range.test_template"
+	var v dhcp.Range
+	startAddr := "10.10.50.61"
+	endAddr := "10.10.50.70"
+	templateName := acctest.RandomNameWithPrefix("range-template")
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccRangeTemplate(startAddr, endAddr, templateName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckRangeExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "template", templateName),
+				),
+			},
+		},
+	})
+}
+
 func TestAccRangeResource_UnknownClients(t *testing.T) {
 	var resourceName = "nios_dhcp_range.test_unknown_clients"
 	var v dhcp.Range
@@ -4079,4 +4105,74 @@ resource "nios_dhcp_range" "test_use_update_dns_on_lease_renewal" {
     use_update_dns_on_lease_renewal = %t
 }
 `, startAddr, endAddr, useUpdateDnsOnLeaseRenewal)
+}
+
+func TestAccRangeResource_RestartIfNeeded(t *testing.T) {
+	resourceName := "nios_dhcp_range.test_restart_if_needed"
+	var v dhcp.Range
+	startAddr := "10.10.0.11"
+	endAddr := "10.10.0.12"
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// Create and Read
+			{
+				Config: testAccRangeRestartIfNeeded(startAddr, endAddr, true),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckRangeExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "restart_if_needed", "true"),
+				),
+			},
+			// Update and Read
+			{
+				Config: testAccRangeRestartIfNeeded(startAddr, endAddr, false),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckRangeExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "restart_if_needed", "false"),
+				),
+			},
+			// Delete testing automatically occurs in TestCase
+		},
+	})
+}
+
+func testAccRangeRestartIfNeeded(startAddr, endAddr string, restartIfNeeded bool) string {
+	return fmt.Sprintf(`
+resource "nios_ipam_network" "test_restart_if_needed" {
+	network = "10.10.0.0/24"
+	network_view = "default"
+}
+
+resource "nios_dhcp_range" "test_restart_if_needed" {
+	start_addr = %q
+	end_addr = %q
+	restart_if_needed = %t
+	depends_on = [nios_ipam_network.test_restart_if_needed]
+}
+`, startAddr, endAddr, restartIfNeeded)
+}
+
+func testAccRangeTemplate(startAddr, endAddr, templateName string) string {
+	return fmt.Sprintf(`
+resource "nios_dhcp_range_template" "test_template" {
+	name                = %q
+	number_of_addresses = 10
+	offset              = 1
+	cloud_api_compatible = true
+}
+
+resource "nios_ipam_network" "test_template" {
+	network = "10.10.50.0/24"
+	network_view = "default"
+}
+
+resource "nios_dhcp_range" "test_template" {
+	start_addr = %q
+	end_addr = %q
+	template = nios_dhcp_range_template.test_template.name
+	depends_on = [nios_ipam_network.test_template]
+}
+`, templateName, startAddr, endAddr)
 }

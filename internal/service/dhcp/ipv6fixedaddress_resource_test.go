@@ -18,12 +18,11 @@ import (
 
 var readableAttributesForIpv6fixedaddress = "address_type,allow_telnet,cli_credentials,cloud_info,comment,device_description,device_location,device_type,device_vendor,disable,disable_discovery,discover_now_status,discovered_data,domain_name,domain_name_servers,duid,extattrs,ipv6addr,ipv6prefix,ipv6prefix_bits,logic_filter_rules,mac_address,match_client,ms_ad_user_data,name,network,network_view,options,preferred_lifetime,reserved_interface,snmp3_credential,snmp_credential,use_cli_credentials,use_domain_name,use_domain_name_servers,use_logic_filter_rules,use_options,use_preferred_lifetime,use_snmp3_credential,use_snmp_credential,use_valid_lifetime,valid_lifetime"
 
+// TODO: Pending Tests
+// Reserved Interface
+
 // Objects to be present on GRID for tests
 // filteroption - ipv6_option_filter and ipv6_option_filter1
-
-// TODO: Add tests:
-// The following require additional resource/data source objects to be supported.
-// - Reserved Interface
 
 func TestAccIpv6fixedaddressResource_basic(t *testing.T) {
 	var resourceName = "nios_dhcp_ipv6fixedaddress.test"
@@ -643,6 +642,43 @@ func TestAccIpv6fixedaddressResource_Duid(t *testing.T) {
 	})
 }
 
+func TestAccIpv6fixedaddressResource_EnableImmediateDiscovery(t *testing.T) {
+	discoveryMember := utils.GetNIOSDiscoveryMemberHostName()
+	if discoveryMember == "" {
+		t.Skip("NIOS_DISCOVERY_MEMBER_HOSTNAME environment variable must be set")
+	}
+	resourceName := "nios_dhcp_ipv6fixedaddress.test_enable_immediate_discovery"
+	var v dhcp.Ipv6fixedaddress
+	ipv6Network := "2001:db8:abcd:12a4::/64"
+	ipv6addr := "2001:db8:abcd:12a4::10"
+	networkView := acctest.RandomNameWithPrefix("network-view")
+	duid := "00:01:00:01:1d:2b:3c:4d:00:0c:29:11:aa:04"
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// Create and Read
+			{
+				Config: testAccIpv6fixedaddressEnableImmediateDiscovery(ipv6addr, duid, networkView, ipv6Network, true),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckIpv6fixedaddressExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "enable_immediate_discovery", "true"),
+				),
+			},
+			// Update and Read
+			{
+				Config: testAccIpv6fixedaddressEnableImmediateDiscovery(ipv6addr, duid, networkView, ipv6Network, false),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckIpv6fixedaddressExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "enable_immediate_discovery", "false"),
+				),
+			},
+			// Delete testing automatically occurs in TestCase
+		},
+	})
+}
+
 func TestAccIpv6fixedaddressResource_ExtAttrs(t *testing.T) {
 	var resourceName = "nios_dhcp_ipv6fixedaddress.test_extattrs"
 	var v dhcp.Ipv6fixedaddress
@@ -991,6 +1027,29 @@ func TestAccIpv6fixedaddressResource_Network(t *testing.T) {
 	})
 }
 
+func TestAccIpv6fixedaddressResource_NetworkView(t *testing.T) {
+	resourceName := "nios_dhcp_ipv6fixedaddress.test_network_view"
+	var v dhcp.Ipv6fixedaddress
+	ipv6Network := "2001:db8:abcd:12a2::/64"
+	ipv6addr := "2001:db8:abcd:12a2::10"
+	networkView := acctest.RandomNameWithPrefix("network-view")
+	duid := "00:01:00:01:1d:2b:3c:4d:00:0c:29:11:aa:02"
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccIpv6fixedaddressNetworkView(ipv6addr, duid, networkView, ipv6Network),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckIpv6fixedaddressExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "network_view", networkView),
+				),
+			},
+		},
+	})
+}
+
 func TestAccIpv6fixedaddressResource_Options(t *testing.T) {
 	var resourceName = "nios_dhcp_ipv6fixedaddress.test_options"
 	var v dhcp.Ipv6fixedaddress
@@ -1134,6 +1193,39 @@ func TestAccIpv6fixedaddressResource_ReservedInterface(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6fixedaddressExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "reserved_interface", reservedInterface2),
+				),
+			},
+			// Delete testing automatically occurs in TestCase
+		},
+	})
+}
+
+func TestAccIpv6fixedaddressResource_RestartIfNeeded(t *testing.T) {
+	resourceName := "nios_dhcp_ipv6fixedaddress.test_restart_if_needed"
+	var v dhcp.Ipv6fixedaddress
+	ipv6Network := "2001:db8:abcd:12a3::/64"
+	ipv6addr := "2001:db8:abcd:12a3::10"
+	networkView := acctest.RandomNameWithPrefix("network-view")
+	duid := "00:01:00:01:1d:2b:3c:4d:00:0c:29:11:aa:03"
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// Create and Read
+			{
+				Config: testAccIpv6fixedaddressRestartIfNeeded(ipv6addr, duid, networkView, ipv6Network, true),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckIpv6fixedaddressExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "restart_if_needed", "true"),
+				),
+			},
+			// Update and Read
+			{
+				Config: testAccIpv6fixedaddressRestartIfNeeded(ipv6addr, duid, networkView, ipv6Network, false),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckIpv6fixedaddressExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "restart_if_needed", "false"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -1975,6 +2067,19 @@ resource "nios_dhcp_ipv6fixedaddress" "test_duid" {
 	return strings.Join([]string{testAccBaseNetworkWithView(networkView, ipv6Network), config}, "")
 }
 
+func testAccIpv6fixedaddressEnableImmediateDiscovery(ipv6addr, duid, networkView, ipv6Network string, enableImmediateDiscovery bool) string {
+	config := fmt.Sprintf(`
+resource "nios_dhcp_ipv6fixedaddress" "test_enable_immediate_discovery" {
+	ipv6addr = %q
+	duid = %q
+	enable_immediate_discovery = %t
+	network = nios_ipam_ipv6network.test_ipv6_network.network
+	network_view = nios_ipam_network_view.parent_network_view.name
+}
+`, ipv6addr, duid, enableImmediateDiscovery)
+	return strings.Join([]string{testAccBaseNetworkWithView(networkView, ipv6Network), config}, "")
+}
+
 func testAccIpv6fixedaddressExtAttrs(ipv6addr, duid, networkView, ipv6Network string, extAttrs map[string]any) string {
 	extAttrsStr := utils.ConvertMapToHCL(extAttrs)
 	config := fmt.Sprintf(`
@@ -2142,6 +2247,18 @@ resource "nios_dhcp_ipv6fixedaddress" "test_network" {
 	return strings.Join([]string{testAccBaseWithTwoIPv6Networks(networkView, ipv6Network1, ipv6Network2), config}, "")
 }
 
+func testAccIpv6fixedaddressNetworkView(ipv6addr, duid, networkView, ipv6Network string) string {
+	config := fmt.Sprintf(`
+resource "nios_dhcp_ipv6fixedaddress" "test_network_view" {
+	ipv6addr = %q
+	duid = %q
+	network = nios_ipam_ipv6network.test_ipv6_network.network
+	network_view = nios_ipam_network_view.parent_network_view.name
+}
+`, ipv6addr, duid)
+	return strings.Join([]string{testAccBaseNetworkWithView(networkView, ipv6Network), config}, "")
+}
+
 func testAccIpv6fixedaddressOptions(ipv6addr, duid, networkView, ipv6Network string, options []map[string]any) string {
 	optionsStr := convertSliceOfMapsToString(options)
 	config := fmt.Sprintf(`
@@ -2183,6 +2300,19 @@ resource "nios_dhcp_ipv6fixedaddress" "test_reserved_interface" {
     network_view = nios_ipam_network_view.parent_network_view.name
 }
 `, ipv6addr, duid, reservedInterface)
+	return strings.Join([]string{testAccBaseNetworkWithView(networkView, ipv6Network), config}, "")
+}
+
+func testAccIpv6fixedaddressRestartIfNeeded(ipv6addr, duid, networkView, ipv6Network string, restartIfNeeded bool) string {
+	config := fmt.Sprintf(`
+resource "nios_dhcp_ipv6fixedaddress" "test_restart_if_needed" {
+	ipv6addr = %q
+	duid = %q
+	restart_if_needed = %t
+	network = nios_ipam_ipv6network.test_ipv6_network.network
+	network_view = nios_ipam_network_view.parent_network_view.name
+}
+`, ipv6addr, duid, restartIfNeeded)
 	return strings.Join([]string{testAccBaseNetworkWithView(networkView, ipv6Network), config}, "")
 }
 
