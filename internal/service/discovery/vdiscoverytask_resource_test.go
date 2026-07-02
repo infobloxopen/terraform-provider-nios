@@ -1041,7 +1041,8 @@ func TestAccVdiscoverytaskResource_PrivateNetworkViewMappingPolicy(t *testing.T)
 					name, "AUTO_CREATE", "test_network_view", "aws_access_key", "aws_secret_key",
 					memberName, true, true, true, "AWS", "AUTO_CREATE", true, false, "us-east-1",
 				),
-				ExpectError: regexp.MustCompile(`'private_network_view' must not be set`)},
+				ExpectError: regexp.MustCompile(`'private_network_view' must not be set`),
+			},
 			// Negative: DIRECT requires private_network_view
 			{
 				Config: testAccVdiscoverytaskPrivateNetworkViewMappingPolicyAutoCreate(
