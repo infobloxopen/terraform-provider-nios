@@ -161,6 +161,7 @@ func TestAccIpv6dhcpoptionspaceResource_OptionDefinitions(t *testing.T) {
 	var v dhcp.Ipv6dhcpoptionspace
 	optionSpace := acctest.RandomNameWithPrefix("option-space")
 	optionDefName := acctest.RandomNameWithPrefix("ipv6-option-definition")
+	optionDefName2 := acctest.RandomNameWithPrefix("ipv6-option-definition")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -175,11 +176,12 @@ func TestAccIpv6dhcpoptionspaceResource_OptionDefinitions(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccIpv6dhcpoptionspaceOptionDefinitions(optionSpace, optionDefName),
+				Config: testAccIpv6dhcpoptionspaceOptionDefinitionsUpdate(optionSpace, optionDefName, optionDefName2),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6dhcpoptionspaceExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "option_definitions.#", "1"),
-					resource.TestCheckResourceAttrPair(resourceName, "option_definitions.0", "nios_dhcp_ipv6optiondefinition.test_option_definition", "name"),
+					resource.TestCheckResourceAttr("nios_dhcp_ipv6optiondefinition.test_option_definition2", "name", optionDefName2),
+					resource.TestCheckResourceAttr("nios_dhcp_ipv6optiondefinition.test_option_definition2", "code", "212"),
+					resource.TestCheckResourceAttr("nios_dhcp_ipv6optiondefinition.test_option_definition2", "space", optionSpace),
 				),
 			},
 		},
@@ -295,4 +297,27 @@ resource "nios_dhcp_ipv6optiondefinition" "test_option_definition" {
 	space = nios_dhcp_ipv6optionspace.test_option_definitions.name
 }
 `, optionSpace, optionDefName)
+}
+
+func testAccIpv6dhcpoptionspaceOptionDefinitionsUpdate(optionSpace, optionDefName, optionDefName2 string) string {
+	return fmt.Sprintf(`
+resource "nios_dhcp_ipv6optionspace" "test_option_definitions" {
+	enterprise_number = "5896"
+	name = %q
+}
+
+resource "nios_dhcp_ipv6optiondefinition" "test_option_definition" {
+	code = "211"
+	name = %q
+	type = "string"
+	space = nios_dhcp_ipv6optionspace.test_option_definitions.name
+}
+
+resource "nios_dhcp_ipv6optiondefinition" "test_option_definition2" {
+	code = "212"
+	name = %q
+	type = "string"
+	space = nios_dhcp_ipv6optionspace.test_option_definitions.name
+}
+`, optionSpace, optionDefName, optionDefName2)
 }

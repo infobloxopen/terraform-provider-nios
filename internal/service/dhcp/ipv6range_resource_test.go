@@ -397,8 +397,8 @@ func TestAccIpv6rangeResource_DiscoveryBlackoutSetting(t *testing.T) {
 
 func TestAccIpv6rangeResource_DiscoveryMember(t *testing.T) {
 	discoveryMember := utils.GetNIOSDiscoveryMemberHostName()
-	if discoveryMember == "" {
-		t.Skip("NIOS_DISCOVERY_MEMBER_HOSTNAME environment variable must be set")
+	if discoveryMember == "" || utils.GetNIOSDiscoveryMemberConfigAddrType() != "BOTH" {
+		t.Skip("Skipping test: NIOS_DISCOVERY_MEMBER_HOSTNAME must be set and Member should have IPv6 enabled")
 	}
 	var resourceName = "nios_dhcp_ipv6range.test_discovery_member"
 	var v dhcp.Ipv6range
@@ -495,8 +495,8 @@ func TestAccIpv6rangeResource_EndAddr(t *testing.T) {
 
 func TestAccIpv6rangeResource_EnableImmediateDiscovery(t *testing.T) {
 	discoveryMember := utils.GetNIOSDiscoveryMemberHostName()
-	if discoveryMember == "" {
-		t.Skip("NIOS_DISCOVERY_MEMBER_HOSTNAME environment variable must be set")
+	if discoveryMember == "" || utils.GetNIOSDiscoveryMemberConfigAddrType() != "BOTH" {
+		t.Skip("Skipping test: NIOS_DISCOVERY_MEMBER_HOSTNAME must be set and Member should have IPv6 enabled")
 	}
 	resourceName := "nios_dhcp_ipv6range.test_enable_immediate_discovery"
 	var v dhcp.Ipv6range

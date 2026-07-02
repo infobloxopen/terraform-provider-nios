@@ -129,6 +129,7 @@ func TestAccDhcpoptionspaceResource_OptionDefinitions(t *testing.T) {
 	var v dhcp.Dhcpoptionspace
 	optionSpace := acctest.RandomNameWithPrefix("dhcp-option-space")
 	optionDefName := acctest.RandomNameWithPrefix("dhcp-option-definition")
+	optionDefName2 := acctest.RandomNameWithPrefix("dhcp-option-definition")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -143,11 +144,12 @@ func TestAccDhcpoptionspaceResource_OptionDefinitions(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccDhcpoptionspaceOptionDefinitions(optionSpace, optionDefName),
+				Config: testAccDhcpoptionspaceOptionDefinitionsUpdate(optionSpace, optionDefName, optionDefName2),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDhcpoptionspaceExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "option_definitions.#", "1"),
-					resource.TestCheckResourceAttrPair(resourceName, "option_definitions.0", "nios_dhcp_optiondefinition.test_option_definition", "name"),
+					resource.TestCheckResourceAttr("nios_dhcp_optiondefinition.test_option_definition2", "name", optionDefName2),
+					resource.TestCheckResourceAttr("nios_dhcp_optiondefinition.test_option_definition2", "code", "211"),
+					resource.TestCheckResourceAttr("nios_dhcp_optiondefinition.test_option_definition2", "space", optionSpace),
 				),
 			},
 		},
@@ -250,4 +252,26 @@ resource "nios_dhcp_optiondefinition" "test_option_definition" {
 	space = nios_dhcp_optionspace.test_option_definitions.name
 }
 `, optionSpace, optionDefName)
+}
+
+func testAccDhcpoptionspaceOptionDefinitionsUpdate(optionSpace, optionDefName, optionDefName2 string) string {
+	return fmt.Sprintf(`
+resource "nios_dhcp_optionspace" "test_option_definitions" {
+	name = %q
+}
+
+resource "nios_dhcp_optiondefinition" "test_option_definition" {
+	code = "210"
+	name = %q
+	type = "string"
+	space = nios_dhcp_optionspace.test_option_definitions.name
+}
+
+resource "nios_dhcp_optiondefinition" "test_option_definition2" {
+	code = "211"
+	name = %q
+	type = "string"
+	space = nios_dhcp_optionspace.test_option_definitions.name
+}
+`, optionSpace, optionDefName, optionDefName2)
 }
