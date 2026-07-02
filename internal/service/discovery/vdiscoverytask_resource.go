@@ -132,6 +132,114 @@ func (r *VdiscoverytaskResource) ValidateConfig(ctx context.Context, req resourc
 		}
 	}
 
+	// Validate DIRECT policy requires explicit network view
+	if !data.PrivateNetworkViewMappingPolicy.IsNull() && !data.PrivateNetworkViewMappingPolicy.IsUnknown() &&
+		data.PrivateNetworkViewMappingPolicy.ValueString() == "DIRECT" {
+		if data.PrivateNetworkView.IsNull() || data.PrivateNetworkView.IsUnknown() || data.PrivateNetworkView.ValueString() == "" {
+			resp.Diagnostics.AddAttributeError(
+				path.Root("private_network_view"),
+				"Missing Private Network View",
+				"'private_network_view' is required when 'private_network_view_mapping_policy' is 'DIRECT'.",
+			)
+		}
+	}
+
+	if !data.PublicNetworkViewMappingPolicy.IsNull() && !data.PublicNetworkViewMappingPolicy.IsUnknown() &&
+		data.PublicNetworkViewMappingPolicy.ValueString() == "DIRECT" {
+		if data.PublicNetworkView.IsNull() || data.PublicNetworkView.IsUnknown() || data.PublicNetworkView.ValueString() == "" {
+			resp.Diagnostics.AddAttributeError(
+				path.Root("public_network_view"),
+				"Missing Public Network View",
+				"'public_network_view' is required when 'public_network_view_mapping_policy' is 'DIRECT'.",
+			)
+		}
+	}
+
+	// Validate AUTO_CREATE policy must not have explicit private network view
+	if !data.PrivateNetworkViewMappingPolicy.IsNull() && !data.PrivateNetworkViewMappingPolicy.IsUnknown() &&
+		data.PrivateNetworkViewMappingPolicy.ValueString() == "AUTO_CREATE" {
+		if !data.PrivateNetworkView.IsNull() && !data.PrivateNetworkView.IsUnknown() && data.PrivateNetworkView.ValueString() != "" {
+			resp.Diagnostics.AddAttributeError(
+				path.Root("private_network_view"),
+				"Invalid Private Network View Configuration",
+				"'private_network_view' must not be set when 'private_network_view_mapping_policy' is 'AUTO_CREATE'.",
+			)
+		}
+	}
+
+	// Validate AUTO_CREATE policy must not have explicit public network view
+	if !data.PublicNetworkViewMappingPolicy.IsNull() && !data.PublicNetworkViewMappingPolicy.IsUnknown() &&
+		data.PublicNetworkViewMappingPolicy.ValueString() == "AUTO_CREATE" {
+		if !data.PublicNetworkView.IsNull() && !data.PublicNetworkView.IsUnknown() && data.PublicNetworkView.ValueString() != "" {
+			resp.Diagnostics.AddAttributeError(
+				path.Root("public_network_view"),
+				"Invalid Public Network View Configuration",
+				"'public_network_view' must not be set when 'public_network_view_mapping_policy' is 'AUTO_CREATE'.",
+			)
+		}
+	}
+
+	// Validate AUTO_CREATE policy cannot be used with private DNS view updates
+	privatePolicyAutoCreate := !data.PrivateNetworkViewMappingPolicy.IsNull() &&
+		!data.PrivateNetworkViewMappingPolicy.IsUnknown() &&
+		data.PrivateNetworkViewMappingPolicy.ValueString() == "AUTO_CREATE"
+
+	updatePrivateTrue := !data.UpdateDnsViewPrivateIp.IsNull() &&
+		!data.UpdateDnsViewPrivateIp.IsUnknown() &&
+		data.UpdateDnsViewPrivateIp.ValueBool()
+
+	if privatePolicyAutoCreate && updatePrivateTrue {
+		resp.Diagnostics.AddAttributeError(
+			path.Root("update_dns_view_private_ip"),
+			"Invalid DNS View Configuration",
+			"'update_dns_view_private_ip' cannot be true when 'private_network_view_mapping_policy' is 'AUTO_CREATE'.",
+		)
+	} else if updatePrivateTrue {
+		if data.DnsViewPrivateIp.IsNull() || data.DnsViewPrivateIp.IsUnknown() || data.DnsViewPrivateIp.ValueString() == "" {
+			resp.Diagnostics.AddAttributeError(
+				path.Root("dns_view_private_ip"),
+				"Missing DNS View",
+				"'dns_view_private_ip' is required when 'update_dns_view_private_ip' is true.",
+			)
+		}
+	}
+
+	// Validate AUTO_CREATE policy cannot be used with public DNS view updates
+	publicPolicyAutoCreate := !data.PublicNetworkViewMappingPolicy.IsNull() &&
+		!data.PublicNetworkViewMappingPolicy.IsUnknown() &&
+		data.PublicNetworkViewMappingPolicy.ValueString() == "AUTO_CREATE"
+
+	updatePublicTrue := !data.UpdateDnsViewPublicIp.IsNull() &&
+		!data.UpdateDnsViewPublicIp.IsUnknown() &&
+		data.UpdateDnsViewPublicIp.ValueBool()
+
+	if publicPolicyAutoCreate && updatePublicTrue {
+		resp.Diagnostics.AddAttributeError(
+			path.Root("update_dns_view_public_ip"),
+			"Invalid DNS View Configuration",
+			"'update_dns_view_public_ip' cannot be true when 'public_network_view_mapping_policy' is 'AUTO_CREATE'.",
+		)
+	} else if updatePublicTrue {
+		if data.DnsViewPublicIp.IsNull() || data.DnsViewPublicIp.IsUnknown() || data.DnsViewPublicIp.ValueString() == "" {
+			resp.Diagnostics.AddAttributeError(
+				path.Root("dns_view_public_ip"),
+				"Missing DNS View",
+				"'dns_view_public_ip' is required when 'update_dns_view_public_ip' is true.",
+			)
+		}
+	}
+
+	// Validate fqdn_or_ip requirement for Azure/VMware/OpenStack
+	if driverType == "VMWARE" || driverType == "OPENSTACK" || driverType == "AZURE" {
+		if data.FqdnOrIp.IsNull() || data.FqdnOrIp.IsUnknown() || data.FqdnOrIp.ValueString() == "" {
+			resp.Diagnostics.AddAttributeError(
+				path.Root("fqdn_or_ip"),
+				"Missing Required Attribute",
+				fmt.Sprintf("'fqdn_or_ip' is required when 'driver_type' is '%s'.", driverType),
+			)
+		}
+	}
+
 	// Validate domain_name requirement for OPENSTACK with KEYSTONE_V3
 	if driverType == "OPENSTACK" {
 		if !data.IdentityVersion.IsNull() && !data.IdentityVersion.IsUnknown() {
@@ -180,6 +288,15 @@ func (r *VdiscoverytaskResource) ValidateConfig(ctx context.Context, req resourc
 					"'username' is required when 'credentials_type' is set to 'DIRECT'.",
 				)
 			}
+		}
+
+		if data.CredentialsType.ValueString() == "INDIRECT" &&
+			(driverType == "VMWARE" || driverType == "AZURE" || driverType == "OPENSTACK") {
+			resp.Diagnostics.AddAttributeError(
+				path.Root("credentials_type"),
+				"Invalid Credentials Type Configuration",
+				fmt.Sprintf("'credentials_type' cannot be 'INDIRECT' when 'driver_type' is '%s'.", driverType),
+			)
 		}
 	}
 
