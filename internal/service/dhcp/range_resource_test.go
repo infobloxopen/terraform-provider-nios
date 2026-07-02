@@ -15,9 +15,9 @@ import (
 	"github.com/infobloxopen/terraform-provider-nios/internal/acctest"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
-
-//TODO : SPLIT MEMBER TEST CASES
-//TODO : SPLIT SCOPE TEST CASES
+// TODO: Pending Tests
+// SPLIT MEMBER
+// SPLIT SCOPE
 
 // TODO: grid setup to run test cases
 // Cisco ISE settings
