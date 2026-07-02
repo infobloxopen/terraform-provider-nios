@@ -68,6 +68,7 @@
 
 - `nios_grid_member` : Manage grid members and retrieve existing grid members. ([#425](https://github.com/infobloxopen/terraform-provider-nios/pull/425))
 - `nios_grid_upgradeschedule` : Manage grid upgrade schedules and retrieve current upgrade schedule. ([#391](https://github.com/infobloxopen/terraform-provider-nios/pull/391))
+- `nios_grid_join` : Join a member to an Infoblox Grid. ([#434](https://github.com/infobloxopen/terraform-provider-nios/pull/434))
 
 #### IPAM
 
