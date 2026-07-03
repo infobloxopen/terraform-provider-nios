@@ -152,7 +152,7 @@ func (m *SharedrecordgroupModel) Flatten(ctx context.Context, from *dns.Sharedre
 	m.Comment = flex.FlattenStringPointer(from.Comment)
 	m.ExtAttrs = FlattenExtAttrs(ctx, m.ExtAttrs, from.ExtAttrs, diags)
 	m.Name = flex.FlattenStringPointer(from.Name)
-	m.RecordNamePolicy = flex.FlattenStringPointer(from.RecordNamePolicy)
+	m.RecordNamePolicy = flex.FlattenStringPointerNilAsNotEmpty(from.RecordNamePolicy)
 	m.UseRecordNamePolicy = types.BoolPointerValue(from.UseRecordNamePolicy)
 	planZoneAssociations := m.ZoneAssociations
 	m.ZoneAssociations = flex.FlattenFrameworkListNestedBlock(ctx, from.ZoneAssociations, SharedrecordgroupZoneAssociationsAttrTypes, diags, FlattenSharedrecordgroupZoneAssociations)
