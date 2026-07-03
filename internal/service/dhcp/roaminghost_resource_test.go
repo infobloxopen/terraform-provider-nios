@@ -973,6 +973,7 @@ func TestAccRoaminghostResource_Ipv6Template(t *testing.T) {
 	name := acctest.RandomNameWithPrefix("roaminghost")
 	ipv6TemplateName := acctest.RandomNameWithPrefix("ipv6-fa-template")
 
+	// Ipv6Template is an immutable field, hence no update step is added.
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
@@ -1259,6 +1260,7 @@ func TestAccRoaminghostResource_Template(t *testing.T) {
 	mac := acctest.RandomMACAddress()
 	templateName := acctest.RandomNameWithPrefix("fa-template")
 
+	// Template is an immutable field, hence no update step is added.
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,

@@ -140,6 +140,10 @@ func TestAccDhcpoptionspaceResource_OptionDefinitions(t *testing.T) {
 				Config: testAccDhcpoptionspaceOptionDefinitions(optionSpace, optionDefName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDhcpoptionspaceExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr("nios_dhcp_optiondefinition.test_option_definition", "name", optionDefName),
+					resource.TestCheckResourceAttr("nios_dhcp_optiondefinition.test_option_definition", "code", "210"),
+					resource.TestCheckResourceAttr("nios_dhcp_optiondefinition.test_option_definition", "type", "string"),
+					resource.TestCheckResourceAttr("nios_dhcp_optiondefinition.test_option_definition", "space", optionSpace),
 				),
 			},
 			// Update and Read

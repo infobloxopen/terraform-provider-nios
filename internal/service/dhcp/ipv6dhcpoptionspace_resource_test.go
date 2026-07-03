@@ -172,6 +172,10 @@ func TestAccIpv6dhcpoptionspaceResource_OptionDefinitions(t *testing.T) {
 				Config: testAccIpv6dhcpoptionspaceOptionDefinitions(optionSpace, optionDefName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6dhcpoptionspaceExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr("nios_dhcp_ipv6optiondefinition.test_option_definition", "name", optionDefName),
+					resource.TestCheckResourceAttr("nios_dhcp_ipv6optiondefinition.test_option_definition", "code", "211"),
+					resource.TestCheckResourceAttr("nios_dhcp_ipv6optiondefinition.test_option_definition", "type", "string"),
+					resource.TestCheckResourceAttr("nios_dhcp_ipv6optiondefinition.test_option_definition", "space", optionSpace),
 				),
 			},
 			// Update and Read

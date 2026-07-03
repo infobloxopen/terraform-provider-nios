@@ -2195,6 +2195,7 @@ func TestAccRangeResource_Template(t *testing.T) {
 	endAddr := "10.10.50.70"
 	templateName := acctest.RandomNameWithPrefix("range-template")
 
+	// Template is an immutable field, hence no update step is added.
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,

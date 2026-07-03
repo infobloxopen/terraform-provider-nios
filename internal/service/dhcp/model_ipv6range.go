@@ -397,7 +397,7 @@ var Ipv6rangeResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 }
 
-func (m *Ipv6rangeModel) Expand(ctx context.Context, diags *diag.Diagnostics) *dhcp.Ipv6range {
+func (m *Ipv6rangeModel) Expand(ctx context.Context, diags *diag.Diagnostics, isCreate bool) *dhcp.Ipv6range {
 	if m == nil {
 		return nil
 	}
@@ -429,7 +429,6 @@ func (m *Ipv6rangeModel) Expand(ctx context.Context, diags *diag.Diagnostics) *d
 		ServerAssociationType:            flex.ExpandStringPointer(m.ServerAssociationType),
 		StartAddr:                        flex.ExpandIPv6Address(m.StartAddr),
 		SubscribeSettings:                ExpandIpv6rangeSubscribeSettings(ctx, m.SubscribeSettings, diags),
-		Template:                         flex.ExpandStringPointer(m.Template),
 		UseBlackoutSetting:               flex.ExpandBoolPointer(m.UseBlackoutSetting),
 		UseDiscoveryBasicPollingSettings: flex.ExpandBoolPointer(m.UseDiscoveryBasicPollingSettings),
 		UseEnableDiscovery:               flex.ExpandBoolPointer(m.UseEnableDiscovery),
@@ -437,6 +436,9 @@ func (m *Ipv6rangeModel) Expand(ctx context.Context, diags *diag.Diagnostics) *d
 		UseRecycleLeases:                 flex.ExpandBoolPointer(m.UseRecycleLeases),
 		UseSubscribeSettings:             flex.ExpandBoolPointer(m.UseSubscribeSettings),
 		NetworkView:                      flex.ExpandStringPointer(m.NetworkView),
+	}
+	if isCreate {
+		to.Template = flex.ExpandStringPointer(m.Template)
 	}
 	return to
 }
