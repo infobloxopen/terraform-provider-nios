@@ -158,8 +158,8 @@ resource "nios_dhcp_ipv6fixedaddress" "create_ipv6_fixed_address_with_func_call"
 - `extattrs_all` (Map of String) Extensible attributes associated with the object, including default attributes.
 - `ms_ad_user_data` (Attributes) The Microsoft Active Directory user related information. (see [below for nested schema](#nestedatt--ms_ad_user_data))
 - `ref` (String) The reference to the object.
-- `uuid` (String) Universally Unique ID assigned for this object.
 - `secrets_version` (Number) Internal version incremented when secrets (snmp3_credential and cli_credentials) change.
+- `uuid` (String) Universally Unique ID assigned for this object.
 
 <a id="nestedatt--cli_credentials"></a>
 ### Nested Schema for `cli_credentials`
