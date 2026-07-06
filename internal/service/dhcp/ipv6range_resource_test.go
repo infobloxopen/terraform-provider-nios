@@ -1072,7 +1072,7 @@ func TestAccIpv6rangeResource_SamePortControlDiscoveryBlackout(t *testing.T) {
 func TestAccIpv6rangeResource_ServerAssociationType(t *testing.T) {
 	var resourceName = "nios_dhcp_ipv6range.test_server_association_type"
 	var v dhcp.Ipv6range
-	view := "default"
+	view := acctest.RandomNameWithPrefix("network-view")
 	memberUpdatedName := utils.GetNIOSGridMemberHostName()
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -1133,6 +1133,7 @@ func TestAccIpv6rangeResource_StartAddr(t *testing.T) {
 func TestAccIpv6rangeResource_SubscribeSettings(t *testing.T) {
 	var resourceName = "nios_dhcp_ipv6range.test_subscribe_settings"
 	var v dhcp.Ipv6range
+	view := acctest.RandomNameWithPrefix("network-view")
 	subscribeSettings := map[string]any{
 		"enabled_attributes": []string{"DOMAINNAME", "ENDPOINT_PROFILE"},
 	}
@@ -1146,7 +1147,7 @@ func TestAccIpv6rangeResource_SubscribeSettings(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccIpv6rangeSubscribeSettings("test_network_view", "219::1", "219::10", subscribeSettings, "true"),
+				Config: testAccIpv6rangeSubscribeSettings(view, "219::1", "219::10", subscribeSettings, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6rangeExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "subscribe_settings.enabled_attributes.0", "DOMAINNAME"),
@@ -1155,7 +1156,7 @@ func TestAccIpv6rangeResource_SubscribeSettings(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccIpv6rangeSubscribeSettings("test_network_view", "219::1", "219::10", subscribeSettingsUpdated, "true"),
+				Config: testAccIpv6rangeSubscribeSettings(view, "219::1", "219::10", subscribeSettingsUpdated, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6rangeExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "subscribe_settings.enabled_attributes.0", "SECURITY_GROUP"),
