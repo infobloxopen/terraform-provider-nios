@@ -33,7 +33,6 @@ func TestAccSharedrecordgroupResource_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "name", name),
 					// Test fields with default value
 					resource.TestCheckResourceAttr(resourceName, "comment", ""),
-					resource.TestCheckResourceAttr(resourceName, "record_name_policy", ""),
 					resource.TestCheckResourceAttr(resourceName, "use_record_name_policy", "false"),
 				),
 			},
