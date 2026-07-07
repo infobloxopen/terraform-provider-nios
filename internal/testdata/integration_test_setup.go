@@ -112,6 +112,7 @@ func ResolveAndStoreGridHostnames(gridClient *grid.APIClient) (GridHostnames, er
 
 	resolved := GridHostnames{}
 	gridMasterConfigAddrType := ""
+	discoveryMemberConfigAddrType := ""
 
 	for _, m := range memberResp {
 		if m.VipSetting == nil || m.VipSetting.Address == nil || m.HostName == nil {
@@ -134,6 +135,9 @@ func ResolveAndStoreGridHostnames(gridClient *grid.APIClient) (GridHostnames, er
 
 		if discoveryMemberAddr != "" && vipAddr == discoveryMemberAddr && resolved.DiscoveryMemberHostname == "" {
 			resolved.DiscoveryMemberHostname = hostName
+			if m.ConfigAddrType != nil {
+				discoveryMemberConfigAddrType = *m.ConfigAddrType
+			}
 		}
 	}
 
@@ -164,6 +168,13 @@ func ResolveAndStoreGridHostnames(gridClient *grid.APIClient) (GridHostnames, er
 			return GridHostnames{}, fmt.Errorf("resolve hostnames: failed to write NIOS_GRID_MASTER_CONFIG_ADDR_TYPE: %w", err)
 		}
 		fmt.Printf("Grid master config address type is %q\n", gridMasterConfigAddrType)
+	}
+
+	if discoveryMemberConfigAddrType != "" {
+		if err := writePipelineEnvVar("NIOS_DISCOVERY_MEMBER_CONFIG_ADDR_TYPE", discoveryMemberConfigAddrType); err != nil {
+			return GridHostnames{}, fmt.Errorf("resolve hostnames: failed to write NIOS_DISCOVERY_MEMBER_CONFIG_ADDR_TYPE: %w", err)
+		}
+		fmt.Printf("Discovery member config address type is %q\n", discoveryMemberConfigAddrType)
 	}
 
 	if masterAddr != "" && resolved.MasterHostname == "" {

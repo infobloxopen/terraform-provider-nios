@@ -23,10 +23,7 @@ var readableAttributesForIpv6fixedaddress = "address_type,allow_telnet,cli_crede
 
 // TODO: Add tests:
 // The following require additional resource/data source objects to be supported.
-// - Logic Filter Rules
 // - Reserved Interface
-// - IPV6 Fixed Address Template
-// - SNMP credentials
 
 func TestAccIpv6fixedaddressResource_basic(t *testing.T) {
 	var resourceName = "nios_dhcp_ipv6fixedaddress.test"
@@ -1083,6 +1080,32 @@ func TestAccIpv6fixedaddressResource_PreferredLifetime(t *testing.T) {
 	})
 }
 
+func TestAccIpv6fixedaddressResource_Template(t *testing.T) {
+	var resourceName = "nios_dhcp_ipv6fixedaddress.test_template"
+	var v dhcp.Ipv6fixedaddress
+	ipv6Network := "2001:db8:abcd:1231::/64"
+	ipv6addr := "2001:db8:abcd:1231::1"
+	networkView := acctest.RandomNameWithPrefix("network-view")
+	duid := "00:01:00:01:1d:2b:3c:4d:00:0c:29:ab:cd:ef"
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// Create and Read
+			{
+				Config: testAccIpv6fixedaddressTemplate(ipv6addr, duid, networkView, ipv6Network),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckIpv6fixedaddressExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttrPair(resourceName, "template", "nios_dhcp_ipv6fixedaddresstemplate.test", "name"),
+				),
+			},
+			// Template is immutable - cannot be updated
+			// Delete testing automatically occurs in TestCase
+		},
+	})
+}
+
 func TestAccIpv6fixedaddressResource_ReservedInterface(t *testing.T) {
 	t.Skip("Skipping test as reserved_interface is not implemented yet")
 	var resourceName = "nios_dhcp_ipv6fixedaddress.test_reserved_interface"
@@ -2040,6 +2063,24 @@ resource "nios_dhcp_ipv6fixedaddress" "test_logic_filter_rules" {
     network_view = nios_ipam_network_view.parent_network_view.name
 }
 `, ipv6addr, duid, logicFilterRulesStr)
+	return strings.Join([]string{testAccBaseNetworkWithView(networkView, ipv6Network), config}, "")
+}
+
+func testAccIpv6fixedaddressTemplate(ipv6addr, duid, networkView, ipv6Network string) string {
+	templateName := acctest.RandomNameWithPrefix("ipv6fa-template-")
+	config := fmt.Sprintf(`
+resource "nios_dhcp_ipv6fixedaddresstemplate" "test" {
+    name = %q
+}
+
+resource "nios_dhcp_ipv6fixedaddress" "test_template" {
+    ipv6addr = %q
+    duid = %q
+    template = nios_dhcp_ipv6fixedaddresstemplate.test.name
+    network = nios_ipam_ipv6network.test_ipv6_network.network
+    network_view = nios_ipam_network_view.parent_network_view.name
+}
+`, templateName, ipv6addr, duid)
 	return strings.Join([]string{testAccBaseNetworkWithView(networkView, ipv6Network), config}, "")
 }
 
