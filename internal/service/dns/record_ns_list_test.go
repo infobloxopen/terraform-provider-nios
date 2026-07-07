@@ -116,6 +116,63 @@ func TestAccRecordNsList_Filters(t *testing.T) {
 	})
 }
 
+func TestAccRecordNsList_CreatorFilter(t *testing.T) {
+	var resourceName = "nios_dns_record_ns.test"
+	var v dns.RecordNs
+	name := "example.com"
+	nameserver := acctest.RandomNameWithPrefix("nameserver") + ".example.com"
+	addresses := []map[string]any{
+		{
+			"address":         "20.0.0.0",
+			"auto_create_ptr": false,
+		},
+	}
+	addressesHCL := FormatZoneNameServersToHCL(addresses)
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: func() { acctest.PreCheck(t) },
+		TerraformVersionChecks: []tfversion.TerraformVersionCheck{
+			tfversion.SkipBelow(tfversion.Version1_14_0),
+		},
+		Steps: []resource.TestStep{
+			// Create and Read a STATIC (Terraform-managed) NS record
+			{
+				ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+				Config:                   testAccRecordNsBasicConfig(name, nameserver, addressesHCL, "default"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckRecordNsExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "name", name),
+				),
+			},
+			// Query with explicit creator=STATIC — the record we created must be found.
+			{
+				ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+				Query:                    true,
+				Config:                   testAccRecordNsListConfigCreatorFilter(name, nameserver, "STATIC"),
+				QueryResultChecks: []querycheck.QueryResultCheck{
+					querycheck.ExpectLengthAtLeast("nios_dns_record_ns.test", 1),
+					querycheck.ExpectResourceKnownValues(
+						resourceName,
+						queryfilter.ByResourceIdentity(map[string]knownvalue.Check{
+							"ref": knownvalue.StringRegexp(regexp.MustCompile("record:ns/")),
+						}),
+						[]querycheck.KnownValueCheck{
+							{
+								Path:       tfjsonpath.New("name"),
+								KnownValue: knownvalue.StringExact(name),
+							},
+							{
+								Path:       tfjsonpath.New("nameserver"),
+								KnownValue: knownvalue.StringExact(nameserver),
+							},
+						},
+					),
+				},
+			},
+		},
+	})
+}
+
 func testAccRecordNsListBasicConfig() string {
 	return `
 list "nios_dns_record_ns" "test" {
@@ -123,6 +180,22 @@ list "nios_dns_record_ns" "test" {
 	limit = 5
 }
 `
+}
+
+func testAccRecordNsListConfigCreatorFilter(name, nameserver, creator string) string {
+	return fmt.Sprintf(`
+list "nios_dns_record_ns" "test" {
+	provider         = nios
+	include_resource = true
+	config {
+		filters = {
+			name       = %q
+			nameserver = %q
+			creator    = %q
+		}
+	}
+}
+`, name, nameserver, creator)
 }
 
 func testAccRecordNsListConfigFilters(name, nameserver string) string {
