@@ -558,6 +558,7 @@ func TestAccZoneForwardResource_Fqdn(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "fqdn", fqdn),
 				),
 			},
+			// Update is not applicable as fqdn is an immutable field.
 			// Delete testing automatically occurs in TestCase
 		},
 	})
@@ -581,6 +582,7 @@ func TestAccZoneForwardResource_View(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "view", "default"),
 				),
 			},
+			// Update is not applicable as view is an immutable field.
 			// Delete testing automatically occurs in TestCase
 		},
 	})
@@ -604,6 +606,7 @@ func TestAccZoneForwardResource_ZoneFormat(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "zone_format", "FORWARD"),
 				),
 			},
+			// Update is not applicable as zone_format is an immutable field.
 			// Delete testing automatically occurs in TestCase
 		},
 	})

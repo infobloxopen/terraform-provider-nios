@@ -246,6 +246,7 @@ func TestAccRulesetResource_Type(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "type", "BLACKLIST"),
 				),
 			},
+			// Update is not applicable as type is an immutable field.
 			// Delete testing automatically occurs in TestCase
 		},
 	})

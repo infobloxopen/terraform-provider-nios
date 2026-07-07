@@ -313,6 +313,7 @@ func TestAccSharedrecordCnameResource_SharedRecordGroup(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "shared_record_group", sharedRecordGroup),
 				),
 			},
+			// Update is not applicable as shared_record_group is an immutable field.
 			// Delete testing automatically occurs in TestCase
 		},
 	})

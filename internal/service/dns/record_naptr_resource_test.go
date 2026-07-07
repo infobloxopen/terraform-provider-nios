@@ -625,6 +625,7 @@ func TestAccRecordNaptrResource_View(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "view", viewName),
 				),
 			},
+			// Update is not applicable as view is an immutable field.
 			// Delete testing automatically occurs in TestCase
 		},
 	})

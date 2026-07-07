@@ -3069,6 +3069,7 @@ func TestAccZoneAuthResource_CreatePtrForBulkHosts(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "create_ptr_for_bulk_hosts", "false"),
 				),
 			},
+			// Update is not applicable as create_ptr_for_bulk_hosts is an immutable field.
 			// Delete testing automatically occurs in TestCase
 		},
 	})
@@ -3091,6 +3092,7 @@ func TestAccZoneAuthResource_CreatePtrForHosts(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "create_ptr_for_hosts", "false"),
 				),
 			},
+			// Update is not applicable as create_ptr_for_hosts is an immutable field.
 			// Delete testing automatically occurs in TestCase
 		},
 	})
@@ -3113,6 +3115,7 @@ func TestAccZoneAuthResource_DnssecKeys(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "dnssec_keys.#", "0"),
 				),
 			},
+			// Update is not applicable as dnssec_keys is an immutable field.
 			// Delete testing automatically occurs in TestCase
 		},
 	})
@@ -3135,6 +3138,7 @@ func TestAccZoneAuthResource_DoHostAbstraction(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "do_host_abstraction", "false"),
 				),
 			},
+			// Update is not applicable as do_host_abstraction is an immutable field.
 			// Delete testing automatically occurs in TestCase
 		},
 	})
@@ -3157,6 +3161,7 @@ func TestAccZoneAuthResource_ImportFrom(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "use_import_from", "false"),
 				),
 			},
+			// Update is not applicable as import_from is an immutable field.
 			// Delete testing automatically occurs in TestCase
 		},
 	})
@@ -3246,6 +3251,7 @@ func TestAccZoneAuthResource_UseImportFrom(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "use_import_from", "false"),
 				),
 			},
+			// Update is not applicable as use_import_from is an immutable field.
 			// Delete testing automatically occurs in TestCase
 		},
 	})
@@ -3268,6 +3274,7 @@ func TestAccZoneAuthResource_ZoneFormat(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "zone_format", "FORWARD"),
 				),
 			},
+			// Update is not applicable as zone_format is an immutable field.
 			// Delete testing automatically occurs in TestCase
 		},
 	})

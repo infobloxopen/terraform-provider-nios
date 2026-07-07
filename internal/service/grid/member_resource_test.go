@@ -4578,6 +4578,7 @@ func TestAccMemberResource_MemberServiceCommunication(t *testing.T) {
 					resource.TestCheckResourceAttrSet(resourceName, "member_service_communication.#"),
 				),
 			},
+			// Update is not applicable as member_service_communication is an immutable field.
 			// Delete testing automatically occurs in TestCase
 		},
 	})

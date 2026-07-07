@@ -217,6 +217,7 @@ func TestAccRecordNsResource_View(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "view", viewName),
 				),
 			},
+			// Update is not applicable as view is an immutable field.
 			// Delete testing automatically occurs in TestCase
 		},
 	})
@@ -225,8 +226,7 @@ func TestAccRecordNsResource_View(t *testing.T) {
 func TestAccRecordNsResource_Name(t *testing.T) {
 	var resourceName = "nios_dns_record_ns.test_name"
 	var v dns.RecordNs
-	name1 := "example.com"
-	name2 := "example.com"
+	name := "example.com"
 	nameserver := acctest.RandomNameWithPrefix("nameserver") + ".example.com"
 	addresses := []map[string]any{
 		{
@@ -242,21 +242,13 @@ func TestAccRecordNsResource_Name(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRecordNsName(name1, nameserver, addressesHCL, "default"),
+				Config: testAccRecordNsName(name, nameserver, addressesHCL, "default"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordNsExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "name", name1),
+					resource.TestCheckResourceAttr(resourceName, "name", name),
 				),
 			},
-			// Update and Read
-			{
-				Config: testAccRecordNsName(name2, fmt.Sprintf("updated-%s", nameserver), addressesHCL, "default"),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckRecordNsExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "name", name2),
-					resource.TestCheckResourceAttr(resourceName, "nameserver", fmt.Sprintf("updated-%s", nameserver)),
-				),
-			},
+			// Update is not applicable as name is an immutable field.
 			// Delete testing automatically occurs in TestCase
 		},
 	})

@@ -350,6 +350,7 @@ func TestAccRecordUnknownResource_RecordType(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "record_type", "SPF"),
 				),
 			},
+			// Update is not applicable as record_type is an immutable field.
 			// Delete testing automatically occurs in TestCase
 		},
 	})

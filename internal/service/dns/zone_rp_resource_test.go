@@ -1523,6 +1523,7 @@ func TestAccZoneRpResource_Fqdn(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "fqdn", zoneFqdn),
 				),
 			},
+			// Update is not applicable as fqdn is an immutable field.
 			// Delete testing automatically occurs in TestCase
 		},
 	})

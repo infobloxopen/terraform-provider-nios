@@ -1467,6 +1467,7 @@ func TestAccAdmingroupResource_EnableRestrictedUserAccess(t *testing.T) {
 					resource.TestCheckResourceAttrSet(resourceName, "enable_restricted_user_access"),
 				),
 			},
+			// Update is not applicable as enable_restricted_user_access is an immutable field.
 			// Delete testing automatically occurs in TestCase
 		},
 	})

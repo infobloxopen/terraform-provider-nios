@@ -934,9 +934,12 @@ func TestAccNotificationRuleResource_AllMembers(t *testing.T) {
 				Config: testAccNotificationRuleAllMembers(eventType, expressionList, name, notificationAction, notificationTarget, templateInstance),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNotificationRuleExists(context.Background(), resourceName, &v),
+					// all_members is a computed-only attribute
+					// This assertion verifies the server's default value.
 					resource.TestCheckResourceAttr(resourceName, "all_members", "true"),
 				),
 			},
+			// Update is not applicable as all_members is an immutable field.
 			// Delete testing automatically occurs in TestCase
 		},
 	})
@@ -959,9 +962,11 @@ func TestAccNotificationRuleResource_SelectedMembers(t *testing.T) {
 				Config: testAccNotificationRuleSelectedMembers(eventType, expressionList, name, notificationAction, notificationTarget, templateInstance),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNotificationRuleExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttrSet(resourceName, "selected_members.#"),
+					// selected_members is a computed-only
+					resource.TestCheckResourceAttr(resourceName, "selected_members.#", "0"),
 				),
 			},
+			// Update is not applicable as selected_members is an immutable field.
 			// Delete testing automatically occurs in TestCase
 		},
 	})
