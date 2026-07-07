@@ -1848,7 +1848,7 @@ resource "nios_dhcp_ipv6range" "test_server_association_type" {
     network = nios_ipam_ipv6network.test.network
     start_addr = %q
     end_addr = %q
-    network_view = "default"
+    network_view = nios_ipam_network_view.test.name
     server_association_type = %q
 	%s
 }
@@ -1871,9 +1871,13 @@ resource "nios_dhcp_ipv6range" "test_start_addr" {
 func testAccIpv6rangeSubscribeSettings(view, startAddr, endAddr string, subscribeSettings map[string]any, useSubscribeSettings string) string {
 	subscribeSettingsStr := utils.ConvertMapToHCL(subscribeSettings)
 	return fmt.Sprintf(`
+resource "nios_ipam_network_view" "test" {
+	name = %q
+}
+
 resource "nios_ipam_ipv6network" "test" {
     network = "219::/64"
-	network_view = %q
+	network_view = nios_ipam_network_view.test.name
 }
 
 resource "nios_dhcp_ipv6range" "test_subscribe_settings" {
@@ -2068,9 +2072,13 @@ resource "nios_ipam_ipv6network" "test" {
 
 func testAccBaseWithIpv6NetworkWithMemberandView(view, member string) string {
 	return fmt.Sprintf(`
+resource "nios_ipam_network_view" "test" {
+	name = %q
+}
+
 resource "nios_ipam_ipv6network" "test" {
     network = "141::/64"
-	network_view = %q
+	network_view = nios_ipam_network_view.test.name
 	members = [{
 		name = %q
 	}]
