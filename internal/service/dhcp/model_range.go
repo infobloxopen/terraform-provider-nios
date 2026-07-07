@@ -321,10 +321,10 @@ var RangeResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed:            true,
 		MarkdownDescription: "A string describing the utilization level of the range.",
 	},
+	// The default setting has been removed to support the `disable` option for MS Super Scope ranges.
 	"disable": schema.BoolAttribute{
 		Optional:            true,
 		Computed:            true,
-		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Determines whether a range is disabled or not. When this is set to False, the range is enabled.",
 	},
 	"discover_now_status": schema.StringAttribute{

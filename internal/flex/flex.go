@@ -210,6 +210,12 @@ func FlattenFrameworkListString(ctx context.Context, l []string, diags *diag.Dia
 }
 
 func FlattenFrameworkListStringNotNull(ctx context.Context, l []string, diags *diag.Diagnostics) types.List {
+	if len(l) == 0 {
+		emptyList, d := types.ListValueFrom(ctx, types.StringType, []string{})
+		diags.Append(d...)
+		return emptyList
+	}
+
 	tfList, d := types.ListValueFrom(ctx, types.StringType, l)
 	diags.Append(d...)
 	return tfList

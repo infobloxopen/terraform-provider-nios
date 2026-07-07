@@ -604,9 +604,6 @@ var ZoneAuthResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional: true,
 		Computed: true,
 		Validators: []validator.List{
-			listvalidator.ConflictsWith(
-				path.MatchRoot("ns_group"),
-			),
 			listvalidator.SizeAtLeast(1),
 		},
 		MarkdownDescription: "The list of external primary servers.",
@@ -619,7 +616,6 @@ var ZoneAuthResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed: true,
 		Validators: []validator.List{
 			listvalidator.SizeAtLeast(1),
-			listvalidator.ConflictsWith(path.MatchRoot("ns_group")),
 		},
 		MarkdownDescription: "The list of external secondary servers.",
 	},
@@ -641,7 +637,6 @@ var ZoneAuthResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional: true,
 		Computed: true,
 		Validators: []validator.List{
-			listvalidator.ConflictsWith(path.MatchRoot("ns_group")),
 			listvalidator.SizeAtLeast(1),
 		},
 		MarkdownDescription: "The grid primary servers for this zone.",
@@ -657,9 +652,6 @@ var ZoneAuthResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional: true,
 		Computed: true,
 		Validators: []validator.List{
-			listvalidator.ConflictsWith(
-				path.MatchRoot("ns_group"),
-			),
 			listvalidator.SizeAtLeast(1),
 		},
 		MarkdownDescription: "The list with Grid members that are secondary servers for this zone.",
@@ -787,7 +779,6 @@ var ZoneAuthResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed: true,
 		Validators: []validator.List{
 			listvalidator.SizeAtLeast(1),
-			listvalidator.ConflictsWith(path.MatchRoot("ns_group")),
 		},
 		MarkdownDescription: "The list with the Microsoft DNS servers that are primary servers for the zone. Although a zone typically has just one primary name server, you can specify up to ten independent servers for a single zone.",
 	},
@@ -803,7 +794,6 @@ var ZoneAuthResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed: true,
 		Validators: []validator.List{
 			listvalidator.SizeAtLeast(1),
-			listvalidator.ConflictsWith(path.MatchRoot("ns_group")),
 		},
 		MarkdownDescription: "The list with the Microsoft DNS servers that are secondary servers for the zone.",
 	},
@@ -837,10 +827,8 @@ var ZoneAuthResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The number of seconds in delay with which notify messages are sent to secondaries.",
 	},
 	"ns_group": schema.StringAttribute{
-		Optional: true,
-		Validators: []validator.String{
-			stringvalidator.ConflictsWith(path.MatchRoot("grid_primary")),
-		},
+		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The name server group that serves DNS for this zone.",
 	},
 	"parent": schema.StringAttribute{

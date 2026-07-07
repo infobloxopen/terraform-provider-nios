@@ -346,15 +346,24 @@ func (r *FilterrelayagentResource) ValidateConfig(ctx context.Context, req resou
 		return
 	}
 
-	// Get the values or default to empty string
-	isCircuitId := "ANY"
-	if !data.IsCircuitId.IsNull() && !data.IsCircuitId.IsUnknown() {
-		isCircuitId = data.IsCircuitId.ValueString()
+	// For Configuration object, any attributes not defined by the user appear as null, unless derived from another instance.
+	// We perform IsUnknown() check to handle variables from .tfvars that are resolved
+	// during the plan phase rather than validation phase, preventing false validation errors.
+
+	var isCircuitId string
+	if !data.IsCircuitId.IsUnknown() {
+		isCircuitId = "ANY"
+		if !data.IsCircuitId.IsNull() {
+			isCircuitId = data.IsCircuitId.ValueString()
+		}
 	}
 
-	isRemoteId := "ANY"
-	if !data.IsRemoteId.IsNull() && !data.IsRemoteId.IsUnknown() {
-		isRemoteId = data.IsRemoteId.ValueString()
+	var isRemoteId string
+	if !data.IsRemoteId.IsUnknown() {
+		isRemoteId = "ANY"
+		if !data.IsRemoteId.IsNull() {
+			isRemoteId = data.IsRemoteId.ValueString()
+		}
 	}
 
 	// Validate that at least one must be set to a non-empty, non-ANY value

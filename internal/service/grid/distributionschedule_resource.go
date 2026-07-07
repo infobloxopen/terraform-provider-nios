@@ -87,6 +87,13 @@ func (r *DistributionscheduleResource) ValidateConfig(ctx context.Context, req r
 					fmt.Sprintf("upgrade_groups[%d].name must be set", idx),
 				)
 			}
+			if group.Name.ValueString() == "Grid Master" {
+				resp.Diagnostics.AddAttributeError(
+					path.Root("upgrade_groups"),
+					"Invalid upgrade group",
+					"\"Grid Master\" is not a valid upgrade group. It is upgraded as part of the \"Default\" group and cannot be scheduled explicitly.",
+				)
+			}
 		}
 	}
 }
