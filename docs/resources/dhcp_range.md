@@ -131,6 +131,7 @@ resource "nios_dhcp_range" "create_range_with_additional_fields" {
 - `split_member` (Attributes) This field contains the split member that will run the DHCP service for this range. If this is not set, the range will be served by the member that is currently serving the network. (see [below for nested schema](#nestedatt--split_member))
 - `split_scope_exclusion_percent` (Number) This field controls the percentage used when creating a split scope. Valid values are numbers between 1 and 99. If the value is 40, it means that the top 40% of the exclusion will be created on the DHCP range assigned to {next_available_ip:next_available_ip} and the lower 60% of the range will be assigned to DHCP range assigned to {next_available_ip:next_available_ip}
 - `subscribe_settings` (Attributes) The subscribe settings for the range. This field is used to configure the subscription settings for the DHCP range. It includes information about the subscription, such as the subscriber's email address and whether the subscription is enabled. (see [below for nested schema](#nestedatt--subscribe_settings))
+- `template` (String) If set on creation, the range will be created according to the values specified in the named template.
 - `unknown_clients` (String) Permission for unknown clients. This can be 'Allow' or 'Deny'. If set to 'Deny', unknown clients will be denied IP addresses. Known clients include roaming hosts and clients with fixed addresses or DHCP host entries. Unknown clients include clients that are not roaming hosts and clients that do not have fixed addresses or DHCP host entries.
 - `update_dns_on_lease_renewal` (Boolean) This field controls whether the DHCP server updates DNS when a DHCP lease is renewed.
 - `use_blackout_setting` (Boolean) Use flag for: discovery_blackout_setting , port_control_blackout_setting, same_port_control_discovery_blackout
@@ -171,7 +172,6 @@ resource "nios_dhcp_range" "create_range_with_additional_fields" {
 - `ms_ad_user_data` (Attributes) This field contains the Microsoft AD user data for this range. This data is used to create a user in the Microsoft AD when a lease is assigned to a host in this range. (see [below for nested schema](#nestedatt--ms_ad_user_data))
 - `ref` (String) The reference to the object.
 - `static_hosts` (Number) The number of static DHCP addresses configured in the range.
-- `template` (String) If set on creation, the range will be created according to the values specified in the named template.
 - `total_hosts` (Number) The total number of DHCP addresses configured in the range.
 
 <a id="nestedatt--cloud_info"></a>

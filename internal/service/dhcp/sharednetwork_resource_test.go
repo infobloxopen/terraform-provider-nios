@@ -18,8 +18,6 @@ import (
 )
 
 // TODO : Required parents for the execution of tests - logic_filter_rules (option_filter, option_logic_filter)
-// TODO: - create NW using GenerateRandomCIDR, and get references of networks using Network resource
-// TODO: - testcases related ignore_id, use_ignore_id, ignore_client_identifier and ignore_client_identifier to be revisited.
 
 var readableAttributesForSharednetwork = "authority,bootfile,bootserver,comment,ddns_generate_hostname,ddns_server_always_updates,ddns_ttl,ddns_update_fixed_addresses,ddns_use_option81,deny_bootp,dhcp_utilization,dhcp_utilization_status,disable,dynamic_hosts,enable_ddns,enable_pxe_lease_time,extattrs,ignore_client_identifier,ignore_dhcp_option_list_request,ignore_id,ignore_mac_addresses,lease_scavenge_time,logic_filter_rules,ms_ad_user_data,name,network_view,networks,nextserver,options,pxe_lease_time,static_hosts,total_hosts,update_dns_on_lease_renewal,use_authority,use_bootfile,use_bootserver,use_ddns_generate_hostname,use_ddns_ttl,use_ddns_update_fixed_addresses,use_ddns_use_option81,use_deny_bootp,use_enable_ddns,use_ignore_client_identifier,use_ignore_dhcp_option_list_request,use_ignore_id,use_lease_scavenge_time,use_logic_filter_rules,use_nextserver,use_options,use_pxe_lease_time,use_update_dns_on_lease_renewal"
 
@@ -569,18 +567,20 @@ func TestAccSharednetworkResource_IgnoreClientIdentifier(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccSharednetworkIgnoreClientIdentifier(name, networks, false, false),
+				Config: testAccSharednetworkIgnoreClientIdentifier(name, networks, true, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSharednetworkExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ignore_client_identifier", "false"),
+					resource.TestCheckResourceAttr(resourceName, "ignore_client_identifier", "true"),
+					resource.TestCheckResourceAttr(resourceName, "use_ignore_client_identifier", "true"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccSharednetworkIgnoreClientIdentifierUpdate(name, networks, true, true),
+				Config: testAccSharednetworkIgnoreClientIdentifier(name, networks, false, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSharednetworkExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ignore_client_identifier", "true"),
+					resource.TestCheckResourceAttr(resourceName, "ignore_client_identifier", "false"),
+					resource.TestCheckResourceAttr(resourceName, "use_ignore_client_identifier", "true"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -839,6 +839,29 @@ func TestAccSharednetworkResource_Networks(t *testing.T) {
 				),
 			},
 			// Delete testing automatically occurs in TestCase
+		},
+	})
+}
+
+func TestAccSharednetworkResource_NetworkView(t *testing.T) {
+	resourceName := "nios_dhcp_shared_network.test_network_view"
+	var v dhcp.Sharednetwork
+	name := acctest.RandomNameWithPrefix("shared_network")
+	networkView := acctest.RandomNameWithPrefix("network-view")
+	networks := []string{"${nios_ipam_network.test_network1.ref}", "${nios_ipam_network.test_network2.ref}"}
+
+	// Network_view is an immutable field, hence no update step is added.
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccSharednetworkNetworkView(name, networkView, networks),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckSharednetworkExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "network_view", networkView),
+				),
+			},
 		},
 	})
 }
@@ -1876,31 +1899,25 @@ resource "nios_dhcp_shared_network" "test_extattrs" {
 
 func testAccSharednetworkIgnoreClientIdentifier(name string, networks []string, ignoreClientIdentifier, useIgnoreClientIdentifier bool) string {
 	networksStr := formatNetworksToHCL(networks)
-	config := fmt.Sprintf(`
-resource "nios_dhcp_shared_network" "test_ignore_client_identifier" {
-   name = %q
-   networks = %s
-   ignore_client_identifier = %t
-   use_ignore_client_identifier = %t
-   use_ignore_id = false
-}
-`, name, networksStr, ignoreClientIdentifier, useIgnoreClientIdentifier)
-	return strings.Join([]string{testAccBaseWithNetworks(
-		"201.31.0.0/24", "201.32.0.0/24"), config}, "\n")
-}
-
-func testAccSharednetworkIgnoreClientIdentifierUpdate(name string, networks []string, ignoreClientIdentifier, useIgnoreClientIdentifier bool) string {
-	networksStr := formatNetworksToHCL(networks)
-	config := fmt.Sprintf(`
-resource "nios_dhcp_shared_network" "test_ignore_client_identifier" {
-   name = %q
-   networks = %s
-   ignore_client_identifier = %t
-   use_ignore_client_identifier = %t
-   use_ignore_id = true
+	var extraConfig string
+	if ignoreClientIdentifier && useIgnoreClientIdentifier {
+		extraConfig = `
    ignore_id = "CLIENT"
+   use_ignore_id = true`
+	} else if !ignoreClientIdentifier && useIgnoreClientIdentifier {
+		extraConfig = `
+   ignore_id = "NONE"
+   use_ignore_id = true`
+	}
+	config := fmt.Sprintf(`
+resource "nios_dhcp_shared_network" "test_ignore_client_identifier" {
+   name = %q
+   networks = %s
+   ignore_client_identifier = %t
+   use_ignore_client_identifier = %t
+   %s
 }
-`, name, networksStr, ignoreClientIdentifier, useIgnoreClientIdentifier)
+`, name, networksStr, ignoreClientIdentifier, useIgnoreClientIdentifier, extraConfig)
 	return strings.Join([]string{testAccBaseWithNetworks(
 		"201.31.0.0/24", "201.32.0.0/24"), config}, "\n")
 }
@@ -1921,16 +1938,28 @@ resource "nios_dhcp_shared_network" "test_ignore_dhcp_option_list_request" {
 
 func testAccSharednetworkIgnoreId(name string, networks []string, ignoreId string, useIgnoreId bool) string {
 	networksStr := formatNetworksToHCL(networks)
+	var extraConfig string
+	if useIgnoreId {
+		switch ignoreId {
+		case "CLIENT":
+			extraConfig = `
+   ignore_client_identifier = true
+   use_ignore_client_identifier = true`
+		case "NONE":
+			extraConfig = `
+   ignore_client_identifier = false
+   use_ignore_client_identifier = true`
+		}
+	}
 	config := fmt.Sprintf(`
 resource "nios_dhcp_shared_network" "test_ignore_id" {
-	name = %q
-	networks = %s
-	ignore_id = %q
-	ignore_client_identifier = true
-	use_ignore_client_identifier = true
-	use_ignore_id = %t
+   name = %q
+   networks = %s
+   ignore_id = %q
+   use_ignore_id = %t
+   %s
 }
-`, name, networksStr, ignoreId, useIgnoreId)
+`, name, networksStr, ignoreId, useIgnoreId, extraConfig)
 	return strings.Join([]string{testAccBaseWithNetworks(
 		"201.35.0.0/24", "201.36.0.0/24"), config}, "\n")
 }
@@ -2027,6 +2056,32 @@ resource "nios_dhcp_shared_network" "test_networks" {
 	network3and4Replace2 := strings.Replace(network3and4Replace1, "test_network2", "test_network4", 1)
 	return strings.Join([]string{testAccBaseWithNetworks(
 		"201.45.0.0/24", "201.46.0.0/24"), network3and4Replace2, config}, "\n")
+}
+
+func testAccSharednetworkNetworkView(name, networkView string, networks []string) string {
+	networksStr := formatNetworksToHCL(networks)
+	config := fmt.Sprintf(`
+resource "nios_ipam_network_view" "test_network_view" {
+	name = %q
+}
+
+resource "nios_ipam_network" "test_network1" {
+	network      = "202.101.0.0/24"
+	network_view = nios_ipam_network_view.test_network_view.name
+}
+
+resource "nios_ipam_network" "test_network2" {
+	network      = "202.102.0.0/24"
+	network_view = nios_ipam_network_view.test_network_view.name
+}
+
+resource "nios_dhcp_shared_network" "test_network_view" {
+	name = %q
+	network_view = nios_ipam_network_view.test_network_view.name
+	networks = %s
+}
+`, networkView, name, networksStr)
+	return config
 }
 
 func testAccSharednetworkNextserver(name string, networks []string, nextserver string, useNextserver bool) string {

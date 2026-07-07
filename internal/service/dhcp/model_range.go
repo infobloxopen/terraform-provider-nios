@@ -783,6 +783,7 @@ var RangeResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The subscribe settings for the range. This field is used to configure the subscription settings for the DHCP range. It includes information about the subscription, such as the subscriber's email address and whether the subscription is enabled.",
 	},
 	"template": schema.StringAttribute{
+		Optional:            true,
 		Computed:            true,
 		MarkdownDescription: "If set on creation, the range will be created according to the values specified in the named template.",
 		PlanModifiers: []planmodifier.String{
@@ -1152,7 +1153,9 @@ func (m *RangeModel) Flatten(ctx context.Context, from *dhcp.Range, diags *diag.
 	m.StartAddr = flex.FlattenIPv4Address(from.StartAddr)
 	m.StaticHosts = flex.FlattenInt64Pointer(from.StaticHosts)
 	m.SubscribeSettings = FlattenRangeSubscribeSettings(ctx, from.SubscribeSettings, diags)
-	m.Template = flex.FlattenStringPointer(from.Template)
+	if m.Template.IsUnknown() || m.Template.IsNull() {
+		m.Template = flex.FlattenStringPointer(from.Template)
+	}
 	m.TotalHosts = flex.FlattenInt64Pointer(from.TotalHosts)
 	m.UnknownClients = flex.FlattenStringPointer(from.UnknownClients)
 	m.UpdateDnsOnLeaseRenewal = types.BoolPointerValue(from.UpdateDnsOnLeaseRenewal)

@@ -28,12 +28,9 @@ var Ipv6networkcontainersubscribesettingsMappedEaAttributesAttrTypes = map[strin
 
 var Ipv6networkcontainersubscribesettingsMappedEaAttributesResourceSchemaAttributes = map[string]schema.Attribute{
 	"name": schema.StringAttribute{
-		Required:            true,
+		Optional:            true,
 		MarkdownDescription: "The Cisco ISE attribute name that is enabled for publishsing from a Cisco ISE endpoint.",
-	},
-	"mapped_ea": schema.StringAttribute{
-		Required:            true,
-		MarkdownDescription: "The name of the extensible attribute definition object the Cisco ISE attribute that is enabled for subscription is mapped on.",
+		Computed:            true,
 		Validators: []validator.String{
 			stringvalidator.OneOf(
 				"ACCOUNT_SESSION_ID",
@@ -47,6 +44,11 @@ var Ipv6networkcontainersubscribesettingsMappedEaAttributesResourceSchemaAttribu
 				"POSTURE_TIMESTAMP",
 			),
 		},
+	},
+	"mapped_ea": schema.StringAttribute{
+		Optional:            true,
+		MarkdownDescription: "The name of the extensible attribute definition object the Cisco ISE attribute that is enabled for subscription is mapped on.",
+		Computed:            true,
 	},
 }
 

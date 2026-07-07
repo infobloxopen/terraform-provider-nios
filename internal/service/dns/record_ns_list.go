@@ -97,10 +97,19 @@ func (l *RecordNsList) List(ctx context.Context, req list.ListRequest, stream *l
 			//Increment the page count
 			pageCount++
 
+			// Use user-provided filters; default creator to "STATIC" if not specified
+			filters := flex.ExpandFrameworkMapString(ctx, data.Filters, &diags)
+			if filters == nil {
+				filters = make(map[string]interface{})
+			}
+			if _, userSetCreator := filters["creator"]; !userSetCreator {
+				filters["creator"] = "STATIC"
+			}
+
 			request := l.client.DNSAPI.
 				RecordNsAPI.
 				List(ctx).
-				Filters(flex.ExpandFrameworkMapString(ctx, data.Filters, &diags)).
+				Filters(filters).
 				ReturnAsObject(1).
 				ReturnFieldsPlus(readableAttributesForRecordNs).
 				Paging(paging).
