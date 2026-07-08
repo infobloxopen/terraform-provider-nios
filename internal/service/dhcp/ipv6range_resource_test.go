@@ -1072,7 +1072,7 @@ func TestAccIpv6rangeResource_SamePortControlDiscoveryBlackout(t *testing.T) {
 func TestAccIpv6rangeResource_ServerAssociationType(t *testing.T) {
 	var resourceName = "nios_dhcp_ipv6range.test_server_association_type"
 	var v dhcp.Ipv6range
-	view := acctest.RandomNameWithPrefix("network-view")
+	view := "default"
 	memberUpdatedName := utils.GetNIOSGridMemberHostName()
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -1133,7 +1133,7 @@ func TestAccIpv6rangeResource_StartAddr(t *testing.T) {
 func TestAccIpv6rangeResource_SubscribeSettings(t *testing.T) {
 	var resourceName = "nios_dhcp_ipv6range.test_subscribe_settings"
 	var v dhcp.Ipv6range
-	view := acctest.RandomNameWithPrefix("network-view")
+	view := "default"
 	subscribeSettings := map[string]any{
 		"enabled_attributes": []string{"DOMAINNAME", "ENDPOINT_PROFILE"},
 	}
@@ -1848,7 +1848,7 @@ resource "nios_dhcp_ipv6range" "test_server_association_type" {
     network = nios_ipam_ipv6network.test.network
     start_addr = %q
     end_addr = %q
-    network_view = nios_ipam_network_view.test.name
+    network_view = "default"
     server_association_type = %q
 	%s
 }
@@ -1871,13 +1871,9 @@ resource "nios_dhcp_ipv6range" "test_start_addr" {
 func testAccIpv6rangeSubscribeSettings(view, startAddr, endAddr string, subscribeSettings map[string]any, useSubscribeSettings string) string {
 	subscribeSettingsStr := utils.ConvertMapToHCL(subscribeSettings)
 	return fmt.Sprintf(`
-resource "nios_ipam_network_view" "test" {
-	name = %q
-}
-
 resource "nios_ipam_ipv6network" "test" {
     network = "219::/64"
-	network_view = nios_ipam_network_view.test.name
+	network_view = %q
 }
 
 resource "nios_dhcp_ipv6range" "test_subscribe_settings" {
@@ -2072,13 +2068,9 @@ resource "nios_ipam_ipv6network" "test" {
 
 func testAccBaseWithIpv6NetworkWithMemberandView(view, member string) string {
 	return fmt.Sprintf(`
-resource "nios_ipam_network_view" "test" {
-	name = %q
-}
-
 resource "nios_ipam_ipv6network" "test" {
     network = "141::/64"
-	network_view = nios_ipam_network_view.test.name
+	network_view = %q
 	members = [{
 		name = %q
 	}]
