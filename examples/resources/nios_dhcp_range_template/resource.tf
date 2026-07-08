@@ -34,7 +34,7 @@ resource "nios_dhcp_range_template" "range_template_additional_fields" {
     {
       name  = "domain-name-servers"
       num   = "6"
-      value = "11.22.1.2"
+      value = "11.22.1.2,11.22.1.3"
     },
     {
       name  = "time-offset"

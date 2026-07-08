@@ -25,6 +25,11 @@ resource "nios_ipam_ipv6network_container" "complete_example" {
       num          = 39,
       value        = "test_options.com",
       vendor_class = "DHCPv6"
+    },
+    {
+      name  = "domain-name-servers"
+      num   = 6
+      value = "8.8.8.8,8.8.4.4"
     }
   ]
   use_options = true

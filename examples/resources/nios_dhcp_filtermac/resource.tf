@@ -26,6 +26,27 @@ resource "nios_dhcp_filtermac" "mac_filter_with_option" {
       name  = "dhcp-lease-time"
       num   = 51
       value = "3600"
+    },
+    {
+      name  = "domain-name-servers"
+      num   = 6
+      value = "8.8.8.8,8.8.4.4"
     }
   ]
 }
+
+	terraform {
+	  required_providers {
+	    nios = {
+	      source  = "infobloxopen/nios"
+	      version = "1.1.0"
+	    }
+	  }
+	}
+	
+	provider "nios" {
+	  nios_host_url = "https://172.28.82.33"
+	  nios_username = "admin"
+	  nios_password = "Infoblox@123"
+}
+

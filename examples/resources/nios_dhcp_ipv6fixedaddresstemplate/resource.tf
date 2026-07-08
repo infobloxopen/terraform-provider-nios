@@ -15,6 +15,11 @@ resource "nios_dhcp_ipv6fixedaddresstemplate" "additional_fields" {
       name  = "dhcp-lease-time"
       num   = "51"
       value = "5000"
+    },
+    {
+      name  = "domain-name-servers"
+      num   = 6
+      value = "2001:4860:4860::8888,2001:4860:4860::8844"
     }
   ]
   use_options        = true
@@ -23,4 +28,19 @@ resource "nios_dhcp_ipv6fixedaddresstemplate" "additional_fields" {
   extattrs = {
     "Site" = "location-1"
   }
+}
+
+terraform {
+	  required_providers {
+	    nios = {
+	      source  = "infobloxopen/nios"
+	      version = "1.1.0"
+	    }
+	  }
+	}
+	
+	provider "nios" {
+	  nios_host_url = "https://172.28.82.33"
+	  nios_username = "admin"
+	  nios_password = "Infoblox@123"
 }

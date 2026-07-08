@@ -37,6 +37,11 @@ resource "nios_ipam_ipv6network" "complete_example" {
       num          = 39,
       value        = "test_options.com",
       vendor_class = "DHCPv6"
+    },
+    {
+      name  = "domain-name-servers"
+      num   = 6
+      value = "2001:4860:4860::8888,2001:4860:4860::8844"
     }
   ]
   port_control_blackout_setting = {
