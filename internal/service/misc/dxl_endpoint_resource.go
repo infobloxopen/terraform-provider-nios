@@ -30,6 +30,8 @@ var _ resource.ResourceWithValidateConfig = &DxlEndpointResource{}
 
 var _ resource.ResourceWithModifyPlan = &DxlEndpointResource{}
 
+var _ resource.ResourceWithUpgradeState = &DxlEndpointResource{}
+
 func NewDxlEndpointResource() resource.Resource {
 	return &DxlEndpointResource{}
 }
@@ -45,8 +47,27 @@ func (r *DxlEndpointResource) Metadata(ctx context.Context, req resource.Metadat
 
 func (r *DxlEndpointResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
+		Version:             1,
 		MarkdownDescription: "Manages a DXL Endpoint.",
 		Attributes:          DxlEndpointResourceSchemaAttributes,
+	}
+}
+
+func (r *DxlEndpointResource) UpgradeState(ctx context.Context) map[int64]resource.StateUpgrader {
+	return map[int64]resource.StateUpgrader{
+		0: {
+			PriorSchema: &schema.Schema{
+				Attributes: DxlEndpointResourceSchemaAttributes,
+			},
+			StateUpgrader: func(ctx context.Context, req resource.UpgradeStateRequest, resp *resource.UpgradeStateResponse) {
+				var data DxlEndpointModel
+				resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
+				if resp.Diagnostics.HasError() {
+					return
+				}
+				resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+			},
+		},
 	}
 }
 

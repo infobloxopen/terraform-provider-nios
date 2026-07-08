@@ -32,6 +32,8 @@ var _ resource.ResourceWithValidateConfig = &VdiscoverytaskResource{}
 
 var _ resource.ResourceWithModifyPlan = &VdiscoverytaskResource{}
 
+var _ resource.ResourceWithUpgradeState = &VdiscoverytaskResource{}
+
 func NewVdiscoverytaskResource() resource.Resource {
 	return &VdiscoverytaskResource{}
 }
@@ -47,8 +49,27 @@ func (r *VdiscoverytaskResource) Metadata(ctx context.Context, req resource.Meta
 
 func (r *VdiscoverytaskResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
+		Version:             1,
 		MarkdownDescription: "Manages a vDiscovery Task.",
 		Attributes:          VdiscoverytaskResourceSchemaAttributes,
+	}
+}
+
+func (r *VdiscoverytaskResource) UpgradeState(ctx context.Context) map[int64]resource.StateUpgrader {
+	return map[int64]resource.StateUpgrader{
+		0: {
+			PriorSchema: &schema.Schema{
+				Attributes: VdiscoverytaskResourceSchemaAttributes,
+			},
+			StateUpgrader: func(ctx context.Context, req resource.UpgradeStateRequest, resp *resource.UpgradeStateResponse) {
+				var data VdiscoverytaskModel
+				resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
+				if resp.Diagnostics.HasError() {
+					return
+				}
+				resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+			},
+		},
 	}
 }
 

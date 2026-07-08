@@ -24,6 +24,7 @@ var readableAttributesForTacacsplusAuthservice = "acct_retries,acct_timeout,auth
 var _ resource.Resource = &TacacsplusAuthserviceResource{}
 var _ resource.ResourceWithImportState = &TacacsplusAuthserviceResource{}
 var _ resource.ResourceWithModifyPlan = &TacacsplusAuthserviceResource{}
+var _ resource.ResourceWithUpgradeState = &TacacsplusAuthserviceResource{}
 
 func NewTacacsplusAuthserviceResource() resource.Resource {
 	return &TacacsplusAuthserviceResource{}
@@ -40,8 +41,27 @@ func (r *TacacsplusAuthserviceResource) Metadata(ctx context.Context, req resour
 
 func (r *TacacsplusAuthserviceResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
+		Version:             1,
 		MarkdownDescription: "Manages a Tacacsplus Authentication Service.",
 		Attributes:          TacacsplusAuthserviceResourceSchemaAttributes,
+	}
+}
+
+func (r *TacacsplusAuthserviceResource) UpgradeState(ctx context.Context) map[int64]resource.StateUpgrader {
+	return map[int64]resource.StateUpgrader{
+		0: {
+			PriorSchema: &schema.Schema{
+				Attributes: TacacsplusAuthserviceResourceSchemaAttributes,
+			},
+			StateUpgrader: func(ctx context.Context, req resource.UpgradeStateRequest, resp *resource.UpgradeStateResponse) {
+				var data TacacsplusAuthserviceModel
+				resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
+				if resp.Diagnostics.HasError() {
+					return
+				}
+				resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+			},
+		},
 	}
 }
 

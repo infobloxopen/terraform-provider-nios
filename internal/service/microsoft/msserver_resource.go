@@ -30,6 +30,8 @@ var _ resource.Resource = &MsserverResource{}
 var _ resource.ResourceWithImportState = &MsserverResource{}
 var _ resource.ResourceWithValidateConfig = &MsserverResource{}
 
+var _ resource.ResourceWithUpgradeState = &MsserverResource{}
+
 func NewMsserverResource() resource.Resource {
 	return &MsserverResource{}
 }
@@ -45,8 +47,27 @@ func (r *MsserverResource) Metadata(ctx context.Context, req resource.MetadataRe
 
 func (r *MsserverResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
+		Version:             1,
 		MarkdownDescription: "Manages a Microsoft Server.",
 		Attributes:          MsserverResourceSchemaAttributes,
+	}
+}
+
+func (r *MsserverResource) UpgradeState(ctx context.Context) map[int64]resource.StateUpgrader {
+	return map[int64]resource.StateUpgrader{
+		0: {
+			PriorSchema: &schema.Schema{
+				Attributes: MsserverResourceSchemaAttributes,
+			},
+			StateUpgrader: func(ctx context.Context, req resource.UpgradeStateRequest, resp *resource.UpgradeStateResponse) {
+				var data MsserverModel
+				resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
+				if resp.Diagnostics.HasError() {
+					return
+				}
+				resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+			},
+		},
 	}
 }
 

@@ -34,6 +34,8 @@ var _ resource.ResourceWithValidateConfig = &NotificationRestEndpointResource{}
 
 var _ resource.ResourceWithModifyPlan = &NotificationRestEndpointResource{}
 
+var _ resource.ResourceWithUpgradeState = &NotificationRestEndpointResource{}
+
 func NewNotificationRestEndpointResource() resource.Resource {
 	return &NotificationRestEndpointResource{}
 }
@@ -49,8 +51,27 @@ func (r *NotificationRestEndpointResource) Metadata(ctx context.Context, req res
 
 func (r *NotificationRestEndpointResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
+		Version:             1,
 		MarkdownDescription: "Manages a Notification REST Endpoint.",
 		Attributes:          NotificationRestEndpointResourceSchemaAttributes,
+	}
+}
+
+func (r *NotificationRestEndpointResource) UpgradeState(ctx context.Context) map[int64]resource.StateUpgrader {
+	return map[int64]resource.StateUpgrader{
+		0: {
+			PriorSchema: &schema.Schema{
+				Attributes: NotificationRestEndpointResourceSchemaAttributes,
+			},
+			StateUpgrader: func(ctx context.Context, req resource.UpgradeStateRequest, resp *resource.UpgradeStateResponse) {
+				var data NotificationRestEndpointModel
+				resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
+				if resp.Diagnostics.HasError() {
+					return
+				}
+				resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+			},
+		},
 	}
 }
 

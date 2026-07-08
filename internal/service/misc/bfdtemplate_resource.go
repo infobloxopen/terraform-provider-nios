@@ -27,6 +27,8 @@ var _ resource.Resource = &BfdtemplateResource{}
 var _ resource.ResourceWithImportState = &BfdtemplateResource{}
 var _ resource.ResourceWithModifyPlan = &BfdtemplateResource{}
 
+var _ resource.ResourceWithUpgradeState = &BfdtemplateResource{}
+
 func NewBfdtemplateResource() resource.Resource {
 	return &BfdtemplateResource{}
 }
@@ -46,8 +48,27 @@ func (r *BfdtemplateResource) Metadata(ctx context.Context, req resource.Metadat
 
 func (r *BfdtemplateResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
+		Version:             1,
 		MarkdownDescription: "Manages a BFD template.",
 		Attributes:          BfdtemplateResourceSchemaAttributes,
+	}
+}
+
+func (r *BfdtemplateResource) UpgradeState(ctx context.Context) map[int64]resource.StateUpgrader {
+	return map[int64]resource.StateUpgrader{
+		0: {
+			PriorSchema: &schema.Schema{
+				Attributes: BfdtemplateResourceSchemaAttributes,
+			},
+			StateUpgrader: func(ctx context.Context, req resource.UpgradeStateRequest, resp *resource.UpgradeStateResponse) {
+				var data BfdtemplateModel
+				resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
+				if resp.Diagnostics.HasError() {
+					return
+				}
+				resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+			},
+		},
 	}
 }
 
