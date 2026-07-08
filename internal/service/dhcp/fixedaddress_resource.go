@@ -32,6 +32,8 @@ var _ resource.ResourceWithIdentity = &FixedaddressResource{}
 
 var _ resource.ResourceWithModifyPlan = &FixedaddressResource{}
 
+var _ resource.ResourceWithUpgradeState = &FixedaddressResource{}
+
 func NewFixedaddressResource() resource.Resource {
 	return &FixedaddressResource{}
 }
@@ -50,6 +52,7 @@ func (r *FixedaddressResource) Metadata(ctx context.Context, req resource.Metada
 
 func (r *FixedaddressResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
+		Version:             1,
 		MarkdownDescription: "Manages a Fixed Address.",
 		Attributes:          FixedaddressResourceSchemaAttributes,
 	}
@@ -60,6 +63,24 @@ func (r *FixedaddressResource) IdentitySchema(ctx context.Context, req resource.
 		Attributes: map[string]identityschema.Attribute{
 			"ref": identityschema.StringAttribute{
 				RequiredForImport: true,
+			},
+		},
+	}
+}
+
+func (r *FixedaddressResource) UpgradeState(ctx context.Context) map[int64]resource.StateUpgrader {
+	return map[int64]resource.StateUpgrader{
+		0: {
+			PriorSchema: &schema.Schema{
+				Attributes: FixedaddressResourceSchemaAttributes,
+			},
+			StateUpgrader: func(ctx context.Context, req resource.UpgradeStateRequest, resp *resource.UpgradeStateResponse) {
+				var data FixedaddressModel
+				resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
+				if resp.Diagnostics.HasError() {
+					return
+				}
+				resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 			},
 		},
 	}
