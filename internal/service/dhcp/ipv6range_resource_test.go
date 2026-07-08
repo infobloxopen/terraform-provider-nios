@@ -1133,7 +1133,7 @@ func TestAccIpv6rangeResource_StartAddr(t *testing.T) {
 func TestAccIpv6rangeResource_SubscribeSettings(t *testing.T) {
 	var resourceName = "nios_dhcp_ipv6range.test_subscribe_settings"
 	var v dhcp.Ipv6range
-	view := "default"
+	view := "test_network_view"
 	subscribeSettings := map[string]any{
 		"enabled_attributes": []string{"DOMAINNAME", "ENDPOINT_PROFILE"},
 	}
@@ -1147,7 +1147,7 @@ func TestAccIpv6rangeResource_SubscribeSettings(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccIpv6rangeSubscribeSettings(view, "219::1", "219::10", subscribeSettings, "true"),
+				Config: testAccIpv6rangeSubscribeSettings(view, "221::1", "221::10", subscribeSettings, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6rangeExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "subscribe_settings.enabled_attributes.0", "DOMAINNAME"),
@@ -1156,7 +1156,7 @@ func TestAccIpv6rangeResource_SubscribeSettings(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccIpv6rangeSubscribeSettings(view, "219::1", "219::10", subscribeSettingsUpdated, "true"),
+				Config: testAccIpv6rangeSubscribeSettings(view, "221::1", "221::10", subscribeSettingsUpdated, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6rangeExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "subscribe_settings.enabled_attributes.0", "SECURITY_GROUP"),
@@ -1872,7 +1872,7 @@ func testAccIpv6rangeSubscribeSettings(view, startAddr, endAddr string, subscrib
 	subscribeSettingsStr := utils.ConvertMapToHCL(subscribeSettings)
 	return fmt.Sprintf(`
 resource "nios_ipam_ipv6network" "test" {
-    network = "219::/64"
+    network = "221::/64"
 	network_view = %q
 }
 

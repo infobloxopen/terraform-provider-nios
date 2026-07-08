@@ -220,6 +220,48 @@ func cleanupNetworks(ctx context.Context, apiClient *client.APIClient) {
 	}
 }
 
+func cleanupIpv6Networks(ctx context.Context, apiClient *client.APIClient) {
+	// Delete hardcoded IPv6 CIDRs used by tests across all network views.
+	type ipv6NetworkEntry struct {
+		cidr        string
+		networkView string
+	}
+	entries := []ipv6NetworkEntry{
+		{"119::/64", "test_network_view"},
+		{"140::/64", "default"},
+		{"141::/64", "default"},
+		{"219::/64", "test_network_view"},
+		{"221::/64", "test_network_view"},
+	}
+	for _, e := range entries {
+		filters := map[string]interface{}{"network": e.cidr, "network_view": e.networkView}
+		resp, _, err := apiClient.IPAMAPI.Ipv6networkAPI.List(ctx).
+			Filters(filters).
+			ReturnAsObject(1).
+			Execute()
+		if err != nil {
+			fmt.Printf("cleanup: failed to list ipv6 network %q (view=%q): %v\n", e.cidr, e.networkView, err)
+			continue
+		}
+		if resp == nil || resp.ListIpv6networkResponseObject == nil || len(resp.ListIpv6networkResponseObject.Result) == 0 {
+			fmt.Printf("cleanup: ipv6 network %q (view=%q) not found, skipping\n", e.cidr, e.networkView)
+			continue
+		}
+		for _, net := range resp.ListIpv6networkResponseObject.Result {
+			ref := utils.ExtractResourceRef(net.GetRef())
+			if ref == "" {
+				continue
+			}
+			_, err := apiClient.IPAMAPI.Ipv6networkAPI.Delete(ctx, ref).Execute()
+			if err != nil {
+				fmt.Printf("cleanup: failed to delete ipv6 network %q (view=%q, ref=%q): %v\n", e.cidr, e.networkView, ref, err)
+			} else {
+				fmt.Printf("cleanup: deleted ipv6 network %q (view=%q, ref=%q)\n", e.cidr, e.networkView, ref)
+			}
+		}
+	}
+}
+
 func cleanupNetworkViews(ctx context.Context, apiClient *client.APIClient) {
 	filters := map[string]interface{}{"name~": "^network-view"}
 	resp, _, err := apiClient.IPAMAPI.NetworkviewAPI.List(ctx).
@@ -405,6 +447,9 @@ func Cleanup(apiClient *client.APIClient) {
 
 	fmt.Println("--- Cleaning up Networks (10.0.0.0/24, 15.0.0.0/24, 16.0.0.0/24, 85.85.0.0/16, 201.*/24) ---")
 	cleanupNetworks(ctx, apiClient)
+
+	fmt.Println("--- Cleaning up IPv6 Networks (test CIDRs) ---")
+	cleanupIpv6Networks(ctx, apiClient)
 
 	fmt.Println("--- Cleaning up Network Views (prefix: network-view) ---")
 	cleanupNetworkViews(ctx, apiClient)
