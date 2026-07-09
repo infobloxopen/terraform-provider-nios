@@ -121,14 +121,15 @@
   - Added a generic retry helper with exponential backoff and a provider-configurable retry timeout for CRUD operations.
 
 **Terraform Search** 
-  - Added Terraform Search support for all the objects across DNS (except Host Record), DHCP, and IPAM.
+  - Added Terraform Search support for objects across DNS, DHCP, and IPAM.
 
-**Write-only Fileds** 
-  - Sensitive fields (such as passwords) that were previously stored in plaintext in the state file are now marked as write-only, encrypted, and stored in private state. These fields now appear as null in the state file.
+**Sensitive Fields** 
+  - Sensitive fields(such as passwords) are no longer visible in the state file — they are now stored securely in private state and will show as null instead of their actual values.
 
 ### Fixes
 
 - IPAM: Fixed VLAN type validation error in Network and IPv6 Network Container objects when reading network objects containing VLAN information. ([#380](https://github.com/infobloxopen/terraform-provider-nios/pull/380))
+- DNS: Fixed Zone Auth import and read errors triggered by unexpected WAPI attributes returned by NIOS. - DNS: Fixed Zone Auth import and read errors triggered by unexpected WAPI attributes returned by NIOS. (Issue [#550](https://github.com/infobloxopen/terraform-provider-nios/issues/550), PR [#555](https://github.com/infobloxopen/terraform-provider-nios/pull/555))
 - Fixed numerous bugs across DHCP, DNS, DTC, IPAM, Grid, Security, and other modules improving overall stability and reliability.
 
 ## Version 1.1.0
