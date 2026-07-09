@@ -484,6 +484,9 @@ var Ipv6networkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional:            true,
 		MarkdownDescription: "The RIR registration action.",
 		Computed:            true,
+		Validators: []validator.String{
+			stringvalidator.OneOf("CREATE", "MODIFY", "DELETE", "NONE"),
+		},
 	},
 	"rir_registration_status": schema.StringAttribute{
 		Optional:            true,
@@ -514,6 +517,9 @@ var Ipv6networkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 		Attributes: Ipv6networkcontainerSubscribeSettingsResourceSchemaAttributes,
 		Optional:   true,
 		Computed:   true,
+		Validators: []validator.Object{
+			objectvalidator.AlsoRequires(path.MatchRoot("use_subscribe_settings")),
+		},
 	},
 	"unmanaged": schema.BoolAttribute{
 		Optional:            true,

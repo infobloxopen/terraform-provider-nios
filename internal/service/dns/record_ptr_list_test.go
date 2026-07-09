@@ -143,6 +143,60 @@ func TestAccRecordPtrList_ExtAttrFilters(t *testing.T) {
 	})
 }
 
+func TestAccRecordPtrList_CreatorFilter(t *testing.T) {
+	var resourceName = "nios_dns_record_ptr.test"
+	var v dns.RecordPtr
+	ptrDName := acctest.RandomNameWithPrefix("ptr") + ".example.com"
+	ipv4addr := "192.168.10.22"
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: func() { acctest.PreCheck(t) },
+		TerraformVersionChecks: []tfversion.TerraformVersionCheck{
+			tfversion.SkipBelow(tfversion.Version1_14_0),
+		},
+		Steps: []resource.TestStep{
+			{
+				ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+				Config:                   testAccRecordPtrBasicConfig(ipv4addr, ptrDName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckRecordPtrExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "ipv4addr", ipv4addr),
+				),
+			},
+			// Query with explicit creator=STATIC
+			{
+				ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+				Query:                    true,
+				Config:                   testAccRecordPtrListConfigCreatorFilter(ptrDName, "STATIC"),
+				QueryResultChecks: []querycheck.QueryResultCheck{
+					querycheck.ExpectLength("nios_dns_record_ptr.test", 1),
+					querycheck.ExpectResourceKnownValues(
+						resourceName,
+						queryfilter.ByResourceIdentity(map[string]knownvalue.Check{
+							"ref": knownvalue.StringRegexp(regexp.MustCompile("record:ptr/")),
+						}),
+						[]querycheck.KnownValueCheck{
+							{
+								Path:       tfjsonpath.New("ptrdname"),
+								KnownValue: knownvalue.StringExact(ptrDName),
+							},
+						},
+					),
+				},
+			},
+			// Query with explicit creator=DYNAMIC
+			{
+				ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+				Query:                    true,
+				Config:                   testAccRecordPtrListConfigCreatorFilter(ptrDName, "DYNAMIC"),
+				QueryResultChecks: []querycheck.QueryResultCheck{
+					querycheck.ExpectLength("nios_dns_record_ptr.test", 0),
+				},
+			},
+		},
+	})
+}
+
 func testAccRecordPtrListBasicConfig() string {
 	return `
 list "nios_dns_record_ptr" "test" {
@@ -164,6 +218,21 @@ list "nios_dns_record_ptr" "test" {
 	}
 }
 `, filterValue)
+}
+
+func testAccRecordPtrListConfigCreatorFilter(ptrDName, creator string) string {
+	return fmt.Sprintf(`
+list "nios_dns_record_ptr" "test" {
+	provider         = nios
+	include_resource = true
+	config {
+		filters = {
+			ptrdname = %q
+			creator  = %q
+		}
+	}
+}
+`, ptrDName, creator)
 }
 
 func testAccRecordPtrListConfigExtAttrFilters(extAttrsValue string) string {
