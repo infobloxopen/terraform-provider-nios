@@ -97,6 +97,7 @@ var Ipv6fixedaddresstemplateResourceSchemaAttributes = map[string]schema.Attribu
 		ElementType: types.StringType,
 		Optional:    true,
 		Computed:    true,
+		Default:     listdefault.StaticValue(types.ListNull(types.StringType)),
 		Validators: []validator.List{
 			listvalidator.SizeAtLeast(1),
 			listvalidator.AlsoRequires(path.MatchRoot("use_domain_name_servers")),

@@ -14,15 +14,15 @@ Manages a Fixed Address.
 
 ```terraform
 // Create an IPV4 Network (Required as Parent)
-resource "nios_ipam_network" "parent_network" {
-  network      = "16.0.0.0/24"
-  network_view = "default"
-  comment      = "Parent network for DHCP fixed addresses"
-}
+# resource "nios_ipam_network" "parent_network" {
+#   network      = "15.0.0.0/24"
+#   network_view = "default"
+#   comment      = "Parent network for DHCP fixed addresses"
+# }
 
 // Create Fixed Address with Basic Fields
 resource "nios_dhcp_fixed_address" "create_fixed_address_basic" {
-  ipv4addr     = "16.0.0.10"
+  ipv4addr     = "16.0.0.11"
   match_client = "MAC_ADDRESS"
   mac          = "00:1a:2b:3c:4d:5e"
 
@@ -30,13 +30,13 @@ resource "nios_dhcp_fixed_address" "create_fixed_address_basic" {
   extattrs = {
     Site = "location-1"
   }
-  depends_on = [nios_ipam_network.parent_network]
+  # depends_on = [nios_ipam_network.parent_network]
 }
 
 // Create Fixed Address with Additional Fields
 resource "nios_dhcp_fixed_address" "create_fixed_address_additional" {
   // Basic Fields
-  ipv4addr     = "16.0.0.20"
+  ipv4addr     = "16.0.0.18"
   match_client = "MAC_ADDRESS"
   mac          = "00:6a:7b:8c:9d:5e"
 
@@ -65,6 +65,11 @@ resource "nios_dhcp_fixed_address" "create_fixed_address_additional" {
       name  = "dhcp-lease-time"
       num   = 51
       value = "7200"
+    },
+    {
+      name  = "domain-name-servers"
+      num   = 6
+      value = "8.8.8.8,8.8.4.4"
     }
   ]
   use_options = true
@@ -72,7 +77,7 @@ resource "nios_dhcp_fixed_address" "create_fixed_address_additional" {
   extattrs = {
     Site = "location-2"
   }
-  depends_on = [nios_ipam_network.parent_network]
+  # depends_on = [nios_ipam_network.parent_network]
 }
 
 // Create Fixed Address using function call to retrieve ipv4addr
@@ -89,8 +94,8 @@ resource "nios_dhcp_fixed_address" "create_fixed_address_with_func_call" {
       network_view = "default"
     }
   }
-  comment    = "Fixed Address created with ipv4addr retrieved via function call"
-  depends_on = [nios_ipam_network.parent_network]
+  comment = "Fixed Address created with ipv4addr retrieved via function call"
+  # depends_on = [nios_ipam_network.parent_network]
 }
 ```
 

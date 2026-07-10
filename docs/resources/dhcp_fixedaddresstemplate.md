@@ -37,6 +37,11 @@ resource "nios_dhcp_fixedaddresstemplate" "additional_fields" {
       "name" : "subnet-mask",
       "value" : "1.1.1.1",
     },
+    {
+      name  = "domain-name-servers"
+      num   = 6
+      value = "8.8.8.8,8.8.4.4"
+    }
   ]
   use_options = true
 

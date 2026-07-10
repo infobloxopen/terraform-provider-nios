@@ -31,7 +31,7 @@ resource "nios_dhcp_ipv6sharednetwork" "dhcp_ipv6sharednetwork_with_additional_f
     {
       name  = "domain-name-servers"
       num   = 6
-      value = "8.8.8.8,8.8.4.4"
+      value = "2001:4860:4860::8888,2001:4860:4860::8844"
     }
   ]
   use_options        = true

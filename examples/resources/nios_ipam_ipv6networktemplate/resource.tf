@@ -32,11 +32,6 @@ resource "nios_ipam_ipv6networktemplate" "ipam_ipv6_network_template_with_additi
       num          = 39,
       value        = "test_options.com",
       vendor_class = "DHCPv6"
-    },
-    {
-      name  = "domain-name-servers"
-      num   = 6
-      value = "8.8.8.8,8.8.4.4"
     }
   ]
   preferred_lifetime          = 27000

@@ -42,6 +42,11 @@ resource "nios_dhcp_ipv6sharednetwork" "dhcp_ipv6sharednetwork_with_additional_f
       name  = "dhcp-lease-time"
       num   = "51"
       value = "50000"
+    },
+    {
+      name  = "domain-name-servers"
+      num   = 6
+      value = "2001:4860:4860::8888,2001:4860:4860::8844"
     }
   ]
   use_options        = true

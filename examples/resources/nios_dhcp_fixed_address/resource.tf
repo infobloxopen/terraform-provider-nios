@@ -79,21 +79,6 @@ resource "nios_dhcp_fixed_address" "create_fixed_address_with_func_call" {
       network_view = "default"
     }
   }
-  comment    = "Fixed Address created with ipv4addr retrieved via function call"
+  comment = "Fixed Address created with ipv4addr retrieved via function call"
   # depends_on = [nios_ipam_network.parent_network]
-}
-
-terraform {
-	  required_providers {
-	    nios = {
-	      source  = "infobloxopen/nios"
-	      version = "1.1.0"
-	    }
-	  }
-	}
-	
-	provider "nios" {
-	  nios_host_url = "https://172.28.82.33"
-	  nios_username = "admin"
-	  nios_password = "Infoblox@123"
 }
