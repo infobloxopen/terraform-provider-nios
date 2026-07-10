@@ -7,7 +7,7 @@ resource "nios_ipam_network" "parent_network" {
 
 // Create Fixed Address with Basic Fields
 resource "nios_dhcp_fixed_address" "create_fixed_address_basic" {
-  ipv4addr     = "16.0.0.11"
+  ipv4addr     = "15.0.0.11"
   match_client = "MAC_ADDRESS"
   mac          = "00:1a:2b:3c:4d:5e"
 
@@ -15,13 +15,13 @@ resource "nios_dhcp_fixed_address" "create_fixed_address_basic" {
   extattrs = {
     Site = "location-1"
   }
-  # depends_on = [nios_ipam_network.parent_network]
+  depends_on = [nios_ipam_network.parent_network]
 }
 
 // Create Fixed Address with Additional Fields
 resource "nios_dhcp_fixed_address" "create_fixed_address_additional" {
   // Basic Fields
-  ipv4addr     = "16.0.0.18"
+  ipv4addr     = "15.0.0.18"
   match_client = "MAC_ADDRESS"
   mac          = "00:6a:7b:8c:9d:5e"
 

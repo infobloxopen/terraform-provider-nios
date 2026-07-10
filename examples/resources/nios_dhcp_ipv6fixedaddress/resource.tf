@@ -16,7 +16,7 @@ resource "nios_dhcp_ipv6fixedaddress" "create_ipv6_fixed_address_basic" {
 resource "nios_dhcp_ipv6fixedaddress" "create_ipv6_fixed_address_additional1" {
   // Basic Fields
   address_type    = "PREFIX"
-  ipv6prefix      = "2001:db8:abcd:1231::"
+  ipv6prefix      = "2001:db8:abcd:1232::"
   ipv6prefix_bits = 64
   match_client    = "MAC_ADDRESS"
   mac_address     = "01:6a:7b:8c:9d:5e"
@@ -25,8 +25,6 @@ resource "nios_dhcp_ipv6fixedaddress" "create_ipv6_fixed_address_additional1" {
   // Additional Fields
   comment = "IPv6 Fixed Address created with additional fields"
 
-  domain_name_servers     = ["2001:4860:4860::1111", "2001:4860:4860::1222"]
-  use_domain_name_servers = false
   options = [
     {
       name  = "domain-name"
