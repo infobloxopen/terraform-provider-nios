@@ -1,9 +1,9 @@
 // Create an IPV4 Network (Required as Parent)
-# resource "nios_ipam_network" "parent_network" {
-#   network      = "15.0.0.0/24"
-#   network_view = "default"
-#   comment      = "Parent network for DHCP fixed addresses"
-# }
+resource "nios_ipam_network" "parent_network" {
+  network      = "15.0.0.0/24"
+  network_view = "default"
+  comment      = "Parent network for DHCP fixed addresses"
+}
 
 // Create Fixed Address with Basic Fields
 resource "nios_dhcp_fixed_address" "create_fixed_address_basic" {
@@ -62,7 +62,7 @@ resource "nios_dhcp_fixed_address" "create_fixed_address_additional" {
   extattrs = {
     Site = "location-2"
   }
-  # depends_on = [nios_ipam_network.parent_network]
+  depends_on = [nios_ipam_network.parent_network]
 }
 
 // Create Fixed Address using function call to retrieve ipv4addr
@@ -79,6 +79,6 @@ resource "nios_dhcp_fixed_address" "create_fixed_address_with_func_call" {
       network_view = "default"
     }
   }
-  comment = "Fixed Address created with ipv4addr retrieved via function call"
-  # depends_on = [nios_ipam_network.parent_network]
+  comment    = "Fixed Address created with ipv4addr retrieved via function call"
+  depends_on = [nios_ipam_network.parent_network]
 }

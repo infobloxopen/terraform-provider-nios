@@ -30,7 +30,7 @@ resource "nios_dhcp_ipv6fixedaddresstemplate" "additional_fields" {
       name  = "dhcp-lease-time"
       num   = "51"
       value = "5000"
-    },
+    }
   ]
   use_options        = true
   valid_lifetime     = 5000
