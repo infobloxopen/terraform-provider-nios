@@ -1,13 +1,13 @@
 // Create an IPV4 Network (Required as Parent)
 resource "nios_ipam_network" "parent_network" {
-  network      = "15.0.0.0/24"
+  network      = "16.0.0.0/24"
   network_view = "default"
   comment      = "Parent network for DHCP fixed addresses"
 }
 
 // Create Fixed Address with Basic Fields
 resource "nios_dhcp_fixed_address" "create_fixed_address_basic" {
-  ipv4addr     = "15.0.0.11"
+  ipv4addr     = "16.0.0.10"
   match_client = "MAC_ADDRESS"
   mac          = "00:1a:2b:3c:4d:5e"
 
@@ -21,7 +21,7 @@ resource "nios_dhcp_fixed_address" "create_fixed_address_basic" {
 // Create Fixed Address with Additional Fields
 resource "nios_dhcp_fixed_address" "create_fixed_address_additional" {
   // Basic Fields
-  ipv4addr     = "15.0.0.18"
+  ipv4addr     = "16.0.0.20"
   match_client = "MAC_ADDRESS"
   mac          = "00:6a:7b:8c:9d:5e"
 
