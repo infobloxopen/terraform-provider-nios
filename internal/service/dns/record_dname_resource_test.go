@@ -446,7 +446,7 @@ func TestAccRecordDnameResource_View(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRecordDnameViewUpdate(target, zoneFqdn, viewName),
+				Config: testAccRecordDnameView(target, zoneFqdn, viewName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordDnameExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "view", viewName),
@@ -691,7 +691,7 @@ resource "nios_dns_zone_auth" "updated_zone" {
 `, zoneFqdn1, zoneFqdn2)
 }
 
-func testAccRecordDnameViewUpdate(target, zoneFqdn, view string) string {
+func testAccRecordDnameView(target, zoneFqdn, view string) string {
 	config := fmt.Sprintf(`
 resource "nios_dns_record_dname" "test_view" {
     name   = nios_dns_zone_auth.test.fqdn

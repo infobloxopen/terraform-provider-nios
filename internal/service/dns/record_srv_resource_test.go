@@ -528,7 +528,7 @@ func TestAccRecordSrvResource_View(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRecordSrvViewUpdate(name, target, 80, 10, 360, viewName),
+				Config: testAccRecordSrvView(name, target, 80, 10, 360, viewName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordSrvExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "view", viewName),
@@ -797,7 +797,7 @@ resource "nios_dns_record_srv" "test_weight" {
 `, name, target, port, priority, weight)
 }
 
-func testAccRecordSrvViewUpdate(name, target string, port, priority, weight int, view string) string {
+func testAccRecordSrvView(name, target string, port, priority, weight int, view string) string {
 	return fmt.Sprintf(`
 resource "nios_dns_view" "test_dns_view" {
 	name = %q

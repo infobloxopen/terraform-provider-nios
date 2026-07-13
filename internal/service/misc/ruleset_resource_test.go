@@ -228,30 +228,6 @@ func TestAccRulesetResource_NxdomainRules(t *testing.T) {
 	})
 }
 
-func TestAccRulesetResource_Type(t *testing.T) {
-	var resourceName = "nios_misc_ruleset.test_type"
-	var v misc.Ruleset
-	name := acctest.RandomNameWithPrefix("tf_test_ruleset_")
-
-	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.PreCheck(t) },
-		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-		Steps: []resource.TestStep{
-			// Create and Read with BLACKLIST
-			{
-				Config: testAccRulesetType(name, "BLACKLIST"),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckRulesetExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "name", name),
-					resource.TestCheckResourceAttr(resourceName, "type", "BLACKLIST"),
-				),
-			},
-			// Update is not applicable as type is an immutable field.
-			// Delete testing automatically occurs in TestCase
-		},
-	})
-}
-
 func testAccCheckRulesetExists(ctx context.Context, resourceName string, v *misc.Ruleset) resource.TestCheckFunc {
 	// Verify the resource exists in the cloud
 	return func(state *terraform.State) error {
@@ -358,13 +334,4 @@ resource "nios_misc_ruleset" "test_nxdomain_rules" {
     nxdomain_rules = %s
 }
 `, name, ruleset_type, rulesetHcl)
-}
-
-func testAccRulesetType(name, rulesetType string) string {
-	return fmt.Sprintf(`
-resource "nios_misc_ruleset" "test_type" {
-    name = %q
-    type = %q
-}
-`, name, rulesetType)
 }

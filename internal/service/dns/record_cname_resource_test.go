@@ -433,7 +433,7 @@ func TestAccRecordCnameResource_View(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRecordCnameViewUpdate(canonical, name, viewName),
+				Config: testAccRecordCnameView(canonical, name, viewName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordCnameExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "view", viewName),
@@ -654,7 +654,7 @@ resource "nios_dns_record_cname" "test_use_ttl" {
 `, canonical, name, view, useTtl)
 }
 
-func testAccRecordCnameViewUpdate(canonical, name, view string) string {
+func testAccRecordCnameView(canonical, name, view string) string {
 	return fmt.Sprintf(`
 resource "nios_dns_view" "test_dns_view" {
 	name = %q

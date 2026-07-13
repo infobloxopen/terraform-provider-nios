@@ -510,30 +510,6 @@ func TestAccZoneDelegatedResource_ZoneFormatIPV6(t *testing.T) {
 	})
 }
 
-func TestAccZoneDelegatedResource_Fqdn(t *testing.T) {
-	var resourceName = "nios_dns_zone_delegated.test_fqdn"
-	var v dns.ZoneDelegated
-	fqdn := acctest.RandomNameWithPrefix("zone-delegated") + ".example.com"
-	delegatedToName := acctest.RandomNameWithPrefix("zone-delegated") + ".com"
-
-	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.PreCheck(t) },
-		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-		Steps: []resource.TestStep{
-			// Create and Read
-			{
-				Config: testAccZoneDelegatedFqdn(fqdn, delegatedToName, "10.0.0.1"),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckZoneDelegatedExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "fqdn", fqdn),
-				),
-			},
-			// Update is not applicable as fqdn is an immutable field.
-			// Delete testing automatically occurs in TestCase
-		},
-	})
-}
-
 func TestAccZoneDelegatedResource_View(t *testing.T) {
 	var resourceName = "nios_dns_zone_delegated.test_view"
 	var v dns.ZoneDelegated
@@ -553,30 +529,6 @@ func TestAccZoneDelegatedResource_View(t *testing.T) {
 				),
 			},
 			// Update is not applicable as view is an immutable field.
-			// Delete testing automatically occurs in TestCase
-		},
-	})
-}
-
-func TestAccZoneDelegatedResource_ZoneFormat(t *testing.T) {
-	var resourceName = "nios_dns_zone_delegated.test_zone_format"
-	var v dns.ZoneDelegated
-	fqdn := acctest.RandomNameWithPrefix("zone-delegated") + ".example.com"
-	delegatedToName := acctest.RandomNameWithPrefix("zone-delegated") + ".com"
-
-	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.PreCheck(t) },
-		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-		Steps: []resource.TestStep{
-			// Create and Read
-			{
-				Config: testAccZoneDelegatedZoneFormat(fqdn, delegatedToName, "10.0.0.1", "FORWARD"),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckZoneDelegatedExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "zone_format", "FORWARD"),
-				),
-			},
-			// Update is not applicable as zone_format is an immutable field.
 			// Delete testing automatically occurs in TestCase
 		},
 	})
@@ -886,35 +838,6 @@ resource "nios_dns_zone_delegated" "test_use_delegated_ttl" {
 `, fqdn, delegateToName, delegateToAddress, useDelegatedTtl, delegatedTTL)
 }
 
-func testAccZoneDelegatedZoneFormat(fqdn, delegateToName, delegateToAddress, zoneFormat string) string {
-	return fmt.Sprintf(`
-resource "nios_dns_zone_delegated" "test_zone_format" {
-	fqdn = %q
-    delegate_to = [
-		{
-			name = %q
-			address = %q
-		}
-	]
-    zone_format = %q
-}
-`, fqdn, delegateToName, delegateToAddress, zoneFormat)
-}
-
-func testAccZoneDelegatedFqdn(fqdn, delegateToName, delegateToAddress string) string {
-	return fmt.Sprintf(`
-resource "nios_dns_zone_delegated" "test_fqdn" {
-	fqdn = %q
-    delegate_to = [
-		{
-			name = %q
-			address = %q
-		}
-	]
-}
-`, fqdn, delegateToName, delegateToAddress)
-}
-
 func testAccZoneDelegatedView(fqdn, delegateToName, delegateToAddress, view string) string {
 	return fmt.Sprintf(`
 resource "nios_dns_zone_delegated" "test_view" {
@@ -967,4 +890,19 @@ func TestAccZoneDelegatedResource_Import(t *testing.T) {
 			// Delete testing automatically occurs in TestCase
 		},
 	})
+}
+
+func testAccZoneDelegatedZoneFormat(fqdn, delegateToName, delegateToAddress, zoneFormat string) string {
+	return fmt.Sprintf(`
+resource "nios_dns_zone_delegated" "test_zone_format" {
+	fqdn = %q
+    delegate_to = [
+		{
+			name = %q
+			address = %q
+		}
+	]
+    zone_format = %q
+}
+`, fqdn, delegateToName, delegateToAddress, zoneFormat)
 }

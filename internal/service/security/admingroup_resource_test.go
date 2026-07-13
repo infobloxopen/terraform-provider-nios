@@ -1458,16 +1458,15 @@ func TestAccAdmingroupResource_EnableRestrictedUserAccess(t *testing.T) {
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
-			// Create and Read
+			// Create and Read — enable_restricted_user_access is computed by NIOS (default false)
 			{
 				Config: testAccAdmingroupEnableRestrictedUserAccess(name),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAdmingroupExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "name", name),
-					resource.TestCheckResourceAttrSet(resourceName, "enable_restricted_user_access"),
+					resource.TestCheckResourceAttr(resourceName, "enable_restricted_user_access", "false"),
 				),
 			},
-			// Update is not applicable as enable_restricted_user_access is an immutable field.
 			// Delete testing automatically occurs in TestCase
 		},
 	})

@@ -1194,36 +1194,6 @@ func TestAccZoneAuthResource_ExternalSecondaries(t *testing.T) {
 	})
 }
 
-func TestAccZoneAuthResource_Fqdn(t *testing.T) {
-	var resourceName = "nios_dns_zone_auth.test_fqdn"
-	var v dns.ZoneAuth
-	zoneFqdn := acctest.RandomNameWithPrefix("zone") + ".com"
-
-	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.PreCheck(t) },
-		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-		Steps: []resource.TestStep{
-			// Create and Read
-			{
-				Config: testAccZoneAuthFqdn(zoneFqdn, "default"),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckZoneAuthExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "fqdn", zoneFqdn),
-				),
-			},
-			// Update and Read
-			{
-				Config: testAccZoneAuthFqdn(zoneFqdn, "default"),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckZoneAuthExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "fqdn", zoneFqdn),
-				),
-			},
-			// Delete testing automatically occurs in TestCase
-		},
-	})
-}
-
 func TestAccZoneAuthResource_GridPrimary(t *testing.T) {
 	var resourceName = "nios_dns_zone_auth.test_grid_primary"
 	var v dns.ZoneAuth
@@ -3063,13 +3033,20 @@ func TestAccZoneAuthResource_CreatePtrForBulkHosts(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccZoneAuthCreatePtrForBulkHosts(zoneFqdn, "default"),
+				Config: testAccZoneAuthCreatePtrForBulkHosts(zoneFqdn, "default", true),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckZoneAuthExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "create_ptr_for_bulk_hosts", "true"),
+				),
+			},
+			// Update and Read
+			{
+				Config: testAccZoneAuthCreatePtrForBulkHosts(zoneFqdn, "default", false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneAuthExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "create_ptr_for_bulk_hosts", "false"),
 				),
 			},
-			// Update is not applicable as create_ptr_for_bulk_hosts is an immutable field.
 			// Delete testing automatically occurs in TestCase
 		},
 	})
@@ -3086,36 +3063,20 @@ func TestAccZoneAuthResource_CreatePtrForHosts(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccZoneAuthCreatePtrForHosts(zoneFqdn, "default"),
+				Config: testAccZoneAuthCreatePtrForHosts(zoneFqdn, "default", true),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckZoneAuthExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "create_ptr_for_hosts", "true"),
+				),
+			},
+			// Update and Read
+			{
+				Config: testAccZoneAuthCreatePtrForHosts(zoneFqdn, "default", false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneAuthExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "create_ptr_for_hosts", "false"),
 				),
 			},
-			// Update is not applicable as create_ptr_for_hosts is an immutable field.
-			// Delete testing automatically occurs in TestCase
-		},
-	})
-}
-
-func TestAccZoneAuthResource_DnssecKeys(t *testing.T) {
-	var resourceName = "nios_dns_zone_auth.test_dnssec_keys"
-	var v dns.ZoneAuth
-	zoneFqdn := acctest.RandomNameWithPrefix("zone") + ".com"
-
-	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.PreCheck(t) },
-		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-		Steps: []resource.TestStep{
-			// Create and Read
-			{
-				Config: testAccZoneAuthDnssecKeys(zoneFqdn, "default"),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckZoneAuthExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "dnssec_keys.#", "0"),
-				),
-			},
-			// Update is not applicable as dnssec_keys is an immutable field.
 			// Delete testing automatically occurs in TestCase
 		},
 	})
@@ -3132,36 +3093,20 @@ func TestAccZoneAuthResource_DoHostAbstraction(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccZoneAuthDoHostAbstraction(zoneFqdn, "default"),
+				Config: testAccZoneAuthDoHostAbstraction(zoneFqdn, "default", true),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckZoneAuthExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "do_host_abstraction", "true"),
+				),
+			},
+			// Update and Read
+			{
+				Config: testAccZoneAuthDoHostAbstraction(zoneFqdn, "default", false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneAuthExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "do_host_abstraction", "false"),
 				),
 			},
-			// Update is not applicable as do_host_abstraction is an immutable field.
-			// Delete testing automatically occurs in TestCase
-		},
-	})
-}
-
-func TestAccZoneAuthResource_ImportFrom(t *testing.T) {
-	var resourceName = "nios_dns_zone_auth.test_import_from"
-	var v dns.ZoneAuth
-	zoneFqdn := acctest.RandomNameWithPrefix("zone") + ".com"
-
-	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.PreCheck(t) },
-		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-		Steps: []resource.TestStep{
-			// Create and Read
-			{
-				Config: testAccZoneAuthImportFrom(zoneFqdn, "default"),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckZoneAuthExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_import_from", "false"),
-				),
-			},
-			// Update is not applicable as import_from is an immutable field.
 			// Delete testing automatically occurs in TestCase
 		},
 	})
@@ -3229,52 +3174,6 @@ func TestAccZoneAuthResource_SetSoaSerialNumber(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "set_soa_serial_number", "false"),
 				),
 			},
-			// Delete testing automatically occurs in TestCase
-		},
-	})
-}
-
-func TestAccZoneAuthResource_UseImportFrom(t *testing.T) {
-	var resourceName = "nios_dns_zone_auth.test_use_import_from"
-	var v dns.ZoneAuth
-	zoneFqdn := acctest.RandomNameWithPrefix("zone") + ".com"
-
-	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.PreCheck(t) },
-		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-		Steps: []resource.TestStep{
-			// Create and Read
-			{
-				Config: testAccZoneAuthUseImportFrom(zoneFqdn, "default"),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckZoneAuthExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "use_import_from", "false"),
-				),
-			},
-			// Update is not applicable as use_import_from is an immutable field.
-			// Delete testing automatically occurs in TestCase
-		},
-	})
-}
-
-func TestAccZoneAuthResource_ZoneFormat(t *testing.T) {
-	var resourceName = "nios_dns_zone_auth.test_zone_format"
-	var v dns.ZoneAuth
-	zoneFqdn := acctest.RandomNameWithPrefix("zone") + ".com"
-
-	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.PreCheck(t) },
-		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-		Steps: []resource.TestStep{
-			// Create and Read
-			{
-				Config: testAccZoneAuthZoneFormat(zoneFqdn, "default", "FORWARD"),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckZoneAuthExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "zone_format", "FORWARD"),
-				),
-			},
-			// Update is not applicable as zone_format is an immutable field.
 			// Delete testing automatically occurs in TestCase
 		},
 	})
@@ -3688,15 +3587,6 @@ resource "nios_dns_zone_auth" "test_external_secondaries" {
     external_secondaries = %s
 }
 `, zoneFqdn, view, gridPrimaryHCL, externalSecondariesHCL)
-}
-
-func testAccZoneAuthFqdn(fqdn, view string) string {
-	return fmt.Sprintf(`
-resource "nios_dns_zone_auth" "test_fqdn" {
-    fqdn = %q
-    view = %q
-}
-`, fqdn, view)
 }
 
 func testAccZoneAuthGridPrimary(zoneFqdn, view string, gridPrimary []map[string]any) string {
@@ -4339,59 +4229,34 @@ resource "nios_dns_zone_auth" "test_view" {
 `, zoneFqdn, view)
 }
 
-func testAccZoneAuthZoneFormat(zoneFqdn, view, zoneFormat string) string {
-	return fmt.Sprintf(`
-resource "nios_dns_zone_auth" "test_zone_format" {
-    fqdn = %q
-    view = %q
-    zone_format = %q
-}
-`, zoneFqdn, view, zoneFormat)
-}
-
-func testAccZoneAuthCreatePtrForBulkHosts(zoneFqdn, view string) string {
+func testAccZoneAuthCreatePtrForBulkHosts(zoneFqdn, view string, createPtrForBulkHosts bool) string {
 	return fmt.Sprintf(`
 resource "nios_dns_zone_auth" "test_create_ptr_for_bulk_hosts" {
     fqdn = %q
     view = %q
+    create_ptr_for_bulk_hosts = %t
 }
-`, zoneFqdn, view)
+`, zoneFqdn, view, createPtrForBulkHosts)
 }
 
-func testAccZoneAuthCreatePtrForHosts(zoneFqdn, view string) string {
+func testAccZoneAuthCreatePtrForHosts(zoneFqdn, view string, createPtrForHosts bool) string {
 	return fmt.Sprintf(`
 resource "nios_dns_zone_auth" "test_create_ptr_for_hosts" {
     fqdn = %q
     view = %q
+    create_ptr_for_hosts = %t
 }
-`, zoneFqdn, view)
-}
-
-func testAccZoneAuthDnssecKeys(zoneFqdn, view string) string {
-	return fmt.Sprintf(`
-resource "nios_dns_zone_auth" "test_dnssec_keys" {
-    fqdn = %q
-    view = %q
-}
-`, zoneFqdn, view)
+`, zoneFqdn, view, createPtrForHosts)
 }
 
-func testAccZoneAuthDoHostAbstraction(zoneFqdn, view string) string {
+func testAccZoneAuthDoHostAbstraction(zoneFqdn, view string, doHostAbstraction bool) string {
 	return fmt.Sprintf(`
 resource "nios_dns_zone_auth" "test_do_host_abstraction" {
     fqdn = %q
     view = %q
+    do_host_abstraction = %t
 }
-`, zoneFqdn, view)
-}
-
-func testAccZoneAuthImportFrom(zoneFqdn, view string) string {
-	return fmt.Sprintf(`
-resource "nios_dns_zone_auth" "test_import_from" {
-    fqdn = %q
-    view = %q
-}
-`, zoneFqdn, view)
+`, zoneFqdn, view, doHostAbstraction)
 }
 
 func testAccZoneAuthRestartIfNeeded(zoneFqdn, view string, restartIfNeeded bool) string {
@@ -4425,11 +4290,12 @@ resource "nios_dns_zone_auth" "test_set_soa_serial_number" {
 }`, zoneFqdn, view, gridPrimaryHCL, soaSerialNumberHCL, setSoaSerialNumber)
 }
 
-func testAccZoneAuthUseImportFrom(zoneFqdn, view string) string {
+func testAccZoneAuthZoneFormat(zoneFqdn, view, zoneFormat string) string {
 	return fmt.Sprintf(`
-resource "nios_dns_zone_auth" "test_use_import_from" {
+resource "nios_dns_zone_auth" "test_zone_format" {
     fqdn = %q
     view = %q
+    zone_format = %q
 }
-`, zoneFqdn, view)
+`, zoneFqdn, view, zoneFormat)
 }

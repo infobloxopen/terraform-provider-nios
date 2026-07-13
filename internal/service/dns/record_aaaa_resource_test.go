@@ -450,7 +450,7 @@ func TestAccRecordAaaaResource_View(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRecordAaaaViewUpdate(name, "2002:1111::1401", viewName),
+				Config: testAccRecordAaaaView(name, "2002:1111::1401", viewName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordAaaaExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "view", viewName),
@@ -697,7 +697,7 @@ resource "nios_dns_record_aaaa" "test_use_ttl" {
 `, name, ipV6Addr, view, useTtl)
 }
 
-func testAccRecordAaaaViewUpdate(name, ipV6Addr, view string) string {
+func testAccRecordAaaaView(name, ipV6Addr, view string) string {
 	return fmt.Sprintf(`
 resource "nios_dns_view" "test_dns_view" {
 	name = %q

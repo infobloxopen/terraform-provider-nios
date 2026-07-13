@@ -520,7 +520,7 @@ func TestAccRecordPtrResource_View(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRecordPtrViewUpdate("192.168.10.30", ptrDName, viewName),
+				Config: testAccRecordPtrView("192.168.10.30", ptrDName, viewName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordPtrExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "view", viewName),
@@ -774,7 +774,7 @@ resource "nios_dns_record_ptr" "test_use_ttl" {
 `, ipv6addr, ptrdname, view, useTtl, ttl)
 }
 
-func testAccRecordPtrViewUpdate(ipv4addr, ptrdname, view string) string {
+func testAccRecordPtrView(ipv4addr, ptrdname, view string) string {
 	return fmt.Sprintf(`
 resource "nios_dns_view" "test_dns_view" {
 	name = %q

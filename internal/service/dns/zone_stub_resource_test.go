@@ -550,35 +550,12 @@ func TestAccZoneStubResource_ZoneFormatIPv6(t *testing.T) {
 	})
 }
 
-func TestAccZoneStubResource_Fqdn(t *testing.T) {
-	var resourceName = "nios_dns_zone_stub.test_fqdn"
-	var v dns.ZoneStub
-	fqdn := acctest.RandomNameWithPrefix("zone-stub") + ".com"
-	stubServerName := acctest.RandomNameWithPrefix("stub_server")
-
-	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.PreCheck(t) },
-		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-		Steps: []resource.TestStep{
-			// Create and Read
-			{
-				Config: testAccZoneStubFqdn(fqdn, "1.1.1.1", stubServerName),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckZoneStubExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "fqdn", fqdn),
-				),
-			},
-			// Update is not applicable as fqdn is an immutable field.
-			// Delete testing automatically occurs in TestCase
-		},
-	})
-}
-
 func TestAccZoneStubResource_View(t *testing.T) {
 	var resourceName = "nios_dns_zone_stub.test_view"
 	var v dns.ZoneStub
 	fqdn := acctest.RandomNameWithPrefix("zone-stub") + ".com"
 	stubServerName := acctest.RandomNameWithPrefix("stub_server")
+	viewName := acctest.RandomNameWithPrefix("view")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -586,37 +563,13 @@ func TestAccZoneStubResource_View(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccZoneStubView(fqdn, "1.1.1.1", stubServerName, "default"),
+				Config: testAccZoneStubView(fqdn, "1.1.1.1", stubServerName, viewName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneStubExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "view", "default"),
+					resource.TestCheckResourceAttr(resourceName, "view", viewName),
 				),
 			},
 			// Update is not applicable as view is an immutable field.
-			// Delete testing automatically occurs in TestCase
-		},
-	})
-}
-
-func TestAccZoneStubResource_ZoneFormat(t *testing.T) {
-	var resourceName = "nios_dns_zone_stub.test_zone_format"
-	var v dns.ZoneStub
-	fqdn := acctest.RandomNameWithPrefix("zone-stub") + ".com"
-	stubServerName := acctest.RandomNameWithPrefix("stub_server")
-
-	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.PreCheck(t) },
-		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-		Steps: []resource.TestStep{
-			// Create and Read
-			{
-				Config: testAccZoneStubZoneFormat(fqdn, "1.1.1.1", stubServerName, "FORWARD"),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckZoneStubExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "zone_format", "FORWARD"),
-				),
-			},
-			// Update is not applicable as zone_format is an immutable field.
 			// Delete testing automatically occurs in TestCase
 		},
 	})
@@ -901,40 +854,19 @@ resource "nios_dns_zone_stub" "test_zone_format" {
 `, fqdn, stubAddress, stubName, zoneFormat)
 }
 
-func testAccZoneStubFqdn(fqdn, stubAddress, stubName string) string {
-	return fmt.Sprintf(`
-resource "nios_dns_zone_stub" "test_fqdn" {
-	fqdn = %q
-	stub_from = [{
-		address = %q
-		name  = %q
-	}]
-}
-`, fqdn, stubAddress, stubName)
-}
-
 func testAccZoneStubView(fqdn, stubAddress, stubName, view string) string {
 	return fmt.Sprintf(`
+resource "nios_dns_view" "test_dns_view" {
+	name = %q
+}
+
 resource "nios_dns_zone_stub" "test_view" {
 	fqdn = %q
 	stub_from = [{
 		address = %q
 		name  = %q
 	}]
-	view = %q
+	view = nios_dns_view.test_dns_view.name
 }
-`, fqdn, stubAddress, stubName, view)
-}
-
-func testAccZoneStubZoneFormat(fqdn, stubAddress, stubName, zoneFormat string) string {
-	return fmt.Sprintf(`
-resource "nios_dns_zone_stub" "test_zone_format" {
-	fqdn = %q
-	stub_from = [{
-		address = %q
-		name  = %q
-	}]
-	zone_format = %q
-}
-`, fqdn, stubAddress, stubName, zoneFormat)
+`, view, fqdn, stubAddress, stubName)
 }

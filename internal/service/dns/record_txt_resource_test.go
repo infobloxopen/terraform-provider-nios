@@ -418,7 +418,7 @@ func TestAccRecordTxtResource_View(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRecordTxtViewUpdate(name, text, viewName),
+				Config: testAccRecordTxtView(name, text, viewName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordTxtExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "view", viewName),
@@ -626,7 +626,7 @@ resource "nios_dns_record_txt" "test_use_ttl" {
 `, name, text, useTtl)
 }
 
-func testAccRecordTxtViewUpdate(name, text, view string) string {
+func testAccRecordTxtView(name, text, view string) string {
 	return fmt.Sprintf(`
 resource "nios_dns_view" "test_dns_view" {
 	name = %q

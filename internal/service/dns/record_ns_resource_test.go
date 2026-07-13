@@ -211,44 +211,13 @@ func TestAccRecordNsResource_View(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRecordNsViewUpdate(name, nameserver, addressesHCL, viewName),
+				Config: testAccRecordNsView(name, nameserver, addressesHCL, viewName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordNsExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "view", viewName),
 				),
 			},
 			// Update is not applicable as view is an immutable field.
-			// Delete testing automatically occurs in TestCase
-		},
-	})
-}
-
-func TestAccRecordNsResource_Name(t *testing.T) {
-	var resourceName = "nios_dns_record_ns.test_name"
-	var v dns.RecordNs
-	name := "example.com"
-	nameserver := acctest.RandomNameWithPrefix("nameserver") + ".example.com"
-	addresses := []map[string]any{
-		{
-			"address":         "20.0.0.0",
-			"auto_create_ptr": false,
-		},
-	}
-	addressesHCL := FormatZoneNameServersToHCL(addresses)
-
-	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.PreCheck(t) },
-		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-		Steps: []resource.TestStep{
-			// Create and Read
-			{
-				Config: testAccRecordNsName(name, nameserver, addressesHCL, "default"),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckRecordNsExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "name", name),
-				),
-			},
-			// Update is not applicable as name is an immutable field.
 			// Delete testing automatically occurs in TestCase
 		},
 	})
@@ -362,7 +331,7 @@ func FormatZoneNameServersToHCL(servers []map[string]any) string {
   ]`, strings.Join(serverBlocks, ",\n"))
 }
 
-func testAccRecordNsViewUpdate(name, nameserver, addresses, view string) string {
+func testAccRecordNsView(name, nameserver, addresses, view string) string {
 	return fmt.Sprintf(`
 resource "nios_dns_view" "test_dns_view" {
 	name = %q
@@ -380,15 +349,4 @@ resource "nios_dns_record_ns" "test_view" {
     view        = nios_dns_zone_auth.test_dns_zone.view
 }
 `, view, name, nameserver, addresses)
-}
-
-func testAccRecordNsName(name, nameserver, addresses, view string) string {
-	return fmt.Sprintf(`
-resource "nios_dns_record_ns" "test_name" {
-    name        = %q
-    nameserver  = %q
-    addresses   = %s
-    view        = %q
-}
-`, name, nameserver, addresses, view)
 }

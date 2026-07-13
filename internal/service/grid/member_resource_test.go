@@ -7490,7 +7490,7 @@ resource "nios_grid_member" "test_external_syslog_server_enable" {
     }
 
     external_syslog_server_enable = %t
-    use_syslog_proxy_setting = %t%s
+    use_syslog_proxy_setting = %t   %s
 }
 `, hostName, configAddrType, platform, serviceTypeConfig, vipAddress, vipGateway, vipSubnetMask, externalSyslogServerEnable, useSyslogProxySetting, syslogServersBlock)
 }
@@ -7522,6 +7522,13 @@ resource "nios_grid_member" "test_member_service_communication" {
         subnet_mask = %q
         use_dscp = false
     }
+
+    member_service_communication = [
+        {
+            service = "GRID"
+            type    = "IPV4"
+        }
+    ]
 }
 `, hostName, configAddrType, platform, serviceTypeConfig, vipAddress, vipGateway, vipSubnetMask)
 }

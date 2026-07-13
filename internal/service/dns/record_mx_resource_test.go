@@ -468,18 +468,18 @@ func TestAccRecordMxResource_DdnsPrincipal(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRecordMxDdnsPrincipal(name, mailExchanger, 10, "default", "DDNS_PRINCIPAL_REPLACE_ME"),
+				Config: testAccRecordMxDdnsPrincipal(name, mailExchanger, 10, "default", "ddns_principal"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordMxExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ddns_principal", "DDNS_PRINCIPAL_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "ddns_principal", "ddns_principal"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccRecordMxDdnsPrincipal(name, mailExchanger, 10, "default", "DDNS_PRINCIPAL_UPDATE_REPLACE_ME"),
+				Config: testAccRecordMxDdnsPrincipal(name, mailExchanger, 10, "default", "ddns_principal_updated"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordMxExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ddns_principal", "DDNS_PRINCIPAL_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "ddns_principal", "ddns_principal_updated"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase

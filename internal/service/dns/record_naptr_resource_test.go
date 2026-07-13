@@ -619,7 +619,7 @@ func TestAccRecordNaptrResource_View(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRecordNaptrViewUpdate(zoneFqdn, name, 10, 10, ".", viewName),
+				Config: testAccRecordNaptrView(zoneFqdn, name, 10, 10, ".", viewName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRecordNaptrExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "view", viewName),
@@ -923,7 +923,7 @@ resource "nios_dns_zone_auth" "test" {
 `, zoneFqdn)
 }
 
-func testAccRecordNaptrViewUpdate(zoneFqdn, name string, order, preference int, replacement, view string) string {
+func testAccRecordNaptrView(zoneFqdn, name string, order, preference int, replacement, view string) string {
 	config := fmt.Sprintf(`
 resource "nios_dns_record_naptr" "test_view" {
     name = "%s.${nios_dns_zone_auth.test.fqdn}"
