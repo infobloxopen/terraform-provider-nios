@@ -33,11 +33,17 @@ The table below shows the compatibility between different versions of the Terraf
 | 2.0.0 | >= 1.25.1 | >= 1.12.1 | 9.1.0 or higher | v2.14 |
 | 1.1.0 , 1.0.0 , 0.0.1 | >= 1.18 | >= 1.8.0 | 9.0.6 or higher | v2.13.6 |
 
+> **Note:** Documentation and guides are maintained on version-specific branches. 
+> For v2.x, refer to the [`nios_v9.1.0`](https://github.com/infobloxopen/terraform-provider-nios/tree/nios_v9.1.0/README.md) branch. For v1.x, refer to the [`main`](https://github.com/infobloxopen/terraform-provider-nios/tree/main/README.md) branch.
+
+
 **Important Notes:**
 - **Version 2.0.0+** introduces UUID based resource identification for NIOS 9.1.0. Resources must be imported using UUID instead of ref.
 - **Version 1.1.0 and earlier** uses reference based resource identification. Resources must be imported using ref.
-- **Recommended**: When upgrading from provider v1.x.x to v2.x.x, execute `terraform refresh` to automatically update your state file with UUID.
+- **Recommended**: When upgrading from provider v1.x.x to v2.x.x, execute `terraform plan -refresh-only` followed by `terraform apply -refresh-only` to automatically update your state file with UUID.
 - For migration from the legacy terraform provider, refer to the [Migration Guide](MIGRATION.md).
+
+> **Note:** The `terraform refresh` command is deprecated. Use the refresh-only workflow instead. See the [Terraform refresh documentation](https://developer.hashicorp.com/terraform/cli/commands/refresh) for more details.
 
 ### Known Issues
 

@@ -378,7 +378,7 @@ func ExtractResourceRef(ref string) string {
 
 func FindModelFieldByTFSdkTag(model any, tagName string) (string, bool) {
 	modelType := reflect.TypeOf(model)
-	if modelType.Kind() == reflect.Ptr {
+	if modelType.Kind() == reflect.Pointer {
 		modelType = modelType.Elem()
 	}
 
