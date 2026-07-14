@@ -478,15 +478,18 @@ func (r *MemberResource) ValidateConfig(ctx context.Context, req resource.Valida
 					}
 				}
 			}
-		}
 
-		if len(nodeInfo) > 0 && (!nodeInfo[0].MgmtNetworkSetting.IsNull() && !nodeInfo[0].MgmtNetworkSetting.IsUnknown()) {
-			if data.MgmtPortSetting.IsNull() || data.MgmtPortSetting.IsUnknown() || data.MgmtPortSetting.Attributes()["enabled"].String() != "true" {
-				resp.Diagnostics.AddError("Validation Error", "node_info.mgmt_network_setting can be set only when mgmt_port_setting.enabled is set to true")
-			} else {
-				mgmtCheckComplete = true
+			if !node.MgmtNetworkSetting.IsNull() && !node.MgmtNetworkSetting.IsUnknown() && len(node.MgmtNetworkSetting.Attributes()) > 0 {
+				if mgmtPortEnabledAttr, ok := node.MgmtNetworkSetting.Attributes()["enabled"]; ok {
+					if !mgmtPortEnabledAttr.IsNull() && mgmtPortEnabledAttr.String() == "true" {
+						if data.MgmtPortSetting.IsNull() || data.MgmtPortSetting.IsUnknown() || data.MgmtPortSetting.Attributes()["enabled"].String() != "true" {
+							resp.Diagnostics.AddError("Validation Error", "node_info.mgmt_network_setting.enabled can be set only when mgmt_port_setting.enabled is set to true")
+						}
+					}
+				}
 			}
 		}
+		mgmtCheckComplete = true
 	}
 
 	if !data.MgmtPortSetting.IsNull() && !data.MgmtPortSetting.IsUnknown() {
