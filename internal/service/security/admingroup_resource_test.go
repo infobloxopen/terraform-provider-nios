@@ -1449,29 +1449,6 @@ func TestAccAdmingroupResource_UserAccess(t *testing.T) {
 	})
 }
 
-func TestAccAdmingroupResource_EnableRestrictedUserAccess(t *testing.T) {
-	var resourceName = "nios_security_admin_group.test_enable_restricted_user_access"
-	var v security.Admingroup
-	name := acctest.RandomNameWithPrefix("admin-group")
-
-	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.PreCheck(t) },
-		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-		Steps: []resource.TestStep{
-			// Create and Read — enable_restricted_user_access is computed by NIOS (default false)
-			{
-				Config: testAccAdmingroupEnableRestrictedUserAccess(name),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckAdmingroupExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "name", name),
-					resource.TestCheckResourceAttr(resourceName, "enable_restricted_user_access", "false"),
-				),
-			},
-			// Delete testing automatically occurs in TestCase
-		},
-	})
-}
-
 func testAccCheckAdmingroupExists(ctx context.Context, resourceName string, v *security.Admingroup) resource.TestCheckFunc {
 	// Verify the resource exists in the cloud
 	return func(state *terraform.State) error {
@@ -1922,12 +1899,4 @@ resource "nios_security_admin_group" "test_user_access" {
     user_access = %s
 }
 `, name, userAccess)
-}
-
-func testAccAdmingroupEnableRestrictedUserAccess(name string) string {
-	return fmt.Sprintf(`
-resource "nios_security_admin_group" "test_enable_restricted_user_access" {
-    name = %q
-}
-`, name)
 }

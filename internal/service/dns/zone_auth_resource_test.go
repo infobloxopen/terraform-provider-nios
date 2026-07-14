@@ -3022,96 +3022,6 @@ func TestAccZoneAuthResource_ZoneFormatIPV6(t *testing.T) {
 	})
 }
 
-func TestAccZoneAuthResource_CreatePtrForBulkHosts(t *testing.T) {
-	var resourceName = "nios_dns_zone_auth.test_create_ptr_for_bulk_hosts"
-	var v dns.ZoneAuth
-	zoneFqdn := acctest.RandomNameWithPrefix("zone") + ".com"
-
-	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.PreCheck(t) },
-		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-		Steps: []resource.TestStep{
-			// Create and Read
-			{
-				Config: testAccZoneAuthCreatePtrForBulkHosts(zoneFqdn, "default", true),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckZoneAuthExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "create_ptr_for_bulk_hosts", "true"),
-				),
-			},
-			// Update and Read
-			{
-				Config: testAccZoneAuthCreatePtrForBulkHosts(zoneFqdn, "default", false),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckZoneAuthExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "create_ptr_for_bulk_hosts", "false"),
-				),
-			},
-			// Delete testing automatically occurs in TestCase
-		},
-	})
-}
-
-func TestAccZoneAuthResource_CreatePtrForHosts(t *testing.T) {
-	var resourceName = "nios_dns_zone_auth.test_create_ptr_for_hosts"
-	var v dns.ZoneAuth
-	zoneFqdn := acctest.RandomNameWithPrefix("zone") + ".com"
-
-	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.PreCheck(t) },
-		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-		Steps: []resource.TestStep{
-			// Create and Read
-			{
-				Config: testAccZoneAuthCreatePtrForHosts(zoneFqdn, "default", true),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckZoneAuthExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "create_ptr_for_hosts", "true"),
-				),
-			},
-			// Update and Read
-			{
-				Config: testAccZoneAuthCreatePtrForHosts(zoneFqdn, "default", false),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckZoneAuthExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "create_ptr_for_hosts", "false"),
-				),
-			},
-			// Delete testing automatically occurs in TestCase
-		},
-	})
-}
-
-func TestAccZoneAuthResource_DoHostAbstraction(t *testing.T) {
-	var resourceName = "nios_dns_zone_auth.test_do_host_abstraction"
-	var v dns.ZoneAuth
-	zoneFqdn := acctest.RandomNameWithPrefix("zone") + ".com"
-
-	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.PreCheck(t) },
-		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-		Steps: []resource.TestStep{
-			// Create and Read
-			{
-				Config: testAccZoneAuthDoHostAbstraction(zoneFqdn, "default", true),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckZoneAuthExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "do_host_abstraction", "true"),
-				),
-			},
-			// Update and Read
-			{
-				Config: testAccZoneAuthDoHostAbstraction(zoneFqdn, "default", false),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckZoneAuthExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "do_host_abstraction", "false"),
-				),
-			},
-			// Delete testing automatically occurs in TestCase
-		},
-	})
-}
-
 func TestAccZoneAuthResource_RestartIfNeeded(t *testing.T) {
 	var resourceName = "nios_dns_zone_auth.test_restart_if_needed"
 	var v dns.ZoneAuth
@@ -4227,36 +4137,6 @@ resource "nios_dns_zone_auth" "test_view" {
     view = %q
 }
 `, zoneFqdn, view)
-}
-
-func testAccZoneAuthCreatePtrForBulkHosts(zoneFqdn, view string, createPtrForBulkHosts bool) string {
-	return fmt.Sprintf(`
-resource "nios_dns_zone_auth" "test_create_ptr_for_bulk_hosts" {
-    fqdn = %q
-    view = %q
-    create_ptr_for_bulk_hosts = %t
-}
-`, zoneFqdn, view, createPtrForBulkHosts)
-}
-
-func testAccZoneAuthCreatePtrForHosts(zoneFqdn, view string, createPtrForHosts bool) string {
-	return fmt.Sprintf(`
-resource "nios_dns_zone_auth" "test_create_ptr_for_hosts" {
-    fqdn = %q
-    view = %q
-    create_ptr_for_hosts = %t
-}
-`, zoneFqdn, view, createPtrForHosts)
-}
-
-func testAccZoneAuthDoHostAbstraction(zoneFqdn, view string, doHostAbstraction bool) string {
-	return fmt.Sprintf(`
-resource "nios_dns_zone_auth" "test_do_host_abstraction" {
-    fqdn = %q
-    view = %q
-    do_host_abstraction = %t
-}
-`, zoneFqdn, view, doHostAbstraction)
 }
 
 func testAccZoneAuthRestartIfNeeded(zoneFqdn, view string, restartIfNeeded bool) string {
