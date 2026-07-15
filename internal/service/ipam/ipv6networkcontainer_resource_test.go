@@ -17,18 +17,10 @@ import (
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
-// TODO: DiscoveryMember requires discovering to be enabled.
-// TODO: EnableDiscovery requires a valid discovery member.
-// TODO: EnableImmediateDiscovery requires a valid discovery member.
-// TODO: Federated realms serve need to enabled.
-// TODO: LogicFilterRules Logic filter rule required.
-// TODO: RirOrganization rir organization configuration required.
-// TODO: RirOrganizationAction rir organization configuration required.
-// TODO: ZoneAssociations need dns zone to test associations.
-// TODO: MappedEAAttributes need ISE server to test mapped_ea_attributes.
-// TODO: Members need a valid member to test members and GO client does not support it yet.
-// TODO: SubscribeSettings need a valid subscribe settings to test subscribe settings.
-// TODO: send rir request need rir organization configuration required
+// TODO: Pending Tests :
+// FederatedRealms
+// ZoneAssociations
+
 var readableAttributesForIpv6networkcontainer = "cloud_info,comment,ddns_domainname,ddns_enable_option_fqdn,ddns_generate_hostname,ddns_server_always_updates,ddns_ttl,discover_now_status,discovery_basic_poll_settings,discovery_blackout_setting,discovery_engine_type,discovery_member,domain_name_servers,enable_ddns,enable_discovery,endpoint_sources,extattrs,last_rir_registration_update_sent,last_rir_registration_update_status,logic_filter_rules,mgm_private,mgm_private_overridable,ms_ad_user_data,network,network_container,network_view,options,port_control_blackout_setting,preferred_lifetime,rir,rir_organization,rir_registration_status,same_port_control_discovery_blackout,subscribe_settings,unmanaged,update_dns_on_lease_renewal,use_blackout_setting,use_ddns_domainname,use_ddns_enable_option_fqdn,use_ddns_generate_hostname,use_ddns_ttl,use_discovery_basic_polling_settings,use_domain_name_servers,use_enable_ddns,use_enable_discovery,use_logic_filter_rules,use_mgm_private,use_options,use_preferred_lifetime,use_subscribe_settings,use_update_dns_on_lease_renewal,use_valid_lifetime,use_zone_associations,utilization,valid_lifetime,zone_associations"
 
 func TestAccIpv6networkcontainerResource_basic(t *testing.T) {
@@ -1776,14 +1768,10 @@ func TestAccIpv6networkcontainerResource_RirOrganization(t *testing.T) {
 	})
 }
 
-func TestAccIpv6networkcontainerResource_RirOrganizationAction(t *testing.T) {
-	var resourceName = "nios_ipam_ipv6network_container.test_rir_registration_action"
+func TestAccIpv6networkcontainerResource_SendRirRequest(t *testing.T) {
+	var resourceName = "nios_ipam_ipv6network_container.test_send_rir_request"
 	var v ipam.Ipv6networkcontainer
-	// Parent needs a larger prefix, child is a subnet within it
-	third := rand.Intn(65536)
-	fourth := rand.Intn(65536)
-	parentNetwork := fmt.Sprintf("2001:db8:%x::/48", third)
-	childNetwork := fmt.Sprintf("2001:db8:%x:%x::/64", third, fourth)
+	network := acctest.RandomIPv6Network()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -1791,18 +1779,20 @@ func TestAccIpv6networkcontainerResource_RirOrganizationAction(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccIpv6networkcontainerRirRegistrationAction(parentNetwork, childNetwork, "CREATE"),
+				Config: testAccIpv6networkcontainerSendRirRequest(network, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networkcontainerExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "rir_registration_action", "CREATE"),
+					resource.TestCheckResourceAttr(resourceName, "send_rir_request", "true"),
+					resource.TestCheckResourceAttr(resourceName, "network", network),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccIpv6networkcontainerRirRegistrationAction(parentNetwork, childNetwork, "NONE"),
+				Config: testAccIpv6networkcontainerSendRirRequest(network, "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networkcontainerExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "rir_registration_action", "NONE"),
+					resource.TestCheckResourceAttr(resourceName, "send_rir_request", "false"),
+					resource.TestCheckResourceAttr(resourceName, "network", network),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -2287,7 +2277,7 @@ resource "nios_ipam_ipv6network_container" "test_rir_registration_status" {
     same_port_control_discovery_blackout = %q
     use_blackout_setting = "true"
 }
-`, network, rirRegistrationStatus)
+`, network, rirRegistrationStatus, samePortControl)
 }
 
 func testAccIpv6networkcontainerSendRirRequest(network, sendRirRequest string) string {

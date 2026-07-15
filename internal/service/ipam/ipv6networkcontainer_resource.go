@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
+	"github.com/hashicorp/terraform-plugin-framework/resource/identityschema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
@@ -28,6 +29,7 @@ var readableAttributesForIpv6networkcontainer = "cloud_info,comment,ddns_domainn
 // Ensure provider defined types fully satisfy framework interfaces.
 var _ resource.Resource = &Ipv6networkcontainerResource{}
 var _ resource.ResourceWithImportState = &Ipv6networkcontainerResource{}
+var _ resource.ResourceWithIdentity = &Ipv6networkcontainerResource{}
 var _ resource.ResourceWithValidateConfig = &Ipv6networkcontainerResource{}
 
 func NewIpv6networkcontainerResource() resource.Resource {
@@ -433,6 +435,17 @@ func (r *Ipv6networkcontainerResource) UpdateFuncCallAttributeName(ctx context.C
 	updatedFuncCallAttrs["attribute_name"] = types.StringValue(pathVar)
 
 	return types.ObjectValueMust(FuncCallAttrTypes, updatedFuncCallAttrs)
+}
+
+func (r *Ipv6networkcontainerResource) IdentitySchema(_ context.Context, _ resource.IdentitySchemaRequest, resp *resource.IdentitySchemaResponse) {
+	resp.IdentitySchema = identityschema.Schema{
+		Attributes: map[string]identityschema.Attribute{
+			"ref": identityschema.StringAttribute{
+				RequiredForImport: true,
+				Description:       "The unique NIOS object reference for this resource.",
+			},
+		},
+	}
 }
 
 func (r *Ipv6networkcontainerResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {

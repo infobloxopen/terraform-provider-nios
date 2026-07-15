@@ -516,6 +516,7 @@ var Ipv6networkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"subscribe_settings": schema.SingleNestedAttribute{
 		Attributes: Ipv6networkcontainerSubscribeSettingsResourceSchemaAttributes,
+		Optional:   true,
 		Computed:   true,
 		Validators: []validator.Object{
 			objectvalidator.AlsoRequires(path.MatchRoot("use_subscribe_settings")),
@@ -694,7 +695,6 @@ func (m *Ipv6networkcontainerModel) Expand(ctx context.Context, diags *diag.Diag
 		Options:                          flex.ExpandFrameworkListNestedBlock(ctx, m.Options, diags, ExpandIpv6networkcontainerOptions),
 		PortControlBlackoutSetting:       ExpandIpv6networkcontainerPortControlBlackoutSetting(ctx, m.PortControlBlackoutSetting, diags),
 		PreferredLifetime:                flex.ExpandInt64Pointer(m.PreferredLifetime),
-		RemoveSubnets:                    flex.ExpandBoolPointer(m.RemoveSubnets),
 		RestartIfNeeded:                  flex.ExpandBoolPointer(m.RestartIfNeeded),
 		RirOrganization:                  flex.ExpandStringPointer(m.RirOrganization),
 		RirRegistrationAction:            flex.ExpandStringPointer(m.RirRegistrationAction),
@@ -796,7 +796,9 @@ func (m *Ipv6networkcontainerModel) Flatten(ctx context.Context, from *ipam.Ipv6
 	m.RemoveSubnets = types.BoolPointerValue(from.RemoveSubnets)
 	m.Rir = flex.FlattenStringPointer(from.Rir)
 	m.RirOrganization = flex.FlattenStringPointer(from.RirOrganization)
-	m.RirRegistrationAction = flex.FlattenStringPointer(from.RirRegistrationAction)
+	if m.RirRegistrationAction.IsNull() || m.RirRegistrationAction.IsUnknown() {
+		m.RirRegistrationAction = flex.FlattenStringPointer(from.RirRegistrationAction)
+	}
 	m.RirRegistrationStatus = flex.FlattenStringPointer(from.RirRegistrationStatus)
 	m.SamePortControlDiscoveryBlackout = types.BoolPointerValue(from.SamePortControlDiscoveryBlackout)
 	m.SubscribeSettings = FlattenIpv6networkcontainerSubscribeSettings(ctx, from.SubscribeSettings, diags)
