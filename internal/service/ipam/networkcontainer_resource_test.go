@@ -3675,7 +3675,7 @@ func testAccNetworkcontainerUseSubscribeSettings(network, useSubscribeSettings s
 resource "nios_ipam_network_container" "test_use_subscribe_settings" {
     network = %q
     network_view = "test_network_view"
-    use_subscribe_settings = %q
+    use_subscribe_settings = %s
     subscribe_settings = {
         enabled_attributes = ["USERNAME"]
     }
@@ -3686,7 +3686,7 @@ resource "nios_ipam_network_container" "test_use_subscribe_settings" {
 resource "nios_ipam_network_container" "test_use_subscribe_settings" {
     network = %q
     network_view = "test_network_view"
-    use_subscribe_settings = %q
+    use_subscribe_settings = %s
 }
 `, network, useSubscribeSettings)
 }
@@ -3698,7 +3698,7 @@ resource "nios_ipam_network_container" "test_subscribe_settings" {
     network = %q
     network_view = "test_network_view"
     subscribe_settings = %s
-    use_subscribe_settings = %q
+    use_subscribe_settings = %s
 }
 `, network, subscribeSettingsStr, useSubscribeSettings)
 }
@@ -4088,7 +4088,7 @@ func testAccNetworkcontainerRemoveSubnets(network, removeSubnets, childNetwork1,
 	return fmt.Sprintf(`
 resource "nios_ipam_network_container" "test_remove_subnets" {
     network = %q
-    remove_subnets = %q
+    remove_subnets = %s
 }
 
 resource "nios_ipam_network" "child1" {

@@ -125,7 +125,7 @@ func (r *Ipv6networkcontainerResource) Create(ctx context.Context, req resource.
 	}
 
 	// Save the Identity of the Resource
-	resp.Diagnostics.Append(resp.Identity.SetAttribute(ctx, path.Root("ref"), &data.Ref)...)
+	resp.Diagnostics.Append(resp.Identity.SetAttribute(ctx, path.Root("ref"), data.Ref)...)
 
 	// Save data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
@@ -202,7 +202,7 @@ func (r *Ipv6networkcontainerResource) Read(ctx context.Context, req resource.Re
 	data.Flatten(ctx, &res, &resp.Diagnostics)
 
 	// Save the Identity of the Resource
-	resp.Diagnostics.Append(resp.Identity.SetAttribute(ctx, path.Root("ref"), &data.Ref)...)
+	resp.Diagnostics.Append(resp.Identity.SetAttribute(ctx, path.Root("ref"), data.Ref)...)
 
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
@@ -344,7 +344,7 @@ func (r *Ipv6networkcontainerResource) Update(ctx context.Context, req resource.
 	data.Flatten(ctx, &res, &resp.Diagnostics)
 
 	// Save the Identity of the Resource
-	resp.Diagnostics.Append(resp.Identity.SetAttribute(ctx, path.Root("ref"), &data.Ref)...)
+	resp.Diagnostics.Append(resp.Identity.SetAttribute(ctx, path.Root("ref"), data.Ref)...)
 
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)

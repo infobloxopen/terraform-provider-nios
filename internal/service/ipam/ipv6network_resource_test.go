@@ -2977,7 +2977,7 @@ resource "nios_ipam_ipv6network" "test_subscribe_settings" {
     network = %q
     network_view = "test_network_view"
     subscribe_settings = %s
-    use_subscribe_settings = %q
+    use_subscribe_settings = %s
 }
 `, network, subscribeSettingsStr, useSubscribeSettings)
 }

@@ -126,7 +126,7 @@ func (r *SuperhostResource) Create(ctx context.Context, req resource.CreateReque
 	data.Flatten(ctx, &res, &resp.Diagnostics)
 
 	// Save the Identity of the Resource
-	resp.Diagnostics.Append(resp.Identity.SetAttribute(ctx, path.Root("ref"), &data.Ref)...)
+	resp.Diagnostics.Append(resp.Identity.SetAttribute(ctx, path.Root("ref"), data.Ref)...)
 
 	// Save data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
@@ -201,7 +201,7 @@ func (r *SuperhostResource) Read(ctx context.Context, req resource.ReadRequest, 
 	data.Flatten(ctx, &res, &resp.Diagnostics)
 
 	// Save the Identity of the Resource
-	resp.Diagnostics.Append(resp.Identity.SetAttribute(ctx, path.Root("ref"), &data.Ref)...)
+	resp.Diagnostics.Append(resp.Identity.SetAttribute(ctx, path.Root("ref"), data.Ref)...)
 
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
@@ -357,7 +357,7 @@ func (r *SuperhostResource) Update(ctx context.Context, req resource.UpdateReque
 	data.Flatten(ctx, &res, &resp.Diagnostics)
 
 	// Save the Identity of the Resource
-	resp.Diagnostics.Append(resp.Identity.SetAttribute(ctx, path.Root("ref"), &data.Ref)...)
+	resp.Diagnostics.Append(resp.Identity.SetAttribute(ctx, path.Root("ref"), data.Ref)...)
 
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)

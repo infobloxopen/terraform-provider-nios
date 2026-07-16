@@ -2284,7 +2284,7 @@ func testAccIpv6networkcontainerSendRirRequest(network, sendRirRequest string) s
 	return fmt.Sprintf(`
 resource "nios_ipam_ipv6network_container" "test_send_rir_request" {
 	network = %q
-    send_rir_request = %q
+    send_rir_request = %s
 }
 `, network, sendRirRequest)
 }
@@ -2589,7 +2589,7 @@ resource "nios_ipam_ipv6network_container" "test_subscribe_settings" {
     network = %q
     network_view = "test_network_view"
     subscribe_settings = %s
-    use_subscribe_settings = %q
+    use_subscribe_settings = %s
 }
 `, network, subscribeSettingsStr, useSubscribeSettings)
 }
@@ -2617,7 +2617,7 @@ func testAccIpv6networkcontainerRemoveSubnets(network, removeSubnets, childNetwo
 	return fmt.Sprintf(`
 resource "nios_ipam_ipv6network_container" "test_remove_subnets" {
     network = %q
-    remove_subnets = %q
+    remove_subnets = %s
 }
 
 resource "nios_ipam_ipv6network" "child1" {
