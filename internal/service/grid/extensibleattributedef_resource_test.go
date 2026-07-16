@@ -540,4 +540,3 @@ resource "nios_grid_extensibleattributedef" "test_type" {
 }
 `, name, eaType)
 }
-

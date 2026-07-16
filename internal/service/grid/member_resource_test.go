@@ -4544,6 +4544,7 @@ func TestAccMemberResource_ExternalSyslogServerEnable(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "external_syslog_server_enable", "false"),
+					resource.TestCheckResourceAttr(resourceName, "use_syslog_proxy_setting", "false"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -4562,7 +4563,7 @@ func TestAccMemberResource_MemberServiceCommunication(t *testing.T) {
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
-			// Create and verify 
+			// Create and verify
 			{
 				Config: testAccMemberMemberServiceCommunication(
 					hostName,
@@ -4572,13 +4573,36 @@ func TestAccMemberResource_MemberServiceCommunication(t *testing.T) {
 					vipAddress,
 					"172.28.38.1",
 					"255.255.254.0",
+					"IPV4",
 				),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttrSet(resourceName, "member_service_communication.#"),
+					resource.TestCheckTypeSetElemNestedAttrs(resourceName, "member_service_communication.*", map[string]string{
+						"service": "GRID",
+						"type":    "IPV4",
+					}),
 				),
 			},
-			// Update is not applicable as member_service_communication is an immutable field.
+			// Update and verify
+			{
+				Config: testAccMemberMemberServiceCommunication(
+					hostName,
+					"IPV4",
+					"VNIOS",
+					"ALL_V4",
+					vipAddress,
+					"172.28.38.1",
+					"255.255.254.0",
+					"IPV6",
+				),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckMemberExists(context.Background(), resourceName, &v),
+					resource.TestCheckTypeSetElemNestedAttrs(resourceName, "member_service_communication.*", map[string]string{
+						"service": "GRID",
+						"type":    "IPV6",
+					}),
+				),
+			},
 			// Delete testing automatically occurs in TestCase
 		},
 	})
@@ -7490,7 +7514,8 @@ resource "nios_grid_member" "test_external_syslog_server_enable" {
     }
 
     external_syslog_server_enable = %t
-    use_syslog_proxy_setting = %t   %s
+    use_syslog_proxy_setting = %t
+	%s
 }
 `, hostName, configAddrType, platform, serviceTypeConfig, vipAddress, vipGateway, vipSubnetMask, externalSyslogServerEnable, useSyslogProxySetting, syslogServersBlock)
 }
@@ -7498,6 +7523,7 @@ resource "nios_grid_member" "test_external_syslog_server_enable" {
 func testAccMemberMemberServiceCommunication(
 	hostName, configAddrType, platform, serviceTypeConfig,
 	vipAddress, vipGateway, vipSubnetMask string,
+	communicationType string,
 ) string {
 	return fmt.Sprintf(`
 resource "nios_grid_member" "test_member_service_communication" {
@@ -7526,9 +7552,9 @@ resource "nios_grid_member" "test_member_service_communication" {
     member_service_communication = [
         {
             service = "GRID"
-            type    = "IPV4"
+            type    = %q
         }
     ]
 }
-`, hostName, configAddrType, platform, serviceTypeConfig, vipAddress, vipGateway, vipSubnetMask)
+`, hostName, configAddrType, platform, serviceTypeConfig, vipAddress, vipGateway, vipSubnetMask, communicationType)
 }
