@@ -3663,7 +3663,7 @@ func testAccNetworkcontainerRirRegistrationStatus(network, rirRegistrationStatus
 resource "nios_ipam_network_container" "test_rir_registration_status" {
     network = %q
     rir_registration_status = %q
-    same_port_control_discovery_blackout = %q
+    same_port_control_discovery_blackout = %s
     use_blackout_setting = true
 }
 `, network, rirRegistrationStatus, samePortControl)
@@ -3707,8 +3707,8 @@ func testAccNetworkcontainerSamePortControlDiscoveryBlackout(network, samePortCo
 	return fmt.Sprintf(`
 resource "nios_ipam_network_container" "test_same_port_control_discovery_blackout" {
     network = %q
-    same_port_control_discovery_blackout = %q
-    use_blackout_setting = %q
+    same_port_control_discovery_blackout = %s
+    use_blackout_setting = %s
 }
 `, network, samePortControlDiscoveryBlackout, useBlackoutSetting)
 }

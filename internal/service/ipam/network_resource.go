@@ -348,7 +348,7 @@ func (r *NetworkResource) Delete(ctx context.Context, req resource.DeleteRequest
 		return
 	}
 
-	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
+	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
 	// NIOS rejects deleting a network that has VLANs assigned. Clear them first.
 	if !data.Vlans.IsNull() && !data.Vlans.IsUnknown() && len(data.Vlans.Elements()) > 0 {

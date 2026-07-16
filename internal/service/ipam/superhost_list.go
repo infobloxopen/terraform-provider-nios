@@ -167,7 +167,7 @@ func (l *SuperhostList) List(ctx context.Context, req list.ListRequest, stream *
 			result := req.NewListResult(ctx)
 
 			// Set the Identity for each result
-			result.Diagnostics.Append(result.Identity.SetAttribute(ctx, path.Root("ref"), &item.Ref)...)
+			result.Diagnostics.Append(result.Identity.SetAttribute(ctx, path.Root("ref"), item.GetRef())...)
 			if result.Diagnostics.HasError() {
 				if !push(result) {
 					return
