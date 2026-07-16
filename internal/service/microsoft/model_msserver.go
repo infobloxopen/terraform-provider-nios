@@ -22,6 +22,7 @@ import (
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
 	planmodifiers "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/immutable"
 	importmod "github.com/infobloxopen/terraform-provider-nios/internal/planmodifiers/import"
+	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
@@ -354,15 +355,43 @@ func (m *MsserverModel) Flatten(ctx context.Context, from *microsoft.Msserver, d
 	}
 	m.Ref = flex.FlattenStringPointer(from.Ref)
 	m.AdDomain = flex.FlattenStringPointer(from.AdDomain)
+	planAdSites := m.AdSites
 	m.AdSites = FlattenMsserverAdSites(ctx, from.AdSites, diags)
+	if !planAdSites.IsUnknown() {
+		result, diags := utils.CopyFieldFromPlanToRespObject(ctx, planAdSites, m.AdSites, "login_password")
+		if !diags.HasError() {
+			m.AdSites = result.(types.Object)
+		}
+	}
+	planAdUser := m.AdUser
 	m.AdUser = FlattenMsserverAdUser(ctx, from.AdUser, diags)
+	if !planAdUser.IsUnknown() {
+		result, diags := utils.CopyFieldFromPlanToRespObject(ctx, planAdUser, m.AdUser, "login_password")
+		if !diags.HasError() {
+			m.AdUser = result.(types.Object)
+		}
+	}
 	m.Address = flex.FlattenStringPointer(from.Address)
 	m.Comment = flex.FlattenStringPointer(from.Comment)
 	m.ConnectionStatus = flex.FlattenStringPointer(from.ConnectionStatus)
 	m.ConnectionStatusDetail = flex.FlattenStringPointer(from.ConnectionStatusDetail)
+	planDhcpServer := m.DhcpServer
 	m.DhcpServer = FlattenMsserverDhcpServer(ctx, from.DhcpServer, diags)
+	if !planDhcpServer.IsUnknown() {
+		result, diags := utils.CopyFieldFromPlanToRespObject(ctx, planDhcpServer, m.DhcpServer, "login_password")
+		if !diags.HasError() {
+			m.DhcpServer = result.(types.Object)
+		}
+	}
 	m.Disabled = types.BoolPointerValue(from.Disabled)
+	planDnsServer := m.DnsServer
 	m.DnsServer = FlattenMsserverDnsServer(ctx, from.DnsServer, diags)
+	if !planDnsServer.IsUnknown() {
+		result, diags := utils.CopyFieldFromPlanToRespObject(ctx, planDnsServer, m.DnsServer, "login_password")
+		if !diags.HasError() {
+			m.DnsServer = result.(types.Object)
+		}
+	}
 	m.DnsView = flex.FlattenStringPointer(from.DnsView)
 	m.ExtAttrs = FlattenExtAttrs(ctx, m.ExtAttrs, from.ExtAttrs, diags)
 	m.GridMember = flex.FlattenStringPointerNilAsNotEmpty(from.GridMember)

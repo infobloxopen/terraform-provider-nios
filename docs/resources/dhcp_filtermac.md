@@ -41,6 +41,11 @@ resource "nios_dhcp_filtermac" "mac_filter_with_option" {
       name  = "dhcp-lease-time"
       num   = 51
       value = "3600"
+    },
+    {
+      name  = "domain-name-servers"
+      num   = 6
+      value = "8.8.8.8,8.8.4.4"
     }
   ]
 }

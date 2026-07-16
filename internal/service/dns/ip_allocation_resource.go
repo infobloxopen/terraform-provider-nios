@@ -793,6 +793,7 @@ func (r *IPAllocationResource) Update(ctx context.Context, req resource.UpdateRe
 
 	// Clear fields not allowed in update call
 	updateReq.NetworkView = nil
+	updateReq.MsAdUserData = nil
 
 	var apiRes *dns.UpdateRecordHostResponse
 

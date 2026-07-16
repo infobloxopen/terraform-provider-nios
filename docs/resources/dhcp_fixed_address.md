@@ -65,6 +65,11 @@ resource "nios_dhcp_fixed_address" "create_fixed_address_additional" {
       name  = "dhcp-lease-time"
       num   = 51
       value = "7200"
+    },
+    {
+      name  = "domain-name-servers"
+      num   = 6
+      value = "8.8.8.8,8.8.4.4"
     }
   ]
   use_options = true
@@ -270,13 +275,10 @@ Optional:
 <a id="nestedatt--snmp_credential"></a>
 ### Nested Schema for `snmp_credential`
 
-Required:
-
-- `community_string` (String) The public community string.
-
 Optional:
 
 - `comment` (String) Comments for the SNMPv1 and SNMPv2 users.
+- `community_string` (String) The public community string.
 - `credential_group` (String) Group for the SNMPv1 and SNMPv2 credential.
 
 

@@ -48,7 +48,7 @@ var MembernodeinfoLanHaPortSettingResourceSchemaAttributes = map[string]schema.A
 		MarkdownDescription: "Public IPv6 address for the LAN1 interface.",
 	},
 	"ha_ip_address": schema.StringAttribute{
-		CustomType: iptypes.IPAddressType{},
+		CustomType:          iptypes.IPAddressType{},
 		Computed:            true,
 		Optional:            true,
 		MarkdownDescription: "HA IP address.",

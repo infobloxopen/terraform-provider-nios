@@ -444,7 +444,6 @@ var NetworktemplateResourceSchemaAttributes = map[string]schema.Attribute{
 		Default:  int64default.StaticInt64(-1),
 		Validators: []validator.Int64{
 			int64validator.AlsoRequires(path.MatchRoot("use_lease_scavenge_time")),
-			int64validator.Between(86400, 2147472000),
 		},
 		MarkdownDescription: "An integer that specifies the period of time (in seconds) that frees and backs up leases remained in the database before they are automatically deleted. To disable lease scavenging, set the parameter to -1. The minimum positive value must be greater than 86400 seconds (1 day).",
 	},
@@ -465,18 +464,18 @@ var NetworktemplateResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed: true,
 		Default:  int64default.StaticInt64(0),
 		Validators: []validator.Int64{
-			int64validator.Between(1, 100),
+			int64validator.Between(0, 100),
 		},
-		MarkdownDescription: "The percentage of DHCP network usage below which the Infoblox appliance generates a syslog message and sends a warning (if enabled). A number that specifies the percentage of allocated addresses. The range is from 1 to 100.",
+		MarkdownDescription: "The percentage of DHCP network usage below which the Infoblox appliance generates a syslog message and sends a warning (if enabled). A number that specifies the percentage of allocated addresses. The range is from 0 to 100.",
 	},
 	"low_water_mark_reset": schema.Int64Attribute{
 		Optional: true,
 		Computed: true,
 		Default:  int64default.StaticInt64(10),
 		Validators: []validator.Int64{
-			int64validator.Between(1, 100),
+			int64validator.Between(0, 100),
 		},
-		MarkdownDescription: "The percentage of DHCP network usage threshold below which network usage is not expected and may warrant your attention. When the low watermark is crossed, the Infoblox appliance generates a syslog message and sends a warning (if enabled). A number that specifies the percentage of allocated addresses. The range is from 1 to 100. The low watermark reset value must be higher than the low watermark value.",
+		MarkdownDescription: "The percentage of DHCP network usage threshold below which network usage is not expected and may warrant your attention. When the low watermark is crossed, the Infoblox appliance generates a syslog message and sends a warning (if enabled). A number that specifies the percentage of allocated addresses. The range is from 0 to 100. The low watermark reset value must be higher than the low watermark value.",
 	},
 	"members": schema.ListNestedAttribute{
 		NestedObject: schema.NestedAttributeObject{

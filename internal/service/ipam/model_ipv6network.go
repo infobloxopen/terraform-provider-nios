@@ -594,6 +594,9 @@ var Ipv6networkResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional:            true,
 		MarkdownDescription: "The RIR organization associated with the IPv6 network.",
 		Computed:            true,
+		PlanModifiers: []planmodifier.String{
+			planmodifiers.ImmutableString(),
+		},
 	},
 	"rir_registration_action": schema.StringAttribute{
 		Optional:            true,
@@ -972,7 +975,9 @@ func (m *Ipv6networkModel) Flatten(ctx context.Context, from *ipam.Ipv6network, 
 	m.RecycleLeases = types.BoolPointerValue(from.RecycleLeases)
 	m.Rir = flex.FlattenStringPointer(from.Rir)
 	m.RirOrganization = flex.FlattenStringPointer(from.RirOrganization)
-	m.RirRegistrationAction = flex.FlattenStringPointer(from.RirRegistrationAction)
+	if m.RirRegistrationAction.IsNull() || m.RirRegistrationAction.IsUnknown() {
+		m.RirRegistrationAction = flex.FlattenStringPointer(from.RirRegistrationAction)
+	}
 	m.RirRegistrationStatus = flex.FlattenStringPointer(from.RirRegistrationStatus)
 	m.SamePortControlDiscoveryBlackout = types.BoolPointerValue(from.SamePortControlDiscoveryBlackout)
 	m.SubscribeSettings = FlattenIpv6networkSubscribeSettings(ctx, from.SubscribeSettings, diags)

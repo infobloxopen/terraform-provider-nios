@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
+	"github.com/hashicorp/terraform-plugin-framework/resource/identityschema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
@@ -23,6 +24,7 @@ var readableAttributesForNsgroupForwardingmember = "comment,extattrs,forwarding_
 // Ensure provider defined types fully satisfy framework interfaces.
 var _ resource.Resource = &NsgroupForwardingmemberResource{}
 var _ resource.ResourceWithImportState = &NsgroupForwardingmemberResource{}
+var _ resource.ResourceWithIdentity = &NsgroupForwardingmemberResource{}
 
 func NewNsgroupForwardingmemberResource() resource.Resource {
 	return &NsgroupForwardingmemberResource{}
@@ -35,12 +37,25 @@ type NsgroupForwardingmemberResource struct {
 
 func (r *NsgroupForwardingmemberResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_" + "dns_nsgroup_forwardingmember"
+	resp.ResourceBehavior = resource.ResourceBehavior{
+		MutableIdentity: true,
+	}
 }
 
 func (r *NsgroupForwardingmemberResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		MarkdownDescription: "Manages an NS Group Forwarding Member.",
 		Attributes:          NsgroupForwardingmemberResourceSchemaAttributes,
+	}
+}
+
+func (r *NsgroupForwardingmemberResource) IdentitySchema(ctx context.Context, req resource.IdentitySchemaRequest, resp *resource.IdentitySchemaResponse) {
+	resp.IdentitySchema = identityschema.Schema{
+		Attributes: map[string]identityschema.Attribute{
+			"ref": identityschema.StringAttribute{
+				RequiredForImport: true,
+			},
+		},
 	}
 }
 
@@ -78,6 +93,7 @@ func (r *NsgroupForwardingmemberResource) Create(ctx context.Context, req resour
 	// Add internal ID exists in the Extensible Attributes if not already present
 	data.ExtAttrs, diags = AddInternalIDToExtAttrs(ctx, data.ExtAttrs, diags)
 	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
 		return
 	}
 
@@ -123,11 +139,15 @@ func (r *NsgroupForwardingmemberResource) Create(ctx context.Context, req resour
 	res := apiRes.CreateNsgroupForwardingmemberResponseAsObject.GetResult()
 	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.ExtAttrs)
 	if diags.HasError() {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while create NsgroupForwardingmember due inherited Extensible attributes, got error: %s", err))
+		resp.Diagnostics.Append(diags...)
+		resp.Diagnostics.AddError("Client Error", "Error while creating NsgroupForwardingmember due to inherited Extensible attributes")
 		return
 	}
 
 	data.Flatten(ctx, &res, &resp.Diagnostics)
+
+	// Save the Identity of the Resource
+	resp.Diagnostics.Append(resp.Identity.SetAttribute(ctx, path.Root("ref"), &data.Ref)...)
 
 	// Save data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
@@ -209,11 +229,15 @@ func (r *NsgroupForwardingmemberResource) Read(ctx context.Context, req resource
 
 	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.ExtAttrs)
 	if diags.HasError() {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while reading NsgroupForwardingmember due inherited Extensible attributes, got error: %s", diags))
+		resp.Diagnostics.Append(diags...)
+		resp.Diagnostics.AddError("Client Error", "Error while reading NsgroupForwardingmember due to inherited Extensible attributes")
 		return
 	}
 
 	data.Flatten(ctx, &res, &resp.Diagnostics)
+
+	// Save the Identity of the Resource
+	resp.Diagnostics.Append(resp.Identity.SetAttribute(ctx, path.Root("ref"), &data.Ref)...)
 
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
@@ -270,6 +294,10 @@ func (r *NsgroupForwardingmemberResource) ReadByExtAttrs(ctx context.Context, da
 	}
 
 	data.Flatten(ctx, &res, &resp.Diagnostics)
+
+	// Save the Identity of the Resource
+	resp.Diagnostics.Append(resp.Identity.SetAttribute(ctx, path.Root("ref"), &data.Ref)...)
+
 	resp.Diagnostics.Append(resp.State.Set(ctx, data)...)
 
 	return true
@@ -298,6 +326,7 @@ func (r *NsgroupForwardingmemberResource) Update(ctx context.Context, req resour
 		resp.Diagnostics.Append(diags...)
 		return
 	}
+
 	associateInternalId, diags := req.Private.GetKey(ctx, "associate_internal_id")
 	resp.Diagnostics.Append(diags...)
 	if diags.HasError() {
@@ -306,6 +335,7 @@ func (r *NsgroupForwardingmemberResource) Update(ctx context.Context, req resour
 	if associateInternalId != nil {
 		data.ExtAttrs, diags = AddInternalIDToExtAttrs(ctx, data.ExtAttrs, diags)
 		if diags.HasError() {
+			resp.Diagnostics.Append(diags...)
 			return
 		}
 	}
@@ -317,12 +347,12 @@ func (r *NsgroupForwardingmemberResource) Update(ctx context.Context, req resour
 		return
 	}
 
+	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
+
 	payload := data.Expand(ctx, &resp.Diagnostics)
 	if resp.Diagnostics.HasError() {
 		return
 	}
-
-	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
 
 	var apiRes *dns.UpdateNsgroupForwardingmemberResponse
 
@@ -354,15 +384,18 @@ func (r *NsgroupForwardingmemberResource) Update(ctx context.Context, req resour
 
 	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, planExtAttrs, *res.ExtAttrs)
 	if diags.HasError() {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while update NsgroupForwardingmember due inherited Extensible attributes, got error: %s", diags))
+		resp.Diagnostics.Append(diags...)
+		resp.Diagnostics.AddError("Client Error", "Error while updating NsgroupForwardingmember due to inherited Extensible attributes")
 		return
 	}
 
 	data.Flatten(ctx, &res, &resp.Diagnostics)
 
+	// Save the Identity of the Resource
+	resp.Diagnostics.Append(resp.Identity.SetAttribute(ctx, path.Root("ref"), &data.Ref)...)
+
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
-
 	if associateInternalId != nil {
 		resp.Diagnostics.Append(resp.Private.SetKey(ctx, "associate_internal_id", nil)...)
 	}
@@ -402,6 +435,13 @@ func (r *NsgroupForwardingmemberResource) Delete(ctx context.Context, req resour
 }
 
 func (r *NsgroupForwardingmemberResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+	if req.Identity != nil && req.Identity.Raw.IsKnown() && !req.Identity.Raw.IsNull() {
+		diags := req.Identity.GetAttribute(ctx, path.Root("ref"), &req.ID)
+		if diags.HasError() {
+			resp.Diagnostics.Append(diags...)
+			return
+		}
+	}
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("ref"), req.ID)...)
 	resp.Diagnostics.Append(resp.Private.SetKey(ctx, "associate_internal_id", []byte("true"))...)
 }

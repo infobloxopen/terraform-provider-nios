@@ -50,6 +50,11 @@ resource "nios_dhcp_fixed_address" "create_fixed_address_additional" {
       name  = "dhcp-lease-time"
       num   = 51
       value = "7200"
+    },
+    {
+      name  = "domain-name-servers"
+      num   = 6
+      value = "8.8.8.8,8.8.4.4"
     }
   ]
   use_options = true

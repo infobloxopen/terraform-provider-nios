@@ -12,7 +12,6 @@ import (
 )
 
 func TestAccParentalcontrolSubscriberrecordDataSource_Filters(t *testing.T) {
-	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	dataSourceName := "data.nios_parentalcontrol_subscriberrecord.test"
 	resourceName := "nios_parentalcontrol_subscriberrecord.test"
 	var v parentalcontrol.ParentalcontrolSubscriberrecord

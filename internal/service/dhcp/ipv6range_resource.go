@@ -488,6 +488,24 @@ func (r *Ipv6rangeResource) ValidateConfig(ctx context.Context, req resource.Val
 		)
 	}
 
+	// discovery_member and enable_discovery can be set only when use_enable_discovery is true
+	if !data.UseEnableDiscovery.IsNull() && !data.UseEnableDiscovery.IsUnknown() && !data.UseEnableDiscovery.ValueBool() {
+		if !data.DiscoveryMember.IsNull() && !data.DiscoveryMember.IsUnknown() {
+			resp.Diagnostics.AddAttributeError(
+				path.Root("discovery_member"),
+				"Discovery Member Not Allowed",
+				"When use_enable_discovery is set to false, discovery_member cannot be configured. Either set use_enable_discovery to true or remove the discovery_member field.",
+			)
+		}
+		if !data.EnableDiscovery.IsNull() && !data.EnableDiscovery.IsUnknown() {
+			resp.Diagnostics.AddAttributeError(
+				path.Root("enable_discovery"),
+				"Enable Discovery Not Allowed",
+				"When use_enable_discovery is set to false, enable_discovery cannot be configured. Either set use_enable_discovery to true or remove the enable_discovery field.",
+			)
+		}
+	}
+
 	// discovery_basic_poll_settings can be set only when use_discovery_basic_polling_settings is true
 	if !data.DiscoveryBasicPollSettings.IsNull() && !data.DiscoveryBasicPollSettings.IsUnknown() {
 		if !data.UseDiscoveryBasicPollingSettings.IsNull() && !data.UseDiscoveryBasicPollingSettings.IsUnknown() && !data.UseDiscoveryBasicPollingSettings.ValueBool() {
