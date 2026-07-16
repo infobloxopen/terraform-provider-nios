@@ -332,10 +332,16 @@ func (r *NetworkcontainerResource) Delete(ctx context.Context, req resource.Dele
 		return
 	}
 
-	httpRes, err := r.client.IPAMAPI.
+	deleteReq := r.client.IPAMAPI.
 		NetworkcontainerAPI.
-		Delete(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
-		Execute()
+		Delete(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref))
+
+	// remove_subnets is a delete-only argument; pass it as a query parameter
+	if !data.RemoveSubnets.IsNull() && !data.RemoveSubnets.IsUnknown() {
+		deleteReq = deleteReq.RemoveSubnets(data.RemoveSubnets.ValueBool())
+	}
+
+	httpRes, err := deleteReq.Execute()
 	if err != nil {
 		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
 			return

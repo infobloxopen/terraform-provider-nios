@@ -464,6 +464,8 @@ var Ipv6networkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"remove_subnets": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(true),
 		MarkdownDescription: "Remove subnets delete option. Determines whether all child objects should be removed alongside with the IPv6 network container or child objects should be assigned to another parental container. By default child objects are deleted with this network container.",
 	},
 	"restart_if_needed": schema.BoolAttribute{
@@ -480,6 +482,9 @@ var Ipv6networkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional:            true,
 		MarkdownDescription: "The RIR organization associated with the IPv6 network container.",
 		Computed:            true,
+		PlanModifiers: []planmodifier.String{
+			planmodifiers.ImmutableString(),
+		},
 	},
 	"rir_registration_action": schema.StringAttribute{
 		Optional:            true,
@@ -793,7 +798,6 @@ func (m *Ipv6networkcontainerModel) Flatten(ctx context.Context, from *ipam.Ipv6
 	}
 	m.PortControlBlackoutSetting = FlattenIpv6networkcontainerPortControlBlackoutSetting(ctx, from.PortControlBlackoutSetting, diags)
 	m.PreferredLifetime = flex.FlattenInt64Pointer(from.PreferredLifetime)
-	m.RemoveSubnets = types.BoolPointerValue(from.RemoveSubnets)
 	m.Rir = flex.FlattenStringPointer(from.Rir)
 	m.RirOrganization = flex.FlattenStringPointer(from.RirOrganization)
 	if m.RirRegistrationAction.IsNull() || m.RirRegistrationAction.IsUnknown() {
@@ -824,6 +828,11 @@ func (m *Ipv6networkcontainerModel) Flatten(ctx context.Context, from *ipam.Ipv6
 	m.Utilization = flex.FlattenInt64Pointer(from.Utilization)
 	m.ValidLifetime = flex.FlattenInt64Pointer(from.ValidLifetime)
 	m.ZoneAssociations = flex.FlattenFrameworkListNestedBlock(ctx, from.ZoneAssociations, Ipv6networkcontainerZoneAssociationsAttrTypes, diags, FlattenIpv6networkcontainerZoneAssociations)
+	// When null/unknown (e.g. data source or import), apply the schema default (true)
+	if m.RemoveSubnets.IsNull() || m.RemoveSubnets.IsUnknown() {
+		defaultVal := true
+		m.RemoveSubnets = types.BoolPointerValue(&defaultVal)
+	}
 }
 
 func ExpandIpv6NetworkcontainerNetwork(str cidrtypes.IPv6Prefix) *ipam.Ipv6networkcontainerNetwork {

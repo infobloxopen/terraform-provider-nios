@@ -18,8 +18,9 @@ import (
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
-//TODO : FEDRATED_REALMS TEST CASES
-//TODO : ZONE_ASSOCIATIONS TEST CASES
+// TODO: Pending Tests :
+// FederatedRealms
+// ZoneAssociations
 
 //TODO : OBJECTS TO BE PRESENT IN GRID FOR TESTS
 //MS DHCP SERVER : 10.10.0.0
