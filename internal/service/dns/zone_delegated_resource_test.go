@@ -515,6 +515,7 @@ func TestAccZoneDelegatedResource_View(t *testing.T) {
 	var v dns.ZoneDelegated
 	fqdn := acctest.RandomNameWithPrefix("zone-delegated") + ".example.com"
 	delegatedToName := acctest.RandomNameWithPrefix("zone-delegated") + ".com"
+	viewName := acctest.RandomNameWithPrefix("view")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -522,10 +523,10 @@ func TestAccZoneDelegatedResource_View(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccZoneDelegatedView(fqdn, delegatedToName, "10.0.0.1", "default"),
+				Config: testAccZoneDelegatedView(fqdn, delegatedToName, "10.0.0.1", viewName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneDelegatedExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "view", "default"),
+					resource.TestCheckResourceAttr(resourceName, "view", viewName),
 				),
 			},
 			// Update is not applicable as view is an immutable field.
@@ -840,6 +841,15 @@ resource "nios_dns_zone_delegated" "test_use_delegated_ttl" {
 
 func testAccZoneDelegatedView(fqdn, delegateToName, delegateToAddress, view string) string {
 	return fmt.Sprintf(`
+resource "nios_dns_view" "test_dns_view" {
+	name = %q
+}
+
+resource "nios_dns_zone_auth" "test_dns_zone" {
+	fqdn = "example.com"
+	view = nios_dns_view.test_dns_view.name
+}
+
 resource "nios_dns_zone_delegated" "test_view" {
 	fqdn = %q
     delegate_to = [
@@ -848,9 +858,10 @@ resource "nios_dns_zone_delegated" "test_view" {
 			address = %q
 		}
 	]
-    view = %q
+    view = nios_dns_zone_auth.test_dns_zone.view
+    depends_on = [nios_dns_zone_auth.test_dns_zone]
 }
-`, fqdn, delegateToName, delegateToAddress, view)
+`, view, fqdn, delegateToName, delegateToAddress)
 }
 
 func TestAccZoneDelegatedResource_Import(t *testing.T) {

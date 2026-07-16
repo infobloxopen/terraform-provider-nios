@@ -545,6 +545,7 @@ func TestAccZoneForwardResource_View(t *testing.T) {
 	var v dns.ZoneForward
 	fqdn := acctest.RandomNameWithPrefix("zone-forward") + ".example.com"
 	externalNsGroup := "ensg1"
+	viewName := acctest.RandomNameWithPrefix("view")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -552,10 +553,10 @@ func TestAccZoneForwardResource_View(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccZoneForwardView(fqdn, externalNsGroup, "default"),
+				Config: testAccZoneForwardView(fqdn, externalNsGroup, viewName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneForwardExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "view", "default"),
+					resource.TestCheckResourceAttr(resourceName, "view", viewName),
 				),
 			},
 			// Update is not applicable as view is an immutable field.
@@ -807,10 +808,14 @@ resource "nios_dns_zone_forward" "test_prefix" {
 
 func testAccZoneForwardView(fqdn, externalNsGroup, view string) string {
 	return fmt.Sprintf(`
+resource "nios_dns_view" "test_dns_view" {
+	name = %q
+}
+
 resource "nios_dns_zone_forward" "test_view" {
    fqdn = %q
    external_ns_group = %q
-   view = %q
+   view = nios_dns_view.test_dns_view.name
 }
-`, fqdn, externalNsGroup, view)
+`, view, fqdn, externalNsGroup)
 }
