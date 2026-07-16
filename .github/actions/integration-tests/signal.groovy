@@ -6,17 +6,23 @@
  */
 
 /**
- * Push a JSON payload to the signal Gist as an immutable per-stage file.
- * Each call creates a NEW file: ci-{sha}-{build#}-{stage}.json
+ * Push a JSON payload to the signal Gist.
+ * Writes a deterministic per-stage file keyed by sha + build number + stage:
+ *   ci-{sha}-{build#}-{stage}.json
+ * Re-signaling the same stage for the same build overwrites the existing file.
  */
 private void _push(Map payload, Map extraFiles = [:]) {
     def gistId      = params.SIGNAL_GIST_ID?.trim() ?: env.SIGNAL_GIST_ID ?: ''
     def token       = params.SIGNAL_TOKEN?.trim()   ?: env.SIGNAL_TOKEN   ?: ''
     def sha         = params.GIT_COMMIT?.trim()     ?: env.GIT_COMMIT     ?: ''
-    def buildNumber = env.BUILD_NUMBER ?: '0'
+    def buildNumber = env.BUILD_NUMBER?.trim()
 
     if (!gistId || !token) {
         echo "⚠  SIGNAL_GIST_ID or SIGNAL_TOKEN not set — skipping signal push."
+        return
+    }
+    if (!buildNumber) {
+        echo "⚠  BUILD_NUMBER not set — skipping signal push to avoid Gist key collisions."
         return
     }
 
@@ -69,11 +75,15 @@ private void _push(Map payload, Map extraFiles = [:]) {
 void triggerGitHubAction(String repoUser, String branch) {
     def token       = params.SIGNAL_TOKEN?.trim() ?: env.SIGNAL_TOKEN ?: ''
     def sha         = env.GIT_COMMIT   ?: ''
-    def buildNumber = env.BUILD_NUMBER ?: '0'
+    def buildNumber = env.BUILD_NUMBER?.trim()
     def gistId      = params.SIGNAL_GIST_ID?.trim() ?: env.SIGNAL_GIST_ID ?: ''
 
     if (!token) {
         echo "⚠  SIGNAL_TOKEN not set — cannot trigger GitHub Actions workflow."
+        return
+    }
+    if (!buildNumber) {
+        echo "⚠  BUILD_NUMBER not set — cannot dispatch GHA workflow (Gist files would use wrong key)."
         return
     }
 
@@ -118,8 +128,12 @@ void triggerGitHubAction(String repoUser, String branch) {
  * @param opts.junit_files  map of filename → XML content to upload alongside the signal
  */
 void success(String stageName, Map opts = [:]) {
-    def sha         = env.GIT_COMMIT   ?: ''
-    def buildNumber = env.BUILD_NUMBER ?: '0'
+    def sha         = env.GIT_COMMIT     ?: ''
+    def buildNumber = env.BUILD_NUMBER?.trim()
+    if (!buildNumber) {
+        echo "⚠  BUILD_NUMBER not set — skipping success signal to avoid JUnit artifact key collisions."
+        return
+    }
     def extraFiles  = [:]
     (opts.junit_files ?: [:]).each { name, content ->
         extraFiles["ci-junit-${sha}-${buildNumber}-${name}".toString()] = content

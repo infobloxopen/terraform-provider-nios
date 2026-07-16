@@ -170,8 +170,8 @@ jobs:
               msg    = data.get("message", "")
               ts     = data.get("timestamp", "")
               print(f"[{stage}] status={status} ts={ts} msg={msg}")
-              if status == "error":
-                  print(f"::error::Jenkins reported error at stage '{stage}': {msg}")
+              if status in ("error", "aborted"):
+                  print(f"::error::Jenkins reported {status} at stage '{stage}': {msg}")
                   sys.exit(1)
 
           if not all_present:
