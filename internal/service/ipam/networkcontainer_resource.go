@@ -546,7 +546,7 @@ func (r *NetworkcontainerResource) ValidateConfig(ctx context.Context, req resou
 				continue
 			}
 
-			if !option.Value.IsUnknown() && !option.Value.IsNull() && option.Value.ValueString() == "" {
+			if !option.Value.IsNull() && !option.Value.IsUnknown() && option.Value.ValueString() == "" {
 				if !isSpecialOption {
 					resp.Diagnostics.AddAttributeError(
 						path.Root("options").AtListIndex(i).AtName("value"),

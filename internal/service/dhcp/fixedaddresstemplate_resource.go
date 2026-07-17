@@ -361,7 +361,7 @@ func (r *FixedaddresstemplateResource) ValidateConfig(ctx context.Context, req r
 				continue
 			}
 
-			if !option.Value.IsUnknown() && !option.Value.IsNull() && option.Value.ValueString() == "" {
+			if !option.Value.IsNull() && !option.Value.IsUnknown() && option.Value.ValueString() == "" {
 				if !isSpecialOption {
 					resp.Diagnostics.AddAttributeError(
 						path.Root("options").AtListIndex(i).AtName("value"),

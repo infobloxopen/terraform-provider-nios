@@ -481,7 +481,7 @@ func (r *FilternacResource) ValidateConfig(ctx context.Context, req resource.Val
 				continue
 			}
 
-			if !option.Value.IsUnknown() && !option.Value.IsNull() && option.Value.ValueString() == "" {
+			if !option.Value.IsNull() && !option.Value.IsUnknown() && option.Value.ValueString() == "" {
 				if !isSpecialOption {
 					resp.Diagnostics.AddAttributeError(
 						path.Root("options").AtListIndex(i).AtName("value"),
@@ -508,7 +508,7 @@ func (r *FilternacResource) ValidateConfig(ctx context.Context, req resource.Val
 				)
 			}
 
-			if option.Name.ValueString() == "dhcp-lease-time" && !option.Value.IsUnknown() && !option.Value.IsNull() {
+			if option.Name.ValueString() == "dhcp-lease-time" && !option.Value.IsNull() && !option.Value.IsUnknown() {
 				hasDhcpLeaseTime = true
 				dhcpLeaseTimeValue = option.Value.ValueString()
 			}

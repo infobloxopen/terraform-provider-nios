@@ -506,7 +506,7 @@ func (r *Ipv6networktemplateResource) ValidateConfig(ctx context.Context, req re
 				continue
 			}
 
-			if !option.Value.IsUnknown() && !option.Value.IsNull() && option.Value.ValueString() == "" {
+			if !option.Value.IsNull() && !option.Value.IsUnknown() && option.Value.ValueString() == "" {
 				if !isSpecialOption {
 					resp.Diagnostics.AddAttributeError(
 						path.Root("options").AtListIndex(i).AtName("value"),
