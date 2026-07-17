@@ -212,7 +212,7 @@ func validateSubConfig(
 	useLoginSet := !useLogin.IsNull() && !useLogin.IsUnknown()
 
 	if loginSet {
-		if !useLoginSet || !useLogin.ValueBool() {
+		if !useLogin.IsUnknown() && (useLogin.IsNull() || !useLogin.ValueBool()) {
 			resp.Diagnostics.AddAttributeError(
 				path.Root(blockName).AtName("uselogin"),
 				"Invalid Login Configuration",
@@ -221,7 +221,7 @@ func validateSubConfig(
 		}
 	}
 
-	if useLoginSet && useLogin.ValueBool() && !loginSet {
+	if useLoginSet && useLogin.ValueBool() && login.IsNull() {
 		resp.Diagnostics.AddAttributeError(
 			path.Root(blockName).AtName("login_name"),
 			"Missing Login Name",
@@ -234,7 +234,7 @@ func validateSubConfig(
 	useSyncDelaySet := !useSyncDelay.IsNull() && !useSyncDelay.IsUnknown()
 
 	if syncDelaySet {
-		if !useSyncDelaySet || !useSyncDelay.ValueBool() {
+		if !useSyncDelay.IsUnknown() && (useSyncDelay.IsNull() || !useSyncDelay.ValueBool()) {
 			resp.Diagnostics.AddAttributeError(
 				path.Root(blockName).AtName("use_synchronization_min_delay"),
 				"Invalid Synchronization Configuration",
@@ -243,7 +243,7 @@ func validateSubConfig(
 		}
 	}
 
-	if useSyncDelaySet && useSyncDelay.ValueBool() && !syncDelaySet {
+	if useSyncDelaySet && useSyncDelay.ValueBool() && syncDelay.IsNull() {
 		resp.Diagnostics.AddAttributeError(
 			path.Root(blockName).AtName("synchronization_min_delay"),
 			"Missing Synchronization Delay",
@@ -259,10 +259,9 @@ func validateMonitoringConfig(
 	blockName string,
 ) {
 	monitoringSet := !enableMonitoring.IsNull() && !enableMonitoring.IsUnknown()
-	useMonitoringSet := !useEnableMonitoring.IsNull() && !useEnableMonitoring.IsUnknown()
 
 	if monitoringSet {
-		if !useMonitoringSet || !useEnableMonitoring.ValueBool() {
+		if !useEnableMonitoring.IsUnknown() && (useEnableMonitoring.IsNull() || !useEnableMonitoring.ValueBool()) {
 			resp.Diagnostics.AddAttributeError(
 				path.Root(blockName).AtName("use_enable_monitoring"),
 				"Invalid Monitoring Configuration",
@@ -280,7 +279,7 @@ func validateAdUserConfig(resp *resource.ValidateConfigResponse, obj MsserverAdU
 	useLoginSet := !obj.UseLogin.IsNull() && !obj.UseLogin.IsUnknown()
 
 	if loginSet {
-		if !useLoginSet || !obj.UseLogin.ValueBool() {
+		if !obj.UseLogin.IsUnknown() && (obj.UseLogin.IsNull() || !obj.UseLogin.ValueBool()) {
 			resp.Diagnostics.AddAttributeError(
 				path.Root(blockName).AtName("use_login"),
 				"Invalid Login Configuration",
@@ -289,7 +288,7 @@ func validateAdUserConfig(resp *resource.ValidateConfigResponse, obj MsserverAdU
 		}
 	}
 
-	if useLoginSet && obj.UseLogin.ValueBool() && !loginSet {
+	if useLoginSet && obj.UseLogin.ValueBool() && obj.LoginName.IsNull() {
 		resp.Diagnostics.AddAttributeError(
 			path.Root(blockName).AtName("login_name"),
 			"Missing Login Name",
@@ -299,10 +298,9 @@ func validateAdUserConfig(resp *resource.ValidateConfigResponse, obj MsserverAdU
 
 	// synchronization_interval validation
 	syncSet := !obj.SynchronizationInterval.IsNull() && !obj.SynchronizationInterval.IsUnknown()
-	useSyncSet := !obj.UseSynchronizationInterval.IsNull() && !obj.UseSynchronizationInterval.IsUnknown()
 
 	if syncSet {
-		if !useSyncSet || !obj.UseSynchronizationInterval.ValueBool() {
+		if !obj.UseSynchronizationInterval.IsUnknown() && (obj.UseSynchronizationInterval.IsNull() || !obj.UseSynchronizationInterval.ValueBool()) {
 			resp.Diagnostics.AddAttributeError(
 				path.Root(blockName).AtName("use_synchronization_interval"),
 				"Invalid Synchronization Configuration",
@@ -314,10 +312,9 @@ func validateAdUserConfig(resp *resource.ValidateConfigResponse, obj MsserverAdU
 	// enable_user_sync validation
 	enableSyncSet := !obj.EnableUserSync.IsNull() && !obj.EnableUserSync.IsUnknown()
 	useEnableSyncSet := !obj.UseEnableUserSync.IsNull() && !obj.UseEnableUserSync.IsUnknown()
-	useAdSyncSet := !obj.UseEnableAdUserSync.IsNull() && !obj.UseEnableAdUserSync.IsUnknown()
 
 	if enableSyncSet {
-		if !useEnableSyncSet || !obj.UseEnableUserSync.ValueBool() {
+		if !obj.UseEnableUserSync.IsUnknown() && (obj.UseEnableUserSync.IsNull() || !obj.UseEnableUserSync.ValueBool()) {
 			resp.Diagnostics.AddAttributeError(
 				path.Root(blockName).AtName("use_enable_user_sync"),
 				"Invalid User Sync Configuration",
@@ -328,7 +325,7 @@ func validateAdUserConfig(resp *resource.ValidateConfigResponse, obj MsserverAdU
 
 	// When use_enable_user_sync is true, use_enable_ad_user_sync must also be true
 	if useEnableSyncSet && obj.UseEnableUserSync.ValueBool() {
-		if !useAdSyncSet || !obj.UseEnableAdUserSync.ValueBool() {
+		if !obj.UseEnableAdUserSync.IsUnknown() && (obj.UseEnableAdUserSync.IsNull() || !obj.UseEnableAdUserSync.ValueBool()) {
 			resp.Diagnostics.AddAttributeError(
 				path.Root(blockName).AtName("use_enable_ad_user_sync"),
 				"Invalid AD User Sync Configuration",

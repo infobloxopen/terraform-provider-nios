@@ -532,7 +532,7 @@ func (r *NetworktemplateResource) ValidateConfig(ctx context.Context, req resour
 
 	if !data.DdnsServerAlwaysUpdates.IsNull() && !data.DdnsServerAlwaysUpdates.IsUnknown() {
 		// Check if ddns_use_option81 is not set to true
-		if data.DdnsUseOption81.IsNull() || data.DdnsUseOption81.IsUnknown() || !data.DdnsUseOption81.ValueBool() {
+		if !data.DdnsUseOption81.IsUnknown() && (data.DdnsUseOption81.IsNull() || !data.DdnsUseOption81.ValueBool()) {
 			resp.Diagnostics.AddAttributeError(
 				path.Root("ddns_server_always_updates"),
 				"Invalid Configuration",
@@ -572,7 +572,7 @@ func (r *NetworktemplateResource) ValidateConfig(ctx context.Context, req resour
 	}
 
 	if !data.AllowAnyNetmask.IsNull() && !data.AllowAnyNetmask.IsUnknown() && !data.AllowAnyNetmask.ValueBool() {
-		if data.Netmask.IsNull() || data.Netmask.IsUnknown() {
+		if data.Netmask.IsNull() {
 			resp.Diagnostics.AddAttributeError(
 				path.Root("netmask"),
 				"Invalid Configuration",

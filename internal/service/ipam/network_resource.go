@@ -678,7 +678,7 @@ func (r *NetworkResource) ValidateConfig(ctx context.Context, req resource.Valid
 	if !data.SubscribeSettings.IsNull() && !data.SubscribeSettings.IsUnknown() {
 		attrs := data.SubscribeSettings.Attributes()
 		enabledAttrs, exists := attrs["enabled_attributes"]
-		if !exists || enabledAttrs.IsNull() || enabledAttrs.IsUnknown() {
+		if !exists || enabledAttrs.IsNull() {
 			resp.Diagnostics.AddAttributeError(
 				path.Root("subscribe_settings").AtName("enabled_attributes"),
 				"Missing Required Attribute",

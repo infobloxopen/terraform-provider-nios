@@ -638,7 +638,7 @@ func (r *NetworkcontainerResource) ValidateConfig(ctx context.Context, req resou
 		resp.Diagnostics.Append(data.SubscribeSettings.As(ctx, &subscribeSettings, basetypes.ObjectAsOptions{})...)
 		if !resp.Diagnostics.HasError() {
 			// enabled_attributes is required when subscribe_settings is configured
-			if subscribeSettings.EnabledAttributes.IsNull() || subscribeSettings.EnabledAttributes.IsUnknown() {
+			if subscribeSettings.EnabledAttributes.IsNull() {
 				resp.Diagnostics.AddAttributeError(
 					path.Root("subscribe_settings").AtName("enabled_attributes"),
 					"Missing Required Attribute",
@@ -650,14 +650,14 @@ func (r *NetworkcontainerResource) ValidateConfig(ctx context.Context, req resou
 				var mappedEaAttrs []NetworkcontainersubscribesettingsMappedEaAttributesModel
 				resp.Diagnostics.Append(subscribeSettings.MappedEaAttributes.ElementsAs(ctx, &mappedEaAttrs, false)...)
 				for i, item := range mappedEaAttrs {
-					if item.Name.IsNull() || item.Name.IsUnknown() || item.Name.ValueString() == "" {
+					if !item.Name.IsUnknown() && (item.Name.IsNull() || item.Name.ValueString() == "") {
 						resp.Diagnostics.AddAttributeError(
 							path.Root("subscribe_settings").AtName("mapped_ea_attributes").AtListIndex(i).AtName("name"),
 							"Missing Required Attribute",
 							"The 'name' attribute is required for each item in 'mapped_ea_attributes'.",
 						)
 					}
-					if item.MappedEa.IsNull() || item.MappedEa.IsUnknown() || item.MappedEa.ValueString() == "" {
+					if !item.MappedEa.IsUnknown() && (item.MappedEa.IsNull() || item.MappedEa.ValueString() == "") {
 						resp.Diagnostics.AddAttributeError(
 							path.Root("subscribe_settings").AtName("mapped_ea_attributes").AtListIndex(i).AtName("mapped_ea"),
 							"Missing Required Attribute",
