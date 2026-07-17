@@ -342,7 +342,7 @@ func (r *Ipv6fixedaddresstemplateResource) ValidateConfig(ctx context.Context, r
 		for i, option := range options {
 			isSpecialOption := false
 			optionName := ""
-			if option.Value.IsNull() || option.Value.IsUnknown() {
+			if option.Value.IsNull() {
 				resp.Diagnostics.AddAttributeError(
 					path.Root("options").AtListIndex(i).AtName("value"),
 					"Invalid configuration for DHCP Option",
@@ -356,6 +356,8 @@ func (r *Ipv6fixedaddresstemplateResource) ValidateConfig(ctx context.Context, r
 				optionNum := option.Num.ValueInt64()
 				isSpecialOption = specialOptionsNum[optionNum]
 				optionName = fmt.Sprintf("with num = %d", optionNum)
+			} else if option.Name.IsUnknown() || option.Num.IsUnknown() {
+				continue
 			} else {
 				resp.Diagnostics.AddAttributeError(
 					path.Root("options").AtListIndex(i).AtName("name"),
@@ -366,7 +368,7 @@ func (r *Ipv6fixedaddresstemplateResource) ValidateConfig(ctx context.Context, r
 				continue
 			}
 
-			if option.Value.ValueString() == "" {
+			if !option.Value.IsUnknown() && !option.Value.IsNull() && option.Value.ValueString() == "" {
 				if !isSpecialOption {
 					resp.Diagnostics.AddAttributeError(
 						path.Root("options").AtListIndex(i).AtName("value"),
@@ -426,7 +428,7 @@ func (r *Ipv6fixedaddresstemplateResource) ValidateConfig(ctx context.Context, r
 
 	// Preferred lifetime must be less than or equal to valid lifetime
 	if !data.PreferredLifetime.IsNull() && !data.PreferredLifetime.IsUnknown() {
-		if (data.ValidLifetime.IsUnknown() || data.ValidLifetime.IsNull()) && !hasDhcpLeaseTime {
+		if data.ValidLifetime.IsNull() && !hasDhcpLeaseTime && !data.Options.IsUnknown() {
 			resp.Diagnostics.AddAttributeError(
 				path.Root("preferred_lifetime"),
 				"Invalid configuration",

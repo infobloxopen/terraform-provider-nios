@@ -598,6 +598,9 @@ func (r *SyslogEndpointResource) ValidateConfig(ctx context.Context, req resourc
 	}
 
 	// Read Syslog Servers from the model
+	if data.SyslogServers.IsNull() || data.SyslogServers.IsUnknown() {
+		return
+	}
 	var syslogServers []SyslogEndpointSyslogServersModel
 	diagResult := data.SyslogServers.ElementsAs(ctx, &syslogServers, false)
 	resp.Diagnostics.Append(diagResult...)
@@ -606,8 +609,8 @@ func (r *SyslogEndpointResource) ValidateConfig(ctx context.Context, req resourc
 	}
 
 	for _, server := range syslogServers {
-		if server.ConnectionType.ValueString() == "stcp" {
-			if server.CertificateFilePath.IsNull() || server.CertificateFilePath.IsUnknown() || server.CertificateFilePath.ValueString() == "" {
+		if !server.ConnectionType.IsNull() && !server.ConnectionType.IsUnknown() && server.ConnectionType.ValueString() == "stcp" {
+			if !server.CertificateFilePath.IsUnknown() && (server.CertificateFilePath.IsNull() || server.CertificateFilePath.ValueString() == "") {
 				resp.Diagnostics.AddError(
 					"Invalid Syslog Server Configuration",
 					"Syslog servers with STCP connection type must have a certificate file path specified through certificate_file_path.",
