@@ -75,7 +75,7 @@ func (r *AdmingroupResource) ValidateConfig(ctx context.Context, req resource.Va
 
 	// Check if disable_concurrent_login is set and use_disable_concurrent_login is false
 	if !config.DisableConcurrentLogin.IsNull() && !config.DisableConcurrentLogin.IsUnknown() &&
-		!config.UseDisableConcurrentLogin.IsNull() && !config.UseDisableConcurrentLogin.IsUnknown() && !config.UseDisableConcurrentLogin.ValueBool() {
+		!config.UseDisableConcurrentLogin.IsUnknown() && (config.UseDisableConcurrentLogin.IsNull() || !config.UseDisableConcurrentLogin.ValueBool()) {
 		resp.Diagnostics.AddAttributeError(
 			path.Root("disable_concurrent_login"),
 			"Invalid Configuration",
@@ -85,10 +85,11 @@ func (r *AdmingroupResource) ValidateConfig(ctx context.Context, req resource.Va
 
 	// Check if password_setting is set and use_password_setting is false
 	if !config.PasswordSetting.IsNull() && !config.PasswordSetting.IsUnknown() &&
-		!config.UsePasswordSetting.IsNull() && !config.UsePasswordSetting.IsUnknown() && !config.UsePasswordSetting.ValueBool() {
+		!config.UsePasswordSetting.IsUnknown() && (config.UsePasswordSetting.IsNull() || !config.UsePasswordSetting.ValueBool()) {
 		resp.Diagnostics.AddAttributeError(path.Root("password_setting"),
 			"Invalid Configuration",
-			"`use_password_setting` must be set to true when `password_setting` is used.")
+			"`use_password_setting` must be set to true when `password_setting` is used.",
+		)
 	}
 
 	// Skip validation if UserAccess is not provided
