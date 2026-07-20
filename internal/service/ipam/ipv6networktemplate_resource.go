@@ -534,7 +534,7 @@ func (r *Ipv6networktemplateResource) ValidateConfig(ctx context.Context, req re
 				)
 			}
 
-			if option.Name.ValueString() == "dhcp-lease-time" {
+			if option.Name.ValueString() == "dhcp-lease-time" && !option.Value.IsNull() && !option.Value.IsUnknown() {
 				hasDhcpLeaseTime = true
 				dhcpLeaseTimeValue = option.Value.ValueString()
 			}
