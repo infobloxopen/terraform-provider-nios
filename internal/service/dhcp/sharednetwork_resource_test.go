@@ -1921,14 +1921,25 @@ resource "nios_dhcp_shared_network" "test_ignore_dhcp_option_list_request" {
 
 func testAccSharednetworkIgnoreId(name string, networks []string, ignoreId string, useIgnoreId bool) string {
 	networksStr := formatNetworksToHCL(networks)
+	ignoreClientIdentifier := "false"
+	useIgnoreClientIdentifier := "true"
+	if ignoreId == "CLIENT" && useIgnoreId {
+		ignoreClientIdentifier = "true"
+		useIgnoreClientIdentifier = "true"
+	} else if ignoreId == "NONE" && !useIgnoreId {
+		ignoreClientIdentifier = "false"
+		useIgnoreClientIdentifier = "false"
+	}
 	config := fmt.Sprintf(`
 resource "nios_dhcp_shared_network" "test_ignore_id" {
    name = %q
    networks = %s
    ignore_id = %q
    use_ignore_id = %t
+   ignore_client_identifier = %s
+   use_ignore_client_identifier = %s
 }
-`, name, networksStr, ignoreId, useIgnoreId)
+`, name, networksStr, ignoreId, useIgnoreId, ignoreClientIdentifier, useIgnoreClientIdentifier)
 	return strings.Join([]string{testAccBaseWithNetworks(
 		"201.35.0.0/24", "201.36.0.0/24"), config}, "\n")
 }
