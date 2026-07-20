@@ -346,10 +346,9 @@ func (r *NsgroupResource) ValidateConfig(ctx context.Context, req resource.Valid
 	}
 
 	externalPrimariesSet := !data.ExternalPrimaries.IsNull() && !data.ExternalPrimaries.IsUnknown()
-	gridSecondariesSet := !data.GridSecondaries.IsNull() && !data.GridSecondaries.IsUnknown()
 
 	// If external_primaries is set, grid_secondaries must be provided
-	if externalPrimariesSet && !gridSecondariesSet {
+	if externalPrimariesSet && data.GridSecondaries.IsNull() {
 		resp.Diagnostics.AddAttributeError(
 			path.Root("grid_secondaries"),
 			"Missing Grid Secondary Server",

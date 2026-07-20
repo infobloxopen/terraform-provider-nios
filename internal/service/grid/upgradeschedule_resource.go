@@ -80,7 +80,7 @@ func (r *UpgradescheduleResource) ValidateConfig(ctx context.Context, req resour
 		}
 
 		for idx, group := range groups {
-			if group.Name.IsNull() || group.Name.IsUnknown() {
+			if group.Name.IsNull() {
 				resp.Diagnostics.AddAttributeError(
 					path.Root("upgrade_groups"),
 					"Invalid upgrade_groups.name",

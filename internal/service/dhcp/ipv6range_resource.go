@@ -429,30 +429,32 @@ func (r *Ipv6rangeResource) ValidateConfig(ctx context.Context, req resource.Val
 		}
 	}
 
-	serverAssociationType := "NONE"
-	if !data.ServerAssociationType.IsNull() && !data.ServerAssociationType.IsUnknown() {
-		serverAssociationType = data.ServerAssociationType.ValueString()
-	}
-
-	// If server_association_type is MEMBER, member field must be set
-	if serverAssociationType == "MEMBER" {
-		if data.Member.IsNull() || data.Member.IsUnknown() {
-			resp.Diagnostics.AddAttributeError(
-				path.Root("member"),
-				"Invalid Configuration",
-				"The 'member' field must be set when 'server_association_type' is set to 'MEMBER'.",
-			)
+	if !data.ServerAssociationType.IsUnknown() {
+		serverAssociationType := "NONE"
+		if !data.ServerAssociationType.IsNull() {
+			serverAssociationType = data.ServerAssociationType.ValueString()
 		}
-	}
 
-	// If server_association_type is NONE, member field cannot be set
-	if serverAssociationType == "NONE" {
-		if !data.Member.IsNull() && !data.Member.IsUnknown() {
-			resp.Diagnostics.AddAttributeError(
-				path.Root("member"),
-				"Invalid Configuration",
-				"The 'member' field cannot be set when 'server_association_type' is set to 'NONE' (default).",
-			)
+		// If server_association_type is MEMBER, member field must be set
+		if serverAssociationType == "MEMBER" {
+			if data.Member.IsNull() {
+				resp.Diagnostics.AddAttributeError(
+					path.Root("member"),
+					"Invalid Configuration",
+					"The 'member' field must be set when 'server_association_type' is set to 'MEMBER'.",
+				)
+			}
+		}
+
+		// If server_association_type is NONE, member field cannot be set
+		if serverAssociationType == "NONE" {
+			if !data.Member.IsNull() && !data.Member.IsUnknown() {
+				resp.Diagnostics.AddAttributeError(
+					path.Root("member"),
+					"Invalid Configuration",
+					"The 'member' field cannot be set when 'server_association_type' is set to 'NONE' (default).",
+				)
+			}
 		}
 	}
 

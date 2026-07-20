@@ -403,7 +403,7 @@ func (r *NetworkcontainerResource) ValidateConfig(ctx context.Context, req resou
 		for i, option := range options {
 			isSpecialOption := false
 			optionName := ""
-			if option.Value.IsNull() || option.Value.IsUnknown() {
+			if option.Value.IsNull() {
 				resp.Diagnostics.AddAttributeError(
 					path.Root("options").AtListIndex(i).AtName("value"),
 					"Invalid configuration for DHCP Option",
@@ -417,6 +417,8 @@ func (r *NetworkcontainerResource) ValidateConfig(ctx context.Context, req resou
 				optionNum := option.Num.ValueInt64()
 				isSpecialOption = specialOptionsNum[optionNum]
 				optionName = fmt.Sprintf("with num = %d", optionNum)
+			} else if option.Name.IsUnknown() || option.Num.IsUnknown() {
+				continue
 			} else {
 				resp.Diagnostics.AddAttributeError(
 					path.Root("options").AtListIndex(i).AtName("name"),
@@ -427,7 +429,7 @@ func (r *NetworkcontainerResource) ValidateConfig(ctx context.Context, req resou
 				continue
 			}
 
-			if option.Value.ValueString() == "" {
+			if !option.Value.IsNull() && !option.Value.IsUnknown() && option.Value.ValueString() == "" {
 				if !isSpecialOption {
 					resp.Diagnostics.AddAttributeError(
 						path.Root("options").AtListIndex(i).AtName("value"),
@@ -507,8 +509,46 @@ func (r *NetworkcontainerResource) ValidateConfig(ctx context.Context, req resou
 		if !data.UseBlackoutSetting.IsNull() && !data.UseBlackoutSetting.IsUnknown() && !data.UseBlackoutSetting.ValueBool() {
 			resp.Diagnostics.AddError(
 				"Same Port Control Discovery Blackout Not Allowed",
-				"When use_blackout_setting is set to false, same_port_control_discovery_blackout cannot be configured. Either set use_blackout_setting to true or remove the same_port_control_discovery_blackout attribute.",
+				"When use_blackout_setting is set to false, same_port_control_discovery_blackout cannot be set to true. Either set use_blackout_setting to true or set same_port_control_discovery_blackout to false.",
 			)
+		}
+	}
+
+	// Validate subscribe_settings: enabled_attributes is required, and each
+	// mapped_ea_attributes item requires name and mapped_ea.
+	if !data.SubscribeSettings.IsNull() && !data.SubscribeSettings.IsUnknown() {
+		var subscribeSettings NetworkcontainerSubscribeSettingsModel
+		resp.Diagnostics.Append(data.SubscribeSettings.As(ctx, &subscribeSettings, basetypes.ObjectAsOptions{})...)
+		if !resp.Diagnostics.HasError() {
+			// enabled_attributes is required when subscribe_settings is configured
+			if subscribeSettings.EnabledAttributes.IsNull() {
+				resp.Diagnostics.AddAttributeError(
+					path.Root("subscribe_settings").AtName("enabled_attributes"),
+					"Missing Required Attribute",
+					"The 'enabled_attributes' attribute is required when 'subscribe_settings' is configured.",
+				)
+			}
+
+			if !subscribeSettings.MappedEaAttributes.IsNull() && !subscribeSettings.MappedEaAttributes.IsUnknown() {
+				var mappedEaAttrs []NetworkcontainersubscribesettingsMappedEaAttributesModel
+				resp.Diagnostics.Append(subscribeSettings.MappedEaAttributes.ElementsAs(ctx, &mappedEaAttrs, false)...)
+				for i, item := range mappedEaAttrs {
+					if !item.Name.IsUnknown() && (item.Name.IsNull() || item.Name.ValueString() == "") {
+						resp.Diagnostics.AddAttributeError(
+							path.Root("subscribe_settings").AtName("mapped_ea_attributes").AtListIndex(i).AtName("name"),
+							"Missing Required Attribute",
+							"The 'name' attribute is required for each item in 'mapped_ea_attributes'.",
+						)
+					}
+					if !item.MappedEa.IsUnknown() && (item.MappedEa.IsNull() || item.MappedEa.ValueString() == "") {
+						resp.Diagnostics.AddAttributeError(
+							path.Root("subscribe_settings").AtName("mapped_ea_attributes").AtListIndex(i).AtName("mapped_ea"),
+							"Missing Required Attribute",
+							"The 'mapped_ea' attribute is required for each item in 'mapped_ea_attributes'.",
+						)
+					}
+				}
+			}
 		}
 	}
 }

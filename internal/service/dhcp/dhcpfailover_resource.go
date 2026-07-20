@@ -365,36 +365,49 @@ func (r *DhcpfailoverResource) ValidateConfig(ctx context.Context, req resource.
 	}
 
 	if secondaryServerType == "EXTERNAL" {
-		secondaryValue := data.Secondary.ValueString()
-		if secondaryValue != "" {
-			ip := net.ParseIP(secondaryValue)
-			if ip == nil || ip.To4() == nil {
-				resp.Diagnostics.AddError(
-					"Invalid Secondary Server",
-					"secondary must be a valid IPv4 address when secondary_server_type is set to EXTERNAL.",
-				)
+		if !data.Secondary.IsNull() && !data.Secondary.IsUnknown() {
+			secondaryValue := data.Secondary.ValueString()
+			if secondaryValue != "" {
+				ip := net.ParseIP(secondaryValue)
+				if ip == nil || ip.To4() == nil {
+					resp.Diagnostics.AddError(
+						"Invalid Secondary Server",
+						"secondary must be a valid IPv4 address when secondary_server_type is set to EXTERNAL.",
+					)
+				}
 			}
 		}
 	}
 
 	if primaryServerType == "EXTERNAL" {
-		primaryValue := data.Primary.ValueString()
-		if primaryValue != "" {
-			ip := net.ParseIP(primaryValue)
-			if ip == nil || ip.To4() == nil {
-				resp.Diagnostics.AddError(
-					"Invalid Primary Server",
-					"primary must be a valid IPv4 address when primary_server_type is set to EXTERNAL.",
-				)
+		if !data.Primary.IsNull() && !data.Primary.IsUnknown() {
+			primaryValue := data.Primary.ValueString()
+			if primaryValue != "" {
+				ip := net.ParseIP(primaryValue)
+				if ip == nil || ip.To4() == nil {
+					resp.Diagnostics.AddError(
+						"Invalid Primary Server",
+						"primary must be a valid IPv4 address when primary_server_type is set to EXTERNAL.",
+					)
+				}
 			}
 		}
 	}
 
 	if !data.UseMsSwitchoverInterval.IsNull() && !data.UseMsSwitchoverInterval.IsUnknown() && data.UseMsSwitchoverInterval.ValueBool() {
-		if data.MsEnableSwitchoverInterval.IsNull() || data.MsEnableSwitchoverInterval.IsUnknown() || !data.MsEnableSwitchoverInterval.ValueBool() {
+		if !data.MsEnableSwitchoverInterval.IsUnknown() && (data.MsEnableSwitchoverInterval.IsNull() || !data.MsEnableSwitchoverInterval.ValueBool()) {
 			resp.Diagnostics.AddError(
 				"Invalid Configuration",
-				"ms_enable_switchover_interval must be set when use_ms_switchover_interval is true.",
+				"ms_enable_switchover_interval must be set to true when use_ms_switchover_interval is true.",
+			)
+		}
+	}
+
+	if !data.MsEnableSwitchoverInterval.IsNull() && !data.MsEnableSwitchoverInterval.IsUnknown() && data.MsEnableSwitchoverInterval.ValueBool() {
+		if !data.UseMsSwitchoverInterval.IsUnknown() && (data.UseMsSwitchoverInterval.IsNull() || !data.UseMsSwitchoverInterval.ValueBool()) {
+			resp.Diagnostics.AddError(
+				"Invalid Configuration",
+				"use_ms_switchover_interval must be set to true when ms_enable_switchover_interval is true.",
 			)
 		}
 	}

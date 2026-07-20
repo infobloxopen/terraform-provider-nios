@@ -71,9 +71,12 @@ func (r *ParentalcontrolSubscriberrecordResource) ValidateConfig(ctx context.Con
 		return
 	}
 
-	// Check if white_list or blacklist are provided and bwflag is set to true, if not return error
-	if !data.WhiteList.IsNull() || !data.BlackList.IsNull() {
-		if data.Bwflag.IsNull() || !data.Bwflag.ValueBool() {
+	// Check if white_list or black_list are provided and bwflag is set to true, if not return error.
+	isWhiteListSet := !data.WhiteList.IsNull() && !data.WhiteList.IsUnknown()
+	isBlackListSet := !data.BlackList.IsNull() && !data.BlackList.IsUnknown()
+
+	if isWhiteListSet || isBlackListSet {
+		if !data.Bwflag.IsUnknown() && (data.Bwflag.IsNull() || !data.Bwflag.ValueBool()) {
 			resp.Diagnostics.AddError(
 				"Invalid Configuration",
 				"bwflag must be set to true when white_list or black_list is provided.",

@@ -77,7 +77,7 @@ func (r *VdiscoverytaskResource) ValidateConfig(ctx context.Context, req resourc
 	// Validate auto_create_dns_record_type and auto_create_dns_hostname_template requirement when auto_create_dns_record is true
 	if !data.AutoCreateDnsRecord.IsNull() && !data.AutoCreateDnsRecord.IsUnknown() && data.AutoCreateDnsRecord.ValueBool() {
 		// Check auto_create_dns_record_type is provided
-		if data.AutoCreateDnsRecordType.IsNull() || data.AutoCreateDnsRecordType.IsUnknown() || data.AutoCreateDnsRecordType.ValueString() == "" {
+		if !data.AutoCreateDnsRecordType.IsUnknown() && (data.AutoCreateDnsRecordType.IsNull() || data.AutoCreateDnsRecordType.ValueString() == "") {
 			resp.Diagnostics.AddError(
 				"Missing DNS Record Type",
 				"'auto_create_dns_record_type' is required when 'auto_create_dns_record' is set to true.",
@@ -85,7 +85,7 @@ func (r *VdiscoverytaskResource) ValidateConfig(ctx context.Context, req resourc
 		}
 
 		// Check auto_create_dns_hostname_template is provided
-		if data.AutoCreateDnsHostnameTemplate.IsNull() || data.AutoCreateDnsHostnameTemplate.IsUnknown() || data.AutoCreateDnsHostnameTemplate.ValueString() == "" {
+		if !data.AutoCreateDnsHostnameTemplate.IsUnknown() && (data.AutoCreateDnsHostnameTemplate.IsNull() || data.AutoCreateDnsHostnameTemplate.ValueString() == "") {
 			resp.Diagnostics.AddError(
 				"Missing DNS Hostname Template",
 				"'auto_create_dns_hostname_template' is required when 'auto_create_dns_record' is set to true.",
@@ -96,7 +96,7 @@ func (r *VdiscoverytaskResource) ValidateConfig(ctx context.Context, req resourc
 	// Validate cdiscovery_file requirement for UPLOAD policy
 	if !data.MultipleAccountsSyncPolicy.IsNull() && !data.MultipleAccountsSyncPolicy.IsUnknown() {
 		if data.MultipleAccountsSyncPolicy.ValueString() == "UPLOAD" {
-			if data.CdiscoveryFile.IsNull() || data.CdiscoveryFile.IsUnknown() || data.CdiscoveryFile.ValueString() == "" {
+			if !data.CdiscoveryFile.IsUnknown() && (data.CdiscoveryFile.IsNull() || data.CdiscoveryFile.ValueString() == "") {
 				resp.Diagnostics.AddError(
 					"Missing CDDiscovery File",
 					"'cdiscovery_file' is required when 'multiple_accounts_sync_policy' is set to 'UPLOAD'.",
@@ -107,7 +107,7 @@ func (r *VdiscoverytaskResource) ValidateConfig(ctx context.Context, req resourc
 
 	// Validate dns_view_private_ip requires update_dns_view_private_ip = true
 	if !data.DnsViewPrivateIp.IsNull() && !data.DnsViewPrivateIp.IsUnknown() && data.DnsViewPrivateIp.ValueString() != "" {
-		if data.UpdateDnsViewPrivateIp.IsNull() || data.UpdateDnsViewPrivateIp.IsUnknown() || !data.UpdateDnsViewPrivateIp.ValueBool() {
+		if !data.UpdateDnsViewPrivateIp.IsUnknown() && (data.UpdateDnsViewPrivateIp.IsNull() || !data.UpdateDnsViewPrivateIp.ValueBool()) {
 			resp.Diagnostics.AddError(
 				"Invalid DNS View Configuration",
 				"'update_dns_view_private_ip' must be set to true to use 'dns_view_private_ip'.",
@@ -117,10 +117,118 @@ func (r *VdiscoverytaskResource) ValidateConfig(ctx context.Context, req resourc
 
 	// Validate dns_view_public_ip requires update_dns_view_public_ip = true
 	if !data.DnsViewPublicIp.IsNull() && !data.DnsViewPublicIp.IsUnknown() && data.DnsViewPublicIp.ValueString() != "" {
-		if data.UpdateDnsViewPublicIp.IsNull() || data.UpdateDnsViewPublicIp.IsUnknown() || !data.UpdateDnsViewPublicIp.ValueBool() {
+		if !data.UpdateDnsViewPublicIp.IsUnknown() && (data.UpdateDnsViewPublicIp.IsNull() || !data.UpdateDnsViewPublicIp.ValueBool()) {
 			resp.Diagnostics.AddError(
 				"Invalid DNS View Configuration",
 				"'update_dns_view_public_ip' must be set to true to use 'dns_view_public_ip'.",
+			)
+		}
+	}
+
+	// Validate DIRECT policy requires explicit network view
+	if !data.PrivateNetworkViewMappingPolicy.IsNull() && !data.PrivateNetworkViewMappingPolicy.IsUnknown() &&
+		data.PrivateNetworkViewMappingPolicy.ValueString() == "DIRECT" {
+		if !data.PrivateNetworkView.IsUnknown() && (data.PrivateNetworkView.IsNull() || data.PrivateNetworkView.ValueString() == "") {
+			resp.Diagnostics.AddAttributeError(
+				path.Root("private_network_view"),
+				"Missing Private Network View",
+				"'private_network_view' is required when 'private_network_view_mapping_policy' is 'DIRECT'.",
+			)
+		}
+	}
+
+	if !data.PublicNetworkViewMappingPolicy.IsNull() && !data.PublicNetworkViewMappingPolicy.IsUnknown() &&
+		data.PublicNetworkViewMappingPolicy.ValueString() == "DIRECT" {
+		if !data.PublicNetworkView.IsUnknown() && (data.PublicNetworkView.IsNull() || data.PublicNetworkView.ValueString() == "") {
+			resp.Diagnostics.AddAttributeError(
+				path.Root("public_network_view"),
+				"Missing Public Network View",
+				"'public_network_view' is required when 'public_network_view_mapping_policy' is 'DIRECT'.",
+			)
+		}
+	}
+
+	// Validate AUTO_CREATE policy must not have explicit private network view
+	if !data.PrivateNetworkViewMappingPolicy.IsNull() && !data.PrivateNetworkViewMappingPolicy.IsUnknown() &&
+		data.PrivateNetworkViewMappingPolicy.ValueString() == "AUTO_CREATE" {
+		if !data.PrivateNetworkView.IsNull() && !data.PrivateNetworkView.IsUnknown() && data.PrivateNetworkView.ValueString() != "" {
+			resp.Diagnostics.AddAttributeError(
+				path.Root("private_network_view"),
+				"Invalid Private Network View Configuration",
+				"'private_network_view' must not be set when 'private_network_view_mapping_policy' is 'AUTO_CREATE'.",
+			)
+		}
+	}
+
+	// Validate AUTO_CREATE policy must not have explicit public network view
+	if !data.PublicNetworkViewMappingPolicy.IsNull() && !data.PublicNetworkViewMappingPolicy.IsUnknown() &&
+		data.PublicNetworkViewMappingPolicy.ValueString() == "AUTO_CREATE" {
+		if !data.PublicNetworkView.IsNull() && !data.PublicNetworkView.IsUnknown() && data.PublicNetworkView.ValueString() != "" {
+			resp.Diagnostics.AddAttributeError(
+				path.Root("public_network_view"),
+				"Invalid Public Network View Configuration",
+				"'public_network_view' must not be set when 'public_network_view_mapping_policy' is 'AUTO_CREATE'.",
+			)
+		}
+	}
+
+	// Validate AUTO_CREATE policy cannot be used with private DNS view updates
+	privatePolicyAutoCreate := !data.PrivateNetworkViewMappingPolicy.IsNull() &&
+		!data.PrivateNetworkViewMappingPolicy.IsUnknown() &&
+		data.PrivateNetworkViewMappingPolicy.ValueString() == "AUTO_CREATE"
+
+	updatePrivateTrue := !data.UpdateDnsViewPrivateIp.IsNull() &&
+		!data.UpdateDnsViewPrivateIp.IsUnknown() &&
+		data.UpdateDnsViewPrivateIp.ValueBool()
+
+	if privatePolicyAutoCreate && updatePrivateTrue {
+		resp.Diagnostics.AddAttributeError(
+			path.Root("update_dns_view_private_ip"),
+			"Invalid DNS View Configuration",
+			"'update_dns_view_private_ip' cannot be true when 'private_network_view_mapping_policy' is 'AUTO_CREATE'.",
+		)
+	} else if updatePrivateTrue {
+		if !data.DnsViewPrivateIp.IsUnknown() && (data.DnsViewPrivateIp.IsNull() || data.DnsViewPrivateIp.ValueString() == "") {
+			resp.Diagnostics.AddAttributeError(
+				path.Root("dns_view_private_ip"),
+				"Missing DNS View",
+				"'dns_view_private_ip' is required when 'update_dns_view_private_ip' is true.",
+			)
+		}
+	}
+
+	// Validate AUTO_CREATE policy cannot be used with public DNS view updates
+	publicPolicyAutoCreate := !data.PublicNetworkViewMappingPolicy.IsNull() &&
+		!data.PublicNetworkViewMappingPolicy.IsUnknown() &&
+		data.PublicNetworkViewMappingPolicy.ValueString() == "AUTO_CREATE"
+
+	updatePublicTrue := !data.UpdateDnsViewPublicIp.IsNull() &&
+		!data.UpdateDnsViewPublicIp.IsUnknown() &&
+		data.UpdateDnsViewPublicIp.ValueBool()
+
+	if publicPolicyAutoCreate && updatePublicTrue {
+		resp.Diagnostics.AddAttributeError(
+			path.Root("update_dns_view_public_ip"),
+			"Invalid DNS View Configuration",
+			"'update_dns_view_public_ip' cannot be true when 'public_network_view_mapping_policy' is 'AUTO_CREATE'.",
+		)
+	} else if updatePublicTrue {
+		if !data.DnsViewPublicIp.IsUnknown() && (data.DnsViewPublicIp.IsNull() || data.DnsViewPublicIp.ValueString() == "") {
+			resp.Diagnostics.AddAttributeError(
+				path.Root("dns_view_public_ip"),
+				"Missing DNS View",
+				"'dns_view_public_ip' is required when 'update_dns_view_public_ip' is true.",
+			)
+		}
+	}
+
+	// Validate fqdn_or_ip requirement for Azure/VMware/OpenStack
+	if driverType == "VMWARE" || driverType == "OPENSTACK" || driverType == "AZURE" {
+		if !data.FqdnOrIp.IsUnknown() && (data.FqdnOrIp.IsNull() || data.FqdnOrIp.ValueString() == "") {
+			resp.Diagnostics.AddAttributeError(
+				path.Root("fqdn_or_ip"),
+				"Missing Required Attribute",
+				fmt.Sprintf("'fqdn_or_ip' is required when 'driver_type' is '%s'.", driverType),
 			)
 		}
 	}
@@ -129,7 +237,7 @@ func (r *VdiscoverytaskResource) ValidateConfig(ctx context.Context, req resourc
 	if driverType == "OPENSTACK" {
 		if !data.IdentityVersion.IsNull() && !data.IdentityVersion.IsUnknown() {
 			if data.IdentityVersion.ValueString() == "KEYSTONE_V3" {
-				if data.DomainName.IsNull() || data.DomainName.IsUnknown() || data.DomainName.ValueString() == "" {
+				if !data.DomainName.IsUnknown() && (data.DomainName.IsNull() || data.DomainName.ValueString() == "") {
 					resp.Diagnostics.AddError(
 						"Missing Domain Name",
 						"'domain_name' is required when 'identity_version' is set to 'KEYSTONE_V3'.",
@@ -139,7 +247,7 @@ func (r *VdiscoverytaskResource) ValidateConfig(ctx context.Context, req resourc
 		}
 
 		// Validate identity_version requirement for OPENSTACK
-		if data.IdentityVersion.IsNull() || data.IdentityVersion.IsUnknown() {
+		if data.IdentityVersion.IsNull() {
 			resp.Diagnostics.AddError(
 				"Missing Identity Version",
 				"'identity_version' is required when 'driver_type' is 'OPENSTACK'.",
@@ -147,7 +255,7 @@ func (r *VdiscoverytaskResource) ValidateConfig(ctx context.Context, req resourc
 		}
 
 		// Validate use_identity requirement for OPENSTACK
-		if data.UseIdentity.IsNull() || data.UseIdentity.IsUnknown() {
+		if data.UseIdentity.IsNull() {
 			resp.Diagnostics.AddError(
 				"Missing Use Identity",
 				"'use_identity' is required when 'driver_type' is 'OPENSTACK'.",
@@ -159,7 +267,7 @@ func (r *VdiscoverytaskResource) ValidateConfig(ctx context.Context, req resourc
 	if !data.CredentialsType.IsNull() && !data.CredentialsType.IsUnknown() {
 		if data.CredentialsType.ValueString() == "DIRECT" {
 			// Password required for DIRECT credentials
-			if data.Password.IsNull() || data.Password.IsUnknown() || data.Password.ValueString() == "" {
+			if !data.Password.IsUnknown() && (data.Password.IsNull() || data.Password.ValueString() == "") {
 				resp.Diagnostics.AddError(
 					"Missing Password",
 					"'password' is required when 'credentials_type' is set to 'DIRECT'.",
@@ -167,7 +275,7 @@ func (r *VdiscoverytaskResource) ValidateConfig(ctx context.Context, req resourc
 			}
 
 			// Username required for DIRECT credentials
-			if data.Username.IsNull() || data.Username.IsUnknown() || data.Username.ValueString() == "" {
+			if !data.Username.IsUnknown() && (data.Username.IsNull() || data.Username.ValueString() == "") {
 				resp.Diagnostics.AddError(
 					"Missing Username",
 					"'username' is required when 'credentials_type' is set to 'DIRECT'.",
@@ -178,7 +286,7 @@ func (r *VdiscoverytaskResource) ValidateConfig(ctx context.Context, req resourc
 
 	// Validate selected_regions requirement for AWS
 	if driverType == "AWS" {
-		if data.SelectedRegions.IsNull() || data.SelectedRegions.IsUnknown() || data.SelectedRegions.ValueString() == "" {
+		if !data.SelectedRegions.IsUnknown() && (data.SelectedRegions.IsNull() || data.SelectedRegions.ValueString() == "") {
 			resp.Diagnostics.AddError(
 				"Missing Selected Regions",
 				"'selected_regions' is required when 'driver_type' is 'AWS'.",
@@ -190,13 +298,13 @@ func (r *VdiscoverytaskResource) ValidateConfig(ctx context.Context, req resourc
 	serviceAccountFileProvided := !data.ServiceAccountFile.IsNull() && !data.ServiceAccountFile.IsUnknown() && data.ServiceAccountFile.ValueString() != ""
 
 	if driverType == "GCP" {
-		if !serviceAccountFileProvided {
+		if !data.ServiceAccountFile.IsUnknown() && (data.ServiceAccountFile.IsNull() || data.ServiceAccountFile.ValueString() == "") {
 			resp.Diagnostics.AddError(
 				"Missing Service Account File",
 				"'service_account_file' is required when 'driver_type' is 'GCP'.",
 			)
 		}
-	} else if serviceAccountFileProvided {
+	} else if serviceAccountFileProvided && !data.DriverType.IsUnknown() {
 		resp.Diagnostics.AddError(
 			"Invalid Service Account File Configuration",
 			fmt.Sprintf("'service_account_file' is only supported for GCP driver type, but got '%s'.", driverType),
@@ -205,7 +313,7 @@ func (r *VdiscoverytaskResource) ValidateConfig(ctx context.Context, req resourc
 
 	// Validate cdiscovery_file is only for AWS and GCP
 	if !data.CdiscoveryFile.IsNull() && !data.CdiscoveryFile.IsUnknown() && data.CdiscoveryFile.ValueString() != "" {
-		if driverType != "AWS" && driverType != "GCP" {
+		if !data.DriverType.IsUnknown() && driverType != "AWS" && driverType != "GCP" {
 			resp.Diagnostics.AddError(
 				"Invalid Cdiscovery File Configuration",
 				fmt.Sprintf("'cdiscovery_file' is only supported for AWS and GCP driver types, but got '%s'.", driverType),

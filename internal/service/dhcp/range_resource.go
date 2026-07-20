@@ -377,7 +377,7 @@ func (r *RangeResource) ValidateConfig(ctx context.Context, req resource.Validat
 		for i, option := range options {
 			isSpecialOption := false
 			optionName := ""
-			if option.Value.IsNull() || option.Value.IsUnknown() {
+			if option.Value.IsNull() {
 				resp.Diagnostics.AddAttributeError(
 					path.Root("options").AtListIndex(i).AtName("value"),
 					"Invalid configuration for DHCP Option",
@@ -391,6 +391,8 @@ func (r *RangeResource) ValidateConfig(ctx context.Context, req resource.Validat
 				optionNum := option.Num.ValueInt64()
 				isSpecialOption = specialOptionsNum[optionNum]
 				optionName = fmt.Sprintf("with num = %d", optionNum)
+			} else if option.Name.IsUnknown() || option.Num.IsUnknown() {
+				continue
 			} else {
 				resp.Diagnostics.AddAttributeError(
 					path.Root("options").AtListIndex(i).AtName("name"),
@@ -401,7 +403,7 @@ func (r *RangeResource) ValidateConfig(ctx context.Context, req resource.Validat
 				continue
 			}
 
-			if option.Value.ValueString() == "" {
+			if !option.Value.IsNull() && !option.Value.IsUnknown() && option.Value.ValueString() == "" {
 				if !isSpecialOption {
 					resp.Diagnostics.AddAttributeError(
 						path.Root("options").AtListIndex(i).AtName("value"),
@@ -430,38 +432,40 @@ func (r *RangeResource) ValidateConfig(ctx context.Context, req resource.Validat
 		}
 	}
 
-	serverAssociationType := "NONE"
-	if !data.ServerAssociationType.IsNull() && !data.ServerAssociationType.IsUnknown() {
-		serverAssociationType = data.ServerAssociationType.ValueString()
-	}
-
-	// If server_association_type is MEMBER, member field must be set
-	if serverAssociationType == "MEMBER" {
-		if data.Member.IsNull() || data.Member.IsUnknown() {
-			resp.Diagnostics.AddAttributeError(
-				path.Root("member"),
-				"Invalid Configuration",
-				"The 'member' field must be set when 'server_association_type' is set to 'MEMBER'.",
-			)
+	if !data.ServerAssociationType.IsUnknown() {
+		serverAssociationType := "NONE"
+		if !data.ServerAssociationType.IsNull() {
+			serverAssociationType = data.ServerAssociationType.ValueString()
 		}
-	}
 
-	// If server_association_type is NONE, member field cannot be set
-	if serverAssociationType == "NONE" {
-		if !data.Member.IsNull() && !data.Member.IsUnknown() {
-			resp.Diagnostics.AddAttributeError(
-				path.Root("member"),
-				"Invalid Configuration",
-				"The 'member' field cannot be set when 'server_association_type' is set to 'NONE' (default).",
-			)
+		// If server_association_type is MEMBER, member field must be set
+		if serverAssociationType == "MEMBER" {
+			if data.Member.IsNull() {
+				resp.Diagnostics.AddAttributeError(
+					path.Root("member"),
+					"Invalid Configuration",
+					"The 'member' field must be set when 'server_association_type' is set to 'MEMBER'.",
+				)
+			}
 		}
-		if !data.MsServer.IsNull() && !data.MsServer.IsUnknown() {
-			resp.Diagnostics.AddAttributeError(
-				path.Root("ms_server"),
-				"Invalid Configuration",
-				"The 'ms_server' field cannot be set when 'server_association_type' is set to 'NONE' (default). "+
-					"Modify the 'server_association_type' field to 'MS_SERVER' to allow setting 'ms_server'.",
-			)
+
+		// If server_association_type is NONE, member field cannot be set
+		if serverAssociationType == "NONE" {
+			if !data.Member.IsNull() && !data.Member.IsUnknown() {
+				resp.Diagnostics.AddAttributeError(
+					path.Root("member"),
+					"Invalid Configuration",
+					"The 'member' field cannot be set when 'server_association_type' is set to 'NONE' (default).",
+				)
+			}
+			if !data.MsServer.IsNull() && !data.MsServer.IsUnknown() {
+				resp.Diagnostics.AddAttributeError(
+					path.Root("ms_server"),
+					"Invalid Configuration",
+					"The 'ms_server' field cannot be set when 'server_association_type' is set to 'NONE' (default). "+
+						"Modify the 'server_association_type' field to 'MS_SERVER' to allow setting 'ms_server'.",
+				)
+			}
 		}
 	}
 
