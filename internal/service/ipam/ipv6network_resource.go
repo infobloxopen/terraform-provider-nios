@@ -616,6 +616,7 @@ func (r *Ipv6networkResource) ValidateConfig(ctx context.Context, req resource.V
 			// domain_name attribute must match the value of option 'domain-name'
 			if option.Name.ValueString() == "domain-name" {
 				if !data.DomainName.IsNull() && !data.DomainName.IsUnknown() &&
+					!option.Value.IsNull() && !option.Value.IsUnknown() &&
 					option.Value.ValueString() != data.DomainName.ValueString() {
 					resp.Diagnostics.AddAttributeError(
 						path.Root("domain_name"),
