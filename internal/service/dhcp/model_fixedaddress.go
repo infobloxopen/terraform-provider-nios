@@ -687,7 +687,6 @@ func (m *FixedaddressModel) Expand(ctx context.Context, diags *diag.Diagnostics,
 		LogicFilterRules:               flex.ExpandFrameworkListNestedBlock(ctx, m.LogicFilterRules, diags, ExpandFixedaddressLogicFilterRules),
 		Mac:                            flex.ExpandMACAddress(m.Mac),
 		MatchClient:                    flex.ExpandStringPointer(m.MatchClient),
-		MsAdUserData:                   ExpandFixedaddressMsAdUserData(ctx, m.MsAdUserData, diags),
 		MsOptions:                      flex.ExpandFrameworkListNestedBlock(ctx, m.MsOptions, diags, ExpandFixedaddressMsOptions),
 		MsServer:                       ExpandFixedaddressMsServer(ctx, m.MsServer, diags),
 		Name:                           flex.ExpandStringPointer(m.Name),
@@ -717,6 +716,7 @@ func (m *FixedaddressModel) Expand(ctx context.Context, diags *diag.Diagnostics,
 	}
 	if isCreate {
 		to.Template = flex.ExpandStringPointer(m.Template)
+		to.MsAdUserData = ExpandFixedaddressMsAdUserData(ctx, m.MsAdUserData, diags)
 	}
 	return to
 }

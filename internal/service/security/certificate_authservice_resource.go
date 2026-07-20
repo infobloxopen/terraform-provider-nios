@@ -27,6 +27,8 @@ var _ resource.ResourceWithImportState = &CertificateAuthserviceResource{}
 
 var _ resource.ResourceWithModifyPlan = &CertificateAuthserviceResource{}
 
+var _ resource.ResourceWithUpgradeState = &CertificateAuthserviceResource{}
+
 func NewCertificateAuthserviceResource() resource.Resource {
 	return &CertificateAuthserviceResource{}
 }
@@ -42,6 +44,7 @@ func (r *CertificateAuthserviceResource) Metadata(ctx context.Context, req resou
 
 func (r *CertificateAuthserviceResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
+		Version:             1,
 		MarkdownDescription: "Manages a Certificate Authentication Service.",
 		Attributes:          CertificateAuthserviceResourceSchemaAttributes,
 	}
@@ -65,6 +68,24 @@ func (r *CertificateAuthserviceResource) Configure(ctx context.Context, req reso
 	}
 
 	r.client = client
+}
+
+func (r *CertificateAuthserviceResource) UpgradeState(ctx context.Context) map[int64]resource.StateUpgrader {
+	return map[int64]resource.StateUpgrader{
+		0: {
+			PriorSchema: &schema.Schema{
+				Attributes: CertificateAuthserviceResourceSchemaAttributes,
+			},
+			StateUpgrader: func(ctx context.Context, req resource.UpgradeStateRequest, resp *resource.UpgradeStateResponse) {
+				var data CertificateAuthserviceModel
+				resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
+				if resp.Diagnostics.HasError() {
+					return
+				}
+				resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+			},
+		},
+	}
 }
 
 type certAuthHashState struct {

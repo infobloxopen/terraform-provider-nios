@@ -70,6 +70,7 @@ var validRipeOrgTypes = map[string]struct{}{
 var _ resource.Resource = &RirOrganizationResource{}
 var _ resource.ResourceWithImportState = &RirOrganizationResource{}
 var _ resource.ResourceWithModifyPlan = &RirOrganizationResource{}
+var _ resource.ResourceWithUpgradeState = &RirOrganizationResource{}
 
 func NewRirOrganizationResource() resource.Resource {
 	return &RirOrganizationResource{}
@@ -90,6 +91,7 @@ func (r *RirOrganizationResource) Metadata(ctx context.Context, req resource.Met
 
 func (r *RirOrganizationResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
+		Version:             1,
 		MarkdownDescription: "Manages a RirOrganization resource object.",
 		Attributes:          RirOrganizationResourceSchemaAttributes,
 	}
@@ -113,6 +115,24 @@ func (r *RirOrganizationResource) Configure(ctx context.Context, req resource.Co
 	}
 
 	r.client = client
+}
+
+func (r *RirOrganizationResource) UpgradeState(ctx context.Context) map[int64]resource.StateUpgrader {
+	return map[int64]resource.StateUpgrader{
+		0: {
+			PriorSchema: &schema.Schema{
+				Attributes: RirOrganizationResourceSchemaAttributes,
+			},
+			StateUpgrader: func(ctx context.Context, req resource.UpgradeStateRequest, resp *resource.UpgradeStateResponse) {
+				var data RirOrganizationModel
+				resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
+				if resp.Diagnostics.HasError() {
+					return
+				}
+				resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+			},
+		},
+	}
 }
 
 func (r *RirOrganizationResource) ModifyPlan(ctx context.Context, req resource.ModifyPlanRequest, resp *resource.ModifyPlanResponse) {

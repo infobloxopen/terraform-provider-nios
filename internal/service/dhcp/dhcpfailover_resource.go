@@ -27,6 +27,8 @@ var _ resource.ResourceWithImportState = &DhcpfailoverResource{}
 var _ resource.ResourceWithModifyPlan = &DhcpfailoverResource{}
 var _ resource.ResourceWithValidateConfig = &DhcpfailoverResource{}
 
+var _ resource.ResourceWithUpgradeState = &DhcpfailoverResource{}
+
 func NewDhcpfailoverResource() resource.Resource {
 	return &DhcpfailoverResource{}
 }
@@ -46,6 +48,7 @@ func (r *DhcpfailoverResource) Metadata(ctx context.Context, req resource.Metada
 
 func (r *DhcpfailoverResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
+		Version:             1,
 		MarkdownDescription: "Manages a DHCP Failover.",
 		Attributes:          DhcpfailoverResourceSchemaAttributes,
 	}
@@ -69,6 +72,24 @@ func (r *DhcpfailoverResource) Configure(ctx context.Context, req resource.Confi
 	}
 
 	r.client = client
+}
+
+func (r *DhcpfailoverResource) UpgradeState(ctx context.Context) map[int64]resource.StateUpgrader {
+	return map[int64]resource.StateUpgrader{
+		0: {
+			PriorSchema: &schema.Schema{
+				Attributes: DhcpfailoverResourceSchemaAttributes,
+			},
+			StateUpgrader: func(ctx context.Context, req resource.UpgradeStateRequest, resp *resource.UpgradeStateResponse) {
+				var data DhcpfailoverModel
+				resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
+				if resp.Diagnostics.HasError() {
+					return
+				}
+				resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+			},
+		},
+	}
 }
 
 func (r *DhcpfailoverResource) ModifyPlan(ctx context.Context, req resource.ModifyPlanRequest, resp *resource.ModifyPlanResponse) {

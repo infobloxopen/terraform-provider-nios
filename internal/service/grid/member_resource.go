@@ -29,6 +29,8 @@ var _ resource.ResourceWithValidateConfig = &MemberResource{}
 
 var _ resource.ResourceWithModifyPlan = &MemberResource{}
 
+var _ resource.ResourceWithUpgradeState = &MemberResource{}
+
 func NewMemberResource() resource.Resource {
 	return &MemberResource{}
 }
@@ -44,6 +46,7 @@ func (r *MemberResource) Metadata(ctx context.Context, req resource.MetadataRequ
 
 func (r *MemberResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
+		Version:             1,
 		MarkdownDescription: "Manages a Member resource object.",
 		Attributes:          MemberResourceSchemaAttributes,
 	}
@@ -67,6 +70,24 @@ func (r *MemberResource) Configure(ctx context.Context, req resource.ConfigureRe
 	}
 
 	r.client = client
+}
+
+func (r *MemberResource) UpgradeState(ctx context.Context) map[int64]resource.StateUpgrader {
+	return map[int64]resource.StateUpgrader{
+		0: {
+			PriorSchema: &schema.Schema{
+				Attributes: MemberResourceSchemaAttributes,
+			},
+			StateUpgrader: func(ctx context.Context, req resource.UpgradeStateRequest, resp *resource.UpgradeStateResponse) {
+				var data MemberModel
+				resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
+				if resp.Diagnostics.HasError() {
+					return
+				}
+				resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+			},
+		},
+	}
 }
 
 type memberPasswordsHashState struct {

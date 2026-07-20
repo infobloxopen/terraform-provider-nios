@@ -28,6 +28,8 @@ var _ resource.ResourceWithValidateConfig = &Ipv6fixedaddressResource{}
 
 var _ resource.ResourceWithModifyPlan = &Ipv6fixedaddressResource{}
 
+var _ resource.ResourceWithUpgradeState = &Ipv6fixedaddressResource{}
+
 func NewIpv6fixedaddressResource() resource.Resource {
 	return &Ipv6fixedaddressResource{}
 }
@@ -43,6 +45,7 @@ func (r *Ipv6fixedaddressResource) Metadata(ctx context.Context, req resource.Me
 
 func (r *Ipv6fixedaddressResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
+		Version:             1,
 		MarkdownDescription: "Manages a DHCP IPV6 Fixed Address.",
 		Attributes:          Ipv6fixedaddressResourceSchemaAttributes,
 	}
@@ -66,6 +69,24 @@ func (r *Ipv6fixedaddressResource) Configure(ctx context.Context, req resource.C
 	}
 
 	r.client = client
+}
+
+func (r *Ipv6fixedaddressResource) UpgradeState(ctx context.Context) map[int64]resource.StateUpgrader {
+	return map[int64]resource.StateUpgrader{
+		0: {
+			PriorSchema: &schema.Schema{
+				Attributes: Ipv6fixedaddressResourceSchemaAttributes,
+			},
+			StateUpgrader: func(ctx context.Context, req resource.UpgradeStateRequest, resp *resource.UpgradeStateResponse) {
+				var data Ipv6fixedaddressModel
+				resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
+				if resp.Diagnostics.HasError() {
+					return
+				}
+				resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+			},
+		},
+	}
 }
 
 func (r *Ipv6fixedaddressResource) ModifyPlan(ctx context.Context, req resource.ModifyPlanRequest, resp *resource.ModifyPlanResponse) {

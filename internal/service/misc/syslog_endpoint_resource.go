@@ -29,6 +29,8 @@ var _ resource.ResourceWithValidateConfig = &SyslogEndpointResource{}
 
 var _ resource.ResourceWithModifyPlan = &SyslogEndpointResource{}
 
+var _ resource.ResourceWithUpgradeState = &SyslogEndpointResource{}
+
 func NewSyslogEndpointResource() resource.Resource {
 	return &SyslogEndpointResource{}
 }
@@ -44,6 +46,7 @@ func (r *SyslogEndpointResource) Metadata(ctx context.Context, req resource.Meta
 
 func (r *SyslogEndpointResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
+		Version:             1,
 		MarkdownDescription: "Manages a Syslog Endpoint.",
 		Attributes:          SyslogEndpointResourceSchemaAttributes,
 	}
@@ -67,6 +70,24 @@ func (r *SyslogEndpointResource) Configure(ctx context.Context, req resource.Con
 	}
 
 	r.client = client
+}
+
+func (r *SyslogEndpointResource) UpgradeState(ctx context.Context) map[int64]resource.StateUpgrader {
+	return map[int64]resource.StateUpgrader{
+		0: {
+			PriorSchema: &schema.Schema{
+				Attributes: SyslogEndpointResourceSchemaAttributes,
+			},
+			StateUpgrader: func(ctx context.Context, req resource.UpgradeStateRequest, resp *resource.UpgradeStateResponse) {
+				var data SyslogEndpointModel
+				resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
+				if resp.Diagnostics.HasError() {
+					return
+				}
+				resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+			},
+		},
+	}
 }
 
 type syslogEndpointHashState struct {
