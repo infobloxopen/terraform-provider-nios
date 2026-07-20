@@ -580,11 +580,9 @@ func (r *NotificationRestEndpointResource) Update(ctx context.Context, req resou
 		plannedHashState.WapiUserPassword = hashString(pp)
 	}
 
-	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
-
 	apiRes, _, err := r.client.NotificationAPI.
 		NotificationRestEndpointAPI.
-		Update(ctx, resourceRef).
+		Update(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
 		NotificationRestEndpoint(*payload).
 		ReturnFieldsPlus(readableAttributesForNotificationRestEndpoint).
 		ReturnAsObject(1).

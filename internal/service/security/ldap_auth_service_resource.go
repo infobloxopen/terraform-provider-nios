@@ -345,11 +345,9 @@ func (r *LdapAuthServiceResource) Update(ctx context.Context, req resource.Updat
 		}
 	}
 
-	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
-
 	apiRes, _, err := r.client.SecurityAPI.
 		LdapAuthServiceAPI.
-		Update(ctx, resourceRef).
+		Update(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
 		LdapAuthService(*payload).
 		ReturnFieldsPlus(readableAttributesForLdapAuthService).
 		ReturnAsObject(1).

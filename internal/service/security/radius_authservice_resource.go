@@ -344,13 +344,11 @@ func (r *RadiusAuthserviceResource) Update(ctx context.Context, req resource.Upd
 		}
 	}
 
-	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
-
 	var apiRes *security.UpdateRadiusAuthserviceResponse
 
 	apiRes, _, err := r.client.SecurityAPI.
 		RadiusAuthserviceAPI.
-		Update(ctx, resourceRef).
+		Update(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
 		RadiusAuthservice(*payload).
 		ReturnFieldsPlus(readableAttributesForRadiusAuthservice).
 		ReturnAsObject(1).

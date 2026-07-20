@@ -553,11 +553,9 @@ func (r *VdiscoverytaskResource) Update(ctx context.Context, req resource.Update
 		payload.Password = password.ValueStringPointer()
 	}
 
-	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
-
 	apiRes, _, err := r.client.DiscoveryAPI.
 		VdiscoverytaskAPI.
-		Update(ctx, resourceRef).
+		Update(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
 		Vdiscoverytask(*payload).
 		ReturnFieldsPlus(readableAttributesForVdiscoverytask).
 		ReturnAsObject(1).

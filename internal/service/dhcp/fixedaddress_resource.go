@@ -505,8 +505,6 @@ func (r *FixedaddressResource) Update(ctx context.Context, req resource.UpdateRe
 		return
 	}
 
-	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
-
 	payload := data.Expand(ctx, &resp.Diagnostics, false)
 	if resp.Diagnostics.HasError() {
 		return
@@ -550,7 +548,7 @@ func (r *FixedaddressResource) Update(ctx context.Context, req resource.UpdateRe
 
 	apiRes, _, err := r.client.DHCPAPI.
 		FixedaddressAPI.
-		Update(ctx, resourceRef).
+		Update(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
 		Fixedaddress(*payload).
 		ReturnFieldsPlus(readableAttributesForFixedaddress).
 		ReturnAsObject(1).

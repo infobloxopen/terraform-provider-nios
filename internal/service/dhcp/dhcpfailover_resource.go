@@ -429,11 +429,9 @@ func (r *DhcpfailoverResource) Update(ctx context.Context, req resource.UpdateRe
 		payload.MsSharedSecret = msSharedSecret.ValueStringPointer()
 	}
 
-	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
-
 	apiRes, _, err := r.client.DHCPAPI.
 		DhcpfailoverAPI.
-		Update(ctx, resourceRef).
+		Update(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
 		Dhcpfailover(*payload).
 		ReturnFieldsPlus(readableAttributesForDhcpfailover).
 		ReturnAsObject(1).

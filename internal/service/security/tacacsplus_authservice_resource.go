@@ -24,7 +24,6 @@ var _ resource.ResourceWithImportState = &TacacsplusAuthserviceResource{}
 var _ resource.ResourceWithModifyPlan = &TacacsplusAuthserviceResource{}
 var _ resource.ResourceWithUpgradeState = &TacacsplusAuthserviceResource{}
 
-
 func NewTacacsplusAuthserviceResource() resource.Resource {
 	return &TacacsplusAuthserviceResource{}
 }
@@ -341,11 +340,9 @@ func (r *TacacsplusAuthserviceResource) Update(ctx context.Context, req resource
 		}
 	}
 
-	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
-
 	apiRes, _, err := r.client.SecurityAPI.
 		TacacsplusAuthserviceAPI.
-		Update(ctx, resourceRef).
+		Update(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
 		TacacsplusAuthservice(*payload).
 		ReturnFieldsPlus(readableAttributesForTacacsplusAuthservice).
 		ReturnAsObject(1).

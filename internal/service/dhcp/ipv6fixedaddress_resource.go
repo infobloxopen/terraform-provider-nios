@@ -507,8 +507,6 @@ func (r *Ipv6fixedaddressResource) Update(ctx context.Context, req resource.Upda
 		return
 	}
 
-	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
-
 	payload := data.Expand(ctx, &resp.Diagnostics, false)
 	if resp.Diagnostics.HasError() {
 		return
@@ -552,7 +550,7 @@ func (r *Ipv6fixedaddressResource) Update(ctx context.Context, req resource.Upda
 
 	apiRes, _, err := r.client.DHCPAPI.
 		Ipv6fixedaddressAPI.
-		Update(ctx, resourceRef).
+		Update(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
 		Ipv6fixedaddress(*payload).
 		ReturnFieldsPlus(readableAttributesForIpv6fixedaddress).
 		ReturnAsObject(1).

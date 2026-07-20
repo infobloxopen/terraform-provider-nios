@@ -33,6 +33,7 @@ var _ resource.ResourceWithValidateConfig = &IPAllocationResource{}
 var _ resource.ResourceWithModifyPlan = &IPAllocationResource{}
 
 var _ resource.ResourceWithUpgradeState = &IPAllocationResource{}
+
 func NewIPAllocationResource() resource.Resource {
 	return &IPAllocationResource{}
 }
@@ -54,7 +55,7 @@ func (r *IPAllocationResource) Metadata(ctx context.Context, req resource.Metada
 
 func (r *IPAllocationResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		Version: 1,
+		Version:             1,
 		MarkdownDescription: "Manages IP Allocation for a DNS HOST Record",
 		Attributes:          IPAllocationResourceSchemaAttributes,
 	}
@@ -817,7 +818,7 @@ func (r *IPAllocationResource) Update(ctx context.Context, req resource.UpdateRe
 		resp.Diagnostics.Append(resp.Private.SetKey(ctx, "secrets_hash", nil)...)
 	}
 
-	data.Flatten(ctx, &res, &resp.Diagnostics)
+	data.Flatten(ctx, &getResObj, &resp.Diagnostics)
 
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)

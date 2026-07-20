@@ -373,7 +373,7 @@ func (r *MemberResource) Create(ctx context.Context, req resource.CreateRequest,
 	if !data.PreProvisioning.IsUnknown() && !data.PreProvisioning.IsNull() {
 		apiRes2, _, err2 := r.client.GridAPI.
 			MemberAPI.
-			Update(ctx, utils.ExtractResourceRef(*res.Ref)).
+			Update(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
 			Member(*data.Expand(ctx, &resp.Diagnostics, false)).
 			ReturnFieldsPlus(readableAttributesForMember).
 			ReturnAsObject(1).

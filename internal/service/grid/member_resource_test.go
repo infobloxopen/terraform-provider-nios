@@ -4378,7 +4378,7 @@ func TestAccMemberResource_Import(t *testing.T) {
 				ImportStateIdFunc:                    testAccMemberImportStateIdFunc(resourceName),
 				ImportStateVerify:                    true,
 				ImportStateVerifyIgnore:              []string{"configure_csp_member_setting", "support_access_info", "password_version"},
-				ImportStateVerifyIdentifierAttribute: "ref",
+				ImportStateVerifyIdentifierAttribute: "uuid",
 				PlanOnly:                             true,
 			},
 			// Import and Verify
@@ -4388,7 +4388,7 @@ func TestAccMemberResource_Import(t *testing.T) {
 				ImportStateIdFunc:                    testAccMemberImportStateIdFunc(resourceName),
 				ImportStateVerify:                    true,
 				ImportStateVerifyIgnore:              []string{"extattrs_all", "configure_csp_member_setting", "support_access_info", "password_version"},
-				ImportStateVerifyIdentifierAttribute: "ref",
+				ImportStateVerifyIdentifierAttribute: "uuid",
 			},
 			// Delete testing automatically occurs in TestCase
 		},

@@ -455,11 +455,9 @@ func (r *SyslogEndpointResource) Update(ctx context.Context, req resource.Update
 		payload.WapiUserPassword = password.ValueStringPointer()
 	}
 
-	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
-
 	apiRes, _, err := r.client.MiscAPI.
 		SyslogEndpointAPI.
-		Update(ctx, resourceRef).
+		Update(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
 		SyslogEndpoint(*payload).
 		ReturnFieldsPlus(readableAttributesForSyslogEndpoint).
 		ReturnAsObject(1).

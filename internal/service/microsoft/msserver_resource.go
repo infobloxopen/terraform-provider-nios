@@ -538,11 +538,9 @@ func (r *MsserverResource) Update(ctx context.Context, req resource.UpdateReques
 		payload.LoginPassword = password.ValueStringPointer()
 	}
 
-	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
-
 	apiRes, _, err := r.client.MicrosoftAPI.
 		MsserverAPI.
-		Update(ctx, resourceRef).
+		Update(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
 		Msserver(*payload).
 		ReturnFieldsPlus(readableAttributesForMsserver).
 		ReturnAsObject(1).

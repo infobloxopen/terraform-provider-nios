@@ -454,11 +454,9 @@ func (r *AdminuserResource) Update(ctx context.Context, req resource.UpdateReque
 		payload.Password = password.ValueStringPointer()
 	}
 
-	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
-
 	apiRes, _, err := r.client.SecurityAPI.
 		AdminuserAPI.
-		Update(ctx, resourceRef).
+		Update(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
 		Adminuser(*payload).
 		ReturnFieldsPlus(readableAttributesForAdminuser).
 		ReturnAsObject(1).

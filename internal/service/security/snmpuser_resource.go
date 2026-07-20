@@ -526,11 +526,9 @@ func (r *SnmpuserResource) Update(ctx context.Context, req resource.UpdateReques
 		plannedHashState.PrivHash = hashString(pp)
 	}
 
-	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
-
 	apiRes, _, err := r.client.SecurityAPI.
 		SnmpuserAPI.
-		Update(ctx, resourceRef).
+		Update(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
 		Snmpuser(*payload).
 		ReturnFieldsPlus(readableAttributesForSnmpuser).
 		ReturnAsObject(1).

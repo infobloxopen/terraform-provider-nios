@@ -463,11 +463,9 @@ func (r *DxlEndpointResource) Update(ctx context.Context, req resource.UpdateReq
 		payload.WapiUserPassword = password.ValueStringPointer()
 	}
 
-	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
-
 	apiRes, _, err := r.client.MiscAPI.
 		DxlEndpointAPI.
-		Update(ctx, resourceRef).
+		Update(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
 		DxlEndpoint(*payload).
 		ReturnFieldsPlus(readableAttributesForDxlEndpoint).
 		ReturnAsObject(1).

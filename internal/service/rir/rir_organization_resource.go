@@ -345,11 +345,9 @@ func (r *RirOrganizationResource) Update(ctx context.Context, req resource.Updat
 		payload.Password = password.ValueStringPointer()
 	}
 
-	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
-
 	apiRes, _, err := r.client.RIRAPI.
 		RirOrganizationAPI.
-		Update(ctx, resourceRef).
+		Update(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
 		RirOrganization(*payload).
 		ReturnFieldsPlus(readableAttributesForRirOrganization).
 		ReturnAsObject(1).

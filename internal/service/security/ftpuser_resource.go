@@ -414,8 +414,6 @@ func (r *FtpuserResource) Update(ctx context.Context, req resource.UpdateRequest
 		return
 	}
 
-	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
-
 	payload := data.Expand(ctx, &resp.Diagnostics, false)
 	if resp.Diagnostics.HasError() {
 		return
@@ -427,7 +425,7 @@ func (r *FtpuserResource) Update(ctx context.Context, req resource.UpdateRequest
 
 	apiRes, _, err := r.client.SecurityAPI.
 		FtpuserAPI.
-		Update(ctx, resourceRef).
+		Update(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
 		Ftpuser(*payload).
 		ReturnFieldsPlus(readableAttributesForFtpuser).
 		ReturnAsObject(1).
