@@ -89,8 +89,12 @@ func (r *ZoneRpResource) ValidateConfig(ctx context.Context, req resource.Valida
 		return
 	}
 
-	if !data.UseGridZoneTimer.IsNull() && !data.UseGridZoneTimer.ValueBool() {
-		if !data.SoaDefaultTtl.IsNull() || !data.SoaExpire.IsNull() || !data.SoaNegativeTtl.IsNull() || !data.SoaRefresh.IsNull() || !data.SoaRetry.IsNull() {
+	if !data.UseGridZoneTimer.IsNull() && !data.UseGridZoneTimer.IsUnknown() && !data.UseGridZoneTimer.ValueBool() {
+		if (!data.SoaDefaultTtl.IsNull() && !data.SoaDefaultTtl.IsUnknown()) ||
+			(!data.SoaExpire.IsNull() && !data.SoaExpire.IsUnknown()) ||
+			(!data.SoaNegativeTtl.IsNull() && !data.SoaNegativeTtl.IsUnknown()) ||
+			(!data.SoaRefresh.IsNull() && !data.SoaRefresh.IsUnknown()) ||
+			(!data.SoaRetry.IsNull() && !data.SoaRetry.IsUnknown()) {
 			resp.Diagnostics.AddError(
 				"SOA Values Not Allowed",
 				"When `use_grid_zone_timer` is set to false, the SOA Values (soa_default_ttl, soa_expire, soa_negative_ttl, soa_refresh, soa_retry) will reset to their default values. And hence they should not be set in the configuration. Either remove these values or set use_grid_zone_timer = true.",
@@ -121,8 +125,12 @@ func (r *ZoneRpResource) ValidateConfig(ctx context.Context, req resource.Valida
 		return
 	}
 
-	if !data.GridSecondaries.IsNull() && !data.GridSecondaries.IsUnknown() ||
-		!data.ExternalSecondaries.IsNull() && !data.ExternalSecondaries.IsUnknown() {
+	primaryUnknown := data.GridPrimary.IsUnknown() || data.ExternalPrimaries.IsUnknown()
+
+	secondarySpecified := (!data.GridSecondaries.IsNull() && !data.GridSecondaries.IsUnknown()) ||
+		(!data.ExternalSecondaries.IsNull() && !data.ExternalSecondaries.IsUnknown())
+
+	if secondarySpecified && !primaryUnknown {
 		if len(specifiedPrimaries) != 1 {
 			resp.Diagnostics.AddError(
 				"Secondary Server Requires Exactly One Primary Server",

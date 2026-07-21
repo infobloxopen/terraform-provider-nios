@@ -750,7 +750,9 @@ func (r *FixedaddressResource) ValidateConfig(ctx context.Context, req resource.
 				"The 'mac' attribute must be set when 'match_client' is set to 'MAC_ADDRESS'.",
 			)
 		}
-		if !data.AgentCircuitId.IsNull() || !data.AgentRemoteId.IsNull() || !data.DhcpClientIdentifier.IsNull() {
+		if (!data.AgentCircuitId.IsNull() && !data.AgentCircuitId.IsUnknown()) ||
+			(!data.AgentRemoteId.IsNull() && !data.AgentRemoteId.IsUnknown()) ||
+			(!data.DhcpClientIdentifier.IsNull() && !data.DhcpClientIdentifier.IsUnknown()) {
 			resp.Diagnostics.AddAttributeError(
 				path.Root("match_client"),
 				"Invalid configuration",
@@ -759,14 +761,16 @@ func (r *FixedaddressResource) ValidateConfig(ctx context.Context, req resource.
 		}
 
 	} else if data.MatchClient.ValueString() == "CLIENT_ID" {
-		if data.DhcpClientIdentifier.IsNull() || data.DhcpClientIdentifier.IsUnknown() || data.DhcpClientIdentifier.ValueString() == "" {
+		if !data.DhcpClientIdentifier.IsUnknown() && (data.DhcpClientIdentifier.IsNull() || data.DhcpClientIdentifier.ValueString() == "") {
 			resp.Diagnostics.AddAttributeError(
 				path.Root("dhcp_client_identifier"),
 				"Invalid configuration",
 				"The 'dhcp_client_identifier' attribute must be set and cannot be empty when 'match_client' is set to 'CLIENT_ID'.",
 			)
 		}
-		if !data.AgentCircuitId.IsNull() || !data.AgentRemoteId.IsNull() || !data.Mac.IsNull() {
+		if (!data.AgentCircuitId.IsNull() && !data.AgentCircuitId.IsUnknown()) ||
+			(!data.AgentRemoteId.IsNull() && !data.AgentRemoteId.IsUnknown()) ||
+			(!data.Mac.IsNull() && !data.Mac.IsUnknown()) {
 			resp.Diagnostics.AddAttributeError(
 				path.Root("match_client"),
 				"Invalid configuration",
@@ -774,14 +778,15 @@ func (r *FixedaddressResource) ValidateConfig(ctx context.Context, req resource.
 			)
 		}
 	} else if data.MatchClient.ValueString() == "CIRCUIT_ID" {
-		if data.AgentCircuitId.IsNull() || data.AgentCircuitId.IsUnknown() {
+		if !data.AgentCircuitId.IsUnknown() && (data.AgentCircuitId.IsNull() || data.AgentCircuitId.ValueString() == "") {
 			resp.Diagnostics.AddAttributeError(
 				path.Root("agent_circuit_id"),
 				"Invalid configuration",
 				"The 'agent_circuit_id' attribute must be set when 'match_client' is set to 'CIRCUIT_ID'.",
 			)
 		}
-		if !data.Mac.IsNull() || !data.DhcpClientIdentifier.IsNull() {
+		if (!data.Mac.IsNull() && !data.Mac.IsUnknown()) ||
+			(!data.DhcpClientIdentifier.IsNull() && !data.DhcpClientIdentifier.IsUnknown()) {
 			resp.Diagnostics.AddAttributeError(
 				path.Root("match_client"),
 				"Invalid configuration",
@@ -789,14 +794,15 @@ func (r *FixedaddressResource) ValidateConfig(ctx context.Context, req resource.
 			)
 		}
 	} else if data.MatchClient.ValueString() == "REMOTE_ID" {
-		if data.AgentRemoteId.IsNull() || data.AgentRemoteId.IsUnknown() {
+		if !data.AgentRemoteId.IsUnknown() && (data.AgentRemoteId.IsNull() || data.AgentRemoteId.ValueString() == "") {
 			resp.Diagnostics.AddAttributeError(
 				path.Root("agent_remote_id"),
 				"Invalid configuration",
 				"The 'agent_remote_id' attribute must be set when 'match_client' is set to 'REMOTE_ID'.",
 			)
 		}
-		if !data.Mac.IsNull() || !data.DhcpClientIdentifier.IsNull() {
+		if (!data.Mac.IsNull() && !data.Mac.IsUnknown()) ||
+			(!data.DhcpClientIdentifier.IsNull() && !data.DhcpClientIdentifier.IsUnknown()) {
 			resp.Diagnostics.AddAttributeError(
 				path.Root("match_client"),
 				"Invalid configuration",
@@ -804,14 +810,16 @@ func (r *FixedaddressResource) ValidateConfig(ctx context.Context, req resource.
 			)
 		}
 	} else if data.MatchClient.ValueString() == "RESERVED" {
-		if !data.Mac.IsNull() && data.Mac.ValueString() != "00:00:00:00:00:00" {
+		if !data.Mac.IsNull() && !data.Mac.IsUnknown() && data.Mac.ValueString() != "00:00:00:00:00:00" {
 			resp.Diagnostics.AddAttributeError(
 				path.Root("mac"),
 				"Invalid configuration",
 				"When 'match_client' is set to 'RESERVED', the 'mac' attribute must be set to '00:00:00:00:00:00' or left unset.",
 			)
 		}
-		if !data.AgentCircuitId.IsNull() || !data.AgentRemoteId.IsNull() || !data.DhcpClientIdentifier.IsNull() {
+		if (!data.AgentCircuitId.IsNull() && !data.AgentCircuitId.IsUnknown()) ||
+			(!data.AgentRemoteId.IsNull() && !data.AgentRemoteId.IsUnknown()) ||
+			(!data.DhcpClientIdentifier.IsNull() && !data.DhcpClientIdentifier.IsUnknown()) {
 			resp.Diagnostics.AddAttributeError(
 				path.Root("match_client"),
 				"Invalid configuration",
@@ -853,7 +861,7 @@ func (r *FixedaddressResource) ValidateConfig(ctx context.Context, req resource.
 		for i, option := range options {
 			isSpecialOption := false
 			optionName := ""
-			if option.Value.IsNull() || option.Value.IsUnknown() {
+			if option.Value.IsNull() {
 				resp.Diagnostics.AddAttributeError(
 					path.Root("options").AtListIndex(i).AtName("value"),
 					"Invalid configuration for DHCP Option",
@@ -867,6 +875,8 @@ func (r *FixedaddressResource) ValidateConfig(ctx context.Context, req resource.
 				optionNum := option.Num.ValueInt64()
 				isSpecialOption = specialOptionsNum[optionNum]
 				optionName = fmt.Sprintf("with num = %d", optionNum)
+			} else if option.Name.IsUnknown() || option.Num.IsUnknown() {
+				continue
 			} else {
 				resp.Diagnostics.AddAttributeError(
 					path.Root("options").AtListIndex(i).AtName("name"),
@@ -877,7 +887,7 @@ func (r *FixedaddressResource) ValidateConfig(ctx context.Context, req resource.
 				continue
 			}
 
-			if option.Value.ValueString() == "" {
+			if !option.Value.IsNull() && !option.Value.IsUnknown() && option.Value.ValueString() == "" {
 				if !isSpecialOption {
 					resp.Diagnostics.AddAttributeError(
 						path.Root("options").AtListIndex(i).AtName("value"),

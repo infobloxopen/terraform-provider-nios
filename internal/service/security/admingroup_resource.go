@@ -74,7 +74,8 @@ func (r *AdmingroupResource) ValidateConfig(ctx context.Context, req resource.Va
 	}
 
 	// Check if disable_concurrent_login is set and use_disable_concurrent_login is false
-	if !config.DisableConcurrentLogin.IsNull() && !config.DisableConcurrentLogin.IsUnknown() && !config.UseDisableConcurrentLogin.ValueBool() {
+	if !config.DisableConcurrentLogin.IsNull() && !config.DisableConcurrentLogin.IsUnknown() &&
+		!config.UseDisableConcurrentLogin.IsUnknown() && (config.UseDisableConcurrentLogin.IsNull() || !config.UseDisableConcurrentLogin.ValueBool()) {
 		resp.Diagnostics.AddAttributeError(
 			path.Root("disable_concurrent_login"),
 			"Invalid Configuration",
@@ -83,10 +84,12 @@ func (r *AdmingroupResource) ValidateConfig(ctx context.Context, req resource.Va
 	}
 
 	// Check if password_setting is set and use_password_setting is false
-	if !config.PasswordSetting.IsNull() && !config.PasswordSetting.IsUnknown() && !config.UsePasswordSetting.ValueBool() {
+	if !config.PasswordSetting.IsNull() && !config.PasswordSetting.IsUnknown() &&
+		!config.UsePasswordSetting.IsUnknown() && (config.UsePasswordSetting.IsNull() || !config.UsePasswordSetting.ValueBool()) {
 		resp.Diagnostics.AddAttributeError(path.Root("password_setting"),
 			"Invalid Configuration",
-			"`use_password_setting` must be set to true when `password_setting` is used.")
+			"`use_password_setting` must be set to true when `password_setting` is used.",
+		)
 	}
 
 	// Skip validation if UserAccess is not provided
@@ -103,10 +106,14 @@ func (r *AdmingroupResource) ValidateConfig(ctx context.Context, req resource.Va
 		obj := elem.(types.Object)
 		attrMap := obj.Attributes()
 
+		if attrMap["ref"].IsUnknown() || attrMap["address"].IsUnknown() || attrMap["permission"].IsUnknown() {
+			continue
+		}
+
 		// Check field presence
 		hasAddress := !attrMap["address"].IsUnknown() && !attrMap["address"].IsNull() && !attrMap["address"].Equal(types.StringValue(""))
 		hasPermission := !attrMap["permission"].IsUnknown() && !attrMap["permission"].IsNull() && !attrMap["permission"].Equal(types.StringValue(""))
-		hasRef := !attrMap["ref"].IsNull() && !attrMap["ref"].Equal(types.StringValue(""))
+		hasRef := !attrMap["ref"].IsNull() && !attrMap["ref"].IsUnknown() && !attrMap["ref"].Equal(types.StringValue(""))
 
 		// Rule 1: Can't have both ref and (address or permission)
 		if hasRef && (hasAddress || hasPermission) {
