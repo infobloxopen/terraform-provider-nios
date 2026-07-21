@@ -159,7 +159,7 @@ var MemberAttrTypes = map[string]attr.Type{
 	"lom_network_config":                  types.ListType{ElemType: types.ObjectType{AttrTypes: MemberLomNetworkConfigAttrTypes}},
 	"lom_users":                           types.ListType{ElemType: types.ObjectType{AttrTypes: MemberLomUsersAttrTypes}},
 	"master_candidate":                    types.BoolType,
-	"member_service_communication":        types.ListType{ElemType: types.ObjectType{AttrTypes: MemberMemberServiceCommunicationAttrTypes}},
+	"member_service_communication":        internaltypes.NewUnorderedList(types.ObjectType{AttrTypes: MemberMemberServiceCommunicationAttrTypes}),
 	"mgmt_port_setting":                   types.ObjectType{AttrTypes: MemberMgmtPortSettingAttrTypes},
 	"mmdb_ea_build_time":                  types.Int64Type,
 	"mmdb_geoip_build_time":               types.Int64Type,
@@ -481,6 +481,7 @@ var MemberResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "Determines if a Grid member is a Grid Master Candidate or not. This flag enables the Grid member to assume the role of the Grid Master as a disaster recovery measure.",
 	},
 	"member_service_communication": schema.ListNestedAttribute{
+		CustomType: internaltypes.NewUnorderedList(types.ObjectType{AttrTypes: MemberMemberServiceCommunicationAttrTypes}),
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: MemberMemberServiceCommunicationResourceSchemaAttributes,
 		},

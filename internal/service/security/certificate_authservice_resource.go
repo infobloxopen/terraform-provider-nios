@@ -292,15 +292,16 @@ func (r *CertificateAuthserviceResource) Update(ctx context.Context, req resourc
 		return
 	}
 
-	payload := data.Expand(ctx, &resp.Diagnostics)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-
 	// Process OCSP responders
 	if !r.processOcspResponders(ctx, &data, &resp.Diagnostics) {
 		return
 	}
+
+	payload := data.Expand(ctx, &resp.Diagnostics)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+	
 	diags = req.State.GetAttribute(ctx, path.Root("ref"), &data.Ref)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
