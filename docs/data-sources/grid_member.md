@@ -906,11 +906,14 @@ Optional:
 <a id="nestedatt--result--member_service_communication"></a>
 ### Nested Schema for `result.member_service_communication`
 
+Optional:
+
+- `service` (String) The service for a Grid member.
+- `type` (String) Communication type.
+
 Read-Only:
 
 - `option` (String) The option for communication type.
-- `service` (String) The service for a Grid member.
-- `type` (String) Communication type.
 
 
 <a id="nestedatt--result--service_status"></a>
