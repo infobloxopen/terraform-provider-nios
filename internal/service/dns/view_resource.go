@@ -151,7 +151,7 @@ func (r *ViewResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 		return
 	}
 
-	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
 	var (
 		httpRes *http.Response
@@ -162,7 +162,7 @@ func (r *ViewResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 		var callErr error
 		apiRes, httpRes, callErr = r.client.DNSAPI.
 			ViewAPI.
-			Read(ctx, resourceRef).
+			Read(ctx, resourceIdentifier).
 			ReturnFieldsPlus(readableAttributesForView).
 			ReturnAsObject(1).
 			ProxySearch(config.GetProxySearch()).
@@ -330,7 +330,7 @@ func (r *ViewResource) Update(ctx context.Context, req resource.UpdateRequest, r
 		return
 	}
 
-	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
 	var apiRes *dns.UpdateViewResponse
 
@@ -341,7 +341,7 @@ func (r *ViewResource) Update(ctx context.Context, req resource.UpdateRequest, r
 		)
 		apiRes, httpRes, callErr = r.client.DNSAPI.
 			ViewAPI.
-			Update(ctx, resourceRef).
+			Update(ctx, resourceIdentifier).
 			View(*payload).
 			ReturnFieldsPlus(readableAttributesForView).
 			ReturnAsObject(1).
@@ -386,12 +386,12 @@ func (r *ViewResource) Delete(ctx context.Context, req resource.DeleteRequest, r
 		return
 	}
 
-	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
 	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
 		httpRes, callErr := r.client.DNSAPI.
 			ViewAPI.
-			Delete(ctx, resourceRef).
+			Delete(ctx, resourceIdentifier).
 			Execute()
 
 		if httpRes != nil {

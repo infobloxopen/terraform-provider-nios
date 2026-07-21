@@ -151,7 +151,7 @@ func (r *DtcMonitorHttpResource) Read(ctx context.Context, req resource.ReadRequ
 		return
 	}
 
-	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
 	var (
 		httpRes *http.Response
@@ -162,7 +162,7 @@ func (r *DtcMonitorHttpResource) Read(ctx context.Context, req resource.ReadRequ
 		var callErr error
 		apiRes, httpRes, callErr = r.client.DTCAPI.
 			DtcMonitorHttpAPI.
-			Read(ctx, resourceRef).
+			Read(ctx, resourceIdentifier).
 			ReturnFieldsPlus(readableAttributesForDtcMonitorHttp).
 			ReturnAsObject(1).
 			ProxySearch(config.GetProxySearch()).
@@ -330,7 +330,7 @@ func (r *DtcMonitorHttpResource) Update(ctx context.Context, req resource.Update
 		return
 	}
 
-	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
 	var apiRes *dtc.UpdateDtcMonitorHttpResponse
 
@@ -341,7 +341,7 @@ func (r *DtcMonitorHttpResource) Update(ctx context.Context, req resource.Update
 		)
 		apiRes, httpRes, callErr = r.client.DTCAPI.
 			DtcMonitorHttpAPI.
-			Update(ctx, resourceRef).
+			Update(ctx, resourceIdentifier).
 			DtcMonitorHttp(*payload).
 			ReturnFieldsPlus(readableAttributesForDtcMonitorHttp).
 			ReturnAsObject(1).
@@ -385,12 +385,12 @@ func (r *DtcMonitorHttpResource) Delete(ctx context.Context, req resource.Delete
 		return
 	}
 
-	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
 	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
 		httpRes, callErr := r.client.DTCAPI.
 			DtcMonitorHttpAPI.
-			Delete(ctx, resourceRef).
+			Delete(ctx, resourceIdentifier).
 			Execute()
 
 		if httpRes != nil {

@@ -131,7 +131,7 @@ func (r *NatgroupResource) Read(ctx context.Context, req resource.ReadRequest, r
 		return
 	}
 
-	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
 	var (
 		httpRes *http.Response
@@ -142,7 +142,7 @@ func (r *NatgroupResource) Read(ctx context.Context, req resource.ReadRequest, r
 		var callErr error
 		apiRes, httpRes, callErr = r.client.GridAPI.
 			NatgroupAPI.
-			Read(ctx, resourceRef).
+			Read(ctx, resourceIdentifier).
 			ReturnFieldsPlus(readableAttributesForNatgroup).
 			ReturnAsObject(1).
 			ProxySearch(config.GetProxySearch()).
@@ -201,7 +201,7 @@ func (r *NatgroupResource) Update(ctx context.Context, req resource.UpdateReques
 		return
 	}
 
-	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
 	var apiRes *grid.UpdateNatgroupResponse
 
@@ -212,7 +212,7 @@ func (r *NatgroupResource) Update(ctx context.Context, req resource.UpdateReques
 		)
 		apiRes, httpRes, callErr = r.client.GridAPI.
 			NatgroupAPI.
-			Update(ctx, resourceRef).
+			Update(ctx, resourceIdentifier).
 			Natgroup(*payload).
 			ReturnFieldsPlus(readableAttributesForNatgroup).
 			ReturnAsObject(1).
@@ -247,12 +247,12 @@ func (r *NatgroupResource) Delete(ctx context.Context, req resource.DeleteReques
 		return
 	}
 
-	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
 	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
 		httpRes, callErr := r.client.GridAPI.
 			NatgroupAPI.
-			Delete(ctx, resourceRef).
+			Delete(ctx, resourceIdentifier).
 			Execute()
 
 		if httpRes != nil {

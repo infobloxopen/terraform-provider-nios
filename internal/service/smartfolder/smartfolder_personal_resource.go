@@ -131,7 +131,7 @@ func (r *SmartfolderPersonalResource) Read(ctx context.Context, req resource.Rea
 		return
 	}
 
-	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
 	var (
 		httpRes *http.Response
@@ -142,7 +142,7 @@ func (r *SmartfolderPersonalResource) Read(ctx context.Context, req resource.Rea
 		var callErr error
 		apiRes, httpRes, callErr = r.client.SmartFolderAPI.
 			SmartfolderPersonalAPI.
-			Read(ctx, resourceRef).
+			Read(ctx, resourceIdentifier).
 			ReturnFieldsPlus(readableAttributesForSmartfolderPersonal).
 			ReturnAsObject(1).
 			ProxySearch(config.GetProxySearch()).
@@ -201,7 +201,7 @@ func (r *SmartfolderPersonalResource) Update(ctx context.Context, req resource.U
 		return
 	}
 
-	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
 	var apiRes *smartfolder.UpdateSmartfolderPersonalResponse
 
@@ -212,7 +212,7 @@ func (r *SmartfolderPersonalResource) Update(ctx context.Context, req resource.U
 		)
 		apiRes, httpRes, callErr = r.client.SmartFolderAPI.
 			SmartfolderPersonalAPI.
-			Update(ctx, resourceRef).
+			Update(ctx, resourceIdentifier).
 			SmartfolderPersonal(*payload).
 			ReturnFieldsPlus(readableAttributesForSmartfolderPersonal).
 			ReturnAsObject(1).
@@ -247,12 +247,12 @@ func (r *SmartfolderPersonalResource) Delete(ctx context.Context, req resource.D
 		return
 	}
 
-	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
 	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
 		httpRes, callErr := r.client.SmartFolderAPI.
 			SmartfolderPersonalAPI.
-			Delete(ctx, resourceRef).
+			Delete(ctx, resourceIdentifier).
 			Execute()
 
 		if httpRes != nil {

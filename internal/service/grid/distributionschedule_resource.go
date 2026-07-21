@@ -187,7 +187,7 @@ func (r *DistributionscheduleResource) Read(ctx context.Context, req resource.Re
 		return
 	}
 
-	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
 	var (
 		httpRes *http.Response
@@ -198,7 +198,7 @@ func (r *DistributionscheduleResource) Read(ctx context.Context, req resource.Re
 		var callErr error
 		apiRes, httpRes, callErr = r.client.GridAPI.
 			DistributionscheduleAPI.
-			Read(ctx, resourceRef).
+			Read(ctx, resourceIdentifier).
 			ReturnFieldsPlus(readableAttributesForDistributionschedule).
 			ReturnAsObject(1).
 			ProxySearch(config.GetProxySearch()).
@@ -259,7 +259,7 @@ func (r *DistributionscheduleResource) Update(ctx context.Context, req resource.
 		return
 	}
 
-	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
 	var apiRes *grid.UpdateDistributionscheduleResponse
 
@@ -270,7 +270,7 @@ func (r *DistributionscheduleResource) Update(ctx context.Context, req resource.
 		)
 		apiRes, httpRes, callErr = r.client.GridAPI.
 			DistributionscheduleAPI.
-			Update(ctx, resourceRef).
+			Update(ctx, resourceIdentifier).
 			Distributionschedule(*payload).
 			ReturnFieldsPlus(readableAttributesForDistributionschedule).
 			ReturnAsObject(1).

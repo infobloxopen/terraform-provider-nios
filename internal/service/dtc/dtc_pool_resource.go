@@ -152,7 +152,7 @@ func (r *DtcPoolResource) Read(ctx context.Context, req resource.ReadRequest, re
 		return
 	}
 
-	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
 	var (
 		httpRes *http.Response
@@ -163,7 +163,7 @@ func (r *DtcPoolResource) Read(ctx context.Context, req resource.ReadRequest, re
 		var callErr error
 		apiRes, httpRes, callErr = r.client.DTCAPI.
 			DtcPoolAPI.
-			Read(ctx, resourceRef).
+			Read(ctx, resourceIdentifier).
 			ReturnFieldsPlus(readableAttributesForDtcPool).
 			ReturnAsObject(1).
 			ProxySearch(config.GetProxySearch()).
@@ -330,7 +330,7 @@ func (r *DtcPoolResource) Update(ctx context.Context, req resource.UpdateRequest
 		return
 	}
 
-	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
 	var apiRes *dtc.UpdateDtcPoolResponse
 
@@ -341,7 +341,7 @@ func (r *DtcPoolResource) Update(ctx context.Context, req resource.UpdateRequest
 		)
 		apiRes, httpRes, callErr = r.client.DTCAPI.
 			DtcPoolAPI.
-			Update(ctx, resourceRef).
+			Update(ctx, resourceIdentifier).
 			DtcPool(*payload).
 			ReturnFieldsPlus(readableAttributesForDtcPool).
 			ReturnAsObject(1).
@@ -386,12 +386,12 @@ func (r *DtcPoolResource) Delete(ctx context.Context, req resource.DeleteRequest
 		return
 	}
 
-	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
 	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
 		httpRes, callErr := r.client.DTCAPI.
 			DtcPoolAPI.
-			Delete(ctx, resourceRef).
+			Delete(ctx, resourceIdentifier).
 			Execute()
 
 		if httpRes != nil {

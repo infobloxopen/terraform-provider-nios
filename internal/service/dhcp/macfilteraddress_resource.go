@@ -172,7 +172,7 @@ func (r *MacfilteraddressResource) Read(ctx context.Context, req resource.ReadRe
 		return
 	}
 
-	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
 	var (
 		httpRes *http.Response
@@ -183,7 +183,7 @@ func (r *MacfilteraddressResource) Read(ctx context.Context, req resource.ReadRe
 		var callErr error
 		apiRes, httpRes, callErr = r.client.DHCPAPI.
 			MacfilteraddressAPI.
-			Read(ctx, resourceRef).
+			Read(ctx, resourceIdentifier).
 			ReturnFieldsPlus(readableAttributesForMacfilteraddress).
 			ReturnAsObject(1).
 			ProxySearch(config.GetProxySearch()).
@@ -351,7 +351,7 @@ func (r *MacfilteraddressResource) Update(ctx context.Context, req resource.Upda
 		return
 	}
 
-	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
 	var apiRes *dhcp.UpdateMacfilteraddressResponse
 
@@ -362,7 +362,7 @@ func (r *MacfilteraddressResource) Update(ctx context.Context, req resource.Upda
 		)
 		apiRes, httpRes, callErr = r.client.DHCPAPI.
 			MacfilteraddressAPI.
-			Update(ctx, resourceRef).
+			Update(ctx, resourceIdentifier).
 			Macfilteraddress(*payload).
 			ReturnFieldsPlus(readableAttributesForMacfilteraddress).
 			ReturnAsObject(1).
@@ -406,12 +406,12 @@ func (r *MacfilteraddressResource) Delete(ctx context.Context, req resource.Dele
 		return
 	}
 
-	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
 	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
 		httpRes, callErr := r.client.DHCPAPI.
 			MacfilteraddressAPI.
-			Delete(ctx, resourceRef).
+			Delete(ctx, resourceIdentifier).
 			Execute()
 
 		if httpRes != nil {

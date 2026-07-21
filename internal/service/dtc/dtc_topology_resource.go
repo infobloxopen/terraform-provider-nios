@@ -156,7 +156,7 @@ func (r *DtcTopologyResource) Read(ctx context.Context, req resource.ReadRequest
 		return
 	}
 
-	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
 	var (
 		httpRes *http.Response
@@ -167,7 +167,7 @@ func (r *DtcTopologyResource) Read(ctx context.Context, req resource.ReadRequest
 		var callErr error
 		apiRes, httpRes, callErr = r.client.DTCAPI.
 			DtcTopologyAPI.
-			Read(ctx, resourceRef).
+			Read(ctx, resourceIdentifier).
 			ReturnFieldsPlus(readableAttributesForDtcTopology).
 			ReturnAsObject(1).
 			ProxySearch(config.GetProxySearch()).
@@ -340,7 +340,7 @@ func (r *DtcTopologyResource) Update(ctx context.Context, req resource.UpdateReq
 		return
 	}
 
-	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
 	var apiRes *dtc.UpdateDtcTopologyResponse
 
@@ -351,7 +351,7 @@ func (r *DtcTopologyResource) Update(ctx context.Context, req resource.UpdateReq
 		)
 		apiRes, httpRes, callErr = r.client.DTCAPI.
 			DtcTopologyAPI.
-			Update(ctx, resourceRef).
+			Update(ctx, resourceIdentifier).
 			DtcTopology(*payload).
 			ReturnFieldsPlus(readableAttributesForDtcTopology).
 			ReturnAsObject(1).
@@ -400,12 +400,12 @@ func (r *DtcTopologyResource) Delete(ctx context.Context, req resource.DeleteReq
 		return
 	}
 
-	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
 	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
 		httpRes, callErr := r.client.DTCAPI.
 			DtcTopologyAPI.
-			Delete(ctx, resourceRef).
+			Delete(ctx, resourceIdentifier).
 			Execute()
 
 		if httpRes != nil {

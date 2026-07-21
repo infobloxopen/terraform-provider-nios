@@ -138,7 +138,7 @@ func (r *CertificateAuthserviceResource) Read(ctx context.Context, req resource.
 		return
 	}
 
-	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
 	var (
 		httpRes *http.Response
@@ -149,7 +149,7 @@ func (r *CertificateAuthserviceResource) Read(ctx context.Context, req resource.
 		var callErr error
 		apiRes, httpRes, callErr = r.client.SecurityAPI.
 			CertificateAuthserviceAPI.
-			Read(ctx, resourceRef).
+			Read(ctx, resourceIdentifier).
 			ReturnFieldsPlus(readableAttributesForCertificateAuthservice).
 			ReturnAsObject(1).
 			ProxySearch(config.GetProxySearch()).
@@ -211,7 +211,7 @@ func (r *CertificateAuthserviceResource) Update(ctx context.Context, req resourc
 		return
 	}
 
-	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
 	var apiRes *security.UpdateCertificateAuthserviceResponse
 
@@ -222,7 +222,7 @@ func (r *CertificateAuthserviceResource) Update(ctx context.Context, req resourc
 		)
 		apiRes, httpRes, callErr = r.client.SecurityAPI.
 			CertificateAuthserviceAPI.
-			Update(ctx, resourceRef).
+			Update(ctx, resourceIdentifier).
 			CertificateAuthservice(*payload).
 			ReturnFieldsPlus(readableAttributesForCertificateAuthservice).
 			ReturnAsObject(1).
@@ -257,12 +257,12 @@ func (r *CertificateAuthserviceResource) Delete(ctx context.Context, req resourc
 		return
 	}
 
-	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
 	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
 		httpRes, callErr := r.client.SecurityAPI.
 			CertificateAuthserviceAPI.
-			Delete(ctx, resourceRef).
+			Delete(ctx, resourceIdentifier).
 			Execute()
 
 		if httpRes != nil {

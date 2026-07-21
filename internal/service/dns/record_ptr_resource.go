@@ -188,7 +188,7 @@ func (r *RecordPtrResource) Read(ctx context.Context, req resource.ReadRequest, 
 		return
 	}
 
-	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
 	var (
 		httpRes *http.Response
@@ -199,7 +199,7 @@ func (r *RecordPtrResource) Read(ctx context.Context, req resource.ReadRequest, 
 		var callErr error
 		apiRes, httpRes, callErr = r.client.DNSAPI.
 			RecordPtrAPI.
-			Read(ctx, resourceRef).
+			Read(ctx, resourceIdentifier).
 			ReturnFieldsPlus(readableAttributesForRecordPtr).
 			ReturnAsObject(1).
 			ProxySearch(config.GetProxySearch()).
@@ -361,7 +361,7 @@ func (r *RecordPtrResource) Update(ctx context.Context, req resource.UpdateReque
 		return
 	}
 
-	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
 	payload := data.Expand(ctx, &resp.Diagnostics, false)
 	if resp.Diagnostics.HasError() {
@@ -377,7 +377,7 @@ func (r *RecordPtrResource) Update(ctx context.Context, req resource.UpdateReque
 		)
 		apiRes, httpRes, callErr = r.client.DNSAPI.
 			RecordPtrAPI.
-			Update(ctx, resourceRef).
+			Update(ctx, resourceIdentifier).
 			RecordPtr(*payload).
 			ReturnFieldsPlus(readableAttributesForRecordPtr).
 			ReturnAsObject(1).
@@ -422,12 +422,12 @@ func (r *RecordPtrResource) Delete(ctx context.Context, req resource.DeleteReque
 		return
 	}
 
-	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
 	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
 		httpRes, callErr := r.client.DNSAPI.
 			RecordPtrAPI.
-			Delete(ctx, resourceRef).
+			Delete(ctx, resourceIdentifier).
 			Execute()
 
 		if httpRes != nil {

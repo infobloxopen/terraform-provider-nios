@@ -243,7 +243,7 @@ func (r *AdmingroupResource) Read(ctx context.Context, req resource.ReadRequest,
 		return
 	}
 
-	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
 	var (
 		httpRes *http.Response
@@ -254,7 +254,7 @@ func (r *AdmingroupResource) Read(ctx context.Context, req resource.ReadRequest,
 		var callErr error
 		apiRes, httpRes, callErr = r.client.SecurityAPI.
 			AdmingroupAPI.
-			Read(ctx, resourceRef).
+			Read(ctx, resourceIdentifier).
 			ReturnFieldsPlus(readableAttributesForAdmingroup).
 			ReturnAsObject(1).
 			ProxySearch(config.GetProxySearch()).
@@ -421,7 +421,7 @@ func (r *AdmingroupResource) Update(ctx context.Context, req resource.UpdateRequ
 		return
 	}
 
-	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
 	var apiRes *security.UpdateAdmingroupResponse
 
@@ -432,7 +432,7 @@ func (r *AdmingroupResource) Update(ctx context.Context, req resource.UpdateRequ
 		)
 		apiRes, httpRes, callErr = r.client.SecurityAPI.
 			AdmingroupAPI.
-			Update(ctx, resourceRef).
+			Update(ctx, resourceIdentifier).
 			Admingroup(*payload).
 			ReturnFieldsPlus(readableAttributesForAdmingroup).
 			ReturnAsObject(1).
@@ -477,12 +477,12 @@ func (r *AdmingroupResource) Delete(ctx context.Context, req resource.DeleteRequ
 		return
 	}
 
-	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
 	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
 		httpRes, callErr := r.client.SecurityAPI.
 			AdmingroupAPI.
-			Delete(ctx, resourceRef).
+			Delete(ctx, resourceIdentifier).
 			Execute()
 
 		if httpRes != nil {

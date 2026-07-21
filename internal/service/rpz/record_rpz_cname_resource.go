@@ -151,7 +151,7 @@ func (r *RecordRpzCnameResource) Read(ctx context.Context, req resource.ReadRequ
 		return
 	}
 
-	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
 	var (
 		httpRes *http.Response
@@ -162,7 +162,7 @@ func (r *RecordRpzCnameResource) Read(ctx context.Context, req resource.ReadRequ
 		var callErr error
 		apiRes, httpRes, callErr = r.client.RPZAPI.
 			RecordRpzCnameAPI.
-			Read(ctx, resourceRef).
+			Read(ctx, resourceIdentifier).
 			ReturnFieldsPlus(readableAttributesForRecordRpzCname).
 			ReturnAsObject(1).
 			ProxySearch(config.GetProxySearch()).
@@ -331,7 +331,7 @@ func (r *RecordRpzCnameResource) Update(ctx context.Context, req resource.Update
 		return
 	}
 
-	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
 	var apiRes *rpz.UpdateRecordRpzCnameResponse
 
@@ -342,7 +342,7 @@ func (r *RecordRpzCnameResource) Update(ctx context.Context, req resource.Update
 		)
 		apiRes, httpRes, callErr = r.client.RPZAPI.
 			RecordRpzCnameAPI.
-			Update(ctx, resourceRef).
+			Update(ctx, resourceIdentifier).
 			RecordRpzCname(*payload).
 			ReturnFieldsPlus(readableAttributesForRecordRpzCname).
 			ReturnAsObject(1).
@@ -386,12 +386,12 @@ func (r *RecordRpzCnameResource) Delete(ctx context.Context, req resource.Delete
 		return
 	}
 
-	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
 	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
 		httpRes, callErr := r.client.RPZAPI.
 			RecordRpzCnameAPI.
-			Delete(ctx, resourceRef).
+			Delete(ctx, resourceIdentifier).
 			Execute()
 
 		if httpRes != nil {

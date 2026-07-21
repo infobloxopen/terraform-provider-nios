@@ -137,7 +137,7 @@ func (r *DhcpoptionspaceResource) Read(ctx context.Context, req resource.ReadReq
 	}
 
 
-	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
 	var (
 		httpRes *http.Response
@@ -148,7 +148,7 @@ func (r *DhcpoptionspaceResource) Read(ctx context.Context, req resource.ReadReq
 		var callErr error
 		apiRes, httpRes, callErr = r.client.DHCPAPI.
 			DhcpoptionspaceAPI.
-			Read(ctx, resourceRef).
+			Read(ctx, resourceIdentifier).
 			ReturnFieldsPlus(readableAttributesForDhcpoptionspace).
 			ReturnAsObject(1).
 			ProxySearch(config.GetProxySearch()).
@@ -206,7 +206,7 @@ func (r *DhcpoptionspaceResource) Update(ctx context.Context, req resource.Updat
 		return
 	}
 
-	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
 
 	var apiRes *dhcp.UpdateDhcpoptionspaceResponse
@@ -218,7 +218,7 @@ func (r *DhcpoptionspaceResource) Update(ctx context.Context, req resource.Updat
 		)
 		apiRes, httpRes, callErr = r.client.DHCPAPI.
 			DhcpoptionspaceAPI.
-			Update(ctx, resourceRef).
+			Update(ctx, resourceIdentifier).
 			Dhcpoptionspace(*payload).
 			ReturnFieldsPlus(readableAttributesForDhcpoptionspace).
 			ReturnAsObject(1).
@@ -253,13 +253,13 @@ func (r *DhcpoptionspaceResource) Delete(ctx context.Context, req resource.Delet
 		return
 	}
 
-	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
 
 	err := retry.DoWithTimeout(ctx, OptionSpaceOperationTimeout, retry.TransientErrors, func(ctx context.Context) (int, error) {
 		httpRes, callErr := r.client.DHCPAPI.
 			DhcpoptionspaceAPI.
-			Delete(ctx, resourceRef).
+			Delete(ctx, resourceIdentifier).
 			Execute()
 
 		if httpRes != nil {

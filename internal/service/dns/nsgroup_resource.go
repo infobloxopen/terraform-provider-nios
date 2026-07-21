@@ -151,7 +151,7 @@ func (r *NsgroupResource) Read(ctx context.Context, req resource.ReadRequest, re
 		return
 	}
 
-	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
 	var (
 		httpRes *http.Response
@@ -162,7 +162,7 @@ func (r *NsgroupResource) Read(ctx context.Context, req resource.ReadRequest, re
 		var callErr error
 		apiRes, httpRes, callErr = r.client.DNSAPI.
 			NsgroupAPI.
-			Read(ctx, resourceRef).
+			Read(ctx, resourceIdentifier).
 			ReturnFieldsPlus(readableAttributesForNsgroup).
 			ReturnAsObject(1).
 			ProxySearch(config.GetProxySearch()).
@@ -324,7 +324,7 @@ func (r *NsgroupResource) Update(ctx context.Context, req resource.UpdateRequest
 		return
 	}
 
-	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
 	payload := data.Expand(ctx, &resp.Diagnostics, false)
 	if resp.Diagnostics.HasError() {
@@ -340,7 +340,7 @@ func (r *NsgroupResource) Update(ctx context.Context, req resource.UpdateRequest
 		)
 		apiRes, httpRes, callErr = r.client.DNSAPI.
 			NsgroupAPI.
-			Update(ctx, resourceRef).
+			Update(ctx, resourceIdentifier).
 			Nsgroup(*payload).
 			ReturnFieldsPlus(readableAttributesForNsgroup).
 			ReturnAsObject(1).
@@ -385,12 +385,12 @@ func (r *NsgroupResource) Delete(ctx context.Context, req resource.DeleteRequest
 		return
 	}
 
-	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
 	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
 		httpRes, callErr := r.client.DNSAPI.
 			NsgroupAPI.
-			Delete(ctx, resourceRef).
+			Delete(ctx, resourceIdentifier).
 			Execute()
 
 		if httpRes != nil {

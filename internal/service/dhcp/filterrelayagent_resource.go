@@ -154,7 +154,7 @@ func (r *FilterrelayagentResource) Read(ctx context.Context, req resource.ReadRe
 		return
 	}
 
-	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
 	var (
 		httpRes *http.Response
@@ -165,7 +165,7 @@ func (r *FilterrelayagentResource) Read(ctx context.Context, req resource.ReadRe
 		var callErr error
 		apiRes, httpRes, callErr = r.client.DHCPAPI.
 			FilterrelayagentAPI.
-			Read(ctx, resourceRef).
+			Read(ctx, resourceIdentifier).
 			ReturnFieldsPlus(readableAttributesForFilterrelayagent).
 			ReturnAsObject(1).
 			ProxySearch(config.GetProxySearch()).
@@ -335,7 +335,7 @@ func (r *FilterrelayagentResource) Update(ctx context.Context, req resource.Upda
 		return
 	}
 
-	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
 	var apiRes *dhcp.UpdateFilterrelayagentResponse
 
@@ -346,7 +346,7 @@ func (r *FilterrelayagentResource) Update(ctx context.Context, req resource.Upda
 		)
 		apiRes, httpRes, callErr = r.client.DHCPAPI.
 			FilterrelayagentAPI.
-			Update(ctx, resourceRef).
+			Update(ctx, resourceIdentifier).
 			Filterrelayagent(*payload).
 			ReturnFieldsPlus(readableAttributesForFilterrelayagent).
 			ReturnAsObject(1).
@@ -391,12 +391,12 @@ func (r *FilterrelayagentResource) Delete(ctx context.Context, req resource.Dele
 		return
 	}
 
-	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
 	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
 		httpRes, callErr := r.client.DHCPAPI.
 			FilterrelayagentAPI.
-			Delete(ctx, resourceRef).
+			Delete(ctx, resourceIdentifier).
 			Execute()
 
 		if httpRes != nil {

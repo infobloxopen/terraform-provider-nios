@@ -173,7 +173,7 @@ func (r *SuperhostResource) Read(ctx context.Context, req resource.ReadRequest, 
 		return
 	}
 
-	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
 	var (
 		httpRes *http.Response
@@ -184,7 +184,7 @@ func (r *SuperhostResource) Read(ctx context.Context, req resource.ReadRequest, 
 		var callErr error
 		apiRes, httpRes, callErr = r.client.IPAMAPI.
 			SuperhostAPI.
-			Read(ctx, resourceRef).
+			Read(ctx, resourceIdentifier).
 			ReturnFieldsPlus(readableAttributesForSuperhost).
 			ReturnAsObject(1).
 			ProxySearch(config.GetProxySearch()).
@@ -374,7 +374,7 @@ func (r *SuperhostResource) Update(ctx context.Context, req resource.UpdateReque
 		return
 	}
 
-	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
 	var apiRes *ipam.UpdateSuperhostResponse
 
@@ -385,7 +385,7 @@ func (r *SuperhostResource) Update(ctx context.Context, req resource.UpdateReque
 		)
 		apiRes, httpRes, callErr = r.client.IPAMAPI.
 			SuperhostAPI.
-			Update(ctx, resourceRef).
+			Update(ctx, resourceIdentifier).
 			Superhost(*payload).
 			ReturnFieldsPlus(readableAttributesForSuperhost).
 			ReturnAsObject(1).
@@ -430,12 +430,12 @@ func (r *SuperhostResource) Delete(ctx context.Context, req resource.DeleteReque
 		return
 	}
 
-	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
 	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
 		httpRes, callErr := r.client.IPAMAPI.
 			SuperhostAPI.
-			Delete(ctx, resourceRef).
+			Delete(ctx, resourceIdentifier).
 			Execute()
 
 		if httpRes != nil {

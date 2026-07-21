@@ -136,7 +136,7 @@ func (r *Ipv6dhcpoptionspaceResource) Read(ctx context.Context, req resource.Rea
 		return
 	}
 
-	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
 	var (
 		httpRes *http.Response
@@ -147,7 +147,7 @@ func (r *Ipv6dhcpoptionspaceResource) Read(ctx context.Context, req resource.Rea
 		var callErr error
 		apiRes, httpRes, callErr = r.client.DHCPAPI.
 			Ipv6dhcpoptionspaceAPI.
-			Read(ctx, resourceRef).
+			Read(ctx, resourceIdentifier).
 			ReturnFieldsPlus(readableAttributesForIpv6dhcpoptionspace).
 			ReturnAsObject(1).
 			ProxySearch(config.GetProxySearch()).
@@ -200,7 +200,7 @@ func (r *Ipv6dhcpoptionspaceResource) Update(ctx context.Context, req resource.U
 		return
 	}
 
-	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
 	payload := data.Expand(ctx, &resp.Diagnostics)
 	if resp.Diagnostics.HasError() {
@@ -216,7 +216,7 @@ func (r *Ipv6dhcpoptionspaceResource) Update(ctx context.Context, req resource.U
 		)
 		apiRes, httpRes, callErr = r.client.DHCPAPI.
 			Ipv6dhcpoptionspaceAPI.
-			Update(ctx, resourceRef).
+			Update(ctx, resourceIdentifier).
 			Ipv6dhcpoptionspace(*payload).
 			ReturnFieldsPlus(readableAttributesForIpv6dhcpoptionspace).
 			ReturnAsObject(1).
@@ -251,12 +251,12 @@ func (r *Ipv6dhcpoptionspaceResource) Delete(ctx context.Context, req resource.D
 		return
 	}
 
-	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
 	err := retry.DoWithTimeout(ctx, Ipv6OptionSpaceOperationTimeout, retry.TransientErrors, func(ctx context.Context) (int, error) {
 		httpRes, callErr := r.client.DHCPAPI.
 			Ipv6dhcpoptionspaceAPI.
-			Delete(ctx, resourceRef).
+			Delete(ctx, resourceIdentifier).
 			Execute()
 
 		if httpRes != nil {

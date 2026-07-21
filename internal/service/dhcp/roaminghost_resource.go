@@ -154,7 +154,7 @@ func (r *RoaminghostResource) Read(ctx context.Context, req resource.ReadRequest
 		return
 	}
 
-	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
 	var (
 		httpRes *http.Response
@@ -165,7 +165,7 @@ func (r *RoaminghostResource) Read(ctx context.Context, req resource.ReadRequest
 		var callErr error
 		apiRes, httpRes, callErr = r.client.DHCPAPI.
 			RoaminghostAPI.
-			Read(ctx, resourceRef).
+			Read(ctx, resourceIdentifier).
 			ReturnFieldsPlus(readableAttributesForRoaminghost).
 			ReturnAsObject(1).
 			ProxySearch(config.GetProxySearch()).
@@ -331,7 +331,7 @@ func (r *RoaminghostResource) Update(ctx context.Context, req resource.UpdateReq
 		return
 	}
 
-	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
 	payload := data.Expand(ctx, &resp.Diagnostics, false)
 	if resp.Diagnostics.HasError() {
@@ -347,7 +347,7 @@ func (r *RoaminghostResource) Update(ctx context.Context, req resource.UpdateReq
 		)
 		apiRes, httpRes, callErr = r.client.DHCPAPI.
 			RoaminghostAPI.
-			Update(ctx, resourceRef).
+			Update(ctx, resourceIdentifier).
 			Roaminghost(*payload).
 			ReturnFieldsPlus(readableAttributesForRoaminghost).
 			ReturnAsObject(1).
@@ -392,12 +392,12 @@ func (r *RoaminghostResource) Delete(ctx context.Context, req resource.DeleteReq
 		return
 	}
 
-	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
 	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
 		httpRes, callErr := r.client.DHCPAPI.
 			RoaminghostAPI.
-			Delete(ctx, resourceRef).
+			Delete(ctx, resourceIdentifier).
 			Execute()
 
 		if httpRes != nil {

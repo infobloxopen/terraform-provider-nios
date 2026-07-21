@@ -356,7 +356,7 @@ func (r *VdiscoverytaskResource) Read(ctx context.Context, req resource.ReadRequ
 		return
 	}
 
-	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
 	var (
 		httpRes *http.Response
@@ -367,7 +367,7 @@ func (r *VdiscoverytaskResource) Read(ctx context.Context, req resource.ReadRequ
 		var callErr error
 		apiRes, httpRes, callErr = r.client.DiscoveryAPI.
 			VdiscoverytaskAPI.
-			Read(ctx, resourceRef).
+			Read(ctx, resourceIdentifier).
 			ReturnFieldsPlus(readableAttributesForVdiscoverytask).
 			ReturnAsObject(1).
 			ProxySearch(config.GetProxySearch()).
@@ -440,7 +440,7 @@ func (r *VdiscoverytaskResource) Update(ctx context.Context, req resource.Update
 		return
 	}
 
-	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
 	var apiRes *discovery.UpdateVdiscoverytaskResponse
 
@@ -451,7 +451,7 @@ func (r *VdiscoverytaskResource) Update(ctx context.Context, req resource.Update
 		)
 		apiRes, httpRes, callErr = r.client.DiscoveryAPI.
 			VdiscoverytaskAPI.
-			Update(ctx, resourceRef).
+			Update(ctx, resourceIdentifier).
 			Vdiscoverytask(*payload).
 			ReturnFieldsPlus(readableAttributesForVdiscoverytask).
 			ReturnAsObject(1).
@@ -486,12 +486,12 @@ func (r *VdiscoverytaskResource) Delete(ctx context.Context, req resource.Delete
 		return
 	}
 
-	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
 	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
 		httpRes, callErr := r.client.DiscoveryAPI.
 			VdiscoverytaskAPI.
-			Delete(ctx, resourceRef).
+			Delete(ctx, resourceIdentifier).
 			Execute()
 
 		if httpRes != nil {

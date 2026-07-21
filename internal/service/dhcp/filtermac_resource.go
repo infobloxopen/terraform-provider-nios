@@ -153,7 +153,7 @@ func (r *FiltermacResource) Read(ctx context.Context, req resource.ReadRequest, 
 		return
 	}
 
-	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
 	var (
 		httpRes *http.Response
@@ -164,7 +164,7 @@ func (r *FiltermacResource) Read(ctx context.Context, req resource.ReadRequest, 
 		var callErr error
 		apiRes, httpRes, callErr = r.client.DHCPAPI.
 			FiltermacAPI.
-			Read(ctx, resourceRef).
+			Read(ctx, resourceIdentifier).
 			ReturnFieldsPlus(readableAttributesForFiltermac).
 			ReturnAsObject(1).
 			ProxySearch(config.GetProxySearch()).
@@ -332,7 +332,7 @@ func (r *FiltermacResource) Update(ctx context.Context, req resource.UpdateReque
 		return
 	}
 
-	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
 	var apiRes *dhcp.UpdateFiltermacResponse
 
@@ -343,7 +343,7 @@ func (r *FiltermacResource) Update(ctx context.Context, req resource.UpdateReque
 		)
 		apiRes, httpRes, callErr = r.client.DHCPAPI.
 			FiltermacAPI.
-			Update(ctx, resourceRef).
+			Update(ctx, resourceIdentifier).
 			Filtermac(*payload).
 			ReturnFieldsPlus(readableAttributesForFiltermac).
 			ReturnAsObject(1).
@@ -387,12 +387,12 @@ func (r *FiltermacResource) Delete(ctx context.Context, req resource.DeleteReque
 		return
 	}
 
-	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
 	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
 		httpRes, callErr := r.client.DHCPAPI.
 			FiltermacAPI.
-			Delete(ctx, resourceRef).
+			Delete(ctx, resourceIdentifier).
 			Execute()
 
 		if httpRes != nil {

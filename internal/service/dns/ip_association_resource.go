@@ -291,7 +291,7 @@ func (r *IPAssociationResource) extractInternalIDFromExtAttrs(hostRecord *dns.Re
 }
 
 func (r *IPAssociationResource) getHostRecordByIdentifier(ctx context.Context, identifier string) (*dns.RecordHost, bool, error) {
-	resourceRef := identifier
+	resourceIdentifier := identifier
 	var (
 		httpRes *http.Response
 		apiRes  *dns.GetRecordHostResponse
@@ -301,7 +301,7 @@ func (r *IPAssociationResource) getHostRecordByIdentifier(ctx context.Context, i
 		var callErr error
 		apiRes, httpRes, callErr = r.client.DNSAPI.
 			RecordHostAPI.
-			Read(ctx, resourceRef).
+			Read(ctx, resourceIdentifier).
 			ReturnFieldsPlus(readableAttributesForIPAssociation).
 			ReturnAsObject(1).
 			ProxySearch(config.GetProxySearch()).

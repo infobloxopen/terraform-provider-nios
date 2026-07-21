@@ -154,7 +154,7 @@ func (r *FilternacResource) Read(ctx context.Context, req resource.ReadRequest, 
 		return
 	}
 
-	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
 	var (
 		httpRes *http.Response
@@ -165,7 +165,7 @@ func (r *FilternacResource) Read(ctx context.Context, req resource.ReadRequest, 
 		var callErr error
 		apiRes, httpRes, callErr = r.client.DHCPAPI.
 			FilternacAPI.
-			Read(ctx, resourceRef).
+			Read(ctx, resourceIdentifier).
 			ReturnFieldsPlus(readableAttributesForFilternac).
 			ReturnAsObject(1).
 			ProxySearch(config.GetProxySearch()).
@@ -335,7 +335,7 @@ func (r *FilternacResource) Update(ctx context.Context, req resource.UpdateReque
 		return
 	}
 
-	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
 	var apiRes *dhcp.UpdateFilternacResponse
 
@@ -346,7 +346,7 @@ func (r *FilternacResource) Update(ctx context.Context, req resource.UpdateReque
 		)
 		apiRes, httpRes, callErr = r.client.DHCPAPI.
 			FilternacAPI.
-			Update(ctx, resourceRef).
+			Update(ctx, resourceIdentifier).
 			Filternac(*payload).
 			ReturnFieldsPlus(readableAttributesForFilternac).
 			ReturnAsObject(1).
@@ -391,12 +391,12 @@ func (r *FilternacResource) Delete(ctx context.Context, req resource.DeleteReque
 		return
 	}
 
-	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
 	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
 		httpRes, callErr := r.client.DHCPAPI.
 			FilternacAPI.
-			Delete(ctx, resourceRef).
+			Delete(ctx, resourceIdentifier).
 			Execute()
 
 		if httpRes != nil {

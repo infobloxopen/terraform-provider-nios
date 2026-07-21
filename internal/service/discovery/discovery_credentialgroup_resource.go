@@ -132,7 +132,7 @@ func (r *DiscoveryCredentialgroupResource) Read(ctx context.Context, req resourc
 		return
 	}
 
-	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
 	var (
 		httpRes *http.Response
@@ -143,7 +143,7 @@ func (r *DiscoveryCredentialgroupResource) Read(ctx context.Context, req resourc
 		var callErr error
 		apiRes, httpRes, callErr = r.client.DiscoveryAPI.
 			DiscoveryCredentialgroupAPI.
-			Read(ctx, resourceRef).
+			Read(ctx, resourceIdentifier).
 			ReturnFieldsPlus(readableAttributesForDiscoveryCredentialgroup).
 			ReturnAsObject(1).
 			ProxySearch(config.GetProxySearch()).
@@ -197,7 +197,7 @@ func (r *DiscoveryCredentialgroupResource) Update(ctx context.Context, req resou
 		return
 	}
 
-	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
 	var apiRes *discovery.UpdateDiscoveryCredentialgroupResponse
 
@@ -208,7 +208,7 @@ func (r *DiscoveryCredentialgroupResource) Update(ctx context.Context, req resou
 		)
 		apiRes, httpRes, callErr = r.client.DiscoveryAPI.
 			DiscoveryCredentialgroupAPI.
-			Update(ctx, resourceRef).
+			Update(ctx, resourceIdentifier).
 			DiscoveryCredentialgroup(*payload).
 			ReturnFieldsPlus(readableAttributesForDiscoveryCredentialgroup).
 			ReturnAsObject(1).
@@ -243,12 +243,12 @@ func (r *DiscoveryCredentialgroupResource) Delete(ctx context.Context, req resou
 		return
 	}
 
-	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
 	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
 		httpRes, callErr := r.client.DiscoveryAPI.
 			DiscoveryCredentialgroupAPI.
-			Delete(ctx, resourceRef).
+			Delete(ctx, resourceIdentifier).
 			Execute()
 
 		if httpRes != nil {

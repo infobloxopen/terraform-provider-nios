@@ -151,7 +151,7 @@ func (r *SharedrecordgroupResource) Read(ctx context.Context, req resource.ReadR
 		return
 	}
 
-	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
 	var (
 		httpRes *http.Response
@@ -162,7 +162,7 @@ func (r *SharedrecordgroupResource) Read(ctx context.Context, req resource.ReadR
 		var callErr error
 		apiRes, httpRes, callErr = r.client.DNSAPI.
 			SharedrecordgroupAPI.
-			Read(ctx, resourceRef).
+			Read(ctx, resourceIdentifier).
 			ReturnFieldsPlus(readableAttributesForSharedrecordgroup).
 			ReturnAsObject(1).
 			ProxySearch(config.GetProxySearch()).
@@ -330,7 +330,7 @@ func (r *SharedrecordgroupResource) Update(ctx context.Context, req resource.Upd
 		return
 	}
 
-	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
 	var apiRes *dns.UpdateSharedrecordgroupResponse
 
@@ -341,7 +341,7 @@ func (r *SharedrecordgroupResource) Update(ctx context.Context, req resource.Upd
 		)
 		apiRes, httpRes, callErr = r.client.DNSAPI.
 			SharedrecordgroupAPI.
-			Update(ctx, resourceRef).
+			Update(ctx, resourceIdentifier).
 			Sharedrecordgroup(*payload).
 			ReturnFieldsPlus(readableAttributesForSharedrecordgroup).
 			ReturnAsObject(1).
@@ -385,12 +385,12 @@ func (r *SharedrecordgroupResource) Delete(ctx context.Context, req resource.Del
 		return
 	}
 
-	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
 	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
 		httpRes, callErr := r.client.DNSAPI.
 			SharedrecordgroupAPI.
-			Delete(ctx, resourceRef).
+			Delete(ctx, resourceIdentifier).
 			Execute()
 
 		if httpRes != nil {

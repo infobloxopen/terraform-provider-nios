@@ -138,7 +138,7 @@ func (r *SharedrecordAaaaResource) Read(ctx context.Context, req resource.ReadRe
 		return
 	}
 
-	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
 	var (
 		httpRes *http.Response
@@ -149,7 +149,7 @@ func (r *SharedrecordAaaaResource) Read(ctx context.Context, req resource.ReadRe
 		var callErr error
 		apiRes, httpRes, callErr = r.client.DNSAPI.
 			SharedrecordAaaaAPI.
-			Read(ctx, resourceRef).
+			Read(ctx, resourceIdentifier).
 			ReturnFieldsPlus(readableAttributesForSharedrecordAaaa).
 			ReturnAsObject(1).
 			ProxySearch(config.GetProxySearch()).
@@ -222,7 +222,7 @@ func (r *SharedrecordAaaaResource) Update(ctx context.Context, req resource.Upda
 		return
 	}
 
-	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
 	payload := data.Expand(ctx, &resp.Diagnostics, false)
 	if resp.Diagnostics.HasError() {
@@ -238,7 +238,7 @@ func (r *SharedrecordAaaaResource) Update(ctx context.Context, req resource.Upda
 		)
 		apiRes, httpRes, callErr = r.client.DNSAPI.
 			SharedrecordAaaaAPI.
-			Update(ctx, resourceRef).
+			Update(ctx, resourceIdentifier).
 			SharedrecordAaaa(*payload).
 			ReturnFieldsPlus(readableAttributesForSharedrecordAaaa).
 			ReturnAsObject(1).
@@ -279,12 +279,12 @@ func (r *SharedrecordAaaaResource) Delete(ctx context.Context, req resource.Dele
 		return
 	}
 
-	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
 	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
 		httpRes, callErr := r.client.DNSAPI.
 			SharedrecordAaaaAPI.
-			Delete(ctx, resourceRef).
+			Delete(ctx, resourceIdentifier).
 			Execute()
 
 		if httpRes != nil {

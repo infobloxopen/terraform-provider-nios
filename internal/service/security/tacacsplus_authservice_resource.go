@@ -131,7 +131,7 @@ func (r *TacacsplusAuthserviceResource) Read(ctx context.Context, req resource.R
 		return
 	}
 
-	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
 	var (
 		httpRes *http.Response
@@ -142,7 +142,7 @@ func (r *TacacsplusAuthserviceResource) Read(ctx context.Context, req resource.R
 		var callErr error
 		apiRes, httpRes, callErr = r.client.SecurityAPI.
 			TacacsplusAuthserviceAPI.
-			Read(ctx, resourceRef).
+			Read(ctx, resourceIdentifier).
 			ReturnFieldsPlus(readableAttributesForTacacsplusAuthservice).
 			ReturnAsObject(1).
 			ProxySearch(config.GetProxySearch()).
@@ -201,7 +201,7 @@ func (r *TacacsplusAuthserviceResource) Update(ctx context.Context, req resource
 		return
 	}
 
-	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
 	var apiRes *security.UpdateTacacsplusAuthserviceResponse
 
@@ -212,7 +212,7 @@ func (r *TacacsplusAuthserviceResource) Update(ctx context.Context, req resource
 		)
 		apiRes, httpRes, callErr = r.client.SecurityAPI.
 			TacacsplusAuthserviceAPI.
-			Update(ctx, resourceRef).
+			Update(ctx, resourceIdentifier).
 			TacacsplusAuthservice(*payload).
 			ReturnFieldsPlus(readableAttributesForTacacsplusAuthservice).
 			ReturnAsObject(1).
@@ -247,12 +247,12 @@ func (r *TacacsplusAuthserviceResource) Delete(ctx context.Context, req resource
 		return
 	}
 
-	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
 	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
 		httpRes, callErr := r.client.SecurityAPI.
 			TacacsplusAuthserviceAPI.
-			Delete(ctx, resourceRef).
+			Delete(ctx, resourceIdentifier).
 			Execute()
 
 		if httpRes != nil {

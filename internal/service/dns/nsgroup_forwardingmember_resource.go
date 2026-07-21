@@ -150,7 +150,7 @@ func (r *NsgroupForwardingmemberResource) Read(ctx context.Context, req resource
 		return
 	}
 
-	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
 	var (
 		httpRes *http.Response
@@ -161,7 +161,7 @@ func (r *NsgroupForwardingmemberResource) Read(ctx context.Context, req resource
 		var callErr error
 		apiRes, httpRes, callErr = r.client.DNSAPI.
 			NsgroupForwardingmemberAPI.
-			Read(ctx, resourceRef).
+			Read(ctx, resourceIdentifier).
 			ReturnFieldsPlus(readableAttributesForNsgroupForwardingmember).
 			ReturnAsObject(1).
 			ProxySearch(config.GetProxySearch()).
@@ -328,7 +328,7 @@ func (r *NsgroupForwardingmemberResource) Update(ctx context.Context, req resour
 		return
 	}
 
-	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
 	var apiRes *dns.UpdateNsgroupForwardingmemberResponse
 
@@ -339,7 +339,7 @@ func (r *NsgroupForwardingmemberResource) Update(ctx context.Context, req resour
 		)
 		apiRes, httpRes, callErr = r.client.DNSAPI.
 			NsgroupForwardingmemberAPI.
-			Update(ctx, resourceRef).
+			Update(ctx, resourceIdentifier).
 			NsgroupForwardingmember(*payload).
 			ReturnFieldsPlus(readableAttributesForNsgroupForwardingmember).
 			ReturnAsObject(1).
@@ -384,12 +384,12 @@ func (r *NsgroupForwardingmemberResource) Delete(ctx context.Context, req resour
 		return
 	}
 
-	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
 	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
 		httpRes, callErr := r.client.DNSAPI.
 			NsgroupForwardingmemberAPI.
-			Delete(ctx, resourceRef).
+			Delete(ctx, resourceIdentifier).
 			Execute()
 
 		if httpRes != nil {

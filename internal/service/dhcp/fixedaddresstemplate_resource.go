@@ -138,7 +138,7 @@ func (r *FixedaddresstemplateResource) Read(ctx context.Context, req resource.Re
 		return
 	}
 
-	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
 	var (
 		httpRes *http.Response
@@ -149,7 +149,7 @@ func (r *FixedaddresstemplateResource) Read(ctx context.Context, req resource.Re
 		var callErr error
 		apiRes, httpRes, callErr = r.client.DHCPAPI.
 			FixedaddresstemplateAPI.
-			Read(ctx, resourceRef).
+			Read(ctx, resourceIdentifier).
 			ReturnFieldsPlus(readableAttributesForFixedaddresstemplate).
 			ReturnAsObject(1).
 			ProxySearch(config.GetProxySearch()).
@@ -226,7 +226,7 @@ func (r *FixedaddresstemplateResource) Update(ctx context.Context, req resource.
 		return
 	}
 
-	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
 	var apiRes *dhcp.UpdateFixedaddresstemplateResponse
 
@@ -237,7 +237,7 @@ func (r *FixedaddresstemplateResource) Update(ctx context.Context, req resource.
 		)
 		apiRes, httpRes, callErr = r.client.DHCPAPI.
 			FixedaddresstemplateAPI.
-			Update(ctx, resourceRef).
+			Update(ctx, resourceIdentifier).
 			Fixedaddresstemplate(*payload).
 			ReturnFieldsPlus(readableAttributesForFixedaddresstemplate).
 			ReturnAsObject(1).
@@ -278,12 +278,12 @@ func (r *FixedaddresstemplateResource) Delete(ctx context.Context, req resource.
 		return
 	}
 
-	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
 	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
 		httpRes, callErr := r.client.DHCPAPI.
 			FixedaddresstemplateAPI.
-			Delete(ctx, resourceRef).
+			Delete(ctx, resourceIdentifier).
 			Execute()
 
 		if httpRes != nil {

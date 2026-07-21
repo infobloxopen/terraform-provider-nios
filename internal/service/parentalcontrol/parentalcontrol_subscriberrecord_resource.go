@@ -152,7 +152,7 @@ func (r *ParentalcontrolSubscriberrecordResource) Read(ctx context.Context, req 
 		return
 	}
 
-	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
 	var (
 		httpRes *http.Response
@@ -163,7 +163,7 @@ func (r *ParentalcontrolSubscriberrecordResource) Read(ctx context.Context, req 
 		var callErr error
 		apiRes, httpRes, callErr = r.client.ParentalControlAPI.
 			ParentalcontrolSubscriberrecordAPI.
-			Read(ctx, resourceRef).
+			Read(ctx, resourceIdentifier).
 			ReturnFieldsPlus(readableAttributesForParentalcontrolSubscriberrecord).
 			ReturnAsObject(1).
 			ProxySearch(config.GetProxySearch()).
@@ -222,7 +222,7 @@ func (r *ParentalcontrolSubscriberrecordResource) Update(ctx context.Context, re
 		return
 	}
 
-	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
 	var apiRes *parentalcontrol.UpdateParentalcontrolSubscriberrecordResponse
 
@@ -233,7 +233,7 @@ func (r *ParentalcontrolSubscriberrecordResource) Update(ctx context.Context, re
 		)
 		apiRes, httpRes, callErr = r.client.ParentalControlAPI.
 			ParentalcontrolSubscriberrecordAPI.
-			Update(ctx, resourceRef).
+			Update(ctx, resourceIdentifier).
 			ParentalcontrolSubscriberrecord(*payload).
 			ReturnFieldsPlus(readableAttributesForParentalcontrolSubscriberrecord).
 			ReturnAsObject(1).
@@ -268,12 +268,12 @@ func (r *ParentalcontrolSubscriberrecordResource) Delete(ctx context.Context, re
 		return
 	}
 
-	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
 	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
 		httpRes, callErr := r.client.ParentalControlAPI.
 			ParentalcontrolSubscriberrecordAPI.
-			Delete(ctx, resourceRef).
+			Delete(ctx, resourceIdentifier).
 			Execute()
 
 		if httpRes != nil {

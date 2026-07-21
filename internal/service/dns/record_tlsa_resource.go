@@ -150,7 +150,7 @@ func (r *RecordTlsaResource) Read(ctx context.Context, req resource.ReadRequest,
 		return
 	}
 
-	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
 	var (
 		httpRes *http.Response
@@ -161,7 +161,7 @@ func (r *RecordTlsaResource) Read(ctx context.Context, req resource.ReadRequest,
 		var callErr error
 		apiRes, httpRes, callErr = r.client.DNSAPI.
 			RecordTlsaAPI.
-			Read(ctx, resourceRef).
+			Read(ctx, resourceIdentifier).
 			ReturnFieldsPlus(readableAttributesForRecordTlsa).
 			ReturnAsObject(1).
 			ProxySearch(config.GetProxySearch()).
@@ -328,7 +328,7 @@ func (r *RecordTlsaResource) Update(ctx context.Context, req resource.UpdateRequ
 		return
 	}
 
-	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
 	var apiRes *dns.UpdateRecordTlsaResponse
 
@@ -339,7 +339,7 @@ func (r *RecordTlsaResource) Update(ctx context.Context, req resource.UpdateRequ
 		)
 		apiRes, httpRes, callErr = r.client.DNSAPI.
 			RecordTlsaAPI.
-			Update(ctx, resourceRef).
+			Update(ctx, resourceIdentifier).
 			RecordTlsa(*payload).
 			ReturnFieldsPlus(readableAttributesForRecordTlsa).
 			ReturnAsObject(1).
@@ -384,12 +384,12 @@ func (r *RecordTlsaResource) Delete(ctx context.Context, req resource.DeleteRequ
 		return
 	}
 
-	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
 	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
 		httpRes, callErr := r.client.DNSAPI.
 			RecordTlsaAPI.
-			Delete(ctx, resourceRef).
+			Delete(ctx, resourceIdentifier).
 			Execute()
 
 		if httpRes != nil {

@@ -153,7 +153,7 @@ func (r *GridServicerestartGroupResource) Read(ctx context.Context, req resource
 		return
 	}
 
-	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
 	var (
 		httpRes *http.Response
@@ -164,7 +164,7 @@ func (r *GridServicerestartGroupResource) Read(ctx context.Context, req resource
 		var callErr error
 		apiRes, httpRes, callErr = r.client.GridAPI.
 			GridServicerestartGroupAPI.
-			Read(ctx, resourceRef).
+			Read(ctx, resourceIdentifier).
 			ReturnFieldsPlus(readableAttributesForGridServicerestartGroup).
 			ReturnAsObject(1).
 			ProxySearch(config.GetProxySearch()).
@@ -331,7 +331,7 @@ func (r *GridServicerestartGroupResource) Update(ctx context.Context, req resour
 		return
 	}
 
-	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
 	var apiRes *grid.UpdateGridServicerestartGroupResponse
 
@@ -342,7 +342,7 @@ func (r *GridServicerestartGroupResource) Update(ctx context.Context, req resour
 		)
 		apiRes, httpRes, callErr = r.client.GridAPI.
 			GridServicerestartGroupAPI.
-			Update(ctx, resourceRef).
+			Update(ctx, resourceIdentifier).
 			GridServicerestartGroup(*payload).
 			ReturnFieldsPlus(readableAttributesForGridServicerestartGroup).
 			ReturnAsObject(1).
@@ -387,12 +387,12 @@ func (r *GridServicerestartGroupResource) Delete(ctx context.Context, req resour
 		return
 	}
 
-	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
 	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
 		httpRes, callErr := r.client.GridAPI.
 			GridServicerestartGroupAPI.
-			Delete(ctx, resourceRef).
+			Delete(ctx, resourceIdentifier).
 			Execute()
 
 		if httpRes != nil {

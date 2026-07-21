@@ -164,7 +164,7 @@ func (r *Ipv6networkcontainerResource) Read(ctx context.Context, req resource.Re
 		return
 	}
 
-	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
 	var (
 		httpRes *http.Response
@@ -175,7 +175,7 @@ func (r *Ipv6networkcontainerResource) Read(ctx context.Context, req resource.Re
 		var callErr error
 		apiRes, httpRes, callErr = r.client.IPAMAPI.
 			Ipv6networkcontainerAPI.
-			Read(ctx, resourceRef).
+			Read(ctx, resourceIdentifier).
 			ReturnFieldsPlus(readableAttributesForIpv6networkcontainer).
 			ReturnAsObject(1).
 			ProxySearch(config.GetProxySearch()).
@@ -337,7 +337,7 @@ func (r *Ipv6networkcontainerResource) Update(ctx context.Context, req resource.
 		return
 	}
 
-	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
 	payload := data.Expand(ctx, &resp.Diagnostics, false)
 	if resp.Diagnostics.HasError() {
@@ -353,7 +353,7 @@ func (r *Ipv6networkcontainerResource) Update(ctx context.Context, req resource.
 		)
 		apiRes, httpRes, callErr = r.client.IPAMAPI.
 			Ipv6networkcontainerAPI.
-			Update(ctx, resourceRef).
+			Update(ctx, resourceIdentifier).
 			Ipv6networkcontainer(*payload).
 			ReturnFieldsPlus(readableAttributesForIpv6networkcontainer).
 			ReturnAsObject(1).
@@ -398,12 +398,12 @@ func (r *Ipv6networkcontainerResource) Delete(ctx context.Context, req resource.
 		return
 	}
 
-	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
 	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
 		httpRes, callErr := r.client.IPAMAPI.
 			Ipv6networkcontainerAPI.
-			Delete(ctx, resourceRef).
+			Delete(ctx, resourceIdentifier).
 			Execute()
 
 		if httpRes != nil {

@@ -131,7 +131,7 @@ func (r *BulkhostnametemplateResource) Read(ctx context.Context, req resource.Re
 		return
 	}
 
-	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
 	var (
 		httpRes *http.Response
@@ -142,7 +142,7 @@ func (r *BulkhostnametemplateResource) Read(ctx context.Context, req resource.Re
 		var callErr error
 		apiRes, httpRes, callErr = r.client.IPAMAPI.
 			BulkhostnametemplateAPI.
-			Read(ctx, resourceRef).
+			Read(ctx, resourceIdentifier).
 			ReturnFieldsPlus(readableAttributesForBulkhostnametemplate).
 			ReturnAsObject(1).
 			ProxySearch(config.GetProxySearch()).
@@ -201,7 +201,7 @@ func (r *BulkhostnametemplateResource) Update(ctx context.Context, req resource.
 		return
 	}
 
-	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
 	var apiRes *ipam.UpdateBulkhostnametemplateResponse
 
@@ -212,7 +212,7 @@ func (r *BulkhostnametemplateResource) Update(ctx context.Context, req resource.
 		)
 		apiRes, httpRes, callErr = r.client.IPAMAPI.
 			BulkhostnametemplateAPI.
-			Update(ctx, resourceRef).
+			Update(ctx, resourceIdentifier).
 			Bulkhostnametemplate(*payload).
 			ReturnFieldsPlus(readableAttributesForBulkhostnametemplate).
 			ReturnAsObject(1).
@@ -247,12 +247,12 @@ func (r *BulkhostnametemplateResource) Delete(ctx context.Context, req resource.
 		return
 	}
 
-	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
 	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
 		httpRes, callErr := r.client.IPAMAPI.
 			BulkhostnametemplateAPI.
-			Delete(ctx, resourceRef).
+			Delete(ctx, resourceIdentifier).
 			Execute()
 
 		if httpRes != nil {

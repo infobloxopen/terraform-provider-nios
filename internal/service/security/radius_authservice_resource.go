@@ -131,7 +131,7 @@ func (r *RadiusAuthserviceResource) Read(ctx context.Context, req resource.ReadR
 		return
 	}
 
-	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
 	var (
 		httpRes *http.Response
@@ -142,7 +142,7 @@ func (r *RadiusAuthserviceResource) Read(ctx context.Context, req resource.ReadR
 		var callErr error
 		apiRes, httpRes, callErr = r.client.SecurityAPI.
 			RadiusAuthserviceAPI.
-			Read(ctx, resourceRef).
+			Read(ctx, resourceIdentifier).
 			ReturnFieldsPlus(readableAttributesForRadiusAuthservice).
 			ReturnAsObject(1).
 			ProxySearch(config.GetProxySearch()).
@@ -201,7 +201,7 @@ func (r *RadiusAuthserviceResource) Update(ctx context.Context, req resource.Upd
 		return
 	}
 
-	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
 	var apiRes *security.UpdateRadiusAuthserviceResponse
 
@@ -212,7 +212,7 @@ func (r *RadiusAuthserviceResource) Update(ctx context.Context, req resource.Upd
 		)
 		apiRes, httpRes, callErr = r.client.SecurityAPI.
 			RadiusAuthserviceAPI.
-			Update(ctx, resourceRef).
+			Update(ctx, resourceIdentifier).
 			RadiusAuthservice(*payload).
 			ReturnFieldsPlus(readableAttributesForRadiusAuthservice).
 			ReturnAsObject(1).
@@ -247,12 +247,12 @@ func (r *RadiusAuthserviceResource) Delete(ctx context.Context, req resource.Del
 		return
 	}
 
-	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
 	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
 		httpRes, callErr := r.client.SecurityAPI.
 			RadiusAuthserviceAPI.
-			Delete(ctx, resourceRef).
+			Delete(ctx, resourceIdentifier).
 			Execute()
 
 		if httpRes != nil {

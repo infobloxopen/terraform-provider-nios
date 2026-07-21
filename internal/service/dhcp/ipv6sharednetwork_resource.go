@@ -152,7 +152,7 @@ func (r *Ipv6sharednetworkResource) Read(ctx context.Context, req resource.ReadR
 		return
 	}
 
-	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
 	var (
 		httpRes *http.Response
@@ -163,7 +163,7 @@ func (r *Ipv6sharednetworkResource) Read(ctx context.Context, req resource.ReadR
 		var callErr error
 		apiRes, httpRes, callErr = r.client.DHCPAPI.
 			Ipv6sharednetworkAPI.
-			Read(ctx, resourceRef).
+			Read(ctx, resourceIdentifier).
 			ReturnFieldsPlus(readableAttributesForIpv6sharednetwork).
 			ReturnAsObject(1).
 			ProxySearch(config.GetProxySearch()).
@@ -326,7 +326,7 @@ func (r *Ipv6sharednetworkResource) Update(ctx context.Context, req resource.Upd
 		return
 	}
 
-	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
 	payload := data.Expand(ctx, &resp.Diagnostics, false)
 	if resp.Diagnostics.HasError() {
@@ -342,7 +342,7 @@ func (r *Ipv6sharednetworkResource) Update(ctx context.Context, req resource.Upd
 		)
 		apiRes, httpRes, callErr = r.client.DHCPAPI.
 			Ipv6sharednetworkAPI.
-			Update(ctx, resourceRef).
+			Update(ctx, resourceIdentifier).
 			Ipv6sharednetwork(*payload).
 			ReturnFieldsPlus(readableAttributesForIpv6sharednetwork).
 			ReturnAsObject(1).
@@ -386,12 +386,12 @@ func (r *Ipv6sharednetworkResource) Delete(ctx context.Context, req resource.Del
 		return
 	}
 
-	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
 	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
 		httpRes, callErr := r.client.DHCPAPI.
 			Ipv6sharednetworkAPI.
-			Delete(ctx, resourceRef).
+			Delete(ctx, resourceIdentifier).
 			Execute()
 
 		if httpRes != nil {

@@ -150,7 +150,7 @@ func (r *NsgroupStubmemberResource) Read(ctx context.Context, req resource.ReadR
 		return
 	}
 
-	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
 	var (
 		httpRes *http.Response
@@ -161,7 +161,7 @@ func (r *NsgroupStubmemberResource) Read(ctx context.Context, req resource.ReadR
 		var callErr error
 		apiRes, httpRes, callErr = r.client.DNSAPI.
 			NsgroupStubmemberAPI.
-			Read(ctx, resourceRef).
+			Read(ctx, resourceIdentifier).
 			ReturnFieldsPlus(readableAttributesForNsgroupStubmember).
 			ReturnAsObject(1).
 			ProxySearch(config.GetProxySearch()).
@@ -328,7 +328,7 @@ func (r *NsgroupStubmemberResource) Update(ctx context.Context, req resource.Upd
 		return
 	}
 
-	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
 	var apiRes *dns.UpdateNsgroupStubmemberResponse
 
@@ -339,7 +339,7 @@ func (r *NsgroupStubmemberResource) Update(ctx context.Context, req resource.Upd
 		)
 		apiRes, httpRes, callErr = r.client.DNSAPI.
 			NsgroupStubmemberAPI.
-			Update(ctx, resourceRef).
+			Update(ctx, resourceIdentifier).
 			NsgroupStubmember(*payload).
 			ReturnFieldsPlus(readableAttributesForNsgroupStubmember).
 			ReturnAsObject(1).
@@ -384,12 +384,12 @@ func (r *NsgroupStubmemberResource) Delete(ctx context.Context, req resource.Del
 		return
 	}
 
-	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
 	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
 		httpRes, callErr := r.client.DNSAPI.
 			NsgroupStubmemberAPI.
-			Delete(ctx, resourceRef).
+			Delete(ctx, resourceIdentifier).
 			Execute()
 
 		if httpRes != nil {

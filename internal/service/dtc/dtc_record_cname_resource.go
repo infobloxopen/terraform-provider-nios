@@ -131,7 +131,7 @@ func (r *DtcRecordCnameResource) Read(ctx context.Context, req resource.ReadRequ
 		return
 	}
 
-	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
 	var (
 		httpRes *http.Response
@@ -142,7 +142,7 @@ func (r *DtcRecordCnameResource) Read(ctx context.Context, req resource.ReadRequ
 		var callErr error
 		apiRes, httpRes, callErr = r.client.DTCAPI.
 			DtcRecordCnameAPI.
-			Read(ctx, resourceRef).
+			Read(ctx, resourceIdentifier).
 			ReturnFieldsPlus(readableAttributesForDtcRecordCname).
 			ReturnAsObject(1).
 			ProxySearch(config.GetProxySearch()).
@@ -196,7 +196,7 @@ func (r *DtcRecordCnameResource) Update(ctx context.Context, req resource.Update
 		return
 	}
 
-	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
 	payload := data.Expand(ctx, &resp.Diagnostics, false)
 	if resp.Diagnostics.HasError() {
@@ -212,7 +212,7 @@ func (r *DtcRecordCnameResource) Update(ctx context.Context, req resource.Update
 		)
 		apiRes, httpRes, callErr = r.client.DTCAPI.
 			DtcRecordCnameAPI.
-			Update(ctx, resourceRef).
+			Update(ctx, resourceIdentifier).
 			DtcRecordCname(*payload).
 			ReturnFieldsPlus(readableAttributesForDtcRecordCname).
 			ReturnAsObject(1).
@@ -247,12 +247,12 @@ func (r *DtcRecordCnameResource) Delete(ctx context.Context, req resource.Delete
 		return
 	}
 
-	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
 	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
 		httpRes, callErr := r.client.DTCAPI.
 			DtcRecordCnameAPI.
-			Delete(ctx, resourceRef).
+			Delete(ctx, resourceIdentifier).
 			Execute()
 
 		if httpRes != nil {

@@ -188,7 +188,7 @@ func (r *UpgradescheduleResource) Read(ctx context.Context, req resource.ReadReq
 		return
 	}
 
-	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
 	var (
 		httpRes *http.Response
@@ -199,7 +199,7 @@ func (r *UpgradescheduleResource) Read(ctx context.Context, req resource.ReadReq
 		var callErr error
 		apiRes, httpRes, callErr = r.client.GridAPI.
 			UpgradescheduleAPI.
-			Read(ctx, resourceRef).
+			Read(ctx, resourceIdentifier).
 			ReturnFieldsPlus(readableAttributesForUpgradeschedule).
 			ReturnAsObject(1).
 			ProxySearch(config.GetProxySearch()).
@@ -258,7 +258,7 @@ func (r *UpgradescheduleResource) Update(ctx context.Context, req resource.Updat
 		return
 	}
 
-	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
 	var apiRes *grid.UpdateUpgradescheduleResponse
 
@@ -269,7 +269,7 @@ func (r *UpgradescheduleResource) Update(ctx context.Context, req resource.Updat
 		)
 		apiRes, httpRes, callErr = r.client.GridAPI.
 			UpgradescheduleAPI.
-			Update(ctx, resourceRef).
+			Update(ctx, resourceIdentifier).
 			Upgradeschedule(*payload).
 			ReturnFieldsPlus(readableAttributesForUpgradeschedule).
 			ReturnAsObject(1).

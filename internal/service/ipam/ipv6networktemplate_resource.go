@@ -152,7 +152,7 @@ func (r *Ipv6networktemplateResource) Read(ctx context.Context, req resource.Rea
 		return
 	}
 
-	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
 	var (
 		httpRes *http.Response
@@ -163,7 +163,7 @@ func (r *Ipv6networktemplateResource) Read(ctx context.Context, req resource.Rea
 		var callErr error
 		apiRes, httpRes, callErr = r.client.IPAMAPI.
 			Ipv6networktemplateAPI.
-			Read(ctx, resourceRef).
+			Read(ctx, resourceIdentifier).
 			ReturnFieldsPlus(readableAttributesForIpv6networktemplate).
 			ReturnAsObject(1).
 			ProxySearch(config.GetProxySearch()).
@@ -331,7 +331,7 @@ func (r *Ipv6networktemplateResource) Update(ctx context.Context, req resource.U
 		return
 	}
 
-	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
 	var apiRes *ipam.UpdateIpv6networktemplateResponse
 
@@ -342,7 +342,7 @@ func (r *Ipv6networktemplateResource) Update(ctx context.Context, req resource.U
 		)
 		apiRes, httpRes, callErr = r.client.IPAMAPI.
 			Ipv6networktemplateAPI.
-			Update(ctx, resourceRef).
+			Update(ctx, resourceIdentifier).
 			Ipv6networktemplate(*payload).
 			ReturnFieldsPlus(readableAttributesForIpv6networktemplate).
 			ReturnAsObject(1).
@@ -386,12 +386,12 @@ func (r *Ipv6networktemplateResource) Delete(ctx context.Context, req resource.D
 		return
 	}
 
-	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
 	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
 		httpRes, callErr := r.client.IPAMAPI.
 			Ipv6networktemplateAPI.
-			Delete(ctx, resourceRef).
+			Delete(ctx, resourceIdentifier).
 			Execute()
 
 		if httpRes != nil {

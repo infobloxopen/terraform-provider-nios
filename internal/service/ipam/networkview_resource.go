@@ -150,7 +150,7 @@ func (r *NetworkviewResource) Read(ctx context.Context, req resource.ReadRequest
 		return
 	}
 
-	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
 	var (
 		httpRes *http.Response
@@ -161,7 +161,7 @@ func (r *NetworkviewResource) Read(ctx context.Context, req resource.ReadRequest
 		var callErr error
 		apiRes, httpRes, callErr = r.client.IPAMAPI.
 			NetworkviewAPI.
-			Read(ctx, resourceRef).
+			Read(ctx, resourceIdentifier).
 			ReturnFieldsPlus(readableAttributesForNetworkview).
 			ReturnAsObject(1).
 			ProxySearch(config.GetProxySearch()).
@@ -329,7 +329,7 @@ func (r *NetworkviewResource) Update(ctx context.Context, req resource.UpdateReq
 		return
 	}
 
-	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
 	var apiRes *ipam.UpdateNetworkviewResponse
 
@@ -340,7 +340,7 @@ func (r *NetworkviewResource) Update(ctx context.Context, req resource.UpdateReq
 		)
 		apiRes, httpRes, callErr = r.client.IPAMAPI.
 			NetworkviewAPI.
-			Update(ctx, resourceRef).
+			Update(ctx, resourceIdentifier).
 			Networkview(*payload).
 			ReturnFieldsPlus(readableAttributesForNetworkview).
 			ReturnAsObject(1).
@@ -385,12 +385,12 @@ func (r *NetworkviewResource) Delete(ctx context.Context, req resource.DeleteReq
 		return
 	}
 
-	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
 	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
 		httpRes, callErr := r.client.IPAMAPI.
 			NetworkviewAPI.
-			Delete(ctx, resourceRef).
+			Delete(ctx, resourceIdentifier).
 			Execute()
 
 		if httpRes != nil {

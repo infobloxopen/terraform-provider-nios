@@ -245,7 +245,7 @@ func (r *NotificationRestEndpointResource) Read(ctx context.Context, req resourc
 		return
 	}
 
-	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
 	var (
 		httpRes *http.Response
@@ -256,7 +256,7 @@ func (r *NotificationRestEndpointResource) Read(ctx context.Context, req resourc
 		var callErr error
 		apiRes, httpRes, callErr = r.client.NotificationAPI.
 			NotificationRestEndpointAPI.
-			Read(ctx, resourceRef).
+			Read(ctx, resourceIdentifier).
 			ReturnFieldsPlus(readableAttributesForNotificationRestEndpoint).
 			ReturnAsObject(1).
 			ProxySearch(config.GetProxySearch()).
@@ -426,7 +426,7 @@ func (r *NotificationRestEndpointResource) Update(ctx context.Context, req resou
 		return
 	}
 
-	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
 	var apiRes *notification.UpdateNotificationRestEndpointResponse
 
@@ -437,7 +437,7 @@ func (r *NotificationRestEndpointResource) Update(ctx context.Context, req resou
 		)
 		apiRes, httpRes, callErr = r.client.NotificationAPI.
 			NotificationRestEndpointAPI.
-			Update(ctx, resourceRef).
+			Update(ctx, resourceIdentifier).
 			NotificationRestEndpoint(*payload).
 			ReturnFieldsPlus(readableAttributesForNotificationRestEndpoint).
 			ReturnAsObject(1).
@@ -482,12 +482,12 @@ func (r *NotificationRestEndpointResource) Delete(ctx context.Context, req resou
 		return
 	}
 
-	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
 	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
 		httpRes, callErr := r.client.NotificationAPI.
 			NotificationRestEndpointAPI.
-			Delete(ctx, resourceRef).
+			Delete(ctx, resourceIdentifier).
 			Execute()
 
 		if httpRes != nil {

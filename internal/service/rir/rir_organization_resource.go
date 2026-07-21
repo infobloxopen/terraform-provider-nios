@@ -177,7 +177,7 @@ func (r *RirOrganizationResource) Read(ctx context.Context, req resource.ReadReq
 		return
 	}
 
-	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
 	var (
 		httpRes *http.Response
@@ -188,7 +188,7 @@ func (r *RirOrganizationResource) Read(ctx context.Context, req resource.ReadReq
 		var callErr error
 		apiRes, httpRes, callErr = r.client.RIRAPI.
 			RirOrganizationAPI.
-			Read(ctx, resourceRef).
+			Read(ctx, resourceIdentifier).
 			ReturnFieldsPlus(readableAttributesForRirOrganization).
 			ReturnAsObject(1).
 			ProxySearch(config.GetProxySearch()).
@@ -247,7 +247,7 @@ func (r *RirOrganizationResource) Update(ctx context.Context, req resource.Updat
 		return
 	}
 
-	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
 	var apiRes *rir.UpdateRirOrganizationResponse
 
@@ -258,7 +258,7 @@ func (r *RirOrganizationResource) Update(ctx context.Context, req resource.Updat
 		)
 		apiRes, httpRes, callErr = r.client.RIRAPI.
 			RirOrganizationAPI.
-			Update(ctx, resourceRef).
+			Update(ctx, resourceIdentifier).
 			RirOrganization(*payload).
 			ReturnFieldsPlus(readableAttributesForRirOrganization).
 			ReturnAsObject(1).
@@ -293,12 +293,12 @@ func (r *RirOrganizationResource) Delete(ctx context.Context, req resource.Delet
 		return
 	}
 
-	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
 	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
 		httpRes, callErr := r.client.RIRAPI.
 			RirOrganizationAPI.
-			Delete(ctx, resourceRef).
+			Delete(ctx, resourceIdentifier).
 			Execute()
 
 		if httpRes != nil {

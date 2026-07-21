@@ -255,7 +255,7 @@ func (r *SharednetworkResource) Read(ctx context.Context, req resource.ReadReque
 		return
 	}
 
-	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
 	var (
 		httpRes *http.Response
@@ -266,7 +266,7 @@ func (r *SharednetworkResource) Read(ctx context.Context, req resource.ReadReque
 		var callErr error
 		apiRes, httpRes, callErr = r.client.DHCPAPI.
 			SharednetworkAPI.
-			Read(ctx, resourceRef).
+			Read(ctx, resourceIdentifier).
 			ReturnFieldsPlus(readableAttributesForSharednetwork).
 			ReturnAsObject(1).
 			ProxySearch(config.GetProxySearch()).
@@ -428,7 +428,7 @@ func (r *SharednetworkResource) Update(ctx context.Context, req resource.UpdateR
 		return
 	}
 
-	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
 	payload := data.Expand(ctx, &resp.Diagnostics, false)
 	if resp.Diagnostics.HasError() {
@@ -444,7 +444,7 @@ func (r *SharednetworkResource) Update(ctx context.Context, req resource.UpdateR
 		)
 		apiRes, httpRes, callErr = r.client.DHCPAPI.
 			SharednetworkAPI.
-			Update(ctx, resourceRef).
+			Update(ctx, resourceIdentifier).
 			Sharednetwork(*payload).
 			ReturnFieldsPlus(readableAttributesForSharednetwork).
 			ReturnAsObject(1).
@@ -489,12 +489,12 @@ func (r *SharednetworkResource) Delete(ctx context.Context, req resource.DeleteR
 		return
 	}
 
-	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
 	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
 		httpRes, callErr := r.client.DHCPAPI.
 			SharednetworkAPI.
-			Delete(ctx, resourceRef).
+			Delete(ctx, resourceIdentifier).
 			Execute()
 
 		if httpRes != nil {

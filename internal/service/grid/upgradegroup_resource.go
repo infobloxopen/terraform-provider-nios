@@ -131,7 +131,7 @@ func (r *UpgradegroupResource) Read(ctx context.Context, req resource.ReadReques
 		return
 	}
 
-	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
 	var (
 		httpRes *http.Response
@@ -142,7 +142,7 @@ func (r *UpgradegroupResource) Read(ctx context.Context, req resource.ReadReques
 		var callErr error
 		apiRes, httpRes, callErr = r.client.GridAPI.
 			UpgradegroupAPI.
-			Read(ctx, resourceRef).
+			Read(ctx, resourceIdentifier).
 			ReturnFieldsPlus(readableAttributesForUpgradegroup).
 			ReturnAsObject(1).
 			ProxySearch(config.GetProxySearch()).
@@ -201,7 +201,7 @@ func (r *UpgradegroupResource) Update(ctx context.Context, req resource.UpdateRe
 		return
 	}
 
-	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
 	var apiRes *grid.UpdateUpgradegroupResponse
 
@@ -212,7 +212,7 @@ func (r *UpgradegroupResource) Update(ctx context.Context, req resource.UpdateRe
 		)
 		apiRes, httpRes, callErr = r.client.GridAPI.
 			UpgradegroupAPI.
-			Update(ctx, resourceRef).
+			Update(ctx, resourceIdentifier).
 			Upgradegroup(*payload).
 			ReturnFieldsPlus(readableAttributesForUpgradegroup).
 			ReturnAsObject(1).
@@ -247,12 +247,12 @@ func (r *UpgradegroupResource) Delete(ctx context.Context, req resource.DeleteRe
 		return
 	}
 
-	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
 	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
 		httpRes, callErr := r.client.GridAPI.
 			UpgradegroupAPI.
-			Delete(ctx, resourceRef).
+			Delete(ctx, resourceIdentifier).
 			Execute()
 
 		if httpRes != nil {

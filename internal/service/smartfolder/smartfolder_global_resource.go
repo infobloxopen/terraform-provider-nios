@@ -131,7 +131,7 @@ func (r *SmartfolderGlobalResource) Read(ctx context.Context, req resource.ReadR
 		return
 	}
 
-	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
 	var (
 		httpRes *http.Response
@@ -142,7 +142,7 @@ func (r *SmartfolderGlobalResource) Read(ctx context.Context, req resource.ReadR
 		var callErr error
 		apiRes, httpRes, callErr = r.client.SmartFolderAPI.
 			SmartfolderGlobalAPI.
-			Read(ctx, resourceRef).
+			Read(ctx, resourceIdentifier).
 			ReturnFieldsPlus(readableAttributesForSmartfolderGlobal).
 			ReturnAsObject(1).
 			ProxySearch(config.GetProxySearch()).
@@ -201,7 +201,7 @@ func (r *SmartfolderGlobalResource) Update(ctx context.Context, req resource.Upd
 		return
 	}
 
-	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
 	var apiRes *smartfolder.UpdateSmartfolderGlobalResponse
 
@@ -212,7 +212,7 @@ func (r *SmartfolderGlobalResource) Update(ctx context.Context, req resource.Upd
 		)
 		apiRes, httpRes, callErr = r.client.SmartFolderAPI.
 			SmartfolderGlobalAPI.
-			Update(ctx, resourceRef).
+			Update(ctx, resourceIdentifier).
 			SmartfolderGlobal(*payload).
 			ReturnFieldsPlus(readableAttributesForSmartfolderGlobal).
 			ReturnAsObject(1).
@@ -247,12 +247,12 @@ func (r *SmartfolderGlobalResource) Delete(ctx context.Context, req resource.Del
 		return
 	}
 
-	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
 	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
 		httpRes, callErr := r.client.SmartFolderAPI.
 			SmartfolderGlobalAPI.
-			Delete(ctx, resourceRef).
+			Delete(ctx, resourceIdentifier).
 			Execute()
 
 		if httpRes != nil {

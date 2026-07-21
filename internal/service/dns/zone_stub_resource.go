@@ -150,7 +150,7 @@ func (r *ZoneStubResource) Read(ctx context.Context, req resource.ReadRequest, r
 		return
 	}
 
-	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
 	var (
 		httpRes *http.Response
@@ -161,7 +161,7 @@ func (r *ZoneStubResource) Read(ctx context.Context, req resource.ReadRequest, r
 		var callErr error
 		apiRes, httpRes, callErr = r.client.DNSAPI.
 			ZoneStubAPI.
-			Read(ctx, resourceRef).
+			Read(ctx, resourceIdentifier).
 			ReturnFieldsPlus(readableAttributesForZoneStub).
 			ReturnAsObject(1).
 			ProxySearch(config.GetProxySearch()).
@@ -323,7 +323,7 @@ func (r *ZoneStubResource) Update(ctx context.Context, req resource.UpdateReques
 		return
 	}
 
-	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
 	payload := data.Expand(ctx, &resp.Diagnostics, false)
 	if resp.Diagnostics.HasError() {
@@ -339,7 +339,7 @@ func (r *ZoneStubResource) Update(ctx context.Context, req resource.UpdateReques
 		)
 		apiRes, httpRes, callErr = r.client.DNSAPI.
 			ZoneStubAPI.
-			Update(ctx, resourceRef).
+			Update(ctx, resourceIdentifier).
 			ZoneStub(*payload).
 			ReturnFieldsPlus(readableAttributesForZoneStub).
 			ReturnAsObject(1).
@@ -384,12 +384,12 @@ func (r *ZoneStubResource) Delete(ctx context.Context, req resource.DeleteReques
 		return
 	}
 
-	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
 	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
 		httpRes, callErr := r.client.DNSAPI.
 			ZoneStubAPI.
-			Delete(ctx, resourceRef).
+			Delete(ctx, resourceIdentifier).
 			Execute()
 
 		if httpRes != nil {

@@ -161,7 +161,7 @@ func (r *DxlEndpointResource) Read(ctx context.Context, req resource.ReadRequest
 		return
 	}
 
-	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
 	var (
 		httpRes *http.Response
@@ -172,7 +172,7 @@ func (r *DxlEndpointResource) Read(ctx context.Context, req resource.ReadRequest
 		var callErr error
 		apiRes, httpRes, callErr = r.client.MiscAPI.
 			DxlEndpointAPI.
-			Read(ctx, resourceRef).
+			Read(ctx, resourceIdentifier).
 			ReturnFieldsPlus(readableAttributesForDxlEndpoint).
 			ReturnAsObject(1).
 			Execute()
@@ -349,7 +349,7 @@ func (r *DxlEndpointResource) Update(ctx context.Context, req resource.UpdateReq
 		return
 	}
 
-	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
 	var apiRes *misc.UpdateDxlEndpointResponse
 
@@ -360,7 +360,7 @@ func (r *DxlEndpointResource) Update(ctx context.Context, req resource.UpdateReq
 		)
 		apiRes, httpRes, callErr = r.client.MiscAPI.
 			DxlEndpointAPI.
-			Update(ctx, resourceRef).
+			Update(ctx, resourceIdentifier).
 			DxlEndpoint(*payload).
 			ReturnFieldsPlus(readableAttributesForDxlEndpoint).
 			ReturnAsObject(1).
@@ -405,12 +405,12 @@ func (r *DxlEndpointResource) Delete(ctx context.Context, req resource.DeleteReq
 		return
 	}
 
-	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
 	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
 		httpRes, callErr := r.client.MiscAPI.
 			DxlEndpointAPI.
-			Delete(ctx, resourceRef).
+			Delete(ctx, resourceIdentifier).
 			Execute()
 
 		if httpRes != nil {

@@ -131,7 +131,7 @@ func (r *PermissionResource) Read(ctx context.Context, req resource.ReadRequest,
 		return
 	}
 
-	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
 	var (
 		httpRes *http.Response
@@ -142,7 +142,7 @@ func (r *PermissionResource) Read(ctx context.Context, req resource.ReadRequest,
 		var callErr error
 		apiRes, httpRes, callErr = r.client.SecurityAPI.
 			PermissionAPI.
-			Read(ctx, resourceRef).
+			Read(ctx, resourceIdentifier).
 			ReturnFieldsPlus(readableAttributesForPermission).
 			ReturnAsObject(1).
 			ProxySearch(config.GetProxySearch()).
@@ -201,7 +201,7 @@ func (r *PermissionResource) Update(ctx context.Context, req resource.UpdateRequ
 		return
 	}
 
-	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
 	var apiRes *security.UpdatePermissionResponse
 
@@ -212,7 +212,7 @@ func (r *PermissionResource) Update(ctx context.Context, req resource.UpdateRequ
 		)
 		apiRes, httpRes, callErr = r.client.SecurityAPI.
 			PermissionAPI.
-			Update(ctx, resourceRef).
+			Update(ctx, resourceIdentifier).
 			Permission(*payload).
 			ReturnFieldsPlus(readableAttributesForPermission).
 			ReturnAsObject(1).
@@ -247,12 +247,12 @@ func (r *PermissionResource) Delete(ctx context.Context, req resource.DeleteRequ
 		return
 	}
 
-	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
 	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
 		httpRes, callErr := r.client.SecurityAPI.
 			PermissionAPI.
-			Delete(ctx, resourceRef).
+			Delete(ctx, resourceIdentifier).
 			Execute()
 
 		if httpRes != nil {

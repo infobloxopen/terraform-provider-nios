@@ -151,7 +151,7 @@ func (r *RecordSvcbResource) Read(ctx context.Context, req resource.ReadRequest,
 		return
 	}
 
-	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
 	var (
 		httpRes *http.Response
@@ -162,7 +162,7 @@ func (r *RecordSvcbResource) Read(ctx context.Context, req resource.ReadRequest,
 		var callErr error
 		apiRes, httpRes, callErr = r.client.DNSAPI.
 			RecordSvcbAPI.
-			Read(ctx, resourceRef).
+			Read(ctx, resourceIdentifier).
 			ReturnFieldsPlus(readableAttributesForRecordSvcb).
 			ReturnAsObject(1).
 			ProxySearch(config.GetProxySearch()).
@@ -327,7 +327,7 @@ func (r *RecordSvcbResource) Update(ctx context.Context, req resource.UpdateRequ
 		return
 	}
 
-	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
 	payload := data.Expand(ctx, &resp.Diagnostics, false)
 	if resp.Diagnostics.HasError() {
@@ -343,7 +343,7 @@ func (r *RecordSvcbResource) Update(ctx context.Context, req resource.UpdateRequ
 		)
 		apiRes, httpRes, callErr = r.client.DNSAPI.
 			RecordSvcbAPI.
-			Update(ctx, resourceRef).
+			Update(ctx, resourceIdentifier).
 			RecordSvcb(*payload).
 			ReturnFieldsPlus(readableAttributesForRecordSvcb).
 			ReturnAsObject(1).
@@ -388,12 +388,12 @@ func (r *RecordSvcbResource) Delete(ctx context.Context, req resource.DeleteRequ
 		return
 	}
 
-	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
 	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
 		httpRes, callErr := r.client.DNSAPI.
 			RecordSvcbAPI.
-			Delete(ctx, resourceRef).
+			Delete(ctx, resourceIdentifier).
 			Execute()
 
 		if httpRes != nil {

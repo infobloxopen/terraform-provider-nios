@@ -131,7 +131,7 @@ func (r *AwsuserResource) Read(ctx context.Context, req resource.ReadRequest, re
 		return
 	}
 
-	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
 	var (
 		httpRes *http.Response
@@ -142,7 +142,7 @@ func (r *AwsuserResource) Read(ctx context.Context, req resource.ReadRequest, re
 		var callErr error
 		apiRes, httpRes, callErr = r.client.CloudAPI.
 			AwsuserAPI.
-			Read(ctx, resourceRef).
+			Read(ctx, resourceIdentifier).
 			ReturnFieldsPlus(readableAttributesForAwsuser).
 			ReturnAsObject(1).
 			ProxySearch(config.GetProxySearch()).
@@ -201,7 +201,7 @@ func (r *AwsuserResource) Update(ctx context.Context, req resource.UpdateRequest
 		return
 	}
 
-	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
 	var apiRes *cloud.UpdateAwsuserResponse
 
@@ -212,7 +212,7 @@ func (r *AwsuserResource) Update(ctx context.Context, req resource.UpdateRequest
 		)
 		apiRes, httpRes, callErr = r.client.CloudAPI.
 			AwsuserAPI.
-			Update(ctx, resourceRef).
+			Update(ctx, resourceIdentifier).
 			Awsuser(*payload).
 			ReturnFieldsPlus(readableAttributesForAwsuser).
 			ReturnAsObject(1).
@@ -247,12 +247,12 @@ func (r *AwsuserResource) Delete(ctx context.Context, req resource.DeleteRequest
 		return
 	}
 
-	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
 	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
 		httpRes, callErr := r.client.CloudAPI.
 			AwsuserAPI.
-			Delete(ctx, resourceRef).
+			Delete(ctx, resourceIdentifier).
 			Execute()
 
 		if httpRes != nil {

@@ -150,7 +150,7 @@ func (r *VlanResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 		return
 	}
 
-	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
 	var (
 		httpRes *http.Response
@@ -161,7 +161,7 @@ func (r *VlanResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 		var callErr error
 		apiRes, httpRes, callErr = r.client.IPAMAPI.
 			VlanAPI.
-			Read(ctx, resourceRef).
+			Read(ctx, resourceIdentifier).
 			ReturnFieldsPlus(readableAttributesForVlan).
 			ReturnAsObject(1).
 			ProxySearch(config.GetProxySearch()).
@@ -329,7 +329,7 @@ func (r *VlanResource) Update(ctx context.Context, req resource.UpdateRequest, r
 		return
 	}
 
-	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
 	var apiRes *ipam.UpdateVlanResponse
 
@@ -340,7 +340,7 @@ func (r *VlanResource) Update(ctx context.Context, req resource.UpdateRequest, r
 		)
 		apiRes, httpRes, callErr = r.client.IPAMAPI.
 			VlanAPI.
-			Update(ctx, resourceRef).
+			Update(ctx, resourceIdentifier).
 			Vlan(*payload).
 			ReturnFieldsPlus(readableAttributesForVlan).
 			ReturnAsObject(1).
@@ -384,12 +384,12 @@ func (r *VlanResource) Delete(ctx context.Context, req resource.DeleteRequest, r
 		return
 	}
 
-	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
 	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
 		httpRes, callErr := r.client.IPAMAPI.
 			VlanAPI.
-			Delete(ctx, resourceRef).
+			Delete(ctx, resourceIdentifier).
 			Execute()
 
 		if httpRes != nil {
