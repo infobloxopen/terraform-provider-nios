@@ -523,9 +523,10 @@ func testAccCheckRecordCaaExists(ctx context.Context, resourceName string, v *dn
 		if !ok {
 			return fmt.Errorf("not found: %s", resourceName)
 		}
+		uuid := rs.Primary.Attributes["uuid"]
 		apiRes, _, err := acctest.NIOSClient.DNSAPI.
 			RecordCaaAPI.
-			Read(ctx, utils.ExtractResourceRef(rs.Primary.Attributes["ref"])).
+			Read(ctx, utils.ResolveObjectIdentifier(&uuid, rs.Primary.Attributes["ref"])).
 			ReturnFieldsPlus(readableAttributesForRecordCaa).
 			ReturnAsObject(1).
 			Execute()
@@ -545,7 +546,7 @@ func testAccCheckRecordCaaDestroy(ctx context.Context, v *dns.RecordCaa) resourc
 	return func(state *terraform.State) error {
 		_, httpRes, err := acctest.NIOSClient.DNSAPI.
 			RecordCaaAPI.
-			Read(ctx, utils.ExtractResourceRef(*v.Ref)).
+			Read(ctx, utils.ResolveObjectIdentifier(v.Uuid, *v.Ref)).
 			ReturnAsObject(1).
 			ReturnFieldsPlus(readableAttributesForRecordCaa).
 			Execute()
@@ -565,7 +566,7 @@ func testAccCheckRecordCaaDisappears(ctx context.Context, v *dns.RecordCaa) reso
 	return func(state *terraform.State) error {
 		_, err := acctest.NIOSClient.DNSAPI.
 			RecordCaaAPI.
-			Delete(ctx, utils.ExtractResourceRef(*v.Ref)).
+			Delete(ctx, utils.ResolveObjectIdentifier(v.Uuid, *v.Ref)).
 			Execute()
 		if err != nil {
 			return err

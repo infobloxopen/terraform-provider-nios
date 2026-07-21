@@ -412,9 +412,10 @@ func testAccCheckRecordTxtExists(ctx context.Context, resourceName string, v *dn
 		if !ok {
 			return fmt.Errorf("not found: %s", resourceName)
 		}
+		uuid := rs.Primary.Attributes["uuid"]
 		apiRes, _, err := acctest.NIOSClient.DNSAPI.
 			RecordTxtAPI.
-			Read(ctx, utils.ExtractResourceRef(rs.Primary.Attributes["ref"])).
+			Read(ctx, utils.ResolveObjectIdentifier(&uuid, rs.Primary.Attributes["ref"])).
 			ReturnFieldsPlus(readableAttributesForRecordTxt).
 			ReturnAsObject(1).
 			Execute()
@@ -434,7 +435,7 @@ func testAccCheckRecordTxtDestroy(ctx context.Context, v *dns.RecordTxt) resourc
 	return func(state *terraform.State) error {
 		_, httpRes, err := acctest.NIOSClient.DNSAPI.
 			RecordTxtAPI.
-			Read(ctx, utils.ExtractResourceRef(*v.Ref)).
+			Read(ctx, utils.ResolveObjectIdentifier(nil, *v.Ref)).
 			ReturnAsObject(1).
 			ReturnFieldsPlus(readableAttributesForRecordTxt).
 			Execute()
@@ -454,7 +455,7 @@ func testAccCheckRecordTxtDisappears(ctx context.Context, v *dns.RecordTxt) reso
 	return func(state *terraform.State) error {
 		_, err := acctest.NIOSClient.DNSAPI.
 			RecordTxtAPI.
-			Delete(ctx, utils.ExtractResourceRef(*v.Ref)).
+			Delete(ctx, utils.ResolveObjectIdentifier(nil, *v.Ref)).
 			Execute()
 		if err != nil {
 			return err

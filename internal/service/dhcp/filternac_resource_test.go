@@ -285,9 +285,10 @@ func testAccCheckFilternacExists(ctx context.Context, resourceName string, v *dh
 		if !ok {
 			return fmt.Errorf("not found: %s", resourceName)
 		}
+		uuid := rs.Primary.Attributes["uuid"]
 		apiRes, _, err := acctest.NIOSClient.DHCPAPI.
 			FilternacAPI.
-			Read(ctx, utils.ExtractResourceRef(rs.Primary.Attributes["ref"])).
+			Read(ctx, utils.ResolveObjectIdentifier(&uuid, rs.Primary.Attributes["ref"])).
 			ReturnFieldsPlus(readableAttributesForFilternac).
 			ReturnAsObject(1).
 			Execute()
@@ -307,7 +308,7 @@ func testAccCheckFilternacDestroy(ctx context.Context, v *dhcp.Filternac) resour
 	return func(state *terraform.State) error {
 		_, httpRes, err := acctest.NIOSClient.DHCPAPI.
 			FilternacAPI.
-			Read(ctx, utils.ExtractResourceRef(*v.Ref)).
+			Read(ctx, utils.ResolveObjectIdentifier(v.Uuid, *v.Ref)).
 			ReturnAsObject(1).
 			ReturnFieldsPlus(readableAttributesForFilternac).
 			Execute()
@@ -327,7 +328,7 @@ func testAccCheckFilternacDisappears(ctx context.Context, v *dhcp.Filternac) res
 	return func(state *terraform.State) error {
 		_, err := acctest.NIOSClient.DHCPAPI.
 			FilternacAPI.
-			Delete(ctx, utils.ExtractResourceRef(*v.Ref)).
+			Delete(ctx, utils.ResolveObjectIdentifier(v.Uuid, *v.Ref)).
 			Execute()
 		if err != nil {
 			return err

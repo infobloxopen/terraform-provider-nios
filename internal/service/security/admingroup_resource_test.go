@@ -1456,9 +1456,10 @@ func testAccCheckAdmingroupExists(ctx context.Context, resourceName string, v *s
 		if !ok {
 			return fmt.Errorf("not found: %s", resourceName)
 		}
+		uuid := rs.Primary.Attributes["uuid"]
 		apiRes, _, err := acctest.NIOSClient.SecurityAPI.
 			AdmingroupAPI.
-			Read(ctx, utils.ExtractResourceRef(rs.Primary.Attributes["ref"])).
+			Read(ctx, utils.ResolveObjectIdentifier(&uuid, rs.Primary.Attributes["ref"])).
 			ReturnFieldsPlus(readableAttributesForAdmingroup).
 			ReturnAsObject(1).
 			Execute()
@@ -1478,7 +1479,7 @@ func testAccCheckAdmingroupDestroy(ctx context.Context, v *security.Admingroup) 
 	return func(state *terraform.State) error {
 		_, httpRes, err := acctest.NIOSClient.SecurityAPI.
 			AdmingroupAPI.
-			Read(ctx, utils.ExtractResourceRef(*v.Ref)).
+			Read(ctx, utils.ResolveObjectIdentifier(v.Uuid, *v.Ref)).
 			ReturnAsObject(1).
 			ReturnFieldsPlus(readableAttributesForAdmingroup).
 			Execute()
@@ -1498,7 +1499,7 @@ func testAccCheckAdmingroupDisappears(ctx context.Context, v *security.Admingrou
 	return func(state *terraform.State) error {
 		_, err := acctest.NIOSClient.SecurityAPI.
 			AdmingroupAPI.
-			Delete(ctx, utils.ExtractResourceRef(*v.Ref)).
+			Delete(ctx, utils.ResolveObjectIdentifier(v.Uuid, *v.Ref)).
 			Execute()
 		if err != nil {
 			return err

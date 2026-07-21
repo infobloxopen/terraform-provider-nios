@@ -163,9 +163,10 @@ func testAccCheckIpv6dhcpoptionspaceExists(ctx context.Context, resourceName str
 		if !ok {
 			return fmt.Errorf("not found: %s", resourceName)
 		}
+		uuid := rs.Primary.Attributes["uuid"]
 		apiRes, _, err := acctest.NIOSClient.DHCPAPI.
 			Ipv6dhcpoptionspaceAPI.
-			Read(ctx, utils.ExtractResourceRef(rs.Primary.Attributes["ref"])).
+			Read(ctx, utils.ResolveObjectIdentifier(&uuid, rs.Primary.Attributes["ref"])).
 			ReturnFieldsPlus(readableAttributesForIpv6dhcpoptionspace).
 			ReturnAsObject(1).
 			Execute()
@@ -185,7 +186,7 @@ func testAccCheckIpv6dhcpoptionspaceDestroy(ctx context.Context, v *dhcp.Ipv6dhc
 	return func(state *terraform.State) error {
 		_, httpRes, err := acctest.NIOSClient.DHCPAPI.
 			Ipv6dhcpoptionspaceAPI.
-			Read(ctx, utils.ExtractResourceRef(*v.Ref)).
+			Read(ctx, utils.ResolveObjectIdentifier(v.Uuid, *v.Ref)).
 			ReturnAsObject(1).
 			ReturnFieldsPlus(readableAttributesForIpv6dhcpoptionspace).
 			Execute()
@@ -205,7 +206,7 @@ func testAccCheckIpv6dhcpoptionspaceDisappears(ctx context.Context, v *dhcp.Ipv6
 	return func(state *terraform.State) error {
 		_, err := acctest.NIOSClient.DHCPAPI.
 			Ipv6dhcpoptionspaceAPI.
-			Delete(ctx, utils.ExtractResourceRef(*v.Ref)).
+			Delete(ctx, utils.ResolveObjectIdentifier(v.Uuid, *v.Ref)).
 			Execute()
 		if err != nil {
 			return err
