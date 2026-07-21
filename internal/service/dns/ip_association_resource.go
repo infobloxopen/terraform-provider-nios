@@ -16,6 +16,7 @@ import (
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/config"
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	"github.com/infobloxopen/terraform-provider-nios/internal/retry"
 	internaltypes "github.com/infobloxopen/terraform-provider-nios/internal/types"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
@@ -249,7 +250,7 @@ func (r *IPAssociationResource) getOrFindHostRecord(ctx context.Context, data *I
 
 	// try ref if it exists
 	if !data.Ref.IsNull() && !data.Ref.IsUnknown() && data.Ref.ValueString() != "" {
-		hostRecord, notFound, err := r.getHostRecordByIdentifier(ctx, utils.ExtractResourceRef(data.Ref.ValueString()))
+		hostRecord, notFound, err := r.getHostRecordByIdentifier(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref))
 		if err == nil {
 			internalID, err := r.extractInternalIDFromExtAttrs(hostRecord)
 			if err != nil {
@@ -290,13 +291,27 @@ func (r *IPAssociationResource) extractInternalIDFromExtAttrs(hostRecord *dns.Re
 }
 
 func (r *IPAssociationResource) getHostRecordByIdentifier(ctx context.Context, identifier string) (*dns.RecordHost, bool, error) {
-	apiRes, httpRes, err := r.client.DNSAPI.
-		RecordHostAPI.
-		Read(ctx, identifier).
-		ReturnFieldsPlus(readableAttributesForIPAssociation).
-		ReturnAsObject(1).
-		ProxySearch(config.GetProxySearch()).
-		Execute()
+	resourceRef := identifier
+	var (
+		httpRes *http.Response
+		apiRes  *dns.GetRecordHostResponse
+	)
+
+	err := retry.Do(ctx, nil, func(ctx context.Context) (int, error) {
+		var callErr error
+		apiRes, httpRes, callErr = r.client.DNSAPI.
+			RecordHostAPI.
+			Read(ctx, resourceRef).
+			ReturnFieldsPlus(readableAttributesForIPAssociation).
+			ReturnAsObject(1).
+			ProxySearch(config.GetProxySearch()).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
 
 	if err != nil {
 		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
@@ -314,15 +329,31 @@ func (r *IPAssociationResource) getHostRecordByInternalID(ctx context.Context, i
 		terraformInternalIDEA: internalID,
 	}
 
-	apiRes, _, err := r.client.DNSAPI.
-		RecordHostAPI.
-		List(ctx).
-		Extattrfilter(searchFilter).
-		ReturnAsObject(1).
-		ReturnFieldsPlus(readableAttributesForIPAssociation).
-		Execute()
+	var (
+		httpRes *http.Response
+		apiRes  *dns.ListRecordHostResponse
+	)
+
+	err := retry.Do(ctx, nil, func(ctx context.Context) (int, error) {
+		var callErr error
+		apiRes, httpRes, callErr = r.client.DNSAPI.
+			RecordHostAPI.
+			List(ctx).
+			Extattrfilter(searchFilter).
+			ReturnAsObject(1).
+			ReturnFieldsPlus(readableAttributesForIPAssociation).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
 
 	if err != nil {
+		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
+			return nil, true, fmt.Errorf("host record not found with internal_id: %s", internalID)
+		}
 		return nil, false, fmt.Errorf("failed to search host record by internal_id %s: %w", internalID, err)
 	}
 
@@ -390,12 +421,25 @@ func (r *IPAssociationResource) updateHostRecord(ctx context.Context, hostRec *d
 	}
 
 	// NOTE: Since UUID update with return fields is not supported, perform a separate GET after update to retrieve the latest state.
-	apiRes, _, err := r.client.DNSAPI.
-		RecordHostAPI.
-		Update(ctx, utils.ResolveIdentifier(types.StringValue(uuid), types.StringValue(*hostRec.Ref))).
-		RecordHost(updateReq).
-		ReturnAsObject(1).
-		Execute()
+	var apiRes *dns.UpdateRecordHostResponse
+
+	err := retry.Do(ctx, nil, func(ctx context.Context) (int, error) {
+		var (
+			httpRes *http.Response
+			callErr error
+		)
+		apiRes, httpRes, callErr = r.client.DNSAPI.
+			RecordHostAPI.
+			Update(ctx, utils.ResolveIdentifier(types.StringValue(uuid), types.StringValue(*hostRec.Ref))).
+			RecordHost(updateReq).
+			ReturnAsObject(1).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
 
 	if err != nil {
 		return nil, err
@@ -403,13 +447,27 @@ func (r *IPAssociationResource) updateHostRecord(ctx context.Context, hostRec *d
 
 	result := apiRes.UpdateRecordHostResponseAsObject.GetResult()
 
-	getRes, _, err := r.client.DNSAPI.
-		RecordHostAPI.
-		Read(ctx, utils.ResolveIdentifier(types.StringValue(*result.Uuid), types.StringValue(*result.Ref))).
-		ReturnFieldsPlus(readableAttributesForIPAssociation).
-		ReturnAsObject(1).
-		ProxySearch(config.GetProxySearch()).
-		Execute()
+	var getRes *dns.GetRecordHostResponse
+
+	err = retry.Do(ctx, nil, func(ctx context.Context) (int, error) {
+		var (
+			httpRes *http.Response
+			callErr error
+		)
+		getRes, httpRes, callErr = r.client.DNSAPI.
+			RecordHostAPI.
+			Read(ctx, utils.ResolveIdentifier(types.StringValue(*result.Uuid), types.StringValue(*result.Ref))).
+			ReturnFieldsPlus(readableAttributesForIPAssociation).
+			ReturnAsObject(1).
+			ProxySearch(config.GetProxySearch()).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
+
 	if err != nil {
 		return nil, err
 	}

@@ -11,8 +11,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
+	"github.com/infobloxopen/infoblox-nios-go-client/dns"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/config"
+	"github.com/infobloxopen/terraform-provider-nios/internal/retry"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
@@ -73,14 +75,41 @@ func (r *SharedrecordCnameResource) Create(ctx context.Context, req resource.Cre
 		return
 	}
 
-	apiRes, _, err := r.client.DNSAPI.
-		SharedrecordCnameAPI.
-		Create(ctx).
-		SharedrecordCname(*data.Expand(ctx, &resp.Diagnostics, true)).
-		ReturnFieldsPlus(readableAttributesForSharedrecordCname).
-		ReturnAsObject(1).
-		Execute()
+	payload := data.Expand(ctx, &resp.Diagnostics, true)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	var apiRes *dns.CreateSharedrecordCnameResponse
+
+	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		var (
+			httpRes *http.Response
+			callErr error
+		)
+		apiRes, httpRes, callErr = r.client.DNSAPI.
+			SharedrecordCnameAPI.
+			Create(ctx).
+			SharedrecordCname(*payload).
+			ReturnFieldsPlus(readableAttributesForSharedrecordCname).
+			ReturnAsObject(1).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
+
 	if err != nil {
+		if retry.IsAlreadyExistsErr(err) {
+			// Resource already exists, import required
+			resp.Diagnostics.AddError(
+				"Resource Already Exists",
+				fmt.Sprintf("Resource already exists, error: %s.\nPlease import the existing resource into terraform state.", err.Error()),
+			)
+			return
+		}
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create SharedrecordCname, got error: %s", err))
 		return
 	}
@@ -109,13 +138,28 @@ func (r *SharedrecordCnameResource) Read(ctx context.Context, req resource.ReadR
 		return
 	}
 
-	apiRes, httpRes, err := r.client.DNSAPI.
-		SharedrecordCnameAPI.
-		Read(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
-		ReturnFieldsPlus(readableAttributesForSharedrecordCname).
-		ReturnAsObject(1).
-		ProxySearch(config.GetProxySearch()).
-		Execute()
+	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+
+	var (
+		httpRes *http.Response
+		apiRes  *dns.GetSharedrecordCnameResponse
+	)
+
+	err := retry.Do(ctx, nil, func(ctx context.Context) (int, error) {
+		var callErr error
+		apiRes, httpRes, callErr = r.client.DNSAPI.
+			SharedrecordCnameAPI.
+			Read(ctx, resourceRef).
+			ReturnFieldsPlus(readableAttributesForSharedrecordCname).
+			ReturnAsObject(1).
+			ProxySearch(config.GetProxySearch()).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
 
 	if err != nil {
 		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
@@ -176,13 +220,34 @@ func (r *SharedrecordCnameResource) Update(ctx context.Context, req resource.Upd
 		return
 	}
 
-	apiRes, _, err := r.client.DNSAPI.
-		SharedrecordCnameAPI.
-		Update(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
-		SharedrecordCname(*data.Expand(ctx, &resp.Diagnostics, false)).
-		ReturnFieldsPlus(readableAttributesForSharedrecordCname).
-		ReturnAsObject(1).
-		Execute()
+	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+
+	payload := data.Expand(ctx, &resp.Diagnostics, false)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	var apiRes *dns.UpdateSharedrecordCnameResponse
+
+	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		var (
+			httpRes *http.Response
+			callErr error
+		)
+		apiRes, httpRes, callErr = r.client.DNSAPI.
+			SharedrecordCnameAPI.
+			Update(ctx, resourceRef).
+			SharedrecordCname(*payload).
+			ReturnFieldsPlus(readableAttributesForSharedrecordCname).
+			ReturnAsObject(1).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
+
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update SharedrecordCname, got error: %s", err))
 		return
@@ -212,14 +277,24 @@ func (r *SharedrecordCnameResource) Delete(ctx context.Context, req resource.Del
 		return
 	}
 
-	httpRes, err := r.client.DNSAPI.
-		SharedrecordCnameAPI.
-		Delete(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
-		Execute()
-	if err != nil {
-		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
-			return
+	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+
+	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		httpRes, callErr := r.client.DNSAPI.
+			SharedrecordCnameAPI.
+			Delete(ctx, resourceRef).
+			Execute()
+
+		if httpRes != nil {
+			if httpRes.StatusCode == http.StatusNotFound {
+				return 0, nil
+			}
+			return httpRes.StatusCode, callErr
 		}
+		return 0, callErr
+	})
+
+	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete SharedrecordCname, got error: %s", err))
 		return
 	}

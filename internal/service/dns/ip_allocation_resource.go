@@ -17,6 +17,7 @@ import (
 	"github.com/infobloxopen/infoblox-nios-go-client/dns"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/config"
+	"github.com/infobloxopen/terraform-provider-nios/internal/retry"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
@@ -140,15 +141,42 @@ func (r *IPAllocationResource) Create(ctx context.Context, req resource.CreateRe
 	// Save original IPv6 function call attributes
 	savedIPv6FuncCalls := r.saveNestedFuncCallAttrs(data.Ipv6addrs)
 
-	apiRes, _, err := r.client.DNSAPI.
-		RecordHostAPI.
-		Create(ctx).
-		RecordHost(*data.Expand(ctx, &resp.Diagnostics)).
-		ReturnFieldsPlus(readableAttributesForIPAllocation).
-		ReturnAsObject(1).
-		Execute()
+	payload := data.Expand(ctx, &resp.Diagnostics)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	var apiRes *dns.CreateRecordHostResponse
+
+	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		var (
+			httpRes *http.Response
+			callErr error
+		)
+		apiRes, httpRes, callErr = r.client.DNSAPI.
+			RecordHostAPI.
+			Create(ctx).
+			RecordHost(*payload).
+			ReturnFieldsPlus(readableAttributesForIPAllocation).
+			ReturnAsObject(1).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
+
 	if err != nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create RecordHost, got error: %s", err))
+		if retry.IsAlreadyExistsErr(err) {
+			// Resource already exists, import required
+			resp.Diagnostics.AddError(
+				"Resource Already Exists",
+				fmt.Sprintf("Resource already exists, error: %s.\nPlease import the existing resource into terraform state.", err.Error()),
+			)
+			return
+		}
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create IPAllocation, got error: %s", err))
 		return
 	}
 
@@ -198,13 +226,28 @@ func (r *IPAllocationResource) Read(ctx context.Context, req resource.ReadReques
 	// Save original IPv6 function call attributes
 	savedIPv6FuncCalls := r.saveNestedFuncCallAttrs(data.Ipv6addrs)
 
-	apiRes, httpRes, err := r.client.DNSAPI.
-		RecordHostAPI.
-		Read(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
-		ReturnFieldsPlus(readableAttributesForIPAllocation).
-		ReturnAsObject(1).
-		ProxySearch(config.GetProxySearch()).
-		Execute()
+	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+
+	var (
+		httpRes *http.Response
+		apiRes  *dns.GetRecordHostResponse
+	)
+
+	err := retry.Do(ctx, nil, func(ctx context.Context) (int, error) {
+		var callErr error
+		apiRes, httpRes, callErr = r.client.DNSAPI.
+			RecordHostAPI.
+			Read(ctx, resourceRef).
+			ReturnFieldsPlus(readableAttributesForIPAllocation).
+			ReturnAsObject(1).
+			ProxySearch(config.GetProxySearch()).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
 
 	// If the resource is not found, try searching using Extensible Attributes
 	if err != nil {
@@ -414,14 +457,30 @@ func (r *IPAllocationResource) Update(ctx context.Context, req resource.UpdateRe
 	updateReq.NetworkView = nil
 
 	// NOTE: Since UUID update with return fields is not supported, perform a separate GET after update to retrieve the latest state.
-	apiRes, _, err := r.client.DNSAPI.
-		RecordHostAPI.
-		Update(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
-		RecordHost(*updateReq).
-		ReturnAsObject(1).
-		Execute()
+	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+
+	var apiRes *dns.UpdateRecordHostResponse
+
+	err = retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		var (
+			httpRes *http.Response
+			callErr error
+		)
+		apiRes, httpRes, callErr = r.client.DNSAPI.
+			RecordHostAPI.
+			Update(ctx, resourceRef).
+			RecordHost(*updateReq).
+			ReturnAsObject(1).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
+
 	if err != nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update RecordHost, got error: %s", err))
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update IPAllocation, got error: %s", err))
 		return
 	}
 
@@ -507,38 +566,25 @@ func (r *IPAllocationResource) Delete(ctx context.Context, req resource.DeleteRe
 		return
 	}
 
-	httpRes, err := r.client.DNSAPI.
-		RecordHostAPI.
-		Delete(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
-		Execute()
-	if err != nil {
-		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
-			// If ref not found, try to locate by internal id and delete using the found ref
-			foundRecord, foundRef, _, errFound := r.findHostByInternalID(ctx, &data)
-			if errFound != nil {
-				resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to locate RecordHost by internal id after delete ref not found: %s", errFound))
-				return
-			}
-			if foundRecord == nil || foundRef == "" {
-				// Nothing to delete
-				return
-			}
+	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
-			// Attempt delete using the foundRef
-			httpResDel, errDel := r.client.DNSAPI.
-				RecordHostAPI.
-				Delete(ctx, utils.ExtractResourceRef(foundRef)).
-				Execute()
-			if errDel != nil {
-				if httpResDel != nil && httpResDel.StatusCode == http.StatusNotFound {
-					return
-				}
-				resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete RecordHost (found by internal id), got error: %s", errDel))
-				return
+	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		httpRes, callErr := r.client.DNSAPI.
+			RecordHostAPI.
+			Delete(ctx, resourceRef).
+			Execute()
+
+		if httpRes != nil {
+			if httpRes.StatusCode == http.StatusNotFound {
+				return 0, nil
 			}
-			return
+			return httpRes.StatusCode, callErr
 		}
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete RecordHost, got error: %s", err))
+		return 0, callErr
+	})
+
+	if err != nil {
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete IPAllocation, got error: %s", err))
 		return
 	}
 }
