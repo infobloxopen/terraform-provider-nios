@@ -224,7 +224,11 @@ func (r *SyslogEndpointResource) Create(ctx context.Context, req resource.Create
 		h.Write([]byte(password.ValueString()))
 		secretData.Password = hex.EncodeToString(h.Sum(nil))
 
-		secretDataJSON, _ := json.Marshal(secretData)
+		secretDataJSON, err := json.Marshal(secretData)
+		if err != nil {
+			resp.Diagnostics.AddError("Private State Marshal Error", err.Error())
+			return
+		}
 		val := map[string]string{"algo": "sha256", "hash": string(secretDataJSON)}
 		hashedPassword, err := json.Marshal(val)
 		if err != nil {

@@ -165,7 +165,7 @@ var SyslogEndpointResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"password_version": schema.Int64Attribute{
 		Computed:            true,
-		MarkdownDescription: "Internal revision incremented when admin user password changes.",
+		MarkdownDescription: "Internal revision incremented when wapi user password changes.",
 		PlanModifiers: []planmodifier.Int64{
 			int64planmodifier.UseStateForUnknown(),
 		},
