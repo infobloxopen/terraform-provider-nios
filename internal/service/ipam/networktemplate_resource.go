@@ -453,7 +453,7 @@ func (r *NetworktemplateResource) ValidateConfig(ctx context.Context, req resour
 		for i, option := range options {
 			isSpecialOption := false
 			optionName := ""
-			if option.Value.IsNull() || option.Value.IsUnknown() {
+			if option.Value.IsNull() {
 				resp.Diagnostics.AddAttributeError(
 					path.Root("options").AtListIndex(i).AtName("value"),
 					"Invalid configuration for DHCP Option",
@@ -467,6 +467,8 @@ func (r *NetworktemplateResource) ValidateConfig(ctx context.Context, req resour
 				optionNum := option.Num.ValueInt64()
 				isSpecialOption = specialOptionsNum[optionNum]
 				optionName = fmt.Sprintf("with num = %d", optionNum)
+			} else if option.Name.IsUnknown() || option.Num.IsUnknown() {
+				continue
 			} else {
 				resp.Diagnostics.AddAttributeError(
 					path.Root("options").AtListIndex(i).AtName("name"),
@@ -477,7 +479,7 @@ func (r *NetworktemplateResource) ValidateConfig(ctx context.Context, req resour
 				continue
 			}
 
-			if option.Value.ValueString() == "" {
+			if !option.Value.IsNull() && !option.Value.IsUnknown() && option.Value.ValueString() == "" {
 				if !isSpecialOption {
 					resp.Diagnostics.AddAttributeError(
 						path.Root("options").AtListIndex(i).AtName("value"),
@@ -508,7 +510,7 @@ func (r *NetworktemplateResource) ValidateConfig(ctx context.Context, req resour
 
 	if !data.DdnsServerAlwaysUpdates.IsNull() && !data.DdnsServerAlwaysUpdates.IsUnknown() {
 		// Check if ddns_use_option81 is not set to true
-		if data.DdnsUseOption81.IsNull() || data.DdnsUseOption81.IsUnknown() || !data.DdnsUseOption81.ValueBool() {
+		if !data.DdnsUseOption81.IsUnknown() && (data.DdnsUseOption81.IsNull() || !data.DdnsUseOption81.ValueBool()) {
 			resp.Diagnostics.AddAttributeError(
 				path.Root("ddns_server_always_updates"),
 				"Invalid Configuration",
@@ -548,7 +550,7 @@ func (r *NetworktemplateResource) ValidateConfig(ctx context.Context, req resour
 	}
 
 	if !data.AllowAnyNetmask.IsNull() && !data.AllowAnyNetmask.IsUnknown() && !data.AllowAnyNetmask.ValueBool() {
-		if data.Netmask.IsNull() || data.Netmask.IsUnknown() {
+		if data.Netmask.IsNull() {
 			resp.Diagnostics.AddAttributeError(
 				path.Root("netmask"),
 				"Invalid Configuration",

@@ -400,7 +400,7 @@ var MemberResourceSchemaAttributes = map[string]schema.Attribute{
 		Computed: true,
 		Optional: true,
 		Validators: []validator.String{
-			stringvalidator.OneOf("AWS", "AZURE", "GCP", "OCI"),
+			stringvalidator.OneOf("AWS", "AZURE", "GCP"),
 		},
 		MarkdownDescription: "Cloud platform for HA.",
 	},
@@ -485,6 +485,7 @@ var MemberResourceSchemaAttributes = map[string]schema.Attribute{
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: MemberMemberServiceCommunicationResourceSchemaAttributes,
 		},
+		Optional:            true,
 		Computed:            true,
 		MarkdownDescription: "Configure communication type for various services.",
 	},
@@ -545,7 +546,6 @@ var MemberResourceSchemaAttributes = map[string]schema.Attribute{
 	"platform": schema.StringAttribute{
 		Computed: true,
 		Optional: true,
-		Default:  stringdefault.StaticString("INFOBLOX"),
 		Validators: []validator.String{
 			stringvalidator.OneOf("CISCO", "IBVM", "INFOBLOX", "RIVERBED", "VNIOS"),
 		},
@@ -914,7 +914,6 @@ func (m *MemberModel) Expand(ctx context.Context, diags *diag.Diagnostics, isCre
 		LomNetworkConfig:                flex.ExpandFrameworkListNestedBlock(ctx, m.LomNetworkConfig, diags, ExpandMemberLomNetworkConfig),
 		LomUsers:                        flex.ExpandFrameworkListNestedBlock(ctx, m.LomUsers, diags, ExpandMemberLomUsers),
 		MasterCandidate:                 flex.ExpandBoolPointer(m.MasterCandidate),
-		MemberServiceCommunication:      flex.ExpandFrameworkListNestedBlockEmptyAsNil(ctx, m.MemberServiceCommunication, diags, ExpandMemberMemberServiceCommunication),
 		MgmtPortSetting:                 ExpandMemberMgmtPortSetting(ctx, m.MgmtPortSetting, diags),
 		NatSetting:                      ExpandMemberNatSetting(ctx, m.NatSetting, diags),
 		NodeInfo:                        flex.ExpandFrameworkListNestedBlockEmptyAsNil(ctx, m.NodeInfo, diags, ExpandMemberNodeInfo),
@@ -934,7 +933,6 @@ func (m *MemberModel) Expand(ctx context.Context, diags *diag.Diagnostics, isCre
 		SyslogSize:                      flex.ExpandInt64Pointer(m.SyslogSize),
 		ThresholdTraps:                  flex.ExpandFrameworkListNestedBlock(ctx, m.ThresholdTraps, diags, ExpandMemberThresholdTraps),
 		TimeZone:                        flex.ExpandStringPointer(m.TimeZone),
-		TrafficCaptureAuthDnsSetting:    ExpandMemberTrafficCaptureAuthDnsSetting(ctx, m.TrafficCaptureAuthDnsSetting, diags),
 		TrafficCaptureChrSetting:        ExpandMemberTrafficCaptureChrSetting(ctx, m.TrafficCaptureChrSetting, diags),
 		TrafficCaptureQpsSetting:        ExpandMemberTrafficCaptureQpsSetting(ctx, m.TrafficCaptureQpsSetting, diags),
 		TrafficCaptureRecDnsSetting:     ExpandMemberTrafficCaptureRecDnsSetting(ctx, m.TrafficCaptureRecDnsSetting, diags),
@@ -967,6 +965,8 @@ func (m *MemberModel) Expand(ctx context.Context, diags *diag.Diagnostics, isCre
 
 	if !isCreate {
 		to.PreProvisioning = ExpandMemberPreProvisioning(ctx, m.PreProvisioning, diags)
+		to.TrafficCaptureAuthDnsSetting = ExpandMemberTrafficCaptureAuthDnsSetting(ctx, m.TrafficCaptureAuthDnsSetting, diags)
+		to.MemberServiceCommunication = flex.ExpandFrameworkListNestedBlockEmptyAsNil(ctx, m.MemberServiceCommunication, diags, ExpandMemberMemberServiceCommunication)
 	}
 
 	if m.ConfigureCspMemberSetting.ValueBool() {
@@ -1054,7 +1054,15 @@ func (m *MemberModel) Flatten(ctx context.Context, from *grid.Member, diags *dia
 		}
 	}
 	m.MasterCandidate = types.BoolPointerValue(from.MasterCandidate)
-	m.MemberServiceCommunication = flex.FlattenFrameworkUnorderedListNestedBlock(ctx, from.MemberServiceCommunication, MemberMemberServiceCommunicationAttrTypes, diags, FlattenMemberMemberServiceCommunication)
+	planMsc := m.MemberServiceCommunication
+	listVal := flex.FlattenFrameworkListNestedBlock(ctx, from.MemberServiceCommunication, MemberMemberServiceCommunicationAttrTypes, diags, FlattenMemberMemberServiceCommunication)
+	if !planMsc.IsUnknown() && !planMsc.IsNull() {
+		reOrderedList, reorderDiags := utils.ReorderAndFilterNestedListResponse(ctx, planMsc.ListValue, listVal, "service")
+		if !reorderDiags.HasError() {
+			listVal = reOrderedList.(basetypes.ListValue)
+		}
+	}
+	m.MemberServiceCommunication = internaltypes.UnorderedListValue{ListValue: listVal}
 	m.MgmtPortSetting = FlattenMemberMgmtPortSetting(ctx, from.MgmtPortSetting, diags)
 	m.MmdbEaBuildTime = flex.FlattenInt64Pointer(from.MmdbEaBuildTime)
 	m.MmdbGeoipBuildTime = flex.FlattenInt64Pointer(from.MmdbGeoipBuildTime)
@@ -1069,7 +1077,7 @@ func (m *MemberModel) Flatten(ctx context.Context, from *grid.Member, diags *dia
 	m.RemoteConsoleAccessEnable = types.BoolPointerValue(from.RemoteConsoleAccessEnable)
 	m.RouterId = flex.FlattenInt64Pointer(from.RouterId)
 	m.ServiceStatus = flex.FlattenFrameworkListNestedBlock(ctx, from.ServiceStatus, MemberServiceStatusAttrTypes, diags, FlattenMemberServiceStatus)
-	m.ServiceTypeConfiguration = flex.FlattenStringPointer(from.ServiceTypeConfiguration)
+	m.ServiceTypeConfiguration = FlattenServiceTypeConfiguration(m.ServiceTypeConfiguration, from.ServiceTypeConfiguration)
 	m.SnmpSetting = FlattenMemberSnmpSetting(ctx, from.SnmpSetting, diags)
 	m.StaticRoutes = flex.FlattenFrameworkListNestedBlock(ctx, from.StaticRoutes, MemberStaticRoutesAttrTypes, diags, FlattenMemberStaticRoutes)
 	m.SupportAccessEnable = types.BoolPointerValue(from.SupportAccessEnable)
@@ -1152,4 +1160,11 @@ func FlattenHACloudPlatform(s *string) types.String {
 		return types.StringNull()
 	}
 	return types.StringValue(*s)
+}
+
+func FlattenServiceTypeConfiguration(planValue types.String, apiValue *string) types.String {
+	if !planValue.IsNull() && !planValue.IsUnknown() && planValue.ValueString() == "CUSTOM" {
+		return planValue
+	}
+	return flex.FlattenStringPointer(apiValue)
 }

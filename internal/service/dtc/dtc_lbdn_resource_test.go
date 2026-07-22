@@ -650,7 +650,6 @@ func testAccDtcLbdnBasicConfig(name, lbMethod string) string {
 resource "nios_dtc_lbdn" "test" {
 	name = %q
 	lb_method = %q
-	types = ["A", "AAAA"]
 }
 `, name, lbMethod)
 }
@@ -702,7 +701,7 @@ resource "nios_dtc_lbdn" "test_auth_zones" {
     auth_zones = %[7]s
     pools = %[8]s
     patterns = %[9]s
-	disable = "true"
+	disable = true
 	types = ["A", "AAAA"]
 }
 `, authZoneNames[0], memberName, authZoneNames[1], authZoneNames[2],
@@ -717,7 +716,6 @@ resource "nios_dtc_lbdn" "test_auto_consolidated_monitors" {
 	name = %q
 	lb_method = %q
     auto_consolidated_monitors = %q
-	types = ["A", "AAAA"]
 }
 `, name, lbMethod, autoConsolidatedMonitors)
 }
@@ -728,7 +726,6 @@ resource "nios_dtc_lbdn" "test_comment" {
     name = %q
     lb_method = %q
     comment = %q
-	types = ["A", "AAAA"]
 }
 `, name, lbMethod, comment)
 }
@@ -739,7 +736,6 @@ resource "nios_dtc_lbdn" "test_disable" {
     name = %q
     lb_method = %q
     disable = %q
-	types = ["A", "AAAA"]
 }
 `, name, lbMethod, disable)
 }
@@ -755,7 +751,6 @@ resource "nios_dtc_lbdn" "test_extattrs" {
     name = %q
     lb_method = %q
     extattrs = %s
-	types = ["A", "AAAA"]
 }
 `, name, lbMethod, extattrsStr)
 }
@@ -771,7 +766,6 @@ resource "nios_dtc_lbdn" "test_lb_method" {
 	name      = %q
 	lb_method = %q
 	%s
-	types = ["A", "AAAA"]
 }
 `, name, lbMethod, extraConfig)
 	return strings.Join([]string{testAccDtcTopologyRulesWithPool(acctest.RandomNameWithPrefix("topology"),
@@ -783,7 +777,6 @@ func testAccDtcLbdnName(name, lbMethod string) string {
 resource "nios_dtc_lbdn" "test_name" {
     name = %q
     lb_method = %q
-	types = ["A", "AAAA"]
 }
 `, name, lbMethod)
 }
@@ -799,7 +792,6 @@ resource "nios_dtc_lbdn" "test_patterns" {
     name = %q
     lb_method = %q
     patterns = %s
-	types = ["A", "AAAA"]
 }
 `, name, lbMethod, patternsStr)
 }
@@ -810,7 +802,6 @@ resource "nios_dtc_lbdn" "test_persistence" {
 	name = %q
 	lb_method = %q
     persistence = %q
-	types = ["A", "AAAA"]
 }
 `, name, lbMethod, persistence)
 }
@@ -858,7 +849,6 @@ resource "nios_dtc_lbdn" "test_pools" {
 	name = %q
 	lb_method = %q
     pools = %s
-	types = ["A", "AAAA"]
 }
 `, acctest.RandomNameWithPrefix("dtc-server"), acctest.RandomIP(),
 		acctest.RandomNameWithPrefix("dtc-server"), acctest.RandomIP(),
@@ -872,7 +862,6 @@ resource "nios_dtc_lbdn" "test_priority" {
 	name = %q
 	lb_method = %q
     priority = %q
-	types = ["A", "AAAA"]
 }
 `, name, lbMethod, priority)
 }
@@ -883,7 +872,6 @@ resource "nios_dtc_lbdn" "test_topology" {
 	name = %q
 	lb_method = %q
     topology = %q
-	types = ["A", "AAAA"]
 }
 `, name, lbMethod, topology)
 	return strings.Join([]string{testAccDtcTopologyRulesWithPool(acctest.RandomNameWithPrefix("topology"),
@@ -897,7 +885,6 @@ resource "nios_dtc_lbdn" "test_ttl" {
 	lb_method = %q
     ttl = %d
 	use_ttl = %t
-	types = ["A", "AAAA"]
 }
 `, name, lbMethod, ttl, useTtl)
 }
@@ -924,7 +911,6 @@ resource "nios_dtc_lbdn" "test_use_ttl" {
 	lb_method = %q
     use_ttl = %t
 	ttl = %d
-	types = ["A", "AAAA"]
 }
 `, name, lbMethod, useTtl, ttl)
 }

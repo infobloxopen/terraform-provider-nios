@@ -215,20 +215,22 @@ func (r *NotificationRestEndpointResource) ValidateConfig(ctx context.Context, r
 	}
 
 	// Outbound Members Validation
-	if data.OutboundMemberType.ValueString() == "MEMBER" {
-		if data.OutboundMembers.IsNull() || data.OutboundMembers.IsUnknown() {
+	if !data.OutboundMemberType.IsNull() && !data.OutboundMemberType.IsUnknown() {
+		if data.OutboundMemberType.ValueString() == "MEMBER" {
+			if !data.OutboundMembers.IsUnknown() && data.OutboundMembers.IsNull() {
+				resp.Diagnostics.AddAttributeError(
+					path.Root("outbound_members"),
+					"Invalid Configuration",
+					"Attribute 'outbound_members' must be specified when 'outbound_member_type' is set to 'MEMBER'.",
+				)
+			}
+		} else if !data.OutboundMembers.IsNull() && !data.OutboundMembers.IsUnknown() {
 			resp.Diagnostics.AddAttributeError(
 				path.Root("outbound_members"),
 				"Invalid Configuration",
-				"Attribute 'outbound_members' must be specified when 'outbound_member_type' is set to 'MEMBER'.",
+				"Attribute 'outbound_members' cannot be specified when 'outbound_member_type' is set to 'GM'.",
 			)
 		}
-	} else if !data.OutboundMembers.IsNull() && !data.OutboundMembers.IsUnknown() {
-		resp.Diagnostics.AddAttributeError(
-			path.Root("outbound_members"),
-			"Invalid Configuration",
-			"Attribute 'outbound_members' cannot be specified when 'outbound_member_type' is set to 'GM'.",
-		)
 	}
 
 	// URI Validation
@@ -250,6 +252,10 @@ func (r *NotificationRestEndpointResource) ValidateConfig(ctx context.Context, r
 
 		resp.Diagnostics.Append(data.TemplateInstance.As(ctx, &templateInstanceModel, basetypes.ObjectAsOptions{})...)
 		if resp.Diagnostics.HasError() {
+			return
+		}
+
+		if templateInstanceModel.Parameters.IsNull() || templateInstanceModel.Parameters.IsUnknown() {
 			return
 		}
 

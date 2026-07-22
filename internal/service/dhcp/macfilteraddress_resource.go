@@ -77,7 +77,7 @@ func (r *MacfilteraddressResource) ValidateConfig(ctx context.Context, req resou
 
 	// if never_expires = false, expiration_time must be set
 	if !data.NeverExpires.IsNull() && !data.NeverExpires.IsUnknown() && !data.NeverExpires.ValueBool() {
-		if data.ExpirationTime.IsNull() || data.ExpirationTime.IsUnknown() {
+		if data.ExpirationTime.IsNull() {
 			resp.Diagnostics.AddError(
 				"Configuration Error",
 				"'expiration_time' must be set when 'never_expires' is set to false.",

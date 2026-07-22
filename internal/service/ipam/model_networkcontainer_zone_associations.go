@@ -34,6 +34,7 @@ var NetworkcontainerZoneAssociationsResourceSchemaAttributes = map[string]schema
 	},
 	"is_default": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "True if this is the default zone.",
 	},
 	"view": schema.StringAttribute{

@@ -424,7 +424,7 @@ func (r *DtcPoolResource) ValidateConfig(ctx context.Context, req resource.Valid
 
 	if !data.Availability.IsNull() && !data.Availability.IsUnknown() {
 		if data.Availability.ValueString() == "QUORUM" {
-			if data.Quorum.IsNull() || data.Quorum.IsUnknown() {
+			if data.Quorum.IsNull() {
 				resp.Diagnostics.AddAttributeError(
 					path.Root("quorum"), "Missing Required Attribute",
 					"When availability is set to 'QUORUM', the 'quorum' attribute must be specified",

@@ -79,7 +79,10 @@ func (m *MemberMemberServiceCommunicationModel) Expand(ctx context.Context, diag
 	if m == nil {
 		return nil
 	}
-	to := &grid.MemberMemberServiceCommunication{}
+	to := &grid.MemberMemberServiceCommunication{
+		Service: flex.ExpandStringPointer(m.Service),
+		Type:    flex.ExpandStringPointer(m.Type),
+	}
 	return to
 }
 

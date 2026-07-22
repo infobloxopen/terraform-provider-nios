@@ -764,6 +764,10 @@ func CopyFieldFromPlanToRespObject(ctx context.Context, planValue, respValue att
 		return respValue, &diags
 	}
 
+	if planFieldValue.IsUnknown() {
+		return respValue, &diags
+	}
+
 	if _, exists := respAttrs[fieldName]; !exists {
 		diags.AddError(
 			"Field Not Found in Response",
