@@ -1,5 +1,31 @@
 # Changelog
 
+## Version 2.1.0
+
+### Key Changes
+
+**Modules**
+
+Added dual stack and HA support for deploying vNIOS on GCP, Azure, and OCI.
+
+### Enhancements
+
+**Retry Mechanism** 
+  - Added a generic retry helper with exponential backoff and a provider-configurable retry timeout for CRUD operations.
+
+**Terraform Search** 
+  - Added Terraform Search support for objects across DNS, DHCP, and IPAM.
+
+**Sensitive Fields** 
+  - Sensitive fields(such as passwords) are no longer visible in the state file — they are now stored securely in private state and will show as null instead of their actual values.
+
+### Fixes
+
+- IPAM: Fixed VLAN type validation error in Network and IPv6 Network Container objects when reading network objects containing VLAN information. ([#380](https://github.com/infobloxopen/terraform-provider-nios/pull/380))
+- DNS: Fixed Zone Auth import and read errors triggered by unexpected WAPI attributes returned by NIOS. - DNS: Fixed Zone Auth import and read errors triggered by unexpected WAPI attributes returned by NIOS. (Issue [#550](https://github.com/infobloxopen/terraform-provider-nios/issues/550), PR [#555](https://github.com/infobloxopen/terraform-provider-nios/pull/555))
+- Fixed plan-time ValidateConfig errors caused by unknown variable values by adding null and unknown checks across multiple resources. (NIOSSPT [#19266](https://infoblox.atlassian.net/browse/NIOSSPT-19266), PR [#574](https://github.com/infobloxopen/terraform-provider-nios/pull/574))
+- Fixed numerous bugs across DHCP, DNS, DTC, IPAM, Grid, Security, and other modules improving overall stability and reliability.
+
 ## Version 2.0.0
 
 ### Key Changes
