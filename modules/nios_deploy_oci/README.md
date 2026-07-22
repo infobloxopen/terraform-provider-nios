@@ -103,6 +103,21 @@ the infrastructure is deployed and NIOS is fully booted (~30 minutes).
 
 ---
 
+## Architecture
+
+### Standalone Mode (`enable_ha = false`)
+- 1 OCI compute instance with a custom NIOS image
+- MGMT VNIC (eth0): primary management interface
+- LAN1 VNIC (eth1): Grid communication interface
+- Optional reporting block volume
+
+### HA Mode (`enable_ha = true`)
+- 1 OCI compute instance (node in HA pair)
+- MGMT VNIC (eth0)
+- LAN1 VNIC (eth1)
+- HA VNIC with a floating VIP on the primary node (`is_primary = true`)
+- Requires OCI IAM (a dynamic group + policies) so each node can move the VIP during failover — automated by the [`nios_oci_ha_iam`](../nios_oci_ha_iam) module
+
 ## Deployment Order
 
 | Step | Resource | Notes |
@@ -117,20 +132,32 @@ the infrastructure is deployed and NIOS is fully booted (~30 minutes).
 
 ## Usage
 
-### Step 1: Deploy OCI Infrastructure
+#### This module supports three deployment modes — **Standalone**, **Master-Member Configuration**, and **HA Pair**.
 
-The module supports two mutually exclusive image-source modes, controlled by `create_image`:
+### 1. Standalone Mode
+
+Deploy a single vNIOS instance on OCI. The module supports two mutually exclusive image-source modes, controlled by `create_image`:
 
 | Mode | `create_image` | Required inputs | Forbidden inputs |
 |---|---|---|---|
 | **Use existing image** (default) | `false` | `image_id` | `bucket_name`, `nios_qcow2_local_path`, `nios_object_name`, `image_name` |
 | **Create image from QCOW2** | `true` | `bucket_name`, `nios_qcow2_local_path`, `nios_object_name`, `image_name` | `image_id` |
 
-When `create_image = true`, the module uploads the QCOW2 to Object Storage and imports it as a custom image. Set `create_bucket = false` to reuse a pre-existing bucket (only valid when`create_image = true`).
+When `create_image = true`, the module uploads the QCOW2 to Object Storage and imports it as a custom image. Set `create_bucket = false` to reuse a pre-existing bucket (only valid when `create_image = true`).
 
 #### Option A — Use an existing custom image (default, `create_image = false`)
 
+> **Note:** The OCI provider is published under the `oracle/oci` namespace (not the default HashiCorp namespace), so it must be declared explicitly in `required_providers`.
+
 ```hcl
+terraform {
+  required_providers {
+    oci = {
+      source = "oracle/oci"
+    }
+  }
+}
+
 provider "oci" {
   tenancy_ocid     = var.tenancy_ocid
   user_ocid        = var.user_ocid
@@ -195,32 +222,44 @@ module "node1" {
   nios_object_name      = var.nios_object_name
   image_name            = var.image_name
 
-  instance_name          = var.instance_name
-  availability_domain    = var.availability_domain
-  nios_model             = var.nios_model
-  mgmt_subnet_id         = var.mgmt_subnet_id
-  lan1_subnet_id         = var.lan1_subnet_id
+  instance_name       = var.instance_name
+  availability_domain = var.availability_domain
+  nios_model          = var.nios_model
+  mgmt_subnet_id      = var.mgmt_subnet_id
+  lan1_subnet_id      = var.lan1_subnet_id
 }
 ```
 
-**Deploy the infrastructure:**
+**Steps:**
+
+**Step 1.** Deploy the infrastructure
+
 ```bash
+terraform init
+terraform plan
 terraform apply
 ```
 
-### Step 2: Wait for NIOS to Boot
+Wait ~30 minutes for NIOS to fully boot before applying any grid configuration.
 
-NIOS takes approximately **30 minutes** to fully boot after the instance starts.
+#### NIOS Provider Configuration
 
-### Step 3: Join the Grid Member to the Master Grid
+The two modes below — **Master-Member Configuration** and **HA Pair Configuration** — use the NIOS Terraform provider to configure the grid. (The Standalone deployment above does not need it.) Declare the provider once before applying any `nios_grid_member` / `nios_grid_join` resources.
 
-Once Grid is up and running, configure the grid member and join to the grid.
+```hcl
+terraform {
+  required_providers {
+    nios = {
+      source  = "infobloxopen/nios"
+      version = ">= 2.0.0"
+    }
+  }
+}
+```
 
-#### Examples
+### 2. Master-Member Configuration
 
-#### Example 1: Join a Member to a Master
-
-#### Deploy OCI infrastructure for Master and Member
+Deploy master and member nodes, then configure the member to join the master grid.
 
 ```hcl
 module "node1" {
@@ -230,12 +269,27 @@ module "node1" {
 module "node2" {
   // ... (same config as Step 1)
 }
+```
 
-// After NIOS is ready (~30 mins), configure grid member
+**Steps:**
+
+**Step 1.** Deploy the infrastructure
+
+```bash
+terraform init
+terraform plan
+terraform apply
+```
+
+Wait ~30 minutes for NIOS to boot.
+
+**Step 2.** Configure the grid member and join it to the master:
+
+```hcl
 provider "nios" {
-  nios_host_url = "https://${module.nios_grid_member.mgmt_private_ip}"
+  nios_host_url = "https://${module.node1.lan1_private_ip}"
   nios_username = "<username>"
-  nios_password = var.nios_password
+  nios_password = "<password>"
 }
 
 resource "nios_grid_member" "member" {
@@ -244,26 +298,27 @@ resource "nios_grid_member" "member" {
   platform         = "VNIOS"
 
   vip_setting = {
-    address     = module.nios_grid_member.lan1_private_ip
-    gateway     = "<lan1_gateway_ip>"
-    subnet_mask = "<lan1_subnet_mask>"
+    address     = module.node2.lan1_private_ip
+    gateway     = module.node2.lan1_gateway
+    subnet_mask = module.node2.lan1_subnet_mask
   }
 }
 
+// Join member to existing grid master
 resource "nios_grid_join" "member_join" {
-  member_url      = "https://${module.nios_grid_member.lan1_private_ip}"
+  member_url      = "https://${module.node2.lan1_private_ip}"
   member_username = "<username>"
-  member_password = var.nios_password
+  member_password = "<password>"
   grid_name       = "Infoblox"
-  master          = "<master_ip>"
-  shared_secret   = var.shared_secret
+  master          = module.node1.lan1_private_ip
+  shared_secret   = "<secret>"
   depends_on      = [nios_grid_member.member]
 }
 ```
 
-#### Example 2: HA Grid Configuration
+### 3. HA Pair Configuration
 
-Deploy two OCI instances for SA-HA Config
+Deploy two OCI instances for SA-HA configuration, plus the OCI IAM resources required for VIP failover.
 
 ```hcl
 // Deploy OCI instance for Node 1 (Active Node)
@@ -334,20 +389,22 @@ For the full background and the complete list of policy statements, see:
 > the OCID of every NIOS HA instance, then attach the sub-compartment and
 > tenancy-level IAM policies listed there.
 
-#### After both nodes are up and running (~30 min), configure HA
-
 > **Important — MGMT interface usage.** On a freshly booted NIOS instance
 > the MGMT interface (`eth0`) is not yet enabled, so the **first** API call
-> (the import in Step 1 below) must go through the **LAN1** interface — that
+> (the import in Step 2 below) must go through the **LAN1** interface — that
 > is why the first `provider "nios"` block targets `module.node1.lan1_private_ip`.
 > As part of that same step we enable `mgmt_port_setting` on the grid member
-> and configure the grid-level DNS resolver  **All subsequent API calls** (Step 2
-> onwards) are made over the MGMT interface, so those `provider "nios"`
+> and configure the grid-level DNS resolver. **All subsequent API calls**
+> (Step 3 onward) are made over the MGMT interface, so those `provider "nios"`
 > blocks target `module.node1.mgmt_ip`.
 
-1. Import Node1 under nios_grid_member.ha_pair
+**Steps:**
 
-```
+**Step 1.** Deploy both nodes and the IAM resources with `terraform init`, `plan`, and `apply`. Wait ~30 minutes for NIOS to boot.
+
+**Step 2.** Import Node1 under `nios_grid_member.ha_pair` and enable the MGMT interface. This first call goes over the **LAN1** interface. Using a config-driven `import` block alongside the resource definition lets a single `terraform apply` perform the import **and** enable `mgmt_port_setting`. Set `master_candidate = true` and `upgrade_group = "Grid Master"`:
+
+```hcl
 provider "nios" {
   nios_host_url = "https://${module.node1.lan1_private_ip}"
   nios_username = "<username>"
@@ -355,8 +412,8 @@ provider "nios" {
 }
 
 import {
-  to = nios_grid_member.example_ha
-  id = "1a1915890950470093f7d3484b5d44a7"
+  to = nios_grid_member.ha_pair
+  id = "<grid_member_uuid>"
 }
 
 resource "nios_grid_member" "ha_pair" {
@@ -366,6 +423,7 @@ resource "nios_grid_member" "ha_pair" {
 
   upgrade_group    = "Grid Master"
   master_candidate = true
+
   mgmt_port_setting = {
     enabled                 = true
     security_access_enabled = false
@@ -391,16 +449,16 @@ resource "nios_grid_member" "ha_pair" {
   grid_level_dns_resolver_setting = {
     resolvers = [
       "10.103.3.10"
-  ] }
+    ]
+  }
 }
 ```
 
-Run Terraform Apply for the resource to be imported and
-modified to enable mgmt settings
+Run `terraform apply` to import Node1 and enable its MGMT settings.
 
-2. Modify the resource to set ha_on_cloud to true and provide the cloud attributes.
+**Step 3.** Update the resource to set `ha_on_cloud = true` and provide the cloud attributes. This call goes over the **MGMT** interface:
 
-```
+```hcl
 provider "nios" {
   nios_host_url = "https://${module.node1.mgmt_ip}"
   nios_username = "<username>"
@@ -414,12 +472,14 @@ resource "nios_grid_member" "ha_pair" {
 
   upgrade_group    = "Grid Master"
   master_candidate = true
+
   mgmt_port_setting = {
     enabled                 = true
     security_access_enabled = false
     vpn_enabled             = false
   }
-    vip_setting = {
+
+  vip_setting = {
     address          = module.node1.vip
     gateway          = module.node1.ha_gateway
     subnet_mask      = module.node1.ha_subnet_mask
@@ -462,16 +522,22 @@ resource "nios_grid_member" "ha_pair" {
   grid_level_dns_resolver_setting = {
     resolvers = [
       "10.10.10.10"
-  ] }
+    ]
+  }
+}
+```
+
+Run `terraform apply` to reconfigure Node1 as the HA active node.
+
+**Step 4.** Join Node2 (Passive Node) to Node1 (Active Node). Point the NIOS provider at the HA VIP, since the active node now serves the grid through the VIP:
+
+```hcl
+provider "nios" {
+  nios_host_url = "https://${module.node1.vip}"
+  nios_username = "<username>"
+  nios_password = "<password>"
 }
 
-```
-
-Run terraform apply to update the resource 
-
-3. Join Node2 (Passive Node) to Node1 (Active Node).
-
-```
 resource "nios_grid_join" "ha_member_join" {
   member_url      = "https://${module.node2.lan1_private_ip}"
   member_username = "<username>"
@@ -479,10 +545,13 @@ resource "nios_grid_join" "ha_member_join" {
   grid_name       = "Infoblox"
   master          = module.node1.vip
   shared_secret   = "<secret>"
+  depends_on      = [nios_grid_member.ha_pair]
 }
 ```
 
 #### Best Practices for HA Deployment
+
+> **Note:** Deletion of the Grid Master via Terraform is **not supported**. Removing the `nios_grid_member` / `nios_grid_join` resources or running `terraform destroy` will not delete the Grid Master from NIOS.
 
 > **Recommended Workflow:** Use a **separate Terraform workspace** for HA configuration. The NIOS HA setup is a one-time provisioning task — once the HA pair is formed and the passive node has joined the grid, the configuration is complete and does not require ongoing Terraform management.
 
@@ -500,7 +569,3 @@ This approach ensures that:
 - Your HA infrastructure is provisioned correctly.
 - Subsequent Terraform operations don't interfere with the running HA pair.
 - The grid master configuration remains stable and is managed through NIOS directly.
-
-### Boot Time
-- NIOS takes around **30 minutes** to fully boot after instance creation, make sure the grid is up and running before triggering grid join.
-- Always verify the NIOS API is responding before applying `nios_grid_member` resources

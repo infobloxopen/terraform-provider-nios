@@ -435,7 +435,6 @@ var NetworkResourceSchemaAttributes = map[string]schema.Attribute{
 	"dhcp_utilization_status": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "A string describing the utilization level of the network.",
-		Default:             stringdefault.StaticString("LOW"),
 		Validators: []validator.String{
 			stringvalidator.OneOf("LOW", "NORMAL", "HIGH", "FULL"),
 		},

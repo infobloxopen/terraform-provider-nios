@@ -972,10 +972,8 @@ var NetworkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 		Default:             booldefault.StaticBool(false),
 	},
 	"use_zone_associations": schema.BoolAttribute{
-		Optional:            true,
-		MarkdownDescription: "Use flag for: zone_associations",
 		Computed:            true,
-		Default:             booldefault.StaticBool(true),
+		MarkdownDescription: "Use flag for: zone_associations",
 	},
 	"utilization": schema.Int64Attribute{
 		Computed:            true,
@@ -988,7 +986,6 @@ var NetworkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 		Optional:            true,
 		MarkdownDescription: "The list of zones associated with this network.",
 		Validators: []validator.List{
-			listvalidator.AlsoRequires(path.MatchRoot("use_zone_associations")),
 			listvalidator.SizeAtLeast(1),
 		},
 	},

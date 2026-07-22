@@ -288,7 +288,7 @@ func (r *UpgradegroupResource) ValidateConfig(ctx context.Context, req resource.
 			return
 		}
 		for i, member := range members {
-			if member.Member.IsNull() || member.Member.IsUnknown() {
+			if member.Member.IsNull() {
 				resp.Diagnostics.AddError(
 					"Validation Error",
 					fmt.Sprintf("members.%d.member must be provided", i),

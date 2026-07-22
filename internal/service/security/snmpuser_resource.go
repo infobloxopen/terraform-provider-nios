@@ -88,7 +88,7 @@ func (r *SnmpuserResource) ValidateConfig(ctx context.Context, req resource.Vali
 
 	// Validate authentication password requirement
 	if data.AuthenticationProtocol.ValueString() != "NONE" {
-		if data.AuthenticationPassword.IsNull() || data.AuthenticationPassword.IsUnknown() || data.AuthenticationPassword.ValueString() == "" {
+		if !data.AuthenticationPassword.IsUnknown() && (data.AuthenticationPassword.IsNull() || data.AuthenticationPassword.ValueString() == "") {
 			resp.Diagnostics.AddError(
 				"Missing Authentication Password",
 				"When authentication_protocol is set to 'SHA' or 'MD5', authentication_password must be provided.",
@@ -98,7 +98,7 @@ func (r *SnmpuserResource) ValidateConfig(ctx context.Context, req resource.Vali
 
 	// Validate privacy password requirement
 	if data.PrivacyProtocol.ValueString() != "NONE" {
-		if data.PrivacyPassword.IsNull() || data.PrivacyPassword.IsUnknown() || data.PrivacyPassword.ValueString() == "" {
+		if !data.PrivacyPassword.IsUnknown() && (data.PrivacyPassword.IsNull() || data.PrivacyPassword.ValueString() == "") {
 			resp.Diagnostics.AddError(
 				"Missing Privacy Password",
 				"When privacy_protocol is set to 'AES' or 'DES', privacy_password must be provided.",

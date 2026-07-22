@@ -415,6 +415,10 @@ func (r *SharedrecordgroupResource) ValidateConfig(ctx context.Context, req reso
 		return
 	}
 
+	if data.ZoneAssociations.IsNull() || data.ZoneAssociations.IsUnknown() {
+		return
+	}
+
 	var zoneAssociations []SharedrecordgroupZoneAssociationsModel
 	diags := data.ZoneAssociations.ElementsAs(ctx, &zoneAssociations, false)
 	resp.Diagnostics.Append(diags...)

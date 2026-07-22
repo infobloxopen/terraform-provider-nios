@@ -86,31 +86,47 @@ The module automatically maps NIOS models to GCP machine types:
 
 ---
 
+## Architecture
+
+### Standalone Mode (`enable_ha = false`)
+- 1 GCP Compute instance with vNIOS image
+- nic0: MGMT interface
+- nic1: LAN1 Grid communication interface
+
+### HA Mode (`enable_ha = true`)
+- 1 GCP Compute instance with vNIOS image (node in HA pair)
+- nic0: MGMT interface
+- nic1: LAN1 interface
+- nic2: HA interface with alias IP (VIP) on the active node (`is_primary = true`)
+
 ## Usage
 
-### Step 1: Deploy GCP Infrastructure
+#### This module supports four deployment modes — **Standalone**, **Master-Member Configuration**, **Master-Member with Dual-Stack**, and **HA Pair**.
+
+### 1. Standalone Mode
+
+Deploy a single vNIOS instance on GCP.
 
 ```hcl
 provider "google" {
-  project = var.project
-  region  = var.region
-  zone    = var.zone
+  project     = var.project
+  region      = var.region
+  zone        = var.zone
   credentials = file("path/to/service-account-key-file.json")
 }
 
 module "node1" {
   source = "github.com/infobloxopen/terraform-provider-nios//modules/nios_deploy_gcp?ref=nios_v9.1.0"
-  source = "github.com/infobloxopen/terraform-provider-nios//modules/nios_deploy_gcp?ref=nios_v9.1.0"
 
-  project = var.project
-  region     = var.region
-  zone       = var.zone
+  project          = var.project
+  region           = var.region
+  zone             = var.zone
 
-  image_name        = var.image_name
-  name              = var.name
-  nios_model        = var.nios_model
-  mgmt_subnet_name  = var.mgmt_subnet_name
-  lan1_subnet_name  = var.lan1_subnet_name
+  image_name       = var.image_name
+  name             = var.name
+  nios_model       = var.nios_model
+  mgmt_subnet_name = var.mgmt_subnet_name
+  lan1_subnet_name = var.lan1_subnet_name
 
   boot_disk_type = var.boot_disk_type
   boot_disk_size = var.boot_disk_size
@@ -125,26 +141,40 @@ module "node1" {
 }
 ```
 
-**Deploy the infrastructure:**
+**Steps:**
+
+**Step 1.** Deploy the infrastructure:
+
 ```bash
+terraform init
+terraform plan
 terraform apply
 ```
 
-### Step 2: Wait for NIOS to Boot
+Wait ~30 minutes for NIOS to fully boot before applying any grid configuration.
 
-NIOS takes approximately around **30 minutes** to fully boot.
+#### NIOS Provider Configuration
 
-### Step 3: Join the Grid Member to the Master Grid
+The modes below — **Master-Member Configuration** and **HA Pair Configuration** — use the NIOS Terraform provider to configure the grid. (The Standalone deployment above does not need it.) Declare the provider once before applying any `nios_grid_member` / `nios_grid_join` resources.
 
-Once Grid is up and running, configure the grid member and join to the grid.
+```hcl
+terraform {
+  required_providers {
+    nios = {
+      source  = "infobloxopen/nios"
+      version = ">= 2.0.0"
+    }
+  }
+}
+```
 
-### Example 1: Join a Member to a Master
+### 2. Master-Member Configuration
 
-#### Deploy GCP infrastructure for Master and Member
+Deploy master and member nodes, then configure the member to join the master grid.
 
 ```hcl
 module "node1" {
-  // ...(same config as Step 1)
+  // ... (same config as Step 1)
 }
 
 module "node2" {
@@ -152,13 +182,25 @@ module "node2" {
 }
 ```
 
-#### After both the grids are up and running (~30 min), configure grid member
+**Steps:**
+
+**Step 1.** Deploy the infrastructure:
+
+```bash
+terraform init
+terraform plan
+terraform apply
+```
+
+Wait ~30 minutes for NIOS to boot.
+
+**Step 2.** Configure the grid member and join it to the master:
 
 ```hcl
 provider "nios" {
   nios_host_url = "https://${module.node1.lan1_ip}"
-  nios_username = "username"
-  nios_password = "password"
+  nios_username = "<username>"
+  nios_password = "<password>"
 }
 
 resource "nios_grid_member" "member" {
@@ -176,8 +218,8 @@ resource "nios_grid_member" "member" {
 // Join member to existing grid master
 resource "nios_grid_join" "member_join" {
   member_url      = "https://${module.node2.lan1_ip}"
-  member_username = "Username"
-  member_password = "Password"
+  member_username = "<username>"
+  member_password = "<password>"
   grid_name       = "Infoblox"
   master          = module.node1.lan1_ip
   shared_secret   = "<secret>"
@@ -185,174 +227,58 @@ resource "nios_grid_join" "member_join" {
 }
 ```
 
-### Example 2: HA Grid Configuration
+### 3. Master-Member Configuration with Dual-Stack (IPv6)
 
-#### Deploy two GCP instances for SA-HA Config
+To provision an IPv6 address on the interfaces, set `enable_ipv6 = true`. IPv6 addresses are exposed through the `mgmt_ipv6_address` and `lan1_ipv6_address` outputs.
 
-> **Note:** HA configuration only supports IPv4. Dual-stack (IPv4 and IPv6) is not supported with HA on GCP.
-
-> **Important - Service Account IAM Configuration:** HA formation fails when using predefined Google roles (e.g., `Compute Instance Admin (v1)`, `Compute Network Admin`, `Service Account User`) attached to the service account. To avoid this issue, create a **single custom IAM role** that combines all required permissions for both Terraform VM provisioning and HA operations. Attach only this custom role to the service account. This is a known limitation related to how NIOS validates IAM permissions with predefined Google roles.
-
-```hcl
-// Deploy GCP infrastructure for Node 1 (Active Node)
-module "node1" {
-  // ... (same config as Step 1)
-  enable_ha         = true
-  is_primary = true
-  ha_subnet_name = "example-ha-subnet"
-}
-
-// Deploy GCP infrastructure for Node 2 (Passive Node)
-module "node2" {
-  // ... (same config as Step 1)
-  enable_ha         = true
-  ha_subnet_name = "example-ha-subnet"
-}
-```
-#### After both the grids are up and running (~30 min), configure HA
-
-1. Import Node1 under nios_grid_member.ha_pair
-
-```hcl 
-provider "nios" {
-  nios_host_url = "https://${module.node1.lan1_ip}"
-  nios_username = "username"
-  nios_password = "password"
-}
-
-import {
-  to = nios_grid_member.ha_pair
-  id = "5c08e1293cf34363878d4cae5bd37636"
-}
-```
-
-2. Modify the resource to set ha_on_cloud to true and provide the cloud attributes.
-
-```
-resource "nios_grid_member" "ha_pair" {
-  host_name         = "infoblox.localdomain"
-  config_addr_type  = "IPV4"
-  platform          = "VNIOS"
-  upgrade_group     = "Grid Master"
-  master_candidate  = true
-
-  enable_ha         = true
-  router_id         = 100
-  ha_on_cloud       = true
-  ha_cloud_platform = "GCP"
-
-  vip_setting = {
-    address         = module.node1.vip
-    gateway         = module.node1.ha_gateway
-    subnet_mask     = module.node1.ha_subnet_mask
-    lan1_gateway     = module.node1.lan1_gateway
-    lan1_subnet_mask = module.node1.lan1_subnet_mask
-    dscp            = 0
-    primary         = true
-    use_dscp        = false
-  }
-
-  node_info = [
-    {
-      lan_ha_port_setting = {
-        ha_ip_address      = module.node1.ha_ip
-        mgmt_lan           = module.node1.lan1_ip
-        ha_cloud_attribute = module.node1.instance_name
-      }
-    },
-    {
-      lan_ha_port_setting = {
-        ha_ip_address      = module.node2.ha_ip
-        mgmt_lan           = module.node2.lan1_ip
-        ha_cloud_attribute = module.node2.instance_name
-      }
-    }
-  ]
-
-  // To configure grid level dns resolver settings, use the 
-  // grid_level_dns_resolver_setting attribute 
-  
-  grid_level_dns_resolver_setting = {
-    resolvers = [
-      "10.10.10.10"
-  ] }
-}
-```
-
-3. Join Node2 (Passive Node) to Node1 (Active Node).
-
-```
-provider "nios" {
-  nios_host_url = "https://${module.node1.vip}"
-  nios_username = "username"
-  nios_password = "password"
-}
-
-resource "nios_grid_join" "ha_member_join" {
-  member_url      = "https://${module.node2.lan1_ip}"
-  member_username = "username"
-  member_password = "password"
-  grid_name       = "Infoblox"
-  master          = module.node1.vip
-  shared_secret   = "shared-secret"
-}
-```
-
-#### Best Practices for HA Deployment
-
-> **Recommended Workflow:** Use a **separate Terraform workspace** for HA configuration. The NIOS HA setup is a one-time provisioning task — once the HA pair is formed and the passive node has joined the grid, the configuration is complete and does not require ongoing Terraform management. Re-applying Terraform after HA formation may attempt to modify NIOS-managed HA attributes.
-
-After successfully deploying the HA pair:
-
-1. **Verify HA formation** is complete through the NIOS UI or API
-2. **Remove the grid master from Terraform state** to prevent accidental modifications:
-   ```bash
-   terraform state rm nios_grid_member.ha_pair
-   terraform state rm nios_grid_join.ha_member_join
-   ```
-3. Optionally, you can delete the entire Terraform state for this workspace if no further infrastructure management is needed.
-
-This approach ensures that:
-- Your HA infrastructure is provisioned correctly
-- Subsequent Terraform operations don't interfere with the running HA pair
-- The grid master configuration remains stable and is managed through NIOS directly
-
-### Example 3: Join a Member to a Master with Dual Stack Config
-
-#### Deploy GCP infrastructure for Master and Member
+> **Note:** On GCP, IPv6 addresses are available in the Terraform state, but you must manually configure the IPv6 settings on the NIOS grid through the UI or API. Unlike AWS, GCP does not automatically configure IPv6 on the NIOS instance. This is a known limitation that will be addressed in a future NIOS release.
 
 ```hcl
 module "node1" {
-  // ...(same config as Step 1)
+  // ... (same config as Step 1)
+
   enable_ipv6 = true
 }
 
 module "node2" {
   // ... (same config as Step 1)
+
   enable_ipv6 = true
 }
 ```
 
-#### After both the grids are up and running (~30 min), configure grid member
+**Steps:**
 
-> **Note:** On GCP, IPv6 addresses are available in the Terraform state (`mgmt_ipv6_address` and `lan1_ipv6_address` outputs), but you must manually configure the IPv6 settings on the NIOS grid through the UI or API. Unlike AWS, GCP does not automatically configure IPv6 on the NIOS instance. This is a known limitation that will be addressed in a future NIOS release.
+**Step 1.** Deploy the infrastructure:
+
+```bash
+terraform init
+terraform plan
+terraform apply
+```
+
+Wait ~30 minutes for NIOS to boot.
+
+**Step 2.** Configure the grid member with dual-stack settings and join it to the master:
 
 ```hcl
 provider "nios" {
   nios_host_url = "https://${module.node1.lan1_ip}"
-  nios_username = "username"
-  nios_password = "password"
+  nios_username = "<username>"
+  nios_password = "<password>"
 }
 
 resource "nios_grid_member" "member" {
   host_name        = "infoblox.member"
   config_addr_type = "BOTH"
   platform         = "VNIOS"
+
   vip_setting = {
     address     = module.node2.lan1_ip
     gateway     = module.node2.lan1_gateway
     subnet_mask = module.node2.lan1_subnet_mask
   }
+
   ipv6_setting = {
     virtual_ip  = module.node2.lan1_ipv6_address
     cidr_prefix = 64
@@ -373,6 +299,147 @@ resource "nios_grid_join" "member_join" {
 }
 ```
 
-### Boot Time
-- NIOS takes **30 minutes** to fully boot after instance creation, make sure the grid is up and running before triggering the grid join.
-- Always verify NIOS API is responding before applying `nios_grid_member` resources
+### 4. HA Pair Configuration
+
+Deploy two GCP Compute instances for SA-HA configuration.
+
+> **Note:** HA configuration only supports IPv4. Dual-stack (IPv4 and IPv6) is not supported with HA on GCP.
+
+> **Important — Service Account IAM Configuration:** HA formation fails when using predefined Google roles (e.g., `Compute Instance Admin (v1)`, `Compute Network Admin`, `Service Account User`) attached to the service account. To avoid this issue, create a **single custom IAM role** that combines all required permissions for both Terraform VM provisioning and HA operations. Attach only this custom role to the service account. This is a known limitation related to how NIOS validates IAM permissions with predefined Google roles.
+
+```hcl
+// Deploy GCP infrastructure for Node 1 (Active Node)
+module "node1" {
+  // ... (same config as Step 1)
+  enable_ha      = true
+  is_primary     = true
+  ha_subnet_name = var.ha_subnet_name
+}
+
+// Deploy GCP infrastructure for Node 2 (Passive Node)
+module "node2" {
+  // ... (same config as Step 1)
+  enable_ha      = true
+  ha_subnet_name = var.ha_subnet_name
+}
+```
+
+**Steps:**
+
+**Step 1.** Deploy the infrastructure:
+
+```bash
+terraform init
+terraform plan
+terraform apply
+```
+
+Wait ~30 minutes for NIOS to boot.
+
+**Step 2.** Import Node1 under `nios_grid_member.ha_pair` and configure it as the HA pair. Using a config-driven `import` block alongside the full resource definition lets a single `terraform apply` perform the import **and** apply the HA configuration. Set `ha_on_cloud = true`, `master_candidate = true`, and `upgrade_group = "Grid Master"`:
+
+```hcl
+provider "nios" {
+  nios_host_url = "https://${module.node1.lan1_ip}"
+  nios_username = "<username>"
+  nios_password = "<password>"
+}
+
+import {
+  to = nios_grid_member.ha_pair
+  id = "<grid_member_uuid>"
+}
+
+resource "nios_grid_member" "ha_pair" {
+  host_name         = "infoblox.localdomain"
+  config_addr_type  = "IPV4"
+  platform          = "VNIOS"
+  enable_ha         = true
+  router_id         = 100
+  ha_on_cloud       = true
+  ha_cloud_platform = "GCP"
+
+  upgrade_group    = "Grid Master"
+  master_candidate = true
+
+  vip_setting = {
+    address          = module.node1.vip
+    gateway          = module.node1.ha_gateway
+    subnet_mask      = module.node1.ha_subnet_mask
+    lan1_gateway     = module.node1.lan1_gateway
+    lan1_subnet_mask = module.node1.lan1_subnet_mask
+    dscp             = 0
+    primary          = true
+    use_dscp         = false
+  }
+
+  node_info = [
+    {
+      // Node 1 configuration
+      lan_ha_port_setting = {
+        ha_ip_address      = module.node1.ha_ip
+        mgmt_lan           = module.node1.lan1_ip
+        ha_cloud_attribute = module.node1.instance_name
+      }
+    },
+    {
+      // Node 2 configuration
+      lan_ha_port_setting = {
+        ha_ip_address      = module.node2.ha_ip
+        mgmt_lan           = module.node2.lan1_ip
+        ha_cloud_attribute = module.node2.instance_name
+      }
+    }
+  ]
+
+  // To configure grid level dns resolver settings, use the grid_level_dns_resolver_setting attribute
+  grid_level_dns_resolver_setting = {
+    resolvers = [
+      "10.10.10.10"
+    ]
+  }
+}
+```
+
+Run `terraform apply` to import Node1 and configure it as the HA active node in a single step.
+
+**Step 3.** Join Node2 (Passive Node) to Node1 (Active Node). Point the NIOS provider at the HA VIP, since the active node now serves the grid through the VIP:
+
+```hcl
+provider "nios" {
+  nios_host_url = "https://${module.node1.vip}"
+  nios_username = "<username>"
+  nios_password = "<password>"
+}
+
+resource "nios_grid_join" "ha_member_join" {
+  member_url      = "https://${module.node2.lan1_ip}"
+  member_username = "<username>"
+  member_password = "<password>"
+  grid_name       = "Infoblox"
+  master          = module.node1.vip
+  shared_secret   = "<secret>"
+  depends_on      = [nios_grid_member.ha_pair]
+}
+```
+
+#### Best Practices for HA Deployment
+
+> **Note:** Deletion of the Grid Master via Terraform is **not supported**. Removing the `nios_grid_member` / `nios_grid_join` resources or running `terraform destroy` will not delete the Grid Master from NIOS.
+
+> **Recommended Workflow:** Use a **separate Terraform workspace** for HA configuration. The NIOS HA setup is a one-time provisioning task — once the HA pair is formed and the passive node has joined the grid, the configuration is complete and does not require ongoing Terraform management.
+
+After successfully deploying the HA pair:
+
+1. **Verify HA formation** is complete through the NIOS UI or API.
+2. **Remove the HA grid member and join resources from Terraform state** to prevent accidental modifications:
+   ```bash
+   terraform state rm nios_grid_member.ha_pair
+   terraform state rm nios_grid_join.ha_member_join
+   ```
+3. Optionally, you can delete the entire Terraform state for this workspace if no further infrastructure management is needed.
+
+This approach ensures that:
+- Your HA infrastructure is provisioned correctly.
+- Subsequent Terraform operations don't interfere with the running HA pair.
+- The grid master configuration remains stable and is managed through NIOS directly.

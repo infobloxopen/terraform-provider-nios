@@ -90,7 +90,7 @@ func (r *MsserverResource) ValidateConfig(ctx context.Context, req resource.Vali
 		if resp.Diagnostics.HasError() {
 			return
 		}
-		validateSubConfig(resp, obj.LoginName, obj.UseLogin, obj.SynchronizationInterval, obj.UseSynchronizationMinDelay, "aduser")
+		validateAdUserConfig(resp, obj)
 	}
 
 	if !data.DhcpServer.IsNull() && !data.DhcpServer.IsUnknown() {
@@ -100,6 +100,7 @@ func (r *MsserverResource) ValidateConfig(ctx context.Context, req resource.Vali
 			return
 		}
 		validateSubConfig(resp, obj.LoginName, obj.UseLogin, obj.SynchronizationMinDelay, obj.UseSynchronizationMinDelay, "dhcpserver")
+		validateMonitoringConfig(resp, obj.EnableMonitoring, obj.UseEnableMonitoring, "dhcpserver")
 	}
 
 	if !data.DnsServer.IsNull() && !data.DnsServer.IsUnknown() {
@@ -109,6 +110,7 @@ func (r *MsserverResource) ValidateConfig(ctx context.Context, req resource.Vali
 			return
 		}
 		validateSubConfig(resp, obj.LoginName, obj.UseLogin, obj.SynchronizationMinDelay, obj.UseSynchronizationMinDelay, "dnsserver")
+		validateMonitoringConfig(resp, obj.EnableMonitoring, obj.UseEnableMonitoring, "dnsserver")
 	}
 }
 
@@ -126,7 +128,7 @@ func validateSubConfig(
 	useLoginSet := !useLogin.IsNull() && !useLogin.IsUnknown()
 
 	if loginSet {
-		if !useLoginSet || !useLogin.ValueBool() {
+		if !useLogin.IsUnknown() && (useLogin.IsNull() || !useLogin.ValueBool()) {
 			resp.Diagnostics.AddAttributeError(
 				path.Root(blockName).AtName("uselogin"),
 				"Invalid Login Configuration",
@@ -135,7 +137,7 @@ func validateSubConfig(
 		}
 	}
 
-	if useLoginSet && useLogin.ValueBool() && !loginSet {
+	if useLoginSet && useLogin.ValueBool() && login.IsNull() {
 		resp.Diagnostics.AddAttributeError(
 			path.Root(blockName).AtName("login_name"),
 			"Missing Login Name",
@@ -148,7 +150,7 @@ func validateSubConfig(
 	useSyncDelaySet := !useSyncDelay.IsNull() && !useSyncDelay.IsUnknown()
 
 	if syncDelaySet {
-		if !useSyncDelaySet || !useSyncDelay.ValueBool() {
+		if !useSyncDelay.IsUnknown() && (useSyncDelay.IsNull() || !useSyncDelay.ValueBool()) {
 			resp.Diagnostics.AddAttributeError(
 				path.Root(blockName).AtName("use_synchronization_min_delay"),
 				"Invalid Synchronization Configuration",
@@ -157,12 +159,95 @@ func validateSubConfig(
 		}
 	}
 
-	if useSyncDelaySet && useSyncDelay.ValueBool() && !syncDelaySet {
+	if useSyncDelaySet && useSyncDelay.ValueBool() && syncDelay.IsNull() {
 		resp.Diagnostics.AddAttributeError(
 			path.Root(blockName).AtName("synchronization_min_delay"),
 			"Missing Synchronization Delay",
 			fmt.Sprintf("`%s.synchronization_min_delay` must be provided when `%s.use_synchronization_min_delay` is set to true.", blockName, blockName),
 		)
+	}
+}
+
+func validateMonitoringConfig(
+	resp *resource.ValidateConfigResponse,
+	enableMonitoring types.Bool,
+	useEnableMonitoring types.Bool,
+	blockName string,
+) {
+	monitoringSet := !enableMonitoring.IsNull() && !enableMonitoring.IsUnknown()
+
+	if monitoringSet {
+		if !useEnableMonitoring.IsUnknown() && (useEnableMonitoring.IsNull() || !useEnableMonitoring.ValueBool()) {
+			resp.Diagnostics.AddAttributeError(
+				path.Root(blockName).AtName("use_enable_monitoring"),
+				"Invalid Monitoring Configuration",
+				fmt.Sprintf("`%s.use_enable_monitoring` must be set to true when `%s.enable_monitoring` is provided.", blockName, blockName),
+			)
+		}
+	}
+}
+
+func validateAdUserConfig(resp *resource.ValidateConfigResponse, obj MsserverAdUserModel) {
+	blockName := "ad_user"
+
+	// login validation
+	loginSet := !obj.LoginName.IsNull() && !obj.LoginName.IsUnknown()
+	useLoginSet := !obj.UseLogin.IsNull() && !obj.UseLogin.IsUnknown()
+
+	if loginSet {
+		if !obj.UseLogin.IsUnknown() && (obj.UseLogin.IsNull() || !obj.UseLogin.ValueBool()) {
+			resp.Diagnostics.AddAttributeError(
+				path.Root(blockName).AtName("use_login"),
+				"Invalid Login Configuration",
+				fmt.Sprintf("`%s.use_login` must be set to true when `%s.login_name` is provided.", blockName, blockName),
+			)
+		}
+	}
+
+	if useLoginSet && obj.UseLogin.ValueBool() && obj.LoginName.IsNull() {
+		resp.Diagnostics.AddAttributeError(
+			path.Root(blockName).AtName("login_name"),
+			"Missing Login Name",
+			fmt.Sprintf("`%s.login_name` must be provided when `%s.use_login` is set to true.", blockName, blockName),
+		)
+	}
+
+	// synchronization_interval validation
+	syncSet := !obj.SynchronizationInterval.IsNull() && !obj.SynchronizationInterval.IsUnknown()
+
+	if syncSet {
+		if !obj.UseSynchronizationInterval.IsUnknown() && (obj.UseSynchronizationInterval.IsNull() || !obj.UseSynchronizationInterval.ValueBool()) {
+			resp.Diagnostics.AddAttributeError(
+				path.Root(blockName).AtName("use_synchronization_interval"),
+				"Invalid Synchronization Configuration",
+				fmt.Sprintf("`%s.use_synchronization_interval` must be set to true when `%s.synchronization_interval` is provided.", blockName, blockName),
+			)
+		}
+	}
+
+	// enable_user_sync validation
+	enableSyncSet := !obj.EnableUserSync.IsNull() && !obj.EnableUserSync.IsUnknown()
+	useEnableSyncSet := !obj.UseEnableUserSync.IsNull() && !obj.UseEnableUserSync.IsUnknown()
+
+	if enableSyncSet {
+		if !obj.UseEnableUserSync.IsUnknown() && (obj.UseEnableUserSync.IsNull() || !obj.UseEnableUserSync.ValueBool()) {
+			resp.Diagnostics.AddAttributeError(
+				path.Root(blockName).AtName("use_enable_user_sync"),
+				"Invalid User Sync Configuration",
+				fmt.Sprintf("`%s.use_enable_user_sync` must be set to true when `%s.enable_user_sync` is provided.", blockName, blockName),
+			)
+		}
+	}
+
+	// When use_enable_user_sync is true, use_enable_ad_user_sync must also be true
+	if useEnableSyncSet && obj.UseEnableUserSync.ValueBool() {
+		if !obj.UseEnableAdUserSync.IsUnknown() && (obj.UseEnableAdUserSync.IsNull() || !obj.UseEnableAdUserSync.ValueBool()) {
+			resp.Diagnostics.AddAttributeError(
+				path.Root(blockName).AtName("use_enable_ad_user_sync"),
+				"Invalid AD User Sync Configuration",
+				fmt.Sprintf("`%s.use_enable_ad_user_sync` must be set to true when `%s.use_enable_user_sync` is true.", blockName, blockName),
+			)
+		}
 	}
 }
 
