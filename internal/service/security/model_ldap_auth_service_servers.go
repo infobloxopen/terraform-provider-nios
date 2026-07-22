@@ -206,9 +206,21 @@ func extractLdapServers(ctx context.Context, list types.List) ([]LdapAuthService
 func hashLdapServers(servers []LdapAuthServiceServersModel) (string, error) {
 	snapshots := make([]ldapServerSnapshot, 0, len(servers))
 	for _, s := range servers {
+		if s.BindPassword.IsUnknown() {
+			// Can't reliably detect changes when any password is unknown.
+			return "", nil
+		}
+		if s.BindPassword.IsNull() {
+			// No password for this server; skip it.
+			continue
+		}
 		snapshots = append(snapshots, ldapServerSnapshot{
 			BindPassword: s.BindPassword.ValueString(),
 		})
+	}
+
+	if len(snapshots) == 0 {
+		return "", nil
 	}
 
 	raw, err := json.Marshal(snapshots)

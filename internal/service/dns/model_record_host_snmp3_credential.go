@@ -54,7 +54,7 @@ var RecordHostSnmp3CredentialResourceSchemaAttributes = map[string]schema.Attrib
 		MarkdownDescription: "Authentication protocol for the SNMPv3 user.",
 	},
 	"authentication_password": schema.StringAttribute{
-		Required:  true,
+		Optional:  true,
 		WriteOnly: true,
 		Validators: []validator.String{
 			customvalidator.ValidateTrimmedString(),
@@ -69,7 +69,7 @@ var RecordHostSnmp3CredentialResourceSchemaAttributes = map[string]schema.Attrib
 		MarkdownDescription: "Privacy protocol for the SNMPv3 user.",
 	},
 	"privacy_password": schema.StringAttribute{
-		Required:  true,
+		Optional:  true,
 		WriteOnly: true,
 		Validators: []validator.String{
 			customvalidator.ValidateTrimmedString(),
