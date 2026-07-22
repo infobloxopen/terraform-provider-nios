@@ -2610,9 +2610,10 @@ func testAccCheckNetworkcontainerExists(ctx context.Context, resourceName string
 		if !ok {
 			return fmt.Errorf("not found: %s", resourceName)
 		}
+		uuid := rs.Primary.Attributes["uuid"]
 		apiRes, _, err := acctest.NIOSClient.IPAMAPI.
 			NetworkcontainerAPI.
-			Read(ctx, utils.ExtractResourceRef(rs.Primary.Attributes["ref"])).
+			Read(ctx, utils.ResolveObjectIdentifier(&uuid, rs.Primary.Attributes["ref"])).
 			ReturnFieldsPlus(readableAttributesForNetworkcontainer).
 			ReturnAsObject(1).
 			Execute()
@@ -2632,7 +2633,7 @@ func testAccCheckNetworkcontainerDestroy(ctx context.Context, v *ipam.Networkcon
 	return func(state *terraform.State) error {
 		_, httpRes, err := acctest.NIOSClient.IPAMAPI.
 			NetworkcontainerAPI.
-			Read(ctx, utils.ExtractResourceRef(*v.Ref)).
+			Read(ctx, utils.ResolveObjectIdentifier(v.Uuid, *v.Ref)).
 			ReturnAsObject(1).
 			ReturnFieldsPlus(readableAttributesForNetworkcontainer).
 			Execute()
@@ -2652,7 +2653,7 @@ func testAccCheckNetworkcontainerDisappears(ctx context.Context, v *ipam.Network
 	return func(state *terraform.State) error {
 		_, err := acctest.NIOSClient.IPAMAPI.
 			NetworkcontainerAPI.
-			Delete(ctx, utils.ExtractResourceRef(*v.Ref)).
+			Delete(ctx, utils.ResolveObjectIdentifier(v.Uuid, *v.Ref)).
 			Execute()
 		if err != nil {
 			return err

@@ -861,9 +861,10 @@ func testAccCheckMsserverExists(ctx context.Context, resourceName string, v *mic
 		if !ok {
 			return fmt.Errorf("not found: %s", resourceName)
 		}
+		uuid := rs.Primary.Attributes["uuid"]
 		apiRes, _, err := acctest.NIOSClient.MicrosoftAPI.
 			MsserverAPI.
-			Read(ctx, utils.ExtractResourceRef(rs.Primary.Attributes["ref"])).
+			Read(ctx, utils.ResolveObjectIdentifier(&uuid, rs.Primary.Attributes["ref"])).
 			ReturnFieldsPlus(readableAttributesForMsserver).
 			ReturnAsObject(1).
 			Execute()
@@ -883,7 +884,7 @@ func testAccCheckMsserverDestroy(ctx context.Context, v *microsoft.Msserver) res
 	return func(state *terraform.State) error {
 		_, httpRes, err := acctest.NIOSClient.MicrosoftAPI.
 			MsserverAPI.
-			Read(ctx, utils.ExtractResourceRef(*v.Ref)).
+			Read(ctx, utils.ResolveObjectIdentifier(v.Uuid, *v.Ref)).
 			ReturnAsObject(1).
 			ReturnFieldsPlus(readableAttributesForMsserver).
 			Execute()
@@ -903,7 +904,7 @@ func testAccCheckMsserverDisappears(ctx context.Context, v *microsoft.Msserver) 
 	return func(state *terraform.State) error {
 		_, err := acctest.NIOSClient.MicrosoftAPI.
 			MsserverAPI.
-			Delete(ctx, utils.ExtractResourceRef(*v.Ref)).
+			Delete(ctx, utils.ResolveObjectIdentifier(v.Uuid, *v.Ref)).
 			Execute()
 		if err != nil {
 			return err

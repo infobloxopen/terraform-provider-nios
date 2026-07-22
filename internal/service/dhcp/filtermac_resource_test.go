@@ -404,9 +404,10 @@ func testAccCheckFiltermacExists(ctx context.Context, resourceName string, v *dh
 		if !ok {
 			return fmt.Errorf("not found: %s", resourceName)
 		}
+		uuid := rs.Primary.Attributes["uuid"]
 		apiRes, _, err := acctest.NIOSClient.DHCPAPI.
 			FiltermacAPI.
-			Read(ctx, utils.ExtractResourceRef(rs.Primary.Attributes["ref"])).
+			Read(ctx, utils.ResolveObjectIdentifier(&uuid, rs.Primary.Attributes["ref"])).
 			ReturnFieldsPlus(readableAttributesForFiltermac).
 			ReturnAsObject(1).
 			Execute()
@@ -426,7 +427,7 @@ func testAccCheckFiltermacDestroy(ctx context.Context, v *dhcp.Filtermac) resour
 	return func(state *terraform.State) error {
 		_, httpRes, err := acctest.NIOSClient.DHCPAPI.
 			FiltermacAPI.
-			Read(ctx, utils.ExtractResourceRef(*v.Ref)).
+			Read(ctx, utils.ResolveObjectIdentifier(v.Uuid, *v.Ref)).
 			ReturnAsObject(1).
 			ReturnFieldsPlus(readableAttributesForFiltermac).
 			Execute()
@@ -446,7 +447,7 @@ func testAccCheckFiltermacDisappears(ctx context.Context, v *dhcp.Filtermac) res
 	return func(state *terraform.State) error {
 		_, err := acctest.NIOSClient.DHCPAPI.
 			FiltermacAPI.
-			Delete(ctx, utils.ExtractResourceRef(*v.Ref)).
+			Delete(ctx, utils.ResolveObjectIdentifier(v.Uuid, *v.Ref)).
 			Execute()
 		if err != nil {
 			return err

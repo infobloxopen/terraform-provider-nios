@@ -162,9 +162,10 @@ func testAccCheckBfdtemplateExists(ctx context.Context, resourceName string, v *
 		if !ok {
 			return fmt.Errorf("not found: %s", resourceName)
 		}
+		uuid := rs.Primary.Attributes["uuid"]
 		apiRes, _, err := acctest.NIOSClient.MiscAPI.
 			BfdtemplateAPI.
-			Read(ctx, utils.ExtractResourceRef(rs.Primary.Attributes["ref"])).
+			Read(ctx, utils.ResolveObjectIdentifier(&uuid, rs.Primary.Attributes["ref"])).
 			ReturnFieldsPlus(readableAttributesForBfdtemplate).
 			ReturnAsObject(1).
 			Execute()
@@ -184,7 +185,7 @@ func testAccCheckBfdtemplateDestroy(ctx context.Context, v *misc.Bfdtemplate) re
 	return func(state *terraform.State) error {
 		_, httpRes, err := acctest.NIOSClient.MiscAPI.
 			BfdtemplateAPI.
-			Read(ctx, utils.ExtractResourceRef(*v.Ref)).
+			Read(ctx, utils.ResolveObjectIdentifier(v.Uuid, *v.Ref)).
 			ReturnAsObject(1).
 			ReturnFieldsPlus(readableAttributesForBfdtemplate).
 			Execute()
@@ -204,7 +205,7 @@ func testAccCheckBfdtemplateDisappears(ctx context.Context, v *misc.Bfdtemplate)
 	return func(state *terraform.State) error {
 		_, err := acctest.NIOSClient.MiscAPI.
 			BfdtemplateAPI.
-			Delete(ctx, utils.ExtractResourceRef(*v.Ref)).
+			Delete(ctx, utils.ResolveObjectIdentifier(v.Uuid, *v.Ref)).
 			Execute()
 		if err != nil {
 			return err

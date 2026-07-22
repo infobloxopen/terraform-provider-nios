@@ -248,9 +248,10 @@ func testAccCheckNsgroupForwardingmemberExists(ctx context.Context, resourceName
 		if !ok {
 			return fmt.Errorf("not found: %s", resourceName)
 		}
+		uuid := rs.Primary.Attributes["uuid"]
 		apiRes, _, err := acctest.NIOSClient.DNSAPI.
 			NsgroupForwardingmemberAPI.
-			Read(ctx, utils.ExtractResourceRef(rs.Primary.Attributes["ref"])).
+			Read(ctx, utils.ResolveObjectIdentifier(&uuid, rs.Primary.Attributes["ref"])).
 			ReturnFieldsPlus(readableAttributesForNsgroupForwardingmember).
 			ReturnAsObject(1).
 			Execute()
@@ -270,7 +271,7 @@ func testAccCheckNsgroupForwardingmemberDestroy(ctx context.Context, v *dns.Nsgr
 	return func(state *terraform.State) error {
 		_, httpRes, err := acctest.NIOSClient.DNSAPI.
 			NsgroupForwardingmemberAPI.
-			Read(ctx, utils.ExtractResourceRef(*v.Ref)).
+			Read(ctx, utils.ResolveObjectIdentifier(v.Uuid, *v.Ref)).
 			ReturnAsObject(1).
 			ReturnFieldsPlus(readableAttributesForNsgroupForwardingmember).
 			Execute()
@@ -290,7 +291,7 @@ func testAccCheckNsgroupForwardingmemberDisappears(ctx context.Context, v *dns.N
 	return func(state *terraform.State) error {
 		_, err := acctest.NIOSClient.DNSAPI.
 			NsgroupForwardingmemberAPI.
-			Delete(ctx, utils.ExtractResourceRef(*v.Ref)).
+			Delete(ctx, utils.ResolveObjectIdentifier(v.Uuid, *v.Ref)).
 			Execute()
 		if err != nil {
 			return err

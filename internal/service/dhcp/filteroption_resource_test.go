@@ -470,9 +470,10 @@ func testAccCheckFilteroptionExists(ctx context.Context, resourceName string, v 
 		if !ok {
 			return fmt.Errorf("not found: %s", resourceName)
 		}
+		uuid := rs.Primary.Attributes["uuid"]
 		apiRes, _, err := acctest.NIOSClient.DHCPAPI.
 			FilteroptionAPI.
-			Read(ctx, utils.ExtractResourceRef(rs.Primary.Attributes["ref"])).
+			Read(ctx, utils.ResolveObjectIdentifier(&uuid, rs.Primary.Attributes["ref"])).
 			ReturnFieldsPlus(readableAttributesForFilteroption).
 			ReturnAsObject(1).
 			Execute()
@@ -492,7 +493,7 @@ func testAccCheckFilteroptionDestroy(ctx context.Context, v *dhcp.Filteroption) 
 	return func(state *terraform.State) error {
 		_, httpRes, err := acctest.NIOSClient.DHCPAPI.
 			FilteroptionAPI.
-			Read(ctx, utils.ExtractResourceRef(*v.Ref)).
+			Read(ctx, utils.ResolveObjectIdentifier(v.Uuid, *v.Ref)).
 			ReturnAsObject(1).
 			ReturnFieldsPlus(readableAttributesForFilteroption).
 			Execute()
@@ -512,7 +513,7 @@ func testAccCheckFilteroptionDisappears(ctx context.Context, v *dhcp.Filteroptio
 	return func(state *terraform.State) error {
 		_, err := acctest.NIOSClient.DHCPAPI.
 			FilteroptionAPI.
-			Delete(ctx, utils.ExtractResourceRef(*v.Ref)).
+			Delete(ctx, utils.ResolveObjectIdentifier(v.Uuid, *v.Ref)).
 			Execute()
 		if err != nil {
 			return err

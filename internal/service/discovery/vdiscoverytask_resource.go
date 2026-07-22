@@ -128,7 +128,7 @@ func (r *VdiscoverytaskResource) ValidateConfig(ctx context.Context, req resourc
 	// Validate DIRECT policy requires explicit network view
 	if !data.PrivateNetworkViewMappingPolicy.IsNull() && !data.PrivateNetworkViewMappingPolicy.IsUnknown() &&
 		data.PrivateNetworkViewMappingPolicy.ValueString() == "DIRECT" {
-		if !data.PrivateNetworkView.IsUnknown() && (data.PrivateNetworkView.IsNull() || data.PrivateNetworkView.ValueString() == "") {
+		if data.PrivateNetworkView.IsNull() || data.PrivateNetworkView.IsUnknown() || data.PrivateNetworkView.ValueString() == "" {
 			resp.Diagnostics.AddAttributeError(
 				path.Root("private_network_view"),
 				"Missing Private Network View",
@@ -139,7 +139,7 @@ func (r *VdiscoverytaskResource) ValidateConfig(ctx context.Context, req resourc
 
 	if !data.PublicNetworkViewMappingPolicy.IsNull() && !data.PublicNetworkViewMappingPolicy.IsUnknown() &&
 		data.PublicNetworkViewMappingPolicy.ValueString() == "DIRECT" {
-		if !data.PublicNetworkView.IsUnknown() && (data.PublicNetworkView.IsNull() || data.PublicNetworkView.ValueString() == "") {
+		if data.PublicNetworkView.IsNull() || data.PublicNetworkView.IsUnknown() || data.PublicNetworkView.ValueString() == "" {
 			resp.Diagnostics.AddAttributeError(
 				path.Root("public_network_view"),
 				"Missing Public Network View",
@@ -188,7 +188,7 @@ func (r *VdiscoverytaskResource) ValidateConfig(ctx context.Context, req resourc
 			"'update_dns_view_private_ip' cannot be true when 'private_network_view_mapping_policy' is 'AUTO_CREATE'.",
 		)
 	} else if updatePrivateTrue {
-		if !data.DnsViewPrivateIp.IsUnknown() && (data.DnsViewPrivateIp.IsNull() || data.DnsViewPrivateIp.ValueString() == "") {
+		if data.DnsViewPrivateIp.IsNull() || data.DnsViewPrivateIp.IsUnknown() || data.DnsViewPrivateIp.ValueString() == "" {
 			resp.Diagnostics.AddAttributeError(
 				path.Root("dns_view_private_ip"),
 				"Missing DNS View",
@@ -213,7 +213,7 @@ func (r *VdiscoverytaskResource) ValidateConfig(ctx context.Context, req resourc
 			"'update_dns_view_public_ip' cannot be true when 'public_network_view_mapping_policy' is 'AUTO_CREATE'.",
 		)
 	} else if updatePublicTrue {
-		if !data.DnsViewPublicIp.IsUnknown() && (data.DnsViewPublicIp.IsNull() || data.DnsViewPublicIp.ValueString() == "") {
+		if data.DnsViewPublicIp.IsNull() || data.DnsViewPublicIp.IsUnknown() || data.DnsViewPublicIp.ValueString() == "" {
 			resp.Diagnostics.AddAttributeError(
 				path.Root("dns_view_public_ip"),
 				"Missing DNS View",
@@ -224,7 +224,7 @@ func (r *VdiscoverytaskResource) ValidateConfig(ctx context.Context, req resourc
 
 	// Validate fqdn_or_ip requirement for Azure/VMware/OpenStack
 	if driverType == "VMWARE" || driverType == "OPENSTACK" || driverType == "AZURE" {
-		if !data.FqdnOrIp.IsUnknown() && (data.FqdnOrIp.IsNull() || data.FqdnOrIp.ValueString() == "") {
+		if data.FqdnOrIp.IsNull() || data.FqdnOrIp.IsUnknown() || data.FqdnOrIp.ValueString() == "" {
 			resp.Diagnostics.AddAttributeError(
 				path.Root("fqdn_or_ip"),
 				"Missing Required Attribute",
@@ -281,6 +281,15 @@ func (r *VdiscoverytaskResource) ValidateConfig(ctx context.Context, req resourc
 					"'username' is required when 'credentials_type' is set to 'DIRECT'.",
 				)
 			}
+		}
+
+		if data.CredentialsType.ValueString() == "INDIRECT" &&
+			(driverType == "VMWARE" || driverType == "AZURE" || driverType == "OPENSTACK") {
+			resp.Diagnostics.AddAttributeError(
+				path.Root("credentials_type"),
+				"Invalid Credentials Type Configuration",
+				fmt.Sprintf("'credentials_type' cannot be 'INDIRECT' when 'driver_type' is '%s'.", driverType),
+			)
 		}
 	}
 

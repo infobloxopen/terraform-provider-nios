@@ -897,3 +897,11 @@ func ResolveIdentifier(uuid, ref types.String) string {
 	}
 	return ExtractResourceRef(ref.ValueString())
 }
+
+// ResolveObjectIdentifier is the test-friendly variant of ResolveIdentifier for use with API clients
+func ResolveObjectIdentifier(uuid *string, ref string) string {
+	if uuid != nil && *uuid != "" {
+		return *uuid
+	}
+	return ExtractResourceRef(ref)
+}

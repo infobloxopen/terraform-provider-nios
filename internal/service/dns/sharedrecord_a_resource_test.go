@@ -324,9 +324,10 @@ func testAccCheckSharedrecordAExists(ctx context.Context, resourceName string, v
 		if !ok {
 			return fmt.Errorf("not found: %s", resourceName)
 		}
+		uuid := rs.Primary.Attributes["uuid"]
 		apiRes, _, err := acctest.NIOSClient.DNSAPI.
 			SharedrecordAAPI.
-			Read(ctx, utils.ExtractResourceRef(rs.Primary.Attributes["ref"])).
+			Read(ctx, utils.ResolveObjectIdentifier(&uuid, rs.Primary.Attributes["ref"])).
 			ReturnFieldsPlus(readableAttributesForSharedrecordA).
 			ReturnAsObject(1).
 			Execute()
@@ -346,7 +347,7 @@ func testAccCheckSharedrecordADestroy(ctx context.Context, v *dns.SharedrecordA)
 	return func(state *terraform.State) error {
 		_, httpRes, err := acctest.NIOSClient.DNSAPI.
 			SharedrecordAAPI.
-			Read(ctx, utils.ExtractResourceRef(*v.Ref)).
+			Read(ctx, utils.ResolveObjectIdentifier(v.Uuid, *v.Ref)).
 			ReturnAsObject(1).
 			ReturnFieldsPlus(readableAttributesForSharedrecordA).
 			Execute()
@@ -366,7 +367,7 @@ func testAccCheckSharedrecordADisappears(ctx context.Context, v *dns.Sharedrecor
 	return func(state *terraform.State) error {
 		_, err := acctest.NIOSClient.DNSAPI.
 			SharedrecordAAPI.
-			Delete(ctx, utils.ExtractResourceRef(*v.Ref)).
+			Delete(ctx, utils.ResolveObjectIdentifier(v.Uuid, *v.Ref)).
 			Execute()
 		if err != nil {
 			return err

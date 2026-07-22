@@ -366,9 +366,10 @@ func testAccCheckRecordRpzTxtExists(ctx context.Context, resourceName string, v 
 		if !ok {
 			return fmt.Errorf("not found: %s", resourceName)
 		}
+		uuid := rs.Primary.Attributes["uuid"]
 		apiRes, _, err := acctest.NIOSClient.RPZAPI.
 			RecordRpzTxtAPI.
-			Read(ctx, utils.ExtractResourceRef(rs.Primary.Attributes["ref"])).
+			Read(ctx, utils.ResolveObjectIdentifier(&uuid, rs.Primary.Attributes["ref"])).
 			ReturnFieldsPlus(readableAttributesForRecordRpzTxt).
 			ReturnAsObject(1).
 			Execute()
@@ -388,7 +389,7 @@ func testAccCheckRecordRpzTxtDestroy(ctx context.Context, v *rpz.RecordRpzTxt) r
 	return func(state *terraform.State) error {
 		_, httpRes, err := acctest.NIOSClient.RPZAPI.
 			RecordRpzTxtAPI.
-			Read(ctx, utils.ExtractResourceRef(*v.Ref)).
+			Read(ctx, utils.ResolveObjectIdentifier(v.Uuid, *v.Ref)).
 			ReturnAsObject(1).
 			ReturnFieldsPlus(readableAttributesForRecordRpzTxt).
 			Execute()
@@ -408,7 +409,7 @@ func testAccCheckRecordRpzTxtDisappears(ctx context.Context, v *rpz.RecordRpzTxt
 	return func(state *terraform.State) error {
 		_, err := acctest.NIOSClient.RPZAPI.
 			RecordRpzTxtAPI.
-			Delete(ctx, utils.ExtractResourceRef(*v.Ref)).
+			Delete(ctx, utils.ResolveObjectIdentifier(v.Uuid, *v.Ref)).
 			Execute()
 		if err != nil {
 			return err

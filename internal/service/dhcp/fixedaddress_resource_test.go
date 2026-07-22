@@ -1935,9 +1935,10 @@ func testAccCheckFixedaddressExists(ctx context.Context, resourceName string, v 
 		if !ok {
 			return fmt.Errorf("not found: %s", resourceName)
 		}
+		uuid := rs.Primary.Attributes["uuid"]
 		apiRes, _, err := acctest.NIOSClient.DHCPAPI.
 			FixedaddressAPI.
-			Read(ctx, utils.ExtractResourceRef(rs.Primary.Attributes["ref"])).
+			Read(ctx, utils.ResolveObjectIdentifier(&uuid, rs.Primary.Attributes["ref"])).
 			ReturnFieldsPlus(readableAttributesForFixedaddress).
 			ReturnAsObject(1).
 			Execute()
@@ -1957,7 +1958,7 @@ func testAccCheckFixedaddressDestroy(ctx context.Context, v *dhcp.Fixedaddress) 
 	return func(state *terraform.State) error {
 		_, httpRes, err := acctest.NIOSClient.DHCPAPI.
 			FixedaddressAPI.
-			Read(ctx, utils.ExtractResourceRef(*v.Ref)).
+			Read(ctx, utils.ResolveObjectIdentifier(v.Uuid, *v.Ref)).
 			ReturnAsObject(1).
 			ReturnFieldsPlus(readableAttributesForFixedaddress).
 			Execute()
@@ -1977,7 +1978,7 @@ func testAccCheckFixedaddressDisappears(ctx context.Context, v *dhcp.Fixedaddres
 	return func(state *terraform.State) error {
 		_, err := acctest.NIOSClient.DHCPAPI.
 			FixedaddressAPI.
-			Delete(ctx, utils.ExtractResourceRef(*v.Ref)).
+			Delete(ctx, utils.ResolveObjectIdentifier(v.Uuid, *v.Ref)).
 			Execute()
 		if err != nil {
 			return err

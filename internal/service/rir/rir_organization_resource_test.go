@@ -382,9 +382,10 @@ func testAccCheckRirOrganizationExists(ctx context.Context, resourceName string,
 		if !ok {
 			return fmt.Errorf("not found: %s", resourceName)
 		}
+		uuid := rs.Primary.Attributes["uuid"]
 		apiRes, _, err := acctest.NIOSClient.RIRAPI.
 			RirOrganizationAPI.
-			Read(ctx, utils.ExtractResourceRef(rs.Primary.Attributes["ref"])).
+			Read(ctx, utils.ResolveObjectIdentifier(&uuid, rs.Primary.Attributes["ref"])).
 			ReturnFieldsPlus(readableAttributesForRirOrganization).
 			ReturnAsObject(1).
 			Execute()
@@ -404,7 +405,7 @@ func testAccCheckRirOrganizationDestroy(ctx context.Context, v *rir.RirOrganizat
 	return func(state *terraform.State) error {
 		_, httpRes, err := acctest.NIOSClient.RIRAPI.
 			RirOrganizationAPI.
-			Read(ctx, utils.ExtractResourceRef(*v.Ref)).
+			Read(ctx, utils.ResolveObjectIdentifier(v.Uuid, *v.Ref)).
 			ReturnAsObject(1).
 			ReturnFieldsPlus(readableAttributesForRirOrganization).
 			Execute()
@@ -424,7 +425,7 @@ func testAccCheckRirOrganizationDisappears(ctx context.Context, v *rir.RirOrgani
 	return func(state *terraform.State) error {
 		_, err := acctest.NIOSClient.RIRAPI.
 			RirOrganizationAPI.
-			Delete(ctx, utils.ExtractResourceRef(*v.Ref)).
+			Delete(ctx, utils.ResolveObjectIdentifier(v.Uuid, *v.Ref)).
 			Execute()
 		if err != nil {
 			return err
