@@ -111,7 +111,6 @@ func (r *MemberResource) Create(ctx context.Context, req resource.CreateRequest,
 	}
 
 	var apiRes *grid.CreateMemberResponse
-	var apiRes2 *grid.UpdateMemberResponse
 
 	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
 		var (
@@ -126,33 +125,10 @@ func (r *MemberResource) Create(ctx context.Context, req resource.CreateRequest,
 			ReturnAsObject(1).
 			Execute()
 
-		if callErr != nil {
-			if httpRes != nil {
-				return httpRes.StatusCode, callErr
-			}
-			return 0, callErr
-		}
-
-		if !data.PreProvisioning.IsUnknown() && !data.PreProvisioning.IsNull() {
-			createRes := apiRes.CreateMemberResponseAsObject.GetResult()
-			apiRes2, httpRes, callErr = r.client.GridAPI.
-				MemberAPI.
-				Update(ctx, utils.ExtractResourceRef(*createRes.Ref)).
-				Member(*data.Expand(ctx, &resp.Diagnostics, false)).
-				ReturnFieldsPlus(readableAttributesForMember).
-				ReturnAsObject(1).
-				Execute()
-
-			if httpRes != nil {
-				return httpRes.StatusCode, callErr
-			}
-			return 0, callErr
-		}
-
 		if httpRes != nil {
-			return httpRes.StatusCode, nil
+			return httpRes.StatusCode, callErr
 		}
-		return 0, nil
+		return 0, callErr
 	})
 
 	if err != nil {
@@ -168,11 +144,21 @@ func (r *MemberResource) Create(ctx context.Context, req resource.CreateRequest,
 		return
 	}
 
-	var res grid.Member
-	if apiRes2 != nil {
+	res := apiRes.CreateMemberResponseAsObject.GetResult()
+
+	if !data.PreProvisioning.IsUnknown() && !data.PreProvisioning.IsNull() {
+		apiRes2, _, err2 := r.client.GridAPI.
+			MemberAPI.
+			Update(ctx, utils.ExtractResourceRef(*res.Ref)).
+			Member(*data.Expand(ctx, &resp.Diagnostics, false)).
+			ReturnFieldsPlus(readableAttributesForMember).
+			ReturnAsObject(1).
+			Execute()
+		if err2 != nil {
+			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to Create Member with pre-provisioning or syslog proxy settings, got error: %s", err2))
+			return
+		}
 		res = apiRes2.UpdateMemberResponseAsObject.GetResult()
-	} else {
-		res = apiRes.CreateMemberResponseAsObject.GetResult()
 	}
 
 	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.ExtAttrs)
