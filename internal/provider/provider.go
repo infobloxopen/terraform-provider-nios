@@ -3,6 +3,7 @@ package provider
 import (
 	"context"
 	"fmt"
+	"net/http"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
@@ -19,6 +20,7 @@ import (
 	"github.com/infobloxopen/infoblox-nios-go-client/option"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/config"
+	"github.com/infobloxopen/terraform-provider-nios/internal/retry"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/acl"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/cloud"
 	"github.com/infobloxopen/terraform-provider-nios/internal/service/dhcp"
@@ -49,11 +51,13 @@ type NIOSProvider struct {
 
 // NIOSProviderModel describes the provider data model.
 type NIOSProviderModel struct {
-	NIOSHostURL  types.String `tfsdk:"nios_host_url"`
-	NIOSUsername types.String `tfsdk:"nios_username"`
-	NIOSPassword types.String `tfsdk:"nios_password"`
-	ProxyURL     types.String `tfsdk:"proxy_url"`
-	ProxySearch  types.String `tfsdk:"proxy_search"`
+	NIOSHostURL        types.String `tfsdk:"nios_host_url"`
+	NIOSUsername       types.String `tfsdk:"nios_username"`
+	NIOSPassword       types.String `tfsdk:"nios_password"`
+	ProxyURL           types.String `tfsdk:"proxy_url"`
+	ProxySearch        types.String `tfsdk:"proxy_search"`
+	RetryTimeout       types.Int64  `tfsdk:"retry_timeout"`
+	ManageInternalIdEA types.Bool   `tfsdk:"manage_internal_id_ea"`
 }
 
 func (p *NIOSProvider) Metadata(_ context.Context, _ provider.MetadataRequest, resp *provider.MetadataResponse) {
@@ -121,13 +125,33 @@ func (p *NIOSProvider) Configure(ctx context.Context, req provider.ConfigureRequ
 	// Set ProxySearch configuration
 	config.SetProxySearch(data.ProxySearch.ValueString())
 
-	err := checkAndCreatePreRequisites(ctx, client)
-	if err != nil {
-		resp.Diagnostics.AddError(
-			"Failed to ensure Terraform extensible attribute exists",
-			err.Error(),
+	// Set global retry timeout if specified
+	if !data.RetryTimeout.IsNull() && !data.RetryTimeout.IsUnknown() {
+		retry.SetRetryTimeout(data.RetryTimeout.ValueInt64())
+	}
+
+	if data.ManageInternalIdEA.IsUnknown() || data.ManageInternalIdEA.IsNull() {
+		data.ManageInternalIdEA = types.BoolValue(true)
+	}
+
+	if data.ManageInternalIdEA.ValueBool() {
+		err := checkAndCreatePreRequisites(ctx, client)
+		if err != nil {
+			resp.Diagnostics.AddError(
+				"Failed to ensure Terraform extensible attribute exists",
+				err.Error(),
+			)
+		}
+	} else {
+		// Raise a warning if the provider is not managing the Terraform Internal ID EA, as this may lead to issues with resource management
+		resp.Diagnostics.AddWarning(
+			"Terraform Internal ID Check Disabled",
+			fmt.Sprintf("The %q extensible attribute check is disabled (manage_internal_id_ea=false). "+
+				"Operations on NIOS-managed resources may fail if the extensible attribute does not exist in NIOS.",
+				terraformInternalIDEA),
 		)
 	}
+
 	resp.DataSourceData = client
 	resp.ResourceData = client
 }
@@ -474,35 +498,53 @@ func checkAndCreatePreRequisites(ctx context.Context, client *niosclient.APIClie
 		"name": terraformInternalIDEA,
 	}
 
-	apiRes, _, err := client.GridAPI.ExtensibleattributedefAPI.
-		List(ctx).
-		Filters(filters).
-		ReturnFieldsPlus(readableAttributesForEADefinition).
-		ReturnAsObject(1).
-		Execute()
-	if err != nil {
-		return fmt.Errorf("error checking for existing extensible attribute: %w", err)
-	}
+	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		var (
+			httpRes *http.Response
+			callErr error
+		)
 
-	// If EA already exists, creation is not required
-	if len(apiRes.ListExtensibleattributedefResponseObject.GetResult()) > 0 {
-		return nil
-	}
+		// Check if EA already exists
+		apiRes, httpRes, callErr := client.GridAPI.ExtensibleattributedefAPI.
+			List(ctx).
+			Filters(filters).
+			ReturnFieldsPlus(readableAttributesForEADefinition).
+			ReturnAsObject(1).
+			Execute()
 
-	// Create EA if it doesn't exist
-	data := gridclient.Extensibleattributedef{
-		Name:    gridclient.PtrString(terraformInternalIDEA),
-		Type:    gridclient.PtrString("STRING"),
-		Comment: gridclient.PtrString("Internal ID for Terraform Resource"),
-		Flags:   gridclient.PtrString("CR"),
-	}
+		if callErr != nil {
+			if httpRes != nil {
+				return httpRes.StatusCode, callErr
+			}
+			return 0, callErr
+		}
 
-	_, _, err = client.GridAPI.ExtensibleattributedefAPI.
-		Create(ctx).
-		Extensibleattributedef(data).
-		ReturnFieldsPlus(readableAttributesForEADefinition).
-		ReturnAsObject(1).
-		Execute()
+		// If EA already exists, creation is not required
+		if len(apiRes.ListExtensibleattributedefResponseObject.GetResult()) > 0 {
+			return http.StatusOK, nil
+		}
+
+		// Create EA if it doesn't exist
+		data := gridclient.Extensibleattributedef{
+			Name:    gridclient.PtrString(terraformInternalIDEA),
+			Type:    gridclient.PtrString("STRING"),
+			Comment: gridclient.PtrString("Internal ID for Terraform Resource"),
+			Flags:   gridclient.PtrString("CR"),
+		}
+
+		_, httpRes, callErr = client.GridAPI.ExtensibleattributedefAPI.
+			Create(ctx).
+			Extensibleattributedef(data).
+			ReturnFieldsPlus(readableAttributesForEADefinition).
+			ReturnAsObject(1).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
+
 	if err != nil {
 		return fmt.Errorf("error creating Terraform extensible attribute: %w", err)
 	}

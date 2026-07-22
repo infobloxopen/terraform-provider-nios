@@ -11,8 +11,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
+	"github.com/infobloxopen/infoblox-nios-go-client/security"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/config"
+	"github.com/infobloxopen/terraform-provider-nios/internal/retry"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
@@ -79,13 +81,41 @@ func (r *FtpuserResource) Create(ctx context.Context, req resource.CreateRequest
 		return
 	}
 
-	apiRes, _, err := r.client.SecurityAPI.FtpuserAPI.
-		Create(ctx).
-		Ftpuser(*data.Expand(ctx, &resp.Diagnostics, true)).
-		ReturnFieldsPlus(readableAttributesForFtpuser).
-		ReturnAsObject(1).
-		Execute()
+	payload := data.Expand(ctx, &resp.Diagnostics, true)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	var apiRes *security.CreateFtpuserResponse
+
+	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		var (
+			httpRes *http.Response
+			callErr error
+		)
+		apiRes, httpRes, callErr = r.client.SecurityAPI.
+			FtpuserAPI.
+			Create(ctx).
+			Ftpuser(*payload).
+			ReturnFieldsPlus(readableAttributesForFtpuser).
+			ReturnAsObject(1).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
+
 	if err != nil {
+		if retry.IsAlreadyExistsErr(err) {
+			// Resource already exists, import required
+			resp.Diagnostics.AddError(
+				"Resource Already Exists",
+				fmt.Sprintf("Resource already exists, error: %s.\nPlease import the existing resource into terraform state.", err.Error()),
+			)
+			return
+		}
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create Ftpuser, got error: %s", err))
 		return
 	}
@@ -120,13 +150,28 @@ func (r *FtpuserResource) Read(ctx context.Context, req resource.ReadRequest, re
 		return
 	}
 
-	apiRes, httpRes, err := r.client.SecurityAPI.
-		FtpuserAPI.
-		Read(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
-		ReturnFieldsPlus(readableAttributesForFtpuser).
-		ReturnAsObject(1).
-		ProxySearch(config.GetProxySearch()).
-		Execute()
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
+
+	var (
+		httpRes *http.Response
+		apiRes  *security.GetFtpuserResponse
+	)
+
+	err := retry.Do(ctx, nil, func(ctx context.Context) (int, error) {
+		var callErr error
+		apiRes, httpRes, callErr = r.client.SecurityAPI.
+			FtpuserAPI.
+			Read(ctx, resourceIdentifier).
+			ReturnFieldsPlus(readableAttributesForFtpuser).
+			ReturnAsObject(1).
+			ProxySearch(config.GetProxySearch()).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
 
 	// If the resource is not found, try searching using Extensible Attributes
 	if err != nil {
@@ -278,13 +323,34 @@ func (r *FtpuserResource) Update(ctx context.Context, req resource.UpdateRequest
 		return
 	}
 
-	apiRes, _, err := r.client.SecurityAPI.
-		FtpuserAPI.
-		Update(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
-		Ftpuser(*data.Expand(ctx, &resp.Diagnostics, false)).
-		ReturnFieldsPlus(readableAttributesForFtpuser).
-		ReturnAsObject(1).
-		Execute()
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
+
+	payload := data.Expand(ctx, &resp.Diagnostics, false)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	var apiRes *security.UpdateFtpuserResponse
+
+	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		var (
+			httpRes *http.Response
+			callErr error
+		)
+		apiRes, httpRes, callErr = r.client.SecurityAPI.
+			FtpuserAPI.
+			Update(ctx, resourceIdentifier).
+			Ftpuser(*payload).
+			ReturnFieldsPlus(readableAttributesForFtpuser).
+			ReturnAsObject(1).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
+
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update Ftpuser, got error: %s", err))
 		return
@@ -318,14 +384,24 @@ func (r *FtpuserResource) Delete(ctx context.Context, req resource.DeleteRequest
 		return
 	}
 
-	httpRes, err := r.client.SecurityAPI.
-		FtpuserAPI.
-		Delete(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
-		Execute()
-	if err != nil {
-		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
-			return
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
+
+	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		httpRes, callErr := r.client.SecurityAPI.
+			FtpuserAPI.
+			Delete(ctx, resourceIdentifier).
+			Execute()
+
+		if httpRes != nil {
+			if httpRes.StatusCode == http.StatusNotFound {
+				return 0, nil
+			}
+			return httpRes.StatusCode, callErr
 		}
+		return 0, callErr
+	})
+
+	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete Ftpuser, got error: %s", err))
 		return
 	}

@@ -12,8 +12,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
+	"github.com/infobloxopen/infoblox-nios-go-client/misc"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/config"
+	"github.com/infobloxopen/terraform-provider-nios/internal/retry"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
@@ -74,14 +76,41 @@ func (r *TftpfiledirResource) Create(ctx context.Context, req resource.CreateReq
 		return
 	}
 
-	apiRes, _, err := r.client.MiscAPI.
-		TftpfiledirAPI.
-		Create(ctx).
-		Tftpfiledir(*data.Expand(ctx, &resp.Diagnostics, true)).
-		ReturnFieldsPlus(readableAttributesForTftpfiledir).
-		ReturnAsObject(1).
-		Execute()
+	payload := data.Expand(ctx, &resp.Diagnostics, true)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	var apiRes *misc.CreateTftpfiledirResponse
+
+	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		var (
+			httpRes *http.Response
+			callErr error
+		)
+		apiRes, httpRes, callErr = r.client.MiscAPI.
+			TftpfiledirAPI.
+			Create(ctx).
+			Tftpfiledir(*payload).
+			ReturnFieldsPlus(readableAttributesForTftpfiledir).
+			ReturnAsObject(1).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
+
 	if err != nil {
+		if retry.IsAlreadyExistsErr(err) {
+			// Resource already exists, import required
+			resp.Diagnostics.AddError(
+				"Resource Already Exists",
+				fmt.Sprintf("Resource already exists, error: %s.\nPlease import the existing resource into terraform state.", err.Error()),
+			)
+			return
+		}
 		if strings.Contains(err.Error(), "The operation failed: Failed system call") {
 			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create Tftpfiledir. This error may occur if the TFTP directory '%s' specified in the 'directory' attribute does not exist on the Infoblox appliance. Please ensure that the directory exists and has the appropriate permissions, then try again.", data.Directory.ValueString()))
 			return
@@ -124,13 +153,28 @@ func (r *TftpfiledirResource) Read(ctx context.Context, req resource.ReadRequest
 		return
 	}
 
-	apiRes, httpRes, err := r.client.MiscAPI.
-		TftpfiledirAPI.
-		Read(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
-		ReturnFieldsPlus(readableAttributesForTftpfiledir).
-		ReturnAsObject(1).
-		ProxySearch(config.GetProxySearch()).
-		Execute()
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
+
+	var (
+		httpRes *http.Response
+		apiRes  *misc.GetTftpfiledirResponse
+	)
+
+	err := retry.Do(ctx, nil, func(ctx context.Context) (int, error) {
+		var callErr error
+		apiRes, httpRes, callErr = r.client.MiscAPI.
+			TftpfiledirAPI.
+			Read(ctx, resourceIdentifier).
+			ReturnFieldsPlus(readableAttributesForTftpfiledir).
+			ReturnAsObject(1).
+			ProxySearch(config.GetProxySearch()).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
 
 	// Handle not found case
 	if err != nil {
@@ -174,13 +218,34 @@ func (r *TftpfiledirResource) Update(ctx context.Context, req resource.UpdateReq
 		return
 	}
 
-	apiRes, _, err := r.client.MiscAPI.
-		TftpfiledirAPI.
-		Update(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
-		Tftpfiledir(*data.Expand(ctx, &resp.Diagnostics, false)).
-		ReturnFieldsPlus(readableAttributesForTftpfiledir).
-		ReturnAsObject(1).
-		Execute()
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
+
+	payload := data.Expand(ctx, &resp.Diagnostics, false)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	var apiRes *misc.UpdateTftpfiledirResponse
+
+	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		var (
+			httpRes *http.Response
+			callErr error
+		)
+		apiRes, httpRes, callErr = r.client.MiscAPI.
+			TftpfiledirAPI.
+			Update(ctx, resourceIdentifier).
+			Tftpfiledir(*payload).
+			ReturnFieldsPlus(readableAttributesForTftpfiledir).
+			ReturnAsObject(1).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
+
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update Tftpfiledir, got error: %s", err))
 		return
@@ -204,14 +269,24 @@ func (r *TftpfiledirResource) Delete(ctx context.Context, req resource.DeleteReq
 		return
 	}
 
-	httpRes, err := r.client.MiscAPI.
-		TftpfiledirAPI.
-		Delete(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
-		Execute()
-	if err != nil {
-		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
-			return
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
+
+	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		httpRes, callErr := r.client.MiscAPI.
+			TftpfiledirAPI.
+			Delete(ctx, resourceIdentifier).
+			Execute()
+
+		if httpRes != nil {
+			if httpRes.StatusCode == http.StatusNotFound {
+				return 0, nil
+			}
+			return httpRes.StatusCode, callErr
 		}
+		return 0, callErr
+	})
+
+	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete Tftpfiledir, got error: %s", err))
 		return
 	}

@@ -12,8 +12,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
+	"github.com/infobloxopen/infoblox-nios-go-client/dns"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/config"
+	"github.com/infobloxopen/terraform-provider-nios/internal/retry"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
@@ -80,14 +82,41 @@ func (r *ViewResource) Create(ctx context.Context, req resource.CreateRequest, r
 		return
 	}
 
-	apiRes, _, err := r.client.DNSAPI.
-		ViewAPI.
-		Create(ctx).
-		View(*data.Expand(ctx, &resp.Diagnostics)).
-		ReturnFieldsPlus(readableAttributesForView).
-		ReturnAsObject(1).
-		Execute()
+	payload := data.Expand(ctx, &resp.Diagnostics)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	var apiRes *dns.CreateViewResponse
+
+	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		var (
+			httpRes *http.Response
+			callErr error
+		)
+		apiRes, httpRes, callErr = r.client.DNSAPI.
+			ViewAPI.
+			Create(ctx).
+			View(*payload).
+			ReturnFieldsPlus(readableAttributesForView).
+			ReturnAsObject(1).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
+
 	if err != nil {
+		if retry.IsAlreadyExistsErr(err) {
+			// Resource already exists, import required
+			resp.Diagnostics.AddError(
+				"Resource Already Exists",
+				fmt.Sprintf("Resource already exists, error: %s.\nPlease import the existing resource into terraform state.", err.Error()),
+			)
+			return
+		}
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create View, got error: %s", err))
 		return
 	}
@@ -122,13 +151,28 @@ func (r *ViewResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 		return
 	}
 
-	apiRes, httpRes, err := r.client.DNSAPI.
-		ViewAPI.
-		Read(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
-		ReturnFieldsPlus(readableAttributesForView).
-		ReturnAsObject(1).
-		ProxySearch(config.GetProxySearch()).
-		Execute()
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
+
+	var (
+		httpRes *http.Response
+		apiRes  *dns.GetViewResponse
+	)
+
+	err := retry.Do(ctx, nil, func(ctx context.Context) (int, error) {
+		var callErr error
+		apiRes, httpRes, callErr = r.client.DNSAPI.
+			ViewAPI.
+			Read(ctx, resourceIdentifier).
+			ReturnFieldsPlus(readableAttributesForView).
+			ReturnAsObject(1).
+			ProxySearch(config.GetProxySearch()).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
 
 	// If the resource is not found, try searching using Extensible Attributes
 	if err != nil {
@@ -281,13 +325,34 @@ func (r *ViewResource) Update(ctx context.Context, req resource.UpdateRequest, r
 		return
 	}
 
-	apiRes, _, err := r.client.DNSAPI.
-		ViewAPI.
-		Update(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
-		View(*data.Expand(ctx, &resp.Diagnostics)).
-		ReturnFieldsPlus(readableAttributesForView).
-		ReturnAsObject(1).
-		Execute()
+	payload := data.Expand(ctx, &resp.Diagnostics)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
+
+	var apiRes *dns.UpdateViewResponse
+
+	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		var (
+			httpRes *http.Response
+			callErr error
+		)
+		apiRes, httpRes, callErr = r.client.DNSAPI.
+			ViewAPI.
+			Update(ctx, resourceIdentifier).
+			View(*payload).
+			ReturnFieldsPlus(readableAttributesForView).
+			ReturnAsObject(1).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
+
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update View, got error: %s", err))
 		return
@@ -321,14 +386,24 @@ func (r *ViewResource) Delete(ctx context.Context, req resource.DeleteRequest, r
 		return
 	}
 
-	httpRes, err := r.client.DNSAPI.
-		ViewAPI.
-		Delete(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
-		Execute()
-	if err != nil {
-		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
-			return
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
+
+	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		httpRes, callErr := r.client.DNSAPI.
+			ViewAPI.
+			Delete(ctx, resourceIdentifier).
+			Execute()
+
+		if httpRes != nil {
+			if httpRes.StatusCode == http.StatusNotFound {
+				return 0, nil
+			}
+			return httpRes.StatusCode, callErr
 		}
+		return 0, callErr
+	})
+
+	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete View, got error: %s", err))
 		return
 	}

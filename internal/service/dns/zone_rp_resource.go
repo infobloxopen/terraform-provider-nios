@@ -12,8 +12,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
+	"github.com/infobloxopen/infoblox-nios-go-client/dns"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/config"
+	"github.com/infobloxopen/terraform-provider-nios/internal/retry"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
@@ -140,14 +142,41 @@ func (r *ZoneRpResource) Create(ctx context.Context, req resource.CreateRequest,
 		return
 	}
 
-	apiRes, _, err := r.client.DNSAPI.
-		ZoneRpAPI.
-		Create(ctx).
-		ZoneRp(*data.Expand(ctx, &resp.Diagnostics, true)).
-		ReturnFieldsPlus(readableAttributesForZoneRp).
-		ReturnAsObject(1).
-		Execute()
+	payload := data.Expand(ctx, &resp.Diagnostics, true)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	var apiRes *dns.CreateZoneRpResponse
+
+	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		var (
+			httpRes *http.Response
+			callErr error
+		)
+		apiRes, httpRes, callErr = r.client.DNSAPI.
+			ZoneRpAPI.
+			Create(ctx).
+			ZoneRp(*payload).
+			ReturnFieldsPlus(readableAttributesForZoneRp).
+			ReturnAsObject(1).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
+
 	if err != nil {
+		if retry.IsAlreadyExistsErr(err) {
+			// Resource already exists, import required
+			resp.Diagnostics.AddError(
+				"Resource Already Exists",
+				fmt.Sprintf("Resource already exists, error: %s.\nPlease import the existing resource into terraform state.", err.Error()),
+			)
+			return
+		}
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create ZoneRp, got error: %s", err))
 		return
 	}
@@ -182,13 +211,28 @@ func (r *ZoneRpResource) Read(ctx context.Context, req resource.ReadRequest, res
 		return
 	}
 
-	apiRes, httpRes, err := r.client.DNSAPI.
-		ZoneRpAPI.
-		Read(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
-		ReturnFieldsPlus(readableAttributesForZoneRp).
-		ReturnAsObject(1).
-		ProxySearch(config.GetProxySearch()).
-		Execute()
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
+
+	var (
+		httpRes *http.Response
+		apiRes  *dns.GetZoneRpResponse
+	)
+
+	err := retry.Do(ctx, nil, func(ctx context.Context) (int, error) {
+		var callErr error
+		apiRes, httpRes, callErr = r.client.DNSAPI.
+			ZoneRpAPI.
+			Read(ctx, resourceIdentifier).
+			ReturnFieldsPlus(readableAttributesForZoneRp).
+			ReturnAsObject(1).
+			ProxySearch(config.GetProxySearch()).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
 
 	// If the resource is not found, try searching using Extensible Attributes
 	if err != nil {
@@ -340,13 +384,34 @@ func (r *ZoneRpResource) Update(ctx context.Context, req resource.UpdateRequest,
 		return
 	}
 
-	apiRes, _, err := r.client.DNSAPI.
-		ZoneRpAPI.
-		Update(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
-		ZoneRp(*data.Expand(ctx, &resp.Diagnostics, false)).
-		ReturnFieldsPlus(readableAttributesForZoneRp).
-		ReturnAsObject(1).
-		Execute()
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
+
+	payload := data.Expand(ctx, &resp.Diagnostics, false)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	var apiRes *dns.UpdateZoneRpResponse
+
+	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		var (
+			httpRes *http.Response
+			callErr error
+		)
+		apiRes, httpRes, callErr = r.client.DNSAPI.
+			ZoneRpAPI.
+			Update(ctx, resourceIdentifier).
+			ZoneRp(*payload).
+			ReturnFieldsPlus(readableAttributesForZoneRp).
+			ReturnAsObject(1).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
+
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update ZoneRp, got error: %s", err))
 		return
@@ -380,14 +445,24 @@ func (r *ZoneRpResource) Delete(ctx context.Context, req resource.DeleteRequest,
 		return
 	}
 
-	httpRes, err := r.client.DNSAPI.
-		ZoneRpAPI.
-		Delete(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
-		Execute()
-	if err != nil {
-		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
-			return
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
+
+	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		httpRes, callErr := r.client.DNSAPI.
+			ZoneRpAPI.
+			Delete(ctx, resourceIdentifier).
+			Execute()
+
+		if httpRes != nil {
+			if httpRes.StatusCode == http.StatusNotFound {
+				return 0, nil
+			}
+			return httpRes.StatusCode, callErr
 		}
+		return 0, callErr
+	})
+
+	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete ZoneRp, got error: %s", err))
 		return
 	}
