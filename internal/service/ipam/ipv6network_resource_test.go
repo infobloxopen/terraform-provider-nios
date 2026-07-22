@@ -2634,8 +2634,8 @@ func testAccIpv6networkRirRegistrationStatus(network, rirRegistrationStatus, sam
 resource "nios_ipam_ipv6network" "test_rir_registration_status" {
     network = %q
     rir_registration_status = %q
-    same_port_control_discovery_blackout = %s
-    use_blackout_setting = true
+    same_port_control_discovery_blackout = %q
+    use_blackout_setting = "true"
 }
 `, network, rirRegistrationStatus, samePortControl)
 }
@@ -2644,8 +2644,8 @@ func testAccIpv6networkSamePortControlDiscoveryBlackout(network, samePortControl
 	return fmt.Sprintf(`
 resource "nios_ipam_ipv6network" "test_same_port_control_discovery_blackout" {
     network = %q
-    same_port_control_discovery_blackout = %s
-    use_blackout_setting = %s
+    same_port_control_discovery_blackout = %q
+    use_blackout_setting = %q
 }
 `, network, samePortControlDiscoveryBlackout, useBlackoutSetting)
 }
@@ -2977,7 +2977,7 @@ resource "nios_ipam_ipv6network" "test_subscribe_settings" {
     network = %q
     network_view = "test_network_view"
     subscribe_settings = %s
-    use_subscribe_settings = %s
+    use_subscribe_settings = %q
 }
 `, network, subscribeSettingsStr, useSubscribeSettings)
 }

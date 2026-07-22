@@ -2274,8 +2274,8 @@ func testAccIpv6networkcontainerRirRegistrationStatus(network, rirRegistrationSt
 resource "nios_ipam_ipv6network_container" "test_rir_registration_status" {
 	network = %q
     rir_registration_status = %q
-    same_port_control_discovery_blackout = %s
-    use_blackout_setting = true
+    same_port_control_discovery_blackout = %q
+    use_blackout_setting = "true"
 }
 `, network, rirRegistrationStatus, samePortControl)
 }
@@ -2284,7 +2284,7 @@ func testAccIpv6networkcontainerSendRirRequest(network, sendRirRequest string) s
 	return fmt.Sprintf(`
 resource "nios_ipam_ipv6network_container" "test_send_rir_request" {
 	network = %q
-    send_rir_request = %s
+    send_rir_request = %q
 }
 `, network, sendRirRequest)
 }
@@ -2293,8 +2293,8 @@ func testAccIpv6networkcontainerSamePortControlDiscoveryBlackout(network, samePo
 	return fmt.Sprintf(`
 resource "nios_ipam_ipv6network_container" "test_same_port_control_discovery_blackout" {
     network = %q
-    same_port_control_discovery_blackout = %s
-    use_blackout_setting = %s
+    same_port_control_discovery_blackout = %q
+    use_blackout_setting = %q
 }
 `, network, samePortControlDiscoveryBlackout, useBlackoutSetting)
 }
@@ -2589,7 +2589,7 @@ resource "nios_ipam_ipv6network_container" "test_subscribe_settings" {
     network = %q
     network_view = "test_network_view"
     subscribe_settings = %s
-    use_subscribe_settings = %s
+    use_subscribe_settings = %q
 }
 `, network, subscribeSettingsStr, useSubscribeSettings)
 }
@@ -2617,7 +2617,7 @@ func testAccIpv6networkcontainerRemoveSubnets(network, removeSubnets, childNetwo
 	return fmt.Sprintf(`
 resource "nios_ipam_ipv6network_container" "test_remove_subnets" {
     network = %q
-    remove_subnets = %s
+    remove_subnets = %q
 }
 
 resource "nios_ipam_ipv6network" "child1" {

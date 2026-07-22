@@ -3663,7 +3663,7 @@ func testAccNetworkcontainerRirRegistrationStatus(network, rirRegistrationStatus
 resource "nios_ipam_network_container" "test_rir_registration_status" {
     network = %q
     rir_registration_status = %q
-    same_port_control_discovery_blackout = %s
+    same_port_control_discovery_blackout = %q
     use_blackout_setting = true
 }
 `, network, rirRegistrationStatus, samePortControl)
@@ -3675,7 +3675,7 @@ func testAccNetworkcontainerUseSubscribeSettings(network, useSubscribeSettings s
 resource "nios_ipam_network_container" "test_use_subscribe_settings" {
     network = %q
     network_view = "test_network_view"
-    use_subscribe_settings = %s
+    use_subscribe_settings = %q
     subscribe_settings = {
         enabled_attributes = ["USERNAME"]
     }
@@ -3686,7 +3686,7 @@ resource "nios_ipam_network_container" "test_use_subscribe_settings" {
 resource "nios_ipam_network_container" "test_use_subscribe_settings" {
     network = %q
     network_view = "test_network_view"
-    use_subscribe_settings = %s
+    use_subscribe_settings = %q
 }
 `, network, useSubscribeSettings)
 }
@@ -3698,7 +3698,7 @@ resource "nios_ipam_network_container" "test_subscribe_settings" {
     network = %q
     network_view = "test_network_view"
     subscribe_settings = %s
-    use_subscribe_settings = %s
+    use_subscribe_settings = %q
 }
 `, network, subscribeSettingsStr, useSubscribeSettings)
 }
@@ -3707,8 +3707,8 @@ func testAccNetworkcontainerSamePortControlDiscoveryBlackout(network, samePortCo
 	return fmt.Sprintf(`
 resource "nios_ipam_network_container" "test_same_port_control_discovery_blackout" {
     network = %q
-    same_port_control_discovery_blackout = %s
-    use_blackout_setting = %s
+    same_port_control_discovery_blackout = %q
+    use_blackout_setting = %q
 }
 `, network, samePortControlDiscoveryBlackout, useBlackoutSetting)
 }
@@ -4088,7 +4088,7 @@ func testAccNetworkcontainerRemoveSubnets(network, removeSubnets, childNetwork1,
 	return fmt.Sprintf(`
 resource "nios_ipam_network_container" "test_remove_subnets" {
     network = %q
-    remove_subnets = %s
+    remove_subnets = %q
 }
 
 resource "nios_ipam_network" "child1" {

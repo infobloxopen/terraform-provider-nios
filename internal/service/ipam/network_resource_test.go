@@ -3916,8 +3916,8 @@ func testAccNetworkRirRegistrationStatus(network, rirRegistrationStatus, samePor
 resource "nios_ipam_network" "test_rir_registration_status" {
     network = %q
     rir_registration_status = %q
-    same_port_control_discovery_blackout = %s
-    use_blackout_setting = true
+    same_port_control_discovery_blackout = %q
+    use_blackout_setting = "true"
 }
 `, network, rirRegistrationStatus, samePortControl)
 }
