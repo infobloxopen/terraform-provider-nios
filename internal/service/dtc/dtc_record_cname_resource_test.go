@@ -262,9 +262,10 @@ func testAccCheckDtcRecordCnameExists(ctx context.Context, resourceName string, 
 		if !ok {
 			return fmt.Errorf("not found: %s", resourceName)
 		}
+		uuid := rs.Primary.Attributes["uuid"]
 		apiRes, _, err := acctest.NIOSClient.DTCAPI.
 			DtcRecordCnameAPI.
-			Read(ctx, utils.ExtractResourceRef(rs.Primary.Attributes["ref"])).
+			Read(ctx, utils.ResolveObjectIdentifier(&uuid, rs.Primary.Attributes["ref"])).
 			ReturnFieldsPlus(readableAttributesForDtcRecordCname).
 			ReturnAsObject(1).
 			Execute()
@@ -284,7 +285,7 @@ func testAccCheckDtcRecordCnameDestroy(ctx context.Context, v *dtc.DtcRecordCnam
 	return func(state *terraform.State) error {
 		_, httpRes, err := acctest.NIOSClient.DTCAPI.
 			DtcRecordCnameAPI.
-			Read(ctx, utils.ExtractResourceRef(*v.Ref)).
+			Read(ctx, utils.ResolveObjectIdentifier(v.Uuid, *v.Ref)).
 			ReturnAsObject(1).
 			ReturnFieldsPlus(readableAttributesForDtcRecordCname).
 			Execute()
@@ -304,7 +305,7 @@ func testAccCheckDtcRecordCnameDisappears(ctx context.Context, v *dtc.DtcRecordC
 	return func(state *terraform.State) error {
 		_, err := acctest.NIOSClient.DTCAPI.
 			DtcRecordCnameAPI.
-			Delete(ctx, utils.ExtractResourceRef(*v.Ref)).
+			Delete(ctx, utils.ResolveObjectIdentifier(v.Uuid, *v.Ref)).
 			Execute()
 		if err != nil {
 			return err

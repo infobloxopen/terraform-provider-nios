@@ -2373,9 +2373,10 @@ func testAccCheckRangetemplateExists(ctx context.Context, resourceName string, v
 		if !ok {
 			return fmt.Errorf("not found: %s", resourceName)
 		}
+		uuid := rs.Primary.Attributes["uuid"]
 		apiRes, _, err := acctest.NIOSClient.DHCPAPI.
 			RangetemplateAPI.
-			Read(ctx, utils.ExtractResourceRef(rs.Primary.Attributes["ref"])).
+			Read(ctx, utils.ResolveObjectIdentifier(&uuid, rs.Primary.Attributes["ref"])).
 			ReturnFieldsPlus(readableAttributesForRangetemplate).
 			ReturnAsObject(1).
 			Execute()
@@ -2395,7 +2396,7 @@ func testAccCheckRangetemplateDestroy(ctx context.Context, v *dhcp.Rangetemplate
 	return func(state *terraform.State) error {
 		_, httpRes, err := acctest.NIOSClient.DHCPAPI.
 			RangetemplateAPI.
-			Read(ctx, utils.ExtractResourceRef(*v.Ref)).
+			Read(ctx, utils.ResolveObjectIdentifier(v.Uuid, *v.Ref)).
 			ReturnAsObject(1).
 			ReturnFieldsPlus(readableAttributesForRangetemplate).
 			Execute()
@@ -2415,7 +2416,7 @@ func testAccCheckRangetemplateDisappears(ctx context.Context, v *dhcp.Rangetempl
 	return func(state *terraform.State) error {
 		_, err := acctest.NIOSClient.DHCPAPI.
 			RangetemplateAPI.
-			Delete(ctx, utils.ExtractResourceRef(*v.Ref)).
+			Delete(ctx, utils.ResolveObjectIdentifier(v.Uuid, *v.Ref)).
 			Execute()
 		if err != nil {
 			return err

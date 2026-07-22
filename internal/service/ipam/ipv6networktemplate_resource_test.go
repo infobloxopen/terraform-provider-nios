@@ -1559,9 +1559,10 @@ func testAccCheckIpv6networktemplateExists(ctx context.Context, resourceName str
 		if !ok {
 			return fmt.Errorf("not found: %s", resourceName)
 		}
+		uuid := rs.Primary.Attributes["uuid"]
 		apiRes, _, err := acctest.NIOSClient.IPAMAPI.
 			Ipv6networktemplateAPI.
-			Read(ctx, utils.ExtractResourceRef(rs.Primary.Attributes["ref"])).
+			Read(ctx, utils.ResolveObjectIdentifier(&uuid, rs.Primary.Attributes["ref"])).
 			ReturnFieldsPlus(readableAttributesForIpv6networktemplate).
 			ReturnAsObject(1).
 			Execute()
@@ -1581,7 +1582,7 @@ func testAccCheckIpv6networktemplateDestroy(ctx context.Context, v *ipam.Ipv6net
 	return func(state *terraform.State) error {
 		_, httpRes, err := acctest.NIOSClient.IPAMAPI.
 			Ipv6networktemplateAPI.
-			Read(ctx, utils.ExtractResourceRef(*v.Ref)).
+			Read(ctx, utils.ResolveObjectIdentifier(v.Uuid, *v.Ref)).
 			ReturnAsObject(1).
 			ReturnFieldsPlus(readableAttributesForIpv6networktemplate).
 			Execute()
@@ -1601,7 +1602,7 @@ func testAccCheckIpv6networktemplateDisappears(ctx context.Context, v *ipam.Ipv6
 	return func(state *terraform.State) error {
 		_, err := acctest.NIOSClient.IPAMAPI.
 			Ipv6networktemplateAPI.
-			Delete(ctx, utils.ExtractResourceRef(*v.Ref)).
+			Delete(ctx, utils.ResolveObjectIdentifier(v.Uuid, *v.Ref)).
 			Execute()
 		if err != nil {
 			return err

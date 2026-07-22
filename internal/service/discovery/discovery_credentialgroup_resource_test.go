@@ -100,9 +100,10 @@ func testAccCheckDiscoveryCredentialgroupExists(ctx context.Context, resourceNam
 		if !ok {
 			return fmt.Errorf("not found: %s", resourceName)
 		}
+		uuid := rs.Primary.Attributes["uuid"]
 		apiRes, _, err := acctest.NIOSClient.DiscoveryAPI.
 			DiscoveryCredentialgroupAPI.
-			Read(ctx, utils.ExtractResourceRef(rs.Primary.Attributes["ref"])).
+			Read(ctx, utils.ResolveObjectIdentifier(&uuid, rs.Primary.Attributes["ref"])).
 			ReturnFieldsPlus(readableAttributesForDiscoveryCredentialgroup).
 			ReturnAsObject(1).
 			Execute()
@@ -122,7 +123,7 @@ func testAccCheckDiscoveryCredentialgroupDestroy(ctx context.Context, v *discove
 	return func(state *terraform.State) error {
 		_, httpRes, err := acctest.NIOSClient.DiscoveryAPI.
 			DiscoveryCredentialgroupAPI.
-			Read(ctx, utils.ExtractResourceRef(*v.Ref)).
+			Read(ctx, utils.ResolveObjectIdentifier(v.Uuid, *v.Ref)).
 			ReturnAsObject(1).
 			ReturnFieldsPlus(readableAttributesForDiscoveryCredentialgroup).
 			Execute()
@@ -142,7 +143,7 @@ func testAccCheckDiscoveryCredentialgroupDisappears(ctx context.Context, v *disc
 	return func(state *terraform.State) error {
 		_, err := acctest.NIOSClient.DiscoveryAPI.
 			DiscoveryCredentialgroupAPI.
-			Delete(ctx, utils.ExtractResourceRef(*v.Ref)).
+			Delete(ctx, utils.ResolveObjectIdentifier(v.Uuid, *v.Ref)).
 			Execute()
 		if err != nil {
 			return err

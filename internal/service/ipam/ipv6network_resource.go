@@ -91,14 +91,41 @@ func (r *Ipv6networkResource) Create(ctx context.Context, req resource.CreateReq
 		data.FuncCall = r.UpdateFuncCallAttributeName(ctx, data, &resp.Diagnostics)
 	}
 
-	apiRes, _, err := r.client.IPAMAPI.
-		Ipv6networkAPI.
-		Create(ctx).
-		Ipv6network(*data.Expand(ctx, &resp.Diagnostics, true)).
-		ReturnFieldsPlus(readableAttributesForIpv6network).
-		ReturnAsObject(1).
-		Execute()
+	payload := data.Expand(ctx, &resp.Diagnostics, true)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	var apiRes *ipam.CreateIpv6networkResponse
+
+	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		var (
+			httpRes *http.Response
+			callErr error
+		)
+		apiRes, httpRes, callErr = r.client.IPAMAPI.
+			Ipv6networkAPI.
+			Create(ctx).
+			Ipv6network(*payload).
+			ReturnFieldsPlus(readableAttributesForIpv6network).
+			ReturnAsObject(1).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
+
 	if err != nil {
+		if retry.IsAlreadyExistsErr(err) {
+			// Resource already exists, import required
+			resp.Diagnostics.AddError(
+				"Resource Already Exists",
+				fmt.Sprintf("Resource already exists, error: %s.\nPlease import the existing resource into terraform state.", err.Error()),
+			)
+			return
+		}
 		errVal := err.Error()
 		if ((strings.Contains(errVal, "The search parameters") &&
 			strings.Contains(errVal, "for object ipv6network did not return any result")) ||
@@ -151,13 +178,28 @@ func (r *Ipv6networkResource) Read(ctx context.Context, req resource.ReadRequest
 		return
 	}
 
-	apiRes, httpRes, err := r.client.IPAMAPI.
-		Ipv6networkAPI.
-		Read(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
-		ReturnFieldsPlus(readableAttributesForIpv6network).
-		ReturnAsObject(1).
-		ProxySearch(config.GetProxySearch()).
-		Execute()
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
+
+	var (
+		httpRes *http.Response
+		apiRes  *ipam.GetIpv6networkResponse
+	)
+
+	err := retry.Do(ctx, nil, func(ctx context.Context) (int, error) {
+		var callErr error
+		apiRes, httpRes, callErr = r.client.IPAMAPI.
+			Ipv6networkAPI.
+			Read(ctx, resourceIdentifier).
+			ReturnFieldsPlus(readableAttributesForIpv6network).
+			ReturnAsObject(1).
+			ProxySearch(config.GetProxySearch()).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
 
 	// If the resource is not found, try searching using Extensible Attributes
 	if err != nil {
@@ -309,13 +351,34 @@ func (r *Ipv6networkResource) Update(ctx context.Context, req resource.UpdateReq
 		return
 	}
 
-	apiRes, _, err := r.client.IPAMAPI.
-		Ipv6networkAPI.
-		Update(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
-		Ipv6network(*data.Expand(ctx, &resp.Diagnostics, false)).
-		ReturnFieldsPlus(readableAttributesForIpv6network).
-		ReturnAsObject(1).
-		Execute()
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
+
+	payload := data.Expand(ctx, &resp.Diagnostics, false)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	var apiRes *ipam.UpdateIpv6networkResponse
+
+	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		var (
+			httpRes *http.Response
+			callErr error
+		)
+		apiRes, httpRes, callErr = r.client.IPAMAPI.
+			Ipv6networkAPI.
+			Update(ctx, resourceIdentifier).
+			Ipv6network(*payload).
+			ReturnFieldsPlus(readableAttributesForIpv6network).
+			ReturnAsObject(1).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
+
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update Ipv6network, got error: %s", err))
 		return
@@ -349,7 +412,7 @@ func (r *Ipv6networkResource) Delete(ctx context.Context, req resource.DeleteReq
 		return
 	}
 
-	resourceRef := utils.ResolveIdentifier(data.Uuid, data.Ref)
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
 	// NIOS rejects deleting a network that has VLANs assigned. Clear them first.
 	if !data.Vlans.IsNull() && !data.Vlans.IsUnknown() && len(data.Vlans.Elements()) > 0 {
@@ -359,7 +422,7 @@ func (r *Ipv6networkResource) Delete(ctx context.Context, req resource.DeleteReq
 		clearErr := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
 			_, httpRes, callErr := r.client.IPAMAPI.
 				Ipv6networkAPI.
-				Update(ctx, resourceRef).
+				Update(ctx, resourceIdentifier).
 				Ipv6network(*clearPayload).
 				Execute()
 			if httpRes != nil {
@@ -373,12 +436,10 @@ func (r *Ipv6networkResource) Delete(ctx context.Context, req resource.DeleteReq
 		}
 	}
 
-	var httpRes *http.Response
 	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
-		var callErr error
-		httpRes, callErr = r.client.IPAMAPI.
+		httpRes, callErr := r.client.IPAMAPI.
 			Ipv6networkAPI.
-			Delete(ctx, resourceRef).
+			Delete(ctx, resourceIdentifier).
 			Execute()
 
 		if httpRes != nil {
@@ -391,9 +452,6 @@ func (r *Ipv6networkResource) Delete(ctx context.Context, req resource.DeleteReq
 	})
 
 	if err != nil {
-		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
-			return
-		}
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete Ipv6network, got error: %s", err))
 		return
 	}

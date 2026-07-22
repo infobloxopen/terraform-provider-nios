@@ -338,9 +338,10 @@ func testAccCheckVlanviewExists(ctx context.Context, resourceName string, v *ipa
 		if !ok {
 			return fmt.Errorf("not found: %s", resourceName)
 		}
+		uuid := rs.Primary.Attributes["uuid"]
 		apiRes, _, err := acctest.NIOSClient.IPAMAPI.
 			VlanviewAPI.
-			Read(ctx, utils.ExtractResourceRef(rs.Primary.Attributes["ref"])).
+			Read(ctx, utils.ResolveObjectIdentifier(&uuid, rs.Primary.Attributes["ref"])).
 			ReturnFieldsPlus(readableAttributesForVlanview).
 			ReturnAsObject(1).
 			Execute()
@@ -360,7 +361,7 @@ func testAccCheckVlanviewDestroy(ctx context.Context, v *ipam.Vlanview) resource
 	return func(state *terraform.State) error {
 		_, httpRes, err := acctest.NIOSClient.IPAMAPI.
 			VlanviewAPI.
-			Read(ctx, utils.ExtractResourceRef(*v.Ref)).
+			Read(ctx, utils.ResolveObjectIdentifier(v.Uuid, *v.Ref)).
 			ReturnAsObject(1).
 			ReturnFieldsPlus(readableAttributesForVlanview).
 			Execute()
@@ -380,7 +381,7 @@ func testAccCheckVlanviewDisappears(ctx context.Context, v *ipam.Vlanview) resou
 	return func(state *terraform.State) error {
 		_, err := acctest.NIOSClient.IPAMAPI.
 			VlanviewAPI.
-			Delete(ctx, utils.ExtractResourceRef(*v.Ref)).
+			Delete(ctx, utils.ResolveObjectIdentifier(v.Uuid, *v.Ref)).
 			Execute()
 		if err != nil {
 			return err

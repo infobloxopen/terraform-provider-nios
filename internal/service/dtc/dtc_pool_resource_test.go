@@ -906,9 +906,10 @@ func testAccCheckDtcPoolExists(ctx context.Context, resourceName string, v *dtc.
 		if !ok {
 			return fmt.Errorf("not found: %s", resourceName)
 		}
+		uuid := rs.Primary.Attributes["uuid"]
 		apiRes, _, err := acctest.NIOSClient.DTCAPI.
 			DtcPoolAPI.
-			Read(ctx, utils.ExtractResourceRef(rs.Primary.Attributes["ref"])).
+			Read(ctx, utils.ResolveObjectIdentifier(&uuid, rs.Primary.Attributes["ref"])).
 			ReturnFieldsPlus(readableAttributesForDtcPool).
 			ReturnAsObject(1).
 			Execute()
@@ -928,7 +929,7 @@ func testAccCheckDtcPoolDestroy(ctx context.Context, v *dtc.DtcPool) resource.Te
 	return func(state *terraform.State) error {
 		_, httpRes, err := acctest.NIOSClient.DTCAPI.
 			DtcPoolAPI.
-			Read(ctx, utils.ExtractResourceRef(*v.Ref)).
+			Read(ctx, utils.ResolveObjectIdentifier(v.Uuid, *v.Ref)).
 			ReturnAsObject(1).
 			ReturnFieldsPlus(readableAttributesForDtcPool).
 			Execute()
@@ -948,7 +949,7 @@ func testAccCheckDtcPoolDisappears(ctx context.Context, v *dtc.DtcPool) resource
 	return func(state *terraform.State) error {
 		_, err := acctest.NIOSClient.DTCAPI.
 			DtcPoolAPI.
-			Delete(ctx, utils.ExtractResourceRef(*v.Ref)).
+			Delete(ctx, utils.ResolveObjectIdentifier(v.Uuid, *v.Ref)).
 			Execute()
 		if err != nil {
 			return err
