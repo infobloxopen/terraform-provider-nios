@@ -613,9 +613,10 @@ func testAccCheckRecordNaptrExists(ctx context.Context, resourceName string, v *
 		if !ok {
 			return fmt.Errorf("not found: %s", resourceName)
 		}
+		uuid := rs.Primary.Attributes["uuid"]
 		apiRes, _, err := acctest.NIOSClient.DNSAPI.
 			RecordNaptrAPI.
-			Read(ctx, utils.ExtractResourceRef(rs.Primary.Attributes["ref"])).
+			Read(ctx, utils.ResolveObjectIdentifier(&uuid, rs.Primary.Attributes["ref"])).
 			ReturnFieldsPlus(readableAttributesForRecordNaptr).
 			ReturnAsObject(1).
 			Execute()
@@ -635,7 +636,7 @@ func testAccCheckRecordNaptrDestroy(ctx context.Context, v *dns.RecordNaptr) res
 	return func(state *terraform.State) error {
 		_, httpRes, err := acctest.NIOSClient.DNSAPI.
 			RecordNaptrAPI.
-			Read(ctx, utils.ExtractResourceRef(*v.Ref)).
+			Read(ctx, utils.ResolveObjectIdentifier(nil, *v.Ref)).
 			ReturnAsObject(1).
 			ReturnFieldsPlus(readableAttributesForRecordNaptr).
 			Execute()
@@ -655,7 +656,7 @@ func testAccCheckRecordNaptrDisappears(ctx context.Context, v *dns.RecordNaptr) 
 	return func(state *terraform.State) error {
 		_, err := acctest.NIOSClient.DNSAPI.
 			RecordNaptrAPI.
-			Delete(ctx, utils.ExtractResourceRef(*v.Ref)).
+			Delete(ctx, utils.ResolveObjectIdentifier(nil, *v.Ref)).
 			Execute()
 		if err != nil {
 			return err

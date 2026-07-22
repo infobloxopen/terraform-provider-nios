@@ -15,7 +15,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
+	"github.com/infobloxopen/infoblox-nios-go-client/misc"
 
+	"github.com/infobloxopen/terraform-provider-nios/internal/retry"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
@@ -235,15 +237,36 @@ func (r *DxlEndpointResource) Create(ctx context.Context, req resource.CreateReq
 		resp.Diagnostics.Append(resp.Private.SetKey(ctx, "password_hash", hashedPassword)...)
 	}
 
-	apiRes, _, err := r.client.MiscAPI.
-		DxlEndpointAPI.
-		Create(ctx).
-		DxlEndpoint(*payload).
-		ReturnFieldsPlus(readableAttributesForDxlEndpoint).
-		ReturnAsObject(1).
-		Execute()
+	var apiRes *misc.CreateDxlEndpointResponse
+
+	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		var (
+			httpRes *http.Response
+			callErr error
+		)
+		apiRes, httpRes, callErr = r.client.MiscAPI.
+			DxlEndpointAPI.
+			Create(ctx).
+			DxlEndpoint(*payload).
+			ReturnFieldsPlus(readableAttributesForDxlEndpoint).
+			ReturnAsObject(1).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
 
 	if err != nil {
+		if retry.IsAlreadyExistsErr(err) {
+			// Resource already exists, import required
+			resp.Diagnostics.AddError(
+				"Resource Already Exists",
+				fmt.Sprintf("Resource already exists, error: %s.\nPlease import the existing resource into terraform state.", err.Error()),
+			)
+			return
+		}
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create DxlEndpoint, got error: %s", err))
 		return
 	}
@@ -280,12 +303,27 @@ func (r *DxlEndpointResource) Read(ctx context.Context, req resource.ReadRequest
 		return
 	}
 
-	apiRes, httpRes, err := r.client.MiscAPI.
-		DxlEndpointAPI.
-		Read(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
-		ReturnFieldsPlus(readableAttributesForDxlEndpoint).
-		ReturnAsObject(1).
-		Execute()
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
+
+	var (
+		httpRes *http.Response
+		apiRes  *misc.GetDxlEndpointResponse
+	)
+
+	err := retry.Do(ctx, nil, func(ctx context.Context) (int, error) {
+		var callErr error
+		apiRes, httpRes, callErr = r.client.MiscAPI.
+			DxlEndpointAPI.
+			Read(ctx, resourceIdentifier).
+			ReturnFieldsPlus(readableAttributesForDxlEndpoint).
+			ReturnAsObject(1).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
 
 	// If the resource is not found, try searching using Extensible Attributes
 	if err != nil {
@@ -463,13 +501,28 @@ func (r *DxlEndpointResource) Update(ctx context.Context, req resource.UpdateReq
 		payload.WapiUserPassword = password.ValueStringPointer()
 	}
 
-	apiRes, _, err := r.client.MiscAPI.
-		DxlEndpointAPI.
-		Update(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
-		DxlEndpoint(*payload).
-		ReturnFieldsPlus(readableAttributesForDxlEndpoint).
-		ReturnAsObject(1).
-		Execute()
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
+
+	var apiRes *misc.UpdateDxlEndpointResponse
+
+	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		var (
+			httpRes *http.Response
+			callErr error
+		)
+		apiRes, httpRes, callErr = r.client.MiscAPI.
+			DxlEndpointAPI.
+			Update(ctx, resourceIdentifier).
+			DxlEndpoint(*payload).
+			ReturnFieldsPlus(readableAttributesForDxlEndpoint).
+			ReturnAsObject(1).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
 
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update DxlEndpoint, got error: %s", err))
@@ -504,14 +557,24 @@ func (r *DxlEndpointResource) Delete(ctx context.Context, req resource.DeleteReq
 		return
 	}
 
-	httpRes, err := r.client.MiscAPI.
-		DxlEndpointAPI.
-		Delete(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
-		Execute()
-	if err != nil {
-		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
-			return
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
+
+	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		httpRes, callErr := r.client.MiscAPI.
+			DxlEndpointAPI.
+			Delete(ctx, resourceIdentifier).
+			Execute()
+
+		if httpRes != nil {
+			if httpRes.StatusCode == http.StatusNotFound {
+				return 0, nil
+			}
+			return httpRes.StatusCode, callErr
 		}
+		return 0, callErr
+	})
+
+	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete DxlEndpoint, got error: %s", err))
 		return
 	}

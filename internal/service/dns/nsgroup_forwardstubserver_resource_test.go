@@ -244,9 +244,10 @@ func testAccCheckNsgroupForwardstubserverExists(ctx context.Context, resourceNam
 		if !ok {
 			return fmt.Errorf("not found: %s", resourceName)
 		}
+		uuid := rs.Primary.Attributes["uuid"]
 		apiRes, _, err := acctest.NIOSClient.DNSAPI.
 			NsgroupForwardstubserverAPI.
-			Read(ctx, utils.ExtractResourceRef(rs.Primary.Attributes["ref"])).
+			Read(ctx, utils.ResolveObjectIdentifier(&uuid, rs.Primary.Attributes["ref"])).
 			ReturnFieldsPlus(readableAttributesForNsgroupForwardstubserver).
 			ReturnAsObject(1).
 			Execute()
@@ -266,7 +267,7 @@ func testAccCheckNsgroupForwardstubserverDestroy(ctx context.Context, v *dns.Nsg
 	return func(state *terraform.State) error {
 		_, httpRes, err := acctest.NIOSClient.DNSAPI.
 			NsgroupForwardstubserverAPI.
-			Read(ctx, utils.ExtractResourceRef(*v.Ref)).
+			Read(ctx, utils.ResolveObjectIdentifier(v.Uuid, *v.Ref)).
 			ReturnAsObject(1).
 			ReturnFieldsPlus(readableAttributesForNsgroupForwardstubserver).
 			Execute()
@@ -286,7 +287,7 @@ func testAccCheckNsgroupForwardstubserverDisappears(ctx context.Context, v *dns.
 	return func(state *terraform.State) error {
 		_, err := acctest.NIOSClient.DNSAPI.
 			NsgroupForwardstubserverAPI.
-			Delete(ctx, utils.ExtractResourceRef(*v.Ref)).
+			Delete(ctx, utils.ResolveObjectIdentifier(v.Uuid, *v.Ref)).
 			Execute()
 		if err != nil {
 			return err

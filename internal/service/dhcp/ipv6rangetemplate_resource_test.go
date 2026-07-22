@@ -591,9 +591,10 @@ func testAccCheckIpv6rangetemplateExists(ctx context.Context, resourceName strin
 		if !ok {
 			return fmt.Errorf("not found: %s", resourceName)
 		}
+		uuid := rs.Primary.Attributes["uuid"]
 		apiRes, _, err := acctest.NIOSClient.DHCPAPI.
 			Ipv6rangetemplateAPI.
-			Read(ctx, utils.ExtractResourceRef(rs.Primary.Attributes["ref"])).
+			Read(ctx, utils.ResolveObjectIdentifier(&uuid, rs.Primary.Attributes["ref"])).
 			ReturnFieldsPlus(readableAttributesForIpv6rangetemplate).
 			ReturnAsObject(1).
 			Execute()
@@ -613,7 +614,7 @@ func testAccCheckIpv6rangetemplateDestroy(ctx context.Context, v *dhcp.Ipv6range
 	return func(state *terraform.State) error {
 		_, httpRes, err := acctest.NIOSClient.DHCPAPI.
 			Ipv6rangetemplateAPI.
-			Read(ctx, utils.ExtractResourceRef(*v.Ref)).
+			Read(ctx, utils.ResolveObjectIdentifier(v.Uuid, *v.Ref)).
 			ReturnAsObject(1).
 			ReturnFieldsPlus(readableAttributesForIpv6rangetemplate).
 			Execute()
@@ -633,7 +634,7 @@ func testAccCheckIpv6rangetemplateDisappears(ctx context.Context, v *dhcp.Ipv6ra
 	return func(state *terraform.State) error {
 		_, err := acctest.NIOSClient.DHCPAPI.
 			Ipv6rangetemplateAPI.
-			Delete(ctx, utils.ExtractResourceRef(*v.Ref)).
+			Delete(ctx, utils.ResolveObjectIdentifier(v.Uuid, *v.Ref)).
 			Execute()
 		if err != nil {
 			return err

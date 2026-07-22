@@ -13,8 +13,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
+	"github.com/infobloxopen/infoblox-nios-go-client/security"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/config"
+	"github.com/infobloxopen/terraform-provider-nios/internal/retry"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
@@ -236,15 +238,36 @@ func (r *LdapAuthServiceResource) Create(ctx context.Context, req resource.Creat
 		passwordVersion = types.Int64Value(1)
 	}
 
-	apiRes, _, err := r.client.SecurityAPI.
-		LdapAuthServiceAPI.
-		Create(ctx).
-		LdapAuthService(*payload).
-		ReturnFieldsPlus(readableAttributesForLdapAuthService).
-		ReturnAsObject(1).
-		Execute()
+	var apiRes *security.CreateLdapAuthServiceResponse
+
+	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		var (
+			httpRes *http.Response
+			callErr error
+		)
+		apiRes, httpRes, callErr = r.client.SecurityAPI.
+			LdapAuthServiceAPI.
+			Create(ctx).
+			LdapAuthService(*payload).
+			ReturnFieldsPlus(readableAttributesForLdapAuthService).
+			ReturnAsObject(1).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
 
 	if err != nil {
+		if retry.IsAlreadyExistsErr(err) {
+			// Resource already exists, import required
+			resp.Diagnostics.AddError(
+				"Resource Already Exists",
+				fmt.Sprintf("Resource already exists, error: %s.\nPlease import the existing resource into terraform state.", err.Error()),
+			)
+			return
+		}
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create LdapAuthService, got error: %s", err))
 		return
 	}
@@ -268,15 +291,30 @@ func (r *LdapAuthServiceResource) Read(ctx context.Context, req resource.ReadReq
 		return
 	}
 
-	apiRes, httpRes, err := r.client.SecurityAPI.
-		LdapAuthServiceAPI.
-		Read(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
-		ReturnFieldsPlus(readableAttributesForLdapAuthService).
-		ReturnAsObject(1).
-		ProxySearch(config.GetProxySearch()).
-		Execute()
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
-		// Handle not found case
+	var (
+		httpRes *http.Response
+		apiRes  *security.GetLdapAuthServiceResponse
+	)
+
+	err := retry.Do(ctx, nil, func(ctx context.Context) (int, error) {
+		var callErr error
+		apiRes, httpRes, callErr = r.client.SecurityAPI.
+			LdapAuthServiceAPI.
+			Read(ctx, resourceIdentifier).
+			ReturnFieldsPlus(readableAttributesForLdapAuthService).
+			ReturnAsObject(1).
+			ProxySearch(config.GetProxySearch()).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
+
+	// Handle not found case
 	if err != nil {
 		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
 			// Resource no longer exists, remove from state
@@ -333,9 +371,6 @@ func (r *LdapAuthServiceResource) Update(ctx context.Context, req resource.Updat
 
 	servers, diags := extractLdapServers(ctx, configData.Servers)
 	resp.Diagnostics.Append(diags...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
 
 	if len(servers) > 0 && len(payload.Servers) == len(servers) {
 		for i := range servers {
@@ -345,13 +380,28 @@ func (r *LdapAuthServiceResource) Update(ctx context.Context, req resource.Updat
 		}
 	}
 
-	apiRes, _, err := r.client.SecurityAPI.
-		LdapAuthServiceAPI.
-		Update(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
-		LdapAuthService(*payload).
-		ReturnFieldsPlus(readableAttributesForLdapAuthService).
-		ReturnAsObject(1).
-		Execute()
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
+
+	var apiRes *security.UpdateLdapAuthServiceResponse
+
+	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		var (
+			httpRes *http.Response
+			callErr error
+		)
+		apiRes, httpRes, callErr = r.client.SecurityAPI.
+			LdapAuthServiceAPI.
+			Update(ctx, resourceIdentifier).
+			LdapAuthService(*payload).
+			ReturnFieldsPlus(readableAttributesForLdapAuthService).
+			ReturnAsObject(1).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
 
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update LdapAuthService, got error: %s", err))
@@ -377,14 +427,24 @@ func (r *LdapAuthServiceResource) Delete(ctx context.Context, req resource.Delet
 		return
 	}
 
-	httpRes, err := r.client.SecurityAPI.
-		LdapAuthServiceAPI.
-		Delete(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
-		Execute()
-	if err != nil {
-		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
-			return
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
+
+	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		httpRes, callErr := r.client.SecurityAPI.
+			LdapAuthServiceAPI.
+			Delete(ctx, resourceIdentifier).
+			Execute()
+
+		if httpRes != nil {
+			if httpRes.StatusCode == http.StatusNotFound {
+				return 0, nil
+			}
+			return httpRes.StatusCode, callErr
 		}
+		return 0, callErr
+	})
+
+	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete LdapAuthService, got error: %s", err))
 		return
 	}

@@ -14,10 +14,12 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
+	"github.com/infobloxopen/infoblox-nios-go-client/discovery"
 
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/config"
+	"github.com/infobloxopen/terraform-provider-nios/internal/retry"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
@@ -151,6 +153,114 @@ func (r *VdiscoverytaskResource) ValidateConfig(ctx context.Context, req resourc
 		}
 	}
 
+	// Validate DIRECT policy requires explicit network view
+	if !data.PrivateNetworkViewMappingPolicy.IsNull() && !data.PrivateNetworkViewMappingPolicy.IsUnknown() &&
+		data.PrivateNetworkViewMappingPolicy.ValueString() == "DIRECT" {
+		if data.PrivateNetworkView.IsNull() || data.PrivateNetworkView.IsUnknown() || data.PrivateNetworkView.ValueString() == "" {
+			resp.Diagnostics.AddAttributeError(
+				path.Root("private_network_view"),
+				"Missing Private Network View",
+				"'private_network_view' is required when 'private_network_view_mapping_policy' is 'DIRECT'.",
+			)
+		}
+	}
+
+	if !data.PublicNetworkViewMappingPolicy.IsNull() && !data.PublicNetworkViewMappingPolicy.IsUnknown() &&
+		data.PublicNetworkViewMappingPolicy.ValueString() == "DIRECT" {
+		if data.PublicNetworkView.IsNull() || data.PublicNetworkView.IsUnknown() || data.PublicNetworkView.ValueString() == "" {
+			resp.Diagnostics.AddAttributeError(
+				path.Root("public_network_view"),
+				"Missing Public Network View",
+				"'public_network_view' is required when 'public_network_view_mapping_policy' is 'DIRECT'.",
+			)
+		}
+	}
+
+	// Validate AUTO_CREATE policy must not have explicit private network view
+	if !data.PrivateNetworkViewMappingPolicy.IsNull() && !data.PrivateNetworkViewMappingPolicy.IsUnknown() &&
+		data.PrivateNetworkViewMappingPolicy.ValueString() == "AUTO_CREATE" {
+		if !data.PrivateNetworkView.IsNull() && !data.PrivateNetworkView.IsUnknown() && data.PrivateNetworkView.ValueString() != "" {
+			resp.Diagnostics.AddAttributeError(
+				path.Root("private_network_view"),
+				"Invalid Private Network View Configuration",
+				"'private_network_view' must not be set when 'private_network_view_mapping_policy' is 'AUTO_CREATE'.",
+			)
+		}
+	}
+
+	// Validate AUTO_CREATE policy must not have explicit public network view
+	if !data.PublicNetworkViewMappingPolicy.IsNull() && !data.PublicNetworkViewMappingPolicy.IsUnknown() &&
+		data.PublicNetworkViewMappingPolicy.ValueString() == "AUTO_CREATE" {
+		if !data.PublicNetworkView.IsNull() && !data.PublicNetworkView.IsUnknown() && data.PublicNetworkView.ValueString() != "" {
+			resp.Diagnostics.AddAttributeError(
+				path.Root("public_network_view"),
+				"Invalid Public Network View Configuration",
+				"'public_network_view' must not be set when 'public_network_view_mapping_policy' is 'AUTO_CREATE'.",
+			)
+		}
+	}
+
+	// Validate AUTO_CREATE policy cannot be used with private DNS view updates
+	privatePolicyAutoCreate := !data.PrivateNetworkViewMappingPolicy.IsNull() &&
+		!data.PrivateNetworkViewMappingPolicy.IsUnknown() &&
+		data.PrivateNetworkViewMappingPolicy.ValueString() == "AUTO_CREATE"
+
+	updatePrivateTrue := !data.UpdateDnsViewPrivateIp.IsNull() &&
+		!data.UpdateDnsViewPrivateIp.IsUnknown() &&
+		data.UpdateDnsViewPrivateIp.ValueBool()
+
+	if privatePolicyAutoCreate && updatePrivateTrue {
+		resp.Diagnostics.AddAttributeError(
+			path.Root("update_dns_view_private_ip"),
+			"Invalid DNS View Configuration",
+			"'update_dns_view_private_ip' cannot be true when 'private_network_view_mapping_policy' is 'AUTO_CREATE'.",
+		)
+	} else if updatePrivateTrue {
+		if data.DnsViewPrivateIp.IsNull() || data.DnsViewPrivateIp.IsUnknown() || data.DnsViewPrivateIp.ValueString() == "" {
+			resp.Diagnostics.AddAttributeError(
+				path.Root("dns_view_private_ip"),
+				"Missing DNS View",
+				"'dns_view_private_ip' is required when 'update_dns_view_private_ip' is true.",
+			)
+		}
+	}
+
+	// Validate AUTO_CREATE policy cannot be used with public DNS view updates
+	publicPolicyAutoCreate := !data.PublicNetworkViewMappingPolicy.IsNull() &&
+		!data.PublicNetworkViewMappingPolicy.IsUnknown() &&
+		data.PublicNetworkViewMappingPolicy.ValueString() == "AUTO_CREATE"
+
+	updatePublicTrue := !data.UpdateDnsViewPublicIp.IsNull() &&
+		!data.UpdateDnsViewPublicIp.IsUnknown() &&
+		data.UpdateDnsViewPublicIp.ValueBool()
+
+	if publicPolicyAutoCreate && updatePublicTrue {
+		resp.Diagnostics.AddAttributeError(
+			path.Root("update_dns_view_public_ip"),
+			"Invalid DNS View Configuration",
+			"'update_dns_view_public_ip' cannot be true when 'public_network_view_mapping_policy' is 'AUTO_CREATE'.",
+		)
+	} else if updatePublicTrue {
+		if data.DnsViewPublicIp.IsNull() || data.DnsViewPublicIp.IsUnknown() || data.DnsViewPublicIp.ValueString() == "" {
+			resp.Diagnostics.AddAttributeError(
+				path.Root("dns_view_public_ip"),
+				"Missing DNS View",
+				"'dns_view_public_ip' is required when 'update_dns_view_public_ip' is true.",
+			)
+		}
+	}
+
+	// Validate fqdn_or_ip requirement for Azure/VMware/OpenStack
+	if driverType == "VMWARE" || driverType == "OPENSTACK" || driverType == "AZURE" {
+		if data.FqdnOrIp.IsNull() || data.FqdnOrIp.IsUnknown() || data.FqdnOrIp.ValueString() == "" {
+			resp.Diagnostics.AddAttributeError(
+				path.Root("fqdn_or_ip"),
+				"Missing Required Attribute",
+				fmt.Sprintf("'fqdn_or_ip' is required when 'driver_type' is '%s'.", driverType),
+			)
+		}
+	}
+
 	// Validate domain_name requirement for OPENSTACK with KEYSTONE_V3
 	if driverType == "OPENSTACK" {
 		if !data.IdentityVersion.IsNull() && !data.IdentityVersion.IsUnknown() {
@@ -199,6 +309,15 @@ func (r *VdiscoverytaskResource) ValidateConfig(ctx context.Context, req resourc
 					"'username' is required when 'credentials_type' is set to 'DIRECT'.",
 				)
 			}
+		}
+
+		if data.CredentialsType.ValueString() == "INDIRECT" &&
+			(driverType == "VMWARE" || driverType == "AZURE" || driverType == "OPENSTACK") {
+			resp.Diagnostics.AddAttributeError(
+				path.Root("credentials_type"),
+				"Invalid Credentials Type Configuration",
+				fmt.Sprintf("'credentials_type' cannot be 'INDIRECT' when 'driver_type' is '%s'.", driverType),
+			)
 		}
 	}
 
@@ -441,15 +560,36 @@ func (r *VdiscoverytaskResource) Create(ctx context.Context, req resource.Create
 		resp.Diagnostics.Append(resp.Private.SetKey(ctx, "password_hash", hashedPassword)...)
 	}
 
-	apiRes, _, err := r.client.DiscoveryAPI.
-		VdiscoverytaskAPI.
-		Create(ctx).
-		Vdiscoverytask(*payload).
-		ReturnFieldsPlus(readableAttributesForVdiscoverytask).
-		ReturnAsObject(1).
-		Execute()
+	var apiRes *discovery.CreateVdiscoverytaskResponse
+
+	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		var (
+			httpRes *http.Response
+			callErr error
+		)
+		apiRes, httpRes, callErr = r.client.DiscoveryAPI.
+			VdiscoverytaskAPI.
+			Create(ctx).
+			Vdiscoverytask(*payload).
+			ReturnFieldsPlus(readableAttributesForVdiscoverytask).
+			ReturnAsObject(1).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
 
 	if err != nil {
+		if retry.IsAlreadyExistsErr(err) {
+			// Resource already exists, import required
+			resp.Diagnostics.AddError(
+				"Resource Already Exists",
+				fmt.Sprintf("Resource already exists, error: %s.\nPlease import the existing resource into terraform state.", err.Error()),
+			)
+			return
+		}
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create Vdiscoverytask, got error: %s", err))
 		return
 	}
@@ -474,15 +614,30 @@ func (r *VdiscoverytaskResource) Read(ctx context.Context, req resource.ReadRequ
 		return
 	}
 
-	apiRes, httpRes, err := r.client.DiscoveryAPI.
-		VdiscoverytaskAPI.
-		Read(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
-		ReturnFieldsPlus(readableAttributesForVdiscoverytask).
-		ReturnAsObject(1).
-		ProxySearch(config.GetProxySearch()).
-		Execute()
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
-		// Handle not found case
+	var (
+		httpRes *http.Response
+		apiRes  *discovery.GetVdiscoverytaskResponse
+	)
+
+	err := retry.Do(ctx, nil, func(ctx context.Context) (int, error) {
+		var callErr error
+		apiRes, httpRes, callErr = r.client.DiscoveryAPI.
+			VdiscoverytaskAPI.
+			Read(ctx, resourceIdentifier).
+			ReturnFieldsPlus(readableAttributesForVdiscoverytask).
+			ReturnAsObject(1).
+			ProxySearch(config.GetProxySearch()).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
+
+	// Handle not found case
 	if err != nil {
 		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
 			// Resource no longer exists, remove from state
@@ -553,13 +708,28 @@ func (r *VdiscoverytaskResource) Update(ctx context.Context, req resource.Update
 		payload.Password = password.ValueStringPointer()
 	}
 
-	apiRes, _, err := r.client.DiscoveryAPI.
-		VdiscoverytaskAPI.
-		Update(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
-		Vdiscoverytask(*payload).
-		ReturnFieldsPlus(readableAttributesForVdiscoverytask).
-		ReturnAsObject(1).
-		Execute()
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
+
+	var apiRes *discovery.UpdateVdiscoverytaskResponse
+
+	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		var (
+			httpRes *http.Response
+			callErr error
+		)
+		apiRes, httpRes, callErr = r.client.DiscoveryAPI.
+			VdiscoverytaskAPI.
+			Update(ctx, resourceIdentifier).
+			Vdiscoverytask(*payload).
+			ReturnFieldsPlus(readableAttributesForVdiscoverytask).
+			ReturnAsObject(1).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
 
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update Vdiscoverytask, got error: %s", err))
@@ -584,14 +754,24 @@ func (r *VdiscoverytaskResource) Delete(ctx context.Context, req resource.Delete
 		return
 	}
 
-	httpRes, err := r.client.DiscoveryAPI.
-		VdiscoverytaskAPI.
-		Delete(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
-		Execute()
-	if err != nil {
-		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
-			return
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
+
+	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		httpRes, callErr := r.client.DiscoveryAPI.
+			VdiscoverytaskAPI.
+			Delete(ctx, resourceIdentifier).
+			Execute()
+
+		if httpRes != nil {
+			if httpRes.StatusCode == http.StatusNotFound {
+				return 0, nil
+			}
+			return httpRes.StatusCode, callErr
 		}
+		return 0, callErr
+	})
+
+	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete Vdiscoverytask, got error: %s", err))
 		return
 	}

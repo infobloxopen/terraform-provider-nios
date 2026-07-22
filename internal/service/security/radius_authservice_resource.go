@@ -16,6 +16,7 @@ import (
 	"github.com/infobloxopen/infoblox-nios-go-client/security"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/config"
+	"github.com/infobloxopen/terraform-provider-nios/internal/retry"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
@@ -239,15 +240,36 @@ func (r *RadiusAuthserviceResource) Create(ctx context.Context, req resource.Cre
 		secretVersion = types.Int64Value(1)
 	}
 
-	apiRes, _, err := r.client.SecurityAPI.
-		RadiusAuthserviceAPI.
-		Create(ctx).
-		RadiusAuthservice(*payload).
-		ReturnFieldsPlus(readableAttributesForRadiusAuthservice).
-		ReturnAsObject(1).
-		Execute()
+	var apiRes *security.CreateRadiusAuthserviceResponse
+
+	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		var (
+			httpRes *http.Response
+			callErr error
+		)
+		apiRes, httpRes, callErr = r.client.SecurityAPI.
+			RadiusAuthserviceAPI.
+			Create(ctx).
+			RadiusAuthservice(*payload).
+			ReturnFieldsPlus(readableAttributesForRadiusAuthservice).
+			ReturnAsObject(1).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
 
 	if err != nil {
+		if retry.IsAlreadyExistsErr(err) {
+			// Resource already exists, import required
+			resp.Diagnostics.AddError(
+				"Resource Already Exists",
+				fmt.Sprintf("Resource already exists, error: %s.\nPlease import the existing resource into terraform state.", err.Error()),
+			)
+			return
+		}
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create RadiusAuthservice, got error: %s", err))
 		return
 	}
@@ -271,15 +293,30 @@ func (r *RadiusAuthserviceResource) Read(ctx context.Context, req resource.ReadR
 		return
 	}
 
-	apiRes, httpRes, err := r.client.SecurityAPI.
-		RadiusAuthserviceAPI.
-		Read(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
-		ReturnFieldsPlus(readableAttributesForRadiusAuthservice).
-		ReturnAsObject(1).
-		ProxySearch(config.GetProxySearch()).
-		Execute()
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
-		// Handle not found case
+	var (
+		httpRes *http.Response
+		apiRes  *security.GetRadiusAuthserviceResponse
+	)
+
+	err := retry.Do(ctx, nil, func(ctx context.Context) (int, error) {
+		var callErr error
+		apiRes, httpRes, callErr = r.client.SecurityAPI.
+			RadiusAuthserviceAPI.
+			Read(ctx, resourceIdentifier).
+			ReturnFieldsPlus(readableAttributesForRadiusAuthservice).
+			ReturnAsObject(1).
+			ProxySearch(config.GetProxySearch()).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
+
+	// Handle not found case
 	if err != nil {
 		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
 			// Resource no longer exists, remove from state
@@ -310,7 +347,6 @@ func (r *RadiusAuthserviceResource) Update(ctx context.Context, req resource.Upd
 		return
 	}
 
-	payload := data.Expand(ctx, &resp.Diagnostics)
 	// Read from Config separately — only to extract write-only shared_secret from servers
 	var configData RadiusAuthserviceModel
 	resp.Diagnostics.Append(req.Config.Get(ctx, &configData)...)
@@ -332,6 +368,7 @@ func (r *RadiusAuthserviceResource) Update(ctx context.Context, req resource.Upd
 
 	servers, diags := extractRadiusServers(ctx, configData.Servers)
 	resp.Diagnostics.Append(diags...)
+	payload := data.Expand(ctx, &resp.Diagnostics)
 	if resp.Diagnostics.HasError() {
 		return
 	}
@@ -344,15 +381,28 @@ func (r *RadiusAuthserviceResource) Update(ctx context.Context, req resource.Upd
 		}
 	}
 
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
+
 	var apiRes *security.UpdateRadiusAuthserviceResponse
 
-	apiRes, _, err := r.client.SecurityAPI.
-		RadiusAuthserviceAPI.
-		Update(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
-		RadiusAuthservice(*payload).
-		ReturnFieldsPlus(readableAttributesForRadiusAuthservice).
-		ReturnAsObject(1).
-		Execute()
+	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		var (
+			httpRes *http.Response
+			callErr error
+		)
+		apiRes, httpRes, callErr = r.client.SecurityAPI.
+			RadiusAuthserviceAPI.
+			Update(ctx, resourceIdentifier).
+			RadiusAuthservice(*payload).
+			ReturnFieldsPlus(readableAttributesForRadiusAuthservice).
+			ReturnAsObject(1).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
 
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update RadiusAuthservice, got error: %s", err))
@@ -378,14 +428,24 @@ func (r *RadiusAuthserviceResource) Delete(ctx context.Context, req resource.Del
 		return
 	}
 
-	httpRes, err := r.client.SecurityAPI.
-		RadiusAuthserviceAPI.
-		Delete(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
-		Execute()
-	if err != nil {
-		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
-			return
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
+
+	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		httpRes, callErr := r.client.SecurityAPI.
+			RadiusAuthserviceAPI.
+			Delete(ctx, resourceIdentifier).
+			Execute()
+
+		if httpRes != nil {
+			if httpRes.StatusCode == http.StatusNotFound {
+				return 0, nil
+			}
+			return httpRes.StatusCode, callErr
 		}
+		return 0, callErr
+	})
+
+	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete RadiusAuthservice, got error: %s", err))
 		return
 	}

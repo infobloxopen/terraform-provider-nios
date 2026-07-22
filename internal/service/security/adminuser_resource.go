@@ -15,8 +15,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
+	"github.com/infobloxopen/infoblox-nios-go-client/security"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/config"
+	"github.com/infobloxopen/terraform-provider-nios/internal/retry"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
@@ -223,15 +225,36 @@ func (r *AdminuserResource) Create(ctx context.Context, req resource.CreateReque
 		resp.Diagnostics.Append(resp.Private.SetKey(ctx, "password_hash", hashedPassword)...)
 	}
 
-	apiRes, _, err := r.client.SecurityAPI.
-		AdminuserAPI.
-		Create(ctx).
-		Adminuser(*payload).
-		ReturnFieldsPlus(readableAttributesForAdminuser).
-		ReturnAsObject(1).
-		Execute()
+	var apiRes *security.CreateAdminuserResponse
+
+	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		var (
+			httpRes *http.Response
+			callErr error
+		)
+		apiRes, httpRes, callErr = r.client.SecurityAPI.
+			AdminuserAPI.
+			Create(ctx).
+			Adminuser(*payload).
+			ReturnFieldsPlus(readableAttributesForAdminuser).
+			ReturnAsObject(1).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
 
 	if err != nil {
+		if retry.IsAlreadyExistsErr(err) {
+			// Resource already exists, import required
+			resp.Diagnostics.AddError(
+				"Resource Already Exists",
+				fmt.Sprintf("Resource already exists, error: %s.\nPlease import the existing resource into terraform state.", err.Error()),
+			)
+			return
+		}
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create Adminuser, got error: %s", err))
 		return
 	}
@@ -273,13 +296,28 @@ func (r *AdminuserResource) Read(ctx context.Context, req resource.ReadRequest, 
 		return
 	}
 
-	apiRes, httpRes, err := r.client.SecurityAPI.
-		AdminuserAPI.
-		Read(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
-		ReturnFieldsPlus(readableAttributesForAdminuser).
-		ReturnAsObject(1).
-		ProxySearch(config.GetProxySearch()).
-		Execute()
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
+
+	var (
+		httpRes *http.Response
+		apiRes  *security.GetAdminuserResponse
+	)
+
+	err := retry.Do(ctx, nil, func(ctx context.Context) (int, error) {
+		var callErr error
+		apiRes, httpRes, callErr = r.client.SecurityAPI.
+			AdminuserAPI.
+			Read(ctx, resourceIdentifier).
+			ReturnFieldsPlus(readableAttributesForAdminuser).
+			ReturnAsObject(1).
+			ProxySearch(config.GetProxySearch()).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
 
 	// If the resource is not found, try searching using Extensible Attributes
 	if err != nil {
@@ -454,13 +492,28 @@ func (r *AdminuserResource) Update(ctx context.Context, req resource.UpdateReque
 		payload.Password = password.ValueStringPointer()
 	}
 
-	apiRes, _, err := r.client.SecurityAPI.
-		AdminuserAPI.
-		Update(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
-		Adminuser(*payload).
-		ReturnFieldsPlus(readableAttributesForAdminuser).
-		ReturnAsObject(1).
-		Execute()
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
+
+	var apiRes *security.UpdateAdminuserResponse
+
+	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		var (
+			httpRes *http.Response
+			callErr error
+		)
+		apiRes, httpRes, callErr = r.client.SecurityAPI.
+			AdminuserAPI.
+			Update(ctx, resourceIdentifier).
+			Adminuser(*payload).
+			ReturnFieldsPlus(readableAttributesForAdminuser).
+			ReturnAsObject(1).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
 
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update Adminuser, got error: %s", err))
@@ -501,14 +554,24 @@ func (r *AdminuserResource) Delete(ctx context.Context, req resource.DeleteReque
 		return
 	}
 
-	httpRes, err := r.client.SecurityAPI.
-		AdminuserAPI.
-		Delete(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
-		Execute()
-	if err != nil {
-		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
-			return
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
+
+	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		httpRes, callErr := r.client.SecurityAPI.
+			AdminuserAPI.
+			Delete(ctx, resourceIdentifier).
+			Execute()
+
+		if httpRes != nil {
+			if httpRes.StatusCode == http.StatusNotFound {
+				return 0, nil
+			}
+			return httpRes.StatusCode, callErr
 		}
+		return 0, callErr
+	})
+
+	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete Adminuser, got error: %s", err))
 		return
 	}

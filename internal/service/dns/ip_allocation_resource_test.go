@@ -1388,9 +1388,10 @@ func testAccCheckIPAllocationExists(ctx context.Context, resourceName string, v 
 		if !ok {
 			return fmt.Errorf("not found: %s", resourceName)
 		}
+		uuid := rs.Primary.Attributes["uuid"]
 		apiRes, _, err := acctest.NIOSClient.DNSAPI.
 			RecordHostAPI.
-			Read(ctx, utils.ExtractResourceRef(rs.Primary.Attributes["ref"])).
+			Read(ctx, utils.ResolveObjectIdentifier(&uuid, rs.Primary.Attributes["ref"])).
 			ReturnFieldsPlus(readableAttributesForIPAllocation).
 			ReturnAsObject(1).
 			Execute()
@@ -1410,7 +1411,7 @@ func testAccCheckIPAllocationDestroy(ctx context.Context, v *dns.RecordHost) res
 	return func(state *terraform.State) error {
 		_, httpRes, err := acctest.NIOSClient.DNSAPI.
 			RecordHostAPI.
-			Read(ctx, utils.ExtractResourceRef(*v.Ref)).
+			Read(ctx, utils.ResolveObjectIdentifier(v.Uuid, *v.Ref)).
 			ReturnAsObject(1).
 			ReturnFieldsPlus(readableAttributesForIPAllocation).
 			Execute()
@@ -1430,7 +1431,7 @@ func testAccCheckIPAllocationDisappears(ctx context.Context, v *dns.RecordHost) 
 	return func(state *terraform.State) error {
 		_, err := acctest.NIOSClient.DNSAPI.
 			RecordHostAPI.
-			Delete(ctx, utils.ExtractResourceRef(*v.Ref)).
+			Delete(ctx, utils.ResolveObjectIdentifier(v.Uuid, *v.Ref)).
 			Execute()
 		if err != nil {
 			return err

@@ -187,9 +187,10 @@ func testAccCheckMsserverAdsitesSiteExists(ctx context.Context, resourceName str
 		if !ok {
 			return fmt.Errorf("not found: %s", resourceName)
 		}
+		uuid := rs.Primary.Attributes["uuid"]
 		apiRes, _, err := acctest.NIOSClient.MicrosoftAPI.
 			MsserverAdsitesSiteAPI.
-			Read(ctx, utils.ExtractResourceRef(rs.Primary.Attributes["ref"])).
+			Read(ctx, utils.ResolveObjectIdentifier(&uuid, rs.Primary.Attributes["ref"])).
 			ReturnFieldsPlus(readableAttributesForMsserverAdsitesSite).
 			ReturnAsObject(1).
 			Execute()
@@ -209,7 +210,7 @@ func testAccCheckMsserverAdsitesSiteDestroy(ctx context.Context, v *microsoft.Ms
 	return func(state *terraform.State) error {
 		_, httpRes, err := acctest.NIOSClient.MicrosoftAPI.
 			MsserverAdsitesSiteAPI.
-			Read(ctx, utils.ExtractResourceRef(*v.Ref)).
+			Read(ctx, utils.ResolveObjectIdentifier(v.Uuid, *v.Ref)).
 			ReturnAsObject(1).
 			ReturnFieldsPlus(readableAttributesForMsserverAdsitesSite).
 			Execute()
@@ -229,7 +230,7 @@ func testAccCheckMsserverAdsitesSiteDisappears(ctx context.Context, v *microsoft
 	return func(state *terraform.State) error {
 		_, err := acctest.NIOSClient.MicrosoftAPI.
 			MsserverAdsitesSiteAPI.
-			Delete(ctx, utils.ExtractResourceRef(*v.Ref)).
+			Delete(ctx, utils.ResolveObjectIdentifier(v.Uuid, *v.Ref)).
 			Execute()
 		if err != nil {
 			return err

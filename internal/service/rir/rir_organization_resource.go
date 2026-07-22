@@ -15,7 +15,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
+	"github.com/infobloxopen/infoblox-nios-go-client/rir"
+
 	"github.com/infobloxopen/terraform-provider-nios/internal/config"
+	"github.com/infobloxopen/terraform-provider-nios/internal/retry"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
@@ -248,15 +251,36 @@ func (r *RirOrganizationResource) Create(ctx context.Context, req resource.Creat
 		resp.Diagnostics.Append(resp.Private.SetKey(ctx, "password_hash", hashedSecret)...)
 	}
 
-	apiRes, _, err := r.client.RIRAPI.
-		RirOrganizationAPI.
-		Create(ctx).
-		RirOrganization(*payload).
-		ReturnFieldsPlus(readableAttributesForRirOrganization).
-		ReturnAsObject(1).
-		Execute()
+	var apiRes *rir.CreateRirOrganizationResponse
+
+	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		var (
+			httpRes *http.Response
+			callErr error
+		)
+		apiRes, httpRes, callErr = r.client.RIRAPI.
+			RirOrganizationAPI.
+			Create(ctx).
+			RirOrganization(*payload).
+			ReturnFieldsPlus(readableAttributesForRirOrganization).
+			ReturnAsObject(1).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
 
 	if err != nil {
+		if retry.IsAlreadyExistsErr(err) {
+			// Resource already exists, import required
+			resp.Diagnostics.AddError(
+				"Resource Already Exists",
+				fmt.Sprintf("Resource already exists, error: %s.\nPlease import the existing resource into terraform state.", err.Error()),
+			)
+			return
+		}
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create RirOrganization, got error: %s", err))
 		return
 	}
@@ -280,13 +304,28 @@ func (r *RirOrganizationResource) Read(ctx context.Context, req resource.ReadReq
 		return
 	}
 
-	apiRes, httpRes, err := r.client.RIRAPI.
-		RirOrganizationAPI.
-		Read(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
-		ReturnFieldsPlus(readableAttributesForRirOrganization).
-		ReturnAsObject(1).
-		ProxySearch(config.GetProxySearch()).
-		Execute()
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
+
+	var (
+		httpRes *http.Response
+		apiRes  *rir.GetRirOrganizationResponse
+	)
+
+	err := retry.Do(ctx, nil, func(ctx context.Context) (int, error) {
+		var callErr error
+		apiRes, httpRes, callErr = r.client.RIRAPI.
+			RirOrganizationAPI.
+			Read(ctx, resourceIdentifier).
+			ReturnFieldsPlus(readableAttributesForRirOrganization).
+			ReturnAsObject(1).
+			ProxySearch(config.GetProxySearch()).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
 
 	// Handle not found case
 	if err != nil {
@@ -345,13 +384,28 @@ func (r *RirOrganizationResource) Update(ctx context.Context, req resource.Updat
 		payload.Password = password.ValueStringPointer()
 	}
 
-	apiRes, _, err := r.client.RIRAPI.
-		RirOrganizationAPI.
-		Update(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
-		RirOrganization(*payload).
-		ReturnFieldsPlus(readableAttributesForRirOrganization).
-		ReturnAsObject(1).
-		Execute()
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
+
+	var apiRes *rir.UpdateRirOrganizationResponse
+
+	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		var (
+			httpRes *http.Response
+			callErr error
+		)
+		apiRes, httpRes, callErr = r.client.RIRAPI.
+			RirOrganizationAPI.
+			Update(ctx, resourceIdentifier).
+			RirOrganization(*payload).
+			ReturnFieldsPlus(readableAttributesForRirOrganization).
+			ReturnAsObject(1).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
 
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update RirOrganization, got error: %s", err))
@@ -376,14 +430,24 @@ func (r *RirOrganizationResource) Delete(ctx context.Context, req resource.Delet
 		return
 	}
 
-	httpRes, err := r.client.RIRAPI.
-		RirOrganizationAPI.
-		Delete(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
-		Execute()
-	if err != nil {
-		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
-			return
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
+
+	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		httpRes, callErr := r.client.RIRAPI.
+			RirOrganizationAPI.
+			Delete(ctx, resourceIdentifier).
+			Execute()
+
+		if httpRes != nil {
+			if httpRes.StatusCode == http.StatusNotFound {
+				return 0, nil
+			}
+			return httpRes.StatusCode, callErr
 		}
+		return 0, callErr
+	})
+
+	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete RirOrganization, got error: %s", err))
 		return
 	}

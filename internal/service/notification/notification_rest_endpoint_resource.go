@@ -17,9 +17,11 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
+	"github.com/infobloxopen/infoblox-nios-go-client/notification"
 
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/infobloxopen/terraform-provider-nios/internal/config"
+	"github.com/infobloxopen/terraform-provider-nios/internal/retry"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
@@ -337,15 +339,36 @@ func (r *NotificationRestEndpointResource) Create(ctx context.Context, req resou
 		plannedHashState.WapiUserPassword = hashString(pp)
 	}
 
-	apiRes, _, err := r.client.NotificationAPI.
-		NotificationRestEndpointAPI.
-		Create(ctx).
-		NotificationRestEndpoint(*payload).
-		ReturnFieldsPlus(readableAttributesForNotificationRestEndpoint).
-		ReturnAsObject(1).
-		Execute()
+	var apiRes *notification.CreateNotificationRestEndpointResponse
+
+	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		var (
+			httpRes *http.Response
+			callErr error
+		)
+		apiRes, httpRes, callErr = r.client.NotificationAPI.
+			NotificationRestEndpointAPI.
+			Create(ctx).
+			NotificationRestEndpoint(*payload).
+			ReturnFieldsPlus(readableAttributesForNotificationRestEndpoint).
+			ReturnAsObject(1).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
 
 	if err != nil {
+		if retry.IsAlreadyExistsErr(err) {
+			// Resource already exists, import required
+			resp.Diagnostics.AddError(
+				"Resource Already Exists",
+				fmt.Sprintf("Resource already exists, error: %s.\nPlease import the existing resource into terraform state.", err.Error()),
+			)
+			return
+		}
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create NotificationRestEndpoint, got error: %s", err))
 		return
 	}
@@ -394,13 +417,28 @@ func (r *NotificationRestEndpointResource) Read(ctx context.Context, req resourc
 		return
 	}
 
-	apiRes, httpRes, err := r.client.NotificationAPI.
-		NotificationRestEndpointAPI.
-		Read(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
-		ReturnFieldsPlus(readableAttributesForNotificationRestEndpoint).
-		ReturnAsObject(1).
-		ProxySearch(config.GetProxySearch()).
-		Execute()
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
+
+	var (
+		httpRes *http.Response
+		apiRes  *notification.GetNotificationRestEndpointResponse
+	)
+
+	err := retry.Do(ctx, nil, func(ctx context.Context) (int, error) {
+		var callErr error
+		apiRes, httpRes, callErr = r.client.NotificationAPI.
+			NotificationRestEndpointAPI.
+			Read(ctx, resourceIdentifier).
+			ReturnFieldsPlus(readableAttributesForNotificationRestEndpoint).
+			ReturnAsObject(1).
+			ProxySearch(config.GetProxySearch()).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
 
 	// If the resource is not found, try searching using Extensible Attributes
 	if err != nil {
@@ -580,13 +618,28 @@ func (r *NotificationRestEndpointResource) Update(ctx context.Context, req resou
 		plannedHashState.WapiUserPassword = hashString(pp)
 	}
 
-	apiRes, _, err := r.client.NotificationAPI.
-		NotificationRestEndpointAPI.
-		Update(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
-		NotificationRestEndpoint(*payload).
-		ReturnFieldsPlus(readableAttributesForNotificationRestEndpoint).
-		ReturnAsObject(1).
-		Execute()
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
+
+	var apiRes *notification.UpdateNotificationRestEndpointResponse
+
+	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		var (
+			httpRes *http.Response
+			callErr error
+		)
+		apiRes, httpRes, callErr = r.client.NotificationAPI.
+			NotificationRestEndpointAPI.
+			Update(ctx, resourceIdentifier).
+			NotificationRestEndpoint(*payload).
+			ReturnFieldsPlus(readableAttributesForNotificationRestEndpoint).
+			ReturnAsObject(1).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
 
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update NotificationRestEndpoint, got error: %s", err))
@@ -633,14 +686,24 @@ func (r *NotificationRestEndpointResource) Delete(ctx context.Context, req resou
 		return
 	}
 
-	httpRes, err := r.client.NotificationAPI.
-		NotificationRestEndpointAPI.
-		Delete(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
-		Execute()
-	if err != nil {
-		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
-			return
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
+
+	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		httpRes, callErr := r.client.NotificationAPI.
+			NotificationRestEndpointAPI.
+			Delete(ctx, resourceIdentifier).
+			Execute()
+
+		if httpRes != nil {
+			if httpRes.StatusCode == http.StatusNotFound {
+				return 0, nil
+			}
+			return httpRes.StatusCode, callErr
 		}
+		return 0, callErr
+	})
+
+	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete NotificationRestEndpoint, got error: %s", err))
 		return
 	}
