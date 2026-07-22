@@ -131,6 +131,7 @@
 - IPAM: Fixed VLAN type validation error in Network and IPv6 Network Container objects when reading network objects containing VLAN information. ([#380](https://github.com/infobloxopen/terraform-provider-nios/pull/380))
 - DNS: Fixed Zone Auth import and read errors triggered by unexpected WAPI attributes returned by NIOS. - DNS: Fixed Zone Auth import and read errors triggered by unexpected WAPI attributes returned by NIOS. (Issue [#550](https://github.com/infobloxopen/terraform-provider-nios/issues/550), PR [#555](https://github.com/infobloxopen/terraform-provider-nios/pull/555))
 - Fixed numerous bugs across DHCP, DNS, DTC, IPAM, Grid, Security, and other modules improving overall stability and reliability.
+- Fixed plan-time ValidateConfig errors caused by unknown variable values by adding null and unknown checks across multiple resources. PR [#574] (https://github.com/infobloxopen/terraform-provider-nios/pull/574)
 
 ## Version 1.1.0
 
