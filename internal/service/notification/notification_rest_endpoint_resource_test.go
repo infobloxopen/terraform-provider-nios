@@ -585,9 +585,10 @@ func testAccCheckNotificationRestEndpointExists(ctx context.Context, resourceNam
 		if !ok {
 			return fmt.Errorf("not found: %s", resourceName)
 		}
+		uuid := rs.Primary.Attributes["uuid"]
 		apiRes, _, err := acctest.NIOSClient.NotificationAPI.
 			NotificationRestEndpointAPI.
-			Read(ctx, utils.ExtractResourceRef(rs.Primary.Attributes["ref"])).
+			Read(ctx, utils.ResolveObjectIdentifier(&uuid, rs.Primary.Attributes["ref"])).
 			ReturnFieldsPlus(readableAttributesForNotificationRestEndpoint).
 			ReturnAsObject(1).
 			Execute()
@@ -607,7 +608,7 @@ func testAccCheckNotificationRestEndpointDestroy(ctx context.Context, v *notific
 	return func(state *terraform.State) error {
 		_, httpRes, err := acctest.NIOSClient.NotificationAPI.
 			NotificationRestEndpointAPI.
-			Read(ctx, utils.ExtractResourceRef(*v.Ref)).
+			Read(ctx, utils.ResolveObjectIdentifier(v.Uuid, *v.Ref)).
 			ReturnAsObject(1).
 			ReturnFieldsPlus(readableAttributesForNotificationRestEndpoint).
 			Execute()
@@ -627,7 +628,7 @@ func testAccCheckNotificationRestEndpointDisappears(ctx context.Context, v *noti
 	return func(state *terraform.State) error {
 		_, err := acctest.NIOSClient.NotificationAPI.
 			NotificationRestEndpointAPI.
-			Delete(ctx, utils.ExtractResourceRef(*v.Ref)).
+			Delete(ctx, utils.ResolveObjectIdentifier(v.Uuid, *v.Ref)).
 			Execute()
 		if err != nil {
 			return err

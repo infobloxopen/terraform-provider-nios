@@ -227,9 +227,10 @@ func testAccCheckNamedaclExists(ctx context.Context, resourceName string, v *acl
 		if !ok {
 			return fmt.Errorf("not found: %s", resourceName)
 		}
+		uuid := rs.Primary.Attributes["uuid"]
 		apiRes, _, err := acctest.NIOSClient.ACLAPI.
 			NamedaclAPI.
-			Read(ctx, utils.ExtractResourceRef(rs.Primary.Attributes["ref"])).
+			Read(ctx, utils.ResolveObjectIdentifier(&uuid, rs.Primary.Attributes["ref"])).
 			ReturnFieldsPlus(readableAttributesForNamedacl).
 			ReturnAsObject(1).
 			Execute()
@@ -249,7 +250,7 @@ func testAccCheckNamedaclDestroy(ctx context.Context, v *acl.Namedacl) resource.
 	return func(state *terraform.State) error {
 		_, httpRes, err := acctest.NIOSClient.ACLAPI.
 			NamedaclAPI.
-			Read(ctx, utils.ExtractResourceRef(*v.Ref)).
+			Read(ctx, utils.ResolveObjectIdentifier(v.Uuid, *v.Ref)).
 			ReturnAsObject(1).
 			ReturnFieldsPlus(readableAttributesForNamedacl).
 			Execute()
@@ -269,7 +270,7 @@ func testAccCheckNamedaclDisappears(ctx context.Context, v *acl.Namedacl) resour
 	return func(state *terraform.State) error {
 		_, err := acctest.NIOSClient.ACLAPI.
 			NamedaclAPI.
-			Delete(ctx, utils.ExtractResourceRef(*v.Ref)).
+			Delete(ctx, utils.ResolveObjectIdentifier(v.Uuid, *v.Ref)).
 			Execute()
 		if err != nil {
 			return err

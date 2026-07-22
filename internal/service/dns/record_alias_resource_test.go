@@ -386,10 +386,11 @@ func testAccCheckRecordAliasExists(ctx context.Context, resourceName string, v *
 		if !ok {
 			return fmt.Errorf("not found: %s", resourceName)
 		}
-		state.RootModule().Resources[resourceName].Primary.ID = utils.ExtractResourceRef(rs.Primary.Attributes["ref"])
+		uuid := rs.Primary.Attributes["uuid"]
+		state.RootModule().Resources[resourceName].Primary.ID = utils.ResolveObjectIdentifier(&uuid, rs.Primary.Attributes["ref"])
 		apiRes, _, err := acctest.NIOSClient.DNSAPI.
 			RecordAliasAPI.
-			Read(ctx, utils.ExtractResourceRef(rs.Primary.Attributes["ref"])).
+			Read(ctx, utils.ResolveObjectIdentifier(&uuid, rs.Primary.Attributes["ref"])).
 			ReturnFieldsPlus(readableAttributesForRecordAlias).
 			ReturnAsObject(1).
 			Execute()
@@ -409,7 +410,7 @@ func testAccCheckRecordAliasDestroy(ctx context.Context, v *dns.RecordAlias) res
 	return func(state *terraform.State) error {
 		_, httpRes, err := acctest.NIOSClient.DNSAPI.
 			RecordAliasAPI.
-			Read(ctx, utils.ExtractResourceRef(*v.Ref)).
+			Read(ctx, utils.ResolveObjectIdentifier(nil, *v.Ref)).
 			ReturnAsObject(1).
 			ReturnFieldsPlus(readableAttributesForRecordAlias).
 			Execute()
@@ -429,7 +430,7 @@ func testAccCheckRecordAliasDisappears(ctx context.Context, v *dns.RecordAlias) 
 	return func(state *terraform.State) error {
 		_, err := acctest.NIOSClient.DNSAPI.
 			RecordAliasAPI.
-			Delete(ctx, utils.ExtractResourceRef(*v.Ref)).
+			Delete(ctx, utils.ResolveObjectIdentifier(nil, *v.Ref)).
 			Execute()
 		if err != nil {
 			return err

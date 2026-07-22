@@ -11,8 +11,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
+	"github.com/infobloxopen/infoblox-nios-go-client/dhcp"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/config"
+	"github.com/infobloxopen/terraform-provider-nios/internal/retry"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
@@ -82,14 +84,41 @@ func (r *FilterrelayagentResource) Create(ctx context.Context, req resource.Crea
 		return
 	}
 
-	apiRes, _, err := r.client.DHCPAPI.
-		FilterrelayagentAPI.
-		Create(ctx).
-		Filterrelayagent(*data.Expand(ctx, &resp.Diagnostics)).
-		ReturnFieldsPlus(readableAttributesForFilterrelayagent).
-		ReturnAsObject(1).
-		Execute()
+	payload := data.Expand(ctx, &resp.Diagnostics)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	var apiRes *dhcp.CreateFilterrelayagentResponse
+
+	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		var (
+			httpRes *http.Response
+			callErr error
+		)
+		apiRes, httpRes, callErr = r.client.DHCPAPI.
+			FilterrelayagentAPI.
+			Create(ctx).
+			Filterrelayagent(*payload).
+			ReturnFieldsPlus(readableAttributesForFilterrelayagent).
+			ReturnAsObject(1).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
+
 	if err != nil {
+		if retry.IsAlreadyExistsErr(err) {
+			// Resource already exists, import required
+			resp.Diagnostics.AddError(
+				"Resource Already Exists",
+				fmt.Sprintf("Resource already exists, error: %s.\nPlease import the existing resource into terraform state.", err.Error()),
+			)
+			return
+		}
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create Filterrelayagent, got error: %s", err))
 		return
 	}
@@ -125,13 +154,28 @@ func (r *FilterrelayagentResource) Read(ctx context.Context, req resource.ReadRe
 		return
 	}
 
-	apiRes, httpRes, err := r.client.DHCPAPI.
-		FilterrelayagentAPI.
-		Read(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
-		ReturnFieldsPlus(readableAttributesForFilterrelayagent).
-		ReturnAsObject(1).
-		ProxySearch(config.GetProxySearch()).
-		Execute()
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
+
+	var (
+		httpRes *http.Response
+		apiRes  *dhcp.GetFilterrelayagentResponse
+	)
+
+	err := retry.Do(ctx, nil, func(ctx context.Context) (int, error) {
+		var callErr error
+		apiRes, httpRes, callErr = r.client.DHCPAPI.
+			FilterrelayagentAPI.
+			Read(ctx, resourceIdentifier).
+			ReturnFieldsPlus(readableAttributesForFilterrelayagent).
+			ReturnAsObject(1).
+			ProxySearch(config.GetProxySearch()).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
 
 	// If the resource is not found, try searching using Extensible Attributes
 	if err != nil {
@@ -286,13 +330,34 @@ func (r *FilterrelayagentResource) Update(ctx context.Context, req resource.Upda
 		return
 	}
 
-	apiRes, _, err := r.client.DHCPAPI.
-		FilterrelayagentAPI.
-		Update(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
-		Filterrelayagent(*data.Expand(ctx, &resp.Diagnostics)).
-		ReturnFieldsPlus(readableAttributesForFilterrelayagent).
-		ReturnAsObject(1).
-		Execute()
+	payload := data.Expand(ctx, &resp.Diagnostics)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
+
+	var apiRes *dhcp.UpdateFilterrelayagentResponse
+
+	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		var (
+			httpRes *http.Response
+			callErr error
+		)
+		apiRes, httpRes, callErr = r.client.DHCPAPI.
+			FilterrelayagentAPI.
+			Update(ctx, resourceIdentifier).
+			Filterrelayagent(*payload).
+			ReturnFieldsPlus(readableAttributesForFilterrelayagent).
+			ReturnAsObject(1).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
+
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update Filterrelayagent, got error: %s", err))
 		return
@@ -326,14 +391,24 @@ func (r *FilterrelayagentResource) Delete(ctx context.Context, req resource.Dele
 		return
 	}
 
-	httpRes, err := r.client.DHCPAPI.
-		FilterrelayagentAPI.
-		Delete(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
-		Execute()
-	if err != nil {
-		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
-			return
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
+
+	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		httpRes, callErr := r.client.DHCPAPI.
+			FilterrelayagentAPI.
+			Delete(ctx, resourceIdentifier).
+			Execute()
+
+		if httpRes != nil {
+			if httpRes.StatusCode == http.StatusNotFound {
+				return 0, nil
+			}
+			return httpRes.StatusCode, callErr
 		}
+		return 0, callErr
+	})
+
+	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete Filterrelayagent, got error: %s", err))
 		return
 	}
@@ -384,7 +459,7 @@ func (r *FilterrelayagentResource) ValidateConfig(ctx context.Context, req resou
 
 	// Validate circuit_id_name is required when is_circuit_id == "MATCHES_VALUE"
 	if isCircuitId == "MATCHES_VALUE" {
-		if data.CircuitIdName.IsUnknown() || data.CircuitIdName.IsNull() || data.CircuitIdName.ValueString() == "" {
+		if !data.CircuitIdName.IsUnknown() && (data.CircuitIdName.IsNull() || data.CircuitIdName.ValueString() == "") {
 			resp.Diagnostics.AddAttributeError(
 				path.Root("circuit_id_name"),
 				"Missing Required Attribute",
@@ -395,7 +470,7 @@ func (r *FilterrelayagentResource) ValidateConfig(ctx context.Context, req resou
 
 	// Validate remote_id_name is required when is_remote_id == "MATCHES_VALUE"
 	if isRemoteId == "MATCHES_VALUE" {
-		if data.RemoteIdName.IsUnknown() || data.RemoteIdName.IsNull() || data.RemoteIdName.ValueString() == "" {
+		if !data.RemoteIdName.IsUnknown() && (data.RemoteIdName.IsNull() || data.RemoteIdName.ValueString() == "") {
 			resp.Diagnostics.AddAttributeError(
 				path.Root("remote_id_name"),
 				"Missing Required Attribute",
@@ -405,9 +480,8 @@ func (r *FilterrelayagentResource) ValidateConfig(ctx context.Context, req resou
 	}
 
 	// Validate circuit_id_substring_length, circuit_id_substring_offset is required when is_circuit_id_substring == true
-	if !data.IsCircuitIdSubstring.IsUnknown() && !data.IsCircuitIdSubstring.IsNull() && data.IsCircuitIdSubstring.ValueBool() {
-		if (data.CircuitIdSubstringLength.IsUnknown() || data.CircuitIdSubstringLength.IsNull()) ||
-			(data.CircuitIdSubstringOffset.IsUnknown() || data.CircuitIdSubstringOffset.IsNull()) {
+	if !data.IsCircuitIdSubstring.IsNull() && !data.IsCircuitIdSubstring.IsUnknown() && data.IsCircuitIdSubstring.ValueBool() {
+		if data.CircuitIdSubstringLength.IsNull() || data.CircuitIdSubstringOffset.IsNull() {
 			resp.Diagnostics.AddAttributeError(
 				path.Root("circuit_id_substring_length"),
 				"Missing Required Attribute",
@@ -415,20 +489,22 @@ func (r *FilterrelayagentResource) ValidateConfig(ctx context.Context, req resou
 			)
 		}
 		// Validate the circuit_id_substring_length is equal to the length of circuit_id_name
-		circuitIdLength := len(data.CircuitIdName.ValueString())
-		if !data.CircuitIdName.IsNull() && data.CircuitIdSubstringLength.ValueInt64() != int64(circuitIdLength) {
-			resp.Diagnostics.AddAttributeError(
-				path.Root("circuit_id_substring_length"),
-				"Invalid Attribute Value",
-				"Attribute circuit_id_substring_length must be equal to the length of circuit_id_name when is_circuit_id_substring is set to true.",
-			)
+		if !data.CircuitIdName.IsNull() && !data.CircuitIdName.IsUnknown() &&
+			!data.CircuitIdSubstringLength.IsNull() && !data.CircuitIdSubstringLength.IsUnknown() {
+			circuitIdLength := len(data.CircuitIdName.ValueString())
+			if data.CircuitIdSubstringLength.ValueInt64() != int64(circuitIdLength) {
+				resp.Diagnostics.AddAttributeError(
+					path.Root("circuit_id_substring_length"),
+					"Invalid Attribute Value",
+					"Attribute circuit_id_substring_length must be equal to the length of circuit_id_name when is_circuit_id_substring is set to true.",
+				)
+			}
 		}
 	}
 
 	// Validate remote_id_substring_length is required when is_remote_id_substring == true
-	if !data.IsRemoteIdSubstring.IsUnknown() && !data.IsRemoteIdSubstring.IsNull() && data.IsRemoteIdSubstring.ValueBool() {
-		if (data.RemoteIdSubstringLength.IsUnknown() || data.RemoteIdSubstringLength.IsNull()) ||
-			(data.RemoteIdSubstringOffset.IsUnknown() || data.RemoteIdSubstringOffset.IsNull()) {
+	if !data.IsRemoteIdSubstring.IsNull() && !data.IsRemoteIdSubstring.IsUnknown() && data.IsRemoteIdSubstring.ValueBool() {
+		if data.RemoteIdSubstringLength.IsNull() || data.RemoteIdSubstringOffset.IsNull() {
 			resp.Diagnostics.AddAttributeError(
 				path.Root("remote_id_substring_length"),
 				"Missing Required Attribute",
@@ -437,19 +513,22 @@ func (r *FilterrelayagentResource) ValidateConfig(ctx context.Context, req resou
 		}
 
 		// Validate the remote_id_substring_length is equal to the length of remote_id_name
-		remoteIdLength := len(data.RemoteIdName.ValueString())
-		if !data.RemoteIdName.IsNull() && data.RemoteIdSubstringLength.ValueInt64() != int64(remoteIdLength) {
-			resp.Diagnostics.AddAttributeError(
-				path.Root("remote_id_substring_length"),
-				"Invalid Attribute Value",
-				"Attribute remote_id_substring_length must be equal to the length of remote_id_name when is_remote_id_substring is set to true.",
-			)
+		if !data.RemoteIdName.IsNull() && !data.RemoteIdName.IsUnknown() &&
+			!data.RemoteIdSubstringLength.IsNull() && !data.RemoteIdSubstringLength.IsUnknown() {
+			remoteIdLength := len(data.RemoteIdName.ValueString())
+			if data.RemoteIdSubstringLength.ValueInt64() != int64(remoteIdLength) {
+				resp.Diagnostics.AddAttributeError(
+					path.Root("remote_id_substring_length"),
+					"Invalid Attribute Value",
+					"Attribute remote_id_substring_length must be equal to the length of remote_id_name when is_remote_id_substring is set to true.",
+				)
+			}
 		}
 	}
 
 	// Validate is_circuit_id_substring is required when is_circuit_id == "MATCHES_VALUE"
 	if isCircuitId == "MATCHES_VALUE" {
-		if data.IsCircuitIdSubstring.IsUnknown() || data.IsCircuitIdSubstring.IsNull() {
+		if data.IsCircuitIdSubstring.IsNull() {
 			resp.Diagnostics.AddAttributeError(
 				path.Root("is_circuit_id_substring"),
 				"Missing Required Attribute",
@@ -460,7 +539,7 @@ func (r *FilterrelayagentResource) ValidateConfig(ctx context.Context, req resou
 
 	// Validate is_remote_id_substring is required when is_remote_id == "MATCHES_VALUE"
 	if isRemoteId == "MATCHES_VALUE" {
-		if data.IsRemoteIdSubstring.IsUnknown() || data.IsRemoteIdSubstring.IsNull() {
+		if data.IsRemoteIdSubstring.IsNull() {
 			resp.Diagnostics.AddAttributeError(
 				path.Root("is_remote_id_substring"),
 				"Missing Required Attribute",

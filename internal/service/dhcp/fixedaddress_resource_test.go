@@ -132,6 +132,15 @@ func TestAccFixedaddressResource_AgentCircuitId(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "agent_circuit_id", "32"),
 				),
 			},
+			// Update and Read
+			{
+				Config: testAccFixedaddressAgentCircuitIdWithRemoteId(ip, "CIRCUIT_ID", 35, 34, "test_agent_circuit_id"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "agent_circuit_id", "35"),
+					resource.TestCheckResourceAttr(resourceName, "agent_remote_id", "34"),
+				),
+			},
 			// Delete testing automatically occurs in TestCase
 		},
 	})
@@ -161,6 +170,15 @@ func TestAccFixedaddressResource_AgentRemoteId(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "agent_remote_id", fmt.Sprintf("%v", agentRemoteID+10)),
+				),
+			},
+			// Update and Read
+			{
+				Config: testAccFixedaddressAgentCircuitIdWithRemoteId(ip, "REMOTE_ID", 35, agentRemoteID+20, "test_agent_remote_id"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "agent_circuit_id", "35"),
+					resource.TestCheckResourceAttr(resourceName, "agent_remote_id", fmt.Sprintf("%v", agentRemoteID+20)),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -1917,9 +1935,10 @@ func testAccCheckFixedaddressExists(ctx context.Context, resourceName string, v 
 		if !ok {
 			return fmt.Errorf("not found: %s", resourceName)
 		}
+		uuid := rs.Primary.Attributes["uuid"]
 		apiRes, _, err := acctest.NIOSClient.DHCPAPI.
 			FixedaddressAPI.
-			Read(ctx, utils.ExtractResourceRef(rs.Primary.Attributes["ref"])).
+			Read(ctx, utils.ResolveObjectIdentifier(&uuid, rs.Primary.Attributes["ref"])).
 			ReturnFieldsPlus(readableAttributesForFixedaddress).
 			ReturnAsObject(1).
 			Execute()
@@ -1939,7 +1958,7 @@ func testAccCheckFixedaddressDestroy(ctx context.Context, v *dhcp.Fixedaddress) 
 	return func(state *terraform.State) error {
 		_, httpRes, err := acctest.NIOSClient.DHCPAPI.
 			FixedaddressAPI.
-			Read(ctx, utils.ExtractResourceRef(*v.Ref)).
+			Read(ctx, utils.ResolveObjectIdentifier(v.Uuid, *v.Ref)).
 			ReturnAsObject(1).
 			ReturnFieldsPlus(readableAttributesForFixedaddress).
 			Execute()
@@ -1959,7 +1978,7 @@ func testAccCheckFixedaddressDisappears(ctx context.Context, v *dhcp.Fixedaddres
 	return func(state *terraform.State) error {
 		_, err := acctest.NIOSClient.DHCPAPI.
 			FixedaddressAPI.
-			Delete(ctx, utils.ExtractResourceRef(*v.Ref)).
+			Delete(ctx, utils.ResolveObjectIdentifier(v.Uuid, *v.Ref)).
 			Execute()
 		if err != nil {
 			return err
@@ -1988,6 +2007,17 @@ resource "nios_dhcp_fixed_address" "test_agent_circuit_id" {
 	agent_circuit_id = %d
 }
 `, ip, matchClient, agentCircuitId)
+}
+
+func testAccFixedaddressAgentCircuitIdWithRemoteId(ip, matchClient string, agentCircuitId, agentRemoteId int, resourceName string) string {
+	return fmt.Sprintf(`
+resource "nios_dhcp_fixed_address" "%s" {
+	ipv4addr = %q
+	match_client = %q
+	agent_circuit_id = %d
+	agent_remote_id = %d
+}
+`, resourceName, ip, matchClient, agentCircuitId, agentRemoteId)
 }
 
 func testAccFixedaddressAgentRemoteId(ip, matchClient string, agentRemoteId int) string {

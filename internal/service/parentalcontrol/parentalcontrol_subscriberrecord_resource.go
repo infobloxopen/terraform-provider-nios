@@ -11,8 +11,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
+	"github.com/infobloxopen/infoblox-nios-go-client/parentalcontrol"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/config"
+	"github.com/infobloxopen/terraform-provider-nios/internal/retry"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
@@ -71,9 +73,12 @@ func (r *ParentalcontrolSubscriberrecordResource) ValidateConfig(ctx context.Con
 		return
 	}
 
-	// Check if white_list or blacklist are provided and bwflag is set to true, if not return error
-	if !data.WhiteList.IsNull() || !data.BlackList.IsNull() {
-		if data.Bwflag.IsNull() || !data.Bwflag.ValueBool() {
+	// Check if white_list or black_list are provided and bwflag is set to true, if not return error.
+	isWhiteListSet := !data.WhiteList.IsNull() && !data.WhiteList.IsUnknown()
+	isBlackListSet := !data.BlackList.IsNull() && !data.BlackList.IsUnknown()
+
+	if isWhiteListSet || isBlackListSet {
+		if !data.Bwflag.IsUnknown() && (data.Bwflag.IsNull() || !data.Bwflag.ValueBool()) {
 			resp.Diagnostics.AddError(
 				"Invalid Configuration",
 				"bwflag must be set to true when white_list or black_list is provided.",
@@ -93,14 +98,41 @@ func (r *ParentalcontrolSubscriberrecordResource) Create(ctx context.Context, re
 		return
 	}
 
-	apiRes, _, err := r.client.ParentalControlAPI.
-		ParentalcontrolSubscriberrecordAPI.
-		Create(ctx).
-		ParentalcontrolSubscriberrecord(*data.Expand(ctx, &resp.Diagnostics)).
-		ReturnFieldsPlus(readableAttributesForParentalcontrolSubscriberrecord).
-		ReturnAsObject(1).
-		Execute()
+	payload := data.Expand(ctx, &resp.Diagnostics)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	var apiRes *parentalcontrol.CreateParentalcontrolSubscriberrecordResponse
+
+	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		var (
+			httpRes *http.Response
+			callErr error
+		)
+		apiRes, httpRes, callErr = r.client.ParentalControlAPI.
+			ParentalcontrolSubscriberrecordAPI.
+			Create(ctx).
+			ParentalcontrolSubscriberrecord(*payload).
+			ReturnFieldsPlus(readableAttributesForParentalcontrolSubscriberrecord).
+			ReturnAsObject(1).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
+
 	if err != nil {
+		if retry.IsAlreadyExistsErr(err) {
+			// Resource already exists, import required
+			resp.Diagnostics.AddError(
+				"Resource Already Exists",
+				fmt.Sprintf("Resource already exists, error: %s.\nPlease import the existing resource into terraform state.", err.Error()),
+			)
+			return
+		}
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create ParentalcontrolSubscriberrecord, got error: %s", err))
 		return
 	}
@@ -123,13 +155,28 @@ func (r *ParentalcontrolSubscriberrecordResource) Read(ctx context.Context, req 
 		return
 	}
 
-	apiRes, httpRes, err := r.client.ParentalControlAPI.
-		ParentalcontrolSubscriberrecordAPI.
-		Read(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
-		ReturnFieldsPlus(readableAttributesForParentalcontrolSubscriberrecord).
-		ReturnAsObject(1).
-		ProxySearch(config.GetProxySearch()).
-		Execute()
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
+
+	var (
+		httpRes *http.Response
+		apiRes  *parentalcontrol.GetParentalcontrolSubscriberrecordResponse
+	)
+
+	err := retry.Do(ctx, nil, func(ctx context.Context) (int, error) {
+		var callErr error
+		apiRes, httpRes, callErr = r.client.ParentalControlAPI.
+			ParentalcontrolSubscriberrecordAPI.
+			Read(ctx, resourceIdentifier).
+			ReturnFieldsPlus(readableAttributesForParentalcontrolSubscriberrecord).
+			ReturnAsObject(1).
+			ProxySearch(config.GetProxySearch()).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
 
 	// Handle not found case
 	if err != nil {
@@ -173,13 +220,34 @@ func (r *ParentalcontrolSubscriberrecordResource) Update(ctx context.Context, re
 		return
 	}
 
-	apiRes, _, err := r.client.ParentalControlAPI.
-		ParentalcontrolSubscriberrecordAPI.
-		Update(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
-		ParentalcontrolSubscriberrecord(*data.Expand(ctx, &resp.Diagnostics)).
-		ReturnFieldsPlus(readableAttributesForParentalcontrolSubscriberrecord).
-		ReturnAsObject(1).
-		Execute()
+	payload := data.Expand(ctx, &resp.Diagnostics)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
+
+	var apiRes *parentalcontrol.UpdateParentalcontrolSubscriberrecordResponse
+
+	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		var (
+			httpRes *http.Response
+			callErr error
+		)
+		apiRes, httpRes, callErr = r.client.ParentalControlAPI.
+			ParentalcontrolSubscriberrecordAPI.
+			Update(ctx, resourceIdentifier).
+			ParentalcontrolSubscriberrecord(*payload).
+			ReturnFieldsPlus(readableAttributesForParentalcontrolSubscriberrecord).
+			ReturnAsObject(1).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
+
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update ParentalcontrolSubscriberrecord, got error: %s", err))
 		return
@@ -203,14 +271,24 @@ func (r *ParentalcontrolSubscriberrecordResource) Delete(ctx context.Context, re
 		return
 	}
 
-	httpRes, err := r.client.ParentalControlAPI.
-		ParentalcontrolSubscriberrecordAPI.
-		Delete(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
-		Execute()
-	if err != nil {
-		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
-			return
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
+
+	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		httpRes, callErr := r.client.ParentalControlAPI.
+			ParentalcontrolSubscriberrecordAPI.
+			Delete(ctx, resourceIdentifier).
+			Execute()
+
+		if httpRes != nil {
+			if httpRes.StatusCode == http.StatusNotFound {
+				return 0, nil
+			}
+			return httpRes.StatusCode, callErr
 		}
+		return 0, callErr
+	})
+
+	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete ParentalcontrolSubscriberrecord, got error: %s", err))
 		return
 	}

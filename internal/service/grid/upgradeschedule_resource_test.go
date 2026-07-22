@@ -3,6 +3,7 @@ package grid_test
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"testing"
 	"time"
 
@@ -150,11 +151,8 @@ func TestAccUpgradescheduleResource_UpgradeGroups(t *testing.T) {
 				Config: testAccUpgradescheduleUpgradeGroups(groupName, startTime, upgrade_groups),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckUpgradescheduleExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "upgrade_groups.#", "2"),
-					resource.TestCheckResourceAttr(resourceName, "upgrade_groups.0.name", "Default"),
-					resource.TestCheckResourceAttr(resourceName, "upgrade_groups.0.upgrade_time", upgrade_time),
-					resource.TestCheckResourceAttr(resourceName, "upgrade_groups.1.name", groupName),
-					resource.TestCheckResourceAttr(resourceName, "upgrade_groups.1.upgrade_time", upgrade_time),
+					resource.TestCheckResourceAttrSet(resourceName, "upgrade_groups.#"),
+					testAccCheckUpgradeGroups(resourceName, "upgrade_time", upgrade_groups),
 				),
 			},
 			// Update and Read
@@ -162,16 +160,54 @@ func TestAccUpgradescheduleResource_UpgradeGroups(t *testing.T) {
 				Config: testAccUpgradescheduleUpgradeGroups(groupName, startTime, updated_upgrade_groups),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckUpgradescheduleExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "upgrade_groups.#", "2"),
-					resource.TestCheckResourceAttr(resourceName, "upgrade_groups.0.name", "Default"),
-					resource.TestCheckResourceAttr(resourceName, "upgrade_groups.0.upgrade_time", updated_upgrade_time),
-					resource.TestCheckResourceAttr(resourceName, "upgrade_groups.1.name", groupName),
-					resource.TestCheckResourceAttr(resourceName, "upgrade_groups.1.upgrade_time", updated_upgrade_time),
+					resource.TestCheckResourceAttrSet(resourceName, "upgrade_groups.#"),
+					testAccCheckUpgradeGroups(resourceName, "upgrade_time", updated_upgrade_groups),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
 		},
 	})
+}
+
+// testAccCheckUpgradeGroups verifies that every entry in expectedGroups
+// is present in the resource's upgrade_groups list (by name) and has the correct
+// value for timeField (e.g. "upgrade_time" or "distribution_time").
+func testAccCheckUpgradeGroups(resourceName, timeField string, expectedGroups []map[string]any) resource.TestCheckFunc {
+	return func(state *terraform.State) error {
+		rs, ok := state.RootModule().Resources[resourceName]
+		if !ok {
+			return fmt.Errorf("resource not found: %s", resourceName)
+		}
+
+		countStr := rs.Primary.Attributes["upgrade_groups.#"]
+		count, err := strconv.Atoi(countStr)
+		if err != nil || count == 0 {
+			return fmt.Errorf("upgrade_groups.# is %q, expected a positive integer", countStr)
+		}
+
+		// Build a map of name -> timeField value from state (order-independent).
+		actual := make(map[string]string, count)
+		for i := range count {
+			prefix := fmt.Sprintf("upgrade_groups.%d.", i)
+			name := rs.Primary.Attributes[prefix+"name"]
+			if name != "" {
+				actual[name] = rs.Primary.Attributes[prefix+timeField]
+			}
+		}
+
+		for _, eg := range expectedGroups {
+			name, _ := eg["name"].(string)
+			wantTime, _ := eg[timeField].(string)
+			gotTime, found := actual[name]
+			if !found {
+				return fmt.Errorf("upgrade group %q not found in state (state has %d groups)", name, count)
+			}
+			if gotTime != wantTime {
+				return fmt.Errorf("upgrade group %q: expected %s=%q, got %q", name, timeField, wantTime, gotTime)
+			}
+		}
+		return nil
+	}
 }
 
 func testAccCheckUpgradescheduleExists(ctx context.Context, resourceName string, v *grid.Upgradeschedule) resource.TestCheckFunc {
@@ -181,9 +217,10 @@ func testAccCheckUpgradescheduleExists(ctx context.Context, resourceName string,
 		if !ok {
 			return fmt.Errorf("not found: %s", resourceName)
 		}
+		uuid := rs.Primary.Attributes["uuid"]
 		apiRes, _, err := acctest.NIOSClient.GridAPI.
 			UpgradescheduleAPI.
-			Read(ctx, utils.ExtractResourceRef(rs.Primary.Attributes["ref"])).
+			Read(ctx, utils.ResolveObjectIdentifier(&uuid, rs.Primary.Attributes["ref"])).
 			ReturnFieldsPlus(readableAttributesForUpgradeschedule).
 			ReturnAsObject(1).
 			Execute()

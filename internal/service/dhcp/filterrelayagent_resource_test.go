@@ -525,9 +525,10 @@ func testAccCheckFilterrelayagentExists(ctx context.Context, resourceName string
 		if !ok {
 			return fmt.Errorf("not found: %s", resourceName)
 		}
+		uuid := rs.Primary.Attributes["uuid"]
 		apiRes, _, err := acctest.NIOSClient.DHCPAPI.
 			FilterrelayagentAPI.
-			Read(ctx, utils.ExtractResourceRef(rs.Primary.Attributes["ref"])).
+			Read(ctx, utils.ResolveObjectIdentifier(&uuid, rs.Primary.Attributes["ref"])).
 			ReturnFieldsPlus(readableAttributesForFilterrelayagent).
 			ReturnAsObject(1).
 			Execute()
@@ -547,7 +548,7 @@ func testAccCheckFilterrelayagentDestroy(ctx context.Context, v *dhcp.Filterrela
 	return func(state *terraform.State) error {
 		_, httpRes, err := acctest.NIOSClient.DHCPAPI.
 			FilterrelayagentAPI.
-			Read(ctx, utils.ExtractResourceRef(*v.Ref)).
+			Read(ctx, utils.ResolveObjectIdentifier(v.Uuid, *v.Ref)).
 			ReturnAsObject(1).
 			ReturnFieldsPlus(readableAttributesForFilterrelayagent).
 			Execute()
@@ -567,7 +568,7 @@ func testAccCheckFilterrelayagentDisappears(ctx context.Context, v *dhcp.Filterr
 	return func(state *terraform.State) error {
 		_, err := acctest.NIOSClient.DHCPAPI.
 			FilterrelayagentAPI.
-			Delete(ctx, utils.ExtractResourceRef(*v.Ref)).
+			Delete(ctx, utils.ResolveObjectIdentifier(v.Uuid, *v.Ref)).
 			Execute()
 		if err != nil {
 			return err

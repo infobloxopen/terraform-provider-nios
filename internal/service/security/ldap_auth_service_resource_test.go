@@ -695,9 +695,10 @@ func testAccCheckLdapAuthServiceExists(ctx context.Context, resourceName string,
 		if !ok {
 			return fmt.Errorf("not found: %s", resourceName)
 		}
+		uuid := rs.Primary.Attributes["uuid"]
 		apiRes, _, err := acctest.NIOSClient.SecurityAPI.
 			LdapAuthServiceAPI.
-			Read(ctx, utils.ExtractResourceRef(rs.Primary.Attributes["ref"])).
+			Read(ctx, utils.ResolveObjectIdentifier(&uuid, rs.Primary.Attributes["ref"])).
 			ReturnFieldsPlus(readableAttributesForLdapAuthService).
 			ReturnAsObject(1).
 			Execute()
@@ -717,7 +718,7 @@ func testAccCheckLdapAuthServiceDestroy(ctx context.Context, v *security.LdapAut
 	return func(state *terraform.State) error {
 		_, httpRes, err := acctest.NIOSClient.SecurityAPI.
 			LdapAuthServiceAPI.
-			Read(ctx, utils.ExtractResourceRef(*v.Ref)).
+			Read(ctx, utils.ResolveObjectIdentifier(v.Uuid, *v.Ref)).
 			ReturnAsObject(1).
 			ReturnFieldsPlus(readableAttributesForLdapAuthService).
 			Execute()
@@ -737,7 +738,7 @@ func testAccCheckLdapAuthServiceDisappears(ctx context.Context, v *security.Ldap
 	return func(state *terraform.State) error {
 		_, err := acctest.NIOSClient.SecurityAPI.
 			LdapAuthServiceAPI.
-			Delete(ctx, utils.ExtractResourceRef(*v.Ref)).
+			Delete(ctx, utils.ResolveObjectIdentifier(v.Uuid, *v.Ref)).
 			Execute()
 		if err != nil {
 			return err

@@ -11,8 +11,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
+	"github.com/infobloxopen/infoblox-nios-go-client/dhcp"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/config"
+	"github.com/infobloxopen/terraform-provider-nios/internal/retry"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
@@ -79,14 +81,41 @@ func (r *RangeResource) Create(ctx context.Context, req resource.CreateRequest, 
 		return
 	}
 
-	apiRes, _, err := r.client.DHCPAPI.
-		RangeAPI.
-		Create(ctx).
-		Range_(*data.Expand(ctx, &resp.Diagnostics, true)).
-		ReturnFieldsPlus(readableAttributesForRange).
-		ReturnAsObject(1).
-		Execute()
+	payload := data.Expand(ctx, &resp.Diagnostics, true)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	var apiRes *dhcp.CreateRangeResponse
+
+	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		var (
+			httpRes *http.Response
+			callErr error
+		)
+		apiRes, httpRes, callErr = r.client.DHCPAPI.
+			RangeAPI.
+			Create(ctx).
+			Range_(*payload).
+			ReturnFieldsPlus(readableAttributesForRange).
+			ReturnAsObject(1).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
+
 	if err != nil {
+		if retry.IsAlreadyExistsErr(err) {
+			// Resource already exists, import required
+			resp.Diagnostics.AddError(
+				"Resource Already Exists",
+				fmt.Sprintf("Resource already exists, error: %s.\nPlease import the existing resource into terraform state.", err.Error()),
+			)
+			return
+		}
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create Range, got error: %s", err))
 		return
 	}
@@ -121,13 +150,28 @@ func (r *RangeResource) Read(ctx context.Context, req resource.ReadRequest, resp
 		return
 	}
 
-	apiRes, httpRes, err := r.client.DHCPAPI.
-		RangeAPI.
-		Read(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
-		ReturnFieldsPlus(readableAttributesForRange).
-		ReturnAsObject(1).
-		ProxySearch(config.GetProxySearch()).
-		Execute()
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
+
+	var (
+		httpRes *http.Response
+		apiRes  *dhcp.GetRangeResponse
+	)
+
+	err := retry.Do(ctx, nil, func(ctx context.Context) (int, error) {
+		var callErr error
+		apiRes, httpRes, callErr = r.client.DHCPAPI.
+			RangeAPI.
+			Read(ctx, resourceIdentifier).
+			ReturnFieldsPlus(readableAttributesForRange).
+			ReturnAsObject(1).
+			ProxySearch(config.GetProxySearch()).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
 
 	// If the resource is not found, try searching using Extensible Attributes
 	if err != nil {
@@ -279,13 +323,34 @@ func (r *RangeResource) Update(ctx context.Context, req resource.UpdateRequest, 
 		return
 	}
 
-	apiRes, _, err := r.client.DHCPAPI.
-		RangeAPI.
-		Update(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
-		Range_(*data.Expand(ctx, &resp.Diagnostics, false)).
-		ReturnFieldsPlus(readableAttributesForRange).
-		ReturnAsObject(1).
-		Execute()
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
+
+	payload := data.Expand(ctx, &resp.Diagnostics, false)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	var apiRes *dhcp.UpdateRangeResponse
+
+	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		var (
+			httpRes *http.Response
+			callErr error
+		)
+		apiRes, httpRes, callErr = r.client.DHCPAPI.
+			RangeAPI.
+			Update(ctx, resourceIdentifier).
+			Range_(*payload).
+			ReturnFieldsPlus(readableAttributesForRange).
+			ReturnAsObject(1).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
+
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update Range, got error: %s", err))
 		return
@@ -319,14 +384,24 @@ func (r *RangeResource) Delete(ctx context.Context, req resource.DeleteRequest, 
 		return
 	}
 
-	httpRes, err := r.client.DHCPAPI.
-		RangeAPI.
-		Delete(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
-		Execute()
-	if err != nil {
-		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
-			return
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
+
+	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		httpRes, callErr := r.client.DHCPAPI.
+			RangeAPI.
+			Delete(ctx, resourceIdentifier).
+			Execute()
+
+		if httpRes != nil {
+			if httpRes.StatusCode == http.StatusNotFound {
+				return 0, nil
+			}
+			return httpRes.StatusCode, callErr
 		}
+		return 0, callErr
+	})
+
+	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete Range, got error: %s", err))
 		return
 	}
@@ -377,7 +452,7 @@ func (r *RangeResource) ValidateConfig(ctx context.Context, req resource.Validat
 		for i, option := range options {
 			isSpecialOption := false
 			optionName := ""
-			if option.Value.IsNull() || option.Value.IsUnknown() {
+			if option.Value.IsNull() {
 				resp.Diagnostics.AddAttributeError(
 					path.Root("options").AtListIndex(i).AtName("value"),
 					"Invalid configuration for DHCP Option",
@@ -391,6 +466,8 @@ func (r *RangeResource) ValidateConfig(ctx context.Context, req resource.Validat
 				optionNum := option.Num.ValueInt64()
 				isSpecialOption = specialOptionsNum[optionNum]
 				optionName = fmt.Sprintf("with num = %d", optionNum)
+			} else if option.Name.IsUnknown() || option.Num.IsUnknown() {
+				continue
 			} else {
 				resp.Diagnostics.AddAttributeError(
 					path.Root("options").AtListIndex(i).AtName("name"),
@@ -401,7 +478,7 @@ func (r *RangeResource) ValidateConfig(ctx context.Context, req resource.Validat
 				continue
 			}
 
-			if option.Value.ValueString() == "" {
+			if !option.Value.IsNull() && !option.Value.IsUnknown() && option.Value.ValueString() == "" {
 				if !isSpecialOption {
 					resp.Diagnostics.AddAttributeError(
 						path.Root("options").AtListIndex(i).AtName("value"),
@@ -430,38 +507,40 @@ func (r *RangeResource) ValidateConfig(ctx context.Context, req resource.Validat
 		}
 	}
 
-	serverAssociationType := "NONE"
-	if !data.ServerAssociationType.IsNull() && !data.ServerAssociationType.IsUnknown() {
-		serverAssociationType = data.ServerAssociationType.ValueString()
-	}
-
-	// If server_association_type is MEMBER, member field must be set
-	if serverAssociationType == "MEMBER" {
-		if data.Member.IsNull() || data.Member.IsUnknown() {
-			resp.Diagnostics.AddAttributeError(
-				path.Root("member"),
-				"Invalid Configuration",
-				"The 'member' field must be set when 'server_association_type' is set to 'MEMBER'.",
-			)
+	if !data.ServerAssociationType.IsUnknown() {
+		serverAssociationType := "NONE"
+		if !data.ServerAssociationType.IsNull() {
+			serverAssociationType = data.ServerAssociationType.ValueString()
 		}
-	}
 
-	// If server_association_type is NONE, member field cannot be set
-	if serverAssociationType == "NONE" {
-		if !data.Member.IsNull() && !data.Member.IsUnknown() {
-			resp.Diagnostics.AddAttributeError(
-				path.Root("member"),
-				"Invalid Configuration",
-				"The 'member' field cannot be set when 'server_association_type' is set to 'NONE' (default).",
-			)
+		// If server_association_type is MEMBER, member field must be set
+		if serverAssociationType == "MEMBER" {
+			if data.Member.IsNull() {
+				resp.Diagnostics.AddAttributeError(
+					path.Root("member"),
+					"Invalid Configuration",
+					"The 'member' field must be set when 'server_association_type' is set to 'MEMBER'.",
+				)
+			}
 		}
-		if !data.MsServer.IsNull() && !data.MsServer.IsUnknown() {
-			resp.Diagnostics.AddAttributeError(
-				path.Root("ms_server"),
-				"Invalid Configuration",
-				"The 'ms_server' field cannot be set when 'server_association_type' is set to 'NONE' (default). "+
-					"Modify the 'server_association_type' field to 'MS_SERVER' to allow setting 'ms_server'.",
-			)
+
+		// If server_association_type is NONE, member field cannot be set
+		if serverAssociationType == "NONE" {
+			if !data.Member.IsNull() && !data.Member.IsUnknown() {
+				resp.Diagnostics.AddAttributeError(
+					path.Root("member"),
+					"Invalid Configuration",
+					"The 'member' field cannot be set when 'server_association_type' is set to 'NONE' (default).",
+				)
+			}
+			if !data.MsServer.IsNull() && !data.MsServer.IsUnknown() {
+				resp.Diagnostics.AddAttributeError(
+					path.Root("ms_server"),
+					"Invalid Configuration",
+					"The 'ms_server' field cannot be set when 'server_association_type' is set to 'NONE' (default). "+
+						"Modify the 'server_association_type' field to 'MS_SERVER' to allow setting 'ms_server'.",
+				)
+			}
 		}
 	}
 

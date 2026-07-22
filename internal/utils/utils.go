@@ -764,6 +764,10 @@ func CopyFieldFromPlanToRespObject(ctx context.Context, planValue, respValue att
 		return respValue, &diags
 	}
 
+	if planFieldValue.IsUnknown() {
+		return respValue, &diags
+	}
+
 	if _, exists := respAttrs[fieldName]; !exists {
 		diags.AddError(
 			"Field Not Found in Response",
@@ -892,4 +896,12 @@ func ResolveIdentifier(uuid, ref types.String) string {
 		return uuid.ValueString()
 	}
 	return ExtractResourceRef(ref.ValueString())
+}
+
+// ResolveObjectIdentifier is the test-friendly variant of ResolveIdentifier for use with API clients
+func ResolveObjectIdentifier(uuid *string, ref string) string {
+	if uuid != nil && *uuid != "" {
+		return *uuid
+	}
+	return ExtractResourceRef(ref)
 }

@@ -11,8 +11,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
+	"github.com/infobloxopen/infoblox-nios-go-client/dhcp"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/config"
+	"github.com/infobloxopen/terraform-provider-nios/internal/retry"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
@@ -79,14 +81,41 @@ func (r *RangetemplateResource) Create(ctx context.Context, req resource.CreateR
 		return
 	}
 
-	apiRes, _, err := r.client.DHCPAPI.
-		RangetemplateAPI.
-		Create(ctx).
-		Rangetemplate(*data.Expand(ctx, &resp.Diagnostics)).
-		ReturnFieldsPlus(readableAttributesForRangetemplate).
-		ReturnAsObject(1).
-		Execute()
+	payload := data.Expand(ctx, &resp.Diagnostics)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	var apiRes *dhcp.CreateRangetemplateResponse
+
+	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		var (
+			httpRes *http.Response
+			callErr error
+		)
+		apiRes, httpRes, callErr = r.client.DHCPAPI.
+			RangetemplateAPI.
+			Create(ctx).
+			Rangetemplate(*payload).
+			ReturnFieldsPlus(readableAttributesForRangetemplate).
+			ReturnAsObject(1).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
+
 	if err != nil {
+		if retry.IsAlreadyExistsErr(err) {
+			// Resource already exists, import required
+			resp.Diagnostics.AddError(
+				"Resource Already Exists",
+				fmt.Sprintf("Resource already exists, error: %s.\nPlease import the existing resource into terraform state.", err.Error()),
+			)
+			return
+		}
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create Rangetemplate, got error: %s", err))
 		return
 	}
@@ -121,13 +150,28 @@ func (r *RangetemplateResource) Read(ctx context.Context, req resource.ReadReque
 		return
 	}
 
-	apiRes, httpRes, err := r.client.DHCPAPI.
-		RangetemplateAPI.
-		Read(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
-		ReturnFieldsPlus(readableAttributesForRangetemplate).
-		ReturnAsObject(1).
-		ProxySearch(config.GetProxySearch()).
-		Execute()
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
+
+	var (
+		httpRes *http.Response
+		apiRes  *dhcp.GetRangetemplateResponse
+	)
+
+	err := retry.Do(ctx, nil, func(ctx context.Context) (int, error) {
+		var callErr error
+		apiRes, httpRes, callErr = r.client.DHCPAPI.
+			RangetemplateAPI.
+			Read(ctx, resourceIdentifier).
+			ReturnFieldsPlus(readableAttributesForRangetemplate).
+			ReturnAsObject(1).
+			ProxySearch(config.GetProxySearch()).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
 
 	// If the resource is not found, try searching using Extensible Attributes
 	if err != nil {
@@ -279,13 +323,34 @@ func (r *RangetemplateResource) Update(ctx context.Context, req resource.UpdateR
 		return
 	}
 
-	apiRes, _, err := r.client.DHCPAPI.
-		RangetemplateAPI.
-		Update(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
-		Rangetemplate(*data.Expand(ctx, &resp.Diagnostics)).
-		ReturnFieldsPlus(readableAttributesForRangetemplate).
-		ReturnAsObject(1).
-		Execute()
+	payload := data.Expand(ctx, &resp.Diagnostics)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
+
+	var apiRes *dhcp.UpdateRangetemplateResponse
+
+	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		var (
+			httpRes *http.Response
+			callErr error
+		)
+		apiRes, httpRes, callErr = r.client.DHCPAPI.
+			RangetemplateAPI.
+			Update(ctx, resourceIdentifier).
+			Rangetemplate(*payload).
+			ReturnFieldsPlus(readableAttributesForRangetemplate).
+			ReturnAsObject(1).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
+
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update Rangetemplate, got error: %s", err))
 		return
@@ -319,14 +384,24 @@ func (r *RangetemplateResource) Delete(ctx context.Context, req resource.DeleteR
 		return
 	}
 
-	httpRes, err := r.client.DHCPAPI.
-		RangetemplateAPI.
-		Delete(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
-		Execute()
-	if err != nil {
-		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
-			return
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
+
+	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		httpRes, callErr := r.client.DHCPAPI.
+			RangetemplateAPI.
+			Delete(ctx, resourceIdentifier).
+			Execute()
+
+		if httpRes != nil {
+			if httpRes.StatusCode == http.StatusNotFound {
+				return 0, nil
+			}
+			return httpRes.StatusCode, callErr
 		}
+		return 0, callErr
+	})
+
+	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete Rangetemplate, got error: %s", err))
 		return
 	}
@@ -377,7 +452,7 @@ func (r *RangetemplateResource) ValidateConfig(ctx context.Context, req resource
 		for i, option := range options {
 			isSpecialOption := false
 			optionName := ""
-			if option.Value.IsNull() || option.Value.IsUnknown() {
+			if option.Value.IsNull() {
 				resp.Diagnostics.AddAttributeError(
 					path.Root("options").AtListIndex(i).AtName("value"),
 					"Invalid configuration for DHCP Option",
@@ -391,6 +466,8 @@ func (r *RangetemplateResource) ValidateConfig(ctx context.Context, req resource
 				optionNum := option.Num.ValueInt64()
 				isSpecialOption = specialOptionsNum[optionNum]
 				optionName = fmt.Sprintf("with num = %d", optionNum)
+			} else if option.Name.IsUnknown() || option.Num.IsUnknown() {
+				continue
 			} else {
 				resp.Diagnostics.AddAttributeError(
 					path.Root("options").AtListIndex(i).AtName("name"),
@@ -401,7 +478,7 @@ func (r *RangetemplateResource) ValidateConfig(ctx context.Context, req resource
 				continue
 			}
 
-			if option.Value.ValueString() == "" {
+			if !option.Value.IsNull() && !option.Value.IsUnknown() && option.Value.ValueString() == "" {
 				if !isSpecialOption {
 					resp.Diagnostics.AddAttributeError(
 						path.Root("options").AtListIndex(i).AtName("value"),
@@ -445,7 +522,7 @@ func (r *RangetemplateResource) ValidateConfig(ctx context.Context, req resource
 
 	// If server_association_type is MEMBER, member field must be set
 	if serverAssociationType == "MEMBER" {
-		if data.Member.IsNull() || data.Member.IsUnknown() {
+		if data.Member.IsNull() {
 			resp.Diagnostics.AddAttributeError(
 				path.Root("member"),
 				"Invalid Configuration",
@@ -456,7 +533,7 @@ func (r *RangetemplateResource) ValidateConfig(ctx context.Context, req resource
 
 	// If server_association_type is FAILOVER, failover_association field must be set
 	if serverAssociationType == "FAILOVER" {
-		if data.FailoverAssociation.IsNull() || data.FailoverAssociation.IsUnknown() {
+		if data.FailoverAssociation.IsNull() {
 			resp.Diagnostics.AddAttributeError(
 				path.Root("failover_association"),
 				"Invalid Configuration",
@@ -467,7 +544,7 @@ func (r *RangetemplateResource) ValidateConfig(ctx context.Context, req resource
 
 	// If server_association_type is MS_SERVER, ms_server field must be set
 	if serverAssociationType == "MS_SERVER" {
-		if data.MsServer.IsNull() || data.MsServer.IsUnknown() {
+		if data.MsServer.IsNull() {
 			resp.Diagnostics.AddAttributeError(
 				path.Root("ms_server"),
 				"Invalid Configuration",

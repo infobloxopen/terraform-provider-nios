@@ -413,9 +413,10 @@ func testAccCheckIpv6filteroptionExists(ctx context.Context, resourceName string
 		if !ok {
 			return fmt.Errorf("not found: %s", resourceName)
 		}
+		uuid := rs.Primary.Attributes["uuid"]
 		apiRes, _, err := acctest.NIOSClient.DHCPAPI.
 			Ipv6filteroptionAPI.
-			Read(ctx, utils.ExtractResourceRef(rs.Primary.Attributes["ref"])).
+			Read(ctx, utils.ResolveObjectIdentifier(&uuid, rs.Primary.Attributes["ref"])).
 			ReturnFieldsPlus(readableAttributesForIpv6filteroption).
 			ReturnAsObject(1).
 			Execute()
@@ -435,7 +436,7 @@ func testAccCheckIpv6filteroptionDestroy(ctx context.Context, v *dhcp.Ipv6filter
 	return func(state *terraform.State) error {
 		_, httpRes, err := acctest.NIOSClient.DHCPAPI.
 			Ipv6filteroptionAPI.
-			Read(ctx, utils.ExtractResourceRef(*v.Ref)).
+			Read(ctx, utils.ResolveObjectIdentifier(v.Uuid, *v.Ref)).
 			ReturnAsObject(1).
 			ReturnFieldsPlus(readableAttributesForIpv6filteroption).
 			Execute()
@@ -455,7 +456,7 @@ func testAccCheckIpv6filteroptionDisappears(ctx context.Context, v *dhcp.Ipv6fil
 	return func(state *terraform.State) error {
 		_, err := acctest.NIOSClient.DHCPAPI.
 			Ipv6filteroptionAPI.
-			Delete(ctx, utils.ExtractResourceRef(*v.Ref)).
+			Delete(ctx, utils.ResolveObjectIdentifier(v.Uuid, *v.Ref)).
 			Execute()
 		if err != nil {
 			return err

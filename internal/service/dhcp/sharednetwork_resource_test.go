@@ -569,7 +569,7 @@ func TestAccSharednetworkResource_IgnoreClientIdentifier(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccSharednetworkIgnoreClientIdentifier(name, networks, false, true),
+				Config: testAccSharednetworkIgnoreClientIdentifier(name, networks, false, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSharednetworkExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "ignore_client_identifier", "false"),
@@ -577,7 +577,7 @@ func TestAccSharednetworkResource_IgnoreClientIdentifier(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccSharednetworkIgnoreClientIdentifier(name, networks, true, true),
+				Config: testAccSharednetworkIgnoreClientIdentifierUpdate(name, networks, true, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSharednetworkExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "ignore_client_identifier", "true"),
@@ -1572,9 +1572,10 @@ func testAccCheckSharednetworkExists(ctx context.Context, resourceName string, v
 		if !ok {
 			return fmt.Errorf("not found: %s", resourceName)
 		}
+		uuid := rs.Primary.Attributes["uuid"]
 		apiRes, _, err := acctest.NIOSClient.DHCPAPI.
 			SharednetworkAPI.
-			Read(ctx, utils.ExtractResourceRef(rs.Primary.Attributes["ref"])).
+			Read(ctx, utils.ResolveObjectIdentifier(&uuid, rs.Primary.Attributes["ref"])).
 			ReturnFieldsPlus(readableAttributesForSharednetwork).
 			ReturnAsObject(1).
 			Execute()
@@ -1594,7 +1595,7 @@ func testAccCheckSharednetworkDestroy(ctx context.Context, v *dhcp.Sharednetwork
 	return func(state *terraform.State) error {
 		_, httpRes, err := acctest.NIOSClient.DHCPAPI.
 			SharednetworkAPI.
-			Read(ctx, utils.ExtractResourceRef(*v.Ref)).
+			Read(ctx, utils.ResolveObjectIdentifier(v.Uuid, *v.Ref)).
 			ReturnAsObject(1).
 			ReturnFieldsPlus(readableAttributesForSharednetwork).
 			Execute()
@@ -1614,7 +1615,7 @@ func testAccCheckSharednetworkDisappears(ctx context.Context, v *dhcp.Sharednetw
 	return func(state *terraform.State) error {
 		_, err := acctest.NIOSClient.DHCPAPI.
 			SharednetworkAPI.
-			Delete(ctx, utils.ExtractResourceRef(*v.Ref)).
+			Delete(ctx, utils.ResolveObjectIdentifier(v.Uuid, *v.Ref)).
 			Execute()
 		if err != nil {
 			return err
@@ -1882,7 +1883,23 @@ resource "nios_dhcp_shared_network" "test_ignore_client_identifier" {
    networks = %s
    ignore_client_identifier = %t
    use_ignore_client_identifier = %t
+   use_ignore_id = false
+}
+`, name, networksStr, ignoreClientIdentifier, useIgnoreClientIdentifier)
+	return strings.Join([]string{testAccBaseWithNetworks(
+		"201.31.0.0/24", "201.32.0.0/24"), config}, "\n")
+}
+
+func testAccSharednetworkIgnoreClientIdentifierUpdate(name string, networks []string, ignoreClientIdentifier, useIgnoreClientIdentifier bool) string {
+	networksStr := formatNetworksToHCL(networks)
+	config := fmt.Sprintf(`
+resource "nios_dhcp_shared_network" "test_ignore_client_identifier" {
+   name = %q
+   networks = %s
+   ignore_client_identifier = %t
+   use_ignore_client_identifier = %t
    use_ignore_id = true
+   ignore_id = "CLIENT"
 }
 `, name, networksStr, ignoreClientIdentifier, useIgnoreClientIdentifier)
 	return strings.Join([]string{testAccBaseWithNetworks(
@@ -1905,14 +1922,25 @@ resource "nios_dhcp_shared_network" "test_ignore_dhcp_option_list_request" {
 
 func testAccSharednetworkIgnoreId(name string, networks []string, ignoreId string, useIgnoreId bool) string {
 	networksStr := formatNetworksToHCL(networks)
+	ignoreClientIdentifier := "false"
+	useIgnoreClientIdentifier := "true"
+	if ignoreId == "CLIENT" && useIgnoreId {
+		ignoreClientIdentifier = "true"
+		useIgnoreClientIdentifier = "true"
+	} else if ignoreId == "NONE" && !useIgnoreId {
+		ignoreClientIdentifier = "false"
+		useIgnoreClientIdentifier = "false"
+	}
 	config := fmt.Sprintf(`
 resource "nios_dhcp_shared_network" "test_ignore_id" {
    name = %q
    networks = %s
    ignore_id = %q
    use_ignore_id = %t
+   ignore_client_identifier = %s
+   use_ignore_client_identifier = %s
 }
-`, name, networksStr, ignoreId, useIgnoreId)
+`, name, networksStr, ignoreId, useIgnoreId, ignoreClientIdentifier, useIgnoreClientIdentifier)
 	return strings.Join([]string{testAccBaseWithNetworks(
 		"201.35.0.0/24", "201.36.0.0/24"), config}, "\n")
 }

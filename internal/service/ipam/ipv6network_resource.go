@@ -14,8 +14,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
+	"github.com/infobloxopen/infoblox-nios-go-client/ipam"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/config"
+	"github.com/infobloxopen/terraform-provider-nios/internal/retry"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
@@ -89,14 +91,41 @@ func (r *Ipv6networkResource) Create(ctx context.Context, req resource.CreateReq
 		data.FuncCall = r.UpdateFuncCallAttributeName(ctx, data, &resp.Diagnostics)
 	}
 
-	apiRes, _, err := r.client.IPAMAPI.
-		Ipv6networkAPI.
-		Create(ctx).
-		Ipv6network(*data.Expand(ctx, &resp.Diagnostics, true)).
-		ReturnFieldsPlus(readableAttributesForIpv6network).
-		ReturnAsObject(1).
-		Execute()
+	payload := data.Expand(ctx, &resp.Diagnostics, true)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	var apiRes *ipam.CreateIpv6networkResponse
+
+	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		var (
+			httpRes *http.Response
+			callErr error
+		)
+		apiRes, httpRes, callErr = r.client.IPAMAPI.
+			Ipv6networkAPI.
+			Create(ctx).
+			Ipv6network(*payload).
+			ReturnFieldsPlus(readableAttributesForIpv6network).
+			ReturnAsObject(1).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
+
 	if err != nil {
+		if retry.IsAlreadyExistsErr(err) {
+			// Resource already exists, import required
+			resp.Diagnostics.AddError(
+				"Resource Already Exists",
+				fmt.Sprintf("Resource already exists, error: %s.\nPlease import the existing resource into terraform state.", err.Error()),
+			)
+			return
+		}
 		errVal := err.Error()
 		if ((strings.Contains(errVal, "The search parameters") &&
 			strings.Contains(errVal, "for object ipv6network did not return any result")) ||
@@ -149,13 +178,28 @@ func (r *Ipv6networkResource) Read(ctx context.Context, req resource.ReadRequest
 		return
 	}
 
-	apiRes, httpRes, err := r.client.IPAMAPI.
-		Ipv6networkAPI.
-		Read(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
-		ReturnFieldsPlus(readableAttributesForIpv6network).
-		ReturnAsObject(1).
-		ProxySearch(config.GetProxySearch()).
-		Execute()
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
+
+	var (
+		httpRes *http.Response
+		apiRes  *ipam.GetIpv6networkResponse
+	)
+
+	err := retry.Do(ctx, nil, func(ctx context.Context) (int, error) {
+		var callErr error
+		apiRes, httpRes, callErr = r.client.IPAMAPI.
+			Ipv6networkAPI.
+			Read(ctx, resourceIdentifier).
+			ReturnFieldsPlus(readableAttributesForIpv6network).
+			ReturnAsObject(1).
+			ProxySearch(config.GetProxySearch()).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
 
 	// If the resource is not found, try searching using Extensible Attributes
 	if err != nil {
@@ -307,13 +351,34 @@ func (r *Ipv6networkResource) Update(ctx context.Context, req resource.UpdateReq
 		return
 	}
 
-	apiRes, _, err := r.client.IPAMAPI.
-		Ipv6networkAPI.
-		Update(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
-		Ipv6network(*data.Expand(ctx, &resp.Diagnostics, false)).
-		ReturnFieldsPlus(readableAttributesForIpv6network).
-		ReturnAsObject(1).
-		Execute()
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
+
+	payload := data.Expand(ctx, &resp.Diagnostics, false)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	var apiRes *ipam.UpdateIpv6networkResponse
+
+	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		var (
+			httpRes *http.Response
+			callErr error
+		)
+		apiRes, httpRes, callErr = r.client.IPAMAPI.
+			Ipv6networkAPI.
+			Update(ctx, resourceIdentifier).
+			Ipv6network(*payload).
+			ReturnFieldsPlus(readableAttributesForIpv6network).
+			ReturnAsObject(1).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
+
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update Ipv6network, got error: %s", err))
 		return
@@ -347,14 +412,24 @@ func (r *Ipv6networkResource) Delete(ctx context.Context, req resource.DeleteReq
 		return
 	}
 
-	httpRes, err := r.client.IPAMAPI.
-		Ipv6networkAPI.
-		Delete(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
-		Execute()
-	if err != nil {
-		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
-			return
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
+
+	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		httpRes, callErr := r.client.IPAMAPI.
+			Ipv6networkAPI.
+			Delete(ctx, resourceIdentifier).
+			Execute()
+
+		if httpRes != nil {
+			if httpRes.StatusCode == http.StatusNotFound {
+				return 0, nil
+			}
+			return httpRes.StatusCode, callErr
 		}
+		return 0, callErr
+	})
+
+	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete Ipv6network, got error: %s", err))
 		return
 	}
@@ -423,7 +498,7 @@ func (r *Ipv6networkResource) ValidateConfig(ctx context.Context, req resource.V
 		for i, option := range options {
 			isSpecialOption := false
 			optionName := ""
-			if option.Value.IsNull() || option.Value.IsUnknown() {
+			if option.Value.IsNull() {
 				resp.Diagnostics.AddAttributeError(
 					path.Root("options").AtListIndex(i).AtName("value"),
 					"Invalid configuration for DHCP Option",
@@ -437,6 +512,8 @@ func (r *Ipv6networkResource) ValidateConfig(ctx context.Context, req resource.V
 				optionNum := option.Num.ValueInt64()
 				isSpecialOption = specialOptionsNum[optionNum]
 				optionName = fmt.Sprintf("with num = %d", optionNum)
+			} else if option.Name.IsUnknown() || option.Num.IsUnknown() {
+				continue
 			} else {
 				resp.Diagnostics.AddAttributeError(
 					path.Root("options").AtListIndex(i).AtName("name"),
@@ -447,7 +524,7 @@ func (r *Ipv6networkResource) ValidateConfig(ctx context.Context, req resource.V
 				continue
 			}
 
-			if option.Value.ValueString() == "" {
+			if !option.Value.IsNull() && !option.Value.IsUnknown() && option.Value.ValueString() == "" {
 				if !isSpecialOption {
 					resp.Diagnostics.AddAttributeError(
 						path.Root("options").AtListIndex(i).AtName("value"),
@@ -475,7 +552,7 @@ func (r *Ipv6networkResource) ValidateConfig(ctx context.Context, req resource.V
 				)
 			}
 
-			if option.Name.ValueString() == "dhcp-lease-time" {
+			if option.Name.ValueString() == "dhcp-lease-time" && !option.Value.IsNull() && !option.Value.IsUnknown() {
 				hasDhcpLeaseTime = true
 				dhcpLeaseTimeValue = option.Value.ValueString()
 			}
@@ -483,6 +560,7 @@ func (r *Ipv6networkResource) ValidateConfig(ctx context.Context, req resource.V
 			// domain_name attribute must match the value of option 'domain-name'
 			if option.Name.ValueString() == "domain-name" {
 				if !data.DomainName.IsNull() && !data.DomainName.IsUnknown() &&
+					!option.Value.IsNull() && !option.Value.IsUnknown() &&
 					option.Value.ValueString() != data.DomainName.ValueString() {
 					resp.Diagnostics.AddAttributeError(
 						path.Root("domain_name"),
@@ -507,7 +585,7 @@ func (r *Ipv6networkResource) ValidateConfig(ctx context.Context, req resource.V
 
 	// Preferred lifetime must be less than or equal to valid lifetime
 	if !data.PreferredLifetime.IsNull() && !data.PreferredLifetime.IsUnknown() {
-		if (data.ValidLifetime.IsUnknown() || data.ValidLifetime.IsNull()) && !hasDhcpLeaseTime {
+		if data.ValidLifetime.IsNull() && !hasDhcpLeaseTime && !data.Options.IsUnknown() {
 			resp.Diagnostics.AddAttributeError(
 				path.Root("preferred_lifetime"),
 				"Invalid configuration",
@@ -536,7 +614,7 @@ func (r *Ipv6networkResource) ValidateConfig(ctx context.Context, req resource.V
 	}
 
 	// Check for valid lifetime or dhcp-lease-time when preferred_lifetime is NOT set
-	if data.PreferredLifetime.IsNull() || data.PreferredLifetime.IsUnknown() {
+	if data.PreferredLifetime.IsNull() {
 		// validate that valid_lifetime is >= 27000
 		if !data.ValidLifetime.IsNull() && !data.ValidLifetime.IsUnknown() &&
 			!data.UseValidLifetime.IsNull() && !data.UseValidLifetime.IsUnknown() {

@@ -12,8 +12,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
+	"github.com/infobloxopen/infoblox-nios-go-client/dhcp"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/config"
+	"github.com/infobloxopen/terraform-provider-nios/internal/retry"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
@@ -81,14 +83,41 @@ func (r *Ipv6sharednetworkResource) Create(ctx context.Context, req resource.Cre
 		return
 	}
 
-	apiRes, _, err := r.client.DHCPAPI.
-		Ipv6sharednetworkAPI.
-		Create(ctx).
-		Ipv6sharednetwork(*data.Expand(ctx, &resp.Diagnostics, true)).
-		ReturnFieldsPlus(readableAttributesForIpv6sharednetwork).
-		ReturnAsObject(1).
-		Execute()
+	payload := data.Expand(ctx, &resp.Diagnostics, true)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	var apiRes *dhcp.CreateIpv6sharednetworkResponse
+
+	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		var (
+			httpRes *http.Response
+			callErr error
+		)
+		apiRes, httpRes, callErr = r.client.DHCPAPI.
+			Ipv6sharednetworkAPI.
+			Create(ctx).
+			Ipv6sharednetwork(*payload).
+			ReturnFieldsPlus(readableAttributesForIpv6sharednetwork).
+			ReturnAsObject(1).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
+
 	if err != nil {
+		if retry.IsAlreadyExistsErr(err) {
+			// Resource already exists, import required
+			resp.Diagnostics.AddError(
+				"Resource Already Exists",
+				fmt.Sprintf("Resource already exists, error: %s.\nPlease import the existing resource into terraform state.", err.Error()),
+			)
+			return
+		}
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create Ipv6sharednetwork, got error: %s", err))
 		return
 	}
@@ -123,13 +152,28 @@ func (r *Ipv6sharednetworkResource) Read(ctx context.Context, req resource.ReadR
 		return
 	}
 
-	apiRes, httpRes, err := r.client.DHCPAPI.
-		Ipv6sharednetworkAPI.
-		Read(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
-		ReturnFieldsPlus(readableAttributesForIpv6sharednetwork).
-		ReturnAsObject(1).
-		ProxySearch(config.GetProxySearch()).
-		Execute()
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
+
+	var (
+		httpRes *http.Response
+		apiRes  *dhcp.GetIpv6sharednetworkResponse
+	)
+
+	err := retry.Do(ctx, nil, func(ctx context.Context) (int, error) {
+		var callErr error
+		apiRes, httpRes, callErr = r.client.DHCPAPI.
+			Ipv6sharednetworkAPI.
+			Read(ctx, resourceIdentifier).
+			ReturnFieldsPlus(readableAttributesForIpv6sharednetwork).
+			ReturnAsObject(1).
+			ProxySearch(config.GetProxySearch()).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
 
 	// If the resource is not found, try searching using Extensible Attributes
 	if err != nil {
@@ -282,13 +326,34 @@ func (r *Ipv6sharednetworkResource) Update(ctx context.Context, req resource.Upd
 		return
 	}
 
-	apiRes, _, err := r.client.DHCPAPI.
-		Ipv6sharednetworkAPI.
-		Update(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
-		Ipv6sharednetwork(*data.Expand(ctx, &resp.Diagnostics, false)).
-		ReturnFieldsPlus(readableAttributesForIpv6sharednetwork).
-		ReturnAsObject(1).
-		Execute()
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
+
+	payload := data.Expand(ctx, &resp.Diagnostics, false)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	var apiRes *dhcp.UpdateIpv6sharednetworkResponse
+
+	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		var (
+			httpRes *http.Response
+			callErr error
+		)
+		apiRes, httpRes, callErr = r.client.DHCPAPI.
+			Ipv6sharednetworkAPI.
+			Update(ctx, resourceIdentifier).
+			Ipv6sharednetwork(*payload).
+			ReturnFieldsPlus(readableAttributesForIpv6sharednetwork).
+			ReturnAsObject(1).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
+
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update Ipv6sharednetwork, got error: %s", err))
 		return
@@ -321,14 +386,24 @@ func (r *Ipv6sharednetworkResource) Delete(ctx context.Context, req resource.Del
 		return
 	}
 
-	httpRes, err := r.client.DHCPAPI.
-		Ipv6sharednetworkAPI.
-		Delete(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
-		Execute()
-	if err != nil {
-		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
-			return
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
+
+	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		httpRes, callErr := r.client.DHCPAPI.
+			Ipv6sharednetworkAPI.
+			Delete(ctx, resourceIdentifier).
+			Execute()
+
+		if httpRes != nil {
+			if httpRes.StatusCode == http.StatusNotFound {
+				return 0, nil
+			}
+			return httpRes.StatusCode, callErr
 		}
+		return 0, callErr
+	})
+
+	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete Ipv6sharednetwork, got error: %s", err))
 		return
 	}
@@ -389,7 +464,7 @@ func (r *Ipv6sharednetworkResource) ValidateConfig(ctx context.Context, req reso
 		for i, option := range options {
 			isSpecialOption := false
 			optionName := ""
-			if option.Value.IsNull() || option.Value.IsUnknown() {
+			if option.Value.IsNull() {
 				resp.Diagnostics.AddAttributeError(
 					path.Root("options").AtListIndex(i).AtName("value"),
 					"Invalid configuration for DHCP Option",
@@ -403,6 +478,8 @@ func (r *Ipv6sharednetworkResource) ValidateConfig(ctx context.Context, req reso
 				optionNum := option.Num.ValueInt64()
 				isSpecialOption = specialOptionsNum[optionNum]
 				optionName = fmt.Sprintf("with num = %d", optionNum)
+			} else if option.Name.IsUnknown() || option.Num.IsUnknown() {
+				continue
 			} else {
 				resp.Diagnostics.AddAttributeError(
 					path.Root("options").AtListIndex(i).AtName("name"),
@@ -413,7 +490,7 @@ func (r *Ipv6sharednetworkResource) ValidateConfig(ctx context.Context, req reso
 				continue
 			}
 
-			if option.Value.ValueString() == "" {
+			if !option.Value.IsNull() && !option.Value.IsUnknown() && option.Value.ValueString() == "" {
 				if !isSpecialOption {
 					resp.Diagnostics.AddAttributeError(
 						path.Root("options").AtListIndex(i).AtName("value"),
@@ -441,7 +518,7 @@ func (r *Ipv6sharednetworkResource) ValidateConfig(ctx context.Context, req reso
 				)
 			}
 
-			if option.Name.ValueString() == "dhcp-lease-time" {
+			if option.Name.ValueString() == "dhcp-lease-time" && !option.Value.IsNull() && !option.Value.IsUnknown() {
 				hasDhcpLeaseTime = true
 				dhcpLeaseTimeValue = option.Value.ValueString()
 			}
@@ -449,6 +526,7 @@ func (r *Ipv6sharednetworkResource) ValidateConfig(ctx context.Context, req reso
 			// domain_name attribute must match the value of option 'domain-name'
 			if option.Name.ValueString() == "domain-name" {
 				if !data.DomainName.IsNull() && !data.DomainName.IsUnknown() &&
+					!option.Value.IsNull() && !option.Value.IsUnknown() &&
 					option.Value.ValueString() != data.DomainName.ValueString() {
 					resp.Diagnostics.AddAttributeError(
 						path.Root("domain_name"),
@@ -473,7 +551,7 @@ func (r *Ipv6sharednetworkResource) ValidateConfig(ctx context.Context, req reso
 
 	// Preferred lifetime must be less than or equal to valid lifetime
 	if !data.PreferredLifetime.IsNull() && !data.PreferredLifetime.IsUnknown() {
-		if (data.ValidLifetime.IsUnknown() || data.ValidLifetime.IsNull()) && !hasDhcpLeaseTime {
+		if data.ValidLifetime.IsNull() && !hasDhcpLeaseTime && !data.Options.IsUnknown() {
 			resp.Diagnostics.AddAttributeError(
 				path.Root("preferred_lifetime"),
 				"Invalid configuration",
@@ -502,7 +580,7 @@ func (r *Ipv6sharednetworkResource) ValidateConfig(ctx context.Context, req reso
 	}
 
 	// Check for valid lifetime or dhcp-lease-time when preferred_lifetime is NOT set
-	if data.PreferredLifetime.IsNull() || data.PreferredLifetime.IsUnknown() {
+	if data.PreferredLifetime.IsNull() {
 		// validate that valid_lifetime is >= 27000
 		if !data.ValidLifetime.IsNull() && !data.ValidLifetime.IsUnknown() &&
 			!data.UseValidLifetime.IsNull() && !data.UseValidLifetime.IsUnknown() {

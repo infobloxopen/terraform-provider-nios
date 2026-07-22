@@ -805,9 +805,10 @@ func testAccCheckDtcMonitorHttpExists(ctx context.Context, resourceName string, 
 		if !ok {
 			return fmt.Errorf("not found: %s", resourceName)
 		}
+		uuid := rs.Primary.Attributes["uuid"]
 		apiRes, _, err := acctest.NIOSClient.DTCAPI.
 			DtcMonitorHttpAPI.
-			Read(ctx, utils.ExtractResourceRef(rs.Primary.Attributes["ref"])).
+			Read(ctx, utils.ResolveObjectIdentifier(&uuid, rs.Primary.Attributes["ref"])).
 			ReturnFieldsPlus(readableAttributesForDtcMonitorHttp).
 			ReturnAsObject(1).
 			Execute()
@@ -827,7 +828,7 @@ func testAccCheckDtcMonitorHttpDestroy(ctx context.Context, v *dtc.DtcMonitorHtt
 	return func(state *terraform.State) error {
 		_, httpRes, err := acctest.NIOSClient.DTCAPI.
 			DtcMonitorHttpAPI.
-			Read(ctx, utils.ExtractResourceRef(*v.Ref)).
+			Read(ctx, utils.ResolveObjectIdentifier(v.Uuid, *v.Ref)).
 			ReturnAsObject(1).
 			ReturnFieldsPlus(readableAttributesForDtcMonitorHttp).
 			Execute()
@@ -847,7 +848,7 @@ func testAccCheckDtcMonitorHttpDisappears(ctx context.Context, v *dtc.DtcMonitor
 	return func(state *terraform.State) error {
 		_, err := acctest.NIOSClient.DTCAPI.
 			DtcMonitorHttpAPI.
-			Delete(ctx, utils.ExtractResourceRef(*v.Ref)).
+			Delete(ctx, utils.ResolveObjectIdentifier(v.Uuid, *v.Ref)).
 			Execute()
 		if err != nil {
 			return err

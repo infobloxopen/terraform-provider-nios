@@ -12,8 +12,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
+	"github.com/infobloxopen/infoblox-nios-go-client/grid"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/config"
+	"github.com/infobloxopen/terraform-provider-nios/internal/retry"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
@@ -103,21 +105,48 @@ func (r *MemberResource) Create(ctx context.Context, req resource.CreateRequest,
 		}
 	}
 
-	apiRes, _, err := r.client.GridAPI.
-		MemberAPI.
-		Create(ctx).
-		Member(*data.Expand(ctx, &resp.Diagnostics, true)).
-		ReturnFieldsPlus(readableAttributesForMember).
-		ReturnAsObject(1).
-		Execute()
+	payload := data.Expand(ctx, &resp.Diagnostics, true)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	var apiRes *grid.CreateMemberResponse
+
+	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		var (
+			httpRes *http.Response
+			callErr error
+		)
+		apiRes, httpRes, callErr = r.client.GridAPI.
+			MemberAPI.
+			Create(ctx).
+			Member(*payload).
+			ReturnFieldsPlus(readableAttributesForMember).
+			ReturnAsObject(1).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
+
 	if err != nil {
+		if retry.IsAlreadyExistsErr(err) {
+			// Resource already exists, import required
+			resp.Diagnostics.AddError(
+				"Resource Already Exists",
+				fmt.Sprintf("Resource already exists, error: %s.\nPlease import the existing resource into terraform state.", err.Error()),
+			)
+			return
+		}
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create Member, got error: %s", err))
 		return
 	}
 
 	res := apiRes.CreateMemberResponseAsObject.GetResult()
 
-	if !data.PreProvisioning.IsUnknown() && !data.PreProvisioning.IsNull() {
+	if !data.PreProvisioning.IsUnknown() && !data.PreProvisioning.IsNull() || (!data.TrafficCaptureAuthDnsSetting.IsUnknown() && !data.TrafficCaptureAuthDnsSetting.IsNull()) || (!data.MemberServiceCommunication.IsUnknown() && !data.MemberServiceCommunication.IsNull()) {
 		apiRes2, _, err2 := r.client.GridAPI.
 			MemberAPI.
 			Update(ctx, utils.ExtractResourceRef(*res.Ref)).
@@ -126,7 +155,7 @@ func (r *MemberResource) Create(ctx context.Context, req resource.CreateRequest,
 			ReturnAsObject(1).
 			Execute()
 		if err2 != nil {
-			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to Create Member with pre-provisioning or syslog proxy settings, got error: %s", err2))
+			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Member was created successfully but failed to apply pre_provisioning, traffic_capture_auth_dns_setting, member_service_communication settings: %s", err2))
 			return
 		}
 		res = apiRes2.UpdateMemberResponseAsObject.GetResult()
@@ -162,13 +191,28 @@ func (r *MemberResource) Read(ctx context.Context, req resource.ReadRequest, res
 		return
 	}
 
-	apiRes, httpRes, err := r.client.GridAPI.
-		MemberAPI.
-		Read(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
-		ReturnFieldsPlus(readableAttributesForMember).
-		ReturnAsObject(1).
-		ProxySearch(config.GetProxySearch()).
-		Execute()
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
+
+	var (
+		httpRes *http.Response
+		apiRes  *grid.GetMemberResponse
+	)
+
+	err := retry.Do(ctx, nil, func(ctx context.Context) (int, error) {
+		var callErr error
+		apiRes, httpRes, callErr = r.client.GridAPI.
+			MemberAPI.
+			Read(ctx, resourceIdentifier).
+			ReturnFieldsPlus(readableAttributesForMember).
+			ReturnAsObject(1).
+			ProxySearch(config.GetProxySearch()).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
 
 	// If the resource is not found, try searching using Extensible Attributes
 	if err != nil {
@@ -353,13 +397,34 @@ func (r *MemberResource) Update(ctx context.Context, req resource.UpdateRequest,
 		}
 	}
 
-	apiRes, _, err := r.client.GridAPI.
-		MemberAPI.
-		Update(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
-		Member(*data.Expand(ctx, &resp.Diagnostics, false)).
-		ReturnFieldsPlus(readableAttributesForMember).
-		ReturnAsObject(1).
-		Execute()
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
+
+	payload := data.Expand(ctx, &resp.Diagnostics, false)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	var apiRes *grid.UpdateMemberResponse
+
+	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		var (
+			httpRes *http.Response
+			callErr error
+		)
+		apiRes, httpRes, callErr = r.client.GridAPI.
+			MemberAPI.
+			Update(ctx, resourceIdentifier).
+			Member(*payload).
+			ReturnFieldsPlus(readableAttributesForMember).
+			ReturnAsObject(1).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
+
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update Member, got error: %s", err))
 		return
@@ -393,14 +458,24 @@ func (r *MemberResource) Delete(ctx context.Context, req resource.DeleteRequest,
 		return
 	}
 
-	httpRes, err := r.client.GridAPI.
-		MemberAPI.
-		Delete(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
-		Execute()
-	if err != nil {
-		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
-			return
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
+
+	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		httpRes, callErr := r.client.GridAPI.
+			MemberAPI.
+			Delete(ctx, resourceIdentifier).
+			Execute()
+
+		if httpRes != nil {
+			if httpRes.StatusCode == http.StatusNotFound {
+				return 0, nil
+			}
+			return httpRes.StatusCode, callErr
 		}
+		return 0, callErr
+	})
+
+	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete Member, got error: %s", err))
 		return
 	}
@@ -439,9 +514,39 @@ func (r *MemberResource) ValidateConfig(ctx context.Context, req resource.Valida
 		}
 	}
 
+	// CSP Member Setting Validation
+	if !data.CspMemberSetting.IsNull() && !data.CspMemberSetting.IsUnknown() {
+		if data.ConfigureCspMemberSetting.IsNull() || data.ConfigureCspMemberSetting.IsUnknown() || !data.ConfigureCspMemberSetting.ValueBool() {
+			resp.Diagnostics.AddError("Validation Error", "configure_csp_member_setting must be set to true when csp_member_setting is provided")
+		}
+	}
+	// HA Cloud Platform Validations - bidirectional checks
+	if !data.HaCloudPlatform.IsNull() && !data.HaCloudPlatform.IsUnknown() {
+		// When ha_cloud_platform is provided, ha_on_cloud must be true
+		if data.HaOnCloud.IsNull() || data.HaOnCloud.IsUnknown() || !data.HaOnCloud.ValueBool() {
+			resp.Diagnostics.AddError("Validation Error", "ha_on_cloud must be set to true when ha_cloud_platform is provided")
+		}
+	}
+
 	if !data.HaOnCloud.IsNull() && !data.HaOnCloud.IsUnknown() && data.HaOnCloud.ValueBool() {
+		// When ha_on_cloud is true, ha_cloud_platform must be provided
+		if data.HaCloudPlatform.IsNull() || data.HaCloudPlatform.IsUnknown() {
+			resp.Diagnostics.AddError("Validation Error", "ha_cloud_platform must be set when ha_on_cloud is true")
+		}
+		// When ha_on_cloud is true, enable_ha must be true
 		if data.EnableHa.IsNull() || data.EnableHa.IsUnknown() || !data.EnableHa.ValueBool() {
-			resp.Diagnostics.AddError("Validation Error", "enable_ha must be true when ha_on_cloud is provided")
+			resp.Diagnostics.AddError("Validation Error", "enable_ha must be true when ha_on_cloud is true")
+		}
+		// When ha_on_cloud is true, platform must be VNIOS
+		if data.Platform.IsNull() || data.Platform.IsUnknown() || data.Platform.ValueString() != "VNIOS" {
+			resp.Diagnostics.AddError("Validation Error", "platform must be set to VNIOS when ha_on_cloud is true")
+		}
+	}
+
+	// Validation: enable_ha requires node_info to be provided
+	if !data.EnableHa.IsNull() && !data.EnableHa.IsUnknown() && data.EnableHa.ValueBool() {
+		if data.NodeInfo.IsNull() || data.NodeInfo.IsUnknown() {
+			resp.Diagnostics.AddError("Validation Error", "node_info must be provided when enable_ha is true")
 		}
 	}
 
@@ -454,9 +559,64 @@ func (r *MemberResource) ValidateConfig(ctx context.Context, req resource.Valida
 			return
 		}
 
-		for _, node := range nodeInfo {
+		// Validation: If enable_ha is true, node_info must have exactly 2 elements
+		if !data.EnableHa.IsNull() && !data.EnableHa.IsUnknown() && data.EnableHa.ValueBool() {
+			if len(nodeInfo) != 2 {
+				resp.Diagnostics.AddError("Validation Error", "node_info must contain exactly 2 elements when enable_ha is true")
+			}
+		}
+
+		for i, node := range nodeInfo {
+			// Validation: lan_ha_port_setting requires enable_ha to be true
+			if !node.LanHaPortSetting.IsNull() && !node.LanHaPortSetting.IsUnknown() {
+				lanHaPortSetting := node.LanHaPortSetting.Attributes()
+
+				if !lanHaPortSetting["mgmt_lan"].IsNull() && !lanHaPortSetting["mgmt_lan"].IsUnknown() {
+					if data.EnableHa.IsNull() || data.EnableHa.IsUnknown() || !data.EnableHa.ValueBool() {
+						resp.Diagnostics.AddError("Validation Error",
+							fmt.Sprintf("enable_ha must be set to true when node_info[%d].lan_ha_port_setting.mgmt_lan is provided", i))
+					}
+				}
+
+				// Validation: When enable_ha is true, both mgmt_lan and ha_ip_address must be set for all nodes
+				if !data.EnableHa.IsNull() && !data.EnableHa.IsUnknown() && data.EnableHa.ValueBool() {
+					if lanHaPortSetting["mgmt_lan"].IsNull() || lanHaPortSetting["mgmt_lan"].IsUnknown() {
+						resp.Diagnostics.AddError("Validation Error",
+							fmt.Sprintf("node_info[%d].lan_ha_port_setting.mgmt_lan must be set when enable_ha is true", i))
+					}
+					if lanHaPortSetting["ha_ip_address"].IsNull() || lanHaPortSetting["ha_ip_address"].IsUnknown() {
+						resp.Diagnostics.AddError("Validation Error",
+							fmt.Sprintf("node_info[%d].lan_ha_port_setting.ha_ip_address must be set when enable_ha is true", i))
+					}
+				}
+			} else if !data.EnableHa.IsNull() && !data.EnableHa.IsUnknown() && data.EnableHa.ValueBool() {
+				// Validation: When enable_ha is true, lan_ha_port_setting must be provided for all nodes
+				resp.Diagnostics.AddError("Validation Error",
+					fmt.Sprintf("node_info[%d].lan_ha_port_setting must be provided when enable_ha is true", i))
+			}
+
 			if !node.V6MgmtNetworkSetting.IsNull() && !node.V6MgmtNetworkSetting.IsUnknown() {
 				v6MgmtNetworkSetting := node.V6MgmtNetworkSetting.Attributes()
+
+				// Validation: When v6_mgmt_network_setting is set, mgmt_port_setting.enabled must be true
+				if data.MgmtPortSetting.IsNull() || data.MgmtPortSetting.IsUnknown() || data.MgmtPortSetting.Attributes()["enabled"].String() != "true" {
+					resp.Diagnostics.AddError("Validation Error", "mgmt_port_setting.enabled must be set to true when node_info.v6_mgmt_network_setting is provided")
+				}
+
+				// Validation: When v6_mgmt_network_setting is set, virtual_ip, gateway, cidr_prefix, and enabled must be set
+				if v6MgmtNetworkSetting["virtual_ip"].IsNull() || v6MgmtNetworkSetting["virtual_ip"].IsUnknown() {
+					resp.Diagnostics.AddError("Validation Error", fmt.Sprintf("node_info[%d].v6_mgmt_network_setting.virtual_ip must be set when node_info.v6_mgmt_network_setting is provided", i))
+				}
+				if v6MgmtNetworkSetting["gateway"].IsNull() || v6MgmtNetworkSetting["gateway"].IsUnknown() {
+					resp.Diagnostics.AddError("Validation Error", fmt.Sprintf("node_info[%d].v6_mgmt_network_setting.gateway must be set when node_info.v6_mgmt_network_setting is provided", i))
+				}
+				if v6MgmtNetworkSetting["cidr_prefix"].IsNull() || v6MgmtNetworkSetting["cidr_prefix"].IsUnknown() {
+					resp.Diagnostics.AddError("Validation Error", fmt.Sprintf("node_info[%d].v6_mgmt_network_setting.cidr_prefix must be set when node_info.v6_mgmt_network_setting is provided", i))
+				}
+				if v6MgmtNetworkSetting["enabled"].IsNull() || v6MgmtNetworkSetting["enabled"].IsUnknown() || v6MgmtNetworkSetting["enabled"].String() != "true" {
+					resp.Diagnostics.AddError("Validation Error", fmt.Sprintf("node_info[%d].v6_mgmt_network_setting.enabled must be set to true when node_info.v6_mgmt_network_setting is provided", i))
+				}
+
 				if v6MgmtNetworkSetting["auto_router_config_enabled"].String() == "true" {
 					if !v6MgmtNetworkSetting["gateway"].IsNull() && !v6MgmtNetworkSetting["gateway"].IsUnknown() {
 						resp.Diagnostics.AddError("Validation Error", "node_info.v6_mgmt_network_setting.gateway cannot be set when node_info.v6_mgmt_network_setting.auto_router_config_enabled is true")
@@ -478,18 +638,42 @@ func (r *MemberResource) ValidateConfig(ctx context.Context, req resource.Valida
 					}
 				}
 			}
+		}
 
-			if !node.MgmtNetworkSetting.IsNull() && !node.MgmtNetworkSetting.IsUnknown() && len(node.MgmtNetworkSetting.Attributes()) > 0 {
-				if mgmtPortEnabledAttr, ok := node.MgmtNetworkSetting.Attributes()["enabled"]; ok {
-					if !mgmtPortEnabledAttr.IsNull() && mgmtPortEnabledAttr.String() == "true" {
-						if data.MgmtPortSetting.IsNull() || data.MgmtPortSetting.IsUnknown() || data.MgmtPortSetting.Attributes()["enabled"].String() != "true" {
-							resp.Diagnostics.AddError("Validation Error", "node_info.mgmt_network_setting.enabled can be set only when mgmt_port_setting.enabled is set to true")
-						}
-					}
-				}
+		if len(nodeInfo) > 0 && (!nodeInfo[0].MgmtNetworkSetting.IsNull() && !nodeInfo[0].MgmtNetworkSetting.IsUnknown()) {
+			if data.MgmtPortSetting.IsNull() || data.MgmtPortSetting.IsUnknown() || data.MgmtPortSetting.Attributes()["enabled"].String() != "true" {
+				resp.Diagnostics.AddError("Validation Error", "node_info.mgmt_network_setting can be set only when mgmt_port_setting.enabled is set to true")
+			} else {
+				mgmtCheckComplete = true
 			}
 		}
-		mgmtCheckComplete = true
+		// enableHaFalse: true when enable_ha is null (defaults to false) or explicitly false.
+		// Skipped when enable_ha is unknown (value not yet determined at plan time).
+		enableHaFalse := data.EnableHa.IsNull() || (!data.EnableHa.IsUnknown() && !data.EnableHa.ValueBool())
+		// enableHaTrue: true only when enable_ha is explicitly set to true.
+		enableHaTrue := !data.EnableHa.IsNull() && !data.EnableHa.IsUnknown() && data.EnableHa.ValueBool()
+
+		nodeCount := len(nodeInfo)
+
+		// Condition 1: len(nodeInfo) == 2 requires enable_ha to be true
+		if nodeCount == 2 && enableHaFalse {
+			resp.Diagnostics.AddError("Validation Error", "enable_ha must be true when node_info has 2 nodes")
+		}
+
+		// Condition 2: enable_ha true requires exactly 2 nodes (not more)
+		if enableHaTrue && nodeCount > 2 {
+			resp.Diagnostics.AddError("Validation Error", "node_info must have exactly 2 nodes when enable_ha is true")
+		}
+
+		// Condition 3a: len(nodeInfo) > 2 with enable_ha false (or not set) is not allowed
+		if nodeCount > 2 && enableHaFalse {
+			resp.Diagnostics.AddError("Validation Error", "node_info cannot have more than 2 nodes when enable_ha is false")
+		}
+
+		// Condition 3b: len(nodeInfo) == 1 with enable_ha true is not allowed
+		if nodeCount == 1 && enableHaTrue {
+			resp.Diagnostics.AddError("Validation Error", "node_info must have exactly 2 nodes when enable_ha is true; a single node_info entry is not valid")
+		}
 	}
 
 	if !data.MgmtPortSetting.IsNull() && !data.MgmtPortSetting.IsUnknown() {
@@ -545,12 +729,6 @@ func (r *MemberResource) ValidateConfig(ctx context.Context, req resource.Valida
 		}
 	}
 
-	if !data.HaOnCloud.IsUnknown() && !data.HaOnCloud.IsNull() && data.HaOnCloud.ValueBool() {
-		if data.Platform.IsNull() || data.Platform.IsUnknown() || data.Platform.ValueString() != "VNIOS" {
-			resp.Diagnostics.AddError("Validation Error", "platform must be set to 'vNIOS' when ha_on_cloud is true")
-		}
-	}
-
 	if !data.ConfigAddrType.IsNull() && !data.ConfigAddrType.IsUnknown() && (data.ConfigAddrType.ValueString() == "IPV6" || data.ConfigAddrType.ValueString() == "BOTH") {
 		if data.Ipv6Setting.IsNull() || data.Ipv6Setting.IsUnknown() {
 			resp.Diagnostics.AddError("Validation Error", "ipv6_setting must be provided when config_addr_type is set to IPV6 or BOTH")
@@ -558,6 +736,18 @@ func (r *MemberResource) ValidateConfig(ctx context.Context, req resource.Valida
 			if data.Ipv6Setting.Attributes()["enabled"].IsNull() || data.Ipv6Setting.Attributes()["enabled"].IsUnknown() || data.Ipv6Setting.Attributes()["enabled"].String() != "true" {
 				resp.Diagnostics.AddError("Validation Error", "ipv6_setting.enabled must be true when config_addr_type is set to IPV6 or BOTH")
 			}
+		}
+	}
+
+	if !data.Ipv6Setting.IsNull() && !data.Ipv6Setting.IsUnknown() {
+		ipv6Attrs := data.Ipv6Setting.Attributes()
+		hasVirtualIP := !ipv6Attrs["virtual_ip"].IsNull() && !ipv6Attrs["virtual_ip"].IsUnknown()
+		hasCidrPrefix := !ipv6Attrs["cidr_prefix"].IsNull() && !ipv6Attrs["cidr_prefix"].IsUnknown()
+		hasGateway := !ipv6Attrs["gateway"].IsNull() && !ipv6Attrs["gateway"].IsUnknown()
+		if (hasVirtualIP && hasCidrPrefix && hasGateway) &&
+			(data.ConfigAddrType.IsNull() || data.ConfigAddrType.IsUnknown() ||
+				(data.ConfigAddrType.ValueString() != "IPV6" && data.ConfigAddrType.ValueString() != "BOTH")) {
+			resp.Diagnostics.AddError("Validation Error", "config_addr_type must be set to IPV6 or BOTH when ipv6_setting.virtual_ip, ipv6_setting.cidr_prefix, and ipv6_setting.gateway are provided")
 		}
 	}
 
@@ -590,8 +780,8 @@ func (r *MemberResource) ValidateConfig(ctx context.Context, req resource.Valida
 				resp.Diagnostics.AddError("Validation Error", "vip_setting.address cannot be set when config_addr_type is set to IPV6")
 			}
 		}
-		if !data.ServiceTypeConfiguration.IsNull() && !data.ServiceTypeConfiguration.IsUnknown() && data.ServiceTypeConfiguration.ValueString() == "ALL_V4" {
-			resp.Diagnostics.AddError("Validation Error", "service_type_configuration cannot be set to ALL_V4 when config_addr_type is set to IPV6")
+		if !data.ServiceTypeConfiguration.IsUnknown() && (data.ServiceTypeConfiguration.IsNull() || data.ServiceTypeConfiguration.ValueString() == "ALL_V4") {
+			resp.Diagnostics.AddError("Validation Error", "service_type_configuration must be ALL_V6 when the config_addr_type is IPV6")
 		}
 	}
 

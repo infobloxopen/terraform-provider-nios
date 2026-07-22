@@ -12,7 +12,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
+	"github.com/infobloxopen/infoblox-nios-go-client/security"
 	"github.com/infobloxopen/terraform-provider-nios/internal/config"
+	"github.com/infobloxopen/terraform-provider-nios/internal/retry"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
@@ -72,7 +74,8 @@ func (r *AdmingroupResource) ValidateConfig(ctx context.Context, req resource.Va
 	}
 
 	// Check if disable_concurrent_login is set and use_disable_concurrent_login is false
-	if !config.DisableConcurrentLogin.IsNull() && !config.DisableConcurrentLogin.IsUnknown() && !config.UseDisableConcurrentLogin.ValueBool() {
+	if !config.DisableConcurrentLogin.IsNull() && !config.DisableConcurrentLogin.IsUnknown() &&
+		!config.UseDisableConcurrentLogin.IsUnknown() && (config.UseDisableConcurrentLogin.IsNull() || !config.UseDisableConcurrentLogin.ValueBool()) {
 		resp.Diagnostics.AddAttributeError(
 			path.Root("disable_concurrent_login"),
 			"Invalid Configuration",
@@ -81,10 +84,12 @@ func (r *AdmingroupResource) ValidateConfig(ctx context.Context, req resource.Va
 	}
 
 	// Check if password_setting is set and use_password_setting is false
-	if !config.PasswordSetting.IsNull() && !config.PasswordSetting.IsUnknown() && !config.UsePasswordSetting.ValueBool() {
+	if !config.PasswordSetting.IsNull() && !config.PasswordSetting.IsUnknown() &&
+		!config.UsePasswordSetting.IsUnknown() && (config.UsePasswordSetting.IsNull() || !config.UsePasswordSetting.ValueBool()) {
 		resp.Diagnostics.AddAttributeError(path.Root("password_setting"),
 			"Invalid Configuration",
-			"`use_password_setting` must be set to true when `password_setting` is used.")
+			"`use_password_setting` must be set to true when `password_setting` is used.",
+		)
 	}
 
 	// Skip validation if UserAccess is not provided
@@ -101,10 +106,14 @@ func (r *AdmingroupResource) ValidateConfig(ctx context.Context, req resource.Va
 		obj := elem.(types.Object)
 		attrMap := obj.Attributes()
 
+		if attrMap["ref"].IsUnknown() || attrMap["address"].IsUnknown() || attrMap["permission"].IsUnknown() {
+			continue
+		}
+
 		// Check field presence
 		hasAddress := !attrMap["address"].IsUnknown() && !attrMap["address"].IsNull() && !attrMap["address"].Equal(types.StringValue(""))
 		hasPermission := !attrMap["permission"].IsUnknown() && !attrMap["permission"].IsNull() && !attrMap["permission"].Equal(types.StringValue(""))
-		hasRef := !attrMap["ref"].IsNull() && !attrMap["ref"].Equal(types.StringValue(""))
+		hasRef := !attrMap["ref"].IsNull() && !attrMap["ref"].IsUnknown() && !attrMap["ref"].Equal(types.StringValue(""))
 
 		// Rule 1: Can't have both ref and (address or permission)
 		if hasRef && (hasAddress || hasPermission) {
@@ -172,14 +181,41 @@ func (r *AdmingroupResource) Create(ctx context.Context, req resource.CreateRequ
 		return
 	}
 
-	apiRes, _, err := r.client.SecurityAPI.
-		AdmingroupAPI.
-		Create(ctx).
-		Admingroup(*data.Expand(ctx, &resp.Diagnostics)).
-		ReturnFieldsPlus(readableAttributesForAdmingroup).
-		ReturnAsObject(1).
-		Execute()
+	payload := data.Expand(ctx, &resp.Diagnostics)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	var apiRes *security.CreateAdmingroupResponse
+
+	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		var (
+			httpRes *http.Response
+			callErr error
+		)
+		apiRes, httpRes, callErr = r.client.SecurityAPI.
+			AdmingroupAPI.
+			Create(ctx).
+			Admingroup(*payload).
+			ReturnFieldsPlus(readableAttributesForAdmingroup).
+			ReturnAsObject(1).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
+
 	if err != nil {
+		if retry.IsAlreadyExistsErr(err) {
+			// Resource already exists, import required
+			resp.Diagnostics.AddError(
+				"Resource Already Exists",
+				fmt.Sprintf("Resource already exists, error: %s.\nPlease import the existing resource into terraform state.", err.Error()),
+			)
+			return
+		}
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create Admingroup, got error: %s", err))
 		return
 	}
@@ -214,13 +250,28 @@ func (r *AdmingroupResource) Read(ctx context.Context, req resource.ReadRequest,
 		return
 	}
 
-	apiRes, httpRes, err := r.client.SecurityAPI.
-		AdmingroupAPI.
-		Read(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
-		ReturnFieldsPlus(readableAttributesForAdmingroup).
-		ReturnAsObject(1).
-		ProxySearch(config.GetProxySearch()).
-		Execute()
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
+
+	var (
+		httpRes *http.Response
+		apiRes  *security.GetAdmingroupResponse
+	)
+
+	err := retry.Do(ctx, nil, func(ctx context.Context) (int, error) {
+		var callErr error
+		apiRes, httpRes, callErr = r.client.SecurityAPI.
+			AdmingroupAPI.
+			Read(ctx, resourceIdentifier).
+			ReturnFieldsPlus(readableAttributesForAdmingroup).
+			ReturnAsObject(1).
+			ProxySearch(config.GetProxySearch()).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
 
 	// If the resource is not found, try searching using Extensible Attributes
 	if err != nil {
@@ -372,13 +423,34 @@ func (r *AdmingroupResource) Update(ctx context.Context, req resource.UpdateRequ
 		return
 	}
 
-	apiRes, _, err := r.client.SecurityAPI.
-		AdmingroupAPI.
-		Update(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
-		Admingroup(*data.Expand(ctx, &resp.Diagnostics)).
-		ReturnFieldsPlus(readableAttributesForAdmingroup).
-		ReturnAsObject(1).
-		Execute()
+	payload := data.Expand(ctx, &resp.Diagnostics)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
+
+	var apiRes *security.UpdateAdmingroupResponse
+
+	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		var (
+			httpRes *http.Response
+			callErr error
+		)
+		apiRes, httpRes, callErr = r.client.SecurityAPI.
+			AdmingroupAPI.
+			Update(ctx, resourceIdentifier).
+			Admingroup(*payload).
+			ReturnFieldsPlus(readableAttributesForAdmingroup).
+			ReturnAsObject(1).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
+
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update Admingroup, got error: %s", err))
 		return
@@ -412,14 +484,24 @@ func (r *AdmingroupResource) Delete(ctx context.Context, req resource.DeleteRequ
 		return
 	}
 
-	httpRes, err := r.client.SecurityAPI.
-		AdmingroupAPI.
-		Delete(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
-		Execute()
-	if err != nil {
-		if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
-			return
+	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
+
+	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+		httpRes, callErr := r.client.SecurityAPI.
+			AdmingroupAPI.
+			Delete(ctx, resourceIdentifier).
+			Execute()
+
+		if httpRes != nil {
+			if httpRes.StatusCode == http.StatusNotFound {
+				return 0, nil
+			}
+			return httpRes.StatusCode, callErr
 		}
+		return 0, callErr
+	})
+
+	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete Admingroup, got error: %s", err))
 		return
 	}

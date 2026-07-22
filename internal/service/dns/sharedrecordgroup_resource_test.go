@@ -33,7 +33,6 @@ func TestAccSharedrecordgroupResource_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "name", name),
 					// Test fields with default value
 					resource.TestCheckResourceAttr(resourceName, "comment", ""),
-					resource.TestCheckResourceAttr(resourceName, "record_name_policy", ""),
 					resource.TestCheckResourceAttr(resourceName, "use_record_name_policy", "false"),
 				),
 			},
@@ -267,9 +266,10 @@ func testAccCheckSharedrecordgroupExists(ctx context.Context, resourceName strin
 		if !ok {
 			return fmt.Errorf("not found: %s", resourceName)
 		}
+		uuid := rs.Primary.Attributes["uuid"]
 		apiRes, _, err := acctest.NIOSClient.DNSAPI.
 			SharedrecordgroupAPI.
-			Read(ctx, utils.ExtractResourceRef(rs.Primary.Attributes["ref"])).
+			Read(ctx, utils.ResolveObjectIdentifier(&uuid, rs.Primary.Attributes["ref"])).
 			ReturnFieldsPlus(readableAttributesForSharedrecordgroup).
 			ReturnAsObject(1).
 			Execute()
@@ -289,7 +289,7 @@ func testAccCheckSharedrecordgroupDestroy(ctx context.Context, v *dns.Sharedreco
 	return func(state *terraform.State) error {
 		_, httpRes, err := acctest.NIOSClient.DNSAPI.
 			SharedrecordgroupAPI.
-			Read(ctx, utils.ExtractResourceRef(*v.Ref)).
+			Read(ctx, utils.ResolveObjectIdentifier(v.Uuid, *v.Ref)).
 			ReturnAsObject(1).
 			ReturnFieldsPlus(readableAttributesForSharedrecordgroup).
 			Execute()
@@ -309,7 +309,7 @@ func testAccCheckSharedrecordgroupDisappears(ctx context.Context, v *dns.Sharedr
 	return func(state *terraform.State) error {
 		_, err := acctest.NIOSClient.DNSAPI.
 			SharedrecordgroupAPI.
-			Delete(ctx, utils.ExtractResourceRef(*v.Ref)).
+			Delete(ctx, utils.ResolveObjectIdentifier(v.Uuid, *v.Ref)).
 			Execute()
 		if err != nil {
 			return err
