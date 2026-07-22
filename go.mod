@@ -13,7 +13,7 @@ require (
 	github.com/hashicorp/terraform-plugin-log v0.10.0
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.38.1
 	github.com/hashicorp/terraform-plugin-testing v1.14.0
-	github.com/infobloxopen/infoblox-nios-go-client v0.2.1-0.20260721093217-a6bc57092e3a
+	github.com/infobloxopen/infoblox-nios-go-client v0.2.1-0.20260721112011-8057489d6de7
 )
 
 require (
