@@ -52,7 +52,7 @@ resource "nios_dhcp_roaminghost" "dhcp_roaminghost_address_type_both" {
     {
       name : "subnet-mask"
       value : "1.1.1.1"
-    },
+    }
   ]
   use_options = true
 

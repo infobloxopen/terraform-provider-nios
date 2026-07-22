@@ -461,13 +461,14 @@ func (r *ZoneDelegatedResource) ValidateConfig(ctx context.Context, req resource
 
 	nsGroup := data.NsGroup
 
-	if delegateTo.IsNull() || delegateTo.IsUnknown() {
-		if nsGroup.IsNull() || nsGroup.IsUnknown() {
-			resp.Diagnostics.AddAttributeError(
-				path.Root("delegate_to"),
-				"Missing Required Configuration",
-				"Either 'delegate_to' must be provided or 'ns_group' must be specified. At least one of these attributes is required.",
-			)
-		}
+	if delegateTo.IsUnknown() || nsGroup.IsUnknown() {
+		return
+	}
+
+	if delegateTo.IsNull() && nsGroup.IsNull() {
+		resp.Diagnostics.AddError(
+			"Missing Required Configuration",
+			"Either 'delegate_to' or 'ns_group' must be specified.",
+		)
 	}
 }

@@ -31,6 +31,8 @@ var _ resource.ResourceWithValidateConfig = &SyslogEndpointResource{}
 
 var _ resource.ResourceWithModifyPlan = &SyslogEndpointResource{}
 
+var _ resource.ResourceWithUpgradeState = &SyslogEndpointResource{}
+
 func NewSyslogEndpointResource() resource.Resource {
 	return &SyslogEndpointResource{}
 }
@@ -46,8 +48,27 @@ func (r *SyslogEndpointResource) Metadata(ctx context.Context, req resource.Meta
 
 func (r *SyslogEndpointResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
+		Version:             1,
 		MarkdownDescription: "Manages a Syslog Endpoint.",
 		Attributes:          SyslogEndpointResourceSchemaAttributes,
+	}
+}
+
+func (r *SyslogEndpointResource) UpgradeState(ctx context.Context) map[int64]resource.StateUpgrader {
+	return map[int64]resource.StateUpgrader{
+		0: {
+			PriorSchema: &schema.Schema{
+				Attributes: SyslogEndpointResourceSchemaAttributes,
+			},
+			StateUpgrader: func(ctx context.Context, req resource.UpgradeStateRequest, resp *resource.UpgradeStateResponse) {
+				var data SyslogEndpointModel
+				resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
+				if resp.Diagnostics.HasError() {
+					return
+				}
+				resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+			},
+		},
 	}
 }
 
@@ -598,6 +619,9 @@ func (r *SyslogEndpointResource) ValidateConfig(ctx context.Context, req resourc
 	}
 
 	// Read Syslog Servers from the model
+	if data.SyslogServers.IsNull() || data.SyslogServers.IsUnknown() {
+		return
+	}
 	var syslogServers []SyslogEndpointSyslogServersModel
 	diagResult := data.SyslogServers.ElementsAs(ctx, &syslogServers, false)
 	resp.Diagnostics.Append(diagResult...)
@@ -606,8 +630,8 @@ func (r *SyslogEndpointResource) ValidateConfig(ctx context.Context, req resourc
 	}
 
 	for _, server := range syslogServers {
-		if server.ConnectionType.ValueString() == "stcp" {
-			if server.CertificateFilePath.IsNull() || server.CertificateFilePath.IsUnknown() || server.CertificateFilePath.ValueString() == "" {
+		if !server.ConnectionType.IsNull() && !server.ConnectionType.IsUnknown() && server.ConnectionType.ValueString() == "stcp" {
+			if !server.CertificateFilePath.IsUnknown() && (server.CertificateFilePath.IsNull() || server.CertificateFilePath.ValueString() == "") {
 				resp.Diagnostics.AddError(
 					"Invalid Syslog Server Configuration",
 					"Syslog servers with STCP connection type must have a certificate file path specified through certificate_file_path.",
