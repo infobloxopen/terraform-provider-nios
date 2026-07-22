@@ -250,7 +250,7 @@ func (r *IPAssociationResource) getOrFindHostRecord(ctx context.Context, data *I
 
 	// try ref if it exists
 	if !data.Ref.IsNull() && !data.Ref.IsUnknown() && data.Ref.ValueString() != "" {
-		hostRecord, notFound, err := r.getHostRecordByIdentifier(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref))
+		hostRecord, notFound, err := r.getHostRecordByIdentifier(ctx, utils.ExtractResourceRef(data.Ref.ValueString()))
 		if err == nil {
 			internalID, err := r.extractInternalIDFromExtAttrs(hostRecord)
 			if err != nil {

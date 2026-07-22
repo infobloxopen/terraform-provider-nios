@@ -574,17 +574,43 @@ func (r *IPAllocationResource) Delete(ctx context.Context, req resource.DeleteRe
 			Delete(ctx, resourceIdentifier).
 			Execute()
 
-		if httpRes != nil {
-			if httpRes.StatusCode == http.StatusNotFound {
+		if callErr != nil {
+			if httpRes != nil && httpRes.StatusCode == http.StatusNotFound {
+				// If ref not found, try to locate by internal id and delete using the found ref
+				foundRecord, foundRef, _, errFound := r.findHostByInternalID(ctx, &data)
+				if errFound != nil {
+					resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to locate RecordHost by internal id after delete ref not found: %s", errFound))
+					return 0, nil
+				}
+				if foundRecord == nil || foundRef == "" {
+					// Nothing to delete
+					return 0, nil
+				}
+
+				// Attempt delete using the foundRef
+				httpResDel, errDel := r.client.DNSAPI.
+					RecordHostAPI.
+					Delete(ctx, utils.ExtractResourceRef(foundRef)).
+					Execute()
+				if errDel != nil {
+					if httpResDel != nil && httpResDel.StatusCode == http.StatusNotFound {
+						return 0, nil
+					}
+					resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete RecordHost (found by internal id), got error: %s", errDel))
+					return 0, nil
+				}
 				return 0, nil
 			}
-			return httpRes.StatusCode, callErr
+			if httpRes != nil {
+				return httpRes.StatusCode, callErr
+			}
+			return 0, callErr
 		}
-		return 0, callErr
+		return 0, nil
 	})
 
 	if err != nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete IPAllocation, got error: %s", err))
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete RecordHost, got error: %s", err))
 		return
 	}
 }
