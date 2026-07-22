@@ -633,9 +633,10 @@ func testAccCheckRadiusAuthserviceExists(ctx context.Context, resourceName strin
 		if !ok {
 			return fmt.Errorf("not found: %s", resourceName)
 		}
+		uuid := rs.Primary.Attributes["uuid"]
 		apiRes, _, err := acctest.NIOSClient.SecurityAPI.
 			RadiusAuthserviceAPI.
-			Read(ctx, utils.ExtractResourceRef(rs.Primary.Attributes["ref"])).
+			Read(ctx, utils.ResolveObjectIdentifier(&uuid, rs.Primary.Attributes["ref"])).
 			ReturnFieldsPlus(readableAttributesForRadiusAuthservice).
 			ReturnAsObject(1).
 			Execute()
@@ -655,7 +656,7 @@ func testAccCheckRadiusAuthserviceDestroy(ctx context.Context, v *security.Radiu
 	return func(state *terraform.State) error {
 		_, httpRes, err := acctest.NIOSClient.SecurityAPI.
 			RadiusAuthserviceAPI.
-			Read(ctx, utils.ExtractResourceRef(*v.Ref)).
+			Read(ctx, utils.ResolveObjectIdentifier(v.Uuid, *v.Ref)).
 			ReturnAsObject(1).
 			ReturnFieldsPlus(readableAttributesForRadiusAuthservice).
 			Execute()
@@ -675,7 +676,7 @@ func testAccCheckRadiusAuthserviceDisappears(ctx context.Context, v *security.Ra
 	return func(state *terraform.State) error {
 		_, err := acctest.NIOSClient.SecurityAPI.
 			RadiusAuthserviceAPI.
-			Delete(ctx, utils.ExtractResourceRef(*v.Ref)).
+			Delete(ctx, utils.ResolveObjectIdentifier(v.Uuid, *v.Ref)).
 			Execute()
 		if err != nil {
 			return err

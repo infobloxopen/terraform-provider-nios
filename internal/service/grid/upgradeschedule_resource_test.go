@@ -181,9 +181,10 @@ func testAccCheckUpgradescheduleExists(ctx context.Context, resourceName string,
 		if !ok {
 			return fmt.Errorf("not found: %s", resourceName)
 		}
+		uuid := rs.Primary.Attributes["uuid"]
 		apiRes, _, err := acctest.NIOSClient.GridAPI.
 			UpgradescheduleAPI.
-			Read(ctx, utils.ExtractResourceRef(rs.Primary.Attributes["ref"])).
+			Read(ctx, utils.ResolveObjectIdentifier(&uuid, rs.Primary.Attributes["ref"])).
 			ReturnFieldsPlus(readableAttributesForUpgradeschedule).
 			ReturnAsObject(1).
 			Execute()

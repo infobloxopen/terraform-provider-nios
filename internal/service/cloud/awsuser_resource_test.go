@@ -283,9 +283,10 @@ func testAccCheckAwsuserExists(ctx context.Context, resourceName string, v *clou
 		if !ok {
 			return fmt.Errorf("not found: %s", resourceName)
 		}
+		uuid := rs.Primary.Attributes["uuid"]
 		apiRes, _, err := acctest.NIOSClient.CloudAPI.
 			AwsuserAPI.
-			Read(ctx, utils.ExtractResourceRef(rs.Primary.Attributes["ref"])).
+			Read(ctx, utils.ResolveObjectIdentifier(&uuid, rs.Primary.Attributes["ref"])).
 			ReturnFieldsPlus(readableAttributesForAwsuser).
 			ReturnAsObject(1).
 			Execute()
@@ -305,7 +306,7 @@ func testAccCheckAwsuserDestroy(ctx context.Context, v *cloud.Awsuser) resource.
 	return func(state *terraform.State) error {
 		_, httpRes, err := acctest.NIOSClient.CloudAPI.
 			AwsuserAPI.
-			Read(ctx, utils.ExtractResourceRef(*v.Ref)).
+			Read(ctx, utils.ResolveObjectIdentifier(v.Uuid, *v.Ref)).
 			ReturnAsObject(1).
 			ReturnFieldsPlus(readableAttributesForAwsuser).
 			Execute()
@@ -325,7 +326,7 @@ func testAccCheckAwsuserDisappears(ctx context.Context, v *cloud.Awsuser) resour
 	return func(state *terraform.State) error {
 		_, err := acctest.NIOSClient.CloudAPI.
 			AwsuserAPI.
-			Delete(ctx, utils.ExtractResourceRef(*v.Ref)).
+			Delete(ctx, utils.ResolveObjectIdentifier(v.Uuid, *v.Ref)).
 			Execute()
 		if err != nil {
 			return err

@@ -513,9 +513,10 @@ func testAccCheckNsgroupExists(ctx context.Context, resourceName string, v *dns.
 		if !ok {
 			return fmt.Errorf("not found: %s", resourceName)
 		}
+		uuid := rs.Primary.Attributes["uuid"]
 		apiRes, _, err := acctest.NIOSClient.DNSAPI.
 			NsgroupAPI.
-			Read(ctx, utils.ExtractResourceRef(rs.Primary.Attributes["ref"])).
+			Read(ctx, utils.ResolveObjectIdentifier(&uuid, rs.Primary.Attributes["ref"])).
 			ReturnFieldsPlus(readableAttributesForNsgroup).
 			ReturnAsObject(1).
 			Execute()
@@ -535,7 +536,7 @@ func testAccCheckNsgroupDestroy(ctx context.Context, v *dns.Nsgroup) resource.Te
 	return func(state *terraform.State) error {
 		_, httpRes, err := acctest.NIOSClient.DNSAPI.
 			NsgroupAPI.
-			Read(ctx, utils.ExtractResourceRef(*v.Ref)).
+			Read(ctx, utils.ResolveObjectIdentifier(v.Uuid, *v.Ref)).
 			ReturnAsObject(1).
 			ReturnFieldsPlus(readableAttributesForNsgroup).
 			Execute()
@@ -555,7 +556,7 @@ func testAccCheckNsgroupDisappears(ctx context.Context, v *dns.Nsgroup) resource
 	return func(state *terraform.State) error {
 		_, err := acctest.NIOSClient.DNSAPI.
 			NsgroupAPI.
-			Delete(ctx, utils.ExtractResourceRef(*v.Ref)).
+			Delete(ctx, utils.ResolveObjectIdentifier(v.Uuid, *v.Ref)).
 			Execute()
 		if err != nil {
 			return err

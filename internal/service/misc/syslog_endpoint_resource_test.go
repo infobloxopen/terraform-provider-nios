@@ -502,9 +502,10 @@ func testAccCheckSyslogEndpointExists(ctx context.Context, resourceName string, 
 		if !ok {
 			return fmt.Errorf("not found: %s", resourceName)
 		}
+		uuid := rs.Primary.Attributes["uuid"]
 		apiRes, _, err := acctest.NIOSClient.MiscAPI.
 			SyslogEndpointAPI.
-			Read(ctx, utils.ExtractResourceRef(rs.Primary.Attributes["ref"])).
+			Read(ctx, utils.ResolveObjectIdentifier(&uuid, rs.Primary.Attributes["ref"])).
 			ReturnFieldsPlus(readableAttributesForSyslogEndpoint).
 			ReturnAsObject(1).
 			Execute()
@@ -524,7 +525,7 @@ func testAccCheckSyslogEndpointDestroy(ctx context.Context, v *misc.SyslogEndpoi
 	return func(state *terraform.State) error {
 		_, httpRes, err := acctest.NIOSClient.MiscAPI.
 			SyslogEndpointAPI.
-			Read(ctx, utils.ExtractResourceRef(*v.Ref)).
+			Read(ctx, utils.ResolveObjectIdentifier(v.Uuid, *v.Ref)).
 			ReturnAsObject(1).
 			ReturnFieldsPlus(readableAttributesForSyslogEndpoint).
 			Execute()
@@ -544,7 +545,7 @@ func testAccCheckSyslogEndpointDisappears(ctx context.Context, v *misc.SyslogEnd
 	return func(state *terraform.State) error {
 		_, err := acctest.NIOSClient.MiscAPI.
 			SyslogEndpointAPI.
-			Delete(ctx, utils.ExtractResourceRef(*v.Ref)).
+			Delete(ctx, utils.ResolveObjectIdentifier(v.Uuid, *v.Ref)).
 			Execute()
 		if err != nil {
 			return err

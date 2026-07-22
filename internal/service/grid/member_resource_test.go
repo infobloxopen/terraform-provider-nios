@@ -4398,9 +4398,10 @@ func testAccCheckMemberExists(ctx context.Context, resourceName string, v *grid.
 		if !ok {
 			return fmt.Errorf("not found: %s", resourceName)
 		}
+		uuid := rs.Primary.Attributes["uuid"]
 		apiRes, _, err := acctest.NIOSClient.GridAPI.
 			MemberAPI.
-			Read(ctx, utils.ExtractResourceRef(rs.Primary.Attributes["ref"])).
+			Read(ctx, utils.ResolveObjectIdentifier(&uuid, rs.Primary.Attributes["ref"])).
 			ReturnFieldsPlus(readableAttributesForMember).
 			ReturnAsObject(1).
 			Execute()
@@ -4420,7 +4421,7 @@ func testAccCheckMemberDestroy(ctx context.Context, v *grid.Member) resource.Tes
 	return func(state *terraform.State) error {
 		_, httpRes, err := acctest.NIOSClient.GridAPI.
 			MemberAPI.
-			Read(ctx, utils.ExtractResourceRef(*v.Ref)).
+			Read(ctx, utils.ResolveObjectIdentifier(v.Uuid, *v.Ref)).
 			ReturnAsObject(1).
 			ReturnFieldsPlus(readableAttributesForMember).
 			Execute()
@@ -4440,7 +4441,7 @@ func testAccCheckMemberDisappears(ctx context.Context, v *grid.Member) resource.
 	return func(state *terraform.State) error {
 		_, err := acctest.NIOSClient.GridAPI.
 			MemberAPI.
-			Delete(ctx, utils.ExtractResourceRef(*v.Ref)).
+			Delete(ctx, utils.ResolveObjectIdentifier(v.Uuid, *v.Ref)).
 			Execute()
 		if err != nil {
 			return err
