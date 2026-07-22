@@ -3972,15 +3972,6 @@ resource "nios_ipam_network_container" "test_use_update_dns_on_lease_renewal" {
 `, network, useUpdateDnsOnLeaseRenewal)
 }
 
-func testAccNetworkcontainerUseZoneAssociations(network, useZoneAssociations string) string {
-	return fmt.Sprintf(`
-resource "nios_ipam_network_container" "test_use_zone_associations" {
-    network = %q
-    use_zone_associations = %q
-}
-`, network, useZoneAssociations)
-}
-
 func testAccNetworkcontainerLogicFilterRules(network string, logicFilterRules []map[string]any) string {
 	logicFilterRulesStr := utils.ConvertSliceOfMapsToHCL(logicFilterRules)
 	return fmt.Sprintf(`
