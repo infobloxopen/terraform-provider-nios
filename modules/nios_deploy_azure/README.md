@@ -90,9 +90,33 @@ This module provisions vNIOS on Azure. The NIOS configuration (`nios_grid_member
 
 ---
 
+## Architecture
+
+### Standalone Mode (`enable_ha = false`)
+- 1 Azure VM with vNIOS image
+- NIC1: LAN1 / Grid communication interface (Subnet 1)
+- NIC2: Secondary interface (Subnet 2)
+
+### HA Mode (`enable_ha = true`)
+- 1 Azure VM with vNIOS image (node in HA pair)
+- NIC1: LAN1 interface (Subnet 1)
+- NIC2: Secondary interface (Subnet 2)
+- NIC3: HA interface with VIP (Subnet 3)
+
 ## Usage
 
-### Step 1: Deploy Azure Infrastructure
+#### This module supports four deployment modes — **Standalone**, **Master-Member Configuration**, **Master-Member with Dual-Stack**, and **HA Pair**.
+
+### 1. Standalone Mode
+
+Deploy a single vNIOS instance on Azure.
+
+> **Important — Manual license installation required on Azure.**
+> Unlike AWS/GCP, the Azure vNIOS image does **not** support cloud-init, so the NIOS
+> temporary license cannot be injected at boot. After the VM is up, you must log into
+> the NIOS CLI (SSH/console) and install the appropriate licenses manually **before**
+> applying any `nios_grid_member` / `nios_grid_join` resources. The grid will not
+> form until the required licenses are present on each node.
 
 ```hcl
 provider "azurerm" {
@@ -127,32 +151,36 @@ module "node1" {
 }
 ```
 
-**Deploy the infrastructure:**
+**Steps:**
+
+**Step 1.** Deploy the infrastructure:
+
 ```bash
+terraform init
+terraform plan
 terraform apply
 ```
 
-### Step 2: Wait for NIOS to Boot
+Wait ~30 minutes for NIOS to fully boot and install licenses before applying any grid configuration.
 
-NIOS takes approximately **30 minutes** to fully boot, make sure the grid is up and running before triggering the grid join.
+#### NIOS Provider Configuration
 
-> **Important — Manual license installation required on Azure.**
-> Unlike OCI/AWS, the Azure vNIOS image does **not** support cloud-init, so the NIOS
-> temporary license cannot be injected at boot. After the VM is up, you must log into
-> the NIOS CLI (SSH/console) on each node and install the appropriate licenses
-> manually **before** applying the `nios_grid_member` / `nios_grid_join`
-> resources. The grid will not form until the required licenses are present on
-> each node.
+The modes below — **Master-Member Configuration** and **HA Pair Configuration** — use the NIOS Terraform provider to configure the grid. (The Standalone deployment above does not need it.) Declare the provider once before applying any `nios_grid_member` / `nios_grid_join` resources.
 
-### Step 3: Join the Grid Member to the Master Grid
+```hcl
+terraform {
+  required_providers {
+    nios = {
+      source  = "infobloxopen/nios"
+      version = ">= 2.0.0"
+    }
+  }
+}
+```
 
-Once Grid is up and running, configure the grid member and join to the grid.
+### 2. Master-Member Configuration
 
-#### Examples
-
-#### Example 1: Join a Member to a Master
-
-##### Deploy Azure infrastructure for Master and Member
+Deploy master and member nodes, then configure the member to join the master grid.
 
 ```hcl
 module "node1" {
@@ -166,13 +194,25 @@ module "node2" {
 }
 ```
 
-##### After NIOS is ready (~30 min), configure grid member
+**Steps:**
+
+**Step 1.** Deploy the infrastructure:
+
+```bash
+terraform init
+terraform plan
+terraform apply
+```
+
+Wait ~30 minutes for NIOS to boot and ensure licenses are installed.
+
+**Step 2.** Configure the grid member and join it to the master:
 
 ```hcl
 provider "nios" {
   nios_host_url = "https://${module.node1.nic1_ip}"
-  nios_username = "username"
-  nios_password = "password"
+  nios_username = "<username>"
+  nios_password = "<password>"
 }
 
 resource "nios_grid_member" "member" {
@@ -190,8 +230,8 @@ resource "nios_grid_member" "member" {
 // Join member to existing grid master
 resource "nios_grid_join" "member_join" {
   member_url      = "https://${module.node2.nic1_ip}"
-  member_username = "Username"
-  member_password = "Password"
+  member_username = "<username>"
+  member_password = "<password>"
   grid_name       = "Infoblox"
   master          = module.node1.nic1_ip
   shared_secret   = "<secret>"
@@ -199,39 +239,47 @@ resource "nios_grid_join" "member_join" {
 }
 ```
 
-#### Example 2: Join a Member with Dual Stack Config
+### 3. Master-Member Configuration with Dual-Stack (IPv6)
 
-To provision an IPv6 address on the NIC, set `enable_ipv6 = true`. The
-member's IPv6 address is then exposed through the `nic1_ipv6` output.
+To provision an IPv6 address on the NIC, set `enable_ipv6 = true`. The member's IPv6 address is then exposed through the `nic1_ipv6` output.
 
-##### Deploy Azure infrastructure for Master and Member
+> **Note:** On Azure, IPv6 addresses are available in the Terraform state (the `nic1_ipv6` output), but you must manually configure the IPv6 settings on the NIOS grid through the UI or API. Unlike AWS, Azure does not automatically configure IPv6 on the NIOS instance. This is a known limitation that will be addressed in a future NIOS release.
 
 ```hcl
 module "node1" {
   source = "github.com/infobloxopen/terraform-provider-nios//modules/nios_deploy_azure?ref=nios_v9.1.0"
   // ... (same config as Step 1)
 
-  enable_ipv6 = true // enable IPv6 on the member NIC
+  enable_ipv6 = true
 }
 
 module "node2" {
   source = "github.com/infobloxopen/terraform-provider-nios//modules/nios_deploy_azure?ref=nios_v9.1.0"
   // ... (same config as Step 1)
 
-  enable_ipv6 = true // enable IPv6 on the member NIC
+  enable_ipv6 = true
 }
 ```
 
-##### After NIOS is ready (~30 min), configure grid member
+**Steps:**
 
-> **Note:** On Azure, IPv6 addresses are available in the Terraform state (the
-> `nic1_ipv6` output), but you must manually configure the IPv6 settings on the NIOS grid through the UI or API. Unlike AWS, Azure does not automatically configure IPv6 on the NIOS instance. This is a known limitation that will be addressed in a future NIOS release.
+**Step 1.** Deploy the infrastructure:
+
+```bash
+terraform init
+terraform plan
+terraform apply
+```
+
+Wait ~30 minutes for NIOS to boot and ensure licenses are installed.
+
+**Step 2.** Configure the grid member with dual-stack settings and join it to the master:
 
 ```hcl
 provider "nios" {
   nios_host_url = "https://${module.node1.nic1_ip}"
-  nios_username = "username"
-  nios_password = "password"
+  nios_username = "<username>"
+  nios_password = "<password>"
 }
 
 resource "nios_grid_member" "member" {
@@ -256,8 +304,8 @@ resource "nios_grid_member" "member" {
 // Join member to existing grid master
 resource "nios_grid_join" "member_join" {
   member_url      = "https://${module.node2.nic1_ip}"
-  member_username = "Username"
-  member_password = "Password"
+  member_username = "<username>"
+  member_password = "<password>"
   grid_name       = "Infoblox"
   master          = module.node1.nic1_ip
   shared_secret   = "<secret>"
@@ -265,18 +313,15 @@ resource "nios_grid_join" "member_join" {
 }
 ```
 
-#### Example 3: HA Grid Configuration
+### 4. HA Pair Configuration
 
-Deploy two Azure VMs for SA-HA configuration. HA on Azure requires a third NIC
-(`nic3`) on a dedicated HA subnet (`subnet3`) and a User-Assigned Managed
-Identity (`identity_id`) attached to each VM so the NIOS appliance can move the
-VIP between nodes during failover.
+Deploy two Azure VMs for SA-HA configuration. HA on Azure requires a third NIC (`nic3`) on a dedicated HA subnet (`subnet3`) and a User-Assigned Managed Identity (`identity_id`) attached to each VM so the NIOS appliance can move the VIP between nodes during failover.
 
 ```hcl
 // Deploy Azure infrastructure for Node 1 (Active Node)
 module "node1" {
-  source = "github.com/infobloxopen/terraform-provider-nios//modules/nios_deploy_azure?ref=nios_v9.1.0"
-  // ... (same base config as Step 1)
+  source = "github.com/infobloxopen/terraform-provider-nios//modules/nios_deploy_azure"
+  // ... (same config as Step 1)
 
   nic3_name    = "${var.nic3_name}-node1"
   subnet3_name = var.subnet3_name
@@ -288,7 +333,7 @@ module "node1" {
 // Deploy Azure infrastructure for Node 2 (Passive Node)
 module "node2" {
   source = "github.com/infobloxopen/terraform-provider-nios//modules/nios_deploy_azure?ref=nios_v9.1.0"
-  // ... (same base config as Step 1)
+  // ... (same config as Step 1)
 
   nic3_name    = "${var.nic3_name}-node2"
   subnet3_name = var.subnet3_name
@@ -298,9 +343,19 @@ module "node2" {
 }
 ```
 
-#### After both nodes are up and running (~30 min) and licenses are installed, configure HA
+**Steps:**
 
-1. Import Node1 under `nios_grid_member.ha_pair` and configure it as the HA pair.
+**Step 1.** Deploy the infrastructure:
+
+```bash
+terraform init
+terraform plan
+terraform apply
+```
+
+Wait ~30 minutes for NIOS to boot and ensure licenses are installed on both nodes.
+
+**Step 2.** Import Node1 under `nios_grid_member.ha_pair` and configure it as the HA pair. Using a config-driven `import` block alongside the full resource definition lets a single `terraform apply` perform the import **and** apply the HA configuration. Set `ha_on_cloud = true`, `master_candidate = true`, and `upgrade_group = "Grid Master"`:
 
 ```hcl
 provider "nios" {
@@ -311,13 +366,17 @@ provider "nios" {
 
 import {
   to = nios_grid_member.ha_pair
-  id = "5e57eac828fd49fd90072931fa4eff3f"
+  id = "<grid_member_uuid>"
 }
 
 resource "nios_grid_member" "ha_pair" {
-  config_addr_type = "IPV4"
-  host_name        = "infoblox.localdomain"
-  platform         = "VNIOS"
+  host_name         = "infoblox.localdomain"
+  config_addr_type  = "IPV4"
+  platform          = "VNIOS"
+  enable_ha         = true
+  router_id         = 111
+  ha_on_cloud       = true
+  ha_cloud_platform = "AZURE"
 
   upgrade_group    = "Grid Master"
   master_candidate = true
@@ -328,12 +387,9 @@ resource "nios_grid_member" "ha_pair" {
     subnet_mask = module.node1.subnet3_mask
   }
 
-  enable_ha         = true
-  ha_on_cloud       = true
-  ha_cloud_platform = "AZURE"
-
   node_info = [
     {
+      // Node 1 configuration
       lan_ha_port_setting = {
         ha_ip_address      = module.node1.nic3_ip
         mgmt_lan           = module.node1.nic1_ip
@@ -341,6 +397,7 @@ resource "nios_grid_member" "ha_pair" {
       }
     },
     {
+      // Node 2 configuration
       lan_ha_port_setting = {
         ha_ip_address      = module.node2.nic3_ip
         mgmt_lan           = module.node2.nic1_ip
@@ -348,8 +405,8 @@ resource "nios_grid_member" "ha_pair" {
       }
     }
   ]
-  router_id = 111
 
+  // To configure grid level dns resolver settings, use the grid_level_dns_resolver_setting attribute
   grid_level_dns_resolver_setting = {
     resolvers = [
       "10.10.10.10"
@@ -358,9 +415,9 @@ resource "nios_grid_member" "ha_pair" {
 }
 ```
 
-Run `terraform apply` to import and reconfigure Node1 as the HA active node.
+Run `terraform apply` to import Node1 and configure it as the HA active node in a single step.
 
-2. Join Node2 (Passive Node) to Node1 (Active Node).
+**Step 3.** Join Node2 (Passive Node) to Node1 (Active Node). Point the NIOS provider at the HA VIP, since the active node now serves the grid through the VIP:
 
 ```hcl
 provider "nios" {
@@ -376,10 +433,13 @@ resource "nios_grid_join" "ha_member_join" {
   grid_name       = "Infoblox"
   master          = module.node1.vip
   shared_secret   = "<secret>"
+  depends_on      = [nios_grid_member.ha_pair]
 }
 ```
 
 #### Best Practices for HA Deployment
+
+> **Note:** Deletion of the Grid Master via Terraform is **not supported**. Removing the `nios_grid_member` / `nios_grid_join` resources or running `terraform destroy` will not delete the Grid Master from NIOS.
 
 > **Recommended Workflow:** Use a **separate Terraform workspace** for HA configuration. The NIOS HA setup is a one-time provisioning task — once the HA pair is formed and the passive node has joined the grid, the configuration is complete and does not require ongoing Terraform management.
 
@@ -397,7 +457,3 @@ This approach ensures that:
 - Your HA infrastructure is provisioned correctly.
 - Subsequent Terraform operations don't interfere with the running HA pair.
 - The grid master configuration remains stable and is managed through NIOS directly.
-
-### Boot Time
-- NIOS takes **30 minutes** to fully boot after VM creation, make sure the grid is up and running before triggering the grid join.
-- Always verify NIOS API is responding before applying `nios_grid_member` resources
