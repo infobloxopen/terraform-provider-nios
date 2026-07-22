@@ -33,6 +33,26 @@ var _ resource.ResourceWithImportState = &IPAllocationResource{}
 var _ resource.ResourceWithValidateConfig = &IPAllocationResource{}
 var _ resource.ResourceWithModifyPlan = &IPAllocationResource{}
 
+var _ resource.ResourceWithUpgradeState = &IPAllocationResource{}
+
+func (r *IPAllocationResource) UpgradeState(ctx context.Context) map[int64]resource.StateUpgrader {
+	return map[int64]resource.StateUpgrader{
+		0: {
+			PriorSchema: &schema.Schema{
+				Attributes: IPAllocationResourceSchemaAttributes,
+			},
+			StateUpgrader: func(ctx context.Context, req resource.UpgradeStateRequest, resp *resource.UpgradeStateResponse) {
+				var data IPAllocationModel
+				resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
+				if resp.Diagnostics.HasError() {
+					return
+				}
+				resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+			},
+		},
+	}
+}
+
 func NewIPAllocationResource() resource.Resource {
 	return &IPAllocationResource{}
 }
@@ -54,6 +74,7 @@ func (r *IPAllocationResource) Metadata(ctx context.Context, req resource.Metada
 
 func (r *IPAllocationResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
+		Version:             1,
 		MarkdownDescription: "Manages IP Allocation for a DNS HOST Record",
 		Attributes:          IPAllocationResourceSchemaAttributes,
 	}

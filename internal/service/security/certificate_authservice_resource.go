@@ -29,6 +29,8 @@ var _ resource.ResourceWithImportState = &CertificateAuthserviceResource{}
 
 var _ resource.ResourceWithModifyPlan = &CertificateAuthserviceResource{}
 
+var _ resource.ResourceWithUpgradeState = &CertificateAuthserviceResource{}
+
 func NewCertificateAuthserviceResource() resource.Resource {
 	return &CertificateAuthserviceResource{}
 }
@@ -44,8 +46,27 @@ func (r *CertificateAuthserviceResource) Metadata(ctx context.Context, req resou
 
 func (r *CertificateAuthserviceResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
+		Version:             1,
 		MarkdownDescription: "Manages a Certificate Authentication Service.",
 		Attributes:          CertificateAuthserviceResourceSchemaAttributes,
+	}
+}
+
+func (r *CertificateAuthserviceResource) UpgradeState(ctx context.Context) map[int64]resource.StateUpgrader {
+	return map[int64]resource.StateUpgrader{
+		0: {
+			PriorSchema: &schema.Schema{
+				Attributes: CertificateAuthserviceResourceSchemaAttributes,
+			},
+			StateUpgrader: func(ctx context.Context, req resource.UpgradeStateRequest, resp *resource.UpgradeStateResponse) {
+				var data CertificateAuthserviceModel
+				resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
+				if resp.Diagnostics.HasError() {
+					return
+				}
+				resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+			},
+		},
 	}
 }
 
@@ -463,8 +484,8 @@ func (r *CertificateAuthserviceResource) ValidateConfig(ctx context.Context, req
 	isManualCheck := ocspCheck.ValueString() == "MANUAL" || ocspCheck.ValueString() == "AIA_AND_MANUAL"
 
 	// Handle when ocsp_check is valid and set to MANUAL or AIA_AND_MANUAL
-	if (isOcspCheckValid && isManualCheck) || !isOcspCheckValid {
-		if ocspResponders.IsNull() || ocspResponders.IsUnknown() {
+	if (isOcspCheckValid && isManualCheck) || ocspCheck.IsNull() {
+		if ocspResponders.IsNull() {
 			resp.Diagnostics.AddError(
 				"Invalid Configuration",
 				"At least one `ocsp_responders` must be specified when `ocsp_check` is set to `MANUAL` or `AIA_AND_MANUAL`, else set the ocsp_check to 'DISABLED'.",
@@ -474,9 +495,9 @@ func (r *CertificateAuthserviceResource) ValidateConfig(ctx context.Context, req
 
 	// Check if remote lookup is enabled and validate required fields
 	isRemoteLookupEnabled := !data.EnableRemoteLookup.IsNull() && !data.EnableRemoteLookup.IsUnknown() && data.EnableRemoteLookup.ValueBool()
-	missingService := data.RemoteLookupService.IsNull() || data.RemoteLookupService.IsUnknown()
-	missingUsername := data.RemoteLookupUsername.IsNull() || data.RemoteLookupUsername.IsUnknown()
-	missingPassword := data.RemoteLookupPassword.IsNull() || data.RemoteLookupPassword.IsUnknown()
+	missingService := data.RemoteLookupService.IsNull()
+	missingUsername := data.RemoteLookupUsername.IsNull()
+	missingPassword := data.RemoteLookupPassword.IsNull()
 
 	if isRemoteLookupEnabled {
 		// Validate required fields for remote lookup
@@ -488,7 +509,7 @@ func (r *CertificateAuthserviceResource) ValidateConfig(ctx context.Context, req
 		}
 
 		// Validate enable_password_request setting
-		if data.EnablePasswordRequest.IsNull() || data.EnablePasswordRequest.IsUnknown() || data.EnablePasswordRequest.ValueBool() {
+		if !data.EnablePasswordRequest.IsUnknown() && (data.EnablePasswordRequest.IsNull() || data.EnablePasswordRequest.ValueBool()) {
 			resp.Diagnostics.AddError(
 				"Invalid Configuration",
 				"When `enable_remote_lookup` is set to `true`, `enable_password_request` must be set to `false`.",

@@ -30,6 +30,8 @@ var _ resource.ResourceWithValidateConfig = &DxlEndpointResource{}
 
 var _ resource.ResourceWithModifyPlan = &DxlEndpointResource{}
 
+var _ resource.ResourceWithUpgradeState = &DxlEndpointResource{}
+
 func NewDxlEndpointResource() resource.Resource {
 	return &DxlEndpointResource{}
 }
@@ -45,8 +47,27 @@ func (r *DxlEndpointResource) Metadata(ctx context.Context, req resource.Metadat
 
 func (r *DxlEndpointResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
+		Version:             1,
 		MarkdownDescription: "Manages a DXL Endpoint.",
 		Attributes:          DxlEndpointResourceSchemaAttributes,
+	}
+}
+
+func (r *DxlEndpointResource) UpgradeState(ctx context.Context) map[int64]resource.StateUpgrader {
+	return map[int64]resource.StateUpgrader{
+		0: {
+			PriorSchema: &schema.Schema{
+				Attributes: DxlEndpointResourceSchemaAttributes,
+			},
+			StateUpgrader: func(ctx context.Context, req resource.UpgradeStateRequest, resp *resource.UpgradeStateResponse) {
+				var data DxlEndpointModel
+				resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
+				if resp.Diagnostics.HasError() {
+					return
+				}
+				resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+			},
+		},
 	}
 }
 
@@ -575,7 +596,7 @@ func (r *DxlEndpointResource) ValidateConfig(ctx context.Context, req resource.V
 				)
 			}
 		case "MEMBER":
-			if !hasOutboundMembers {
+			if data.OutboundMembers.IsNull() {
 				resp.Diagnostics.AddError(
 					"Invalid Configuration",
 					"'outbound_member_type' cannot be set to 'MEMBER' when 'outbound_members' is not specified.",
@@ -590,7 +611,7 @@ func (r *DxlEndpointResource) ValidateConfig(ctx context.Context, req resource.V
 			"Invalid Configuration",
 			"Only one of 'brokers' or 'brokers_import_file' should be specified.",
 		)
-	} else if (data.Brokers.IsNull() || data.Brokers.IsUnknown()) && (data.BrokersImportFile.IsNull() || data.BrokersImportFile.IsUnknown()) {
+	} else if data.Brokers.IsNull() && data.BrokersImportFile.IsNull() {
 		resp.Diagnostics.AddError(
 			"Invalid Configuration",
 			"One of 'brokers' or 'brokers_import_file' must be specified.",
@@ -607,7 +628,7 @@ func (r *DxlEndpointResource) ValidateConfig(ctx context.Context, req resource.V
 		}
 
 		for i, broker := range brokers {
-			if broker.HostName.IsNull() || broker.HostName.IsUnknown() {
+			if broker.HostName.IsNull() {
 				resp.Diagnostics.AddAttributeError(
 					path.Root("brokers").AtListIndex(i).AtName("host_name"),
 					"Invalid Configuration",
