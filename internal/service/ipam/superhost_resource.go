@@ -9,7 +9,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
-	"github.com/hashicorp/terraform-plugin-framework/resource/identityschema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
@@ -25,7 +24,6 @@ var readableAttributesForSuperhost = "comment,dhcp_associated_objects,disabled,d
 // Ensure provider defined types fully satisfy framework interfaces.
 var _ resource.Resource = &SuperhostResource{}
 var _ resource.ResourceWithImportState = &SuperhostResource{}
-var _ resource.ResourceWithIdentity = &SuperhostResource{}
 var _ resource.ResourceWithValidateConfig = &SuperhostResource{}
 
 func NewSuperhostResource() resource.Resource {
@@ -154,9 +152,6 @@ func (r *SuperhostResource) Create(ctx context.Context, req resource.CreateReque
 
 	data.Flatten(ctx, &res, &resp.Diagnostics)
 
-	// Save the Identity of the Resource
-	resp.Diagnostics.Append(resp.Identity.SetAttribute(ctx, path.Root("ref"), data.Ref)...)
-
 	// Save data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
@@ -243,9 +238,6 @@ func (r *SuperhostResource) Read(ctx context.Context, req resource.ReadRequest, 
 	}
 
 	data.Flatten(ctx, &res, &resp.Diagnostics)
-
-	// Save the Identity of the Resource
-	resp.Diagnostics.Append(resp.Identity.SetAttribute(ctx, path.Root("ref"), data.Ref)...)
 
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
@@ -421,9 +413,6 @@ func (r *SuperhostResource) Update(ctx context.Context, req resource.UpdateReque
 
 	data.Flatten(ctx, &res, &resp.Diagnostics)
 
-	// Save the Identity of the Resource
-	resp.Diagnostics.Append(resp.Identity.SetAttribute(ctx, path.Root("ref"), data.Ref)...)
-
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 	if associateInternalId != nil {
@@ -500,15 +489,4 @@ func (r *SuperhostResource) ValidateConfig(ctx context.Context, req resource.Val
 func (r *SuperhostResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("uuid"), req.ID)...)
 	resp.Diagnostics.Append(resp.Private.SetKey(ctx, "associate_internal_id", []byte("true"))...)
-}
-
-func (r *SuperhostResource) IdentitySchema(_ context.Context, _ resource.IdentitySchemaRequest, resp *resource.IdentitySchemaResponse) {
-	resp.IdentitySchema = identityschema.Schema{
-		Attributes: map[string]identityschema.Attribute{
-			"ref": identityschema.StringAttribute{
-				RequiredForImport: true,
-				Description:       "The unique NIOS object reference for this resource.",
-			},
-		},
-	}
 }

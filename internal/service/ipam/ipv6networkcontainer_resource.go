@@ -9,7 +9,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
-	"github.com/hashicorp/terraform-plugin-framework/resource/identityschema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
@@ -27,7 +26,6 @@ var readableAttributesForIpv6networkcontainer = "cloud_info,comment,ddns_domainn
 // Ensure provider defined types fully satisfy framework interfaces.
 var _ resource.Resource = &Ipv6networkcontainerResource{}
 var _ resource.ResourceWithImportState = &Ipv6networkcontainerResource{}
-var _ resource.ResourceWithIdentity = &Ipv6networkcontainerResource{}
 var _ resource.ResourceWithValidateConfig = &Ipv6networkcontainerResource{}
 
 func NewIpv6networkcontainerResource() resource.Resource {
@@ -84,7 +82,6 @@ func (r *Ipv6networkcontainerResource) Create(ctx context.Context, req resource.
 	// Add internal ID exists in the Extensible Attributes if not already present
 	data.ExtAttrs, diags = AddInternalIDToExtAttrs(ctx, data.ExtAttrs, diags)
 	if diags.HasError() {
-		resp.Diagnostics.Append(diags...)
 		return
 	}
 
@@ -136,8 +133,7 @@ func (r *Ipv6networkcontainerResource) Create(ctx context.Context, req resource.
 	res := apiRes.CreateIpv6networkcontainerResponseAsObject.GetResult()
 	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.ExtAttrs)
 	if diags.HasError() {
-		resp.Diagnostics.Append(diags...)
-		resp.Diagnostics.AddError("Client Error", "Error while creating Ipv6networkcontainer due to inherited Extensible attributes")
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while creating Ipv6networkcontainer due to inherited Extensible attributes, got error: %s", err))
 		return
 	}
 
@@ -147,9 +143,6 @@ func (r *Ipv6networkcontainerResource) Create(ctx context.Context, req resource.
 	if len(origFunCallAttrs) > 0 {
 		data.FuncCall = types.ObjectValueMust(FuncCallAttrTypes, origFunCallAttrs)
 	}
-
-	// Save the Identity of the Resource
-	resp.Diagnostics.Append(resp.Identity.SetAttribute(ctx, path.Root("ref"), data.Ref)...)
 
 	// Save data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
@@ -231,15 +224,11 @@ func (r *Ipv6networkcontainerResource) Read(ctx context.Context, req resource.Re
 
 	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.ExtAttrs)
 	if diags.HasError() {
-		resp.Diagnostics.Append(diags...)
-		resp.Diagnostics.AddError("Client Error", "Error while reading Ipv6networkcontainer due to inherited Extensible attributes")
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while reading Ipv6networkcontainer due to inherited Extensible attributes, got error: %s", diags))
 		return
 	}
 
 	data.Flatten(ctx, &res, &resp.Diagnostics)
-
-	// Save the Identity of the Resource
-	resp.Diagnostics.Append(resp.Identity.SetAttribute(ctx, path.Root("ref"), data.Ref)...)
 
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
@@ -339,7 +328,6 @@ func (r *Ipv6networkcontainerResource) Update(ctx context.Context, req resource.
 	if associateInternalId != nil {
 		data.ExtAttrs, diags = AddInternalIDToExtAttrs(ctx, data.ExtAttrs, diags)
 		if diags.HasError() {
-			resp.Diagnostics.Append(diags...)
 			return
 		}
 	}
@@ -388,14 +376,10 @@ func (r *Ipv6networkcontainerResource) Update(ctx context.Context, req resource.
 
 	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, planExtAttrs, *res.ExtAttrs)
 	if diags.HasError() {
-		resp.Diagnostics.Append(diags...)
-		resp.Diagnostics.AddError("Client Error", "Error while updating Ipv6networkcontainer due to inherited Extensible attributes")
+	resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while updating Ipv6networkcontainer due to inherited Extensible attributes, got error: %s", diags))
 		return
 	}
 	data.Flatten(ctx, &res, &resp.Diagnostics)
-
-	// Save the Identity of the Resource
-	resp.Diagnostics.Append(resp.Identity.SetAttribute(ctx, path.Root("ref"), data.Ref)...)
 
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
@@ -455,17 +439,6 @@ func (r *Ipv6networkcontainerResource) UpdateFuncCallAttributeName(ctx context.C
 	updatedFuncCallAttrs["attribute_name"] = types.StringValue(pathVar)
 
 	return types.ObjectValueMust(FuncCallAttrTypes, updatedFuncCallAttrs)
-}
-
-func (r *Ipv6networkcontainerResource) IdentitySchema(_ context.Context, _ resource.IdentitySchemaRequest, resp *resource.IdentitySchemaResponse) {
-	resp.IdentitySchema = identityschema.Schema{
-		Attributes: map[string]identityschema.Attribute{
-			"ref": identityschema.StringAttribute{
-				RequiredForImport: true,
-				Description:       "The unique NIOS object reference for this resource.",
-			},
-		},
-	}
 }
 
 func (r *Ipv6networkcontainerResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
