@@ -964,19 +964,6 @@ Optional:
 - `vlan_id` (Number) The identifier for the VLAN. Valid values are from 1 to 4096.
 
 
-<a id="nestedatt--member_service_communication"></a>
-### Nested Schema for `member_service_communication`
-
-Optional:
-
-- `service` (String) The service for a Grid member.
-- `type` (String) Communication type.
-
-Read-Only:
-
-- `option` (String) The option for communication type.
-
-
 <a id="nestedatt--service_status"></a>
 ### Nested Schema for `service_status`
 
