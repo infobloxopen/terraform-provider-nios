@@ -446,7 +446,7 @@ func (r *RangetemplateResource) ValidateConfig(ctx context.Context, req resource
 		for i, option := range options {
 			isSpecialOption := false
 			optionName := ""
-			if option.Value.IsNull() || option.Value.IsUnknown() {
+			if option.Value.IsNull() {
 				resp.Diagnostics.AddAttributeError(
 					path.Root("options").AtListIndex(i).AtName("value"),
 					"Invalid configuration for DHCP Option",
@@ -460,6 +460,8 @@ func (r *RangetemplateResource) ValidateConfig(ctx context.Context, req resource
 				optionNum := option.Num.ValueInt64()
 				isSpecialOption = specialOptionsNum[optionNum]
 				optionName = fmt.Sprintf("with num = %d", optionNum)
+			} else if option.Name.IsUnknown() || option.Num.IsUnknown() {
+				continue
 			} else {
 				resp.Diagnostics.AddAttributeError(
 					path.Root("options").AtListIndex(i).AtName("name"),
@@ -470,7 +472,7 @@ func (r *RangetemplateResource) ValidateConfig(ctx context.Context, req resource
 				continue
 			}
 
-			if option.Value.ValueString() == "" {
+			if !option.Value.IsNull() && !option.Value.IsUnknown() && option.Value.ValueString() == "" {
 				if !isSpecialOption {
 					resp.Diagnostics.AddAttributeError(
 						path.Root("options").AtListIndex(i).AtName("value"),
@@ -514,7 +516,7 @@ func (r *RangetemplateResource) ValidateConfig(ctx context.Context, req resource
 
 	// If server_association_type is MEMBER, member field must be set
 	if serverAssociationType == "MEMBER" {
-		if data.Member.IsNull() || data.Member.IsUnknown() {
+		if data.Member.IsNull() {
 			resp.Diagnostics.AddAttributeError(
 				path.Root("member"),
 				"Invalid Configuration",
@@ -525,7 +527,7 @@ func (r *RangetemplateResource) ValidateConfig(ctx context.Context, req resource
 
 	// If server_association_type is FAILOVER, failover_association field must be set
 	if serverAssociationType == "FAILOVER" {
-		if data.FailoverAssociation.IsNull() || data.FailoverAssociation.IsUnknown() {
+		if data.FailoverAssociation.IsNull() {
 			resp.Diagnostics.AddAttributeError(
 				path.Root("failover_association"),
 				"Invalid Configuration",
@@ -536,7 +538,7 @@ func (r *RangetemplateResource) ValidateConfig(ctx context.Context, req resource
 
 	// If server_association_type is MS_SERVER, ms_server field must be set
 	if serverAssociationType == "MS_SERVER" {
-		if data.MsServer.IsNull() || data.MsServer.IsUnknown() {
+		if data.MsServer.IsNull() {
 			resp.Diagnostics.AddAttributeError(
 				path.Root("ms_server"),
 				"Invalid Configuration",

@@ -27,6 +27,8 @@ var _ resource.Resource = &LdapAuthServiceResource{}
 var _ resource.ResourceWithImportState = &LdapAuthServiceResource{}
 var _ resource.ResourceWithModifyPlan = &LdapAuthServiceResource{}
 
+var _ resource.ResourceWithUpgradeState = &LdapAuthServiceResource{}
+
 func NewLdapAuthServiceResource() resource.Resource {
 	return &LdapAuthServiceResource{}
 }
@@ -42,8 +44,27 @@ func (r *LdapAuthServiceResource) Metadata(ctx context.Context, req resource.Met
 
 func (r *LdapAuthServiceResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
+		Version:             1,
 		MarkdownDescription: "Manages an LDAP Auth Service.",
 		Attributes:          LdapAuthServiceResourceSchemaAttributes,
+	}
+}
+
+func (r *LdapAuthServiceResource) UpgradeState(ctx context.Context) map[int64]resource.StateUpgrader {
+	return map[int64]resource.StateUpgrader{
+		0: {
+			PriorSchema: &schema.Schema{
+				Attributes: LdapAuthServiceResourceSchemaAttributes,
+			},
+			StateUpgrader: func(ctx context.Context, req resource.UpgradeStateRequest, resp *resource.UpgradeStateResponse) {
+				var data LdapAuthServiceModel
+				resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
+				if resp.Diagnostics.HasError() {
+					return
+				}
+				resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+			},
+		},
 	}
 }
 
