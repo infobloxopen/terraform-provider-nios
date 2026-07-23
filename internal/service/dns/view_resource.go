@@ -457,7 +457,6 @@ func (r *ViewResource) ValidateConfig(ctx context.Context, req resource.Validate
 		return
 	}
 
-	// Nothing to validate if filter_aaaa_list is not set or not yet known at plan time.
 	if data.FilterAaaaList.IsNull() || data.FilterAaaaList.IsUnknown() {
 		return
 	}
