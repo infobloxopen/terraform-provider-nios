@@ -1442,7 +1442,7 @@ func TestAccMemberResource_Lan2Enabled(t *testing.T) {
 func TestAccMemberResource_Lan2PortSetting(t *testing.T) {
 	var resourceName = "nios_grid_member.test_lan2_port_setting"
 	var v grid.Member
-	networkSettingAddress := fmt.Sprintf("172.29.38.%d", acctest.RandomNumber(254))
+	networkSettingAddress := fmt.Sprintf("172.29.38.%d", acctest.RandomNumber(252)+2)
 	networkSettingAddress6 := fmt.Sprintf("2001:db8:%x:%x::%x", acctest.RandomNumber(65535), acctest.RandomNumber(65535), acctest.RandomNumber(65535))
 	lan2PortSettingVal := map[string]any{
 		"virtual_router_id": 10,
@@ -1541,7 +1541,7 @@ func TestAccMemberResource_Lan2PortSetting(t *testing.T) {
 func TestAccMemberResource_LomNetworkConfig(t *testing.T) {
 	var resourceName = "nios_grid_member.test_lom_network_config"
 	var v grid.Member
-	networkSettingAddress := fmt.Sprintf("172.29.38.%d", acctest.RandomNumber(254))
+	networkSettingAddress := fmt.Sprintf("172.29.38.%d", acctest.RandomNumber(252)+2)
 	vipAddress := "172.28.38.125"
 	lomNetworkConfigVal := []map[string]any{
 		{
