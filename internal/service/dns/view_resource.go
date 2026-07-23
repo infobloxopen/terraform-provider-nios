@@ -465,6 +465,10 @@ func (r *ViewResource) ValidateConfig(ctx context.Context, req resource.Validate
 	diags = data.FilterAaaaList.ElementsAs(ctx, &filterAaaaListItems, false)
 	resp.Diagnostics.Append(diags...)
 
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
 	hasRefInList := false
 	for _, item := range filterAaaaListItems {
 		itemMap := item.Attributes()
