@@ -145,8 +145,7 @@ jobs:
               fname = f"ci-{git_sha}-{build_number}-{stage}.json"
               fdata = gist["files"].get(fname)
               if not fdata:
-                  print(f"::warning::Stage file not found: {fname}")
-                  return None
+                  return None, fname
               content = fdata.get("content") or ""
               if fdata.get("truncated") and fdata.get("raw_url"):
                   req2 = urllib.request.Request(
@@ -155,16 +154,16 @@ jobs:
                   with urllib.request.urlopen(req2, timeout=15) as r:
                       content = r.read().decode()
               try:
-                  return json.loads(content)
+                  return json.loads(content), fname
               except json.JSONDecodeError:
-                  print(f"::warning::Stage file {fname} contains invalid JSON.")
-                  return None
+                  print(f"::error::Stage file {fname} contains invalid JSON.")
+                  return None, fname
 
-          all_present = True
+          missing = []
           for stage in ["job-started", "env-setup", "tests-complete"]:
-              data = read_stage(stage)
+              data, fname = read_stage(stage)
               if data is None:
-                  all_present = False
+                  missing.append(fname)
                   continue
               status = data.get("status", "unknown")
               msg    = data.get("message", "")
@@ -174,10 +173,13 @@ jobs:
                   print(f"::error::Jenkins reported {status} at stage '{stage}': {msg}")
                   sys.exit(1)
 
-          if not all_present:
-              print("::warning::Some stage files were missing — results may be incomplete.")
-          else:
-              print("All stage signals present and validated.")
+          if missing:
+              print(f"::error::Missing required stage signal(s): {', '.join(missing)}. "
+                    f"Jenkins did not confirm this build reached all pipeline stages — "
+                    f"failing rather than reporting on incomplete data.")
+              sys.exit(1)
+
+          print("All stage signals present and validated.")
           EOF
 
       # ------------------------------------------------------------------ #
