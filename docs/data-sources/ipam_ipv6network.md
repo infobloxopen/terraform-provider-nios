@@ -278,6 +278,7 @@ Optional:
 - `ipv4addr` (String) The IPv4 Address of the Grid Member.
 - `ipv6addr` (String) The IPv6 Address of the Grid Member.
 - `name` (String) The Grid member name
+- `struct` (String) The struct type of the member object (e.g. 'dhcpmember' or 'msdhcpserver').
 
 
 <a id="nestedatt--result--options"></a>

@@ -18,12 +18,14 @@ type Ipv6networkMembersModel struct {
 	Ipv4addr types.String `tfsdk:"ipv4addr"`
 	Ipv6addr types.String `tfsdk:"ipv6addr"`
 	Name     types.String `tfsdk:"name"`
+	Struct   types.String `tfsdk:"struct"`
 }
 
 var Ipv6networkMembersAttrTypes = map[string]attr.Type{
 	"ipv4addr": types.StringType,
 	"ipv6addr": types.StringType,
 	"name":     types.StringType,
+	"struct":   types.StringType,
 }
 
 var Ipv6networkMembersResourceSchemaAttributes = map[string]schema.Attribute{
@@ -40,6 +42,11 @@ var Ipv6networkMembersResourceSchemaAttributes = map[string]schema.Attribute{
 	"name": schema.StringAttribute{
 		Optional:            true,
 		MarkdownDescription: "The Grid member name",
+		Computed:            true,
+	},
+	"struct": schema.StringAttribute{
+		Optional:            true,
+		MarkdownDescription: "The struct type of the member object (e.g. 'dhcpmember' or 'msdhcpserver').",
 		Computed:            true,
 	},
 }
@@ -65,6 +72,11 @@ func (m *Ipv6networkMembersModel) Expand(ctx context.Context, diags *diag.Diagno
 		Ipv6addr: flex.ExpandStringPointer(m.Ipv6addr),
 		Name:     flex.ExpandStringPointer(m.Name),
 	}
+	if !m.Struct.IsNull() && !m.Struct.IsUnknown() && m.Struct.ValueString() != "" {
+		to.AdditionalProperties = map[string]interface{}{
+			"_struct": m.Struct.ValueString(),
+		}
+	}
 	return to
 }
 
@@ -89,4 +101,9 @@ func (m *Ipv6networkMembersModel) Flatten(ctx context.Context, from *ipam.Ipv6ne
 	m.Ipv4addr = flex.FlattenStringPointer(from.Ipv4addr)
 	m.Ipv6addr = flex.FlattenStringPointer(from.Ipv6addr)
 	m.Name = flex.FlattenStringPointer(from.Name)
+	if v, ok := from.AdditionalProperties["_struct"]; ok {
+		if s, ok := v.(string); ok {
+			m.Struct = types.StringValue(s)
+		}
+	}
 }

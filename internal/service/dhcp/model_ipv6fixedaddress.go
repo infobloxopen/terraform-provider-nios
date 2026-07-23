@@ -636,8 +636,28 @@ func (m *Ipv6fixedaddressModel) Flatten(ctx context.Context, from *dhcp.Ipv6fixe
 	}
 	m.PreferredLifetime = flex.FlattenInt64Pointer(from.PreferredLifetime)
 	m.ReservedInterface = flex.FlattenStringPointer(from.ReservedInterface)
-	m.Snmp3Credential = FlattenIpv6fixedaddressSnmp3Credential(ctx, from.Snmp3Credential, diags)
-	m.SnmpCredential = FlattenIpv6fixedaddressSnmpCredential(ctx, from.SnmpCredential, diags)
+	planSnmp3Credential := m.Snmp3Credential
+	if from.UseSnmp3Credential != nil && !*from.UseSnmp3Credential && (planSnmp3Credential.IsNull() || planSnmp3Credential.IsUnknown()) {
+		m.Snmp3Credential = types.ObjectNull(Ipv6fixedaddressSnmp3CredentialAttrTypes)
+	} else {
+		m.Snmp3Credential = FlattenIpv6fixedaddressSnmp3Credential(ctx, from.Snmp3Credential, diags)
+		if !planSnmp3Credential.IsUnknown() {
+			snmp3CredentialVal, diags := utils.CopyFieldFromPlanToRespObject(ctx, planSnmp3Credential, m.Snmp3Credential, "privacy_password")
+			if !diags.HasError() {
+				m.Snmp3Credential = snmp3CredentialVal.(types.Object)
+			}
+			snmp3CredentialVal2, diags := utils.CopyFieldFromPlanToRespObject(ctx, planSnmp3Credential, m.Snmp3Credential, "authentication_password")
+			if !diags.HasError() {
+				m.Snmp3Credential = snmp3CredentialVal2.(types.Object)
+			}
+		}
+	}
+	planSnmpCredential := m.SnmpCredential
+	if from.UseSnmpCredential != nil && !*from.UseSnmpCredential && (planSnmpCredential.IsNull() || planSnmpCredential.IsUnknown()) {
+		m.SnmpCredential = types.ObjectNull(Ipv6fixedaddressSnmpCredentialAttrTypes)
+	} else {
+		m.SnmpCredential = FlattenIpv6fixedaddressSnmpCredential(ctx, from.SnmpCredential, diags)
+	}
 	m.Template = flex.FlattenStringPointer(from.Template)
 	m.UseCliCredentials = types.BoolPointerValue(from.UseCliCredentials)
 	m.UseDomainName = types.BoolPointerValue(from.UseDomainName)

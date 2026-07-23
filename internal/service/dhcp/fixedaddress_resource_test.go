@@ -832,7 +832,9 @@ func TestAccFixedaddressResource_EnableDdns(t *testing.T) {
 }
 
 func TestAccFixedaddressResource_EnableImmediateDiscovery(t *testing.T) {
-	t.Skip("Skipping test as Discovery is not supported")
+	if utils.GetNIOSDiscoveryMemberHostName() == "" {
+		t.Skip("Discovery Member is Required to run this test")
+	}
 	var resourceName = "nios_dhcp_fixed_address.test_enable_immediate_discovery"
 	var v dhcp.Fixedaddress
 	ip := "15.0.0.23"
@@ -1160,7 +1162,6 @@ func TestAccFixedaddressResource_MsOptions(t *testing.T) {
 }
 
 func TestAccFixedaddressResource_MsServer(t *testing.T) {
-	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_dhcp_fixed_address.test_ms_server"
 	var v dhcp.Fixedaddress
 	ip := "150.0.0.32"
@@ -1183,7 +1184,6 @@ func TestAccFixedaddressResource_MsServer(t *testing.T) {
 }
 
 func TestAccFixedaddressResource_Name(t *testing.T) {
-	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_dhcp_fixed_address.test_name"
 	var v dhcp.Fixedaddress
 	ip := "15.0.0.33"
@@ -1425,7 +1425,6 @@ func TestAccFixedaddressResource_ReservedInterface(t *testing.T) {
 }
 
 func TestAccFixedaddressResource_RestartIfNeeded(t *testing.T) {
-	t.Skip("Skipping test as it requires a CP member to be configured")
 	var resourceName = "nios_dhcp_fixed_address.test_restart_if_needed"
 	var v dhcp.Fixedaddress
 	ip := "15.0.0.40"
@@ -2086,7 +2085,6 @@ func TestAccFixedaddressResource_UseSnmp3Credential(t *testing.T) {
 }
 
 func TestAccFixedaddressResource_UseSnmpCredential(t *testing.T) {
-	t.Skip("Skipping test as SNMP Credential are not set up in the GRID")
 	var resourceName = "nios_dhcp_fixed_address.test_use_snmp_credential"
 	var v dhcp.Fixedaddress
 	ip := "15.0.0.57"
@@ -2098,7 +2096,7 @@ func TestAccFixedaddressResource_UseSnmpCredential(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccFixedaddressUseSnmpCredential(ip, "CIRCUIT_ID", agentCircuitID, "true"),
+				Config: testAccFixedaddressUseSnmpCredentialSet(ip, "CIRCUIT_ID", agentCircuitID, "true", "COMMUNITY_STRING", "SNMP Credential Comment", "default"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFixedaddressExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_snmp_credential", "true"),
@@ -3008,13 +3006,29 @@ resource "nios_dhcp_fixed_address" "test_use_snmp3_credential" {
 `, ip, matchClient, agentCircuitID, useSnmp3Credential)
 }
 
+func testAccFixedaddressUseSnmpCredentialSet(ip, matchClient string, agentCircuitID int, useSnmpCredential, snmpCredentialCommStr, snmpCredentialComment, snmpCredentialGroup string) string {
+	return fmt.Sprintf(`
+resource "nios_dhcp_fixed_address" "test_use_snmp_credential" {
+	ipv4addr = %q
+	match_client = %q
+	agent_circuit_id = %d
+	use_snmp_credential = %s
+	snmp_credential = {
+		community_string = %q
+		comment = %q
+		credential_group = %q
+	}
+}
+`, ip, matchClient, agentCircuitID, useSnmpCredential, snmpCredentialCommStr, snmpCredentialComment, snmpCredentialGroup)
+}
+
 func testAccFixedaddressUseSnmpCredential(ip, matchClient string, agentCircuitID int, useSnmpCredential string) string {
 	return fmt.Sprintf(`
 resource "nios_dhcp_fixed_address" "test_use_snmp_credential" {
 	ipv4addr = %q
 	match_client = %q
 	agent_circuit_id = %d
-	use_snmp_credential = %q
+	use_snmp_credential = %s
 }
 `, ip, matchClient, agentCircuitID, useSnmpCredential)
 }
