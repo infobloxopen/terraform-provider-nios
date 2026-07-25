@@ -184,7 +184,7 @@ func extractRadiusServers(ctx context.Context, list types.List) ([]RadiusAuthser
 func hashRadiusServers(servers []RadiusAuthserviceServersModel) (string, error) {
 	snapshots := make([]radiusServerSnapshot, 0, len(servers))
 	for _, s := range servers {
-		if s.SharedSecret.IsNull() && s.SharedSecret.IsUnknown() {
+		if s.SharedSecret.IsNull() || s.SharedSecret.IsUnknown() {
  			return "", nil
  		}
 		snapshots = append(snapshots, radiusServerSnapshot{

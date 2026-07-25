@@ -180,7 +180,7 @@ func extractTacacsServers(ctx context.Context, list types.List) ([]TacacsplusAut
 func hashTacacsServers(servers []TacacsplusAuthserviceServersModel) (string, error) {
 	snapshots := make([]tacacsServerSnapshot, 0, len(servers))
 	for _, s := range servers {
-		if s.SharedSecret.IsNull() && s.SharedSecret.IsUnknown() {
+		if s.SharedSecret.IsNull() || s.SharedSecret.IsUnknown() {
  			return "", nil
  		}
 		snapshots = append(snapshots, tacacsServerSnapshot{
