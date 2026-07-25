@@ -228,7 +228,11 @@ func (r *LdapAuthServiceResource) Create(ctx context.Context, req resource.Creat
 
 		if serversHash != "" {
 			secretData.PasswordHash = serversHash
-			secretDataJSON, _ := json.Marshal(secretData)
+			secretDataJSON, err := json.Marshal(secretData)
+			if err != nil {
+ 				resp.Diagnostics.AddError("Private State Marshal Error", err.Error())
+ 				return
+ 			}
 			val := map[string]string{"algo": "sha256", "hash": string(secretDataJSON)}
 			hashedSecret, err := json.Marshal(val)
 			if err != nil {
