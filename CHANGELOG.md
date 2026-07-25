@@ -8,7 +8,7 @@
 
 - Added HA support for deploying vNIOS on GCP. ([#519](https://github.com/infobloxopen/terraform-provider-nios/pull/519))
 - Added HA support for deploying vNIOS on Azure. ([#521](https://github.com/infobloxopen/terraform-provider-nios/pull/521))
-- Added HA support for deploying vNIOS on OCI. ([#510] (https://github.com/infobloxopen/terraform-provider-nios/pull/510))
+- Added HA support for deploying vNIOS on OCI. ([#510](https://github.com/infobloxopen/terraform-provider-nios/pull/510))
 
 ### Enhancements
 
