@@ -226,16 +226,22 @@ func (r *LdapAuthServiceResource) Create(ctx context.Context, req resource.Creat
 			return
 		}
 
-		secretData.PasswordHash = serversHash
-		secretDataJSON, _ := json.Marshal(secretData)
-		val := map[string]string{"algo": "sha256", "hash": string(secretDataJSON)}
-		hashedSecret, err := json.Marshal(val)
-		if err != nil {
-			resp.Diagnostics.AddError("Private State Marshal Error", err.Error())
-			return
+		if serversHash != "" {
+			secretData.PasswordHash = serversHash
+			secretDataJSON, err := json.Marshal(secretData)
+			if err != nil {
+ 				resp.Diagnostics.AddError("Private State Marshal Error", err.Error())
+ 				return
+ 			}
+			val := map[string]string{"algo": "sha256", "hash": string(secretDataJSON)}
+			hashedSecret, err := json.Marshal(val)
+			if err != nil {
+				resp.Diagnostics.AddError("Private State Marshal Error", err.Error())
+				return
+			}
+			resp.Diagnostics.Append(resp.Private.SetKey(ctx, "servers_bind_password_hash", hashedSecret)...)
+			passwordVersion = types.Int64Value(1)
 		}
-		resp.Diagnostics.Append(resp.Private.SetKey(ctx, "servers_bind_password_hash", hashedSecret)...)
-		passwordVersion = types.Int64Value(1)
 	}
 
 	var apiRes *security.CreateLdapAuthServiceResponse
