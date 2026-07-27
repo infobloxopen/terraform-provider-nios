@@ -426,6 +426,9 @@ func (r *Ipv6networkResource) Delete(ctx context.Context, req resource.DeleteReq
 				Ipv6network(*clearPayload).
 				Execute()
 			if httpRes != nil {
+				if httpRes.StatusCode == http.StatusNotFound {
+					return 0, nil
+				}
 				return httpRes.StatusCode, callErr
 			}
 			return 0, callErr

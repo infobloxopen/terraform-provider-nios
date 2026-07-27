@@ -133,7 +133,7 @@ func (r *Ipv6networkcontainerResource) Create(ctx context.Context, req resource.
 	res := apiRes.CreateIpv6networkcontainerResponseAsObject.GetResult()
 	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.ExtAttrs)
 	if diags.HasError() {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while creating Ipv6networkcontainer due to inherited Extensible attributes, got error: %s", err))
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while creating Ipv6networkcontainer due to inherited Extensible attributes, got error: %s", diags))
 		return
 	}
 
