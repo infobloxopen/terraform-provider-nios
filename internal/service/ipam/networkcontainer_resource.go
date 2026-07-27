@@ -562,22 +562,6 @@ func (r *NetworkcontainerResource) ValidateConfig(ctx context.Context, req resou
 				}
 			}
 
-			if option.Value.ValueString() == "" {
-				if !isSpecialOption {
-					resp.Diagnostics.AddAttributeError(
-						path.Root("options").AtListIndex(i).AtName("value"),
-						"Invalid configuration for DHCP Option",
-						"The 'value' attribute cannot be set as empty for Custom DHCP Option '"+optionName+"'.",
-					)
-				} else if !option.UseOption.IsUnknown() && !option.UseOption.IsNull() && !option.UseOption.ValueBool() {
-					resp.Diagnostics.AddAttributeError(
-						path.Root("options").AtListIndex(i).AtName("value"),
-						"Invalid configuration for DHCP Option",
-						"The 'value' attribute cannot be set as empty for Special DHCP Option '"+optionName+"' when 'use_option' is set to false.",
-					)
-				}
-			}
-
 			if !isSpecialOption && !option.UseOption.IsNull() && !option.UseOption.IsUnknown() {
 				resp.Diagnostics.AddAttributeError(
 					path.Root("options").AtListIndex(i).AtName("use_option"),
