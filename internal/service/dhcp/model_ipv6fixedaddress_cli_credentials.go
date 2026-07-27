@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
@@ -37,7 +38,6 @@ var Ipv6fixedaddressCliCredentialsAttrTypes = map[string]attr.Type{
 var Ipv6fixedaddressCliCredentialsResourceSchemaAttributes = map[string]schema.Attribute{
 	"user": schema.StringAttribute{
 		Optional: true,
-		Computed: true,
 		Validators: []validator.String{
 			customvalidator.ValidateTrimmedString(),
 		},
@@ -45,16 +45,14 @@ var Ipv6fixedaddressCliCredentialsResourceSchemaAttributes = map[string]schema.A
 	},
 	"password": schema.StringAttribute{
 		Optional:  true,
-		Computed:  true,
-		Sensitive: true,
+		WriteOnly: true,
 		Validators: []validator.String{
 			customvalidator.ValidateTrimmedString(),
 		},
 		MarkdownDescription: "The CLI password.",
 	},
 	"credential_type": schema.StringAttribute{
-		Optional: true,
-		Computed: true,
+		Required: true,
 		Validators: []validator.String{
 			stringvalidator.OneOf("ENABLE_SSH", "ENABLE_TELNET", "SSH", "TELNET"),
 		},
@@ -63,6 +61,7 @@ var Ipv6fixedaddressCliCredentialsResourceSchemaAttributes = map[string]schema.A
 	"comment": schema.StringAttribute{
 		Optional: true,
 		Computed: true,
+		Default:  stringdefault.StaticString(""),
 		Validators: []validator.String{
 			customvalidator.ValidateTrimmedString(),
 		},
@@ -75,6 +74,7 @@ var Ipv6fixedaddressCliCredentialsResourceSchemaAttributes = map[string]schema.A
 	"credential_group": schema.StringAttribute{
 		Optional:            true,
 		Computed:            true,
+		Default:             stringdefault.StaticString("default"),
 		MarkdownDescription: "Group for the CLI credential.",
 	},
 }
@@ -124,7 +124,6 @@ func (m *Ipv6fixedaddressCliCredentialsModel) Flatten(ctx context.Context, from 
 		*m = Ipv6fixedaddressCliCredentialsModel{}
 	}
 	m.User = flex.FlattenStringPointer(from.User)
-	m.Password = flex.FlattenStringPointer(from.Password)
 	m.CredentialType = flex.FlattenStringPointer(from.CredentialType)
 	m.Comment = flex.FlattenStringPointer(from.Comment)
 	m.Id = flex.FlattenInt64Pointer(from.Id)

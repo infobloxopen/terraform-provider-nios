@@ -45,7 +45,7 @@ var MemberLomUsersResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"password": schema.StringAttribute{
 		Required:  true,
-		Sensitive: true,
+		WriteOnly: true,
 		Validators: []validator.String{
 			customvalidator.ValidateTrimmedString(),
 		},
@@ -91,11 +91,10 @@ func (m *MemberLomUsersModel) Expand(ctx context.Context, diags *diag.Diagnostic
 		return nil
 	}
 	to := &grid.MemberLomUsers{
-		Name:     flex.ExpandStringPointer(m.Name),
-		Role:     flex.ExpandStringPointer(m.Role),
-		Disable:  flex.ExpandBoolPointer(m.Disable),
-		Comment:  flex.ExpandStringPointer(m.Comment),
-		Password: flex.ExpandStringPointer(m.Password),
+		Name:    flex.ExpandStringPointer(m.Name),
+		Role:    flex.ExpandStringPointer(m.Role),
+		Disable: flex.ExpandBoolPointer(m.Disable),
+		Comment: flex.ExpandStringPointer(m.Comment),
 	}
 	return to
 }
@@ -119,7 +118,6 @@ func (m *MemberLomUsersModel) Flatten(ctx context.Context, from *grid.MemberLomU
 		*m = MemberLomUsersModel{}
 	}
 	m.Name = flex.FlattenStringPointer(from.Name)
-	m.Password = flex.FlattenStringPointer(from.Password)
 	m.Role = flex.FlattenStringPointer(from.Role)
 	m.Disable = types.BoolPointerValue(from.Disable)
 	m.Comment = flex.FlattenStringPointer(from.Comment)

@@ -57,6 +57,7 @@ Optional:
 Read-Only:
 
 - `ref` (String) The reference to the object.
+- `secret_version` (Number) Internal version incremented when shared_secret sub field of servers changes.
 - `uuid` (String) Universally Unique ID assigned for this object.
 
 <a id="nestedatt--result--servers"></a>
@@ -64,7 +65,7 @@ Read-Only:
 
 Required:
 
-- `shared_secret` (String, Sensitive) The secret key with which to connect to the TACACS+ server.
+- `shared_secret` (String) The secret key with which to connect to the TACACS+ server.
 
 Optional:
 

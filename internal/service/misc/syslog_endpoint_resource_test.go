@@ -467,8 +467,8 @@ func TestAccSyslogEndpointResource_WapiUserPassword(t *testing.T) {
 	connectionType := "udp"
 	format := "formatted"
 	wapiUserName := "admin"
-	wapiUserPassword := "WAPI_USER_PASSWORD_REPLACE_ME"
-	updatedWapiUserPassword := "WAPI_USER_PASSWORD_UPDATE_REPLACE_ME"
+	wapiUserPassword := "password123"
+	updatedWapiUserPassword := "password1234@"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -479,7 +479,7 @@ func TestAccSyslogEndpointResource_WapiUserPassword(t *testing.T) {
 				Config: testAccSyslogEndpointWapiUserPassword(name, outboundMemberType, syslogServer, connectionType, format, wapiUserName, wapiUserPassword),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSyslogEndpointExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "wapi_user_password", "WAPI_USER_PASSWORD_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "password_version", "1"),
 				),
 			},
 			// Update and Read
@@ -487,7 +487,7 @@ func TestAccSyslogEndpointResource_WapiUserPassword(t *testing.T) {
 				Config: testAccSyslogEndpointWapiUserPassword(name, outboundMemberType, syslogServer, connectionType, format, wapiUserName, updatedWapiUserPassword),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSyslogEndpointExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "wapi_user_password", "WAPI_USER_PASSWORD_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "password_version", "2"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase

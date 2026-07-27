@@ -65,7 +65,7 @@ Optional:
 - `grid_member` (String) eference to the assigned grid member
 - `log_destination` (String) Directs logging of sync messages either to syslog or mslog
 - `log_level` (String) Log level for this Microsoft Server
-- `login_password` (String, Sensitive) Microsoft Server login password
+- `login_password` (String) Microsoft Server login password
 - `ms_max_connection` (Number) Maximum number of connections to MS server
 - `ms_rpc_timeout_in_seconds` (Number) Timeout in seconds of RPC connections for this MS Server
 - `network_view` (String) Reference to the network view
@@ -83,6 +83,7 @@ Read-Only:
 - `extattrs_all` (Map of String) Extensible attributes associated with the object, including default attributes.
 - `last_seen` (Number) Timestamp of the last message received
 - `managing_member` (String) Hostname of grid member managing this Microsoft Server
+- `password_version` (Number) Internal revision incremented when login_password changes.
 - `ref` (String) The reference to the object.
 - `root_ad_domain` (String) The root Active Directory domain to which this server belongs (if applicable).
 - `server_name` (String) Gives the server name as reported by itself

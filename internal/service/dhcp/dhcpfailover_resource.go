@@ -2,6 +2,9 @@ package dhcp
 
 import (
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
+	"encoding/json"
 	"fmt"
 	"net"
 	"net/http"
@@ -10,7 +13,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
-
+	"github.com/hashicorp/terraform-plugin-framework/types"
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
 	"github.com/infobloxopen/infoblox-nios-go-client/dhcp"
 
@@ -24,7 +27,10 @@ var readableAttributesForDhcpfailover = "association_type,comment,extattrs,failo
 // Ensure provider defined types fully satisfy framework interfaces.
 var _ resource.Resource = &DhcpfailoverResource{}
 var _ resource.ResourceWithImportState = &DhcpfailoverResource{}
+var _ resource.ResourceWithModifyPlan = &DhcpfailoverResource{}
 var _ resource.ResourceWithValidateConfig = &DhcpfailoverResource{}
+
+var _ resource.ResourceWithUpgradeState = &DhcpfailoverResource{}
 
 func NewDhcpfailoverResource() resource.Resource {
 	return &DhcpfailoverResource{}
@@ -35,12 +41,17 @@ type DhcpfailoverResource struct {
 	client *niosclient.APIClient
 }
 
+type secretsHashState struct {
+	MsSharedSecret string `json:"ms_shared_secret"`
+}
+
 func (r *DhcpfailoverResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_" + "dhcp_failover"
 }
 
 func (r *DhcpfailoverResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
+		Version:             1,
 		MarkdownDescription: "Manages a DHCP Failover.",
 		Attributes:          DhcpfailoverResourceSchemaAttributes,
 	}
@@ -66,6 +77,102 @@ func (r *DhcpfailoverResource) Configure(ctx context.Context, req resource.Confi
 	r.client = client
 }
 
+func (r *DhcpfailoverResource) UpgradeState(ctx context.Context) map[int64]resource.StateUpgrader {
+	return map[int64]resource.StateUpgrader{
+		0: {
+			PriorSchema: &schema.Schema{
+				Attributes: DhcpfailoverResourceSchemaAttributes,
+			},
+			StateUpgrader: func(ctx context.Context, req resource.UpgradeStateRequest, resp *resource.UpgradeStateResponse) {
+				var data DhcpfailoverModel
+				resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
+				if resp.Diagnostics.HasError() {
+					return
+				}
+				resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+			},
+		},
+	}
+}
+
+func (r *DhcpfailoverResource) ModifyPlan(ctx context.Context, req resource.ModifyPlanRequest, resp *resource.ModifyPlanResponse) {
+	if req.Plan.Raw.IsNull() {
+		return
+	}
+
+	var stateRev types.Int64
+	var planSecret types.String
+
+	curRev := int64(0)
+	if !req.State.Raw.IsNull() && req.State.Raw.IsKnown() {
+		resp.Diagnostics.Append(req.State.GetAttribute(ctx, path.Root("ms_shared_secret_version"), &stateRev)...)
+		if resp.Diagnostics.HasError() {
+			return
+		}
+		if !stateRev.IsNull() && !stateRev.IsUnknown() {
+			curRev = stateRev.ValueInt64()
+		}
+	}
+
+	resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("ms_shared_secret"), &planSecret)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	computeNewHash := !planSecret.IsNull() && !planSecret.IsUnknown()
+	prevHashes := secretsHashState{}
+	plannedHashes := secretsHashState{}
+
+	if computeNewHash {
+		var prev struct {
+			Algo string `json:"algo"`
+			Hash string `json:"hash"`
+		}
+
+		if b, diags := req.Private.GetKey(ctx, "ms_shared_secret_hash"); diags != nil {
+			resp.Diagnostics.Append(diags...)
+		} else if b != nil {
+			if err := json.Unmarshal(b, &prev); err != nil {
+				prev.Hash = ""
+			}
+		}
+
+		var plannedHash string
+		if prev.Hash != "" {
+			_ = json.Unmarshal([]byte(prev.Hash), &prevHashes)
+		}
+
+		if !planSecret.IsUnknown() {
+			if planSecret.IsNull() {
+				plannedHashes.MsSharedSecret = ""
+			} else {
+				h := sha256.New()
+				h.Write([]byte(planSecret.ValueString()))
+				plannedHashes.MsSharedSecret = hex.EncodeToString(h.Sum(nil))
+			}
+		}
+
+		if data, err := json.Marshal(plannedHashes); err == nil {
+			plannedHash = string(data)
+		}
+
+		if plannedHashes.MsSharedSecret != "" && plannedHashes.MsSharedSecret != prevHashes.MsSharedSecret {
+			newRev := types.Int64Value(curRev + 1)
+			resp.Diagnostics.Append(resp.Plan.SetAttribute(ctx, path.Root("ms_shared_secret_version"), newRev)...)
+
+			val := map[string]string{"algo": "sha256", "hash": plannedHash}
+			b, err := json.Marshal(val)
+			if err != nil {
+				resp.Diagnostics.AddError("Private State Marshal Error", err.Error())
+				return
+			}
+			resp.Diagnostics.Append(resp.Private.SetKey(ctx, "ms_shared_secret_hash", b)...)
+		} else {
+			resp.Diagnostics.Append(resp.Plan.SetAttribute(ctx, path.Root("ms_shared_secret_version"), curRev)...)
+		}
+	}
+}
+
 func (r *DhcpfailoverResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var diags diag.Diagnostics
 	var data DhcpfailoverModel
@@ -86,6 +193,26 @@ func (r *DhcpfailoverResource) Create(ctx context.Context, req resource.CreateRe
 	payload := data.Expand(ctx, &resp.Diagnostics)
 	if resp.Diagnostics.HasError() {
 		return
+	}
+
+	msSharedSecretVersion := types.Int64Value(0)
+	var msSharedSecret types.String
+	resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("ms_shared_secret"), &msSharedSecret)...)
+	secretData := secretsHashState{}
+	if !msSharedSecret.IsNull() && !msSharedSecret.IsUnknown() {
+		payload.MsSharedSecret = msSharedSecret.ValueStringPointer()
+		msSharedSecretVersion = types.Int64Value(1)
+		h := sha256.New()
+		h.Write([]byte(msSharedSecret.ValueString()))
+		secretData.MsSharedSecret = hex.EncodeToString(h.Sum(nil))
+		secretDataJSON, _ := json.Marshal(secretData)
+		val := map[string]string{"algo": "sha256", "hash": string(secretDataJSON)}
+		hashedSecret, err := json.Marshal(val)
+		if err != nil {
+			resp.Diagnostics.AddError("Private State Marshal Error", err.Error())
+			return
+		}
+		resp.Diagnostics.Append(resp.Private.SetKey(ctx, "ms_shared_secret_hash", hashedSecret)...)
 	}
 
 	var apiRes *dhcp.CreateDhcpfailoverResponse
@@ -129,6 +256,7 @@ func (r *DhcpfailoverResource) Create(ctx context.Context, req resource.CreateRe
 		return
 	}
 
+	data.MsSharedSecretVersion = msSharedSecretVersion
 	data.Flatten(ctx, &res, &resp.Diagnostics)
 
 	// Save data into Terraform state
@@ -326,9 +454,18 @@ func (r *DhcpfailoverResource) Update(ctx context.Context, req resource.UpdateRe
 		return
 	}
 
+	var msSharedSecret types.String
+	resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("ms_shared_secret"), &msSharedSecret)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
 	payload := data.Expand(ctx, &resp.Diagnostics)
 	if resp.Diagnostics.HasError() {
 		return
+	}
+	if !msSharedSecret.IsNull() && !msSharedSecret.IsUnknown() {
+		payload.MsSharedSecret = msSharedSecret.ValueStringPointer()
 	}
 
 	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)

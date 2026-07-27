@@ -424,44 +424,50 @@ func (r *ViewResource) ValidateConfig(ctx context.Context, req resource.Validate
 		return
 	}
 
-	// Check if filter_aaaa_list contains items with a ref field
-	if !data.FilterAaaaList.IsNull() && !data.FilterAaaaList.IsUnknown() {
-		var filterAaaaListItems []types.Object
-		diags = data.FilterAaaaList.ElementsAs(ctx, &filterAaaaListItems, false)
-		resp.Diagnostics.Append(diags...)
+	if data.FilterAaaaList.IsNull() || data.FilterAaaaList.IsUnknown() {
+		return
+	}
 
-		hasRefInList := false
-		for _, item := range filterAaaaListItems {
-			itemMap := item.Attributes()
+	var filterAaaaListItems []types.Object
+	diags = data.FilterAaaaList.ElementsAs(ctx, &filterAaaaListItems, false)
+	resp.Diagnostics.Append(diags...)
 
-			// Check if ref field exists and is not empty
-			if refAttr, ok := itemMap["ref"]; ok {
-				refValue, _ := refAttr.(types.String)
-				if !refValue.IsNull() && !refValue.IsUnknown() && refValue.ValueString() != "" {
-					hasRefInList = true
-					break
-				}
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	hasRefInList := false
+	for _, item := range filterAaaaListItems {
+		itemMap := item.Attributes()
+
+		if refAttr, ok := itemMap["ref"]; ok {
+			refValue, _ := refAttr.(types.String)
+			if !refValue.IsNull() && !refValue.IsUnknown() && refValue.ValueString() != "" {
+				hasRefInList = true
+				break
 			}
 		}
+	}
 
-		// If ref field is found, validate filter_aaaa value
-		if hasRefInList {
-			if !data.FilterAaaa.IsNull() && !data.FilterAaaa.IsUnknown() {
-				filterAaaaValue := data.FilterAaaa.ValueString()
-				if filterAaaaValue == "NO" {
-					resp.Diagnostics.AddAttributeError(
-						path.Root("filter_aaaa"),
-						"Invalid Filter AAAA Configuration",
-						"When 'ref' field is provided in filter_aaaa_list, filter_aaaa must be set to 'YES' or 'BREAK_DNSSEC', not 'NO'.",
-					)
-				}
-			} else {
+	if data.FilterAaaa.IsUnknown() {
+		return
+	}
+	// If ref field is found, validate filter_aaaa value.
+	if hasRefInList {
+		if !data.FilterAaaa.IsNull() {
+			if data.FilterAaaa.ValueString() == "NO" {
 				resp.Diagnostics.AddAttributeError(
 					path.Root("filter_aaaa"),
-					"Missing Filter AAAA Configuration",
-					"When 'ref' field is provided in filter_aaaa_list, filter_aaaa must be set to 'YES' or 'BREAK_DNSSEC', it cannot be null or empty.",
+					"Invalid Filter AAAA Configuration",
+					"When 'ref' field is provided in filter_aaaa_list, filter_aaaa must be set to 'YES' or 'BREAK_DNSSEC', not 'NO'.",
 				)
 			}
+		} else {
+			resp.Diagnostics.AddAttributeError(
+				path.Root("filter_aaaa"),
+				"Missing Filter AAAA Configuration",
+				"When 'ref' field is provided in filter_aaaa_list, filter_aaaa must be set to 'YES' or 'BREAK_DNSSEC', it cannot be null or empty.",
+			)
 		}
 	}
 }

@@ -84,7 +84,7 @@ func TestAccSnmpuserResource_AuthenticationPassword(t *testing.T) {
 				Config: testAccSnmpuserAuthenticationPassword(name, "SHA", auth_password, "NONE"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSnmpuserExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "authentication_password", auth_password),
+					resource.TestCheckResourceAttr(resourceName, "password_version", "1"),
 				),
 			},
 			// Update and Read
@@ -92,7 +92,7 @@ func TestAccSnmpuserResource_AuthenticationPassword(t *testing.T) {
 				Config: testAccSnmpuserAuthenticationPassword(name, "SHA", updated_auth_password, "NONE"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSnmpuserExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "authentication_password", updated_auth_password),
+					resource.TestCheckResourceAttr(resourceName, "password_version", "2"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -277,7 +277,7 @@ func TestAccSnmpuserResource_PrivacyPassword(t *testing.T) {
 				Config: testAccSnmpuserPrivacyPassword(name, "MD5", auth_password, "DES", privacy_password),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSnmpuserExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "privacy_password", privacy_password),
+					resource.TestCheckResourceAttr(resourceName, "password_version", "1"),
 				),
 			},
 			// Update and Read
@@ -285,7 +285,7 @@ func TestAccSnmpuserResource_PrivacyPassword(t *testing.T) {
 				Config: testAccSnmpuserPrivacyPassword(name, "MD5", auth_password, "DES", updated_privacy_password),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSnmpuserExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "privacy_password", updated_privacy_password),
+					resource.TestCheckResourceAttr(resourceName, "password_version", "2"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase

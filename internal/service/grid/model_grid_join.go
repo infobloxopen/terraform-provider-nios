@@ -44,7 +44,7 @@ var GridJoinResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"member_password": schema.StringAttribute{
 		Required:  true,
-		Sensitive: true,
+		WriteOnly: true,
 		PlanModifiers: []planmodifier.String{
 			planmodifiers.ImmutableString(),
 		},
@@ -73,7 +73,7 @@ var GridJoinResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"shared_secret": schema.StringAttribute{
 		Required:  true,
-		Sensitive: true,
+		WriteOnly: true,
 		PlanModifiers: []planmodifier.String{
 			planmodifiers.ImmutableString(),
 		},
