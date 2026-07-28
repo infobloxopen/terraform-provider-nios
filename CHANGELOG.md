@@ -109,29 +109,24 @@
 - `nios_misc_dxl_endpoint` : Manage DXL endpoints and retrieve existing DXL endpoints. ([#389](https://github.com/infobloxopen/terraform-provider-nios/pull/389))
 - `nios_misc_syslog_endpoint` : Manage syslog endpoints and retrieve existing syslog endpoints. ([#438](https://github.com/infobloxopen/terraform-provider-nios/pull/438))
 
-### Modules
+### Modules [HA Supported]
 
-- **NIOS Grid Member AWS Module**: Terraform module for deploying NIOS Grid EC2 instances on AWS with optional high-availability (HA) support. ([#434](https://github.com/infobloxopen/terraform-provider-nios/pull/434))
-- **NIOS Grid Member Azure Module**: Terraform module for deploying NIOS Grid Virtual Machines on Azure with optional high-availability (HA) support. ([#457](https://github.com/infobloxopen/terraform-provider-nios/pull/457))
-- **NIOS Grid Member GCP Module**: Terraform module for deploying NIOS Grid Compute instances on GCP with optional high-availability (HA) support. ([#457](https://github.com/infobloxopen/terraform-provider-nios/pull/457))
+- **NIOS AWS Module**: Terraform module for deploying vNIOS on AWS. ([#434](https://github.com/infobloxopen/terraform-provider-nios/pull/434))
+- **NIOS Azure Module**: Terraform module for deploying vNIOS on Azure. ([#457](https://github.com/infobloxopen/terraform-provider-nios/pull/457))
+- **NIOS GCP Module**: Terraform module for deploying vNIOS on GCP. ([#457](https://github.com/infobloxopen/terraform-provider-nios/pull/457))
 
 ### Enhancements
 
-**Retry Mechanism** 
   - Added a generic retry helper with exponential backoff and a provider-configurable retry timeout for CRUD operations.
-
-**Terraform Search** 
   - Added Terraform Search support for objects across DNS, DHCP, and IPAM.
-
-**Sensitive Fields** 
   - Sensitive fields(such as passwords) are no longer visible in the state file — they are now stored securely in private state and will show as null instead of their actual values.
+  - Introduced manage_internal_id_ea Flag to Disable Management of Terraform Internal ID Extensible Attribute prerequisite by Terraform. ([#477](https://github.com/infobloxopen/terraform-provider-nios/pull/477))
 
 ### Fixes
 
-- IPAM: Fixed VLAN type validation error in Network and IPv6 Network Container objects when reading network objects containing VLAN information. ([#380](https://github.com/infobloxopen/terraform-provider-nios/pull/380))
-- DNS: Fixed Zone Auth import and read errors triggered by unexpected WAPI attributes returned by NIOS. - DNS: Fixed Zone Auth import and read errors triggered by unexpected WAPI attributes returned by NIOS. (Issue [#550](https://github.com/infobloxopen/terraform-provider-nios/issues/550), PR [#555](https://github.com/infobloxopen/terraform-provider-nios/pull/555))
-- Fixed plan-time ValidateConfig errors caused by unknown variable values by adding null and unknown checks across multiple resources. (NIOSSPT [#19266](https://infoblox.atlassian.net/browse/NIOSSPT-19266), PR [#574](https://github.com/infobloxopen/terraform-provider-nios/pull/574))
-- Added a flag to allow disabling automatic Terraform Internal ID extensible-attribute prerequisite creation/checks for environments where that EA should not be managed by Terraform. ([#477](https://github.com/infobloxopen/terraform-provider-nios/pull/477))
+- [IPAM] Handled VLAN type validation error in Network and IPv6 Network Container objects when reading network objects containing VLAN information. ([#380](https://github.com/infobloxopen/terraform-provider-nios/pull/380))
+- [DNS] Fixed Zone Auth CRUD issues by changing the network_associations attribute from a list of strings to a list of objects. (Issue [#550](https://github.com/infobloxopen/terraform-provider-nios/issues/550), PR [#555](https://github.com/infobloxopen/terraform-provider-nios/pull/555))
+- Handled plan time ValidateConfig errors caused by unknown variable values by adding null and unknown checks across multiple resources.(NIOSSPT [#19266](https://infoblox.atlassian.net/browse/NIOSSPT-19266), PR [#574](https://github.com/infobloxopen/terraform-provider-nios/pull/574))
 - Fixed numerous bugs across DHCP, DNS, DTC, IPAM, Grid, Security, and other modules improving overall stability and reliability.
 
 ## Version 1.1.0
