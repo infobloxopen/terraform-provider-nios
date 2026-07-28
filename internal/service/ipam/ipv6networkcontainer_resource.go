@@ -376,7 +376,7 @@ func (r *Ipv6networkcontainerResource) Update(ctx context.Context, req resource.
 
 	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, planExtAttrs, *res.ExtAttrs)
 	if diags.HasError() {
-	resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while updating Ipv6networkcontainer due to inherited Extensible attributes, got error: %s", diags))
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while updating Ipv6networkcontainer due to inherited Extensible attributes, got error: %s", diags))
 		return
 	}
 	data.Flatten(ctx, &res, &resp.Diagnostics)
