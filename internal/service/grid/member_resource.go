@@ -396,7 +396,7 @@ func (r *MemberResource) Create(ctx context.Context, req resource.CreateRequest,
 	if !data.PreProvisioning.IsUnknown() && !data.PreProvisioning.IsNull() || (!data.TrafficCaptureAuthDnsSetting.IsUnknown() && !data.TrafficCaptureAuthDnsSetting.IsNull()) || (!data.MemberServiceCommunication.IsUnknown() && !data.MemberServiceCommunication.IsNull()) {
 		apiRes2, _, err2 := r.client.GridAPI.
 			MemberAPI.
-			Update(ctx, utils.ResolveIdentifier(data.Uuid, data.Ref)).
+			Update(ctx, utils.ResolveObjectIdentifier(res.Uuid, *res.Ref)).
 			Member(*data.Expand(ctx, &resp.Diagnostics, false)).
 			ReturnFieldsPlus(readableAttributesForMember).
 			ReturnAsObject(1).
