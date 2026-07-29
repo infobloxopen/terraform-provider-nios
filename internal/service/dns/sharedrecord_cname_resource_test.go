@@ -447,4 +447,3 @@ resource "nios_dns_sharedrecord_cname" "test_use_ttl" {
 `, name, canonical, ttl, useTtl)
 	return strings.Join([]string{testAccBaseSharedRecordGroup(sharedRecordGroup), config}, "")
 }
-
