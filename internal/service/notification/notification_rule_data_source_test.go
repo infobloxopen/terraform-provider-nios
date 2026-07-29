@@ -13,6 +13,9 @@ import (
 )
 
 func TestAccNotificationRuleDataSource_Filters(t *testing.T) {
+	if notificationTarget == "" {
+		t.Skip("NIOS_NOTIFICATION_REST_ENDPOINT_REF environment variable must be set for this test to run")
+	}
 	dataSourceName := "data.nios_notification_rule.test"
 	resourceName := "nios_notification_rule.test"
 	var v notification.NotificationRule

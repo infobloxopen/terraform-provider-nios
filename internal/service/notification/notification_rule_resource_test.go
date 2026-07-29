@@ -462,8 +462,8 @@ func TestAccNotificationRuleResource_EventPriority(t *testing.T) {
 }
 
 func TestAccNotificationRuleResource_EventType(t *testing.T) {
-	if notificationTarget == "" {
-		t.Skip("NIOS_NOTIFICATION_REST_ENDPOINT_REF environment variable must be set for this test to run")
+	if notificationTarget == "" || syslogEndpoint == "" {
+		t.Skip("NIOS_NOTIFICATION_REST_ENDPOINT_REF and NIOS_SYSLOG_ENDPOINT_REF environment variables must be set for this test to run")
 	}
 	var resourceName = "nios_notification_rule.test_event_type"
 	var v notification.NotificationRule
@@ -698,8 +698,8 @@ func TestAccNotificationRuleResource_NotificationTarget(t *testing.T) {
 }
 
 func TestAccNotificationRuleResource_PublishSettings(t *testing.T) {
-	if notificationTarget == "" {
-		t.Skip("NIOS_NOTIFICATION_REST_ENDPOINT_REF environment variable must be set for this test to run")
+	if utils.GetNIOSPxgridEndpointRef() == "" {
+		t.Skip("NIOS_PXGRID_ENDPOINT_REF environment variable must be set for this test to run")
 	}
 	var resourceName = "nios_notification_rule.test_publish_settings"
 	var v notification.NotificationRule
@@ -850,8 +850,8 @@ func TestAccNotificationRuleResource_TemplateInstance(t *testing.T) {
 }
 
 func TestAccNotificationRuleResource_UsePublishSettings(t *testing.T) {
-	if notificationTarget == "" {
-		t.Skip("NIOS_NOTIFICATION_REST_ENDPOINT_REF environment variable must be set for this test to run")
+	if notificationTarget == "" || utils.GetNIOSPxgridEndpointRef() == "" {
+		t.Skip("NIOS_NOTIFICATION_REST_ENDPOINT_REF and NIOS_PXGRID_ENDPOINT_REF environment variables must be set for this test to run")
 	}
 	var resourceName = "nios_notification_rule.test_use_publish_settings"
 	var v notification.NotificationRule
