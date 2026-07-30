@@ -75,7 +75,7 @@ func (r *SharednetworkResource) ValidateConfig(ctx context.Context, req resource
 
 	if !data.DdnsServerAlwaysUpdates.IsNull() && !data.DdnsServerAlwaysUpdates.IsUnknown() {
 		// Check if ddns_use_option81 is set to false
-		if data.DdnsUseOption81.IsNull() || data.DdnsUseOption81.IsUnknown() || !data.DdnsUseOption81.ValueBool() {
+		if !data.DdnsUseOption81.IsUnknown() && (data.DdnsUseOption81.IsNull() || !data.DdnsUseOption81.ValueBool()) {
 			resp.Diagnostics.AddAttributeError(
 				path.Root("ddns_server_always_updates"),
 				"Invalid Configuration",
@@ -104,8 +104,13 @@ func (r *SharednetworkResource) ValidateConfig(ctx context.Context, req resource
 	useIgnoreIdTrue := boolIsTrue(data.UseIgnoreId)
 	useIgnoreIdFalse := boolIsFalse(data.UseIgnoreId)
 
+	allIgnoreFieldsKnown := !data.IgnoreClientIdentifier.IsUnknown() &&
+		!data.UseIgnoreClientIdentifier.IsUnknown() &&
+		!data.IgnoreId.IsUnknown() &&
+		!data.UseIgnoreId.IsUnknown()
+
 	// Case 1: icid=true && useIcid=true  =>  ignore_id="CLIENT" && use_ignore_id=true
-	if icidTrue && useIcidTrue && (!ignoreIdClient || !useIgnoreIdTrue) {
+	if allIgnoreFieldsKnown && icidTrue && useIcidTrue && (!ignoreIdClient || !useIgnoreIdTrue) {
 		resp.Diagnostics.AddAttributeError(
 			path.Root("ignore_id"),
 			"Invalid Configuration",
@@ -114,7 +119,7 @@ func (r *SharednetworkResource) ValidateConfig(ctx context.Context, req resource
 	}
 
 	// Case 2: ignore_id="CLIENT" && use_ignore_id=true  =>  icid=true && useIcid=true
-	if ignoreIdClient && useIgnoreIdTrue && (!icidTrue || !useIcidTrue) {
+	if allIgnoreFieldsKnown && ignoreIdClient && useIgnoreIdTrue && (!icidTrue || !useIcidTrue) {
 		resp.Diagnostics.AddAttributeError(
 			path.Root("ignore_client_identifier"),
 			"Invalid Configuration",
@@ -123,7 +128,7 @@ func (r *SharednetworkResource) ValidateConfig(ctx context.Context, req resource
 	}
 
 	// Case 3: ignore_id="NONE" && use_ignore_id=false  =>  icid=false && useIcid=false
-	if ignoreIdNone && useIgnoreIdFalse && (!icidFalse || !useIcidFalse) {
+	if allIgnoreFieldsKnown && ignoreIdNone && useIgnoreIdFalse && (!icidFalse || !useIcidFalse) {
 		resp.Diagnostics.AddAttributeError(
 			path.Root("ignore_client_identifier"),
 			"Invalid Configuration",
@@ -132,7 +137,7 @@ func (r *SharednetworkResource) ValidateConfig(ctx context.Context, req resource
 	}
 
 	// Case 4: ignore_id="NONE" && use_ignore_id=true  =>  icid=false && useIcid=true
-	if ignoreIdNone && useIgnoreIdTrue && (icidTrue || !useIcidTrue) {
+	if allIgnoreFieldsKnown && ignoreIdNone && useIgnoreIdTrue && (icidTrue || !useIcidTrue) {
 		resp.Diagnostics.AddAttributeError(
 			path.Root("ignore_client_identifier"),
 			"Invalid Configuration",
@@ -172,7 +177,7 @@ func (r *SharednetworkResource) ValidateConfig(ctx context.Context, req resource
 		for i, option := range options {
 			isSpecialOption := false
 			optionName := ""
-			if option.Value.IsNull() || option.Value.IsUnknown() {
+			if option.Value.IsNull() {
 				resp.Diagnostics.AddAttributeError(
 					path.Root("options").AtListIndex(i).AtName("value"),
 					"Invalid configuration for DHCP Option",
@@ -186,6 +191,8 @@ func (r *SharednetworkResource) ValidateConfig(ctx context.Context, req resource
 				optionNum := option.Num.ValueInt64()
 				isSpecialOption = specialOptionsNum[optionNum]
 				optionName = fmt.Sprintf("with num = %d", optionNum)
+			} else if option.Name.IsUnknown() || option.Num.IsUnknown() {
+				continue
 			} else {
 				resp.Diagnostics.AddAttributeError(
 					path.Root("options").AtListIndex(i).AtName("name"),
@@ -196,7 +203,7 @@ func (r *SharednetworkResource) ValidateConfig(ctx context.Context, req resource
 				continue
 			}
 
-			if option.Value.ValueString() == "" {
+			if !option.Value.IsNull() && !option.Value.IsUnknown() && option.Value.ValueString() == "" {
 				if !isSpecialOption {
 					resp.Diagnostics.AddAttributeError(
 						path.Root("options").AtListIndex(i).AtName("value"),

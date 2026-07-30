@@ -427,6 +427,7 @@ func TestAccTacacsplusAuthserviceResource_Servers(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "servers.0.port", "49"),
 					resource.TestCheckResourceAttr(resourceName, "servers.0.use_accounting", "false"),
 					resource.TestCheckResourceAttr(resourceName, "servers.0.use_mgmt_port", "false"),
+					resource.TestCheckResourceAttr(resourceName, "secret_version", "1"),
 				),
 			},
 			// Update and Read
@@ -441,6 +442,7 @@ func TestAccTacacsplusAuthserviceResource_Servers(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "servers.0.port", "49"),
 					resource.TestCheckResourceAttr(resourceName, "servers.0.use_accounting", "false"),
 					resource.TestCheckResourceAttr(resourceName, "servers.0.use_mgmt_port", "true"),
+					resource.TestCheckResourceAttr(resourceName, "secret_version", "2"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase

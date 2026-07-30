@@ -89,8 +89,12 @@ func (r *ZoneAuthResource) ValidateConfig(ctx context.Context, req resource.Vali
 		return
 	}
 
-	if !data.UseGridZoneTimer.IsNull() && !data.UseGridZoneTimer.ValueBool() {
-		if !data.SoaDefaultTtl.IsNull() || !data.SoaExpire.IsNull() || !data.SoaNegativeTtl.IsNull() || !data.SoaRefresh.IsNull() || !data.SoaRetry.IsNull() {
+	if !data.UseGridZoneTimer.IsNull() && !data.UseGridZoneTimer.IsUnknown() && !data.UseGridZoneTimer.ValueBool() {
+		if (!data.SoaDefaultTtl.IsNull() && !data.SoaDefaultTtl.IsUnknown()) ||
+			(!data.SoaExpire.IsNull() && !data.SoaExpire.IsUnknown()) ||
+			(!data.SoaNegativeTtl.IsNull() && !data.SoaNegativeTtl.IsUnknown()) ||
+			(!data.SoaRefresh.IsNull() && !data.SoaRefresh.IsUnknown()) ||
+			(!data.SoaRetry.IsNull() && !data.SoaRetry.IsUnknown()) {
 			resp.Diagnostics.AddError(
 				"SOA Values Not Allowed",
 				"When grid_zone_timer is set to false, the SOA Values (soa_default_ttl, soa_expire, soa_negative_ttl, soa_refresh, soa_retry) will reset to their default values. And hence they should not be set in the configuration. Either remove these values or set use_grid_zone_timer = true.",
@@ -99,8 +103,7 @@ func (r *ZoneAuthResource) ValidateConfig(ctx context.Context, req resource.Vali
 	}
 
 	if !data.MsSyncDisabled.IsNull() && !data.MsSyncDisabled.IsUnknown() && data.MsSyncDisabled.ValueBool() {
-		hasMsPrimaries := !data.MsPrimaries.IsNull() && !data.MsPrimaries.IsUnknown()
-		if !hasMsPrimaries {
+		if data.MsPrimaries.IsNull() {
 			resp.Diagnostics.AddError(
 				"Invalid Configuration",
 				"'ms_primaries' must be provided when 'ms_sync_disabled' is set.",
@@ -116,8 +119,9 @@ func (r *ZoneAuthResource) ValidateConfig(ctx context.Context, req resource.Vali
 	if hasUseSoaEmail || hasSoaSerialNumber || hasMemberSoaMnames {
 		hasGridPrimary := !data.GridPrimary.IsNull() && !data.GridPrimary.IsUnknown()
 		hasNsGroup := !data.NsGroup.IsNull() && !data.NsGroup.IsUnknown()
+		isPrimaryOrNsGroupUnknown := data.GridPrimary.IsUnknown() || data.NsGroup.IsUnknown()
 
-		if !hasGridPrimary && !hasNsGroup {
+		if !hasGridPrimary && !hasNsGroup && !isPrimaryOrNsGroupUnknown {
 			resp.Diagnostics.AddError(
 				"Invalid Configuration",
 				"When use_soa_email, soa_serial_number, or member_soa_mnames is specified, either grid_primary or ns_group must be provided.",
@@ -152,10 +156,14 @@ func (r *ZoneAuthResource) ValidateConfig(ctx context.Context, req resource.Vali
 		return
 	}
 
-	if !data.GridSecondaries.IsNull() && !data.GridSecondaries.IsUnknown() ||
-		!data.ExternalSecondaries.IsNull() && !data.ExternalSecondaries.IsUnknown() ||
-		!data.MsSecondaries.IsNull() && !data.MsSecondaries.IsUnknown() {
-		if len(specifiedPrimaries) == 0 || len(specifiedPrimaries) > 1 {
+	primaryUnknown := data.GridPrimary.IsUnknown() || data.ExternalPrimaries.IsUnknown() || data.MsPrimaries.IsUnknown()
+
+	secondarySpecified := (!data.GridSecondaries.IsNull() && !data.GridSecondaries.IsUnknown()) ||
+		(!data.ExternalSecondaries.IsNull() && !data.ExternalSecondaries.IsUnknown()) ||
+		(!data.MsSecondaries.IsNull() && !data.MsSecondaries.IsUnknown())
+
+	if secondarySpecified && !primaryUnknown {
+		if len(specifiedPrimaries) != 1 {
 			resp.Diagnostics.AddError(
 				"Secondary Server Requires Exactly One Primary Server",
 				"When secondary servers (grid_secondaries, external_secondaries, or ms_secondaries) are specified, exactly one primary server (grid_primary, external_primaries, or ms_primaries) is required.",

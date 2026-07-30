@@ -88,7 +88,7 @@ func (r *Ipv6rangetemplateResource) ValidateConfig(ctx context.Context, req reso
 
 	// If server_association_type is MEMBER, member field must be set
 	if serverAssociationType == "MEMBER" {
-		if config.Member.IsNull() || config.Member.IsUnknown() {
+		if config.Member.IsNull() {
 			resp.Diagnostics.AddAttributeError(
 				path.Root("member"),
 				"Invalid Configuration",

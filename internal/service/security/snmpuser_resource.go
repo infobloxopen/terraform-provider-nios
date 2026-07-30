@@ -30,6 +30,8 @@ var _ resource.ResourceWithImportState = &SnmpuserResource{}
 var _ resource.ResourceWithValidateConfig = &SnmpuserResource{}
 var _ resource.ResourceWithModifyPlan = &SnmpuserResource{}
 
+var _ resource.ResourceWithUpgradeState = &SnmpuserResource{}
+
 func NewSnmpuserResource() resource.Resource {
 	return &SnmpuserResource{}
 }
@@ -45,8 +47,27 @@ func (r *SnmpuserResource) Metadata(ctx context.Context, req resource.MetadataRe
 
 func (r *SnmpuserResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
+		Version:             1,
 		MarkdownDescription: "Manages an SNMPv3 User.",
 		Attributes:          SnmpuserResourceSchemaAttributes,
+	}
+}
+
+func (r *SnmpuserResource) UpgradeState(ctx context.Context) map[int64]resource.StateUpgrader {
+	return map[int64]resource.StateUpgrader{
+		0: {
+			PriorSchema: &schema.Schema{
+				Attributes: SnmpuserResourceSchemaAttributes,
+			},
+			StateUpgrader: func(ctx context.Context, req resource.UpgradeStateRequest, resp *resource.UpgradeStateResponse) {
+				var data SnmpuserModel
+				resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
+				if resp.Diagnostics.HasError() {
+					return
+				}
+				resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+			},
+		},
 	}
 }
 
@@ -204,7 +225,7 @@ func (r *SnmpuserResource) ValidateConfig(ctx context.Context, req resource.Vali
 
 	// Validate authentication password requirement
 	if data.AuthenticationProtocol.ValueString() != "NONE" {
-		if data.AuthenticationPassword.IsNull() || data.AuthenticationPassword.IsUnknown() || data.AuthenticationPassword.ValueString() == "" {
+		if !data.AuthenticationPassword.IsUnknown() && (data.AuthenticationPassword.IsNull() || data.AuthenticationPassword.ValueString() == "") {
 			resp.Diagnostics.AddError(
 				"Missing Authentication Password",
 				"When authentication_protocol is set to 'SHA' or 'MD5', authentication_password must be provided.",
@@ -214,7 +235,7 @@ func (r *SnmpuserResource) ValidateConfig(ctx context.Context, req resource.Vali
 
 	// Validate privacy password requirement
 	if data.PrivacyProtocol.ValueString() != "NONE" {
-		if data.PrivacyPassword.IsNull() || data.PrivacyPassword.IsUnknown() || data.PrivacyPassword.ValueString() == "" {
+		if !data.PrivacyPassword.IsUnknown() && (data.PrivacyPassword.IsNull() || data.PrivacyPassword.ValueString() == "") {
 			resp.Diagnostics.AddError(
 				"Missing Privacy Password",
 				"When privacy_protocol is set to 'AES' or 'DES', privacy_password must be provided.",

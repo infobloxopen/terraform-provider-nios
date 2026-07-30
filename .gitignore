@@ -51,3 +51,6 @@ providers-schema.json
 providers-schema-hashicorp.json
 
 Jenkinsfile
+
+.claude/
+.copilot/
