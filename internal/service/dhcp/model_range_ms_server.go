@@ -83,4 +83,8 @@ func (m *RangeMsServerModel) Flatten(ctx context.Context, from *dhcp.RangeMsServ
 	if (m.Ipv4addr.IsNull() || m.Ipv4addr.ValueString() == "") && from.Address != nil && *from.Address != "" {
 		m.Ipv4addr = flex.FlattenStringPointer(from.Address)
 	}
+	// When ms_server ipv4addr is a hostname/FQDN, WAPI stores it in 'name' not 'ipv4addr'.
+	if (m.Ipv4addr.IsNull() || m.Ipv4addr.ValueString() == "") && from.Name != nil && *from.Name != "" {
+		m.Ipv4addr = flex.FlattenStringPointer(from.Name)
+	}
 }
