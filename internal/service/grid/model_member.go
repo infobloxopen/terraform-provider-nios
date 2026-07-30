@@ -1073,6 +1073,7 @@ func (m *MemberModel) Flatten(ctx context.Context, from *grid.Member, diags *dia
 	m.OspfList = flex.FlattenFrameworkListNestedBlock(ctx, from.OspfList, MemberOspfListAttrTypes, diags, FlattenMemberOspfList)
 	if !planOspfList.IsNull() {
 		result, copyDiags := utils.CopyFieldFromPlanToRespList(ctx, planOspfList, m.OspfList, "authentication_key")
+		diags.Append((*copyDiags)...)
 		if !copyDiags.HasError() {
 			m.OspfList = result.(basetypes.ListValue)
 		}

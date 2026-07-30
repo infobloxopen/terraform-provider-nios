@@ -43,6 +43,7 @@ func TestAccDistributionscheduleResource_basic(t *testing.T) {
 func TestAccDistributionscheduleResource_Active(t *testing.T) {
 	var resourceName = "nios_grid_distributionschedule.test_active"
 	var v grid.Distributionschedule
+	startTime := time.Now().UTC().Add(12 * time.Hour).Format(utils.NaiveDatetimeLayout)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -50,7 +51,7 @@ func TestAccDistributionscheduleResource_Active(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccDistributionscheduleActive(true),
+				Config: testAccDistributionscheduleActive(true, startTime),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDistributionscheduleExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "active", "true"),
@@ -58,7 +59,7 @@ func TestAccDistributionscheduleResource_Active(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccDistributionscheduleActive(false),
+				Config: testAccDistributionscheduleActive(false, startTime),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDistributionscheduleExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "active", "false"),
@@ -195,8 +196,7 @@ resource "nios_grid_distributionschedule" "test" {
 `, active, start_time)
 }
 
-func testAccDistributionscheduleActive(active bool) string {
-	startTime := time.Now().UTC().Add(12 * time.Hour).Format(utils.NaiveDatetimeLayout)
+func testAccDistributionscheduleActive(active bool, startTime string) string {
 	return fmt.Sprintf(`
 resource "nios_grid_distributionschedule" "test_active" {
     active = %t
