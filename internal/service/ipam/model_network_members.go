@@ -112,10 +112,6 @@ func (m *NetworkMembersModel) Flatten(ctx context.Context, from *ipam.NetworkMem
 	if (m.Ipv4addr.IsNull() || m.Ipv4addr.ValueString() == "") && from.Address != nil && *from.Address != "" {
 		m.Ipv4addr = flex.FlattenStringPointer(from.Address)
 	}
-	// For msdhcpserver, WAPI may store an FQDN/hostname in 'name' when ipv4addr is not an IP.
-	if (m.Ipv4addr.IsNull() || m.Ipv4addr.ValueString() == "") && m.Struct.ValueString() == "msdhcpserver" && from.Name != nil && *from.Name != "" {
-		m.Ipv4addr = flex.FlattenStringPointer(from.Name)
-	}
 	m.Ipv6addr = flex.FlattenStringPointer(from.Ipv6addr)
 	m.Name = flex.FlattenStringPointer(from.Name)
 }
