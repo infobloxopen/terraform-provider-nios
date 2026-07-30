@@ -9,7 +9,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
-
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
 	"github.com/infobloxopen/infoblox-nios-go-client/misc"
 

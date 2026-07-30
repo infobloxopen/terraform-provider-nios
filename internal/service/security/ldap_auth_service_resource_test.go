@@ -606,6 +606,84 @@ func TestAccLdapAuthServiceResource_Servers(t *testing.T) {
 			"version":             "V2",
 		},
 	}
+	serversUpdate2 := []map[string]any{
+		{
+			"address":             "2.2.2.4",
+			"authentication_type": "AUTHENTICATED",
+			"base_dn":             "ou=People,dc=example1,dc=com",
+			"disable":             true,
+			"encryption":          "SSL",
+			"port":                631,
+			"use_mgmt_port":       false,
+			"version":             "V2",
+			"bind_password":       "test",
+			"bind_user_dn":"cn=ldapbind,ou=People,dc=example,dc=com",
+		},
+	}
+	serversUpdate3 := []map[string]any{
+		{
+			"address":             "2.2.2.4",
+			"authentication_type": "AUTHENTICATED",
+			"base_dn":             "ou=People,dc=example1,dc=com",
+			"disable":             true,
+			"encryption":          "SSL",
+			"port":                631,
+			"use_mgmt_port":       false,
+			"version":             "V2",
+			"bind_password":       "test123",
+			"bind_user_dn":"cn=ldapbind,ou=People,dc=example,dc=com",
+		},
+	}
+
+	serversUpdate4 := []map[string]any{
+		{
+			"address":             "2.2.2.4",
+			"authentication_type": "AUTHENTICATED",
+			"base_dn":             "ou=People,dc=example1,dc=com",
+			"disable":             true,
+			"encryption":          "SSL",
+			"port":                631,
+			"use_mgmt_port":       false,
+			"version":             "V2",
+			"bind_password":       "test123",
+			"bind_user_dn":"cn=ldapbind,ou=People,dc=example,dc=com",
+		},
+		{
+			"address":             "2.2.2.5",
+			"authentication_type": "ANONYMOUS",
+			"base_dn":             "ou=People,dc=example1,dc=com",
+			"disable":             true,
+			"encryption":          "SSL",
+			"port":                631,
+			"use_mgmt_port":       false,
+			"version":             "V2",
+		},
+	}
+
+	serversUpdate5 := []map[string]any{
+		{
+			"address":             "2.2.2.4",
+			"authentication_type": "ANONYMOUS",
+			"base_dn":             "ou=People,dc=example1,dc=com",
+			"disable":             true,
+			"encryption":          "SSL",
+			"port":                631,
+			"use_mgmt_port":       false,
+			"version":             "V2",
+			"bind_password":       "",
+			"bind_user_dn":"cn=ldapbind,ou=People,dc=example,dc=com",
+		},
+		{
+			"address":             "2.2.2.5",
+			"authentication_type": "ANONYMOUS",
+			"base_dn":             "ou=People,dc=example1,dc=com",
+			"disable":             true,
+			"encryption":          "SSL",
+			"port":                631,
+			"use_mgmt_port":       false,
+			"version":             "V2",
+		},
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -624,9 +702,10 @@ func TestAccLdapAuthServiceResource_Servers(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "servers.0.port", "636"),
 					resource.TestCheckResourceAttr(resourceName, "servers.0.use_mgmt_port", "false"),
 					resource.TestCheckResourceAttr(resourceName, "servers.0.version", "V3"),
+					resource.TestCheckResourceAttr(resourceName, "password_version", "0"),
 				),
 			},
-			// Update and Read
+			// Update non write-only field and Read
 			{
 				Config: testAccLdapAuthServiceServers(name, serversUpdate, "adminID", 30, 5, 5),
 				Check: resource.ComposeTestCheckFunc(
@@ -639,6 +718,137 @@ func TestAccLdapAuthServiceResource_Servers(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "servers.0.port", "631"),
 					resource.TestCheckResourceAttr(resourceName, "servers.0.use_mgmt_port", "false"),
 					resource.TestCheckResourceAttr(resourceName, "servers.0.version", "V2"),
+					resource.TestCheckResourceAttr(resourceName, "password_version", "0"),
+				),
+			},
+			// Update write-only field and Read
+			{
+				Config: testAccLdapAuthServiceServers(name, serversUpdate2, "adminID", 30, 5, 5),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckLdapAuthServiceExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "servers.0.address", "2.2.2.4"),
+					resource.TestCheckResourceAttr(resourceName, "servers.0.authentication_type", "AUTHENTICATED"),
+					resource.TestCheckResourceAttr(resourceName, "servers.0.base_dn", "ou=People,dc=example1,dc=com"),
+					resource.TestCheckResourceAttr(resourceName, "servers.0.disable", "true"),
+					resource.TestCheckResourceAttr(resourceName, "servers.0.encryption", "SSL"),
+					resource.TestCheckResourceAttr(resourceName, "servers.0.port", "631"),
+					resource.TestCheckResourceAttr(resourceName, "servers.0.use_mgmt_port", "false"),
+					resource.TestCheckResourceAttr(resourceName, "servers.0.version", "V2"),
+					resource.TestCheckResourceAttr(resourceName, "password_version", "1"),
+				),
+			},
+			// Update write-only field and Read
+			{
+				Config: testAccLdapAuthServiceServers(name, serversUpdate3, "adminID", 30, 5, 5),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckLdapAuthServiceExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "servers.0.address", "2.2.2.4"),
+					resource.TestCheckResourceAttr(resourceName, "servers.0.authentication_type", "AUTHENTICATED"),
+					resource.TestCheckResourceAttr(resourceName, "servers.0.base_dn", "ou=People,dc=example1,dc=com"),
+					resource.TestCheckResourceAttr(resourceName, "servers.0.disable", "true"),
+					resource.TestCheckResourceAttr(resourceName, "servers.0.encryption", "SSL"),
+					resource.TestCheckResourceAttr(resourceName, "servers.0.port", "631"),
+					resource.TestCheckResourceAttr(resourceName, "servers.0.use_mgmt_port", "false"),
+					resource.TestCheckResourceAttr(resourceName, "servers.0.version", "V2"),
+					resource.TestCheckResourceAttr(resourceName, "password_version", "2"),
+				),
+			},
+			// Update (add a block without write-only field) and Read
+			{
+				Config: testAccLdapAuthServiceServers(name, serversUpdate4, "adminID", 30, 5, 5),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckLdapAuthServiceExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "servers.0.address", "2.2.2.4"),
+					resource.TestCheckResourceAttr(resourceName, "servers.0.authentication_type", "AUTHENTICATED"),
+					resource.TestCheckResourceAttr(resourceName, "servers.0.base_dn", "ou=People,dc=example1,dc=com"),
+					resource.TestCheckResourceAttr(resourceName, "servers.0.disable", "true"),
+					resource.TestCheckResourceAttr(resourceName, "servers.0.encryption", "SSL"),
+					resource.TestCheckResourceAttr(resourceName, "servers.0.port", "631"),
+					resource.TestCheckResourceAttr(resourceName, "servers.0.use_mgmt_port", "false"),
+					resource.TestCheckResourceAttr(resourceName, "servers.0.version", "V2"),
+
+					resource.TestCheckResourceAttr(resourceName, "servers.1.address", "2.2.2.5"),
+					resource.TestCheckResourceAttr(resourceName, "servers.1.authentication_type", "ANONYMOUS"),
+					resource.TestCheckResourceAttr(resourceName, "servers.1.base_dn", "ou=People,dc=example1,dc=com"),
+					resource.TestCheckResourceAttr(resourceName, "servers.1.disable", "true"),
+					resource.TestCheckResourceAttr(resourceName, "servers.1.encryption", "SSL"),
+					resource.TestCheckResourceAttr(resourceName, "servers.1.port", "631"),
+					resource.TestCheckResourceAttr(resourceName, "servers.1.use_mgmt_port", "false"),
+					resource.TestCheckResourceAttr(resourceName, "servers.1.version", "V2"),
+					resource.TestCheckResourceAttr(resourceName, "password_version", "2"),
+				),
+			},
+			// Update (remove write-only field from a block of server) and Read
+			{
+				Config: testAccLdapAuthServiceServers(name, serversUpdate5, "adminID", 30, 5, 5),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckLdapAuthServiceExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "servers.0.address", "2.2.2.4"),
+					resource.TestCheckResourceAttr(resourceName, "servers.0.authentication_type", "ANONYMOUS"),
+					resource.TestCheckResourceAttr(resourceName, "servers.0.base_dn", "ou=People,dc=example1,dc=com"),
+					resource.TestCheckResourceAttr(resourceName, "servers.0.disable", "true"),
+					resource.TestCheckResourceAttr(resourceName, "servers.0.encryption", "SSL"),
+					resource.TestCheckResourceAttr(resourceName, "servers.0.port", "631"),
+					resource.TestCheckResourceAttr(resourceName, "servers.0.use_mgmt_port", "false"),
+					resource.TestCheckResourceAttr(resourceName, "servers.0.version", "V2"),
+
+					resource.TestCheckResourceAttr(resourceName, "servers.1.address", "2.2.2.5"),
+					resource.TestCheckResourceAttr(resourceName, "servers.1.authentication_type", "ANONYMOUS"),
+					resource.TestCheckResourceAttr(resourceName, "servers.1.base_dn", "ou=People,dc=example1,dc=com"),
+					resource.TestCheckResourceAttr(resourceName, "servers.1.disable", "true"),
+					resource.TestCheckResourceAttr(resourceName, "servers.1.encryption", "SSL"),
+					resource.TestCheckResourceAttr(resourceName, "servers.1.port", "631"),
+					resource.TestCheckResourceAttr(resourceName, "servers.1.use_mgmt_port", "false"),
+					resource.TestCheckResourceAttr(resourceName, "servers.1.version", "V2"),
+					resource.TestCheckResourceAttr(resourceName, "password_version", "3"),
+				),
+			},
+			// Update (revert to original servers) and Read
+			{
+				Config: testAccLdapAuthServiceServers(name, servers, "adminID", 30, 5, 5),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckLdapAuthServiceExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "servers.0.address", "2.2.2.2"),
+					resource.TestCheckResourceAttr(resourceName, "servers.0.authentication_type", "ANONYMOUS"),
+					resource.TestCheckResourceAttr(resourceName, "servers.0.base_dn", "ou=People,dc=example,dc=com"),
+					resource.TestCheckResourceAttr(resourceName, "servers.0.disable", "false"),
+					resource.TestCheckResourceAttr(resourceName, "servers.0.encryption", "SSL"),
+					resource.TestCheckResourceAttr(resourceName, "servers.0.port", "636"),
+					resource.TestCheckResourceAttr(resourceName, "servers.0.use_mgmt_port", "false"),
+					resource.TestCheckResourceAttr(resourceName, "servers.0.version", "V3"),
+					resource.TestCheckResourceAttr(resourceName, "password_version", "3"),
+				),
+			},
+			// Update (no changes) and Read
+			{
+				Config: testAccLdapAuthServiceServers(name, servers, "adminID", 30, 5, 5),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckLdapAuthServiceExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "servers.0.address", "2.2.2.2"),
+					resource.TestCheckResourceAttr(resourceName, "servers.0.authentication_type", "ANONYMOUS"),
+					resource.TestCheckResourceAttr(resourceName, "servers.0.base_dn", "ou=People,dc=example,dc=com"),
+					resource.TestCheckResourceAttr(resourceName, "servers.0.disable", "false"),
+					resource.TestCheckResourceAttr(resourceName, "servers.0.encryption", "SSL"),
+					resource.TestCheckResourceAttr(resourceName, "servers.0.port", "636"),
+					resource.TestCheckResourceAttr(resourceName, "servers.0.use_mgmt_port", "false"),
+					resource.TestCheckResourceAttr(resourceName, "servers.0.version", "V3"),
+					resource.TestCheckResourceAttr(resourceName, "password_version", "3"),
+				),
+			},
+			// Update (add a new server with write-only field) and Read
+			{
+				Config: testAccLdapAuthServiceServers(name, serversUpdate2, "adminID", 30, 5, 5),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckLdapAuthServiceExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "servers.0.address", "2.2.2.4"),
+					resource.TestCheckResourceAttr(resourceName, "servers.0.authentication_type", "AUTHENTICATED"),
+					resource.TestCheckResourceAttr(resourceName, "servers.0.base_dn", "ou=People,dc=example1,dc=com"),
+					resource.TestCheckResourceAttr(resourceName, "servers.0.disable", "true"),
+					resource.TestCheckResourceAttr(resourceName, "servers.0.encryption", "SSL"),
+					resource.TestCheckResourceAttr(resourceName, "servers.0.port", "631"),
+					resource.TestCheckResourceAttr(resourceName, "servers.0.use_mgmt_port", "false"),
+					resource.TestCheckResourceAttr(resourceName, "servers.0.version", "V2"),
+					resource.TestCheckResourceAttr(resourceName, "password_version", "4"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase

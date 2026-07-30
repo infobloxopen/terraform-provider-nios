@@ -61,7 +61,7 @@ Optional:
 - `extattrs` (Map of String) Extensible attributes associated with the object.
 - `log_level` (String) The log level for a notification REST endpoint.
 - `outbound_members` (List of String) The list of members for outbound events.
-- `password` (String, Sensitive) The password of the user that can log into a notification REST endpoint.
+- `password` (String) The password of the user that can log into a notification REST endpoint.
 - `server_cert_validation` (String) The server certificate validation type.
 - `sync_disabled` (Boolean) Determines if the sync process is disabled for a notification REST endpoint.
 - `template_instance` (Attributes) The notification REST template instance. (see [below for nested schema](#nestedatt--result--template_instance))
@@ -69,7 +69,7 @@ Optional:
 - `username` (String) The username of the user that can log into a notification REST endpoint.
 - `vendor_identifier` (String) The vendor identifier.
 - `wapi_user_name` (String) The user name for WAPI integration.
-- `wapi_user_password` (String, Sensitive) The user password for WAPI integration.
+- `wapi_user_password` (String) The user password for WAPI integration.
 
 Read-Only:
 
@@ -78,6 +78,7 @@ Read-Only:
 - `client_certificate_valid_from` (Number) The timestamp when client certificate for a notification REST endpoint was created.
 - `client_certificate_valid_to` (Number) The timestamp when client certificate for a notification REST endpoint expires.
 - `extattrs_all` (Map of String) Extensible attributes associated with the object , including default attributes.
+- `password_version` (Number) Internal version incremented when password or wapi_user_password changes.
 - `ref` (String) The reference to the object.
 - `uuid` (String) Universally Unique ID assigned for this object.
 

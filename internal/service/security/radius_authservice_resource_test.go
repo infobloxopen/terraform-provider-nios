@@ -584,7 +584,7 @@ func TestAccRadiusAuthserviceResource_Servers(t *testing.T) {
 			"disable":        false,
 			"use_accounting": true,
 			"use_mgmt_port":  false,
-			"shared_secret":  "test",
+			"shared_secret":  "test123",
 		},
 	}
 	resource.ParallelTest(t, resource.TestCase{
@@ -604,6 +604,7 @@ func TestAccRadiusAuthserviceResource_Servers(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "servers.0.disable", "false"),
 					resource.TestCheckResourceAttr(resourceName, "servers.0.use_accounting", "false"),
 					resource.TestCheckResourceAttr(resourceName, "servers.0.use_mgmt_port", "false"),
+					resource.TestCheckResourceAttr(resourceName, "secret_version", "1"),
 				),
 			},
 			// Update and Read
@@ -619,6 +620,7 @@ func TestAccRadiusAuthserviceResource_Servers(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "servers.0.disable", "false"),
 					resource.TestCheckResourceAttr(resourceName, "servers.0.use_accounting", "true"),
 					resource.TestCheckResourceAttr(resourceName, "servers.0.use_mgmt_port", "false"),
+					resource.TestCheckResourceAttr(resourceName, "secret_version", "2"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase

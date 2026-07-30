@@ -14,9 +14,11 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/client"
 	"github.com/infobloxopen/infoblox-nios-go-client/dhcp"
+	"github.com/infobloxopen/infoblox-nios-go-client/discovery"
 	"github.com/infobloxopen/infoblox-nios-go-client/dns"
 	"github.com/infobloxopen/infoblox-nios-go-client/grid"
 	"github.com/infobloxopen/infoblox-nios-go-client/ipam"
@@ -25,6 +27,7 @@ import (
 	"github.com/infobloxopen/infoblox-nios-go-client/notification"
 	"github.com/infobloxopen/infoblox-nios-go-client/option"
 	"github.com/infobloxopen/infoblox-nios-go-client/parentalcontrol"
+	"github.com/infobloxopen/infoblox-nios-go-client/rir"
 	"github.com/infobloxopen/infoblox-nios-go-client/security"
 	"github.com/infobloxopen/terraform-provider-nios/internal/acctest"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
@@ -77,8 +80,9 @@ func normalizeAddressFromEnv(value string) string {
 }
 
 type GridHostnames struct {
-	MasterHostname string
-	MemberHostname string
+	MasterHostname          string
+	MemberHostname          string
+	DiscoveryMemberHostname string
 }
 
 // ResolveAndStoreGridHostnames resolves grid hostnames from VIP addresses and
@@ -90,10 +94,11 @@ func ResolveAndStoreGridHostnames(gridClient *grid.APIClient) (GridHostnames, er
 
 	masterAddr := normalizeAddressFromEnv(os.Getenv("NIOS_HOST_URL"))
 	memberAddr := normalizeAddressFromEnv(os.Getenv("NIOS_MEMBER_URL"))
+	discoveryMemberAddr := normalizeAddressFromEnv(os.Getenv("NIOS_DISCOVERY_MEMBER_URL"))
 
 	memberListResp, _, err := gridClient.MemberAPI.List(context.Background()).
 		ReturnAsObject(1).
-		ReturnFieldsPlus("vip_setting,host_name").
+		ReturnFieldsPlus("vip_setting,host_name,config_addr_type").
 		Execute()
 	if err != nil {
 		return GridHostnames{}, fmt.Errorf("resolve hostnames: failed to list members: %w", err)
@@ -106,6 +111,8 @@ func ResolveAndStoreGridHostnames(gridClient *grid.APIClient) (GridHostnames, er
 	memberResp := memberListResp.ListMemberResponseObject.Result
 
 	resolved := GridHostnames{}
+	gridMasterConfigAddrType := ""
+	discoveryMemberConfigAddrType := ""
 
 	for _, m := range memberResp {
 		if m.VipSetting == nil || m.VipSetting.Address == nil || m.HostName == nil {
@@ -117,10 +124,20 @@ func ResolveAndStoreGridHostnames(gridClient *grid.APIClient) (GridHostnames, er
 
 		if masterAddr != "" && vipAddr == masterAddr && resolved.MasterHostname == "" {
 			resolved.MasterHostname = hostName
+			if m.ConfigAddrType != nil {
+				gridMasterConfigAddrType = *m.ConfigAddrType
+			}
 		}
 
 		if memberAddr != "" && vipAddr == memberAddr && resolved.MemberHostname == "" {
 			resolved.MemberHostname = hostName
+		}
+
+		if discoveryMemberAddr != "" && vipAddr == discoveryMemberAddr && resolved.DiscoveryMemberHostname == "" {
+			resolved.DiscoveryMemberHostname = hostName
+			if m.ConfigAddrType != nil {
+				discoveryMemberConfigAddrType = *m.ConfigAddrType
+			}
 		}
 	}
 
@@ -138,12 +155,38 @@ func ResolveAndStoreGridHostnames(gridClient *grid.APIClient) (GridHostnames, er
 		fmt.Printf("Mapped member VIP %q to hostname %q\n", memberAddr, resolved.MemberHostname)
 	}
 
+	if resolved.DiscoveryMemberHostname != "" {
+		if err := writePipelineEnvVar("NIOS_DISCOVERY_MEMBER_HOSTNAME", resolved.DiscoveryMemberHostname); err != nil {
+			return GridHostnames{}, fmt.Errorf("resolve hostnames: failed to write NIOS_DISCOVERY_MEMBER_HOSTNAME: %w", err)
+		}
+		fmt.Printf("Mapped discovery member VIP %q to hostname %q\n", discoveryMemberAddr, resolved.DiscoveryMemberHostname)
+	}
+
+	// Add Grid Master Config Addr Type as env variable
+	if gridMasterConfigAddrType != "" {
+		if err := writePipelineEnvVar("NIOS_GRID_MASTER_CONFIG_ADDR_TYPE", gridMasterConfigAddrType); err != nil {
+			return GridHostnames{}, fmt.Errorf("resolve hostnames: failed to write NIOS_GRID_MASTER_CONFIG_ADDR_TYPE: %w", err)
+		}
+		fmt.Printf("Grid master config address type is %q\n", gridMasterConfigAddrType)
+	}
+
+	if discoveryMemberConfigAddrType != "" {
+		if err := writePipelineEnvVar("NIOS_DISCOVERY_MEMBER_CONFIG_ADDR_TYPE", discoveryMemberConfigAddrType); err != nil {
+			return GridHostnames{}, fmt.Errorf("resolve hostnames: failed to write NIOS_DISCOVERY_MEMBER_CONFIG_ADDR_TYPE: %w", err)
+		}
+		fmt.Printf("Discovery member config address type is %q\n", discoveryMemberConfigAddrType)
+	}
+
 	if masterAddr != "" && resolved.MasterHostname == "" {
 		fmt.Printf("No member found with VIP address matching NIOS_HOST_URL (%q)\n", masterAddr)
 	}
 
 	if memberAddr != "" && resolved.MemberHostname == "" {
 		fmt.Printf("No member found with VIP address matching NIOS_MEMBER_URL (%q)\n", memberAddr)
+	}
+
+	if discoveryMemberAddr != "" && resolved.DiscoveryMemberHostname == "" {
+		fmt.Printf("No member found with VIP address matching NIOS_DISCOVERY_MEMBER_URL (%q)\n", discoveryMemberAddr)
 	}
 
 	return resolved, nil
@@ -417,11 +460,9 @@ func ConfigurePxgridEndpoint(host, wapiVer, username, password, certUploadFilePa
 		ReturnFieldsPlus("name").
 		Execute()
 	if err != nil {
-		if strings.Contains(err.Error(), "already exists") {
-			filters := map[string]interface{}{"name": endpointName}
+		if strings.Contains(err.Error(), "already exists") || strings.Contains(err.Error(), "is already in use for another endpoint") {
 			existingResp, _, listErr := miscClient.PxgridEndpointAPI.List(context.Background()).
 				ReturnAsObject(1).
-				Filters(filters).
 				ReturnFieldsPlus("name").
 				Execute()
 			if listErr != nil {
@@ -547,6 +588,8 @@ type PreConfigClients struct {
 	NOTIFICATION *notification.APIClient
 	PARENTAL     *parentalcontrol.APIClient
 	SECURITY     *security.APIClient
+	RIR          *rir.APIClient
+	DISCOVERY    *discovery.APIClient
 }
 
 // PreConfig creates the network views required for integration testing.
@@ -579,6 +622,9 @@ func PreConfig(clients PreConfigClients, hostnames GridHostnames) error {
 	}
 	if clients.SECURITY == nil {
 		return fmt.Errorf("preconfig: SECURITY client is required")
+	}
+	if clients.RIR == nil {
+		return fmt.Errorf("preconfig: RIR client is required")
 	}
 
 	// Ensure roaming hosts support is enabled at grid DHCP properties level.
@@ -642,6 +688,9 @@ func PreConfig(clients PreConfigClients, hostnames GridHostnames) error {
 			EnableNetworkUsers: grid.PtrBool(true),
 		},
 		EnableRirSwip: grid.PtrBool(true),
+		DnsResolverSetting: &grid.GridDnsResolverSetting{
+			Resolvers: []string{"127.0.0.1"},
+		},
 	}
 	_, _, err = clients.GRID.GridAPI.Update(context.Background(), utils.ExtractResourceRef(*gridRef)).
 		Grid(gridBody).
@@ -691,6 +740,52 @@ func PreConfig(clients PreConfigClients, hostnames GridHostnames) error {
 		fmt.Printf("Parental control enabled for subscriber %q\n", *parentalSubscriber.Ref)
 	} else {
 		fmt.Printf("Parental control already enabled for subscriber %q, skipping update\n", *parentalSubscriber.Ref)
+	}
+
+	// Check if ip_space_discriminator is available as a readable field.
+	ipDiscResp, _, err := clients.PARENTAL.ParentalcontrolSubscriberAPI.List(context.Background()).
+		ReturnAsObject(1).
+		ReturnFieldsPlus("ip_space_discriminator").
+		Execute()
+	if err != nil {
+		return fmt.Errorf("failed to list parentalcontrol subscribers for ip_space_discriminator check: %w", err)
+	}
+	if ipDiscResp.ListParentalcontrolSubscriberResponseObject == nil || len(ipDiscResp.ListParentalcontrolSubscriberResponseObject.Result) == 0 {
+		return fmt.Errorf("parentalcontrol subscriber list returned no results for ip_space_discriminator check")
+	}
+
+	ipDiscSubscriber := ipDiscResp.ListParentalcontrolSubscriberResponseObject.Result[0]
+	if ipDiscSubscriber.IpSpaceDiscriminator != nil && *ipDiscSubscriber.IpSpaceDiscriminator != "" {
+		// ip_space_discriminator already present — field is readable/editable
+		fmt.Printf("ip_space_discriminator already present (%q) for subscriber %q, marking editable\n",
+			*ipDiscSubscriber.IpSpaceDiscriminator, *ipDiscSubscriber.Ref)
+		if err := writePipelineEnvVar("SUBSCRIBER_BLOCK_SIZE_EDITABLE", "true"); err != nil {
+			return fmt.Errorf("failed to write SUBSCRIBER_BLOCK_SIZE_EDITABLE: %w", err)
+		}
+	} else {
+		// ip_space_discriminator absent — attempt an Update to probe editability
+		if ipDiscSubscriber.Ref == nil || *ipDiscSubscriber.Ref == "" {
+			return fmt.Errorf("parentalcontrol subscriber ref is empty for ip_space_discriminator update")
+		}
+		ipDiscRef := utils.ExtractResourceRef(*ipDiscSubscriber.Ref)
+		_, _, updateErr := clients.PARENTAL.ParentalcontrolSubscriberAPI.Update(context.Background(), ipDiscRef).
+			ParentalcontrolSubscriber(parentalcontrol.ParentalcontrolSubscriber{
+				IpSpaceDiscriminator: parentalcontrol.PtrString("Deterministic-NAT-Port"),
+			}).
+			Execute()
+		if updateErr != nil {
+			fmt.Printf("ip_space_discriminator update failed for subscriber %q (API error: %v), marking not editable\n",
+				*ipDiscSubscriber.Ref, updateErr)
+			if err := writePipelineEnvVar("SUBSCRIBER_BLOCK_SIZE_EDITABLE", "false"); err != nil {
+				return fmt.Errorf("failed to write SUBSCRIBER_BLOCK_SIZE_EDITABLE: %w", err)
+			}
+		} else {
+			fmt.Printf("ip_space_discriminator updated to \"Deterministic-NAT-Port\" for subscriber %q, marking editable\n",
+				*ipDiscSubscriber.Ref)
+			if err := writePipelineEnvVar("SUBSCRIBER_BLOCK_SIZE_EDITABLE", "true"); err != nil {
+				return fmt.Errorf("failed to write SUBSCRIBER_BLOCK_SIZE_EDITABLE: %w", err)
+			}
+		}
 	}
 
 	networkViews := []string{"test_network_view", "custom_view", "test_network_view2", "ms_server", "ms_server2"}
@@ -1236,8 +1331,8 @@ func PreConfig(clients PreConfigClients, hostnames GridHostnames) error {
 		ipv6SettingVal  grid.MemberIpv6Setting
 		masterCandidate bool
 	}{
-		{hostName: "infoblox.member2", vipAddress: "172.28.32.251", configAddrType: "BOTH", ipv6SettingVal: ipv6SettingVal2, masterCandidate: true},
-		{hostName: "infoblox.member3", vipAddress: "172.28.32.252", configAddrType: "IPV4", ipv6SettingVal: ipv6SettingVal3, masterCandidate: false},
+		{hostName: "infoblox.member2", vipAddress: "172.28.38.251", configAddrType: "BOTH", ipv6SettingVal: ipv6SettingVal2, masterCandidate: true},
+		{hostName: "infoblox.member3", vipAddress: "172.28.38.252", configAddrType: "IPV4", ipv6SettingVal: ipv6SettingVal3, masterCandidate: false},
 	}
 
 	for _, member := range members {
@@ -1273,6 +1368,118 @@ func PreConfig(clients PreConfigClients, hostnames GridHostnames) error {
 		fmt.Printf("Member %q created successfully\n", member.hostName)
 	}
 
+	// Ensure upgrade schedule has required start time and group upgrade times.
+	upgradeScheduleResp, _, err := clients.GRID.UpgradescheduleAPI.List(context.Background()).
+		ReturnAsObject(1).
+		ReturnFieldsPlus("start_time,upgrade_groups").
+		Execute()
+	if err != nil {
+		return fmt.Errorf("failed to list upgrade schedule: %w", err)
+	}
+	if upgradeScheduleResp.ListUpgradescheduleResponseObject == nil || len(upgradeScheduleResp.ListUpgradescheduleResponseObject.Result) == 0 {
+		return fmt.Errorf("upgrade schedule list returned no results")
+	}
+
+	upgradeSchedule := upgradeScheduleResp.ListUpgradescheduleResponseObject.Result[0]
+	if upgradeSchedule.Ref == nil || *upgradeSchedule.Ref == "" {
+		return fmt.Errorf("upgrade schedule ref is empty")
+	}
+
+	const defaultUpgradeScheduleStartTime int64 = 1829280600
+	const defaultUpgradeGroupTime int64 = 1830144600
+
+	upgradeScheduleBody := grid.Upgradeschedule{
+		Active: dns.PtrBool(false),
+	}
+
+	upgradeScheduleBody.StartTime = grid.PtrInt64(defaultUpgradeScheduleStartTime)
+
+	if upgradeSchedule.HasUpgradeGroups() {
+		scheduleUpgradeGroups := upgradeSchedule.GetUpgradeGroups()
+		hasMissingGroupUpgradeTime := false
+
+		var upgradeGroupsForBody []grid.UpgradescheduleUpgradeGroups
+		for _, ug := range scheduleUpgradeGroups {
+			groupBody := grid.UpgradescheduleUpgradeGroups{}
+			if ug.HasName() {
+				groupBody.SetName(ug.GetName())
+			}
+			groupBody.SetUpgradeTime(defaultUpgradeGroupTime)
+			hasMissingGroupUpgradeTime = true
+			upgradeGroupsForBody = append(upgradeGroupsForBody, groupBody)
+		}
+
+		if hasMissingGroupUpgradeTime {
+			upgradeScheduleBody.SetUpgradeGroups(upgradeGroupsForBody)
+		}
+	}
+
+	upgradeScheduleRef := utils.ExtractResourceRef(*upgradeSchedule.Ref)
+	_, _, err = clients.GRID.UpgradescheduleAPI.Update(context.Background(), upgradeScheduleRef).
+		Upgradeschedule(upgradeScheduleBody).
+		Execute()
+	if err != nil {
+		return fmt.Errorf("failed to update upgrade schedule %q: %w", *upgradeSchedule.Ref, err)
+	}
+
+	fmt.Printf("Upgrade schedule %q updated\n", *upgradeSchedule.Ref)
+
+	// Ensure distribution schedule has required start time and group upgrade times.
+	distributionScheduleResp, _, err := clients.GRID.DistributionscheduleAPI.List(context.Background()).
+		ReturnAsObject(1).
+		ReturnFieldsPlus("start_time,upgrade_groups").
+		Execute()
+	if err != nil {
+		return fmt.Errorf("failed to list distribution schedule: %w", err)
+	}
+	if distributionScheduleResp.ListDistributionscheduleResponseObject == nil || len(distributionScheduleResp.ListDistributionscheduleResponseObject.Result) == 0 {
+		return fmt.Errorf("distribution schedule list returned no results")
+	}
+
+	distributionSchedule := distributionScheduleResp.ListDistributionscheduleResponseObject.Result[0]
+	if distributionSchedule.Ref == nil || *distributionSchedule.Ref == "" {
+		return fmt.Errorf("distribution schedule ref is empty")
+	}
+
+	defaultDistributionScheduleStartTime := time.Now().Add(12 * time.Hour).Unix()
+	defaultDistributionScheduleGroupTime := time.Now().Add(18 * time.Hour).Unix()
+
+	distributionScheduleBody := grid.Distributionschedule{
+		Active: dns.PtrBool(false),
+	}
+
+	distributionScheduleBody.StartTime = grid.PtrInt64(defaultDistributionScheduleStartTime)
+
+	if distributionSchedule.HasUpgradeGroups() {
+		scheduleUpgradeGroups := distributionSchedule.GetUpgradeGroups()
+		hasMissingGroupUpgradeTime := false
+
+		var upgradeGroupsForBody []grid.DistributionscheduleUpgradeGroups
+		for _, ug := range scheduleUpgradeGroups {
+			groupBody := grid.DistributionscheduleUpgradeGroups{}
+			if ug.HasName() {
+				groupBody.SetName(ug.GetName())
+			}
+			groupBody.SetDistributionTime(defaultDistributionScheduleGroupTime)
+			hasMissingGroupUpgradeTime = true
+			upgradeGroupsForBody = append(upgradeGroupsForBody, groupBody)
+		}
+
+		if hasMissingGroupUpgradeTime {
+			distributionScheduleBody.SetUpgradeGroups(upgradeGroupsForBody)
+		}
+	}
+
+	distributionScheduleRef := utils.ExtractResourceRef(*distributionSchedule.Ref)
+	_, _, err = clients.GRID.DistributionscheduleAPI.Update(context.Background(), distributionScheduleRef).
+		Distributionschedule(distributionScheduleBody).
+		Execute()
+	if err != nil {
+		return fmt.Errorf("failed to update distribution schedule %q: %w", *distributionSchedule.Ref, err)
+	}
+
+	fmt.Printf("Distribution schedule %q updated\n", *distributionSchedule.Ref)
+
 	// Create upgrade dependent groups
 	upgradeGroups := []string{"example_upgrade_dependent_group1", "example_upgrade_dependent_group2"}
 
@@ -1294,6 +1501,47 @@ func PreConfig(clients PreConfigClients, hostnames GridHostnames) error {
 		}
 
 		fmt.Printf("Upgrade dependent group %q created successfully\n", groupName)
+	}
+
+	// Create RIR organizations
+	rirExtAttrs := map[string]rir.ExtAttrs{
+		"RIPE Admin Contact":     {Value: "ib-contact"},
+		"RIPE Country":           {Value: "United Kingdom (GB)"},
+		"RIPE Technical Contact": {Value: "TEST123-IB"},
+		"RIPE Email":             {Value: "support@infoblox.com"},
+	}
+
+	rirOrgs := []struct {
+		id   string
+		name string
+	}{
+		{id: "ORG-CB11-INTEST", name: "rir-org-test1"},
+		{id: "ORG-CB12-INTEST", name: "rir-org-test2"},
+	}
+
+	for _, org := range rirOrgs {
+		rirOrgBody := rir.RirOrganization{
+			Id:          rir.PtrString(org.id),
+			Name:        rir.PtrString(org.name),
+			Maintainer:  rir.PtrString("infoblox"),
+			Password:    rir.PtrString("test-pass"),
+			SenderEmail: rir.PtrString("support@infoblox.com"),
+			Rir:         rir.PtrString("RIPE"),
+			ExtAttrs:    &rirExtAttrs,
+		}
+
+		_, _, err := clients.RIR.RirOrganizationAPI.Create(context.Background()).
+			RirOrganization(rirOrgBody).
+			Execute()
+		if err != nil {
+			if strings.Contains(err.Error(), "already exists") {
+				fmt.Printf("RIR organization %q already exists, skipping creation\n", org.id)
+				continue
+			}
+			return fmt.Errorf("failed to create RIR organization %q: %w", org.id, err)
+		}
+
+		fmt.Printf("RIR organization %q created successfully\n", org.id)
 	}
 
 	// Create Active Directory auth services
@@ -1386,6 +1634,58 @@ func PreConfig(clients PreConfigClients, hostnames GridHostnames) error {
 		fmt.Printf("Active Directory auth service %q created successfully (ref: %s, env: %s)\n", ad.name, adRef, ad.refEnvVar)
 	}
 
+	// TODO : Remote Lookup Services need to be removed to run Member UTs
+	// Update auth policy to append the first AD auth service ref
+	// Only proceed if at least one new ref was captured
+	//firstADRef := adAuthServiceRefs["active_dir"]
+	//if firstADRef != "" {
+	//	// GET current auth policy
+	//	listResp, _, err := clients.SECURITY.AuthpolicyAPI.List(context.Background()).
+	//		ReturnAsObject(1).
+	//		ReturnFieldsPlus("auth_services").
+	//		Execute()
+	//	if err != nil {
+	//		return fmt.Errorf("failed to list auth policy: %w", err)
+	//	}
+	//
+	//	// Resolve the auth policy slice and ref from either response shape
+	//	var authPolicies []security.Authpolicy
+	//	if listResp.ListAuthpolicyResponseObject != nil {
+	//		authPolicies = listResp.ListAuthpolicyResponseObject.Result
+	//	} else if listResp.ArrayOfAuthpolicy != nil {
+	//		authPolicies = *listResp.ArrayOfAuthpolicy
+	//	}
+	//
+	//	if len(authPolicies) == 0 {
+	//		return fmt.Errorf("auth policy list returned no results")
+	//	}
+	//
+	//	authPolicyRef := authPolicies[0].Ref
+	//
+	//	if authPolicyRef == nil || *authPolicyRef == "" {
+	//		return fmt.Errorf("auth policy ref is empty")
+	//	}
+	//
+	//	extractedAuthPolicyRef := utils.ExtractResourceRef(*authPolicyRef)
+	//
+	//	// Append first AD auth service ref to existing auth services
+	//	authServices := authPolicies[0].GetAuthServices()
+	//	authServices = append(authServices, firstADRef)
+	//
+	//	authPolicyBody := security.Authpolicy{
+	//		AuthServices: authServices,
+	//	}
+	//
+	//	_, _, err = clients.SECURITY.AuthpolicyAPI.Update(context.Background(), extractedAuthPolicyRef).
+	//		Authpolicy(authPolicyBody).
+	//		Execute()
+	//	if err != nil {
+	//		return fmt.Errorf("failed to update auth policy %q: %w", *authPolicyRef, err)
+	//	}
+	//
+	//	fmt.Printf("Auth policy %q updated with AD auth service ref %q\n", *authPolicyRef, firstADRef)
+	//}
+
 	// Update MemberFileDistribution to append a new TFTP ACL entry
 	memberFiledistResp, _, err := clients.GRID.MemberFiledistributionAPI.List(context.Background()).ReturnAsObject(1).Execute()
 	if err != nil {
@@ -1450,8 +1750,9 @@ func PreConfig(clients PreConfigClients, hostnames GridHostnames) error {
 
 	dnsGridPropertiesRef := utils.ExtractResourceRef(*gridDNSRef)
 	rpzLoggingLevel := gridDNSResp.ListGridDnsResponseObject.Result[0].LoggingCategories.LogRpz
+	allowRecursiveQuery := gridDNSResp.ListGridDnsResponseObject.Result[0].AllowRecursiveQuery
 
-	if rpzLoggingLevel == nil || !*rpzLoggingLevel {
+	if rpzLoggingLevel == nil || !*rpzLoggingLevel || allowRecursiveQuery == nil || !*allowRecursiveQuery {
 		fmt.Printf("RPZ logging level is %v, updating to true\n", rpzLoggingLevel)
 		dnsGridUpdateBody := grid.GridDns{
 			LoggingCategories: &grid.GridDnsLoggingCategories{
@@ -1594,6 +1895,52 @@ func PreConfig(clients PreConfigClients, hostnames GridHostnames) error {
 		}
 
 		fmt.Printf("Syslog endpoint %q created successfully (ref: %s)\n", *syslogEndpointBody.Name, syslogEndpointRef)
+	}
+
+	// Enable Discovery service on the discovery member if NIOS_DISCOVERY_MEMBER_URL is set.
+	discoveryMemberAddr := normalizeAddressFromEnv(os.Getenv("NIOS_DISCOVERY_MEMBER_URL"))
+	if discoveryMemberAddr != "" {
+		if clients.DISCOVERY == nil {
+			return fmt.Errorf("preconfig: DISCOVERY client is required when NIOS_DISCOVERY_MEMBER_URL is set")
+		}
+
+		discoveryListResp, _, err := clients.DISCOVERY.DiscoveryMemberpropertiesAPI.List(context.Background()).
+			ReturnAsObject(1).
+			ReturnFieldsPlus("address,enable_service,is_sa").
+			Execute()
+		if err != nil {
+			return fmt.Errorf("preconfig: failed to list discovery member properties: %w", err)
+		}
+		if discoveryListResp.ListDiscoveryMemberpropertiesResponseObject == nil {
+			return fmt.Errorf("preconfig: discovery member properties list response object is nil")
+		}
+
+		discoveryMemberRef := ""
+		for _, dm := range discoveryListResp.ListDiscoveryMemberpropertiesResponseObject.Result {
+			if dm.Address != nil && strings.TrimSpace(*dm.Address) == discoveryMemberAddr {
+				discoveryMemberRef = dm.GetRef()
+				break
+			}
+		}
+
+		if discoveryMemberRef == "" {
+			fmt.Printf("No discovery member found with address %q, skipping discovery service enablement\n", discoveryMemberAddr)
+		} else {
+			extractedRef := utils.ExtractResourceRef(discoveryMemberRef)
+			discoveryMemberBody := discovery.DiscoveryMemberproperties{
+				EnableService: discovery.PtrBool(true),
+				IsSa:          discovery.PtrBool(true),
+			}
+
+			_, _, err = clients.DISCOVERY.DiscoveryMemberpropertiesAPI.Update(context.Background(), extractedRef).
+				DiscoveryMemberproperties(discoveryMemberBody).
+				Execute()
+			if err != nil {
+				return fmt.Errorf("preconfig: failed to enable discovery service on member %q: %w", discoveryMemberRef, err)
+			}
+
+			fmt.Printf("Discovery service enabled (enable_service=true, is_sa=true) for member %q\n", discoveryMemberRef)
+		}
 	}
 
 	return nil
@@ -1812,6 +2159,70 @@ func main() {
 		return
 	}
 
+	ecosystemTemplatePath10 := filepath.Join(cwd, "internal/testdata/nios_ecosystem_templates", "Version5_Syslog_Session_Template1.json")
+
+	if _, statErr := os.Stat(ecosystemTemplatePath10); statErr == nil {
+		err = ConfigureEcoSystemTemplates(host, wapiVer, username, password, ecosystemTemplatePath10)
+		if err != nil {
+			fmt.Printf("Error uploading ecosystem templates: %v\n", err)
+			return
+		}
+		fmt.Println("Ecosystem template 10 uploaded successfully")
+	} else if os.IsNotExist(statErr) {
+		fmt.Printf("Ecosystem template 10 not found at %s, skipping upload\n", ecosystemTemplatePath10)
+	} else {
+		fmt.Printf("Error checking ecosystem template 10 path %s: %v\n", ecosystemTemplatePath10, statErr)
+		return
+	}
+
+	ecosystemTemplatePath11 := filepath.Join(cwd, "internal/testdata/nios_ecosystem_templates", "Version5_DXL_Session_Template1.json")
+
+	if _, statErr := os.Stat(ecosystemTemplatePath11); statErr == nil {
+		err = ConfigureEcoSystemTemplates(host, wapiVer, username, password, ecosystemTemplatePath11)
+		if err != nil {
+			fmt.Printf("Error uploading ecosystem templates: %v\n", err)
+			return
+		}
+		fmt.Println("Ecosystem template 11 uploaded successfully")
+	} else if os.IsNotExist(statErr) {
+		fmt.Printf("Ecosystem template 11 not found at %s, skipping upload\n", ecosystemTemplatePath11)
+	} else {
+		fmt.Printf("Error checking ecosystem template 11 path %s: %v\n", ecosystemTemplatePath11, statErr)
+		return
+	}
+
+	ecosystemTemplatePath12 := filepath.Join(cwd, "internal/testdata/nios_ecosystem_templates", "Version5_REST_API_Session_Template1.json")
+
+	if _, statErr := os.Stat(ecosystemTemplatePath12); statErr == nil {
+		err = ConfigureEcoSystemTemplates(host, wapiVer, username, password, ecosystemTemplatePath12)
+		if err != nil {
+			fmt.Printf("Error uploading ecosystem templates: %v\n", err)
+			return
+		}
+		fmt.Println("Ecosystem template 12 uploaded successfully")
+	} else if os.IsNotExist(statErr) {
+		fmt.Printf("Ecosystem template 12 not found at %s, skipping upload\n", ecosystemTemplatePath12)
+	} else {
+		fmt.Printf("Error checking ecosystem template 12 path %s: %v\n", ecosystemTemplatePath12, statErr)
+		return
+	}
+
+	ecosystemTemplatePath13 := filepath.Join(cwd, "internal/testdata/nios_ecosystem_templates", "event_template_schema_default.json")
+
+	if _, statErr := os.Stat(ecosystemTemplatePath13); statErr == nil {
+		err = ConfigureEcoSystemTemplates(host, wapiVer, username, password, ecosystemTemplatePath13)
+		if err != nil {
+			fmt.Printf("Error uploading ecosystem templates: %v\n", err)
+			return
+		}
+		fmt.Println("Ecosystem template 13 uploaded successfully")
+	} else if os.IsNotExist(statErr) {
+		fmt.Printf("Ecosystem template 13 not found at %s, skipping upload\n", ecosystemTemplatePath13)
+	} else {
+		fmt.Printf("Error checking ecosystem template 13 path %s: %v\n", ecosystemTemplatePath13, statErr)
+		return
+	}
+
 	clients := PreConfigClients{
 		IPAM:         apiClient.IPAMAPI,
 		DHCP:         apiClient.DHCPAPI,
@@ -1822,6 +2233,8 @@ func main() {
 		NOTIFICATION: apiClient.NotificationAPI,
 		PARENTAL:     apiClient.ParentalControlAPI,
 		SECURITY:     apiClient.SecurityAPI,
+		RIR:          apiClient.RIRAPI,
+		DISCOVERY:    apiClient.DiscoveryAPI,
 	}
 
 	err = PreConfig(clients, hostnames)

@@ -47,7 +47,7 @@ func TestAccRirOrganizationResource_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "id", id),
 					resource.TestCheckResourceAttr(resourceName, "maintainer", "infoblox"),
 					resource.TestCheckResourceAttr(resourceName, "name", name),
-					resource.TestCheckResourceAttr(resourceName, "password", "test-pass"),
+					resource.TestCheckResourceAttr(resourceName, "password_version", "1"),
 					resource.TestCheckResourceAttr(resourceName, "sender_email", "support@infoblox.com"),
 					// Test fields with default value
 					resource.TestCheckResourceAttr(resourceName, "rir", "RIPE"),
@@ -300,7 +300,7 @@ func TestAccRirOrganizationResource_Password(t *testing.T) {
 					id, "infoblox", name, "test-pass", "RIPE", "support@infoblox.com"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRirOrganizationExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "password", "test-pass"),
+					resource.TestCheckResourceAttr(resourceName, "password_version", "1"),
 				),
 			},
 			// Update and Read
@@ -309,7 +309,7 @@ func TestAccRirOrganizationResource_Password(t *testing.T) {
 					id, "infoblox", name, "test-pass2", "RIPE", "support@infoblox.com"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRirOrganizationExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "password", "test-pass2"),
+					resource.TestCheckResourceAttr(resourceName, "password_version", "2"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase

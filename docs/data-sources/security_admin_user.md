@@ -52,7 +52,7 @@ Required:
 
 - `admin_groups` (List of String) The names of the Admin Groups to which this Admin User belongs. Currently, this is limited to only one Admin Group.
 - `name` (String) The name of the admin user.
-- `password` (String, Sensitive) The password for the administrator to use when logging in.
+- `password` (String) The password for the administrator to use when logging in.
 
 Optional:
 
@@ -73,6 +73,7 @@ Optional:
 Read-Only:
 
 - `extattrs_all` (Map of String) Extensible attributes associated with the object , including default attributes.
+- `password_revision` (Number) Internal revision incremented when admin user password changes.
 - `ref` (String) The reference to the object.
 - `status` (String) Status of the user account.
 - `uuid` (String) Universally Unique ID assigned for this object.

@@ -7,8 +7,10 @@ import (
 	"io"
 	"strings"
 
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
@@ -34,8 +36,27 @@ func (r *GridJoinResource) Metadata(ctx context.Context, req resource.MetadataRe
 
 func (r *GridJoinResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
+		Version:             1,
 		MarkdownDescription: "Manages joining a member to an Infoblox Grid.",
 		Attributes:          GridJoinResourceSchemaAttributes,
+	}
+}
+
+func (r *GridJoinResource) UpgradeState(ctx context.Context) map[int64]resource.StateUpgrader {
+	return map[int64]resource.StateUpgrader{
+		0: {
+			PriorSchema: &schema.Schema{
+				Attributes: GridJoinResourceSchemaAttributes,
+			},
+			StateUpgrader: func(ctx context.Context, req resource.UpgradeStateRequest, resp *resource.UpgradeStateResponse) {
+				var data GridJoinModel
+				resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
+				if resp.Diagnostics.HasError() {
+					return
+				}
+				resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+			},
+		},
 	}
 }
 
@@ -69,9 +90,16 @@ func (r *GridJoinResource) Create(ctx context.Context, req resource.CreateReques
 		return
 	}
 
+	var memberPassword, sharedSecret types.String
+	resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("member_password"), &memberPassword)...)
+	resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("shared_secret"), &sharedSecret)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
 	memberClient := niosclient.NewAPIClient(
 		option.WithNIOSUsername(data.MemberUsername.ValueString()),
-		option.WithNIOSPassword(data.MemberPassword.ValueString()),
+		option.WithNIOSPassword(memberPassword.ValueString()),
 		option.WithNIOSHostUrl(data.MemberURL.ValueString()),
 		option.WithDebug(true),
 	)
@@ -79,7 +107,7 @@ func (r *GridJoinResource) Create(ctx context.Context, req resource.CreateReques
 	joinReq := gridclient.GridJoin{
 		GridName:     data.GridName.ValueStringPointer(),
 		Master:       data.Master.ValueStringPointer(),
-		SharedSecret: data.SharedSecret.ValueStringPointer(),
+		SharedSecret: sharedSecret.ValueStringPointer(),
 	}
 
 	_, httpResp, err := memberClient.GridAPI.

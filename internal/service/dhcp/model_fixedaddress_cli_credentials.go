@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
@@ -38,7 +39,6 @@ var FixedaddressCliCredentialsAttrTypes = map[string]attr.Type{
 var FixedaddressCliCredentialsResourceSchemaAttributes = map[string]schema.Attribute{
 	"user": schema.StringAttribute{
 		Optional: true,
-		Computed: true,
 		Validators: []validator.String{
 			customvalidator.ValidateTrimmedString(),
 		},
@@ -46,8 +46,7 @@ var FixedaddressCliCredentialsResourceSchemaAttributes = map[string]schema.Attri
 	},
 	"password": schema.StringAttribute{
 		Optional:  true,
-		Computed:  true,
-		Sensitive: true,
+		WriteOnly: true,
 		Validators: []validator.String{
 			customvalidator.ValidateTrimmedString(),
 		},
@@ -63,6 +62,7 @@ var FixedaddressCliCredentialsResourceSchemaAttributes = map[string]schema.Attri
 	"comment": schema.StringAttribute{
 		Optional: true,
 		Computed: true,
+		Default:  stringdefault.StaticString(""),
 		Validators: []validator.String{
 			customvalidator.ValidateTrimmedString(),
 		},
@@ -75,6 +75,7 @@ var FixedaddressCliCredentialsResourceSchemaAttributes = map[string]schema.Attri
 	"credential_group": schema.StringAttribute{
 		Optional:            true,
 		Computed:            true,
+		Default:             stringdefault.StaticString("default"),
 		MarkdownDescription: "Group for the CLI credential.",
 	},
 }
@@ -124,7 +125,6 @@ func (m *FixedaddressCliCredentialsModel) Flatten(ctx context.Context, from *dhc
 		*m = FixedaddressCliCredentialsModel{}
 	}
 	m.User = flex.FlattenStringPointer(from.User)
-	m.Password = flex.FlattenStringPointer(from.Password)
 	m.CredentialType = flex.FlattenStringPointer(from.CredentialType)
 	m.Comment = flex.FlattenStringPointer(from.Comment)
 	m.Id = flex.FlattenInt64Pointer(from.Id)

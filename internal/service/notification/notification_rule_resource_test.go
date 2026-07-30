@@ -204,7 +204,7 @@ func TestAccNotificationRuleResource_EnableEventDeduplication(t *testing.T) {
 			"op": "ENDLIST",
 		},
 	}
-	notificationTarget := utils.GetSyslogEndpointRef()
+	notificationTarget := utils.GetNIOSSyslogEndpointRef()
 	templateInstance := map[string]any{
 		"template": "Version5_Syslog_Action_Template",
 	}
@@ -260,7 +260,7 @@ func TestAccNotificationRuleResource_EnableEventDeduplicationLog(t *testing.T) {
 			"op": "ENDLIST",
 		},
 	}
-	notificationTarget := utils.GetSyslogEndpointRef()
+	notificationTarget := utils.GetNIOSSyslogEndpointRef()
 	templateInstance := map[string]any{
 		"template": "Version5_REST_API_Session_Template",
 	}
@@ -316,7 +316,7 @@ func TestAccNotificationRuleResource_EventDeduplicationFields(t *testing.T) {
 			"op": "ENDLIST",
 		},
 	}
-	notificationTarget := utils.GetSyslogEndpointRef()
+	notificationTarget := utils.GetNIOSSyslogEndpointRef()
 	templateInstance := map[string]any{
 		"template": "Version5_Syslog_Action_Template",
 	}
@@ -378,7 +378,7 @@ func TestAccNotificationRuleResource_EventDeduplicationLookbackPeriod(t *testing
 			"op": "ENDLIST",
 		},
 	}
-	notificationTarget := utils.GetSyslogEndpointRef()
+	notificationTarget := utils.GetNIOSSyslogEndpointRef()
 	templateInstance := map[string]any{
 		"template": "Version5_Syslog_Action_Template",
 	}
@@ -467,7 +467,7 @@ func TestAccNotificationRuleResource_EventType(t *testing.T) {
 			"op": "ENDLIST",
 		},
 	}
-	updatedNotificationTarget := utils.GetSyslogEndpointRef()
+	updatedNotificationTarget := utils.GetNIOSSyslogEndpointRef()
 	updatedTemplateInstance := map[string]any{
 		"template": "Version5_Syslog_Action_Template",
 	}
@@ -519,7 +519,7 @@ func TestAccNotificationRuleResource_ExpressionList(t *testing.T) {
 			"op": "ENDLIST",
 		},
 	}
-	updatedNotificationTarget := utils.GetSyslogEndpointRef()
+	updatedNotificationTarget := utils.GetNIOSSyslogEndpointRef()
 	updatedTemplateInstance := map[string]any{
 		"template": "Version5_Syslog_Action_Template",
 	}
@@ -650,7 +650,7 @@ func TestAccNotificationRuleResource_NotificationTarget(t *testing.T) {
 			"op": "ENDLIST",
 		},
 	}
-	updatedNotificationTarget := utils.GetSyslogEndpointRef()
+	updatedNotificationTarget := utils.GetNIOSSyslogEndpointRef()
 	updatedTemplateInstance := map[string]any{
 		"template": "Version5_REST_API_Session_Template",
 	}

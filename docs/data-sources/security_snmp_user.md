@@ -56,14 +56,15 @@ Required:
 
 Optional:
 
-- `authentication_password` (String, Sensitive) Determines an authentication password for the user. This is a write-only attribute. Must be between 8 and 256 characters.
+- `authentication_password` (String) Determines an authentication password for the user. This is a write-only attribute. Must be between 8 and 256 characters.
 - `comment` (String) A descriptive comment for the SNMPv3 User.
 - `disable` (Boolean) Determines if SNMPv3 user is disabled or not.
 - `extattrs` (Map of String) Extensible attributes associated with the object.
-- `privacy_password` (String, Sensitive) Determines a password for the privacy protocol.
+- `privacy_password` (String) Determines a password for the privacy protocol.
 
 Read-Only:
 
 - `extattrs_all` (Map of String) Extensible attributes associated with the object , including default attributes.
+- `password_version` (Number) Internal version incremented when authentication or privacy password changes.
 - `ref` (String) The reference to the object.
 - `uuid` (String) Universally Unique ID assigned for this object.

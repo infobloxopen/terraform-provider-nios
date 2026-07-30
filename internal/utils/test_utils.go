@@ -62,6 +62,18 @@ func GetGSSTSIGCertRef() string {
 	return os.Getenv("NIOS_GSS_TSIG_CERT_REF")
 }
 
-func GetSyslogEndpointRef() string {
+func GetNIOSGridMasterConfigAddrType() string {
+	return os.Getenv("NIOS_GRID_MASTER_CONFIG_ADDR_TYPE")
+}
+
+func GetNIOSDiscoveryMemberConfigAddrType() string {
+	return os.Getenv("NIOS_DISCOVERY_MEMBER_CONFIG_ADDR_TYPE")
+}
+
+func GetNIOSSyslogEndpointRef() string {
 	return os.Getenv("NIOS_SYSLOG_ENDPOINT_REF")
+}
+
+func GetSubscriberBlockSizeEditable() string {
+	return os.Getenv("SUBSCRIBER_BLOCK_SIZE_EDITABLE")
 }

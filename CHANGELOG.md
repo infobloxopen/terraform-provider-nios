@@ -1,5 +1,26 @@
 # Changelog
 
+## Version 2.1.0
+
+### Key Changes
+
+**Modules**
+
+- Added HA support for deploying vNIOS on GCP. ([#519](https://github.com/infobloxopen/terraform-provider-nios/pull/519))
+- Added HA support for deploying vNIOS on Azure. ([#521](https://github.com/infobloxopen/terraform-provider-nios/pull/521))
+- Added HA support for deploying vNIOS on OCI. ([#510](https://github.com/infobloxopen/terraform-provider-nios/pull/510))
+
+### Enhancements
+  - Added a generic retry helper with exponential backoff and a provider-configurable retry timeout for CRUD operations. ([#579](https://github.com/infobloxopen/terraform-provider-nios/pull/579))
+  - Sensitive fields (such as passwords) are no longer visible in the state file — they are now stored securely in private state and will show as null instead of their actual values. ([#546](https://github.com/infobloxopen/terraform-provider-nios/pull/546))
+- Introduced manage_internal_id_ea Flag to Disable Management of Terraform Internal ID Extensible Attribute prerequisite by Terraform. ([#579](https://github.com/infobloxopen/terraform-provider-nios/pull/579))
+
+### Fixes
+
+- [DNS] Fixed Zone Auth CRUD issues by changing the network_associations attribute from a list of strings to a list of objects. (Issue [#550](https://github.com/infobloxopen/terraform-provider-nios/issues/550), PR [#555](https://github.com/infobloxopen/terraform-provider-nios/pull/555))
+- Handled plan time ValidateConfig errors caused by unknown variable values by adding null and unknown checks across multiple resources. (NIOSSPT [#19266](https://infoblox.atlassian.net/browse/NIOSSPT-19266), PR [#574](https://github.com/infobloxopen/terraform-provider-nios/pull/574))
+- Fixed numerous bugs across DHCP, DNS, DTC, IPAM, Grid, Security, and other modules improving overall stability and reliability.
+
 ## Version 2.0.0
 
 ### Key Changes

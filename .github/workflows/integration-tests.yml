@@ -1,0 +1,374 @@
+name: Integration Tests
+
+on:
+  workflow_dispatch:
+    inputs:
+      sha:
+        description: 'Commit SHA Jenkins tested. Empty = HEAD of dispatch branch.'
+        required: false
+        default: ''
+      build_number:
+        description: 'Jenkins build number. Empty = scan Gist for latest matching SHA.'
+        required: false
+        default: ''
+      gist_id:
+        description: 'Gist ID containing signal files. Empty = use GH_SIGNAL_GIST_URL secret.'
+        required: false
+        default: ''
+
+# Only one reporter run per branch at a time
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  pipeline:
+    name: Integration Test Pipeline
+    runs-on: ubuntu-latest
+
+    # No polling — reads pre-written Gist files. 30 min is generous.
+    timeout-minutes: 30
+
+    steps:
+      # ------------------------------------------------------------------ #
+      # 0.  Resolve inputs
+      #     Jenkins supplies sha/build_number/gist_id.  For manual dispatches
+      #     from the GitHub UI, these are empty and the step derives them.
+      # ------------------------------------------------------------------ #
+      - name: Resolve inputs
+        id: resolve
+        env:
+          GH_TOKEN:           ${{ secrets.GH_SIGNAL_TOKEN }}
+          GH_SIGNAL_GIST_URL: ${{ secrets.GH_SIGNAL_GIST_URL }}
+          INPUT_SHA:          ${{ inputs.sha }}
+          INPUT_BUILD_NUMBER: ${{ inputs.build_number }}
+          INPUT_GIST_ID:      ${{ inputs.gist_id }}
+        run: |
+          # ── SHA ──────────────────────────────────────────────────────
+          SHA="${INPUT_SHA:-${{ github.sha }}}"
+          echo "::add-mask::$SHA"
+          echo "sha=$SHA" >> "$GITHUB_OUTPUT"
+
+          # ── Gist ID ──────────────────────────────────────────────────
+          if [ -n "$INPUT_GIST_ID" ]; then
+            GIST_ID="$INPUT_GIST_ID"
+          elif [ -n "$GH_SIGNAL_GIST_URL" ]; then
+            GIST_ID="${GH_SIGNAL_GIST_URL##*/}"
+          else
+            echo "::error::No gist_id input and GH_SIGNAL_GIST_URL secret not set."
+            exit 1
+          fi
+          if [ -z "$GIST_ID" ]; then
+            echo "::error::Could not extract GIST_ID from GH_SIGNAL_GIST_URL."
+            exit 1
+          fi
+          echo "::add-mask::$GIST_ID"
+          echo "gist_id=$GIST_ID" >> "$GITHUB_OUTPUT"
+
+          # ── Build number ──────────────────────────────────────────────
+          if [ -n "$INPUT_BUILD_NUMBER" ]; then
+            BUILD_NUMBER="$INPUT_BUILD_NUMBER"
+          else
+            # Manual dispatch: scan Gist for the latest build matching this SHA
+            export RESOLVED_GIST_ID="$GIST_ID"
+            export RESOLVED_SHA="$SHA"
+            BUILD_NUMBER=$(python3 - <<'PYEOF'
+          import json, os, sys, re, urllib.request
+
+          gist_id = os.environ["RESOLVED_GIST_ID"]
+          sha     = os.environ["RESOLVED_SHA"]
+          token   = os.environ["GH_TOKEN"]
+
+          req = urllib.request.Request(
+              f"https://api.github.com/gists/{gist_id}",
+              headers={"Authorization": f"token {token}",
+                       "Accept": "application/vnd.github+json"})
+          try:
+              with urllib.request.urlopen(req, timeout=15) as r:
+                  gist = json.load(r)
+          except Exception as exc:
+              print(f"::error::Failed to fetch Gist: {exc}", file=sys.stderr)
+              sys.exit(1)
+
+          pattern = re.compile(rf"^ci-{re.escape(sha)}-(\d+)-job-started\.json$")
+          candidates = [int(m.group(1)) for f in gist.get("files", {}) if (m := pattern.match(f))]
+
+          if not candidates:
+              print(f"::error::No job-started signal files found in Gist for SHA {sha[:8]}. "
+                    f"Provide build_number input or ensure Jenkins has run.", file=sys.stderr)
+              sys.exit(1)
+
+          print(max(candidates))
+          PYEOF
+          )
+          fi
+          echo "build_number=$BUILD_NUMBER" >> "$GITHUB_OUTPUT"
+          echo "Resolved: sha=${SHA:0:8}, build_number=$BUILD_NUMBER, gist_id=***"
+
+      # ------------------------------------------------------------------ #
+      # 1.  Checkout repository at the resolved SHA (needed for parse_junit.py)
+      # ------------------------------------------------------------------ #
+      - name: Checkout repository
+        uses: actions/checkout@v5.0.0
+        with:
+          ref: ${{ steps.resolve.outputs.sha }}
+
+      # ------------------------------------------------------------------ #
+      # 2.  Read and validate per-stage signal files written by Jenkins
+      #     Files: ci-{sha}-{build#}-job-started.json
+      #            ci-{sha}-{build#}-env-setup.json
+      #            ci-{sha}-{build#}-tests-complete.json
+      # ------------------------------------------------------------------ #
+      - name: Validate stage signals
+        env:
+          GH_TOKEN:     ${{ secrets.GH_SIGNAL_TOKEN }}
+          GIST_ID:      ${{ steps.resolve.outputs.gist_id }}
+          GIT_SHA:      ${{ steps.resolve.outputs.sha }}
+          BUILD_NUMBER: ${{ steps.resolve.outputs.build_number }}
+        run: |
+          python3 - <<'EOF'
+          import json, os, sys, urllib.request
+
+          gist_id      = os.environ["GIST_ID"]
+          git_sha      = os.environ["GIT_SHA"]
+          build_number = os.environ["BUILD_NUMBER"]
+          token        = os.environ["GH_TOKEN"]
+
+          req = urllib.request.Request(
+              f"https://api.github.com/gists/{gist_id}",
+              headers={"Authorization": f"token {token}",
+                       "Accept": "application/vnd.github+json"})
+          with urllib.request.urlopen(req, timeout=15) as r:
+              gist = json.load(r)
+
+          def read_stage(stage):
+              fname = f"ci-{git_sha}-{build_number}-{stage}.json"
+              fdata = gist["files"].get(fname)
+              if not fdata:
+                  return None, fname
+              content = fdata.get("content") or ""
+              if fdata.get("truncated") and fdata.get("raw_url"):
+                  req2 = urllib.request.Request(
+                      fdata["raw_url"],
+                      headers={"Authorization": f"token {token}"})
+                  with urllib.request.urlopen(req2, timeout=15) as r:
+                      content = r.read().decode()
+              try:
+                  return json.loads(content), fname
+              except json.JSONDecodeError:
+                  print(f"::error::Stage file {fname} contains invalid JSON.")
+                  return None, fname
+
+          missing = []
+          for stage in ["job-started", "env-setup", "tests-complete"]:
+              data, fname = read_stage(stage)
+              if data is None:
+                  missing.append(fname)
+                  continue
+              status = data.get("status", "unknown")
+              msg    = data.get("message", "")
+              ts     = data.get("timestamp", "")
+              print(f"[{stage}] status={status} ts={ts} msg={msg}")
+              if status in ("error", "aborted"):
+                  print(f"::error::Jenkins reported {status} at stage '{stage}': {msg}")
+                  sys.exit(1)
+
+          if missing:
+              print(f"::error::Missing required stage signal(s): {', '.join(missing)}. "
+                    f"Jenkins did not confirm this build reached all pipeline stages — "
+                    f"failing rather than reporting on incomplete data.")
+              sys.exit(1)
+
+          print("All stage signals present and validated.")
+          EOF
+
+      # ------------------------------------------------------------------ #
+      # 3.  Download JUnit XML files from Gist
+      #     Jenkins uploads these as: ci-junit-{sha}-{build#}-{suite}-junit.xml
+      # ------------------------------------------------------------------ #
+      - name: Download test artifacts
+        env:
+          GH_TOKEN:     ${{ secrets.GH_SIGNAL_TOKEN }}
+          GIST_ID:      ${{ steps.resolve.outputs.gist_id }}
+          GIT_SHA:      ${{ steps.resolve.outputs.sha }}
+          BUILD_NUMBER: ${{ steps.resolve.outputs.build_number }}
+        run: |
+          mkdir -p test-results
+
+          python3 - <<'EOF'
+          import os, json, urllib.request, sys
+
+          gist_id      = os.environ["GIST_ID"]
+          git_sha      = os.environ["GIT_SHA"]
+          build_number = os.environ["BUILD_NUMBER"]
+          token        = os.environ["GH_TOKEN"]
+
+          req = urllib.request.Request(
+              f"https://api.github.com/gists/{gist_id}",
+              headers={"Authorization": f"token {token}",
+                       "Accept": "application/vnd.github+json"})
+          with urllib.request.urlopen(req, timeout=15) as r:
+              gist = json.load(r)
+
+          prefix = f"ci-junit-{git_sha}-{build_number}-"
+          count  = 0
+          for fname, fdata in gist["files"].items():
+              if not fname.startswith(prefix):
+                  continue
+              local_name = fname[len(prefix):]
+              if not local_name or os.sep in local_name or local_name.startswith("."):
+                  print(f"::warning::Skipping unsafe filename '{fname}'")
+                  continue
+              dest = os.path.join("test-results", local_name)
+              print(f"Fetching {fname} → {dest} ...")
+              if fdata.get("truncated"):
+                  dl_req = urllib.request.Request(
+                      fdata["raw_url"],
+                      headers={"Authorization": f"token {token}"})
+                  with urllib.request.urlopen(dl_req, timeout=30) as r:
+                      content = r.read().decode()
+              else:
+                  content = fdata.get("content") or ""
+              with open(dest, "w") as f:
+                  f.write(content)
+              count += 1
+
+          if count == 0:
+              print("::warning::No JUnit XML files found in Gist for this build.")
+          else:
+              print(f"Fetched {count} JUnit file(s) from Gist.")
+          EOF
+
+      # ------------------------------------------------------------------ #
+      # 4.  Parse JUnit XML → job summary
+      # ------------------------------------------------------------------ #
+      - name: Parse results and write summary
+        run: |
+          python3 .github/actions/integration-tests/parse_junit.py \
+            --results-dir  test-results \
+            --summary-file "$GITHUB_STEP_SUMMARY" \
+            --output-file  test-results/summary.json
+
+      # ------------------------------------------------------------------ #
+      # 5.  Upload artifacts
+      # ------------------------------------------------------------------ #
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results-${{ steps.resolve.outputs.sha }}
+          path: test-results/
+          retention-days: 15
+
+      # ------------------------------------------------------------------ #
+      # 6.  Evaluate results
+      # ------------------------------------------------------------------ #
+      - name: Evaluate result
+        run: |
+          python3 - <<'EOF'
+          import json, sys
+          try:
+              with open("test-results/summary.json") as f:
+                  d = json.load(f)
+          except FileNotFoundError:
+              print("::error::summary.json not found — artifact download may have failed.")
+              sys.exit(1)
+
+          if d.get("total", 0) == 0:
+              print("::error::No tests were recorded. JUnit XML artifacts may be missing or empty.")
+              sys.exit(1)
+
+          if d["failures"] > 0 or d["errors"] > 0:
+              print(f"::error::{d['failures']} test failure(s), {d['errors']} error(s). See job summary for details.")
+              sys.exit(1)
+
+          print(f"All {d['total']} tests passed.")
+          EOF
+
+      # ------------------------------------------------------------------ #
+      # 7.  Cleanup Gist
+      #     Deletes this build's files (ci-{sha}-{build#}-* and
+      #     ci-junit-{sha}-{build#}-*), then age-prunes any build whose
+      #     job-started timestamp is older than 24 h.
+      # ------------------------------------------------------------------ #
+      - name: Cleanup Gist
+        if: always()
+        env:
+          GH_TOKEN:     ${{ secrets.GH_SIGNAL_TOKEN }}
+          GIST_ID:      ${{ steps.resolve.outputs.gist_id }}
+          GIT_SHA:      ${{ steps.resolve.outputs.sha }}
+          BUILD_NUMBER: ${{ steps.resolve.outputs.build_number }}
+        run: |
+          python3 - <<'EOF'
+          import json, os, re, sys, urllib.request
+          from datetime import datetime, timezone, timedelta
+
+          gist_id      = os.environ["GIST_ID"]
+          git_sha      = os.environ["GIT_SHA"]
+          build_number = os.environ["BUILD_NUMBER"]
+          token        = os.environ["GH_TOKEN"]
+
+          req = urllib.request.Request(
+              f"https://api.github.com/gists/{gist_id}",
+              headers={"Authorization": f"token {token}",
+                       "Accept": "application/vnd.github+json"})
+          try:
+              with urllib.request.urlopen(req, timeout=15) as r:
+                  gist = json.load(r)
+          except Exception as exc:
+              print(f"::warning::Could not fetch Gist for cleanup: {exc}")
+              sys.exit(0)
+
+          files  = gist.get("files", {})
+          cutoff = datetime.now(timezone.utc) - timedelta(hours=24)
+          to_delete = {}
+
+          # Always delete all files belonging to this specific build
+          for fname in files:
+              if fname.startswith(f"ci-{git_sha}-{build_number}-") or \
+                 fname.startswith(f"ci-junit-{git_sha}-{build_number}-"):
+                  to_delete[fname] = None
+
+          # Age-prune: find job-started files older than 24 h and delete their entire build
+          started_pat = re.compile(r'^ci-([a-f0-9]+)-(\d+)-job-started\.json$')
+          for fname, fdata in files.items():
+              if fname in to_delete:
+                  continue
+              m = started_pat.match(fname)
+              if not m:
+                  continue
+              try:
+                  content = json.loads(fdata.get("content") or "{}")
+                  ts_str  = content.get("timestamp", "")
+                  if not ts_str:
+                      continue
+                  ts = datetime.fromisoformat(ts_str)
+                  if ts >= cutoff:
+                      continue
+                  stale_sha   = m.group(1)
+                  stale_build = m.group(2)
+                  for jf in files:
+                      if jf.startswith(f"ci-{stale_sha}-{stale_build}-") or \
+                         jf.startswith(f"ci-junit-{stale_sha}-{stale_build}-"):
+                          to_delete[jf] = None
+              except (KeyError, ValueError):
+                  continue
+
+          if not to_delete:
+              print("Nothing to clean up.")
+              sys.exit(0)
+
+          patch_req = urllib.request.Request(
+              f"https://api.github.com/gists/{gist_id}",
+              data=json.dumps({"files": to_delete}).encode(),
+              headers={"Authorization": f"token {token}",
+                       "Accept": "application/vnd.github+json",
+                       "Content-Type": "application/json"},
+              method="PATCH")
+          try:
+              with urllib.request.urlopen(patch_req, timeout=15) as r:
+                  r.read()
+              print(f"Deleted {len(to_delete)} file(s): {', '.join(to_delete)}")
+          except Exception as exc:
+              print(f"::warning::Gist cleanup PATCH failed: {exc}")
+          EOF
