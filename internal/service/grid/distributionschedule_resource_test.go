@@ -17,10 +17,9 @@ import (
 var readableAttributesForDistributionschedule = "active,start_time,time_zone,upgrade_groups"
 
 func TestAccDistributionscheduleResource_basic(t *testing.T) {
-	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_grid_distributionschedule.test"
 	var v grid.Distributionschedule
-	start_time := time.Now().Add(12 * time.Hour).Format(utils.NaiveDatetimeLayout)
+	start_time := time.Now().UTC().Add(12 * time.Hour).Format(utils.NaiveDatetimeLayout)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -42,7 +41,6 @@ func TestAccDistributionscheduleResource_basic(t *testing.T) {
 }
 
 func TestAccDistributionscheduleResource_Active(t *testing.T) {
-	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_grid_distributionschedule.test_active"
 	var v grid.Distributionschedule
 
@@ -72,10 +70,9 @@ func TestAccDistributionscheduleResource_Active(t *testing.T) {
 }
 
 func TestAccDistributionscheduleResource_StartTime(t *testing.T) {
-	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_grid_distributionschedule.test_start_time"
 	var v grid.Distributionschedule
-	now := time.Now()
+	now := time.Now().UTC()
 	start_time := now.Add(6 * time.Hour).Format(utils.NaiveDatetimeLayout)
 	updated_start_time := now.Add(10 * time.Hour).Format(utils.NaiveDatetimeLayout)
 
@@ -105,13 +102,12 @@ func TestAccDistributionscheduleResource_StartTime(t *testing.T) {
 }
 
 func TestAccDistributionscheduleResource_UpgradeGroups(t *testing.T) {
-	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_grid_distributionschedule.test_upgrade_groups"
 	var v grid.Distributionschedule
 
 	groupName := acctest.RandomNameWithPrefix("example-upgradegroup-")
 
-	now := time.Now()
+	now := time.Now().UTC()
 
 	startTime := now.Add(12 * time.Hour).Format(utils.NaiveDatetimeLayout)
 
@@ -200,11 +196,13 @@ resource "nios_grid_distributionschedule" "test" {
 }
 
 func testAccDistributionscheduleActive(active bool) string {
+	startTime := time.Now().UTC().Add(12 * time.Hour).Format(utils.NaiveDatetimeLayout)
 	return fmt.Sprintf(`
 resource "nios_grid_distributionschedule" "test_active" {
     active = %t
+    start_time = %q
 }
-`, active)
+`, active, startTime)
 }
 
 func testAccDistributionscheduleStartTime(startTime string) string {
@@ -226,14 +224,17 @@ resource "nios_grid_upgradegroup" "test" {
 resource "nios_grid_distributionschedule" "test_upgrade_groups" {
   start_time = %q
   upgrade_groups = %s
+  depends_on = [nios_grid_upgradegroup.test]
 }
 `, groupName, startTime, upgradeGroupsHCL)
 }
 
 func testAccDistributionscheduleDeactivate() string {
-	return `
+	startTime := time.Now().UTC().Add(12 * time.Hour).Format(utils.NaiveDatetimeLayout)
+	return fmt.Sprintf(`
 resource "nios_grid_distributionschedule" "deactivate_schedule" {
     active = false
+    start_time = %q
 }
-`
+`, startTime)
 }
