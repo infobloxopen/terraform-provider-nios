@@ -420,10 +420,10 @@ func (r *DtcMonitorHttpResource) ValidateConfig(ctx context.Context, req resourc
 
 		// Validate EXTRACT operation
 		if contentCheckValue == "EXTRACT" {
-			if data.ContentCheckRegex.IsNull() || data.ContentCheckRegex.IsUnknown() ||
-				data.ContentExtractType.IsNull() || data.ContentExtractType.IsUnknown() ||
-				data.ContentExtractValue.IsNull() || data.ContentExtractValue.IsUnknown() ||
-				data.ContentCheckOp.IsNull() || data.ContentCheckOp.IsUnknown() {
+			if data.ContentCheckRegex.IsNull() ||
+				data.ContentExtractType.IsNull() ||
+				data.ContentExtractValue.IsNull() ||
+				data.ContentCheckOp.IsNull() {
 				resp.Diagnostics.AddAttributeError(
 					path.Root("content_check"),
 					"Invalid configuration for content check EXTRACT",
@@ -434,8 +434,8 @@ func (r *DtcMonitorHttpResource) ValidateConfig(ctx context.Context, req resourc
 
 		// Validate MATCH operation
 		if contentCheckValue == "MATCH" {
-			if data.ContentCheckRegex.IsNull() || data.ContentCheckRegex.IsUnknown() ||
-				data.ContentCheckOp.IsNull() || data.ContentCheckOp.IsUnknown() {
+			if data.ContentCheckRegex.IsNull() ||
+				data.ContentCheckOp.IsNull() {
 				resp.Diagnostics.AddAttributeError(
 					path.Root("content_check"),
 					"Invalid configuration for content check MATCH",

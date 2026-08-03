@@ -519,7 +519,7 @@ func (r *NetworkcontainerResource) ValidateConfig(ctx context.Context, req resou
 		for i, option := range options {
 			isSpecialOption := false
 			optionName := ""
-			if option.Value.IsNull() || option.Value.IsUnknown() {
+			if option.Value.IsNull() {
 				resp.Diagnostics.AddAttributeError(
 					path.Root("options").AtListIndex(i).AtName("value"),
 					"Invalid configuration for DHCP Option",
@@ -534,6 +534,8 @@ func (r *NetworkcontainerResource) ValidateConfig(ctx context.Context, req resou
 				optionNum := option.Num.ValueInt64()
 				isSpecialOption = specialOptionsNum[optionNum]
 				optionName = fmt.Sprintf("with num = %d", optionNum)
+			} else if option.Name.IsUnknown() || option.Num.IsUnknown() {
+				continue
 			} else {
 				resp.Diagnostics.AddAttributeError(
 					path.Root("options").AtListIndex(i).AtName("name"),
@@ -544,23 +546,7 @@ func (r *NetworkcontainerResource) ValidateConfig(ctx context.Context, req resou
 				continue
 			}
 
-			if option.Value.ValueString() == "" {
-				if !isSpecialOption {
-					resp.Diagnostics.AddAttributeError(
-						path.Root("options").AtListIndex(i).AtName("value"),
-						"Invalid configuration for DHCP Option",
-						"The 'value' attribute cannot be set as empty for Custom DHCP Option '"+optionName+"'.",
-					)
-				} else if !option.UseOption.IsUnknown() && !option.UseOption.IsNull() && !option.UseOption.ValueBool() {
-					resp.Diagnostics.AddAttributeError(
-						path.Root("options").AtListIndex(i).AtName("value"),
-						"Invalid configuration for DHCP Option",
-						"The 'value' attribute cannot be set as empty for Special DHCP Option '"+optionName+"' when 'use_option' is set to false.",
-					)
-				}
-			}
-
-			if option.Value.ValueString() == "" {
+			if !option.Value.IsNull() && !option.Value.IsUnknown() && option.Value.ValueString() == "" {
 				if !isSpecialOption {
 					resp.Diagnostics.AddAttributeError(
 						path.Root("options").AtListIndex(i).AtName("value"),
@@ -636,7 +622,7 @@ func (r *NetworkcontainerResource) ValidateConfig(ctx context.Context, req resou
 		resp.Diagnostics.Append(data.SubscribeSettings.As(ctx, &subscribeSettings, basetypes.ObjectAsOptions{})...)
 		if !resp.Diagnostics.HasError() {
 			// enabled_attributes is required when subscribe_settings is configured
-			if subscribeSettings.EnabledAttributes.IsNull() || subscribeSettings.EnabledAttributes.IsUnknown() {
+			if subscribeSettings.EnabledAttributes.IsNull() {
 				resp.Diagnostics.AddAttributeError(
 					path.Root("subscribe_settings").AtName("enabled_attributes"),
 					"Missing Required Attribute",
@@ -648,14 +634,14 @@ func (r *NetworkcontainerResource) ValidateConfig(ctx context.Context, req resou
 				var mappedEaAttrs []NetworkcontainersubscribesettingsMappedEaAttributesModel
 				resp.Diagnostics.Append(subscribeSettings.MappedEaAttributes.ElementsAs(ctx, &mappedEaAttrs, false)...)
 				for i, item := range mappedEaAttrs {
-					if item.Name.IsNull() || item.Name.IsUnknown() || item.Name.ValueString() == "" {
+					if !item.Name.IsUnknown() && (item.Name.IsNull() || item.Name.ValueString() == "") {
 						resp.Diagnostics.AddAttributeError(
 							path.Root("subscribe_settings").AtName("mapped_ea_attributes").AtListIndex(i).AtName("name"),
 							"Missing Required Attribute",
 							"The 'name' attribute is required for each item in 'mapped_ea_attributes'.",
 						)
 					}
-					if item.MappedEa.IsNull() || item.MappedEa.IsUnknown() || item.MappedEa.ValueString() == "" {
+					if !item.MappedEa.IsUnknown() && (item.MappedEa.IsNull() || item.MappedEa.ValueString() == "") {
 						resp.Diagnostics.AddAttributeError(
 							path.Root("subscribe_settings").AtName("mapped_ea_attributes").AtListIndex(i).AtName("mapped_ea"),
 							"Missing Required Attribute",

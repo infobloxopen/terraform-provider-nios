@@ -66,7 +66,7 @@ var RecordHostCliCredentialsResourceSchemaAttributes = map[string]schema.Attribu
 		Validators: []validator.String{
 			customvalidator.ValidateTrimmedString(),
 		},
-		MarkdownDescription: "The commment for the credential.",
+		MarkdownDescription: "The comment for the credential.",
 	},
 	"id": schema.Int64Attribute{
 		Computed:            true,
