@@ -540,6 +540,31 @@ func TestAccZoneForwardResource_Prefix(t *testing.T) {
 	})
 }
 
+func TestAccZoneForwardResource_View(t *testing.T) {
+	var resourceName = "nios_dns_zone_forward.test_view"
+	var v dns.ZoneForward
+	fqdn := acctest.RandomNameWithPrefix("zone-forward") + ".example.com"
+	externalNsGroup := "ensg1"
+	viewName := acctest.RandomNameWithPrefix("view")
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// Create and Read
+			{
+				Config: testAccZoneForwardView(fqdn, externalNsGroup, viewName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckZoneForwardExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "view", viewName),
+				),
+			},
+			// Update is not applicable as view is an immutable field.
+			// Delete testing automatically occurs in TestCase
+		},
+	})
+}
+
 func testAccCheckZoneForwardExists(ctx context.Context, resourceName string, v *dns.ZoneForward) resource.TestCheckFunc {
 	// Verify the resource exists in the cloud
 	return func(state *terraform.State) error {
@@ -780,4 +805,18 @@ resource "nios_dns_zone_forward" "test_prefix" {
    prefix = %q
 }
 `, fqdn, externalNsGroup, prefix)
+}
+
+func testAccZoneForwardView(fqdn, externalNsGroup, view string) string {
+	return fmt.Sprintf(`
+resource "nios_dns_view" "test_dns_view" {
+	name = %q
+}
+
+resource "nios_dns_zone_forward" "test_view" {
+   fqdn = %q
+   external_ns_group = %q
+   view = nios_dns_view.test_dns_view.name
+}
+`, view, fqdn, externalNsGroup)
 }
