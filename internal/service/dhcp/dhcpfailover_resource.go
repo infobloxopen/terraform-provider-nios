@@ -29,6 +29,8 @@ var _ resource.ResourceWithImportState = &DhcpfailoverResource{}
 var _ resource.ResourceWithModifyPlan = &DhcpfailoverResource{}
 var _ resource.ResourceWithValidateConfig = &DhcpfailoverResource{}
 
+var _ resource.ResourceWithUpgradeState = &DhcpfailoverResource{}
+
 func NewDhcpfailoverResource() resource.Resource {
 	return &DhcpfailoverResource{}
 }
@@ -48,8 +50,27 @@ func (r *DhcpfailoverResource) Metadata(ctx context.Context, req resource.Metada
 
 func (r *DhcpfailoverResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
+		Version:             1,
 		MarkdownDescription: "Manages a DHCP Failover.",
 		Attributes:          DhcpfailoverResourceSchemaAttributes,
+	}
+}
+
+func (r *DhcpfailoverResource) UpgradeState(ctx context.Context) map[int64]resource.StateUpgrader {
+	return map[int64]resource.StateUpgrader{
+		0: {
+			PriorSchema: &schema.Schema{
+				Attributes: DhcpfailoverResourceSchemaAttributes,
+			},
+			StateUpgrader: func(ctx context.Context, req resource.UpgradeStateRequest, resp *resource.UpgradeStateResponse) {
+				var data DhcpfailoverModel
+				resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
+				if resp.Diagnostics.HasError() {
+					return
+				}
+				resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+			},
+		},
 	}
 }
 
@@ -549,36 +570,49 @@ func (r *DhcpfailoverResource) ValidateConfig(ctx context.Context, req resource.
 	}
 
 	if secondaryServerType == "EXTERNAL" {
-		secondaryValue := data.Secondary.ValueString()
-		if secondaryValue != "" {
-			ip := net.ParseIP(secondaryValue)
-			if ip == nil || ip.To4() == nil {
-				resp.Diagnostics.AddError(
-					"Invalid Secondary Server",
-					"secondary must be a valid IPv4 address when secondary_server_type is set to EXTERNAL.",
-				)
+		if !data.Secondary.IsNull() && !data.Secondary.IsUnknown() {
+			secondaryValue := data.Secondary.ValueString()
+			if secondaryValue != "" {
+				ip := net.ParseIP(secondaryValue)
+				if ip == nil || ip.To4() == nil {
+					resp.Diagnostics.AddError(
+						"Invalid Secondary Server",
+						"secondary must be a valid IPv4 address when secondary_server_type is set to EXTERNAL.",
+					)
+				}
 			}
 		}
 	}
 
 	if primaryServerType == "EXTERNAL" {
-		primaryValue := data.Primary.ValueString()
-		if primaryValue != "" {
-			ip := net.ParseIP(primaryValue)
-			if ip == nil || ip.To4() == nil {
-				resp.Diagnostics.AddError(
-					"Invalid Primary Server",
-					"primary must be a valid IPv4 address when primary_server_type is set to EXTERNAL.",
-				)
+		if !data.Primary.IsNull() && !data.Primary.IsUnknown() {
+			primaryValue := data.Primary.ValueString()
+			if primaryValue != "" {
+				ip := net.ParseIP(primaryValue)
+				if ip == nil || ip.To4() == nil {
+					resp.Diagnostics.AddError(
+						"Invalid Primary Server",
+						"primary must be a valid IPv4 address when primary_server_type is set to EXTERNAL.",
+					)
+				}
 			}
 		}
 	}
 
 	if !data.UseMsSwitchoverInterval.IsNull() && !data.UseMsSwitchoverInterval.IsUnknown() && data.UseMsSwitchoverInterval.ValueBool() {
-		if data.MsEnableSwitchoverInterval.IsNull() || data.MsEnableSwitchoverInterval.IsUnknown() || !data.MsEnableSwitchoverInterval.ValueBool() {
+		if !data.MsEnableSwitchoverInterval.IsUnknown() && (data.MsEnableSwitchoverInterval.IsNull() || !data.MsEnableSwitchoverInterval.ValueBool()) {
 			resp.Diagnostics.AddError(
 				"Invalid Configuration",
-				"ms_enable_switchover_interval must be set when use_ms_switchover_interval is true.",
+				"ms_enable_switchover_interval must be set to true when use_ms_switchover_interval is true.",
+			)
+		}
+	}
+
+	if !data.MsEnableSwitchoverInterval.IsNull() && !data.MsEnableSwitchoverInterval.IsUnknown() && data.MsEnableSwitchoverInterval.ValueBool() {
+		if !data.UseMsSwitchoverInterval.IsUnknown() && (data.UseMsSwitchoverInterval.IsNull() || !data.UseMsSwitchoverInterval.ValueBool()) {
+			resp.Diagnostics.AddError(
+				"Invalid Configuration",
+				"use_ms_switchover_interval must be set to true when ms_enable_switchover_interval is true.",
 			)
 		}
 	}

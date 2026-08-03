@@ -138,7 +138,7 @@ Required:
 
 Optional:
 
-- `comment` (String) The commment for the credential.
+- `comment` (String) The comment for the credential.
 - `credential_group` (String) Group for the CLI credential.
 - `password` (String, [Write-only](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments)) The CLI password.
 - `user` (String) The CLI user name.
@@ -533,16 +533,16 @@ Read-Only:
 
 Required:
 
-- `authentication_password` (String, [Write-only](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments)) Authentication password for the SNMPv3 user.
 - `authentication_protocol` (String) Authentication protocol for the SNMPv3 user.
-- `privacy_password` (String, [Write-only](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments)) Privacy password for the SNMPv3 user.
 - `privacy_protocol` (String) Privacy protocol for the SNMPv3 user.
 - `user` (String) The SNMPv3 user name.
 
 Optional:
 
+- `authentication_password` (String, [Write-only](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments)) Authentication password for the SNMPv3 user.
 - `comment` (String) Comments for the SNMPv3 user.
 - `credential_group` (String) Group for the SNMPv3 credential.
+- `privacy_password` (String, [Write-only](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments)) Privacy password for the SNMPv3 user.
 
 
 <a id="nestedatt--snmp_credential"></a>

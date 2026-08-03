@@ -26,6 +26,7 @@ var readableAttributesForFtpuser = "extattrs,home_dir,permission,username"
 var _ resource.Resource = &FtpuserResource{}
 var _ resource.ResourceWithImportState = &FtpuserResource{}
 var _ resource.ResourceWithModifyPlan = &FtpuserResource{}
+var _ resource.ResourceWithUpgradeState = &FtpuserResource{}
 
 func NewFtpuserResource() resource.Resource {
 	return &FtpuserResource{}
@@ -42,8 +43,27 @@ func (r *FtpuserResource) Metadata(ctx context.Context, req resource.MetadataReq
 
 func (r *FtpuserResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
+		Version:             1,
 		MarkdownDescription: "Manages an FTP user.",
 		Attributes:          FtpuserResourceSchemaAttributes,
+	}
+}
+
+func (r *FtpuserResource) UpgradeState(ctx context.Context) map[int64]resource.StateUpgrader {
+	return map[int64]resource.StateUpgrader{
+		0: {
+			PriorSchema: &schema.Schema{
+				Attributes: FtpuserResourceSchemaAttributes,
+			},
+			StateUpgrader: func(ctx context.Context, req resource.UpgradeStateRequest, resp *resource.UpgradeStateResponse) {
+				var data FtpuserModel
+				resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
+				if resp.Diagnostics.HasError() {
+					return
+				}
+				resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+			},
+		},
 	}
 }
 
@@ -543,7 +563,7 @@ func (r *FtpuserResource) ValidateConfig(ctx context.Context, req resource.Valid
 			"You cannot specify 'home_dir' when 'create_home_dir' is set to true. When create_home_dir is true, the system automatically creates the home directory using the username.",
 		)
 	}
-	if !createHomeDir.IsNull() && !createHomeDir.ValueBool() && (homeDir.IsNull() || homeDir.IsUnknown()) {
+	if !createHomeDir.IsNull() && !createHomeDir.ValueBool() && homeDir.IsNull() {
 		resp.Diagnostics.AddError(
 			"Invalid Configuration",
 			"You must specify home_dir when create_home_dir is set to False.",

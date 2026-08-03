@@ -29,6 +29,8 @@ var _ resource.Resource = &AdminuserResource{}
 var _ resource.ResourceWithImportState = &AdminuserResource{}
 var _ resource.ResourceWithModifyPlan = &AdminuserResource{}
 
+var _ resource.ResourceWithUpgradeState = &AdminuserResource{}
+
 func NewAdminuserResource() resource.Resource {
 	return &AdminuserResource{}
 }
@@ -48,8 +50,27 @@ func (r *AdminuserResource) Metadata(ctx context.Context, req resource.MetadataR
 
 func (r *AdminuserResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
+		Version:             1,
 		MarkdownDescription: "Manages an Admin User.",
 		Attributes:          AdminuserResourceSchemaAttributes,
+	}
+}
+
+func (r *AdminuserResource) UpgradeState(ctx context.Context) map[int64]resource.StateUpgrader {
+	return map[int64]resource.StateUpgrader{
+		0: {
+			PriorSchema: &schema.Schema{
+				Attributes: AdminuserResourceSchemaAttributes,
+			},
+			StateUpgrader: func(ctx context.Context, req resource.UpgradeStateRequest, resp *resource.UpgradeStateResponse) {
+				var data AdminuserModel
+				resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
+				if resp.Diagnostics.HasError() {
+					return
+				}
+				resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+			},
+		},
 	}
 }
 
