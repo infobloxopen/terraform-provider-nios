@@ -5208,20 +5208,53 @@ resource "nios_grid_member" "test_external_syslog_backup_servers" {
 }
 
 func testAccMemberHaCloudPlatform(hostName string, haCloudPlatform string, vipAddress, vipGateway, vipSubnetMask string) string {
+	// For all platforms ha_ip_address must be in same subnet as VIP.
+	// For GCP mgmt_lan must be in a different subnet from the VIP; for AWS/AZURE it must be in the same subnet.
+	// GCP also requires lan_subnet_mask and lan_gateway in vip_setting.
+	nodeIP1, nodeMgmt1 := "172.28.38.220", "172.28.38.221"
+	nodeIP2, nodeMgmt2 := "172.28.38.222", "172.28.38.223"
+	gcpLanSettings := ""
+	if haCloudPlatform == "GCP" {
+		nodeMgmt1 = "172.28.40.221"
+		nodeMgmt2 = "172.28.40.223"
+		gcpLanSettings = `
+        lan_subnet_mask = "255.255.254.0"
+        lan_gateway     = "172.28.40.1"`
+	}
 	return fmt.Sprintf(`
 resource "nios_grid_member" "test_ha_cloud_platform" {
-    host_name = %q
+    host_name         = %q
     ha_cloud_platform = %q
-	vip_setting = {
-		address = %q
-		dscp = 0
-		gateway = %q
-		primary = true
-		subnet_mask = %q
-		use_dscp = false
-	}
+    ha_on_cloud       = true
+    enable_ha         = true
+    platform          = "VNIOS"
+    router_id         = 116
+    node_info = [
+        {
+            lan_ha_port_setting = {
+                ha_cloud_attribute = "1"
+                ha_ip_address      = %q
+                mgmt_lan           = %q
+            }
+        },
+        {
+            lan_ha_port_setting = {
+                ha_cloud_attribute = "2"
+                ha_ip_address      = %q
+                mgmt_lan           = %q
+            }
+        }
+    ]
+    vip_setting = {
+        address     = %q
+        dscp        = 0
+        gateway     = %q
+        primary     = true
+        subnet_mask = %q
+        use_dscp    = false%s
+    }
 }
-`, hostName, haCloudPlatform, vipAddress, vipGateway, vipSubnetMask)
+`, hostName, haCloudPlatform, nodeIP1, nodeMgmt1, nodeIP2, nodeMgmt2, vipAddress, vipGateway, vipSubnetMask, gcpLanSettings)
 }
 
 func testAccMemberHaOnCloud(hostName string, haOnCloud string, haCloudPlatform, vipAddress, vipGateway, vipSubnetMask, enableHA string, routerID int) string {
