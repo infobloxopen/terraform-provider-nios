@@ -35,7 +35,7 @@ The table below shows the compatibility between different versions of the Terraf
 
 
 > **Note:** Documentation and guides are maintained on version-specific branches. 
-> For v2.x, refer to the [`nios_v9.1.0`](https://github.com/infobloxopen/terraform-provider-nios/tree/nios_v9.1.0/README.md) branch. For v1.x, refer to the [`main`](https://github.com/infobloxopen/terraform-provider-nios/tree/main/README.md) branch.
+> For v2.x, refer to the [`nios_v9.1.0`](https://github.com/infobloxopen/terraform-provider-nios/tree/nios_v9.1.0/README.md) branch. For v1.x, refer to the [`nios_v9.0.6`](https://github.com/infobloxopen/terraform-provider-nios/blob/nios_v9.0.6/README.md) branch.
 
 
 ## Getting Started
