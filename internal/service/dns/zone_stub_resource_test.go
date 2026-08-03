@@ -550,6 +550,31 @@ func TestAccZoneStubResource_ZoneFormatIPv6(t *testing.T) {
 	})
 }
 
+func TestAccZoneStubResource_View(t *testing.T) {
+	var resourceName = "nios_dns_zone_stub.test_view"
+	var v dns.ZoneStub
+	fqdn := acctest.RandomNameWithPrefix("zone-stub") + ".com"
+	stubServerName := acctest.RandomNameWithPrefix("stub_server")
+	viewName := acctest.RandomNameWithPrefix("view")
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// Create and Read
+			{
+				Config: testAccZoneStubView(fqdn, "1.1.1.1", stubServerName, viewName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckZoneStubExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "view", viewName),
+				),
+			},
+			// Update is not applicable as view is an immutable field.
+			// Delete testing automatically occurs in TestCase
+		},
+	})
+}
+
 func testAccCheckZoneStubExists(ctx context.Context, resourceName string, v *dns.ZoneStub) resource.TestCheckFunc {
 	// Verify the resource exists in the cloud
 	return func(state *terraform.State) error {
@@ -827,4 +852,21 @@ resource "nios_dns_zone_stub" "test_zone_format" {
 	zone_format = %q
 }
 `, fqdn, stubAddress, stubName, zoneFormat)
+}
+
+func testAccZoneStubView(fqdn, stubAddress, stubName, view string) string {
+	return fmt.Sprintf(`
+resource "nios_dns_view" "test_dns_view" {
+	name = %q
+}
+
+resource "nios_dns_zone_stub" "test_view" {
+	fqdn = %q
+	stub_from = [{
+		address = %q
+		name  = %q
+	}]
+	view = nios_dns_view.test_dns_view.name
+}
+`, view, fqdn, stubAddress, stubName)
 }

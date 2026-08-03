@@ -35,7 +35,7 @@ The table below shows the compatibility between different versions of the Terraf
 
 
 > **Note:** Documentation and guides are maintained on version-specific branches. 
-> For v2.x, refer to the [`nios_v9.1.0`](https://github.com/infobloxopen/terraform-provider-nios/tree/nios_v9.1.0/README.md) branch. For v1.x, refer to the [`main`](https://github.com/infobloxopen/terraform-provider-nios/tree/main/README.md) branch.
+> For v2.x, refer to the [`nios_v9.1.0`](https://github.com/infobloxopen/terraform-provider-nios/tree/nios_v9.1.0/README.md) branch. For v1.x, refer to the [`nios_v9.0.6`](https://github.com/infobloxopen/terraform-provider-nios/blob/nios_v9.0.6/README.md) branch.
 
 
 ## Getting Started
@@ -79,13 +79,17 @@ The object groups available in this provider are categorized as follows:
   - [DHCP](guides/resources_datasources.md#dhcp)
   - [DNS](guides/resources_datasources.md#dns)
   - [DTC](guides/resources_datasources.md#dtc)
+  - [RPZ](guides/resources_datasources.md#rpz)
   - [IPAM](guides/resources_datasources.md#ipam)
   - [CLOUD](guides/resources_datasources.md#cloud)
+  - [GRID](guides/resources_datasources.md#grid)
   - [SECURITY](guides/resources_datasources.md#security)
-  - [MISC](guides/resources_datasources.md#misc)
+  - [MICROSOFT](guides/resources_datasources.md#microsoft)
+  - [PARENTAL CONTROL](guides/resources_datasources.md#parental-control)
+  - [RIR](guides/resources_datasources.md#rir)
+  - [MISC](guides/resources_datasources.md#miscellaneous)
   - [SMARTFOLDER](guides/resources_datasources.md#smartfolder)
   - [ACL](guides/resources_datasources.md#acl)
-  - [GRID](guides/resources_datasources.md#grid)
   - [DISCOVERY](guides/resources_datasources.md#discovery)
   - [NOTIFICATION](guides/resources_datasources.md#notification)
 
