@@ -52,6 +52,7 @@ func (m *RangeMsServerModel) Expand(ctx context.Context, diags *diag.Diagnostics
 	}
 	to := &dhcp.RangeMsServer{
 		Ipv4addr: flex.ExpandStringPointer(m.Ipv4addr),
+		Address:  flex.ExpandStringPointer(m.Ipv4addr),
 	}
 	return to
 }
@@ -74,5 +75,10 @@ func (m *RangeMsServerModel) Flatten(ctx context.Context, from *dhcp.RangeMsServ
 	if m == nil {
 		*m = RangeMsServerModel{}
 	}
-	m.Ipv4addr = flex.FlattenStringPointer(from.Ipv4addr)
+	// NIOS returns the MS server address in Name, not Ipv4addr
+	if from.Ipv4addr != nil && *from.Ipv4addr != "" {
+		m.Ipv4addr = flex.FlattenStringPointer(from.Ipv4addr)
+	} else {
+		m.Ipv4addr = flex.FlattenStringPointer(from.Name)
+	}
 }

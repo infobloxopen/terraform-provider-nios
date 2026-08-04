@@ -1222,7 +1222,7 @@ func (m *NetworkModel) Expand(ctx context.Context, diags *diag.Diagnostics, isCr
 		EnablePxeLeaseTime:               flex.ExpandBoolPointer(m.EnablePxeLeaseTime),
 		EnableSnmpWarnings:               flex.ExpandBoolPointer(m.EnableSnmpWarnings),
 		ExtAttrs:                         ExpandExtAttrs(ctx, m.ExtAttrs, diags),
-		FederatedRealms:                  flex.ExpandFrameworkListNestedBlock(ctx, m.FederatedRealms, diags, ExpandNetworkFederatedRealms),
+		FederatedRealms:                  flex.ExpandFrameworkListNestedBlockEmptyAsNil(ctx, m.FederatedRealms, diags, ExpandNetworkFederatedRealms),
 		HighWaterMark:                    flex.ExpandInt64Pointer(m.HighWaterMark),
 		HighWaterMarkReset:               flex.ExpandInt64Pointer(m.HighWaterMarkReset),
 		IgnoreDhcpOptionListRequest:      flex.ExpandBoolPointer(m.IgnoreDhcpOptionListRequest),
