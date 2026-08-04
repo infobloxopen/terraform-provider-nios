@@ -29,7 +29,7 @@ var readableAttributesForNotificationRule = "all_members,comment,disable,enable_
 
 var (
 	notificationTarget = utils.GetNIOSNotificationRestEndpointRef()
-	syslogEndpoint     = utils.GetSyslogEndpointRef()
+	syslogEndpoint     = utils.GetNIOSSyslogEndpointRef()
 	eventType          = "DHCP_LEASES"
 	expressionList     = []map[string]any{
 		{
