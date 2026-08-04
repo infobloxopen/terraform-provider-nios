@@ -581,7 +581,7 @@ func TestAccRangeResource_DiscoveryBlackoutSetting(t *testing.T) {
 func TestAccRangeResource_DiscoveryMember(t *testing.T) {
 	discoveryMemberHostname := utils.GetNIOSDiscoveryMemberHostName()
 	if discoveryMemberHostname == "" {
-		t.Skip("Skipping test: Discovery Member must be set ( using NIOS_DISCOVERY_MEMBER_HOSTNAME ) ")
+		t.Skip("Skipping test: Discovery Member must be set (using NIOS_DISCOVERY_MEMBER_HOSTNAME)")
 	}
 	var resourceName = "nios_dhcp_range.test_discovery_member"
 	var v dhcp.Range
@@ -950,7 +950,7 @@ func TestAccRangeResource_ExtAttrs(t *testing.T) {
 func TestAccRangeResource_EnableDiscovery(t *testing.T) {
 	discoveryMemberHostname := utils.GetNIOSDiscoveryMemberHostName()
 	if discoveryMemberHostname == "" {
-		t.Skip("Skipping test: Discovery Member must be set (using NIOS_DISCOVERY_MEMBER_HOSTNAME")
+		t.Skip("Skipping test: Discovery Member must be set (using NIOS_DISCOVERY_MEMBER_HOSTNAME)")
 	}
 	var resourceName = "nios_dhcp_range.test_enable_discovery"
 	var v dhcp.Range

@@ -1530,7 +1530,7 @@ resource "nios_dhcp_ipv6range" "test_discovery_member" {
 func testAccIpv6rangeEnableDiscovery(view, startAddr, endAddr string, enableDiscovery string, discoveryMember string) string {
 	config := fmt.Sprintf(`
 resource "nios_dhcp_ipv6range" "test_enable_discovery" {
-    network = nios_ipam_ipv6network.test2.network
+    network = nios_ipam_ipv6network.test1.network
     start_addr = %q
     end_addr = %q
     network_view = nios_ipam_network_view.test.name
