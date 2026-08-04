@@ -1463,6 +1463,9 @@ func TestAccIpv6networkcontainerResource_UsePreferredLifetime(t *testing.T) {
 }
 
 func TestAccIpv6networkcontainerResource_UseSubscribeSettings(t *testing.T) {
+	if utils.GetNIOSPxgridEndpointRef() == "" {
+		t.Skip("Skipping: NIOS_PXGRID_ENDPOINT_REF not set. A configured pxGrid/ISE endpoint is required.")
+	}
 	var resourceName = "nios_ipam_ipv6network_container.test_use_subscribe_settings"
 	var v ipam.Ipv6networkcontainer
 	network := acctest.RandomIPv6Network()
@@ -1477,6 +1480,15 @@ func TestAccIpv6networkcontainerResource_UseSubscribeSettings(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networkcontainerExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "use_subscribe_settings", "false"),
+					resource.TestCheckResourceAttr(resourceName, "network", network),
+				),
+			},
+			// Update and Read
+			{
+				Config: testAccIpv6networkcontainerUseSubscribeSettings(network, "true"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckIpv6networkcontainerExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "use_subscribe_settings", "true"),
 					resource.TestCheckResourceAttr(resourceName, "network", network),
 				),
 			},
@@ -2440,12 +2452,27 @@ resource "nios_ipam_ipv6network_container" "test_use_preferred_lifetime" {
 }
 
 func testAccIpv6networkcontainerUseSubscribeSettings(network, useSubscribeSettings string) string {
+	subscribeSettingsBlock := ""
+	if useSubscribeSettings == "true" {
+		subscribeSettingsBlock = `
+    subscribe_settings = {
+        enabled_attributes = ["USERNAME"]
+        mapped_ea_attributes = [
+            {
+                name = "IP_ADDRESS"
+                mapped_ea = "Site"
+            }
+        ]
+    }`
+	}
 	return fmt.Sprintf(`
 resource "nios_ipam_ipv6network_container" "test_use_subscribe_settings" {
     network = %q
+    network_view = "test_network_view"
     use_subscribe_settings = %q
+    %s
 }
-`, network, useSubscribeSettings)
+`, network, useSubscribeSettings, subscribeSettingsBlock)
 }
 
 func testAccIpv6networkcontainerUseUpdateDnsOnLeaseRenewal(network, useUpdateDnsOnLeaseRenewal string) string {

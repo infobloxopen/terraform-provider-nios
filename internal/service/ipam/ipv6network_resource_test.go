@@ -1800,6 +1800,41 @@ func TestAccIpv6networkResource_UseRecycleLeases(t *testing.T) {
 	})
 }
 
+func TestAccIpv6networkResource_UseSubscribeSettings(t *testing.T) {
+	if utils.GetNIOSPxgridEndpointRef() == "" {
+		t.Skip("Skipping: NIOS_PXGRID_ENDPOINT_REF not set. A configured pxGrid/ISE endpoint is required.")
+	}
+	var resourceName = "nios_ipam_ipv6network.test_use_subscribe_settings"
+	var v ipam.Ipv6network
+	network := acctest.RandomIPv6Network()
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// Create and Read
+			{
+				Config: testAccIpv6networkUseSubscribeSettings(network, "false"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckIpv6networkExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "use_subscribe_settings", "false"),
+					resource.TestCheckResourceAttr(resourceName, "network", network),
+				),
+			},
+			// Update and Read
+			{
+				Config: testAccIpv6networkUseSubscribeSettings(network, "true"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckIpv6networkExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "use_subscribe_settings", "true"),
+					resource.TestCheckResourceAttr(resourceName, "network", network),
+				),
+			},
+			// Delete testing automatically occurs in TestCase
+		},
+	})
+}
+
 func TestAccIpv6networkResource_UseUpdateDnsOnLeaseRenewal(t *testing.T) {
 	var resourceName = "nios_ipam_ipv6network.test_use_update_dns_on_lease_renewal"
 	var v ipam.Ipv6network
@@ -2825,6 +2860,30 @@ resource "nios_ipam_ipv6network" "test_use_recycle_leases" {
     use_recycle_leases = %q
 }
 `, network, useRecycleLeases)
+}
+
+func testAccIpv6networkUseSubscribeSettings(network, useSubscribeSettings string) string {
+	subscribeSettingsBlock := ""
+	if useSubscribeSettings == "true" {
+		subscribeSettingsBlock = `
+    subscribe_settings = {
+        enabled_attributes = ["USERNAME"]
+        mapped_ea_attributes = [
+            {
+                name = "IP_ADDRESS"
+                mapped_ea = "Site"
+            }
+        ]
+    }`
+	}
+	return fmt.Sprintf(`
+resource "nios_ipam_ipv6network" "test_use_subscribe_settings" {
+    network      = %q
+    network_view = "test_network_view"
+    use_subscribe_settings = %q
+    %s
+}
+`, network, useSubscribeSettings, subscribeSettingsBlock)
 }
 
 func testAccIpv6networkUseUpdateDnsOnLeaseRenewal(network, useUpdateDnsOnLeaseRenewal string) string {
