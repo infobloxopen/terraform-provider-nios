@@ -81,8 +81,8 @@ func (m *NetworkMembersModel) Expand(ctx context.Context, diags *diag.Diagnostic
 		Ipv6addr: flex.ExpandStringPointer(m.Ipv6addr),
 		Name:     flex.ExpandStringPointer(m.Name),
 	}
-	// NIOS 9.2.0+ requires `address` for msdhcpserver members
-	if m.Struct.ValueString() == "msdhcpserver" {
+	// WAPI v2.14 requires 'address' for msdhcpserver struct type.
+	if m.Struct.ValueString() == "msdhcpserver" && !m.Ipv4addr.IsNull() && !m.Ipv4addr.IsUnknown() {
 		to.Address = flex.ExpandStringPointer(m.Ipv4addr)
 	}
 	return to
@@ -107,12 +107,11 @@ func (m *NetworkMembersModel) Flatten(ctx context.Context, from *ipam.NetworkMem
 		*m = NetworkMembersModel{}
 	}
 	m.Struct = flex.FlattenStringPointer(from.Struct)
+	m.Ipv4addr = flex.FlattenStringPointer(from.Ipv4addr)
+	// WAPI v2.14 stores FQDN msdhcpserver identifiers in 'name', not 'ipv4addr'.
+	if (m.Ipv4addr.IsNull() || m.Ipv4addr.ValueString() == "") && m.Struct.ValueString() == "msdhcpserver" && from.Name != nil && *from.Name != "" {
+		m.Ipv4addr = flex.FlattenStringPointer(from.Name)
+	}
 	m.Ipv6addr = flex.FlattenStringPointer(from.Ipv6addr)
 	m.Name = flex.FlattenStringPointer(from.Name)
-	// NIOS returns msdhcpserver address in Name, not Ipv4addr
-	if from.Struct != nil && *from.Struct == "msdhcpserver" {
-		m.Ipv4addr = flex.FlattenStringPointer(from.Name)
-	} else {
-		m.Ipv4addr = flex.FlattenStringPointer(from.Ipv4addr)
-	}
 }
