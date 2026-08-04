@@ -18,7 +18,6 @@ import (
 var readableAttributesForUpgradeschedule = "active,start_time,time_zone,upgrade_groups"
 
 func TestAccUpgradescheduleResource_basic(t *testing.T) {
-	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_grid_upgradeschedule.test"
 	var v grid.Upgradeschedule
 	start_time := time.Now().Add(12 * time.Hour).Format(utils.NaiveDatetimeLayout)
@@ -43,7 +42,6 @@ func TestAccUpgradescheduleResource_basic(t *testing.T) {
 }
 
 func TestAccUpgradescheduleResource_Active(t *testing.T) {
-	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_grid_upgradeschedule.test_active"
 	var v grid.Upgradeschedule
 
@@ -73,7 +71,6 @@ func TestAccUpgradescheduleResource_Active(t *testing.T) {
 }
 
 func TestAccUpgradescheduleResource_StartTime(t *testing.T) {
-	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_grid_upgradeschedule.test_start_time"
 	var v grid.Upgradeschedule
 	now := time.Now()
@@ -106,7 +103,6 @@ func TestAccUpgradescheduleResource_StartTime(t *testing.T) {
 }
 
 func TestAccUpgradescheduleResource_UpgradeGroups(t *testing.T) {
-	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_grid_upgradeschedule.test_upgrade_groups"
 	var v grid.Upgradeschedule
 
@@ -271,6 +267,7 @@ resource "nios_grid_upgradegroup" "test" {
 resource "nios_grid_upgradeschedule" "test_upgrade_groups" {
   	start_time = %q
     upgrade_groups = %s
+    depends_on = [nios_grid_upgradegroup.test]
 }
 `, groupName, startTime, upgradeGroupsHCL)
 }
