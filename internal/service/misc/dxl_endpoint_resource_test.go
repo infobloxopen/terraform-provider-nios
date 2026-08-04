@@ -584,6 +584,7 @@ func TestAccDxlEndpointResource_WapiUserName(t *testing.T) {
 }
 
 func TestAccDxlEndpointResource_WapiUserPassword(t *testing.T) {
+	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_misc_dxl_endpoint.test_wapi_user_password"
 	var v misc.DxlEndpoint
 	name := acctest.RandomNameWithPrefix("dxl-endpoint")

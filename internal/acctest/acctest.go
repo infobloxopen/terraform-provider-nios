@@ -122,6 +122,15 @@ func Random32Hexadecimal() string {
 	return fmt.Sprintf("%016x%016x", rand.Uint64(), rand.Uint64())
 }
 
+// RandomDUID generates a random DUID-LLT (type 1) in colon-separated hex format.
+// Format: 00:01:00:01:<4-byte-time>:<6-byte-mac>
+func RandomDUID() string {
+	return fmt.Sprintf("00:01:00:01:%02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x",
+		rand.Intn(256), rand.Intn(256), rand.Intn(256), rand.Intn(256),
+		rand.Intn(256), rand.Intn(256), rand.Intn(256), rand.Intn(256),
+		rand.Intn(256), rand.Intn(256))
+}
+
 func PreCheck(t *testing.T) {
 	hostURL := os.Getenv("NIOS_HOST_URL")
 	if hostURL == "" {

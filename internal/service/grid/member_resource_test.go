@@ -1180,7 +1180,6 @@ func TestAccMemberResource_HaCloudPlatform(t *testing.T) {
 }
 
 func TestAccMemberResource_HaOnCloud(t *testing.T) {
-	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_grid_member.test_ha_on_cloud"
 	var v grid.Member
 
@@ -1352,12 +1351,15 @@ func TestAccMemberResource_Ipv6Setting(t *testing.T) {
 }
 
 func TestAccMemberResource_Ipv6StaticRoutes(t *testing.T) {
-	t.Skip("IPv6 Static Routes cannot be created if other routes exist.")
+	if utils.GetNIOSGridMasterConfigAddrType() != "BOTH" {
+		t.Skip("Skipping test since grid master config addr type is not set to BOTH")
+	}
 	var resourceName = "nios_grid_member.test_ipv6_static_routes"
 	var v grid.Member
 	hostName := fmt.Sprintf("infoblox-%s.localdomain", acctest.RandomName())
 	vipAddress := "172.28.38.122"
-	networkSettingAddress := fmt.Sprintf("2001:db8:%x:%x::%x", acctest.RandomNumber(65535), acctest.RandomNumber(65535), acctest.RandomNumber(65535))
+	vipAddress6 := fmt.Sprintf("2001::%x", acctest.RandomNumber(65534)+2)
+	networkSettingAddress := fmt.Sprintf("2001:db8:%x:%x::", acctest.RandomNumber(65535), acctest.RandomNumber(65535))
 	ipv6StaticRoutesVal := []map[string]any{
 		{
 			"address": networkSettingAddress,
@@ -1376,10 +1378,13 @@ func TestAccMemberResource_Ipv6StaticRoutes(t *testing.T) {
 					ipv6StaticRoutesVal,
 					vipAddress,
 					"172.28.38.1",
-					"255.255.254.0"),
+					"255.255.254.0",
+					vipAddress6),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMemberExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "ipv6_static_routes", "IPV6_STATIC_ROUTES_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "ipv6_static_routes.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "ipv6_static_routes.0.cidr", "64"),
+					resource.TestCheckResourceAttr(resourceName, "ipv6_static_routes.0.gateway", "2001::1"),
 				),
 			},
 			// Cannot change or remove IP address configuration due to existing static routes.
@@ -2096,8 +2101,6 @@ func TestAccMemberResource_NtpSetting(t *testing.T) {
 }
 
 func TestAccMemberResource_OspfList(t *testing.T) {
-	// Authentication Key Issue
-	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_grid_member.test_ospf_list"
 	var v grid.Member
 
@@ -2524,7 +2527,6 @@ func TestAccMemberResource_SnmpSetting(t *testing.T) {
 }
 
 func TestAccMemberResource_StaticRoutes(t *testing.T) {
-	t.Skip("Cannot create Static Routes if Static Routes already exist")
 	var resourceName = "nios_grid_member.test_static_routes"
 	var v grid.Member
 
@@ -2533,9 +2535,9 @@ func TestAccMemberResource_StaticRoutes(t *testing.T) {
 
 	staticRoutesVal := []map[string]any{
 		{
-			"address":     "172.28.90.10",
-			"gateway":     "172.28.90.1",
-			"subnet_mask": "255.255.254.0",
+			"address":     "172.28.90.0",
+			"gateway":     "172.28.38.1",
+			"subnet_mask": "255.255.255.0",
 		},
 	}
 
@@ -5208,67 +5210,53 @@ resource "nios_grid_member" "test_external_syslog_backup_servers" {
 }
 
 func testAccMemberHaCloudPlatform(hostName string, haCloudPlatform string, vipAddress, vipGateway, vipSubnetMask string) string {
-	lanSettingsStr := ""
-	mgmtLan1 := "172.28.38.236"
-	mgmtLan2 := "172.28.38.238"
+	// For all platforms ha_ip_address must be in same subnet as VIP.
+	// For GCP mgmt_lan must be in a different subnet from the VIP; for AWS/AZURE it must be in the same subnet.
+	// GCP also requires lan_subnet_mask and lan_gateway in vip_setting.
+	nodeIP1, nodeMgmt1 := "172.28.38.220", "172.28.38.221"
+	nodeIP2, nodeMgmt2 := "172.28.38.222", "172.28.38.223"
+	gcpLanSettings := ""
 	if haCloudPlatform == "GCP" {
-		lanSettingsStr = `
-		lan_gateway     = "10.1.0.1"
-		lan_subnet_mask = "255.255.255.0"
-		`
-		mgmtLan1 = "10.1.0.12"
-		mgmtLan2 = "10.1.0.14"
+		nodeMgmt1 = "172.28.40.221"
+		nodeMgmt2 = "172.28.40.223"
+		gcpLanSettings = `
+        lan_subnet_mask = "255.255.254.0"
+        lan_gateway     = "172.28.40.1"`
 	}
 	return fmt.Sprintf(`
 resource "nios_grid_member" "test_ha_cloud_platform" {
-    host_name = %q
+    host_name         = %q
     ha_cloud_platform = %q
-	vip_setting = {
-		address = %q
-		dscp = 0
-		gateway = %q
-		primary = true
-		subnet_mask = %q
-		use_dscp = false
-		%s
-	}
-	platform = "VNIOS"
-	enable_ha = true
-	router_id = 213
-
-	node_info = [
-	{
-	  lan_ha_port_setting = {
-		ha_cloud_attribute = "3"
-		ha_ip_address = "172.28.38.235"
-		ha_port_setting = {
-			auto_port_setting_enabled = true
-			speed = "10"
-		}
-		lan_port_setting = {
-			auto_port_setting_enabled = true
-		}
-		mgmt_lan = %q
-	  }
-	},
-    {
-      lan_ha_port_setting = {
-      	ha_cloud_attribute = "4"
-      	ha_ip_address = "172.28.38.237"
-      	ha_port_setting = {
-        	auto_port_setting_enabled = true
-        	speed = "10"
+    ha_on_cloud       = true
+    enable_ha         = true
+    platform          = "VNIOS"
+    router_id         = 116
+    node_info = [
+        {
+            lan_ha_port_setting = {
+                ha_cloud_attribute = "1"
+                ha_ip_address      = %q
+                mgmt_lan           = %q
+            }
+        },
+        {
+            lan_ha_port_setting = {
+                ha_cloud_attribute = "2"
+                ha_ip_address      = %q
+                mgmt_lan           = %q
+            }
         }
-      	lan_port_setting = {
-        	auto_port_setting_enabled = true
-      	}
-      	mgmt_lan = %q
-      }
+    ]
+    vip_setting = {
+        address     = %q
+        dscp        = 0
+        gateway     = %q
+        primary     = true
+        subnet_mask = %q
+        use_dscp    = false%s
     }
-  ]
 }
-`, hostName, haCloudPlatform, vipAddress, vipGateway, vipSubnetMask, lanSettingsStr,
-		mgmtLan1, mgmtLan2)
+`, hostName, haCloudPlatform, nodeIP1, nodeMgmt1, nodeIP2, nodeMgmt2, vipAddress, vipGateway, vipSubnetMask, gcpLanSettings)
 }
 
 func testAccMemberHaOnCloud(hostName string, haOnCloud string, haCloudPlatform, vipAddress, vipGateway, vipSubnetMask, enableHA string, routerID int) string {
@@ -5381,12 +5369,25 @@ resource "nios_grid_member" "test_ipv6_setting" {
 `, hostName, configAddrType, platform, serviceTypeConfig, ipv6SettingStr, vipAddress, vipGateway, vipSubnetMask)
 }
 
-func testAccMemberIpv6StaticRoutes(hostName string, ipv6StaticRoutes []map[string]any, vipAddress, vipGateway, vipSubnetMask string) string {
+func testAccMemberIpv6StaticRoutes(hostName string, ipv6StaticRoutes []map[string]any, vipAddress, vipGateway, vipSubnetMask, vipAddress6 string) string {
 	ipv6StaticRoutesStr := utils.ConvertSliceOfMapsToHCL(ipv6StaticRoutes)
 	return fmt.Sprintf(`
 resource "nios_grid_member" "test_ipv6_static_routes" {
     host_name = %q
+    config_addr_type = "BOTH"
+    platform = "VNIOS"
+    service_type_configuration = "ALL_V4"
     ipv6_static_routes = %s
+    ipv6_setting = {
+        auto_router_config_enabled = false
+        dscp = 0
+        enabled = true
+        virtual_ip = %q
+        cidr_prefix = 64
+        gateway = "2001::1"
+        primary = true
+        use_dscp = false
+    }
 	vip_setting = {
         address = %q
         dscp = 0
@@ -5396,7 +5397,7 @@ resource "nios_grid_member" "test_ipv6_static_routes" {
         use_dscp = false
     }
 }
-`, hostName, ipv6StaticRoutesStr, vipAddress, vipGateway, vipSubnetMask)
+`, hostName, ipv6StaticRoutesStr, vipAddress6, vipAddress, vipGateway, vipSubnetMask)
 }
 
 func testAccMemberLan2Enabled(hostName string, lan2Enabled string, vipAddress, vipGateway, vipSubnetMask string) string {
