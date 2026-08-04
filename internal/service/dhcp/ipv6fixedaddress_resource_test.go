@@ -186,7 +186,8 @@ func TestAccIpv6fixedaddressResource_CliCredentials(t *testing.T) {
 	ipv6addr := "2001:db8:abcd:1231::1"
 	ipv6addr1 := "2001:db8:abcd:1231::2"
 	networkView := acctest.RandomNameWithPrefix("network-view")
-	duid := "00:01:00:01:1d:2b:3c:5d:40:0c:39:ab:cd:ef"
+	duid := acctest.RandomDUID()
+	duid1 := acctest.RandomDUID()
 	cliCred := []map[string]any{{
 		"user":             "user1",
 		"credential_type":  "SSH",
@@ -262,7 +263,7 @@ func TestAccIpv6fixedaddressResource_CliCredentials(t *testing.T) {
 			},
 			// Create an IPv6 FA without cli_credentials and Read
 			{
-				Config: testAccIpv6fixedaddressCliCredentialsSecrets(resourceName1, ipv6addr1, duid, networkView, ipv6Network, nil),
+				Config: testAccIpv6fixedaddressCliCredentialsSecrets(resourceName1, ipv6addr1, duid1, networkView, ipv6Network, nil),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6fixedaddressExists(context.Background(), resourceName1, &v),
 					resource.TestCheckResourceAttr(resourceName1, "cli_credentials.#", "0"),
@@ -271,7 +272,7 @@ func TestAccIpv6fixedaddressResource_CliCredentials(t *testing.T) {
 			},
 			// Add cli_credentials and Read
 			{
-				Config: testAccIpv6fixedaddressCliCredentialsSecrets(resourceName1, ipv6addr1, duid, networkView, ipv6Network, cliCred),
+				Config: testAccIpv6fixedaddressCliCredentialsSecrets(resourceName1, ipv6addr1, duid1, networkView, ipv6Network, cliCred),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6fixedaddressExists(context.Background(), resourceName1, &v),
 					resource.TestCheckResourceAttr(resourceName1, "cli_credentials.0.credential_type", "SSH"),
@@ -282,7 +283,7 @@ func TestAccIpv6fixedaddressResource_CliCredentials(t *testing.T) {
 			},
 			// Update write-only field of cli_credentials and Read
 			{
-				Config: testAccIpv6fixedaddressCliCredentialsSecrets(resourceName1, ipv6addr1, duid, networkView, ipv6Network, cliCred1),
+				Config: testAccIpv6fixedaddressCliCredentialsSecrets(resourceName1, ipv6addr1, duid1, networkView, ipv6Network, cliCred1),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6fixedaddressExists(context.Background(), resourceName1, &v),
 					resource.TestCheckResourceAttr(resourceName1, "cli_credentials.0.comment", "cli credential comment"),
@@ -294,7 +295,7 @@ func TestAccIpv6fixedaddressResource_CliCredentials(t *testing.T) {
 			},
 			// Update non write-only field of cli_credentials and Read
 			{
-				Config: testAccIpv6fixedaddressCliCredentialsSecrets(resourceName1, ipv6addr1, duid, networkView, ipv6Network, cliCred2),
+				Config: testAccIpv6fixedaddressCliCredentialsSecrets(resourceName1, ipv6addr1, duid1, networkView, ipv6Network, cliCred2),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6fixedaddressExists(context.Background(), resourceName1, &v),
 					resource.TestCheckResourceAttr(resourceName1, "cli_credentials.0.comment", "cli credential comment update"),

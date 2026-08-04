@@ -81,7 +81,6 @@ func TestAccParentalcontrolSubscribersiteResource_disappears(t *testing.T) {
 }
 
 func TestAccParentalcontrolSubscribersiteResource_Abss(t *testing.T) {
-	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_parentalcontrol_subscribersite.test_abss"
 	var v parentalcontrol.ParentalcontrolSubscribersite
 	name := acctest.RandomNameWithPrefix("subscriber-site")
@@ -107,7 +106,7 @@ func TestAccParentalcontrolSubscribersiteResource_Abss(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccParentalcontrolSubscribersiteAbss(name, abss1, blockingPolicy1, value1),
+				Config: testAccParentalcontrolSubscribersiteAbss(name, abss1, blockingPolicy1, value1, blockingPolicy2, value2),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckParentalcontrolSubscribersiteExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "abss.#", "1"),
@@ -117,7 +116,7 @@ func TestAccParentalcontrolSubscribersiteResource_Abss(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccParentalcontrolSubscribersiteAbss(name, abss2, blockingPolicy2, value2),
+				Config: testAccParentalcontrolSubscribersiteAbss(name, abss2, blockingPolicy1, value1, blockingPolicy2, value2),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckParentalcontrolSubscribersiteExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "abss.#", "1"),
@@ -658,7 +657,6 @@ func TestAccParentalcontrolSubscribersiteResource_Msps(t *testing.T) {
 }
 
 func TestAccParentalcontrolSubscribersiteResource_NasGateways(t *testing.T) {
-	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_parentalcontrol_subscribersite.test_nas_gateways"
 	var v parentalcontrol.ParentalcontrolSubscribersite
 	name := acctest.RandomNameWithPrefix("subscriber-site")
@@ -924,16 +922,16 @@ resource "nios_parentalcontrol_subscribersite" "test" {
 `, name)
 }
 
-func testAccParentalcontrolSubscribersiteAbss(name string, abss []map[string]any, blockingPolicy, value string) string {
+func testAccParentalcontrolSubscribersiteAbss(name string, abss []map[string]any, blockingPolicy, value, blockingPolicy2, value2 string) string {
 	abssStr := utils.ConvertSliceOfMapsToHCL(abss)
 	config := fmt.Sprintf(`
 resource "nios_parentalcontrol_subscribersite" "test_abss" {
     name = %q
     abss = %s
-	depends_on = [nios_parentalcontrol_blockingpolicy.test_blocking_policy]
+	depends_on = [nios_parentalcontrol_blockingpolicy.test_blocking_policy,nios_parentalcontrol_blockingpolicy.test_blocking_policy2]
 }
 `, name, abssStr)
-	return strings.Join([]string{testAccParentBlockingPolicy(blockingPolicy, value), config}, "")
+	return strings.Join([]string{testAccParentBlockingPolicy(blockingPolicy, value, blockingPolicy2, value2), config}, "")
 }
 
 func testAccParentalcontrolSubscribersiteApiMembers(name string, apiMembers []map[string]any) string {
@@ -1161,11 +1159,16 @@ resource "nios_parentalcontrol_subscribersite" "test_strict_nat" {
 `, name, strictNat)
 }
 
-func testAccParentBlockingPolicy(name, value string) string {
+func testAccParentBlockingPolicy(name, value, name2, value2 string) string {
 	return fmt.Sprintf(`
 resource "nios_parentalcontrol_blockingpolicy" "test_blocking_policy" {
 	name = %q
 	value = %q
 }
-`, name, value)
+
+resource "nios_parentalcontrol_blockingpolicy" "test_blocking_policy2" {
+	name = %q
+	value = %q
+}
+`, name, value, name2, value2)
 }
