@@ -142,7 +142,7 @@ func (m *MemberVipSettingModel) Flatten(ctx context.Context, from *grid.MemberVi
 	m.VlanId = flex.FlattenInt64Pointer(from.VlanId)
 	m.Primary = types.BoolPointerValue(from.Primary)
 	m.Dscp = flex.FlattenInt64Pointer(from.Dscp)
-	m.LanSubnetMask = flex.FlattenStringPointer(from.LanSubnetMask)
+	m.LanSubnetMask = flex.FlattenStringPointerNilAsNotEmpty(from.LanSubnetMask)
 	m.LanGateway = flex.FlattenStringPointer(from.LanGateway)
 	m.UseDscp = types.BoolPointerValue(from.UseDscp)
 }
