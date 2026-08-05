@@ -848,6 +848,8 @@ func TestAccSharednetworkResource_NetworkView(t *testing.T) {
 	var v dhcp.Sharednetwork
 	name := acctest.RandomNameWithPrefix("shared_network")
 	networkView := acctest.RandomNameWithPrefix("network-view")
+	network1 := acctest.RandomCIDRNetwork()
+	network2 := acctest.RandomCIDRNetwork()
 	networks := []string{"${nios_ipam_network.test_network1.ref}", "${nios_ipam_network.test_network2.ref}"}
 
 	// Network_view is an immutable field, hence no update step is added.
@@ -856,7 +858,7 @@ func TestAccSharednetworkResource_NetworkView(t *testing.T) {
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccSharednetworkNetworkView(name, networkView, networks),
+				Config: testAccSharednetworkNetworkView(name, networkView, network1, network2, networks),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSharednetworkExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "network_view", networkView),
@@ -2058,7 +2060,7 @@ resource "nios_dhcp_shared_network" "test_networks" {
 		"201.45.0.0/24", "201.46.0.0/24"), network3and4Replace2, config}, "\n")
 }
 
-func testAccSharednetworkNetworkView(name, networkView string, networks []string) string {
+func testAccSharednetworkNetworkView(name, networkView, network1, network2 string, networks []string) string {
 	networksStr := formatNetworksToHCL(networks)
 	config := fmt.Sprintf(`
 resource "nios_ipam_network_view" "test_network_view" {
@@ -2066,12 +2068,12 @@ resource "nios_ipam_network_view" "test_network_view" {
 }
 
 resource "nios_ipam_network" "test_network1" {
-	network      = "202.101.0.0/24"
+	network      = %q
 	network_view = nios_ipam_network_view.test_network_view.name
 }
 
 resource "nios_ipam_network" "test_network2" {
-	network      = "202.102.0.0/24"
+	network      = %q
 	network_view = nios_ipam_network_view.test_network_view.name
 }
 
@@ -2080,7 +2082,7 @@ resource "nios_dhcp_shared_network" "test_network_view" {
 	network_view = nios_ipam_network_view.test_network_view.name
 	networks = %s
 }
-`, networkView, name, networksStr)
+`, networkView, network1, network2, name, networksStr)
 	return config
 }
 

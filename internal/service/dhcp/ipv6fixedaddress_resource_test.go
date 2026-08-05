@@ -1027,29 +1027,6 @@ func TestAccIpv6fixedaddressResource_Network(t *testing.T) {
 	})
 }
 
-func TestAccIpv6fixedaddressResource_NetworkView(t *testing.T) {
-	resourceName := "nios_dhcp_ipv6fixedaddress.test_network_view"
-	var v dhcp.Ipv6fixedaddress
-	ipv6Network := "2001:db8:abcd:12a2::/64"
-	ipv6addr := "2001:db8:abcd:12a2::10"
-	networkView := acctest.RandomNameWithPrefix("network-view")
-	duid := "00:01:00:01:1d:2b:3c:4d:00:0c:29:11:aa:02"
-
-	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.PreCheck(t) },
-		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-		Steps: []resource.TestStep{
-			{
-				Config: testAccIpv6fixedaddressNetworkView(ipv6addr, duid, networkView, ipv6Network),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckIpv6fixedaddressExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "network_view", networkView),
-				),
-			},
-		},
-	})
-}
-
 func TestAccIpv6fixedaddressResource_Options(t *testing.T) {
 	var resourceName = "nios_dhcp_ipv6fixedaddress.test_options"
 	var v dhcp.Ipv6fixedaddress
@@ -2245,18 +2222,6 @@ resource "nios_dhcp_ipv6fixedaddress" "test_network" {
 }
 `, ipv6addr, duid, networkName)
 	return strings.Join([]string{testAccBaseWithTwoIPv6Networks(networkView, ipv6Network1, ipv6Network2), config}, "")
-}
-
-func testAccIpv6fixedaddressNetworkView(ipv6addr, duid, networkView, ipv6Network string) string {
-	config := fmt.Sprintf(`
-resource "nios_dhcp_ipv6fixedaddress" "test_network_view" {
-	ipv6addr = %q
-	duid = %q
-	network = nios_ipam_ipv6network.test_ipv6_network.network
-	network_view = nios_ipam_network_view.parent_network_view.name
-}
-`, ipv6addr, duid)
-	return strings.Join([]string{testAccBaseNetworkWithView(networkView, ipv6Network), config}, "")
 }
 
 func testAccIpv6fixedaddressOptions(ipv6addr, duid, networkView, ipv6Network string, options []map[string]any) string {

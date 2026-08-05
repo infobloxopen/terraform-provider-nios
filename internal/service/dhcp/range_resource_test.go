@@ -4111,8 +4111,11 @@ resource "nios_dhcp_range" "test_use_update_dns_on_lease_renewal" {
 func TestAccRangeResource_RestartIfNeeded(t *testing.T) {
 	resourceName := "nios_dhcp_range.test_restart_if_needed"
 	var v dhcp.Range
-	startAddr := "10.10.0.11"
-	endAddr := "10.10.0.12"
+	oct1 := acctest.RandomNumber(245) + 10
+	oct2 := acctest.RandomNumber(254) + 1
+	network := fmt.Sprintf("%d.%d.0.0/24", oct1, oct2)
+	startAddr := fmt.Sprintf("%d.%d.0.11", oct1, oct2)
+	endAddr := fmt.Sprintf("%d.%d.0.12", oct1, oct2)
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -4120,7 +4123,7 @@ func TestAccRangeResource_RestartIfNeeded(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccRangeRestartIfNeeded(startAddr, endAddr, true),
+				Config: testAccRangeRestartIfNeeded(network, startAddr, endAddr, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangeExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "restart_if_needed", "true"),
@@ -4128,7 +4131,7 @@ func TestAccRangeResource_RestartIfNeeded(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccRangeRestartIfNeeded(startAddr, endAddr, false),
+				Config: testAccRangeRestartIfNeeded(network, startAddr, endAddr, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRangeExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "restart_if_needed", "false"),
@@ -4139,10 +4142,10 @@ func TestAccRangeResource_RestartIfNeeded(t *testing.T) {
 	})
 }
 
-func testAccRangeRestartIfNeeded(startAddr, endAddr string, restartIfNeeded bool) string {
+func testAccRangeRestartIfNeeded(network, startAddr, endAddr string, restartIfNeeded bool) string {
 	return fmt.Sprintf(`
 resource "nios_ipam_network" "test_restart_if_needed" {
-	network = "10.10.0.0/24"
+	network = %q
 	network_view = "default"
 }
 
@@ -4152,7 +4155,7 @@ resource "nios_dhcp_range" "test_restart_if_needed" {
 	restart_if_needed = %t
 	depends_on = [nios_ipam_network.test_restart_if_needed]
 }
-`, startAddr, endAddr, restartIfNeeded)
+`, network, startAddr, endAddr, restartIfNeeded)
 }
 
 func testAccRangeTemplate(startAddr, endAddr, templateName string) string {
