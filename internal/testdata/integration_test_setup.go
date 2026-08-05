@@ -838,6 +838,7 @@ func PreConfig(clients PreConfigClients, hostnames GridHostnames) error {
 		{"10.0.0.0/24", "default"},
 		{"15.0.0.0/24", "default"},
 		{"16.0.0.0/24", "default"},
+		{"192.168.10.0/24", "default"},
 	}
 
 	for _, n := range networks {
