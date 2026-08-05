@@ -1194,36 +1194,6 @@ func TestAccZoneAuthResource_ExternalSecondaries(t *testing.T) {
 	})
 }
 
-func TestAccZoneAuthResource_Fqdn(t *testing.T) {
-	var resourceName = "nios_dns_zone_auth.test_fqdn"
-	var v dns.ZoneAuth
-	zoneFqdn := acctest.RandomNameWithPrefix("zone") + ".com"
-
-	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.PreCheck(t) },
-		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-		Steps: []resource.TestStep{
-			// Create and Read
-			{
-				Config: testAccZoneAuthFqdn(zoneFqdn, "default"),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckZoneAuthExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "fqdn", zoneFqdn),
-				),
-			},
-			// Update and Read
-			{
-				Config: testAccZoneAuthFqdn(zoneFqdn, "default"),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckZoneAuthExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "fqdn", zoneFqdn),
-				),
-			},
-			// Delete testing automatically occurs in TestCase
-		},
-	})
-}
-
 func TestAccZoneAuthResource_GridPrimary(t *testing.T) {
 	var resourceName = "nios_dns_zone_auth.test_grid_primary"
 	var v dns.ZoneAuth
@@ -3052,6 +3022,73 @@ func TestAccZoneAuthResource_ZoneFormatIPV6(t *testing.T) {
 	})
 }
 
+func TestAccZoneAuthResource_RestartIfNeeded(t *testing.T) {
+	var resourceName = "nios_dns_zone_auth.test_restart_if_needed"
+	var v dns.ZoneAuth
+	zoneFqdn := acctest.RandomNameWithPrefix("zone") + ".com"
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// Create and Read
+			{
+				Config: testAccZoneAuthRestartIfNeeded(zoneFqdn, "default", true),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckZoneAuthExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "restart_if_needed", "true"),
+				),
+			},
+			// Update and Read
+			{
+				Config: testAccZoneAuthRestartIfNeeded(zoneFqdn, "default", false),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckZoneAuthExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "restart_if_needed", "false"),
+				),
+			},
+			// Delete testing automatically occurs in TestCase
+		},
+	})
+}
+
+func TestAccZoneAuthResource_SetSoaSerialNumber(t *testing.T) {
+	var resourceName = "nios_dns_zone_auth.test_set_soa_serial_number"
+	var v dns.ZoneAuth
+	zoneFqdn := acctest.RandomNameWithPrefix("zone") + ".com"
+	memberName := utils.GetNIOSGridMasterHostName()
+	gridPrimary := []map[string]any{
+		{
+			"name": memberName,
+		},
+	}
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// Create and Read
+			{
+				Config: testAccZoneAuthSetSoaSerialNumber(zoneFqdn, "default", gridPrimary, 10, true),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckZoneAuthExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "set_soa_serial_number", "true"),
+					resource.TestCheckResourceAttr(resourceName, "soa_serial_number", "10"),
+				),
+			},
+			// Update and Read
+			{
+				Config: testAccZoneAuthSetSoaSerialNumber(zoneFqdn, "default", gridPrimary, 20, false),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckZoneAuthExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "set_soa_serial_number", "false"),
+				),
+			},
+			// Delete testing automatically occurs in TestCase
+		},
+	})
+}
+
 func testAccCheckZoneAuthExists(ctx context.Context, resourceName string, v *dns.ZoneAuth) resource.TestCheckFunc {
 	// Verify the resource exists in the cloud
 	return func(state *terraform.State) error {
@@ -3460,15 +3497,6 @@ resource "nios_dns_zone_auth" "test_external_secondaries" {
     external_secondaries = %s
 }
 `, zoneFqdn, view, gridPrimaryHCL, externalSecondariesHCL)
-}
-
-func testAccZoneAuthFqdn(fqdn, view string) string {
-	return fmt.Sprintf(`
-resource "nios_dns_zone_auth" "test_fqdn" {
-    fqdn = %q
-    view = %q
-}
-`, fqdn, view)
 }
 
 func testAccZoneAuthGridPrimary(zoneFqdn, view string, gridPrimary []map[string]any) string {
@@ -4109,6 +4137,37 @@ resource "nios_dns_zone_auth" "test_view" {
     view = %q
 }
 `, zoneFqdn, view)
+}
+
+func testAccZoneAuthRestartIfNeeded(zoneFqdn, view string, restartIfNeeded bool) string {
+	return fmt.Sprintf(`
+resource "nios_dns_zone_auth" "test_restart_if_needed" {
+    fqdn = %q
+    view = %q
+    restart_if_needed = %t
+}
+`, zoneFqdn, view, restartIfNeeded)
+}
+
+func testAccZoneAuthSetSoaSerialNumber(zoneFqdn, view string, gridPrimary []map[string]any, soaSerialNumber int64, setSoaSerialNumber bool) string {
+	gridPrimaryHCL := utils.ConvertSliceOfMapsToHCL(gridPrimary)
+	soaSerialNumberHCL := ""
+	if setSoaSerialNumber {
+		soaSerialNumberHCL = fmt.Sprintf("\n    soa_serial_number = %d", soaSerialNumber)
+	}
+	return fmt.Sprintf(`
+resource "nios_dns_zone_auth" "test_set_soa_serial_number" {
+    fqdn = %q
+    view = %q
+    grid_primary = %s%s
+    set_soa_serial_number = %t
+    soa_retry = 3600
+    soa_negative_ttl = 900
+    soa_expire = 2419200
+    soa_default_ttl = 28800
+    soa_refresh = 10800
+    use_grid_zone_timer = true
+}`, zoneFqdn, view, gridPrimaryHCL, soaSerialNumberHCL, setSoaSerialNumber)
 }
 
 func testAccZoneAuthZoneFormat(zoneFqdn, view, zoneFormat string) string {
