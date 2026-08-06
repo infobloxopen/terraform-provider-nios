@@ -30,13 +30,18 @@ The table below shows the compatibility between different versions of the Terraf
 
 | Provider Version | Go Version | Terraform Version | NIOS Version | WAPI Version |
 |-----------------|------------|-------------------|--------------|--------------|
-| 2.0.0 | >= 1.25.1 | >= 1.12.1 | 9.1.0 or higher | v2.14 |
-| 1.1.0 , 1.0.0 , 0.0.1 | >= 1.18 | >= 1.8.0 | 9.0.6 or higher | v2.13.6 |
+| 2.1.0, 2.0.0 | >= 1.25.1 | >= 1.12.1 | 9.1.0 or higher | v2.14 |
+| 1.2.0, 1.1.0 , 1.0.0 , 0.0.1 | >= 1.25.1 | >= 1.12.1 | 9.0.6 or higher | v2.13.6 |
 
 
 > **Note:** Documentation and guides are maintained on version-specific branches. 
 > For v2.x, refer to the [`nios_v9.1.0`](https://github.com/infobloxopen/terraform-provider-nios/tree/nios_v9.1.0/README.md) branch. For v1.x, refer to the [`nios_v9.0.6`](https://github.com/infobloxopen/terraform-provider-nios/blob/nios_v9.0.6/README.md) branch.
 
+**Important Notes:**
+- **Version 2.x.0+** introduces UUID based resource identification for NIOS 9.1.0. Resources must be imported using UUID instead of ref.
+- **Version 1.x.0 and earlier** uses reference based resource identification. Resources must be imported using ref.
+- **Recommended**: When upgrading from provider v1.x.x to v2.x.x, execute `terraform refresh` to automatically update your state file with UUID.
+- For migration from the legacy terraform provider, refer to the [Migration Guide](MIGRATION.md).
 
 ## Getting Started
 
@@ -70,6 +75,8 @@ Detailed examples for each resource and data source are available in the `exampl
 For example:
 - Resources examples: [`examples/resources/nios_*`](examples/resources/)
 - Data sources examples: [`examples/data-sources/nios_*`](examples/data-sources/)
+- Modules examples: [`examples/modules/nios_*`](examples/modules/)
+- List examples: [`examples/modules/nios_*`](examples/list-resources/)
 
 Please refer to these examples for detailed usage patterns and configurations. 
 
