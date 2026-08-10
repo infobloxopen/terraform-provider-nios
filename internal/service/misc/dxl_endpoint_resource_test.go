@@ -605,11 +605,11 @@ func TestAccDxlEndpointResource_WapiUserPassword(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccDxlEndpointWapiUserPassword(clientCertificateFile, broker, name, "GM", "admin", "password456"),
+				Config: testAccDxlEndpointWapiUserPassword(clientCertificateFile, broker, name, "GM", "admin_updated", "password456"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDxlEndpointExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "password_version", "2"),
-					resource.TestCheckResourceAttr(resourceName, "wapi_user_name", "admin"),
+					resource.TestCheckResourceAttr(resourceName, "wapi_user_name", "admin_updated"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase

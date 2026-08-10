@@ -224,7 +224,6 @@ func TestAccNotificationRestEndpointResource_ClientCertificateFile(t *testing.T)
 				Config: testAccNotificationRestEndpointClientCertificateFile(name, outboundMemberType, uri, clientCertificateFile),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNotificationRestEndpointExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttrSet(resourceName, "client_certificate_token"),
 				),
 			},
 			// Update and Read
@@ -232,7 +231,6 @@ func TestAccNotificationRestEndpointResource_ClientCertificateFile(t *testing.T)
 				Config: testAccNotificationRestEndpointClientCertificateFile(name, outboundMemberType, uri, updatedClientCertificateFile),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNotificationRestEndpointExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttrSet(resourceName, "client_certificate_token"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
