@@ -81,9 +81,12 @@ func (m *NetworkMembersModel) Expand(ctx context.Context, diags *diag.Diagnostic
 		Ipv6addr: flex.ExpandStringPointer(m.Ipv6addr),
 		Name:     flex.ExpandStringPointer(m.Name),
 	}
-	// WAPI v2.14 requires 'address' for msdhcpserver struct type.
-	if m.Struct.ValueString() == "msdhcpserver" && !m.Ipv4addr.IsNull() && !m.Ipv4addr.IsUnknown() {
-		to.Address = flex.ExpandStringPointer(m.Ipv4addr)
+	if m.Struct.ValueString() == "msdhcpserver" {
+		if !m.Ipv4addr.IsNull() && !m.Ipv4addr.IsUnknown() {
+			to.Address = flex.ExpandStringPointer(m.Ipv4addr)
+		} else if !m.Ipv6addr.IsNull() && !m.Ipv6addr.IsUnknown() {
+			to.Address = flex.ExpandStringPointer(m.Ipv6addr)
+		}
 	}
 	return to
 }
