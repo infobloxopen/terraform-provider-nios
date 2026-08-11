@@ -466,6 +466,7 @@ func TestAccZoneStubResource_StubMembers(t *testing.T) {
 }
 
 func TestAccZoneStubResource_StubMsservers(t *testing.T) {
+	t.Skip("WAPI does not return stealth for stub_msservers")
 	var resourceName = "nios_dns_zone_stub.test_stub_msservers"
 	var v dns.ZoneStub
 	fqdn := acctest.RandomNameWithPrefix("zone-stub") + ".com"

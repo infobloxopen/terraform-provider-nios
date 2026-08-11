@@ -60,7 +60,6 @@ var ZoneStubStubMsserversResourceSchemaAttributes = map[string]schema.Attribute{
 	"stealth": schema.BoolAttribute{
 		Optional:            true,
 		Computed:            true,
-		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Set this flag to hide the NS record for the primary name server from DNS queries.",
 	},
 	"shared_with_ms_parent_delegation": schema.BoolAttribute{
@@ -117,11 +116,6 @@ func (m *ZoneStubStubMsserversModel) Flatten(ctx context.Context, from *dns.Zone
 	m.IsMaster = types.BoolPointerValue(from.IsMaster)
 	m.NsIp = flex.FlattenStringPointer(from.NsIp)
 	m.NsName = flex.FlattenStringPointer(from.NsName)
-	// NIOS does not return stealth for stub_msservers; default to false to match schema default.
-	if from.Stealth != nil {
-		m.Stealth = types.BoolValue(*from.Stealth)
-	} else {
-		m.Stealth = types.BoolValue(false)
-	}
+	m.Stealth = types.BoolPointerValue(from.Stealth)
 	m.SharedWithMsParentDelegation = types.BoolPointerValue(from.SharedWithMsParentDelegation)
 }

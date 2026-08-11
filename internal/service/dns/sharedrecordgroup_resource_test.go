@@ -238,6 +238,13 @@ func TestAccSharedrecordgroupResource_ZoneAssociations(t *testing.T) {
 			},
 			// Update and Read
 			{
+				Config: testAccSharedrecordgroupZoneAssociations(name, "", "", ""),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckSharedrecordgroupExists(context.Background(), resourceName, &v),
+				),
+			},
+			// Update and Read
+			{
 				Config: testAccSharedrecordgroupZoneAssociations(name, zoneFqdn2, "default", "test2"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSharedrecordgroupExists(context.Background(), resourceName, &v),
