@@ -2221,12 +2221,14 @@ func TestAccIpv6networkResource_Members(t *testing.T) {
 	network := acctest.RandomIPv6Network()
 	membersVal := []map[string]any{
 		{
-			"name": memberName,
+			"struct": "dhcpmember",
+			"name":   memberName,
 		},
 	}
 	membersValUpdated := []map[string]any{
 		{
-			"name": memberUpdatedName,
+			"struct": "dhcpmember",
+			"name":   memberUpdatedName,
 		},
 	}
 
@@ -2239,6 +2241,7 @@ func TestAccIpv6networkResource_Members(t *testing.T) {
 				Config: testAccIpv6networkMembers(network, membersVal),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networkExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "members.0.struct", "dhcpmember"),
 					resource.TestCheckResourceAttr(resourceName, "members.0.name", memberName),
 					resource.TestCheckResourceAttr(resourceName, "network", network),
 				),
@@ -2248,6 +2251,7 @@ func TestAccIpv6networkResource_Members(t *testing.T) {
 				Config: testAccIpv6networkMembers(network, membersValUpdated),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6networkExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "members.0.struct", "dhcpmember"),
 					resource.TestCheckResourceAttr(resourceName, "members.0.name", memberUpdatedName),
 					resource.TestCheckResourceAttr(resourceName, "network", network),
 				),
