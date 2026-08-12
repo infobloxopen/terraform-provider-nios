@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -980,23 +979,6 @@ func testAccCheckNotificationRuleDisappears(ctx context.Context, v *notification
 	}
 }
 
-func testAccBasWithSyslogEndpoint(name string) string {
-	return fmt.Sprintf(`
-resource "nios_misc_syslog_endpoint" "test" {
-    name = %q
-    outbound_member_type = "GM"
-    syslog_servers = [
-		{
-		  address         = "10.1.1.1"
-		  port            = 514
-		  connection_type = "udp"
-		  format          = "formatted"
-		}
-  	]
-}
-`, name)
-}
-
 func testAccNotificationRuleBasicConfig(eventType string, expressionList []map[string]any, name, notificationAction, notificationTarget string, templateInstance map[string]any) string {
 	expressionListHCL := utils.ConvertSliceOfMapsToHCL(expressionList)
 	templateInstanceHCL := utils.ConvertMapToHCL(templateInstance)
@@ -1055,7 +1037,7 @@ func testAccNotificationRuleEnableEventDeduplication(eventType string, expressio
 	expressionListHCL := utils.ConvertSliceOfMapsToHCL(expressionList)
 	templateInstanceHCL := utils.ConvertMapToHCL(templateInstance)
 	eventDeduplicationFieldsHCL := utils.ConvertStringSliceToHCL(eventDeduplicationFields)
-	config := fmt.Sprintf(`
+	return fmt.Sprintf(`
 resource "nios_notification_rule" "test_enable_event_deduplication" {
     event_type = %q
     expression_list = %s
@@ -1067,14 +1049,13 @@ resource "nios_notification_rule" "test_enable_event_deduplication" {
 	event_deduplication_fields = %s
 }
 `, eventType, expressionListHCL, name, notificationAction, notificationTarget, templateInstanceHCL, enableEventDeduplication, eventDeduplicationFieldsHCL)
-	return strings.Join([]string{testAccBasWithSyslogEndpoint(acctest.RandomName()), config}, "")
 }
 
 func testAccNotificationRuleEnableEventDeduplicationLog(eventType string, expressionList []map[string]any, name, notificationAction, notificationTarget string, templateInstance map[string]any, enableEventDeduplicationLog string, eventDeduplicationFields []string) string {
 	expressionListHCL := utils.ConvertSliceOfMapsToHCL(expressionList)
 	templateInstanceHCL := utils.ConvertMapToHCL(templateInstance)
 	eventDeduplicationFieldsHCL := utils.ConvertStringSliceToHCL(eventDeduplicationFields)
-	config := fmt.Sprintf(`
+	return fmt.Sprintf(`
 resource "nios_notification_rule" "test_enable_event_deduplication_log" {
     event_type = %q
     expression_list = %s
@@ -1086,7 +1067,6 @@ resource "nios_notification_rule" "test_enable_event_deduplication_log" {
 	event_deduplication_fields = %s
 }
 `, eventType, expressionListHCL, name, notificationAction, notificationTarget, templateInstanceHCL, enableEventDeduplicationLog, eventDeduplicationFieldsHCL)
-	return strings.Join([]string{testAccBasWithSyslogEndpoint(acctest.RandomName()), config}, "")
 }
 
 func testAccNotificationRuleEventDeduplicationFields(eventType string, expressionList []map[string]any, name, notificationAction, notificationTarget string, templateInstance map[string]any, eventDeduplicationFields []string) string {
