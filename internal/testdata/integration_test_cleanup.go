@@ -14,7 +14,7 @@
 //	  - Shared Networks whose name starts with "shared_network"
 //
 //	IPAM / Networks
-//	  - Networks: 10.0.0.0/24, 15.0.0.0/24, 16.0.0.0/24, 85.85.0.0/16 (exact match)
+//	  - Networks: 10.0.0.0/24, 15.0.0.0/24, 16.0.0.0/24, 85.85.0.0/16, 192.168.10.0/24 (exact match)
 //	  - Networks: any network matching 201.*/24 (regex filter)
 //	  - Network Views whose name starts with "network-view" (regex filter)
 //
@@ -163,7 +163,7 @@ func cleanupSharedNetworks(ctx context.Context, apiClient *client.APIClient) {
 }
 
 func cleanupNetworks(ctx context.Context, apiClient *client.APIClient) {
-	hardcoded := []string{"10.0.0.0/24", "15.0.0.0/24", "16.0.0.0/24", "85.85.0.0/16"}
+	hardcoded := []string{"10.0.0.0/24", "15.0.0.0/24", "16.0.0.0/24", "85.85.0.0/16", "192.168.10.0/24"}
 	for _, cidr := range hardcoded {
 		filters := map[string]interface{}{"network": cidr}
 		resp, _, err := apiClient.IPAMAPI.NetworkAPI.List(ctx).
