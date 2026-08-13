@@ -21,7 +21,6 @@ type Ipv6networkMembersModel struct {
 	Ipv4addr types.String `tfsdk:"ipv4addr"`
 	Ipv6addr types.String `tfsdk:"ipv6addr"`
 	Name     types.String `tfsdk:"name"`
-	Struct   types.String `tfsdk:"struct"`
 }
 
 var Ipv6networkMembersAttrTypes = map[string]attr.Type{
@@ -29,7 +28,6 @@ var Ipv6networkMembersAttrTypes = map[string]attr.Type{
 	"ipv4addr": types.StringType,
 	"ipv6addr": types.StringType,
 	"name":     types.StringType,
-	"struct":   types.StringType,
 }
 
 var Ipv6networkMembersResourceSchemaAttributes = map[string]schema.Attribute{
@@ -53,11 +51,6 @@ var Ipv6networkMembersResourceSchemaAttributes = map[string]schema.Attribute{
 	"name": schema.StringAttribute{
 		Optional:            true,
 		MarkdownDescription: "The Grid member name",
-		Computed:            true,
-	},
-	"struct": schema.StringAttribute{
-		Optional:            true,
-		MarkdownDescription: "The struct type of the member object (e.g. 'dhcpmember' or 'msdhcpserver').",
 		Computed:            true,
 	},
 }
