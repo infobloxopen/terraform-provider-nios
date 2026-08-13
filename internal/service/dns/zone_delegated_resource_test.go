@@ -270,6 +270,45 @@ func TestAccZoneDelegatedResource_ExtAttrs(t *testing.T) {
 	})
 }
 
+func TestAccZoneDelegatedResource_Import(t *testing.T) {
+	var resourceName = "nios_dns_zone_delegated.test"
+	var v dns.ZoneDelegated
+	fqdn := acctest.RandomNameWithPrefix("zone-delegated") + ".example.com"
+	delegatedToName := acctest.RandomNameWithPrefix("zone-delegated") + ".com"
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccZoneDelegatedBasicConfig(fqdn, delegatedToName, "10.0.0.1"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckZoneDelegatedExists(context.Background(), resourceName, &v),
+				),
+			},
+			// Import with PlanOnly to detect differences
+			{
+				ResourceName:                         resourceName,
+				ImportState:                          true,
+				ImportStateIdFunc:                    testAccZoneDelegatedImportStateIdFunc(resourceName),
+				ImportStateVerify:                    true,
+				ImportStateVerifyIdentifierAttribute: "uuid",
+				PlanOnly:                             true,
+			},
+			// Import and Verify
+			{
+				ResourceName:                         resourceName,
+				ImportState:                          true,
+				ImportStateIdFunc:                    testAccZoneDelegatedImportStateIdFunc(resourceName),
+				ImportStateVerify:                    true,
+				ImportStateVerifyIgnore:              []string{"extattrs_all"},
+				ImportStateVerifyIdentifierAttribute: "uuid",
+			},
+			// Delete testing automatically occurs in TestCase
+		},
+	})
+}
+
 func TestAccZoneDelegatedResource_Locked(t *testing.T) {
 	var resourceName = "nios_dns_zone_delegated.test_locked"
 	var v dns.ZoneDelegated
@@ -863,45 +902,6 @@ resource "nios_dns_zone_delegated" "test_view" {
     depends_on = [nios_dns_zone_auth.test_dns_zone]
 }
 `, view, fqdn, delegateToName, delegateToAddress)
-}
-
-func TestAccZoneDelegatedResource_Import(t *testing.T) {
-	var resourceName = "nios_dns_zone_delegated.test"
-	var v dns.ZoneDelegated
-	fqdn := acctest.RandomNameWithPrefix("zone-delegated") + ".example.com"
-	delegatedToName := acctest.RandomNameWithPrefix("zone-delegated") + ".com"
-
-	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.PreCheck(t) },
-		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
-		Steps: []resource.TestStep{
-			{
-				Config: testAccZoneDelegatedBasicConfig(fqdn, delegatedToName, "10.0.0.1"),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckZoneDelegatedExists(context.Background(), resourceName, &v),
-				),
-			},
-			// Import with PlanOnly to detect differences
-			{
-				ResourceName:                         resourceName,
-				ImportState:                          true,
-				ImportStateIdFunc:                    testAccZoneDelegatedImportStateIdFunc(resourceName),
-				ImportStateVerify:                    true,
-				ImportStateVerifyIdentifierAttribute: "uuid",
-				PlanOnly:                             true,
-			},
-			// Import and Verify
-			{
-				ResourceName:                         resourceName,
-				ImportState:                          true,
-				ImportStateIdFunc:                    testAccZoneDelegatedImportStateIdFunc(resourceName),
-				ImportStateVerify:                    true,
-				ImportStateVerifyIgnore:              []string{"extattrs_all"},
-				ImportStateVerifyIdentifierAttribute: "uuid",
-			},
-			// Delete testing automatically occurs in TestCase
-		},
-	})
 }
 
 func testAccZoneDelegatedZoneFormat(fqdn, delegateToName, delegateToAddress, zoneFormat string) string {
