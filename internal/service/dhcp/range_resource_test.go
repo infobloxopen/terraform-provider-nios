@@ -3553,7 +3553,7 @@ resource "nios_ipam_network" "example_network" {
 	members = [
 		{
 			struct = "msdhcpserver"
-			ipv4addr = %q
+			address = %q
 		}
 	]
 }
@@ -3563,7 +3563,7 @@ resource "nios_dhcp_range" "test_ms_options" {
 	end_addr = %q
 	ms_options = %s
 	ms_server = {
-		ipv4addr = nios_ipam_network.example_network.members[0].ipv4addr
+		ipv4addr = nios_ipam_network.example_network.members[0].address
 	}
 }
 `, msServers, startAddr, endAddr, msOptionsHCL)
@@ -3578,7 +3578,7 @@ resource "nios_ipam_network" "example_network" {
 	members = [
 		{
 			struct = "msdhcpserver"
-			ipv4addr = %q
+			address = %q
 		}
 	]
 }
@@ -3587,7 +3587,7 @@ resource "nios_dhcp_range" "test_ms_server" {
 	start_addr = %q
 	end_addr = %q
     ms_server = {
-		ipv4addr = nios_ipam_network.example_network.members[0].ipv4addr
+		ipv4addr = nios_ipam_network.example_network.members[0].address
 	}
 	server_association_type = "MS_SERVER"
 }

@@ -2642,7 +2642,7 @@ resource "nios_ipam_network" "example_network" {
 	members = [
 		{
 			struct = "msdhcpserver"
-			ipv4addr = %q
+			address = %q
 		}
 	]
 }
@@ -2651,7 +2651,7 @@ resource "nios_dhcp_range" "test_ms_server_range" {
     start_addr = "150.0.0.35"
 	end_addr = "150.0.0.40"
 	ms_server = {
-		ipv4addr = nios_ipam_network.example_network.members[0].ipv4addr
+		ipv4addr = nios_ipam_network.example_network.members[0].address
 	}
 	server_association_type = "MS_SERVER"
 }
@@ -2661,7 +2661,7 @@ resource "nios_dhcp_fixed_address" "test_ms_server" {
 	match_client = %q
 	mac = %q
 	ms_server = {
-		ipv4addr = nios_ipam_network.example_network.members[0].ipv4addr
+		ipv4addr = nios_ipam_network.example_network.members[0].address
 	}
 	network_view = %q
 	name = %q

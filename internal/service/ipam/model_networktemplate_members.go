@@ -18,6 +18,7 @@ import (
 
 type NetworktemplateMembersModel struct {
 	Struct   types.String `tfsdk:"struct"`
+	Address  types.String `tfsdk:"address"`
 	Ipv4addr types.String `tfsdk:"ipv4addr"`
 	Ipv6addr types.String `tfsdk:"ipv6addr"`
 	Name     types.String `tfsdk:"name"`
@@ -25,6 +26,7 @@ type NetworktemplateMembersModel struct {
 
 var NetworktemplateMembersAttrTypes = map[string]attr.Type{
 	"struct":   types.StringType,
+	"address":  types.StringType,
 	"ipv4addr": types.StringType,
 	"ipv6addr": types.StringType,
 	"name":     types.StringType,
@@ -37,6 +39,10 @@ var NetworktemplateMembersResourceSchemaAttributes = map[string]schema.Attribute
 			stringvalidator.OneOf("dhcpmember", "msdhcpserver"),
 		},
 		MarkdownDescription: "The struct type of the object. The value must be one of 'dhcpmember' or 'msdhcpserver'.",
+	},
+	"address": schema.StringAttribute{
+		Optional:            true,
+		MarkdownDescription: "The IPv4 Address, IPv6 Address or FQDN of the Microsoft server. Required when 'struct' is 'msdhcpserver', and not supported when 'struct' is 'dhcpmember'.",
 	},
 	"ipv4addr": schema.StringAttribute{
 		Optional:            true,
@@ -77,6 +83,10 @@ func (m *NetworktemplateMembersModel) Expand(ctx context.Context, diags *diag.Di
 		Ipv6addr: flex.ExpandStringPointer(m.Ipv6addr),
 		Name:     flex.ExpandStringPointer(m.Name),
 	}
+	// WAPI requires 'address' for msdhcpserver struct type.
+	if m.Struct.ValueString() == "msdhcpserver" {
+		to.Address = flex.ExpandStringPointer(m.Address)
+	}
 	return to
 }
 
@@ -102,4 +112,8 @@ func (m *NetworktemplateMembersModel) Flatten(ctx context.Context, from *ipam.Ne
 	m.Ipv4addr = flex.FlattenStringPointer(from.Ipv4addr)
 	m.Ipv6addr = flex.FlattenStringPointer(from.Ipv6addr)
 	m.Name = flex.FlattenStringPointer(from.Name)
+	// 'address' is write-only in NIOS; an msdhcpserver is reported back through 'name'.
+	if m.Struct.ValueString() == "msdhcpserver" {
+		m.Address = flex.FlattenStringPointer(from.Name)
+	}
 }
