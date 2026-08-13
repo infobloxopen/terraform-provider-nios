@@ -466,7 +466,7 @@ func TestAccZoneStubResource_StubMembers(t *testing.T) {
 }
 
 func TestAccZoneStubResource_StubMsservers(t *testing.T) {
-	t.Skip("Skipping test for stub members as it requires a MS Servers setup in the NIOS grid")
+	t.Skip("WAPI does not return stealth for stub_msservers")
 	var resourceName = "nios_dns_zone_stub.test_stub_msservers"
 	var v dns.ZoneStub
 	fqdn := acctest.RandomNameWithPrefix("zone-stub") + ".com"
@@ -478,10 +478,10 @@ func TestAccZoneStubResource_StubMsservers(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccZoneStubStubMsservers(fqdn, "1.1.1.1", stubServerName, "3.3.3.3", false, "1.1.1.1", "ns_server"),
+				Config: testAccZoneStubStubMsservers(fqdn, "1.1.1.1", stubServerName, "example_server", false, "1.1.1.1", "ns_server"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneStubExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "stub_msservers.0.address", "3.3.3.3"),
+					resource.TestCheckResourceAttr(resourceName, "stub_msservers.0.address", "example_server"),
 					resource.TestCheckResourceAttr(resourceName, "stub_msservers.0.is_master", "false"),
 					resource.TestCheckResourceAttr(resourceName, "stub_msservers.0.ns_ip", "1.1.1.1"),
 					resource.TestCheckResourceAttr(resourceName, "stub_msservers.0.ns_name", "ns_server"),
@@ -489,10 +489,10 @@ func TestAccZoneStubResource_StubMsservers(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccZoneStubStubMsservers(fqdn, "1.1.1.1", stubServerName, "4.4.4.4", false, "2.1.1.1", "ns_server2"),
+				Config: testAccZoneStubStubMsservers(fqdn, "1.1.1.1", stubServerName, "example_server", false, "2.1.1.1", "ns_server2"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZoneStubExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "stub_msservers.0.address", "4.4.4.4"),
+					resource.TestCheckResourceAttr(resourceName, "stub_msservers.0.address", "example_server"),
 					resource.TestCheckResourceAttr(resourceName, "stub_msservers.0.is_master", "false"),
 					resource.TestCheckResourceAttr(resourceName, "stub_msservers.0.ns_ip", "2.1.1.1"),
 					resource.TestCheckResourceAttr(resourceName, "stub_msservers.0.ns_name", "ns_server2"),

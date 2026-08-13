@@ -54,16 +54,16 @@ func GetNIOSPxgridEndpointRef() string {
 	return os.Getenv("NIOS_PXGRID_ENDPOINT_REF")
 }
 
+func GetNIOSDiscoveryMemberConfigAddrType() string {
+	return os.Getenv("NIOS_DISCOVERY_MEMBER_CONFIG_ADDR_TYPE")
+}
+
 func GetGSSTSIGCertRef() string {
 	return os.Getenv("NIOS_GSS_TSIG_CERT_REF")
 }
 
 func GetNIOSGridMasterConfigAddrType() string {
 	return os.Getenv("NIOS_GRID_MASTER_CONFIG_ADDR_TYPE")
-}
-
-func GetNIOSDiscoveryMemberConfigAddrType() string {
-	return os.Getenv("NIOS_DISCOVERY_MEMBER_CONFIG_ADDR_TYPE")
 }
 
 func GetNIOSSyslogEndpointRef() string {

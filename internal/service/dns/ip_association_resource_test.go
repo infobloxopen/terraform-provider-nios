@@ -44,7 +44,6 @@ func TestAccIPAssociationResource_basic(t *testing.T) {
 }
 
 func TestAccIPAssociationResource_macAssociation(t *testing.T) {
-	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_ip_association.mac_association"
 	var v dns.RecordHost
 
@@ -86,7 +85,6 @@ func TestAccIPAssociationResource_macAssociation(t *testing.T) {
 }
 
 func TestAccIPAssociationResource_duidAssociation(t *testing.T) {
-	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_ip_association.duid_association"
 	var v dns.RecordHost
 
@@ -129,7 +127,6 @@ func TestAccIPAssociationResource_duidAssociation(t *testing.T) {
 }
 
 func TestAccIPAssociationResource_matchClient(t *testing.T) {
-	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_ip_association.match_client"
 	var v dns.RecordHost
 
