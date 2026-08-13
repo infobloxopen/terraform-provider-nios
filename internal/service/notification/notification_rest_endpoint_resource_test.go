@@ -745,6 +745,7 @@ resource "nios_notification_rest_endpoint" "test_client_certificate_file" {
 }
 `, name, outboundMemberType, uri, clientCertificateFile)
 }
+
 func testAccNotificationRestEndpointPassword(name string, outboundMemberType string, uri string, username string, password string) string {
 	return fmt.Sprintf(`
 resource "nios_notification_rest_endpoint" "test_password" {
