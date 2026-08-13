@@ -79,11 +79,6 @@ func (m *Ipv6networkMembersModel) Expand(ctx context.Context, diags *diag.Diagno
 			"_struct": m.Struct.ValueString(),
 		},
 	}
-	if !m.Struct.IsNull() && !m.Struct.IsUnknown() && m.Struct.ValueString() != "" {
-		to.AdditionalProperties = map[string]interface{}{
-			"_struct": m.Struct.ValueString(),
-		}
-	}
 	return to
 }
 
@@ -113,9 +108,4 @@ func (m *Ipv6networkMembersModel) Flatten(ctx context.Context, from *ipam.Ipv6ne
 	m.Ipv4addr = flex.FlattenStringPointer(from.Ipv4addr)
 	m.Ipv6addr = flex.FlattenStringPointer(from.Ipv6addr)
 	m.Name = flex.FlattenStringPointer(from.Name)
-	if v, ok := from.AdditionalProperties["_struct"]; ok {
-		if s, ok := v.(string); ok {
-			m.Struct = types.StringValue(s)
-		}
-	}
 }
