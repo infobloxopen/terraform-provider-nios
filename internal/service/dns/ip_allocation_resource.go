@@ -804,6 +804,7 @@ func (r *IPAllocationResource) Update(ctx context.Context, req resource.UpdateRe
 
 	// Clear fields not allowed in update call
 	updateReq.NetworkView = nil
+	updateReq.MsAdUserData = nil
 
 	// NOTE: Since UUID update with return fields is not supported, perform a separate GET after update to retrieve the latest state.
 	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)

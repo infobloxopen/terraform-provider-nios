@@ -323,6 +323,10 @@ Required:
 <a id="nestedatt--members"></a>
 ### Nested Schema for `members`
 
+Required:
+
+- `struct` (String) The struct type of the object. The value must be one of 'dhcpmember' or 'msdhcpserver'.
+
 Optional:
 
 - `ipv4addr` (String) The IPv4 Address of the Grid Member.

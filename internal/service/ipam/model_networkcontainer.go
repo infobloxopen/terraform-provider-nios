@@ -725,6 +725,8 @@ var NetworkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"remove_subnets": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(true),
 		MarkdownDescription: "Remove subnets delete option. Determines whether all child objects should be removed alongside with the network container or child objects should be assigned to another parental container. By default child objects are deleted with the network container.",
 	},
 	"restart_if_needed": schema.BoolAttribute{
@@ -736,17 +738,22 @@ var NetworkcontainerResourceSchemaAttributes = map[string]schema.Attribute{
 	"rir": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The registry (RIR) that allocated the network container address space.",
-		Default:             stringdefault.StaticString("NONE"),
 	},
 	"rir_organization": schema.StringAttribute{
 		Optional:            true,
 		MarkdownDescription: "The RIR organization assoicated with the network container.",
 		Computed:            true,
+		PlanModifiers: []planmodifier.String{
+			planmodifiers.ImmutableString(),
+		},
 	},
 	"rir_registration_action": schema.StringAttribute{
 		Optional:            true,
 		MarkdownDescription: "The RIR registration action.",
 		Computed:            true,
+		Validators: []validator.String{
+			stringvalidator.OneOf("CREATE", "MODIFY", "DELETE", "NONE"),
+		},
 	},
 	"rir_registration_status": schema.StringAttribute{
 		Optional:            true,
@@ -1037,7 +1044,6 @@ func (m *NetworkcontainerModel) Expand(ctx context.Context, diags *diag.Diagnost
 		PortControlBlackoutSetting:       ExpandNetworkcontainerPortControlBlackoutSetting(ctx, m.PortControlBlackoutSetting, diags),
 		PxeLeaseTime:                     flex.ExpandInt64Pointer(m.PxeLeaseTime),
 		RecycleLeases:                    flex.ExpandBoolPointer(m.RecycleLeases),
-		RemoveSubnets:                    flex.ExpandBoolPointer(m.RemoveSubnets),
 		RestartIfNeeded:                  flex.ExpandBoolPointer(m.RestartIfNeeded),
 		RirOrganization:                  flex.ExpandStringPointer(m.RirOrganization),
 		RirRegistrationAction:            flex.ExpandStringPointer(m.RirRegistrationAction),
@@ -1170,10 +1176,15 @@ func (m *NetworkcontainerModel) Flatten(ctx context.Context, from *ipam.Networkc
 	m.PortControlBlackoutSetting = FlattenNetworkcontainerPortControlBlackoutSetting(ctx, from.PortControlBlackoutSetting, diags)
 	m.PxeLeaseTime = flex.FlattenInt64Pointer(from.PxeLeaseTime)
 	m.RecycleLeases = types.BoolPointerValue(from.RecycleLeases)
-	m.RemoveSubnets = types.BoolPointerValue(from.RemoveSubnets)
+	if m.RemoveSubnets.IsNull() || m.RemoveSubnets.IsUnknown() {
+		defaultVal := true
+		m.RemoveSubnets = types.BoolPointerValue(&defaultVal)
+	}
 	m.Rir = flex.FlattenStringPointer(from.Rir)
 	m.RirOrganization = flex.FlattenStringPointer(from.RirOrganization)
-	m.RirRegistrationAction = flex.FlattenStringPointer(from.RirRegistrationAction)
+	if m.RirRegistrationAction.IsNull() || m.RirRegistrationAction.IsUnknown() {
+		m.RirRegistrationAction = flex.FlattenStringPointer(from.RirRegistrationAction)
+	}
 	m.RirRegistrationStatus = flex.FlattenStringPointer(from.RirRegistrationStatus)
 	m.SamePortControlDiscoveryBlackout = types.BoolPointerValue(from.SamePortControlDiscoveryBlackout)
 	m.SubscribeSettings = FlattenNetworkcontainerSubscribeSettings(ctx, from.SubscribeSettings, diags)

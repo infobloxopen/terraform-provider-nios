@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
 	"github.com/infobloxopen/infoblox-nios-go-client/ipam"
@@ -132,7 +133,7 @@ func (r *Ipv6networkcontainerResource) Create(ctx context.Context, req resource.
 	res := apiRes.CreateIpv6networkcontainerResponseAsObject.GetResult()
 	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.ExtAttrs)
 	if diags.HasError() {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while create Ipv6networkcontainer due inherited Extensible attributes, got error: %s", err))
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while creating Ipv6networkcontainer due to inherited Extensible attributes, got error: %s", diags))
 		return
 	}
 
@@ -223,7 +224,7 @@ func (r *Ipv6networkcontainerResource) Read(ctx context.Context, req resource.Re
 
 	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.ExtAttrs)
 	if diags.HasError() {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while reading Ipv6networkcontainer due inherited Extensible attributes, got error: %s", diags))
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while reading Ipv6networkcontainer due to inherited Extensible attributes, got error: %s", diags))
 		return
 	}
 
@@ -318,6 +319,7 @@ func (r *Ipv6networkcontainerResource) Update(ctx context.Context, req resource.
 		resp.Diagnostics.Append(diags...)
 		return
 	}
+
 	associateInternalId, diags := req.Private.GetKey(ctx, "associate_internal_id")
 	resp.Diagnostics.Append(diags...)
 	if diags.HasError() {
@@ -374,15 +376,13 @@ func (r *Ipv6networkcontainerResource) Update(ctx context.Context, req resource.
 
 	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, planExtAttrs, *res.ExtAttrs)
 	if diags.HasError() {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while update Ipv6networkcontainer due inherited Extensible attributes, got error: %s", diags))
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Error while updating Ipv6networkcontainer due to inherited Extensible attributes, got error: %s", diags))
 		return
 	}
-
 	data.Flatten(ctx, &res, &resp.Diagnostics)
 
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
-
 	if associateInternalId != nil {
 		resp.Diagnostics.Append(resp.Private.SetKey(ctx, "associate_internal_id", nil)...)
 	}
@@ -401,10 +401,16 @@ func (r *Ipv6networkcontainerResource) Delete(ctx context.Context, req resource.
 	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
 	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
-		httpRes, callErr := r.client.IPAMAPI.
+		deleteReq := r.client.IPAMAPI.
 			Ipv6networkcontainerAPI.
-			Delete(ctx, resourceIdentifier).
-			Execute()
+			Delete(ctx, resourceIdentifier)
+
+		// remove_subnets is a delete-only argument; pass it as a query parameter
+		if !data.RemoveSubnets.IsNull() && !data.RemoveSubnets.IsUnknown() {
+			deleteReq = deleteReq.RemoveSubnets(data.RemoveSubnets.ValueBool())
+		}
+
+		httpRes, callErr := deleteReq.Execute()
 
 		if httpRes != nil {
 			if httpRes.StatusCode == http.StatusNotFound {
@@ -675,5 +681,46 @@ func (r *Ipv6networkcontainerResource) ValidateConfig(ctx context.Context, req r
 			"Invalid MGM Private Configuration",
 			"When 'use_mgm_private' is set to true, 'mgm_private' must also be set to true.",
 		)
+	}
+
+	// Validate subscribe_settings: enabled_attributes is required, and each
+	// mapped_ea_attributes item requires name and mapped_ea.
+	if !data.SubscribeSettings.IsNull() && !data.SubscribeSettings.IsUnknown() {
+		var subscribeSettings Ipv6networkcontainerSubscribeSettingsModel
+		resp.Diagnostics.Append(data.SubscribeSettings.As(ctx, &subscribeSettings, basetypes.ObjectAsOptions{})...)
+		if !resp.Diagnostics.HasError() {
+			// enabled_attributes is required when subscribe_settings is configured
+			if subscribeSettings.EnabledAttributes.IsNull() || subscribeSettings.EnabledAttributes.IsUnknown() {
+				resp.Diagnostics.AddAttributeError(
+					path.Root("subscribe_settings").AtName("enabled_attributes"),
+					"Missing Required Attribute",
+					"The 'enabled_attributes' attribute is required when 'subscribe_settings' is configured.",
+				)
+			}
+
+			if !subscribeSettings.MappedEaAttributes.IsNull() && !subscribeSettings.MappedEaAttributes.IsUnknown() {
+				var mappedEaAttrs []Ipv6networkcontainersubscribesettingsMappedEaAttributesModel
+				resp.Diagnostics.Append(subscribeSettings.MappedEaAttributes.ElementsAs(ctx, &mappedEaAttrs, false)...)
+				for i, item := range mappedEaAttrs {
+					if item.Name.IsUnknown() || item.MappedEa.IsUnknown() {
+						continue
+					}
+					if item.Name.IsNull() || item.Name.ValueString() == "" {
+						resp.Diagnostics.AddAttributeError(
+							path.Root("subscribe_settings").AtName("mapped_ea_attributes").AtListIndex(i).AtName("name"),
+							"Missing Required Attribute",
+							"The 'name' attribute is required for each item in 'mapped_ea_attributes'.",
+						)
+					}
+					if item.MappedEa.IsNull() || item.MappedEa.ValueString() == "" {
+						resp.Diagnostics.AddAttributeError(
+							path.Root("subscribe_settings").AtName("mapped_ea_attributes").AtListIndex(i).AtName("mapped_ea"),
+							"Missing Required Attribute",
+							"The 'mapped_ea' attribute is required for each item in 'mapped_ea_attributes'.",
+						)
+					}
+				}
+			}
+		}
 	}
 }

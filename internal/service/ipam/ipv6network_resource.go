@@ -414,6 +414,31 @@ func (r *Ipv6networkResource) Delete(ctx context.Context, req resource.DeleteReq
 
 	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
+	// NIOS rejects deleting a network that has VLANs assigned. Clear them first.
+	if !data.Vlans.IsNull() && !data.Vlans.IsUnknown() && len(data.Vlans.Elements()) > 0 {
+		clearPayload := ipam.NewIpv6network()
+		clearPayload.SetVlans([]ipam.Ipv6networkVlans{})
+
+		clearErr := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+			_, httpRes, callErr := r.client.IPAMAPI.
+				Ipv6networkAPI.
+				Update(ctx, resourceIdentifier).
+				Ipv6network(*clearPayload).
+				Execute()
+			if httpRes != nil {
+				if httpRes.StatusCode == http.StatusNotFound {
+					return 0, nil
+				}
+				return httpRes.StatusCode, callErr
+			}
+			return 0, callErr
+		})
+		if clearErr != nil {
+			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to clear VLANs from Ipv6network before deletion, got error: %s", clearErr))
+			return
+		}
+	}
+
 	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
 		httpRes, callErr := r.client.IPAMAPI.
 			Ipv6networkAPI.
@@ -733,6 +758,19 @@ func (r *Ipv6networkResource) ValidateConfig(ctx context.Context, req resource.V
 			"Invalid MGM Private Configuration",
 			"When 'use_mgm_private' is set to true, 'mgm_private' must also be set to true.",
 		)
+	}
+
+	// enabled_attributes is required when subscribe_settings is configured
+	if !data.SubscribeSettings.IsNull() && !data.SubscribeSettings.IsUnknown() {
+		attrs := data.SubscribeSettings.Attributes()
+		enabledAttrs, exists := attrs["enabled_attributes"]
+		if !exists || enabledAttrs.IsNull() || enabledAttrs.IsUnknown() {
+			resp.Diagnostics.AddAttributeError(
+				path.Root("subscribe_settings").AtName("enabled_attributes"),
+				"Missing Required Attribute",
+				"The 'enabled_attributes' attribute is required when 'subscribe_settings' is configured.",
+			)
+		}
 	}
 }
 

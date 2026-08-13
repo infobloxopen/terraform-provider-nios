@@ -890,7 +890,6 @@ var NetworkResourceSchemaAttributes = map[string]schema.Attribute{
 	"rir": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The registry (RIR) that allocated the network address space.",
-		Default:             stringdefault.StaticString("NONE"),
 	},
 	"rir_organization": schema.StringAttribute{
 		Optional:            true,

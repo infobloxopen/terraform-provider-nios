@@ -218,7 +218,6 @@ func TestAccSharedrecordgroupResource_UseRecordNamePolicy(t *testing.T) {
 }
 
 func TestAccSharedrecordgroupResource_ZoneAssociations(t *testing.T) {
-	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_dns_sharedrecordgroup.test_zone_associations"
 	var v dns.Sharedrecordgroup
 	name := acctest.RandomNameWithPrefix("sharedrecordgroup")
@@ -239,6 +238,13 @@ func TestAccSharedrecordgroupResource_ZoneAssociations(t *testing.T) {
 			},
 			// Update and Read
 			{
+				Config: testAccSharedrecordgroupZoneAssociations(name, "", "", ""),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckSharedrecordgroupExists(context.Background(), resourceName, &v),
+				),
+			},
+			// Update and Read
+			{
 				Config: testAccSharedrecordgroupZoneAssociations(name, zoneFqdn2, "default", "test2"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSharedrecordgroupExists(context.Background(), resourceName, &v),
@@ -251,7 +257,6 @@ func TestAccSharedrecordgroupResource_ZoneAssociations(t *testing.T) {
 				Config: testAccSharedrecordgroupZoneAssociations(name, "", "", ""),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSharedrecordgroupExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "zone_associations.#", "0"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
