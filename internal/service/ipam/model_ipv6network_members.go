@@ -3,9 +3,11 @@ package ipam
 import (
 	"context"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
@@ -15,18 +17,27 @@ import (
 )
 
 type Ipv6networkMembersModel struct {
+	Struct   types.String `tfsdk:"struct"`
 	Ipv4addr types.String `tfsdk:"ipv4addr"`
 	Ipv6addr types.String `tfsdk:"ipv6addr"`
 	Name     types.String `tfsdk:"name"`
 }
 
 var Ipv6networkMembersAttrTypes = map[string]attr.Type{
+	"struct":   types.StringType,
 	"ipv4addr": types.StringType,
 	"ipv6addr": types.StringType,
 	"name":     types.StringType,
 }
 
 var Ipv6networkMembersResourceSchemaAttributes = map[string]schema.Attribute{
+	"struct": schema.StringAttribute{
+		Required: true,
+		Validators: []validator.String{
+			stringvalidator.OneOf("dhcpmember", "msdhcpserver"),
+		},
+		MarkdownDescription: "The struct type of the object. The value must be one of 'dhcpmember' or 'msdhcpserver'.",
+	},
 	"ipv4addr": schema.StringAttribute{
 		Optional:            true,
 		MarkdownDescription: "The IPv4 Address of the Grid Member.",
@@ -64,6 +75,9 @@ func (m *Ipv6networkMembersModel) Expand(ctx context.Context, diags *diag.Diagno
 		Ipv4addr: flex.ExpandStringPointer(m.Ipv4addr),
 		Ipv6addr: flex.ExpandStringPointer(m.Ipv6addr),
 		Name:     flex.ExpandStringPointer(m.Name),
+		AdditionalProperties: map[string]interface{}{
+			"_struct": m.Struct.ValueString(),
+		},
 	}
 	return to
 }
@@ -85,6 +99,11 @@ func (m *Ipv6networkMembersModel) Flatten(ctx context.Context, from *ipam.Ipv6ne
 	}
 	if m == nil {
 		*m = Ipv6networkMembersModel{}
+	}
+	if s, ok := from.AdditionalProperties["_struct"].(string); ok {
+		m.Struct = types.StringValue(s)
+	} else {
+		m.Struct = types.StringNull()
 	}
 	m.Ipv4addr = flex.FlattenStringPointer(from.Ipv4addr)
 	m.Ipv6addr = flex.FlattenStringPointer(from.Ipv6addr)

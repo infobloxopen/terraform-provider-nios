@@ -264,7 +264,6 @@ func (m *NetworkviewModel) Flatten(ctx context.Context, from *ipam.Networkview, 
 	m.AssociatedMembers = flex.FlattenFrameworkListNestedBlock(ctx, from.AssociatedMembers, NetworkviewAssociatedMembersAttrTypes, diags, FlattenNetworkviewAssociatedMembers)
 	m.CloudInfo = FlattenNetworkviewCloudInfo(ctx, from.CloudInfo, diags)
 	m.Comment = flex.FlattenStringPointer(from.Comment)
-
 	configDdnsDnsView := m.DdnsDnsView
 	m.DdnsDnsView = flex.FlattenStringPointer(from.DdnsDnsView)
 	if !m.DdnsDnsView.IsNull() && from.Name != nil {

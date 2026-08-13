@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -24,12 +23,12 @@ import (
 // TODO
 // TestAccNotificationRuleResource_EventPriority
 // TestAccNotificationRuleResource_ScheduledEvent
-// TestAccNotificationRuleResource_NotificationAction
 
 var readableAttributesForNotificationRule = "all_members,comment,disable,enable_event_deduplication,enable_event_deduplication_log,event_deduplication_fields,event_deduplication_lookback_period,event_priority,event_type,expression_list,name,notification_action,notification_target,publish_settings,scheduled_event,selected_members,template_instance,use_publish_settings"
 
 var (
 	notificationTarget = utils.GetNIOSNotificationRestEndpointRef()
+	syslogEndpoint     = utils.GetNIOSSyslogEndpointRef()
 	eventType          = "DHCP_LEASES"
 	expressionList     = []map[string]any{
 		{
@@ -54,7 +53,9 @@ var (
 )
 
 func TestAccNotificationRuleResource_basic(t *testing.T) {
-	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
+	if notificationTarget == "" {
+		t.Skip("NIOS_NOTIFICATION_REST_ENDPOINT_REF environment variable must be set for this test to run")
+	}
 	var resourceName = "nios_notification_rule.test"
 	var v notification.NotificationRule
 	name := acctest.RandomNameWithPrefix("example-notification-rule")
@@ -97,7 +98,9 @@ func TestAccNotificationRuleResource_basic(t *testing.T) {
 }
 
 func TestAccNotificationRuleResource_disappears(t *testing.T) {
-	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
+	if notificationTarget == "" {
+		t.Skip("NIOS_NOTIFICATION_REST_ENDPOINT_REF environment variable must be set for this test to run")
+	}
 	resourceName := "nios_notification_rule.test"
 	var v notification.NotificationRule
 	name := acctest.RandomNameWithPrefix("example-notification-rule")
@@ -120,7 +123,9 @@ func TestAccNotificationRuleResource_disappears(t *testing.T) {
 }
 
 func TestAccNotificationRuleResource_Comment(t *testing.T) {
-	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
+	if notificationTarget == "" {
+		t.Skip("NIOS_NOTIFICATION_REST_ENDPOINT_REF environment variable must be set for this test to run")
+	}
 	var resourceName = "nios_notification_rule.test_comment"
 	var v notification.NotificationRule
 	name := acctest.RandomNameWithPrefix("example-notification-rule")
@@ -151,7 +156,9 @@ func TestAccNotificationRuleResource_Comment(t *testing.T) {
 }
 
 func TestAccNotificationRuleResource_Disable(t *testing.T) {
-	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
+	if notificationTarget == "" {
+		t.Skip("NIOS_NOTIFICATION_REST_ENDPOINT_REF environment variable must be set for this test to run")
+	}
 	var resourceName = "nios_notification_rule.test_disable"
 	var v notification.NotificationRule
 	name := acctest.RandomNameWithPrefix("example-notification-rule")
@@ -183,7 +190,9 @@ func TestAccNotificationRuleResource_Disable(t *testing.T) {
 
 // Deduplication events are supported only for DNS_RPZ, SECURITY_ADP, DB_CHANGE_DNS_DISCOVERY_DATA, DXL_EVENT_SUBSCRIBER event types
 func TestAccNotificationRuleResource_EnableEventDeduplication(t *testing.T) {
-	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
+	if notificationTarget == "" {
+		t.Skip("NIOS_NOTIFICATION_REST_ENDPOINT_REF environment variable must be set for this test to run")
+	}
 	var resourceName = "nios_notification_rule.test_enable_event_deduplication"
 	var v notification.NotificationRule
 	name := acctest.RandomNameWithPrefix("example-notification-rule")
@@ -239,7 +248,9 @@ func TestAccNotificationRuleResource_EnableEventDeduplication(t *testing.T) {
 }
 
 func TestAccNotificationRuleResource_EnableEventDeduplicationLog(t *testing.T) {
-	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
+	if notificationTarget == "" || syslogEndpoint == "" {
+		t.Skip("NIOS_NOTIFICATION_REST_ENDPOINT_REF and NIOS_SYSLOG_ENDPOINT_REF environment variables must be set for this test to run")
+	}
 	var resourceName = "nios_notification_rule.test_enable_event_deduplication_log"
 	var v notification.NotificationRule
 	name := acctest.RandomNameWithPrefix("example-notification-rule")
@@ -262,7 +273,7 @@ func TestAccNotificationRuleResource_EnableEventDeduplicationLog(t *testing.T) {
 	}
 	notificationTarget := utils.GetNIOSSyslogEndpointRef()
 	templateInstance := map[string]any{
-		"template": "Version5_REST_API_Session_Template",
+		"template": "Version5_Syslog_Action_Template",
 	}
 	eventDeduplicationFields := []string{
 		"SOURCE_IP",
@@ -295,7 +306,9 @@ func TestAccNotificationRuleResource_EnableEventDeduplicationLog(t *testing.T) {
 }
 
 func TestAccNotificationRuleResource_EventDeduplicationFields(t *testing.T) {
-	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
+	if notificationTarget == "" || syslogEndpoint == "" {
+		t.Skip("NIOS_NOTIFICATION_REST_ENDPOINT_REF and NIOS_SYSLOG_ENDPOINT_REF environment variables must be set for this test to run")
+	}
 	var resourceName = "nios_notification_rule.test_event_deduplication_fields"
 	var v notification.NotificationRule
 	name := acctest.RandomNameWithPrefix("example-notification-rule")
@@ -357,7 +370,9 @@ func TestAccNotificationRuleResource_EventDeduplicationFields(t *testing.T) {
 }
 
 func TestAccNotificationRuleResource_EventDeduplicationLookbackPeriod(t *testing.T) {
-	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
+	if notificationTarget == "" || syslogEndpoint == "" {
+		t.Skip("NIOS_NOTIFICATION_REST_ENDPOINT_REF and NIOS_SYSLOG_ENDPOINT_REF environment variables must be set for this test to run")
+	}
 	var resourceName = "nios_notification_rule.test_event_deduplication_lookback_period"
 	var v notification.NotificationRule
 	name := acctest.RandomNameWithPrefix("example-notification-rule")
@@ -414,11 +429,25 @@ func TestAccNotificationRuleResource_EventDeduplicationLookbackPeriod(t *testing
 
 // The event priority can be configured only for outbound notification rules that contain the scheduled event type
 func TestAccNotificationRuleResource_EventPriority(t *testing.T) {
-	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
-	t.Skip("Additional config is required for test")
+	t.Skip("Requires a Schedule_Event_Template notification template supporting SCHEDULE event type to be uploaded to the NIOS grid")
+	if notificationTarget == "" {
+		t.Skip("NIOS_NOTIFICATION_REST_ENDPOINT_REF environment variable must be set for this test to run")
+	}
 	var resourceName = "nios_notification_rule.test_event_priority"
 	var v notification.NotificationRule
 	name := acctest.RandomNameWithPrefix("example-notification-rule")
+	localTemplateInstance := map[string]any{
+		"template": "Schedule_Event_Template",
+	}
+	scheduledEvent := map[string]any{
+		"weekdays":          []string{"MONDAY"},
+		"frequency":         "WEEKLY",
+		"every":             1,
+		"minutes_past_hour": 0,
+		"disable":           false,
+		"repeat":            "RECUR",
+		"hour_of_day":       12,
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -426,7 +455,7 @@ func TestAccNotificationRuleResource_EventPriority(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccNotificationRuleEventPriority(eventType, expressionList, name, notificationAction, notificationTarget, templateInstance, "NORMAL"),
+				Config: testAccNotificationRuleEventPriority("SCHEDULE", expressionList, name, notificationAction, notificationTarget, localTemplateInstance, scheduledEvent, "NORMAL"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNotificationRuleExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "event_priority", "NORMAL"),
@@ -434,7 +463,7 @@ func TestAccNotificationRuleResource_EventPriority(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccNotificationRuleEventPriority(eventType, expressionList, name, notificationAction, notificationTarget, templateInstance, "HIGH"),
+				Config: testAccNotificationRuleEventPriority("SCHEDULE", expressionList, name, notificationAction, notificationTarget, localTemplateInstance, scheduledEvent, "HIGH"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNotificationRuleExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "event_priority", "HIGH"),
@@ -446,7 +475,9 @@ func TestAccNotificationRuleResource_EventPriority(t *testing.T) {
 }
 
 func TestAccNotificationRuleResource_EventType(t *testing.T) {
-	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
+	if notificationTarget == "" || syslogEndpoint == "" {
+		t.Skip("NIOS_NOTIFICATION_REST_ENDPOINT_REF and NIOS_SYSLOG_ENDPOINT_REF environment variables must be set for this test to run")
+	}
 	var resourceName = "nios_notification_rule.test_event_type"
 	var v notification.NotificationRule
 	name := acctest.RandomNameWithPrefix("example-notification-rule")
@@ -498,7 +529,9 @@ func TestAccNotificationRuleResource_EventType(t *testing.T) {
 }
 
 func TestAccNotificationRuleResource_ExpressionList(t *testing.T) {
-	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
+	if notificationTarget == "" || syslogEndpoint == "" {
+		t.Skip("NIOS_NOTIFICATION_REST_ENDPOINT_REF and NIOS_SYSLOG_ENDPOINT_REF environment variables must be set for this test to run")
+	}
 	var resourceName = "nios_notification_rule.test_expression_list"
 	var v notification.NotificationRule
 	name := acctest.RandomNameWithPrefix("example-notification-rule")
@@ -574,7 +607,9 @@ func TestAccNotificationRuleResource_ExpressionList(t *testing.T) {
 }
 
 func TestAccNotificationRuleResource_Name(t *testing.T) {
-	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
+	if notificationTarget == "" {
+		t.Skip("NIOS_NOTIFICATION_REST_ENDPOINT_REF environment variable must be set for this test to run")
+	}
 	var resourceName = "nios_notification_rule.test_name"
 	var v notification.NotificationRule
 	name := acctest.RandomNameWithPrefix("example-notification-rule")
@@ -597,8 +632,9 @@ func TestAccNotificationRuleResource_Name(t *testing.T) {
 }
 
 func TestAccNotificationRuleResource_NotificationAction(t *testing.T) {
-	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
-	t.Skip("Additional config is required for test")
+	if notificationTarget == "" {
+		t.Skip("NIOS_NOTIFICATION_REST_ENDPOINT_REF environment variable must be set for this test to run")
+	}
 	var resourceName = "nios_notification_rule.test_notification_action"
 	var v notification.NotificationRule
 	name := acctest.RandomNameWithPrefix("example-notification-rule")
@@ -612,15 +648,7 @@ func TestAccNotificationRuleResource_NotificationAction(t *testing.T) {
 				Config: testAccNotificationRuleNotificationAction(eventType, expressionList, name, notificationAction, notificationTarget, templateInstance),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNotificationRuleExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "notification_action", "RESTAPI_TEMPLATE_INSTANCE"),
-				),
-			},
-			// Update and Read
-			{
-				Config: testAccNotificationRuleNotificationAction(eventType, expressionList, name, notificationAction, notificationTarget, templateInstance),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckNotificationRuleExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "notification_action", "NOTIFICATION_ACTION_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "notification_action", notificationAction),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -629,7 +657,9 @@ func TestAccNotificationRuleResource_NotificationAction(t *testing.T) {
 }
 
 func TestAccNotificationRuleResource_NotificationTarget(t *testing.T) {
-	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
+	if notificationTarget == "" || syslogEndpoint == "" {
+		t.Skip("NIOS_NOTIFICATION_REST_ENDPOINT_REF and NIOS_SYSLOG_ENDPOINT_REF environment variables must be set for this test to run")
+	}
 	var resourceName = "nios_notification_rule.test_notification_target"
 	var v notification.NotificationRule
 	name := acctest.RandomNameWithPrefix("example-notification-rule")
@@ -652,7 +682,7 @@ func TestAccNotificationRuleResource_NotificationTarget(t *testing.T) {
 	}
 	updatedNotificationTarget := utils.GetNIOSSyslogEndpointRef()
 	updatedTemplateInstance := map[string]any{
-		"template": "Version5_REST_API_Session_Template",
+		"template": "Version5_Syslog_Action_Template",
 	}
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -681,7 +711,9 @@ func TestAccNotificationRuleResource_NotificationTarget(t *testing.T) {
 }
 
 func TestAccNotificationRuleResource_PublishSettings(t *testing.T) {
-	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
+	if utils.GetNIOSPxgridEndpointRef() == "" {
+		t.Skip("NIOS_PXGRID_ENDPOINT_REF environment variable must be set for this test to run")
+	}
 	var resourceName = "nios_notification_rule.test_publish_settings"
 	var v notification.NotificationRule
 	name := acctest.RandomNameWithPrefix("example-notification-rule")
@@ -727,11 +759,16 @@ func TestAccNotificationRuleResource_PublishSettings(t *testing.T) {
 }
 
 func TestAccNotificationRuleResource_ScheduledEvent(t *testing.T) {
-	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
-	t.Skip("Additional config is required for test")
+	t.Skip("Requires a Schedule_Event_Template notification template supporting SCHEDULE event type to be uploaded to the NIOS grid")
+	if notificationTarget == "" {
+		t.Skip("NIOS_NOTIFICATION_REST_ENDPOINT_REF environment variable must be set for this test to run")
+	}
 	var resourceName = "nios_notification_rule.test_scheduled_event"
 	var v notification.NotificationRule
 	name := acctest.RandomNameWithPrefix("example-notification-rule")
+	localTemplateInstance := map[string]any{
+		"template": "Schedule_Event_Template",
+	}
 
 	scheduleEvent := map[string]any{
 		"weekdays":          []string{"TUESDAY", "WEDNESDAY", "MONDAY"},
@@ -743,12 +780,13 @@ func TestAccNotificationRuleResource_ScheduledEvent(t *testing.T) {
 		"hour_of_day":       20,
 	}
 	scheduleEventUpdated := map[string]any{
-		"minutes_past_hour": 6,
-		"repeat":            "ONCE",
-		"day_of_month":      30,
-		"month":             1,
-		"year":              2026,
-		"hour_of_day":       20,
+		"weekdays":          []string{"MONDAY", "FRIDAY"},
+		"frequency":         "WEEKLY",
+		"every":             1,
+		"minutes_past_hour": 30,
+		"disable":           false,
+		"repeat":            "RECUR",
+		"hour_of_day":       14,
 	}
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -757,18 +795,30 @@ func TestAccNotificationRuleResource_ScheduledEvent(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccNotificationRuleScheduledEvent("SCHEDULE", expressionList, name, notificationAction, notificationTarget, templateInstance, scheduleEvent),
+				Config: testAccNotificationRuleScheduledEvent("SCHEDULE", expressionList, name, notificationAction, notificationTarget, localTemplateInstance, scheduleEvent),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNotificationRuleExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "scheduled_event", "SCHEDULED_EVENT_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "event_type", "SCHEDULE"),
+					resource.TestCheckResourceAttr(resourceName, "scheduled_event.repeat", "RECUR"),
+					resource.TestCheckResourceAttr(resourceName, "scheduled_event.frequency", "WEEKLY"),
+					resource.TestCheckResourceAttr(resourceName, "scheduled_event.every", "15"),
+					resource.TestCheckResourceAttr(resourceName, "scheduled_event.minutes_past_hour", "6"),
+					resource.TestCheckResourceAttr(resourceName, "scheduled_event.hour_of_day", "20"),
+					resource.TestCheckResourceAttr(resourceName, "scheduled_event.disable", "false"),
+					resource.TestCheckResourceAttr(resourceName, "scheduled_event.weekdays.#", "3"),
 				),
 			},
 			// Update and Read
 			{
-				Config: testAccNotificationRuleScheduledEvent("SCHEDULE", expressionList, name, notificationAction, notificationTarget, templateInstance, scheduleEventUpdated),
+				Config: testAccNotificationRuleScheduledEvent("SCHEDULE", expressionList, name, notificationAction, notificationTarget, localTemplateInstance, scheduleEventUpdated),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNotificationRuleExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "scheduled_event", "SCHEDULED_EVENT_UPDATE_REPLACE_ME"),
+					resource.TestCheckResourceAttr(resourceName, "scheduled_event.repeat", "RECUR"),
+					resource.TestCheckResourceAttr(resourceName, "scheduled_event.frequency", "WEEKLY"),
+					resource.TestCheckResourceAttr(resourceName, "scheduled_event.every", "1"),
+					resource.TestCheckResourceAttr(resourceName, "scheduled_event.minutes_past_hour", "30"),
+					resource.TestCheckResourceAttr(resourceName, "scheduled_event.hour_of_day", "14"),
+					resource.TestCheckResourceAttr(resourceName, "scheduled_event.weekdays.#", "2"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -777,7 +827,9 @@ func TestAccNotificationRuleResource_ScheduledEvent(t *testing.T) {
 }
 
 func TestAccNotificationRuleResource_TemplateInstance(t *testing.T) {
-	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
+	if notificationTarget == "" || syslogEndpoint == "" {
+		t.Skip("NIOS_NOTIFICATION_REST_ENDPOINT_REF environment variable must be set for this test to run")
+	}
 	var resourceName = "nios_notification_rule.test_template_instance"
 	var v notification.NotificationRule
 	name := acctest.RandomNameWithPrefix("example-notification-rule")
@@ -798,9 +850,9 @@ func TestAccNotificationRuleResource_TemplateInstance(t *testing.T) {
 			"op": "ENDLIST",
 		},
 	}
-	updatedNotificationTarget := "${nios_misc_syslog_endpoint.syslogendpoint.ref}"
+	updatedNotificationTarget := syslogEndpoint
 	updatedTemplateInstance := map[string]any{
-		"template": "Version5_DNS_Zone_and_Records",
+		"template": "Version5_Syslog_Action_Template",
 	}
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -820,7 +872,7 @@ func TestAccNotificationRuleResource_TemplateInstance(t *testing.T) {
 				Config: testAccNotificationRuleTemplateInstance(updatedEventType, updatedExpressionList, name, notificationAction, updatedNotificationTarget, updatedTemplateInstance),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNotificationRuleExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "template_instance.template", "Version5_DNS_Zone_and_Records"),
+					resource.TestCheckResourceAttr(resourceName, "template_instance.template", "Version5_Syslog_Action_Template"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -829,7 +881,9 @@ func TestAccNotificationRuleResource_TemplateInstance(t *testing.T) {
 }
 
 func TestAccNotificationRuleResource_UsePublishSettings(t *testing.T) {
-	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
+	if notificationTarget == "" || utils.GetNIOSPxgridEndpointRef() == "" {
+		t.Skip("NIOS_NOTIFICATION_REST_ENDPOINT_REF and NIOS_PXGRID_ENDPOINT_REF environment variables must be set for this test to run")
+	}
 	var resourceName = "nios_notification_rule.test_use_publish_settings"
 	var v notification.NotificationRule
 	name := acctest.RandomNameWithPrefix("example-notification-rule")
@@ -925,23 +979,6 @@ func testAccCheckNotificationRuleDisappears(ctx context.Context, v *notification
 	}
 }
 
-func testAccBasWithSyslogEndpoint(name string) string {
-	return fmt.Sprintf(`
-resource "nios_misc_syslog_endpoint" "test" {
-    name = %q
-    outbound_member_type = "GM"
-    syslog_servers = [
-		{
-		  address         = "10.1.1.1"
-		  port            = 514
-		  connection_type = "udp"
-		  format          = "formatted"
-		}
-  	]
-}
-`, name)
-}
-
 func testAccNotificationRuleBasicConfig(eventType string, expressionList []map[string]any, name, notificationAction, notificationTarget string, templateInstance map[string]any) string {
 	expressionListHCL := utils.ConvertSliceOfMapsToHCL(expressionList)
 	templateInstanceHCL := utils.ConvertMapToHCL(templateInstance)
@@ -1000,7 +1037,7 @@ func testAccNotificationRuleEnableEventDeduplication(eventType string, expressio
 	expressionListHCL := utils.ConvertSliceOfMapsToHCL(expressionList)
 	templateInstanceHCL := utils.ConvertMapToHCL(templateInstance)
 	eventDeduplicationFieldsHCL := utils.ConvertStringSliceToHCL(eventDeduplicationFields)
-	config := fmt.Sprintf(`
+	return fmt.Sprintf(`
 resource "nios_notification_rule" "test_enable_event_deduplication" {
     event_type = %q
     expression_list = %s
@@ -1012,14 +1049,13 @@ resource "nios_notification_rule" "test_enable_event_deduplication" {
 	event_deduplication_fields = %s
 }
 `, eventType, expressionListHCL, name, notificationAction, notificationTarget, templateInstanceHCL, enableEventDeduplication, eventDeduplicationFieldsHCL)
-	return strings.Join([]string{testAccBasWithSyslogEndpoint(acctest.RandomName()), config}, "")
 }
 
 func testAccNotificationRuleEnableEventDeduplicationLog(eventType string, expressionList []map[string]any, name, notificationAction, notificationTarget string, templateInstance map[string]any, enableEventDeduplicationLog string, eventDeduplicationFields []string) string {
 	expressionListHCL := utils.ConvertSliceOfMapsToHCL(expressionList)
 	templateInstanceHCL := utils.ConvertMapToHCL(templateInstance)
 	eventDeduplicationFieldsHCL := utils.ConvertStringSliceToHCL(eventDeduplicationFields)
-	config := fmt.Sprintf(`
+	return fmt.Sprintf(`
 resource "nios_notification_rule" "test_enable_event_deduplication_log" {
     event_type = %q
     expression_list = %s
@@ -1031,7 +1067,6 @@ resource "nios_notification_rule" "test_enable_event_deduplication_log" {
 	event_deduplication_fields = %s
 }
 `, eventType, expressionListHCL, name, notificationAction, notificationTarget, templateInstanceHCL, enableEventDeduplicationLog, eventDeduplicationFieldsHCL)
-	return strings.Join([]string{testAccBasWithSyslogEndpoint(acctest.RandomName()), config}, "")
 }
 
 func testAccNotificationRuleEventDeduplicationFields(eventType string, expressionList []map[string]any, name, notificationAction, notificationTarget string, templateInstance map[string]any, eventDeduplicationFields []string) string {
@@ -1069,9 +1104,10 @@ resource "nios_notification_rule" "test_event_deduplication_lookback_period" {
 `, eventType, expressionListHCL, name, notificationAction, notificationTarget, templateInstanceHCL, eventDeduplicationLookbackPeriod, eventDeduplicationFieldsHCL)
 }
 
-func testAccNotificationRuleEventPriority(eventType string, expressionList []map[string]any, name, notificationAction, notificationTarget string, templateInstance map[string]any, eventPriority string) string {
+func testAccNotificationRuleEventPriority(eventType string, expressionList []map[string]any, name, notificationAction, notificationTarget string, templateInstance map[string]any, scheduledEvent map[string]any, eventPriority string) string {
 	expressionListHCL := utils.ConvertSliceOfMapsToHCL(expressionList)
 	templateInstanceHCL := utils.ConvertMapToHCL(templateInstance)
+	scheduledEventHCL := utils.ConvertMapToHCL(scheduledEvent)
 	return fmt.Sprintf(`
 resource "nios_notification_rule" "test_event_priority" {
     event_type = %q
@@ -1080,9 +1116,10 @@ resource "nios_notification_rule" "test_event_priority" {
     notification_action = %q
     notification_target = %q
     template_instance = %s
+    scheduled_event = %s
     event_priority = %q
 }
-`, eventType, expressionListHCL, name, notificationAction, notificationTarget, templateInstanceHCL, eventPriority)
+`, eventType, expressionListHCL, name, notificationAction, notificationTarget, templateInstanceHCL, scheduledEventHCL, eventPriority)
 }
 
 func testAccNotificationRuleEventType(eventType string, expressionList []map[string]any, name, notificationAction, notificationTarget string, templateInstance map[string]any) string {

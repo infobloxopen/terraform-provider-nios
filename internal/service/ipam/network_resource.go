@@ -413,6 +413,31 @@ func (r *NetworkResource) Delete(ctx context.Context, req resource.DeleteRequest
 
 	resourceIdentifier := utils.ResolveIdentifier(data.Uuid, data.Ref)
 
+	// NIOS rejects deleting a network that has VLANs assigned. Clear them first.
+	if !data.Vlans.IsNull() && !data.Vlans.IsUnknown() && len(data.Vlans.Elements()) > 0 {
+		clearPayload := ipam.NewNetwork()
+		clearPayload.SetVlans([]ipam.NetworkVlans{})
+
+		clearErr := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+			_, httpRes, callErr := r.client.IPAMAPI.
+				NetworkAPI.
+				Update(ctx, resourceIdentifier).
+				Network(*clearPayload).
+				Execute()
+			if httpRes != nil {
+				if httpRes.StatusCode == http.StatusNotFound {
+					return 0, nil
+				}
+				return httpRes.StatusCode, callErr
+			}
+			return 0, callErr
+		})
+		if clearErr != nil {
+			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to clear VLANs from Network before deletion, got error: %s", clearErr))
+			return
+		}
+	}
+
 	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
 		httpRes, callErr := r.client.IPAMAPI.
 			NetworkAPI.
@@ -622,7 +647,7 @@ func (r *NetworkResource) ValidateConfig(ctx context.Context, req resource.Valid
 	if !data.SubscribeSettings.IsNull() && !data.SubscribeSettings.IsUnknown() {
 		attrs := data.SubscribeSettings.Attributes()
 		enabledAttrs, exists := attrs["enabled_attributes"]
-		if !exists || enabledAttrs.IsNull() {
+		if !exists || enabledAttrs.IsNull() || enabledAttrs.IsUnknown() {
 			resp.Diagnostics.AddAttributeError(
 				path.Root("subscribe_settings").AtName("enabled_attributes"),
 				"Missing Required Attribute",
