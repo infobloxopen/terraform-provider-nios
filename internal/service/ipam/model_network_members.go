@@ -81,13 +81,6 @@ func (m *NetworkMembersModel) Expand(ctx context.Context, diags *diag.Diagnostic
 		Ipv6addr: flex.ExpandStringPointer(m.Ipv6addr),
 		Name:     flex.ExpandStringPointer(m.Name),
 	}
-	if m.Struct.ValueString() == "msdhcpserver" {
-		if !m.Ipv4addr.IsNull() && !m.Ipv4addr.IsUnknown() {
-			to.Address = flex.ExpandStringPointer(m.Ipv4addr)
-		} else if !m.Ipv6addr.IsNull() && !m.Ipv6addr.IsUnknown() {
-			to.Address = flex.ExpandStringPointer(m.Ipv6addr)
-		}
-	}
 	return to
 }
 
@@ -111,10 +104,6 @@ func (m *NetworkMembersModel) Flatten(ctx context.Context, from *ipam.NetworkMem
 	}
 	m.Struct = flex.FlattenStringPointer(from.Struct)
 	m.Ipv4addr = flex.FlattenStringPointer(from.Ipv4addr)
-	// WAPI v2.14 stores FQDN msdhcpserver identifiers in 'name', not 'ipv4addr'.
-	if (m.Ipv4addr.IsNull() || m.Ipv4addr.ValueString() == "") && m.Struct.ValueString() == "msdhcpserver" && from.Name != nil && *from.Name != "" {
-		m.Ipv4addr = flex.FlattenStringPointer(from.Name)
-	}
 	m.Ipv6addr = flex.FlattenStringPointer(from.Ipv6addr)
 	m.Name = flex.FlattenStringPointer(from.Name)
 }
