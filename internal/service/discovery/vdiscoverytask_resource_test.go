@@ -1350,6 +1350,7 @@ func TestAccVdiscoverytaskResource_ServiceAccountFile(t *testing.T) {
 		},
 	})
 }
+
 func TestAccVdiscoverytaskResource_SyncChildAccounts(t *testing.T) {
 	var resourceName = "nios_discovery_vdiscovery_task.test_sync_child_accounts"
 	var v discovery.Vdiscoverytask

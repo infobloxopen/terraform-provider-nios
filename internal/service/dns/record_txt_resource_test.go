@@ -405,6 +405,31 @@ func TestAccRecordTxtResource_UseTtl(t *testing.T) {
 	})
 }
 
+func TestAccRecordTxtResource_View(t *testing.T) {
+	var resourceName = "nios_dns_record_txt.test_view"
+	var v dns.RecordTxt
+	name := acctest.RandomNameWithPrefix("record-txt") + ".example.com"
+	text := "v=spf1 include:example.com ~all"
+	viewName := acctest.RandomNameWithPrefix("view")
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// Create and Read
+			{
+				Config: testAccRecordTxtView(name, text, viewName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckRecordTxtExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "view", viewName),
+				),
+			},
+			// Update is not applicable as view is an immutable field.
+			// Delete testing automatically occurs in TestCase
+		},
+	})
+}
+
 func testAccCheckRecordTxtExists(ctx context.Context, resourceName string, v *dns.RecordTxt) resource.TestCheckFunc {
 	// Verify the resource exists in the cloud
 	return func(state *terraform.State) error {
@@ -590,4 +615,23 @@ resource "nios_dns_record_txt" "test_use_ttl" {
 	ttl = %d
 }
 `, name, text, useTtl, ttl)
+}
+
+func testAccRecordTxtView(name, text, view string) string {
+	return fmt.Sprintf(`
+resource "nios_dns_view" "test_dns_view" {
+	name = %q
+}
+
+resource "nios_dns_zone_auth" "test_dns_zone" {
+	fqdn = "example.com"
+	view = nios_dns_view.test_dns_view.name
+}
+
+resource "nios_dns_record_txt" "test_view" {
+	name = %q
+	text = %q
+	view = nios_dns_zone_auth.test_dns_zone.view
+}
+`, view, name, text)
 }

@@ -191,6 +191,38 @@ func TestAccRecordNsResource_Nameserver(t *testing.T) {
 	})
 }
 
+func TestAccRecordNsResource_View(t *testing.T) {
+	var resourceName = "nios_dns_record_ns.test_view"
+	var v dns.RecordNs
+	name := "example.com"
+	nameserver := acctest.RandomNameWithPrefix("nameserver") + ".example.com"
+	viewName := acctest.RandomNameWithPrefix("view")
+	addresses := []map[string]any{
+		{
+			"address":         "20.0.0.0",
+			"auto_create_ptr": false,
+		},
+	}
+	addressesHCL := FormatZoneNameServersToHCL(addresses)
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.PreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// Create and Read
+			{
+				Config: testAccRecordNsView(name, nameserver, addressesHCL, viewName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckRecordNsExists(context.Background(), resourceName, &v),
+					resource.TestCheckResourceAttr(resourceName, "view", viewName),
+				),
+			},
+			// Update is not applicable as view is an immutable field.
+			// Delete testing automatically occurs in TestCase
+		},
+	})
+}
+
 func testAccCheckRecordNsExists(ctx context.Context, resourceName string, v *dns.RecordNs) resource.TestCheckFunc {
 	// Verify the resource exists in the cloud
 	return func(state *terraform.State) error {
@@ -298,4 +330,24 @@ func FormatZoneNameServersToHCL(servers []map[string]any) string {
 	return fmt.Sprintf(`[
 %s
   ]`, strings.Join(serverBlocks, ",\n"))
+}
+
+func testAccRecordNsView(name, nameserver, addresses, view string) string {
+	return fmt.Sprintf(`
+resource "nios_dns_view" "test_dns_view" {
+	name = %q
+}
+
+resource "nios_dns_zone_auth" "test_dns_zone" {
+	fqdn = "example.com"
+	view = nios_dns_view.test_dns_view.name
+}
+
+resource "nios_dns_record_ns" "test_view" {
+    name        = %q
+    nameserver  = %q
+    addresses   = %s
+    view        = nios_dns_zone_auth.test_dns_zone.view
+}
+`, view, name, nameserver, addresses)
 }
