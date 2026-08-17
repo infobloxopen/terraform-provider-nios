@@ -396,7 +396,10 @@ func TestAccIpv6rangeResource_DiscoveryBlackoutSetting(t *testing.T) {
 }
 
 func TestAccIpv6rangeResource_DiscoveryMember(t *testing.T) {
-	t.Skip("Additional configuration is required to run this test")
+	gridMemberHostname := utils.GetNIOSDiscoveryMemberHostName()
+	if gridMemberHostname == "" || utils.GetNIOSDiscoveryMemberConfigAddrType() != "BOTH" {
+		t.Skip("Skipping test: NIOS_DISCOVERY_MEMBER_HOSTNAME must be set and Member should have IPv6 enabled")
+	}
 	var resourceName = "nios_dhcp_ipv6range.test_discovery_member"
 	var v dhcp.Ipv6range
 	view := acctest.RandomNameWithPrefix("network-view")
@@ -407,18 +410,18 @@ func TestAccIpv6rangeResource_DiscoveryMember(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccIpv6rangeDiscoveryMember(view, "14::1", "14::10", "infoblox.member1", "true"),
+				Config: testAccIpv6rangeDiscoveryMember(view, "14::1", "14::10", gridMemberHostname, "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6rangeExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "discovery_member", "infoblox.member1"),
+					resource.TestCheckResourceAttr(resourceName, "discovery_member", gridMemberHostname),
 				),
 			},
-			// Update and Read
+			// Update and Read - disable discovery
 			{
-				Config: testAccIpv6rangeDiscoveryMember(view, "14::1", "14::10", "infoblox.member2", "true"),
+				Config: testAccIpv6rangeDiscoveryMemberDisabled(view, "14::1", "14::10"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6rangeExists(context.Background(), resourceName, &v),
-					resource.TestCheckResourceAttr(resourceName, "discovery_member", "infoblox.member2"),
+					resource.TestCheckResourceAttr(resourceName, "use_enable_discovery", "false"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -427,7 +430,10 @@ func TestAccIpv6rangeResource_DiscoveryMember(t *testing.T) {
 }
 
 func TestAccIpv6rangeResource_EnableDiscovery(t *testing.T) {
-	t.Skip("Additional configuration is required to run this test")
+	gridMemberHostname := utils.GetNIOSDiscoveryMemberHostName()
+	if gridMemberHostname == "" || utils.GetNIOSDiscoveryMemberConfigAddrType() != "BOTH" {
+		t.Skip("Skipping test: NIOS_DISCOVERY_MEMBER_HOSTNAME must be set and Member should have IPv6 enabled")
+	}
 	var resourceName = "nios_dhcp_ipv6range.test_enable_discovery"
 	var v dhcp.Ipv6range
 	view := acctest.RandomNameWithPrefix("network-view")
@@ -438,7 +444,7 @@ func TestAccIpv6rangeResource_EnableDiscovery(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read
 			{
-				Config: testAccIpv6rangeEnableDiscovery(view, "14::1", "14::10", "true"),
+				Config: testAccIpv6rangeEnableDiscovery(view, "14::1", "14::10", "true", gridMemberHostname),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6rangeExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "enable_discovery", "true"),
@@ -446,7 +452,7 @@ func TestAccIpv6rangeResource_EnableDiscovery(t *testing.T) {
 			},
 			// Update and Read
 			{
-				Config: testAccIpv6rangeEnableDiscovery(view, "14::1", "14::10", "false"),
+				Config: testAccIpv6rangeEnableDiscovery(view, "14::1", "14::10", "false", gridMemberHostname),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIpv6rangeExists(context.Background(), resourceName, &v),
 					resource.TestCheckResourceAttr(resourceName, "enable_discovery", "false"),
@@ -709,7 +715,6 @@ func TestAccIpv6rangeResource_LogicFilterRules(t *testing.T) {
 }
 
 func TestAccIpv6rangeResource_Member(t *testing.T) {
-	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_dhcp_ipv6range.test_member"
 	var v dhcp.Ipv6range
 	view := "default"
@@ -1001,7 +1006,6 @@ func TestAccIpv6rangeResource_SamePortControlDiscoveryBlackout(t *testing.T) {
 }
 
 func TestAccIpv6rangeResource_ServerAssociationType(t *testing.T) {
-	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	var resourceName = "nios_dhcp_ipv6range.test_server_association_type"
 	var v dhcp.Ipv6range
 	view := "default"
@@ -1510,17 +1514,32 @@ resource "nios_dhcp_ipv6range" "test_discovery_member" {
 	return strings.Join([]string{testAccBaseWithIpv6NetworkandView(view), config}, "")
 }
 
-func testAccIpv6rangeEnableDiscovery(view, startAddr, endAddr string, enableDiscovery string) string {
+func testAccIpv6rangeDiscoveryMemberDisabled(view, startAddr, endAddr string) string {
+	config := fmt.Sprintf(`
+resource "nios_dhcp_ipv6range" "test_discovery_member" {
+	network = nios_ipam_ipv6network.test.network
+	start_addr = %q
+	end_addr = %q
+	network_view = nios_ipam_network_view.test.name
+	use_enable_discovery = false
+}
+`, startAddr, endAddr)
+	return strings.Join([]string{testAccBaseWithIpv6NetworkandView(view), config}, "")
+}
+
+func testAccIpv6rangeEnableDiscovery(view, startAddr, endAddr string, enableDiscovery string, discoveryMember string) string {
 	config := fmt.Sprintf(`
 resource "nios_dhcp_ipv6range" "test_enable_discovery" {
-    network = nios_ipam_ipv6network.test.network
+    network = nios_ipam_ipv6network.test1.network
     start_addr = %q
     end_addr = %q
     network_view = nios_ipam_network_view.test.name
-    enable_discovery = %q
+    enable_discovery = %s
+    discovery_member = %q
+	use_enable_discovery = true
 }
-`, startAddr, endAddr, enableDiscovery)
-	return strings.Join([]string{testAccBaseWithIpv6NetworkandView(view), config}, "")
+`, startAddr, endAddr, enableDiscovery, discoveryMember)
+	return strings.Join([]string{testAccBaseWithTwoIpv6NetworksandView(view), config}, "")
 }
 
 func testAccIpv6rangeEndAddr(view, startAddr, endAddr string) string {
@@ -1907,11 +1926,13 @@ resource "nios_ipam_ipv6network" "test" {
     network = "140::/64"
 	network_view = %q
 	members = [{
-		name = %q
-	},
-	{
-		name = %q
-	}]
+			struct = "dhcpmember"
+			name = %q
+		},
+		{
+			struct = "dhcpmember"
+			name = %q
+		}]
 }
 `, view, member1, member2)
 }
@@ -1922,6 +1943,7 @@ resource "nios_ipam_ipv6network" "test" {
     network = "141::/64"
 	network_view = %q
 	members = [{
+		struct = "dhcpmember"
 		name = %q
 	}]
 }

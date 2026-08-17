@@ -1521,7 +1521,6 @@ func TestAccIpv6fixedaddressResource_UsePreferredLifetime(t *testing.T) {
 }
 
 func TestAccIpv6fixedaddressResource_UseSnmp3Credential(t *testing.T) {
-	// t.Skip("Skipping test as SNMP3 Credential are not set up in the GRID")
 	var resourceName = "nios_dhcp_ipv6fixedaddress.test_use_snmp3_credential"
 	var v dhcp.Ipv6fixedaddress
 	ipv6Network := "2001:db8:abcd:1231::/64"
@@ -1555,7 +1554,6 @@ func TestAccIpv6fixedaddressResource_UseSnmp3Credential(t *testing.T) {
 }
 
 func TestAccIpv6fixedaddressResource_UseSnmpCredential(t *testing.T) {
-	t.Skip("Skipping test as SNMP Credential are not set up in the GRID")
 	var resourceName = "nios_dhcp_ipv6fixedaddress.test_use_snmp_credential"
 	var v dhcp.Ipv6fixedaddress
 	ipv6Network := "2001:db8:abcd:1231::/64"

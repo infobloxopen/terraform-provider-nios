@@ -55,6 +55,10 @@ func (m *FixedAddressStructMsServerModel) Expand(ctx context.Context, diags *dia
 		Struct:   flex.ExpandStringPointer(m.Struct),
 		Ipv4addr: flex.ExpandStringPointer(m.Ipv4addr),
 	}
+	// WAPI v2.14 requires 'address' when querying by struct=msdhcpserver.
+	if m.Struct.ValueString() == "msdhcpserver" && !m.Ipv4addr.IsNull() && !m.Ipv4addr.IsUnknown() {
+		to.AdditionalProperties = map[string]interface{}{"address": flex.ExpandStringPointer(m.Ipv4addr)}
+	}
 	return to
 }
 

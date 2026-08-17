@@ -61,7 +61,6 @@ func TestAccFixedaddressDataSource_ExtAttrFilters(t *testing.T) {
 }
 
 func TestAccFixedaddressDataSource_MsServerStruct(t *testing.T) {
-	t.Skip("TODO - TO BE FIXED IN FUTURE RELEASES FOR INTEGRATION TESTS")
 	dataSourceName := "data.nios_dhcp_fixed_address.test"
 	macAddress := "00:16:3e:00:00:01"
 	ip := acctest.RandomIPWithSpecificOctetsSet("189.0.0")
@@ -192,7 +191,7 @@ resource "nios_ipam_network" "example_network" {
 	members = [
 		{
 			struct = "msdhcpserver"
-			ipv4addr = "example_server"
+			address = "example_server"
 		}
 	]
 }
@@ -201,7 +200,7 @@ resource "nios_dhcp_range" "test_range" {
     start_addr = "189.0.0.25"
 	end_addr = "189.0.0.30"
 	ms_server = {
-		ipv4addr = nios_ipam_network.example_network.members[0].ipv4addr
+		ipv4addr = nios_ipam_network.example_network.members[0].address
 	}
 	server_association_type = "MS_SERVER"
 }

@@ -53,6 +53,10 @@ func (m *RangeMsServerModel) Expand(ctx context.Context, diags *diag.Diagnostics
 	to := &dhcp.RangeMsServer{
 		Ipv4addr: flex.ExpandStringPointer(m.Ipv4addr),
 	}
+	// WAPI v2.14 requires 'address' for msdhcpserver.
+	if !m.Ipv4addr.IsNull() && !m.Ipv4addr.IsUnknown() {
+		to.Address = flex.ExpandStringPointer(m.Ipv4addr)
+	}
 	return to
 }
 
@@ -75,4 +79,8 @@ func (m *RangeMsServerModel) Flatten(ctx context.Context, from *dhcp.RangeMsServ
 		*m = RangeMsServerModel{}
 	}
 	m.Ipv4addr = flex.FlattenStringPointer(from.Ipv4addr)
+	// WAPI v2.14 stores FQDN ms_server identifiers in 'name', not 'ipv4addr'.
+	if (m.Ipv4addr.IsNull() || m.Ipv4addr.ValueString() == "") && from.Name != nil && *from.Name != "" {
+		m.Ipv4addr = flex.FlattenStringPointer(from.Name)
+	}
 }

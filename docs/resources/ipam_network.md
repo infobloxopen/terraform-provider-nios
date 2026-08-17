@@ -384,6 +384,7 @@ Required:
 
 Optional:
 
+- `address` (String) The IPv4 Address, IPv6 Address or FQDN of the Microsoft server. Required when 'struct' is 'msdhcpserver', and not supported when 'struct' is 'dhcpmember'.
 - `ipv4addr` (String) The IPv4 Address or FQDN of the Microsoft server.
 - `ipv6addr` (String) The IPv6 Address of the Grid Member.
 - `name` (String) The Grid member name
