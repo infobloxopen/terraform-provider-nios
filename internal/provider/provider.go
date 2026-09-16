@@ -7,6 +7,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/action"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/list"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
@@ -43,6 +44,8 @@ import (
 var _ provider.Provider = &NIOSProvider{}
 
 var _ provider.ProviderWithListResources = &NIOSProvider{}
+
+var _ provider.ProviderWithActions = &NIOSProvider{}
 
 const terraformInternalIDEA = "Terraform Internal ID"
 
@@ -158,6 +161,13 @@ func (p *NIOSProvider) Configure(ctx context.Context, req provider.ConfigureRequ
 	resp.DataSourceData = client
 	resp.ResourceData = client
 	resp.ListResourceData = client
+	resp.ActionData = client
+}
+
+func (p *NIOSProvider) Actions(_ context.Context) []func() action.Action {
+	return []func() action.Action{
+		grid.NewRestartServicesAction,
+	}
 }
 
 func (p *NIOSProvider) Resources(_ context.Context) []func() resource.Resource {
