@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/list"
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
 	"github.com/hashicorp/terraform-plugin-framework/provider/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -61,6 +62,9 @@ type NIOSProviderModel struct {
 	ProxySearch        types.String `tfsdk:"proxy_search"`
 	RetryTimeout       types.Int64  `tfsdk:"retry_timeout"`
 	ManageInternalIdEA types.Bool   `tfsdk:"manage_internal_id_ea"`
+	SslVerify          types.Bool   `tfsdk:"ssl_verify"`
+	CACertFile         types.String `tfsdk:"ca_cert_file"`
+	CACertPEM          types.String `tfsdk:"ca_cert_pem"`
 }
 
 func (p *NIOSProvider) Metadata(_ context.Context, _ provider.MetadataRequest, resp *provider.MetadataResponse) {
@@ -103,6 +107,25 @@ func (p *NIOSProvider) Schema(_ context.Context, _ provider.SchemaRequest, resp 
 				Optional:    true,
 				Description: "Determines whether the provider manages the Terraform Internal ID extensible attribute in NIOS. This attribute is required by the provider to store the Terraform resource ID corresponding to NIOS objects. When true, the provider ensures the attribute exists and manages its lifecycle. When false, the provider does not validate, create, update, or otherwise manage the attribute. Default value: true",
 			},
+			"ssl_verify": schema.BoolAttribute{
+				Optional:    true,
+				Description: "Enables TLS certificate verification when connecting directly to a NIOS Grid. Default value: false, for backward compatibility with Grids serving a self-signed certificate. Connections made through NIOS Portal passthrough are always verified regardless of this setting. Can also be set with the NIOS_SSL_VERIFY environment variable.",
+			},
+			"ca_cert_file": schema.StringAttribute{
+				Optional:    true,
+				Description: "Path to a PEM-encoded CA certificate bundle used to verify the Grid's TLS certificate when ssl_verify is true, for Grids using a certificate issued by an internal CA. If neither ca_cert_file nor ca_cert_pem is set, the system trust store is used. Can also be set with the CA_CERT_PATH environment variable.",
+				Validators: []validator.String{
+					stringvalidator.ConflictsWith(path.MatchRoot("ca_cert_pem")),
+				},
+			},
+			"ca_cert_pem": schema.StringAttribute{
+				Optional:    true,
+				Sensitive:   true,
+				Description: "Inline PEM-encoded CA certificate bundle used to verify the Grid's TLS certificate when ssl_verify is true, for Grids using a certificate issued by an internal CA. If neither ca_cert_file nor ca_cert_pem is set, the system trust store is used.",
+				Validators: []validator.String{
+					stringvalidator.ConflictsWith(path.MatchRoot("ca_cert_file")),
+				},
+			},
 		},
 	}
 }
@@ -116,14 +139,23 @@ func (p *NIOSProvider) Configure(ctx context.Context, req provider.ConfigureRequ
 		return
 	}
 
-	client := niosclient.NewAPIClient(
+	clientOptions := []option.ClientOption{
 		option.WithClientName(fmt.Sprintf("terraform/%s#%s", p.version, p.commit)),
 		option.WithNIOSUsername(data.NIOSUsername.ValueString()),
 		option.WithNIOSPassword(data.NIOSPassword.ValueString()),
 		option.WithNIOSHostUrl(data.NIOSHostURL.ValueString()),
 		option.WithDebug(true),
 		option.WithProxyURL(data.ProxyURL.ValueString()),
-	)
+		option.WithSslVerify(data.SslVerify.ValueBool()),
+	}
+
+	if data.CACertPEM.ValueString() != "" {
+		clientOptions = append(clientOptions, option.WithCACert([]byte(data.CACertPEM.ValueString())))
+	} else if data.CACertFile.ValueString() != "" {
+		clientOptions = append(clientOptions, option.WithCACertPath(data.CACertFile.ValueString()))
+	}
+
+	client := niosclient.NewAPIClient(clientOptions...)
 
 	// Set ProxySearch configuration
 	config.SetProxySearch(data.ProxySearch.ValueString())

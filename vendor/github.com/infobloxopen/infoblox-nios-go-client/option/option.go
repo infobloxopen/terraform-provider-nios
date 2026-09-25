@@ -1,8 +1,10 @@
 package option
 
 import (
+	"log"
 	"net/http"
 	"net/url"
+	"os"
 	"strings"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/internal"
@@ -42,6 +44,52 @@ func WithNIOSPassword(NIOSPassword string) ClientOption {
 	}
 }
 
+// WithNIOSPassthrough returns a ClientOption that reaches NIOS through the Infoblox Portal.
+func WithNIOSPassthrough(enabled bool) ClientOption {
+	return func(configuration *internal.Configuration) {
+		configuration.NIOSPassthrough = enabled
+	}
+}
+
+// WithNIOSLicenseUID returns a ClientOption that sets the license UID of the NIOS Grid to reach
+// through the Infoblox Portal. Can also be configured using the `NIOS_LICENSE_UID` environment variable.
+func WithNIOSLicenseUID(NIOSLicenseUID string) ClientOption {
+	return func(configuration *internal.Configuration) {
+		if NIOSLicenseUID != "" {
+			configuration.NIOSLicenseUID = NIOSLicenseUID
+		}
+	}
+}
+
+// WithPortalUrl returns a ClientOption that sets the Infoblox Portal WAPI endpoint used in
+// passthrough mode. Can also be configured using the `INFOBLOX_PORTAL_URL` environment variable.
+func WithPortalUrl(portalURL string) ClientOption {
+	return func(configuration *internal.Configuration) {
+		if portalURL != "" {
+			configuration.PortalURL = portalURL
+		}
+	}
+}
+
+// WithPortalAPIKey returns a ClientOption that sets the Infoblox Portal API key authenticating
+// passthrough requests. Can also be configured using the `INFOBLOX_PORTAL_KEY` environment variable.
+func WithPortalAPIKey(portalAPIKey string) ClientOption {
+	return func(configuration *internal.Configuration) {
+		if portalAPIKey != "" {
+			configuration.PortalAPIKey = portalAPIKey
+		}
+	}
+}
+
+// ValidatePassthrough reports whether the options describe a usable passthrough setup.
+func ValidatePassthrough(options ...ClientOption) error {
+	configuration := internal.NewConfiguration()
+	for _, opt := range options {
+		opt(configuration)
+	}
+	return configuration.CheckPortalConfig()
+}
+
 // WithHTTPClient returns a ClientOption that sets the HTTPClient to use for the SDK.
 // Optional. The default HTTPClient will be used if not provided.
 func WithHTTPClient(httpClient *http.Client) ClientOption {
@@ -76,6 +124,47 @@ func WithClientName(clientName string) ClientOption {
 func WithDebug(debug bool) ClientOption {
 	return func(configuration *internal.Configuration) {
 		configuration.Debug = debug
+	}
+}
+
+// WithSslVerify returns a ClientOption that enables or disables TLS certificate verification
+// for direct-to-Grid connections. Can also be configured using the `NIOS_SSL_VERIFY` environment
+// variable. Optional. Defaults to false for backward compatibility; connections through the
+// Infoblox Portal are always verified regardless of this setting.
+func WithSslVerify(sslVerify bool) ClientOption {
+	return func(configuration *internal.Configuration) {
+		configuration.SslVerify = sslVerify
+	}
+}
+
+// WithCACert returns a ClientOption that sets a PEM-encoded CA certificate bundle used to verify
+// the NIOS Grid's TLS certificate when SslVerify is enabled. Can also be configured using the
+// `CA_CERT_PATH` environment variable.
+// Optional. If not provided, the system trust store is used.
+func WithCACert(caCertPEM []byte) ClientOption {
+	return func(configuration *internal.Configuration) {
+		if len(caCertPEM) > 0 {
+			configuration.CACert = caCertPEM
+		}
+	}
+}
+
+// WithCACertPath returns a ClientOption that reads a PEM-encoded CA certificate bundle from the
+// given file path and uses it to verify the NIOS Grid's TLS certificate when SslVerify is enabled.
+// Can also be configured using the `CA_CERT_PATH` environment variable.
+// Optional. If not provided, the system trust store is used.
+func WithCACertPath(caCertPath string) ClientOption {
+	return func(configuration *internal.Configuration) {
+		caCertPath = strings.TrimSpace(caCertPath)
+		if caCertPath == "" {
+			return
+		}
+		data, err := os.ReadFile(caCertPath)
+		if err != nil {
+			log.Printf("Error reading CA certificate file '%s': %v", caCertPath, err)
+			return
+		}
+		configuration.CACert = data
 	}
 }
 
