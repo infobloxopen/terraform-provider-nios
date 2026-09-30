@@ -109,11 +109,11 @@ func (p *NIOSProvider) Schema(_ context.Context, _ provider.SchemaRequest, resp 
 			},
 			"ssl_verify": schema.BoolAttribute{
 				Optional:    true,
-				Description: "Enables TLS certificate verification when connecting directly to a NIOS Grid. Default value: false, for backward compatibility with Grids serving a self-signed certificate. Connections made through NIOS Portal passthrough are always verified regardless of this setting. Can also be set with the NIOS_SSL_VERIFY environment variable.",
+				Description: "Enables TLS certificate verification when connecting directly to a NIOS Grid. Defaults to false. Connections made through NIOS Portal passthrough are always verified regardless of this setting. Can also be set with the NIOS_SSL_VERIFY environment variable.",
 			},
 			"ca_cert_file": schema.StringAttribute{
 				Optional:    true,
-				Description: "Path to a PEM-encoded CA certificate bundle used to verify the Grid's TLS certificate when ssl_verify is true, for Grids using a certificate issued by an internal CA. If neither ca_cert_file nor ca_cert_pem is set, the system trust store is used. Can also be set with the CA_CERT_PATH environment variable.",
+				Description: "Path to a PEM-encoded CA certificate bundle used to verify the Grid's TLS certificate when ssl_verify is true, for Grids using a certificate issued by an internal CA. Can also be set with the CA_CERT_PATH environment variable.",
 				Validators: []validator.String{
 					stringvalidator.ConflictsWith(path.MatchRoot("ca_cert_pem")),
 				},
@@ -121,7 +121,7 @@ func (p *NIOSProvider) Schema(_ context.Context, _ provider.SchemaRequest, resp 
 			"ca_cert_pem": schema.StringAttribute{
 				Optional:    true,
 				Sensitive:   true,
-				Description: "Inline PEM-encoded CA certificate bundle used to verify the Grid's TLS certificate when ssl_verify is true, for Grids using a certificate issued by an internal CA. If neither ca_cert_file nor ca_cert_pem is set, the system trust store is used.",
+				Description: "Inline PEM-encoded CA certificate bundle used to verify the Grid's TLS certificate when ssl_verify is true, for Grids using a certificate issued by an internal CA.",
 				Validators: []validator.String{
 					stringvalidator.ConflictsWith(path.MatchRoot("ca_cert_file")),
 				},
