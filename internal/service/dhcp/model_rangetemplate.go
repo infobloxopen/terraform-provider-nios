@@ -470,7 +470,10 @@ var RangetemplateResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The number of addresses for this range.",
 	},
 	"offset": schema.Int64Attribute{
-		Required:            true,
+		Required: true,
+		Validators: []validator.Int64{
+			int64validator.Between(1, 2147483647),
+		},
 		MarkdownDescription: "The start address offset for this range.",
 	},
 	"option_filter_rules": schema.ListNestedAttribute{
