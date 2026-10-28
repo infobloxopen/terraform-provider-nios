@@ -38,6 +38,7 @@ var Ipv6networkZoneAssociationsResourceSchemaAttributes = map[string]schema.Attr
 	},
 	"is_default": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "True if this is the default zone.",
 	},
 	"view": schema.StringAttribute{
