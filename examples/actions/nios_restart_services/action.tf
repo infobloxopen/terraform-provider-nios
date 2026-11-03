@@ -6,7 +6,7 @@ resource "nios_ipam_network" "example" { // ( Required As Parent )
 action "nios_restart_services" "dhcpv4" {
   config {
     services       = ["DHCPV4"]
-    restart_option = "RESTART_IF_NEEDED"
+    restart_option = "FORCE_RESTART"
     members        = ["infoblox.member1"]
     user_name      = "admin"
     mode           = "SEQUENTIAL"

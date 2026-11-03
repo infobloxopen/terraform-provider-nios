@@ -12,6 +12,11 @@ description: |-
 
 Terraform actions require Terraform 1.14 or later.
 
+Set `restart_option = "FORCE_RESTART"` if you want Terraform to perform the
+restart itself. Leaving `restart_option` as `RESTART_IF_NEEDED` only flags the
+services for a restart; NIOS will not restart them until a user manually
+performs the restart manually from the NIOS UI.
+
 {{ if .HasExample -}}
 ## Coordinate a restart after multiple changes
 

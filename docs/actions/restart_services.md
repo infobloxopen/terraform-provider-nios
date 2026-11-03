@@ -12,6 +12,11 @@ Requests a restart of NIOS Grid services.
 
 Terraform actions require Terraform 1.14 or later.
 
+Set `restart_option = "FORCE_RESTART"` if you want Terraform to perform the
+restart itself. Leaving `restart_option` as `RESTART_IF_NEEDED` only flags the
+services for a restart; NIOS will not restart them until a user manually
+performs the restart manually from the NIOS UI.
+
 ## Coordinate a restart after multiple changes
 
 Use a `terraform_data` resource to invoke the action once after a collection of
@@ -28,7 +33,7 @@ resource "nios_ipam_network" "example" { // ( Required As Parent )
 action "nios_restart_services" "dhcpv4" {
   config {
     services       = ["DHCPV4"]
-    restart_option = "RESTART_IF_NEEDED"
+    restart_option = "FORCE_RESTART"
     members        = ["infoblox.member1"]
     user_name      = "admin"
     mode           = "SEQUENTIAL"
