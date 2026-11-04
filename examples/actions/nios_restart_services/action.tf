@@ -1,30 +1,34 @@
-resource "nios_ipam_network" "example" { // ( Required As Parent )
-  network      = "10.0.0.0/24"
-  network_view = "default"
-}
-
-action "nios_restart_services" "dhcpv4" {
+action "nios_restart_services" "dns" {
   config {
-    services       = ["DHCPV4"]
+    services       = ["DNS"]
     restart_option = "FORCE_RESTART"
-    members        = ["infoblox.member1"]
+    members        = ["infoblox.member2"]
     user_name      = "admin"
     mode           = "SEQUENTIAL"
   }
 }
 
-# Restart the DHCPv4 service on the target member after the DHCP range is updated.
-resource "nios_dhcp_range" "example" {
-  start_addr = "10.0.0.170"
-  end_addr   = "10.0.0.180"
-  comment    = "Primary DHCP range"
+# Restart the DNS Service once the Grid Primary is added to Zone Auth
+resource "nios_dns_zone_auth" "create_zone5" {
+  // Basic Fields
+  fqdn = "example_restart_services.com"
+  view = "default"
 
-  depends_on = [nios_ipam_network.example]
+  grid_primary = [
+    {
+      name = "infoblox.member2",
+    }
+  ]
+
+  comment = "Zone Auth Restart Services Example"
+  extattrs = {
+    Site = "location-1"
+  }
 
   lifecycle {
     action_trigger {
-      events  = [after_update]
-      actions = [action.nios_restart_services.dhcpv4]
+      events  = [after_create, after_update]
+      actions = [action.nios_restart_services.dns]
     }
   }
 }
