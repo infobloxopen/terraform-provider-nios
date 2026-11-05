@@ -113,6 +113,10 @@ func RemoveInheritedExtAttrs(ctx context.Context, planExtAttrs types.Map, respEx
 			}
 			continue
 		}
+		// INTEGER EAs come back normalized (e.g. "02" -> 2); keep the configured form.
+		if planVal, ok := planMap[k]; ok && utils.IsSameInteger(planVal.Value, v.Value) {
+			v = planVal
+		}
 		extAttrsRespMap[k] = v
 	}
 	extAttrAll = FlattenExtAttrs(ctx, planExtAttrs, &extAttrsAllRespMap, &diags)

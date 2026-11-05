@@ -431,6 +431,20 @@ func ParseInterfaceValueWithIntFallback(valStr string) interface{} {
 	return value
 }
 
+// IsSameInteger reports whether a configured string and an API number are the same integer, e.g. "02" and 2.
+func IsSameInteger(planVal, respVal any) bool {
+	s, ok := planVal.(string)
+	if !ok {
+		return false
+	}
+	p, err := strconv.ParseInt(s, 10, 64)
+	if err != nil {
+		return false
+	}
+	r, ok := respVal.(float64) // JSON numbers decode as float64
+	return ok && float64(p) == r
+}
+
 // ConvertSliceOfMapsToHCL serializes a slice of []map[string]any into an HCL format.
 func ConvertSliceOfMapsToHCL(data []map[string]any) string {
 	var blocks []string
