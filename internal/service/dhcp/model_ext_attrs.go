@@ -105,11 +105,12 @@ func RemoveInheritedExtAttrs(ctx context.Context, planExtAttrs types.Map, respEx
 
 		// If the EA is inherited , if the state is override , add it to the ExtAttrs.
 		// If the EA is inherited and state is inherited , add it ExtAttrsAll
-		if respExtAttrs[k].AdditionalProperties["inheritance_source"] != nil {
-			if planVal, ok := planMap[k]; ok {
-				extAttrsRespMap[k] = planVal
+		if v.AdditionalProperties["inheritance_source"] != nil {
+			// Use the NIOS value so a parent change shows as drift on a key set in config (if its inherited).
+			if _, ok := planMap[k]; ok {
+				extAttrsRespMap[k] = v
 			} else {
-				extAttrsAllRespMap[k] = respExtAttrs[k]
+				extAttrsAllRespMap[k] = v
 			}
 			continue
 		}
