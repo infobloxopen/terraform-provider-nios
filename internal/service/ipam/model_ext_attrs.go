@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/hashicorp/go-uuid"
@@ -70,6 +71,9 @@ func FlattenExtAttrs(ctx context.Context, planExtAttrs types.Map, extattrs *map[
 				}
 				result[key] = types.StringValue(value)
 			}
+		case float64:
+			// JSON numbers decode as float64, avoid exponent form like 1e+06.
+			result[key] = types.StringValue(strconv.FormatFloat(v, 'f', -1, 64))
 		default:
 			// Convert primitive values to string
 			result[key] = types.StringValue(fmt.Sprintf("%v", v))
