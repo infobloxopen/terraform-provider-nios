@@ -205,7 +205,33 @@ func (r *Ipv6fixedaddresstemplateResource) Update(ctx context.Context, req resou
 		return
 	}
 
-	diags = req.State.GetAttribute(ctx, path.Root("extattrs_all"), &data.ExtAttrsAll)
+	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
+
+	// Inherited EAs in state can be stale, sending them makes NIOS store them as overrides.
+	var getApiRes *dhcp.GetIpv6fixedaddresstemplateResponse
+	err := retry.Do(ctx, nil, func(ctx context.Context) (int, error) {
+		var (
+			httpRes *http.Response
+			callErr error
+		)
+		getApiRes, httpRes, callErr = r.client.DHCPAPI.
+			Ipv6fixedaddresstemplateAPI.
+			Read(ctx, resourceRef).
+			ReturnFields("extattrs").
+			ReturnAsObject(1).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
+	if err != nil {
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read Ipv6fixedaddresstemplate extensible attributes before update, got error: %s", err))
+		return
+	}
+	getRes := getApiRes.GetIpv6fixedaddresstemplateResponseObjectAsResult.GetResult()
+	_, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, planExtAttrs, getRes.GetExtAttrs())
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -223,11 +249,9 @@ func (r *Ipv6fixedaddresstemplateResource) Update(ctx context.Context, req resou
 		return
 	}
 
-	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
-
 	var apiRes *dhcp.UpdateIpv6fixedaddresstemplateResponse
 
-	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+	err = retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
 		var (
 			httpRes *http.Response
 			callErr error
