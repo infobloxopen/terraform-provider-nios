@@ -14,15 +14,13 @@ Terraform actions require Terraform 1.14 or later.
 
 Set `restart_option = "FORCE_RESTART"` if you want Terraform to perform the
 restart itself. Leaving `restart_option` as `RESTART_IF_NEEDED` only flags the
-services for a restart; NIOS will not restart them until a user manually
-performs the restart manually from the NIOS UI.
+services for a restart; NIOS will not restart them until a user performs the
+restart from the NIOS UI.
 
-## Coordinate a restart after multiple changes
+## Trigger a restart from a single resource
 
-Use a `terraform_data` resource to invoke the action once after a collection of
-resources changes. Include the configuration that requires a restart in
-`terraform_data.input`. Use `depends_on` to ensure Terraform finishes updating
-the NIOS resources before it invokes the action.
+Use `action_trigger` inside a resource's `lifecycle` block to invoke the action
+automatically whenever that resource is created or updated.
 
 ```terraform
 action "nios_restart_services" "dns" {
@@ -58,6 +56,51 @@ resource "nios_dns_zone_auth" "create_zone5" {
       actions = [action.nios_restart_services.dns]
     }
   }
+}
+```
+
+## Coordinate a restart after multiple changes
+
+Use a `terraform_data` resource to invoke the action once after a collection of
+resources changes. Include the configuration that requires a restart in
+`terraform_data.input`. Use `depends_on` to ensure Terraform finishes updating
+the NIOS resources before it invokes the action.
+
+```terraform
+action "nios_restart_services" "dns" {
+  config {
+    services       = ["DNS"]
+    restart_option = "FORCE_RESTART"
+  }
+}
+
+resource "nios_dns_zone_auth" "zone_a" {
+  fqdn = "a.example.com"
+  view = "default"
+}
+
+resource "nios_dns_zone_auth" "zone_b" {
+  fqdn = "b.example.com"
+  view = "default"
+}
+
+resource "terraform_data" "restart_after_zones" {
+  input = {
+    zone_a = nios_dns_zone_auth.zone_a.id
+    zone_b = nios_dns_zone_auth.zone_b.id
+  }
+
+  lifecycle {
+    action_trigger {
+      events  = [after_create, after_update]
+      actions = [action.nios_restart_services.dns]
+    }
+  }
+
+  depends_on = [
+    nios_dns_zone_auth.zone_a,
+    nios_dns_zone_auth.zone_b,
+  ]
 }
 ```
 

@@ -93,7 +93,7 @@ func (a *RestartServicesAction) Invoke(ctx context.Context, req action.InvokeReq
 		return
 	}
 
-	if httpResp.StatusCode < http.StatusOK {
+	if httpResp.StatusCode != http.StatusOK {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to restart NIOS services, got status code: %d", httpResp.StatusCode))
 		return
 	}
