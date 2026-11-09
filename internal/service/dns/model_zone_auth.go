@@ -1190,7 +1190,6 @@ func (m *ZoneAuthModel) Expand(ctx context.Context, diags *diag.Diagnostics, isC
 		DnsIntegrityMember:                  flex.ExpandStringPointer(m.DnsIntegrityMember),
 		DnsIntegrityVerboseLogging:          flex.ExpandBoolPointer(m.DnsIntegrityVerboseLogging),
 		DnssecKeyParams:                     ExpandZoneAuthDnssecKeyParams(ctx, m.DnssecKeyParams, diags),
-		DnssecKeys:                          flex.ExpandFrameworkListNestedBlock(ctx, m.DnssecKeys, diags, ExpandZoneAuthDnssecKeys),
 		DoHostAbstraction:                   flex.ExpandBoolPointer(m.DoHostAbstraction),
 		EffectiveCheckNamesPolicy:           flex.ExpandStringPointer(m.EffectiveCheckNamesPolicy),
 		ExtAttrs:                            ExpandExtAttrs(ctx, m.ExtAttrs, diags),

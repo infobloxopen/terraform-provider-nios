@@ -82,7 +82,7 @@ func (r *Ipv6rangeResource) Create(ctx context.Context, req resource.CreateReque
 		return
 	}
 
-	payload := data.Expand(ctx, &resp.Diagnostics)
+	payload := data.Expand(ctx, &resp.Diagnostics, true)
 	if resp.Diagnostics.HasError() {
 		return
 	}
@@ -319,7 +319,7 @@ func (r *Ipv6rangeResource) Update(ctx context.Context, req resource.UpdateReque
 		return
 	}
 
-	payload := data.Expand(ctx, &resp.Diagnostics)
+	payload := data.Expand(ctx, &resp.Diagnostics, false)
 	if resp.Diagnostics.HasError() {
 		return
 	}
