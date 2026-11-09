@@ -12,7 +12,9 @@ The Terraform Provider for Infoblox NIOS allows you to manage your Infoblox NIOS
     - [Installation](#installation)
 - [Usage Examples](#usage-examples)
 - [Available Resources and DataSources](#available-resources-and-datasources)
+- [Available Actions](#available-actions)
 - [Host Record Management](#host-record-management)
+- [Extensible Attribute Behaviour](#extensible-attribute-behaviour)
 - [Importing Existing Resources](#importing-existing-resources)
 - [Documentation](#documentation)
 - [Debugging](#logging-and-debugging)
@@ -20,7 +22,7 @@ The Terraform Provider for Infoblox NIOS allows you to manage your Infoblox NIOS
 
 ## Requirements
 
-- [Go](https://golang.org/doc/install) >= 1.25.1
+- [Go](https://golang.org/doc/install) >= 1.26.0
 - [Terraform](https://www.terraform.io/downloads.html) >= 1.12.1
 - [Infoblox NIOS](https://www.infoblox.com/products/nios/) (version 9.0.6 or higher)
 
@@ -31,6 +33,7 @@ The table below shows the compatibility between different versions of the Terraf
 | Provider Version | Go Version | Terraform Version | NIOS Version | WAPI Version |
 |-----------------|------------|-------------------|--------------|--------------|
 | 2.1.0, 2.0.0 | >= 1.25.1 | >= 1.12.1 | 9.1.0 or higher | v2.14 |
+| 1.3.0 | >= 1.26.0 | >= 1.12.1 | 9.0.6 or higher | v2.13.6 |
 | 1.2.0, 1.1.0 , 1.0.0 , 0.0.1 | >= 1.25.1 | >= 1.12.1 | 9.0.6 or higher | v2.13.6 |
 
 
@@ -102,6 +105,14 @@ The object groups available in this provider are categorized as follows:
 
 For a detailed list of available resources and data sources, refer to the [Resources and Data Sources](guides/resources_datasources.md) page.
 
+## Available Actions
+
+Terraform actions run an operation on NIOS without managing it as a resource. Actions require Terraform 1.14 or later.
+
+- `nios_restart_services`: Requests a restart of NIOS Grid services.
+
+For details and examples, refer to the [Restart Services](docs/actions/restart_services.md) page.
+
 ## Host Record Management
 
 - The `ip_allocation` resource allocates a new IP address from an existing NIOS network and manages the corresponding DNS-related settings. It creates a Host Record in NIOS with either an IPv4 address, an IPv6 address, or both. The IP can be allocated statically (by specifying the address) or dynamically (as the next available address from a network). Once allocated, the address is marked as used in NIOS.
@@ -109,6 +120,21 @@ For a detailed list of available resources and data sources, refer to the [Resou
 - The `ip_association` resource manages DHCP-related settings of the Host Record created via ip_allocation. It updates the record with VM-specific details such as the MAC address for IPv4 and the DUID for IPv6, enabling full integration with cloud or virtualized environments.
 
 Detailed documentation for these resources can be found in [Host Record Documentation](guides/host_record_management.md) page.
+
+## Extensible Attribute Behaviour
+
+- `extattrs` holds the extensible attributes (EAs) set in your configuration.
+- `extattrs_all` holds every other EA on the object, including EAs inherited from a parent and the `Terraform Internal ID`.
+- An EA inherited from a parent (for example, a network's EA on its ranges and fixed addresses) appears only in `extattrs_all`. When the parent value changes, the child picks up the new value.
+- Setting the same key on the child with a different value overrides it. The override is stored on the child, and later parent changes do not affect it.
+- If the child's value matches the parent's value, NIOS keeps it inherited. If the parent later changes, Terraform shows the difference and re-applies your value as an override.
+
+### Inheriting an EA again after overriding it
+
+Removing an overridden EA from the child's configuration removes it from the child. It does not go back to inheriting the parent value. To make it inherited again:
+
+1. Set the child's value to the same value as the parent and run `terraform apply`. NIOS marks the EA as inherited. It stays under `extattrs` because it is still in your configuration.
+2. Remove the key from the child's `extattrs` and run `terraform apply`. The EA moves to `extattrs_all` and keeps inheriting from the parent.
 
 ## Importing Existing Resources
 
