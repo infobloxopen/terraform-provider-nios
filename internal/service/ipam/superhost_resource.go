@@ -362,7 +362,33 @@ func (r *SuperhostResource) Update(ctx context.Context, req resource.UpdateReque
 		return
 	}
 
-	diags = req.State.GetAttribute(ctx, path.Root("extattrs_all"), &data.ExtAttrsAll)
+	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
+
+	// Inherited EAs in state can be stale, sending them makes NIOS store them as overrides.
+	var getApiRes *ipam.GetSuperhostResponse
+	err := retry.Do(ctx, nil, func(ctx context.Context) (int, error) {
+		var (
+			httpRes *http.Response
+			callErr error
+		)
+		getApiRes, httpRes, callErr = r.client.IPAMAPI.
+			SuperhostAPI.
+			Read(ctx, resourceRef).
+			ReturnFields("extattrs").
+			ReturnAsObject(1).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
+	if err != nil {
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read Superhost extensible attributes before update, got error: %s", err))
+		return
+	}
+	getRes := getApiRes.GetSuperhostResponseObjectAsResult.GetResult()
+	_, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, planExtAttrs, getRes.GetExtAttrs())
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -388,8 +414,6 @@ func (r *SuperhostResource) Update(ctx context.Context, req resource.UpdateReque
 		return
 	}
 
-	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
-
 	payload := data.Expand(ctx, &resp.Diagnostics)
 	if resp.Diagnostics.HasError() {
 		return
@@ -397,7 +421,7 @@ func (r *SuperhostResource) Update(ctx context.Context, req resource.UpdateReque
 
 	var apiRes *ipam.UpdateSuperhostResponse
 
-	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+	err = retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
 		var (
 			httpRes *http.Response
 			callErr error
