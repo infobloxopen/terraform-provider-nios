@@ -321,7 +321,33 @@ func (r *VlanResource) Update(ctx context.Context, req resource.UpdateRequest, r
 		return
 	}
 
-	diags = req.State.GetAttribute(ctx, path.Root("extattrs_all"), &data.ExtAttrsAll)
+	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
+
+	// Inherited EAs in state can be stale, sending them makes NIOS store them as overrides.
+	var getApiRes *ipam.GetVlanResponse
+	err := retry.Do(ctx, nil, func(ctx context.Context) (int, error) {
+		var (
+			httpRes *http.Response
+			callErr error
+		)
+		getApiRes, httpRes, callErr = r.client.IPAMAPI.
+			VlanAPI.
+			Read(ctx, resourceRef).
+			ReturnFields("extattrs").
+			ReturnAsObject(1).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
+	if err != nil {
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read Vlan extensible attributes before update, got error: %s", err))
+		return
+	}
+	getRes := getApiRes.GetVlanResponseObjectAsResult.GetResult()
+	_, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, planExtAttrs, getRes.GetExtAttrs())
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -347,8 +373,6 @@ func (r *VlanResource) Update(ctx context.Context, req resource.UpdateRequest, r
 		return
 	}
 
-	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
-
 	payload := data.Expand(ctx, &resp.Diagnostics)
 	if resp.Diagnostics.HasError() {
 		return
@@ -356,7 +380,7 @@ func (r *VlanResource) Update(ctx context.Context, req resource.UpdateRequest, r
 
 	var apiRes *ipam.UpdateVlanResponse
 
-	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+	err = retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
 		var (
 			httpRes *http.Response
 			callErr error
