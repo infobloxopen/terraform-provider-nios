@@ -5,18 +5,23 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/tfversion"
 	"github.com/infobloxopen/terraform-provider-nios/internal/acctest"
 	"github.com/infobloxopen/terraform-provider-nios/internal/utils"
 )
 
 func TestRestartServicesAction_DNS(t *testing.T) {
+	viewName := acctest.RandomNameWithPrefix("dns-view")
 	resource.Test(t, resource.TestCase{
+		TerraformVersionChecks: []tfversion.TerraformVersionCheck{
+			tfversion.SkipBelow(tfversion.Version1_14_0),
+		},
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			// Forces restart of DNS Service in GROUPED mode after DNS View creation
 			{
-				Config: testaccrestartservicesactionDns(),
+				Config: testaccrestartservicesactionDns(viewName),
 			},
 			// Delete testing automatically occurs in TestCase
 		},
@@ -29,6 +34,9 @@ func TestRestartServicesAction_DHCPv4(t *testing.T) {
 	memberName := utils.GetNIOSGridMemberHostName()
 
 	resource.Test(t, resource.TestCase{
+		TerraformVersionChecks: []tfversion.TerraformVersionCheck{
+			tfversion.SkipBelow(tfversion.Version1_14_0),
+		},
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
@@ -52,6 +60,9 @@ func TestRestartServicesAction_DHCPv6(t *testing.T) {
 	duid := "00:01:00:01:1d:2b:3c:4d:00:0c:19:ab:cd:ef"
 
 	resource.Test(t, resource.TestCase{
+		TerraformVersionChecks: []tfversion.TerraformVersionCheck{
+			tfversion.SkipBelow(tfversion.Version1_14_0),
+		},
 		PreCheck:                 func() { acctest.PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
@@ -64,8 +75,8 @@ func TestRestartServicesAction_DHCPv6(t *testing.T) {
 	})
 }
 
-func testaccrestartservicesactionDns() string {
-	return `
+func testaccrestartservicesactionDns(viewName string) string {
+	return fmt.Sprintf(`
 action "nios_restart_services" "dns" {
   config {
     services       = ["DNS"]
@@ -75,7 +86,7 @@ action "nios_restart_services" "dns" {
 }
 
 resource "nios_dns_view" "test" {
-  name = "new_view"
+  name = %q
 
   lifecycle {
     action_trigger {
@@ -84,7 +95,7 @@ resource "nios_dns_view" "test" {
     }
   }
 }
-`
+`, viewName)
 }
 
 func testAccRestartServicesAction_DHCPv4(startAddr, endAddr, comment, member, userName string) string {
