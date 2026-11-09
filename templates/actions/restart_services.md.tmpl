@@ -53,8 +53,8 @@ resource "nios_dns_zone_auth" "zone_b" {
 
 resource "terraform_data" "restart_after_zones" {
   input = {
-    zone_a = nios_dns_zone_auth.zone_a.id
-    zone_b = nios_dns_zone_auth.zone_b.id
+    zone_a = nios_dns_zone_auth.zone_a.ref
+    zone_b = nios_dns_zone_auth.zone_b.ref
   }
 
   lifecycle {
