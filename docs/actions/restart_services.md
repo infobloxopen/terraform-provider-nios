@@ -59,7 +59,7 @@ resource "nios_dns_zone_auth" "create_zone5" {
 }
 ```
 
-## Coordinate a restart after multiple changes
+## Trigger a restart from multiple resources
 
 Use a `terraform_data` resource to invoke the action once after a collection of
 resources changes. Include the configuration that requires a restart in
