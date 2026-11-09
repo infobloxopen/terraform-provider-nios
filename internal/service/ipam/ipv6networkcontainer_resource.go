@@ -336,7 +336,33 @@ func (r *Ipv6networkcontainerResource) Update(ctx context.Context, req resource.
 		return
 	}
 
-	diags = req.State.GetAttribute(ctx, path.Root("extattrs_all"), &data.ExtAttrsAll)
+	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
+
+	// Inherited EAs in state can be stale, sending them makes NIOS store them as overrides.
+	var getApiRes *ipam.GetIpv6networkcontainerResponse
+	err := retry.Do(ctx, nil, func(ctx context.Context) (int, error) {
+		var (
+			httpRes *http.Response
+			callErr error
+		)
+		getApiRes, httpRes, callErr = r.client.IPAMAPI.
+			Ipv6networkcontainerAPI.
+			Read(ctx, resourceRef).
+			ReturnFields("extattrs").
+			ReturnAsObject(1).
+			Execute()
+
+		if httpRes != nil {
+			return httpRes.StatusCode, callErr
+		}
+		return 0, callErr
+	})
+	if err != nil {
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read Ipv6networkcontainer extensible attributes before update, got error: %s", err))
+		return
+	}
+	getRes := getApiRes.GetIpv6networkcontainerResponseObjectAsResult.GetResult()
+	_, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, planExtAttrs, getRes.GetExtAttrs())
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -362,8 +388,6 @@ func (r *Ipv6networkcontainerResource) Update(ctx context.Context, req resource.
 		return
 	}
 
-	resourceRef := utils.ExtractResourceRef(data.Ref.ValueString())
-
 	payload := data.Expand(ctx, &resp.Diagnostics, false)
 	if resp.Diagnostics.HasError() {
 		return
@@ -371,7 +395,7 @@ func (r *Ipv6networkcontainerResource) Update(ctx context.Context, req resource.
 
 	var apiRes *ipam.UpdateIpv6networkcontainerResponse
 
-	err := retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
+	err = retry.Do(ctx, retry.TransientErrors, func(ctx context.Context) (int, error) {
 		var (
 			httpRes *http.Response
 			callErr error

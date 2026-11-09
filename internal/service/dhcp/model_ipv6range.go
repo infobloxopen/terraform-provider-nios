@@ -352,8 +352,12 @@ var Ipv6rangeResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "The DHCP IPv6 Range Cisco ISE subscribe settings.",
 	},
 	"template": schema.StringAttribute{
+		Optional:            true,
 		Computed:            true,
 		MarkdownDescription: "If set on creation, the range will be created according to the values specified in the named template.",
+		PlanModifiers: []planmodifier.String{
+			planmodifiers.ImmutableString(),
+		},
 	},
 	"use_blackout_setting": schema.BoolAttribute{
 		Optional:            true,
@@ -393,7 +397,7 @@ var Ipv6rangeResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 }
 
-func (m *Ipv6rangeModel) Expand(ctx context.Context, diags *diag.Diagnostics) *dhcp.Ipv6range {
+func (m *Ipv6rangeModel) Expand(ctx context.Context, diags *diag.Diagnostics, isCreate bool) *dhcp.Ipv6range {
 	if m == nil {
 		return nil
 	}
@@ -432,6 +436,9 @@ func (m *Ipv6rangeModel) Expand(ctx context.Context, diags *diag.Diagnostics) *d
 		UseRecycleLeases:                 flex.ExpandBoolPointer(m.UseRecycleLeases),
 		UseSubscribeSettings:             flex.ExpandBoolPointer(m.UseSubscribeSettings),
 		NetworkView:                      flex.ExpandStringPointer(m.NetworkView),
+	}
+	if isCreate {
+		to.Template = flex.ExpandStringPointer(m.Template)
 	}
 	return to
 }
@@ -484,7 +491,9 @@ func (m *Ipv6rangeModel) Flatten(ctx context.Context, from *dhcp.Ipv6range, diag
 	m.ServerAssociationType = flex.FlattenStringPointer(from.ServerAssociationType)
 	m.StartAddr = flex.FlattenIPv6Address(from.StartAddr)
 	m.SubscribeSettings = FlattenIpv6rangeSubscribeSettings(ctx, from.SubscribeSettings, diags)
-	m.Template = flex.FlattenStringPointer(from.Template)
+	if m.Template.IsUnknown() || m.Template.IsNull() {
+		m.Template = flex.FlattenStringPointer(from.Template)
+	}
 	m.UseBlackoutSetting = types.BoolPointerValue(from.UseBlackoutSetting)
 	m.UseDiscoveryBasicPollingSettings = types.BoolPointerValue(from.UseDiscoveryBasicPollingSettings)
 	m.UseEnableDiscovery = types.BoolPointerValue(from.UseEnableDiscovery)

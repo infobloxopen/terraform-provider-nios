@@ -17,6 +17,7 @@ The table below shows the compatibility between different versions of the Terraf
 | Provider Version | Go Version | Terraform Version | NIOS Version | WAPI Version |
 |-----------------|------------|-------------------|--------------|--------------|
 | 2.1.0, 2.0.0 | >= 1.25.1 | >= 1.12.1 | 9.1.0 or higher | v2.14 |
+| 1.2.1 | >= 1.26.0 | >= 1.12.1 | 9.0.6 or higher | v2.13.6 |
 | 1.2.0, 1.1.0, 1.0.0, 0.0.1 | >= 1.25.1 | >= 1.12.1 | 9.0.6 or higher | v2.13.6 |
 
 >For more guides and detailed documentation, see the [NIOS Terraform Provider Guides](https://github.com/infobloxopen/terraform-provider-nios/tree/main/guides).
@@ -30,7 +31,7 @@ terraform {
   required_providers {
     nios = {
       source  = "infobloxopen/nios"
-      version = "1.2.0"
+      version = "1.2.1"
     }
   }
 }
@@ -48,6 +49,8 @@ provider "nios" {
 
 ### Optional
 
+- `ca_cert_file` (String) Path to a PEM-encoded CA certificate bundle used to verify the Grid's TLS certificate when ssl_verify is true, for Grids using a certificate issued by an internal CA. Can also be set with the CA_CERT_PATH environment variable.
+- `ca_cert_pem` (String, Sensitive) Inline PEM-encoded CA certificate bundle used to verify the Grid's TLS certificate when ssl_verify is true, for Grids using a certificate issued by an internal CA.
 - `manage_internal_id_ea` (Boolean) Determines whether the provider manages the Terraform Internal ID extensible attribute in NIOS. This attribute is required by the provider to store the Terraform resource ID corresponding to NIOS objects. When true, the provider ensures the attribute exists and manages its lifecycle. When false, the provider does not validate, create, update, or otherwise manage the attribute. Default value: true
 - `nios_host_url` (String)
 - `nios_password` (String)
@@ -55,3 +58,4 @@ provider "nios" {
 - `proxy_search` (String) Proxy search mode. Allowed values: LOCAL (default), GM.
 - `proxy_url` (String) Proxy URL to connect to Infoblox NIOS.
 - `retry_timeout` (Number) Specifies the timeout duration (in seconds) for retrying operations that fail due to transient errors.
+- `ssl_verify` (Boolean) Enables TLS certificate verification when connecting directly to a NIOS Grid. Defaults to false. Connections made through NIOS Portal passthrough are always verified regardless of this setting. Can also be set with the NIOS_SSL_VERIFY environment variable.

@@ -607,7 +607,9 @@ func (m *Ipv6fixedaddressModel) Flatten(ctx context.Context, from *dhcp.Ipv6fixe
 	m.DomainName.StringValue = flex.FlattenStringPointer(from.DomainName)
 	m.DomainNameServers = flex.FlattenFrameworkListString(ctx, from.DomainNameServers, diags)
 	m.Duid = flex.FlattenDUID(from.Duid)
-	m.EnableImmediateDiscovery = types.BoolPointerValue(from.EnableImmediateDiscovery)
+	if m.EnableImmediateDiscovery.IsUnknown() || m.EnableImmediateDiscovery.IsNull() {
+		m.EnableImmediateDiscovery = types.BoolPointerValue(from.EnableImmediateDiscovery)
+	}
 	m.ExtAttrs = FlattenExtAttrs(ctx, m.ExtAttrs, from.ExtAttrs, diags)
 	m.Ipv6addr = FlattenIpv6fixedaddressIpv6addr(from.Ipv6addr)
 	m.Ipv6prefix = flex.FlattenStringPointer(from.Ipv6prefix)
