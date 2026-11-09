@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/hashicorp/go-uuid"
@@ -70,6 +71,9 @@ func FlattenExtAttrs(ctx context.Context, planExtAttrs types.Map, extattrs *map[
 				}
 				result[key] = types.StringValue(value)
 			}
+		case float64:
+			// JSON numbers decode as float64, avoid exponent form like 1e+06.
+			result[key] = types.StringValue(strconv.FormatFloat(v, 'f', -1, 64))
 		default:
 			// Convert primitive values to string
 			result[key] = types.StringValue(fmt.Sprintf("%v", v))
@@ -105,13 +109,18 @@ func RemoveInheritedExtAttrs(ctx context.Context, planExtAttrs types.Map, respEx
 
 		// If the EA is inherited , if the state is override , add it to the ExtAttrs.
 		// If the EA is inherited and state is inherited , add it ExtAttrsAll
-		if respExtAttrs[k].AdditionalProperties["inheritance_source"] != nil {
-			if planVal, ok := planMap[k]; ok {
-				extAttrsRespMap[k] = planVal
+		if v.AdditionalProperties["inheritance_source"] != nil {
+			// Use the NIOS value so a parent change shows as drift on a key set in config (if its inherited).
+			if _, ok := planMap[k]; ok {
+				extAttrsRespMap[k] = v
 			} else {
-				extAttrsAllRespMap[k] = respExtAttrs[k]
+				extAttrsAllRespMap[k] = v
 			}
 			continue
+		}
+		// INTEGER EAs come back normalized (e.g. "02" -> 2); keep the configured form.
+		if planVal, ok := planMap[k]; ok && utils.IsSameInteger(planVal.Value, v.Value) {
+			v = planVal
 		}
 		extAttrsRespMap[k] = v
 	}
