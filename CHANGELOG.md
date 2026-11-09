@@ -1,5 +1,29 @@
 # Changelog
 
+## Version 1.2.1
+
+### Newly Supported Actions
+
+#### Grid
+
+- `nios_restart_services` : Restart NIOS Grid services on selected members or restart groups. Requires Terraform 1.14 or later. ([#619](https://github.com/infobloxopen/terraform-provider-nios/pull/619))
+
+### Features
+
+- Made SSL/TLS certificate verification configurable with the new provider options `ssl_verify`, `ca_cert_file` and `ca_cert_pem`. `ssl_verify` defaults to `false`. (Issue [#615](https://github.com/infobloxopen/terraform-provider-nios/issues/615), PR [#617](https://github.com/infobloxopen/terraform-provider-nios/pull/617))
+
+### Fixes
+
+- [ALL] Fixed child objects losing extensible attribute inheritance when updated after the parent's value changed. The old value was saved on the child and caused an "inconsistent result after apply" error. ([#622](https://github.com/infobloxopen/terraform-provider-nios/pull/622))
+- [ALL] Fixed "inconsistent result after apply" errors for INTEGER extensible attributes with leading zeros (for example `"02"`) or values of 1,000,000 or more. ([#621](https://github.com/infobloxopen/terraform-provider-nios/pull/621))
+- [ALL] Fixed hidden drift when a child extensible attribute has the same value as its parent and the parent value changes. ([#621](https://github.com/infobloxopen/terraform-provider-nios/pull/621))
+- [DNS] Fixed updates to DNSSEC-signed `nios_dns_zone_auth` failing with "Cannot delete the active key". (Issue [#618](https://github.com/infobloxopen/terraform-provider-nios/issues/618), PR [#623](https://github.com/infobloxopen/terraform-provider-nios/pull/623))
+- [DHCP] Added validation for the `offset` field in `nios_dhcp_rangetemplate`. ([#571](https://github.com/infobloxopen/terraform-provider-nios/pull/571))
+
+### Maintenance
+
+- Upgraded the Go version to v1.26.0 and updated dependencies. ([#620](https://github.com/infobloxopen/terraform-provider-nios/pull/620))
+
 ## Version 1.2.0
 
 ### Newly Supported Resources and Datasources
