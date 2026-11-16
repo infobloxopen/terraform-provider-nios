@@ -17,9 +17,11 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listdefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
@@ -282,6 +284,9 @@ var ZoneAuthResourceSchemaAttributes = map[string]schema.Attribute{
 	"ref": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The reference to the object.",
+		PlanModifiers: []planmodifier.String{
+			stringplanmodifier.UseStateForUnknown(),
+		},
 	},
 	"address": schema.StringAttribute{
 		CustomType:          iptypes.IPAddressType{},
@@ -502,10 +507,16 @@ var ZoneAuthResourceSchemaAttributes = map[string]schema.Attribute{
 	"display_domain": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The displayed name of the DNS zone.",
+		PlanModifiers: []planmodifier.String{
+			stringplanmodifier.UseStateForUnknown(),
+		},
 	},
 	"dns_fqdn": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The name of this DNS zone in punycode format. For a reverse zone, this is in \"address/cidr\" format. For other zones, this is in FQDN format in punycode format.",
+		PlanModifiers: []planmodifier.String{
+			stringplanmodifier.UseStateForUnknown(),
+		},
 	},
 	"dns_integrity_enable": schema.BoolAttribute{
 		Optional:            true,
@@ -816,11 +827,17 @@ var ZoneAuthResourceSchemaAttributes = map[string]schema.Attribute{
 		},
 		Computed:            true,
 		MarkdownDescription: "The list with the associated network/network container information.",
+		PlanModifiers: []planmodifier.List{
+			listplanmodifier.UseStateForUnknown(),
+		},
 	},
 
 	"network_view": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The name of the network view in which this zone resides.",
+		PlanModifiers: []planmodifier.String{
+			stringplanmodifier.UseStateForUnknown(),
+		},
 	},
 	"notify_delay": schema.Int64Attribute{
 		Optional: true,
@@ -840,6 +857,9 @@ var ZoneAuthResourceSchemaAttributes = map[string]schema.Attribute{
 	"parent": schema.StringAttribute{
 		Computed:            true,
 		MarkdownDescription: "The parent zone of this zone. Note that when searching for reverse zones, the \"in-addr.arpa\" notation should be used.",
+		PlanModifiers: []planmodifier.String{
+			stringplanmodifier.UseStateForUnknown(),
+		},
 	},
 	"prefix": schema.StringAttribute{
 		CustomType: internaltypes.CaseInsensitiveString{},
