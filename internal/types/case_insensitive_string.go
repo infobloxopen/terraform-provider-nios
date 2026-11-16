@@ -106,6 +106,17 @@ func (old CaseInsensitiveStringValue) StringSemanticEquals(ctx context.Context, 
 	return strings.EqualFold(oldStr, newStr), diags
 }
 
+// Equal reports whether o is a CaseInsensitiveStringValue with the same state and value.
+// Without it, the Equal promoted from the embedded basetypes.StringValue is used, which
+// asserts o to basetypes.StringValue and therefore always returns false for this type.
+func (v CaseInsensitiveStringValue) Equal(o attr.Value) bool {
+	other, ok := o.(CaseInsensitiveStringValue)
+	if !ok {
+		return false
+	}
+	return v.StringValue.Equal(other.StringValue)
+}
+
 func (v CaseInsensitiveStringValue) Type(ctx context.Context) attr.Type {
 	return CaseInsensitiveString{}
 }
