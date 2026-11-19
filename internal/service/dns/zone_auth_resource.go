@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/identityschema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	niosclient "github.com/infobloxopen/infoblox-nios-go-client/client"
 	"github.com/infobloxopen/infoblox-nios-go-client/dns"
@@ -88,6 +89,8 @@ func (r *ZoneAuthResource) ValidateConfig(ctx context.Context, req resource.Vali
 	if resp.Diagnostics.HasError() {
 		return
 	}
+
+	validateScavengingExpressionOps(data.ScavengingSettings, &resp.Diagnostics)
 
 	if !data.UseGridZoneTimer.IsNull() && !data.UseGridZoneTimer.IsUnknown() && !data.UseGridZoneTimer.ValueBool() {
 		if (!data.SoaDefaultTtl.IsNull() && !data.SoaDefaultTtl.IsUnknown()) ||
@@ -183,6 +186,35 @@ func (r *ZoneAuthResource) ValidateConfig(ctx context.Context, req resource.Vali
 				"NS Group Not Allowed",
 				"The ns_group attribute cannot be specified when any of primary (grid_primary, external_primaries, or ms_primaries) or secondary server (grid_secondaries, external_secondaries, or ms_secondaries) is specified. Please remove the ns_group attribute or the primary/secondary server attributes.",
 			)
+		}
+	}
+}
+
+// op is Optional+Computed in the schema so zone-stored expressions don't cause plan drift; enforce it for configured elements here.
+func validateScavengingExpressionOps(settings types.Object, diags *diag.Diagnostics) {
+	if settings.IsNull() || settings.IsUnknown() {
+		return
+	}
+
+	for _, listName := range []string{"expression_list", "ea_expression_list"} {
+		list, ok := settings.Attributes()[listName].(types.List)
+		if !ok || list.IsNull() || list.IsUnknown() {
+			continue
+		}
+
+		for i, elem := range list.Elements() {
+			obj, ok := elem.(types.Object)
+			if !ok || obj.IsNull() || obj.IsUnknown() {
+				continue
+			}
+
+			if op, ok := obj.Attributes()["op"].(types.String); ok && op.IsNull() {
+				diags.AddAttributeError(
+					path.Root("scavenging_settings").AtName(listName).AtListIndex(i).AtName("op"),
+					"Missing Required Attribute",
+					fmt.Sprintf("The attribute 'op' is required for each element of scavenging_settings.%s.", listName),
+				)
+			}
 		}
 	}
 }
