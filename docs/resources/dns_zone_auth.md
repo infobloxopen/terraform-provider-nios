@@ -540,12 +540,9 @@ Read-Only:
 <a id="nestedatt--scavenging_settings--ea_expression_list"></a>
 ### Nested Schema for `scavenging_settings.ea_expression_list`
 
-Required:
-
-- `op` (String) The operation name.
-
 Optional:
 
+- `op` (String) The operation name.
 - `op1` (String) The name of the Extensible Attribute Definition object which is used as the first operand value.
 - `op1_type` (String) The first operand type.
 - `op2` (String) The second operand value.
@@ -555,12 +552,9 @@ Optional:
 <a id="nestedatt--scavenging_settings--expression_list"></a>
 ### Nested Schema for `scavenging_settings.expression_list`
 
-Required:
-
-- `op` (String) The operation name.
-
 Optional:
 
+- `op` (String) The operation name.
 - `op1` (String) The first operand value.
 - `op1_type` (String) The first operand type.
 - `op2` (String) The second operand value.

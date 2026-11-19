@@ -33,7 +33,8 @@ var ZoneauthscavengingsettingsEaExpressionListAttrTypes = map[string]attr.Type{
 
 var ZoneauthscavengingsettingsEaExpressionListResourceSchemaAttributes = map[string]schema.Attribute{
 	"op": schema.StringAttribute{
-		Required: true,
+		Optional: true,
+		Computed: true,
 		Validators: []validator.String{
 			stringvalidator.OneOf(
 				"AND", "ENDLIST", "EQ", "EXISTS", "GE", "GT", "LE", "LT", "MATCH_CIDR", "MATCH_IP", "MATCH_RANGE", "NOT_EQ", "NOT_EXISTS", "OR",
